@@ -10,7 +10,8 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerRegistrationNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -28,7 +29,7 @@ public class DataChangeEventResolver {
     private static final DOMImmutableDataChangeEvent NO_CHANGE = builder().build();
     private final ImmutableList.Builder<ChangeListenerNotifyTask> tasks = ImmutableList.builder();
     private InstanceIdentifier rootPath;
-    private ListenerRegistrationNode listenerRoot;
+    private ListenerTree listenerRoot;
     private NodeModification modificationRoot;
     private Optional<StoreMetadataNode> beforeRoot;
     private Optional<StoreMetadataNode> afterRoot;
@@ -42,11 +43,11 @@ public class DataChangeEventResolver {
         return this;
     }
 
-    protected ListenerRegistrationNode getListenerRoot() {
+    protected ListenerTree getListenerRoot() {
         return listenerRoot;
     }
 
-    protected DataChangeEventResolver setListenerRoot(final ListenerRegistrationNode listenerRoot) {
+    protected DataChangeEventResolver setListenerRoot(final ListenerTree listenerRoot) {
         this.listenerRoot = listenerRoot;
         return this;
     }
@@ -79,13 +80,16 @@ public class DataChangeEventResolver {
     }
 
     public Iterable<ChangeListenerNotifyTask> resolve() {
-        LOG.trace("Resolving events for {}" ,modificationRoot);
-        resolveAnyChangeEvent(rootPath, Optional.of(listenerRoot), modificationRoot, beforeRoot, afterRoot);
-        return tasks.build();
+        LOG.trace("Resolving events for {}", modificationRoot);
+
+        try (final Walker w = listenerRoot.getWalker()) {
+            resolveAnyChangeEvent(rootPath, Optional.of(w.getRootNode()), modificationRoot, beforeRoot, afterRoot);
+            return tasks.build();
+        }
     }
 
     private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final InstanceIdentifier path,
-            final Optional<ListenerRegistrationNode> listeners, final NodeModification modification,
+            final Optional<ListenerTree.Node> listeners, final NodeModification modification,
             final Optional<StoreMetadataNode> before, final Optional<StoreMetadataNode> after) {
         // No listeners are present in listener registration subtree
         // no before and after state is present
@@ -119,13 +123,13 @@ public class DataChangeEventResolver {
      * @return
      */
     private DOMImmutableDataChangeEvent resolveCreateEvent(final InstanceIdentifier path,
-            final Optional<ListenerRegistrationNode> listeners, final StoreMetadataNode afterState) {
+            final Optional<ListenerTree.Node> listeners, final StoreMetadataNode afterState) {
         final NormalizedNode<?, ?> node = afterState.getData();
         Builder builder = builder().setAfter(node).addCreated(path, node);
 
         for (StoreMetadataNode child : afterState.getChildren()) {
             PathArgument childId = child.getIdentifier();
-            Optional<ListenerRegistrationNode> childListeners = getChild(listeners, childId);
+            Optional<ListenerTree.Node> childListeners = getChild(listeners, childId);
 
             InstanceIdentifier childPath = StoreUtils.append(path, childId);
             builder.merge(resolveCreateEvent(childPath, childListeners, child));
@@ -135,13 +139,13 @@ public class DataChangeEventResolver {
     }
 
     private DOMImmutableDataChangeEvent resolveDeleteEvent(final InstanceIdentifier path,
-            final Optional<ListenerRegistrationNode> listeners, final StoreMetadataNode beforeState) {
+            final Optional<ListenerTree.Node> listeners, final StoreMetadataNode beforeState) {
         final NormalizedNode<?, ?> node = beforeState.getData();
         Builder builder = builder().setBefore(node).addRemoved(path, node);
 
         for (StoreMetadataNode child : beforeState.getChildren()) {
             PathArgument childId = child.getIdentifier();
-            Optional<ListenerRegistrationNode> childListeners = getChild(listeners, childId);
+            Optional<ListenerTree.Node> childListeners = getChild(listeners, childId);
             InstanceIdentifier childPath = StoreUtils.append(path, childId);
             builder.merge(resolveDeleteEvent(childPath, childListeners, child));
         }
@@ -149,7 +153,7 @@ public class DataChangeEventResolver {
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final InstanceIdentifier path,
-            final Optional<ListenerRegistrationNode> listeners, final NodeModification modification,
+            final Optional<ListenerTree.Node> listeners, final NodeModification modification,
             final StoreMetadataNode before, final StoreMetadataNode after) {
 
         Builder one = builder().setBefore(before.getData()).setAfter(after.getData());
@@ -159,7 +163,7 @@ public class DataChangeEventResolver {
         for (NodeModification childMod : modification.getModifications()) {
             PathArgument childId = childMod.getIdentifier();
             InstanceIdentifier childPath = append(path, childId);
-            Optional<ListenerRegistrationNode> childListen = getChild(listeners, childId);
+            Optional<ListenerTree.Node> childListen = getChild(listeners, childId);
 
             Optional<StoreMetadataNode> childBefore = before.getChild(childId);
             Optional<StoreMetadataNode> childAfter = after.getChild(childId);
@@ -189,13 +193,13 @@ public class DataChangeEventResolver {
     }
 
     private DOMImmutableDataChangeEvent resolveReplacedEvent(final InstanceIdentifier path,
-            final Optional<ListenerRegistrationNode> listeners, final NodeModification modification,
+            final Optional<ListenerTree.Node> listeners, final NodeModification modification,
             final StoreMetadataNode before, final StoreMetadataNode after) {
         // FIXME Add task
         return builder().build();
     }
 
-    private DOMImmutableDataChangeEvent addNotifyTask(final Optional<ListenerRegistrationNode> listeners, final DOMImmutableDataChangeEvent event) {
+    private DOMImmutableDataChangeEvent addNotifyTask(final Optional<ListenerTree.Node> listeners, final DOMImmutableDataChangeEvent event) {
         if (listeners.isPresent()) {
             final Collection<DataChangeListenerRegistration<?>> l = listeners.get().getListeners();
             if (!l.isEmpty()) {
@@ -206,7 +210,7 @@ public class DataChangeEventResolver {
         return event;
     }
 
-    private void addNotifyTask(final ListenerRegistrationNode listenerRegistrationNode, final DataChangeScope scope,
+    private void addNotifyTask(final ListenerTree.Node listenerRegistrationNode, final DataChangeScope scope,
             final DOMImmutableDataChangeEvent event) {
         Collection<DataChangeListenerRegistration<?>> potential = listenerRegistrationNode.getListeners();
         if(!potential.isEmpty()) {
