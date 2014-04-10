@@ -15,7 +15,14 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
 
-public class DataChangeEventImpl<P extends Path<P>, D> implements DataChangeEvent<P, D>, Immutable {
+public class
+
+
+
+
+
+
+<P extends Path<P>, D> implements DataChangeEvent<P, D>, Immutable {
 
     private final DataChange<P, D> dataChange;
 
@@ -24,9 +31,9 @@ public class DataChangeEventImpl<P extends Path<P>, D> implements DataChangeEven
     private final D updatedOperationalSubtree;
     private final D updatedConfigurationSubtree;
 
-    
-    
-    
+
+
+
     public DataChangeEventImpl(DataChange<P, D> dataChange, D originalConfigurationSubtree,
             D originalOperationalSubtree, D updatedOperationalSubtree, D updatedConfigurationSubtree) {
         super();
