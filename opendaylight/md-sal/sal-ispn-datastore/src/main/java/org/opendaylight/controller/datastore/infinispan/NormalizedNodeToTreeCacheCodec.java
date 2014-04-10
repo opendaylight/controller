@@ -21,6 +21,16 @@ public class NormalizedNodeToTreeCacheCodec {
 
         if(id != null){
             parentPath = id.toString();
+            String[] parentPaths = parentPath.split("/");
+            if(parentPaths[parentPaths.length-1].equals(node.getIdentifier().toString())){
+                if(parentPaths.length > 2){
+                    for(int i=0;i<parentPaths.length-2;i++){
+                        parentPath += "/" + parentPaths + 1;
+                    }
+                } else {
+                    parentPath = "/";
+                }
+            }
         }
 
         new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache)).navigate(parentPath, node);

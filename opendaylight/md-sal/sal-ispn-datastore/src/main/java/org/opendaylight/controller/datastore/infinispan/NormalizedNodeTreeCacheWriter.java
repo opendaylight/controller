@@ -2,16 +2,19 @@ package org.opendaylight.controller.datastore.infinispan;
 
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
+import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeVisitor;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
+    private final InfinispanTreeWrapper treeCacheWrapper;
     private final TreeCache treeCache;
 
     public NormalizedNodeTreeCacheWriter(TreeCache treeCache){
         this.treeCache = treeCache;
+        this.treeCacheWrapper = new InfinispanTreeWrapper();
     }
 
     @Override
@@ -26,7 +29,7 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
             System.out.println("Key : " + normalizedNode.getKey());
             System.out.println("Value : " + normalizedNode.getValue());
 
-            treeCache.put(nodeFqn, "___data___", normalizedNode.getValue());
+            treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
         }
 
     }

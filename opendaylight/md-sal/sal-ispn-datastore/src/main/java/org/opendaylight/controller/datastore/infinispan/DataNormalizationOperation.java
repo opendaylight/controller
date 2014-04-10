@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
+import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierWithPredicatesGenerator;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -54,6 +55,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
     private final T identifier;
+    protected final InfinispanTreeWrapper infinispanTreeWrapper;
 
     @Override
     public T getIdentifier() {
@@ -63,6 +65,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     protected DataNormalizationOperation(final T identifier) {
         super();
         this.identifier = identifier;
+        this.infinispanTreeWrapper = new InfinispanTreeWrapper();
     }
 
     public boolean isMixin() {
@@ -130,7 +133,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         protected NormalizedNode<?, ?> normalizeImpl(final QName nodeType, final Node node) {
-            return ImmutableNodes.leafNode(nodeType, node.get("___data___"));
+            return ImmutableNodes.leafNode(nodeType, infinispanTreeWrapper.readValue(node));
         }
 
     }
@@ -143,7 +146,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         protected NormalizedNode<?, ?> normalizeImpl(final QName nodeType, final Node node) {
-            final Object data = node.get("___data___");
+            final Object data = infinispanTreeWrapper.readValue(node);
             if(data == null){
                 Preconditions.checkArgument(false, "No data available in leaf list entry for " + nodeType);
             }
@@ -274,17 +277,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             String[] ids = treeCacheNode.getFqn().toString().split("/");
 
             ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
-            for (QName key : keyDefinition) {
-
-// TODO: FIXMEMOIZ
-//                SimpleNode<?> valueNode = checkNotNull(treeCacheNode.getFirstSimpleByName(key),
-//                        "List node %s MUST contain leaf %s with value.", getIdentifier().getNodeType(), key);
-//                keys.put(key, valueNode.getValue());
-            }
-
-//            return Builders.mapEntryBuilder().withNodeIdentifier(
-//                    new NodeIdentifierWithPredicates(getIdentifier().getNodeType(), keys.build()));
-
             return Builders.mapEntryBuilder().withNodeIdentifier(new NodeIdentifierWithPredicatesGenerator(ids[ids.length-1], this.schemaNode).getPathArgument());
         }
 

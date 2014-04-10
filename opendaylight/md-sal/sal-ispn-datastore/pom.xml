@@ -3,18 +3,26 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
   <parent>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-parent</artifactId>
       <version>1.1-SNAPSHOT</version>
   </parent>
     <artifactId>sal-ispn-datastore</artifactId>
+    <packaging>bundle</packaging>
   <dependencies>
       <dependency>
           <groupId>org.infinispan</groupId>
           <artifactId>infinispan-tree</artifactId>
           <version>6.0.2.Final</version>
       </dependency>
+    <dependency>
+        <groupId>org.infinispan</groupId>
+        <artifactId>infinispan-commons</artifactId>
+        <version>6.0.2.Final</version>
+    </dependency>
+
       <dependency>
           <groupId>org.infinispan</groupId>
           <artifactId>infinispan-core</artifactId>
@@ -25,6 +33,11 @@
           <artifactId>narayana-jta</artifactId>
           <version>4.17.18.Final</version>
       </dependency>
+    <dependency>
+      <groupId>net.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+      <version>1.0</version>
+    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -67,8 +80,46 @@
         <artifactId>yang-parser-impl</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
+
   </dependencies>
 
-
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+              <instructions>
+                  <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                  <Export-Package>
+                    org.opendaylight.controller.datastore.infinispan,
+                    org.opendaylight.controller.datastore.ispn
+                  </Export-Package>
+                  <Import-Package>
+                    !org.apache.logging.log4j.*,
+                    !bsh*,
+                    !net.jcip.*,
+                    !javax.swing,
+                    !org.hornetq.*,
+                    !org.jboss.*,
+                      *
+                  </Import-Package>
+                <Embed-Dependency>
+                  infinispan-core,infinispan-commons,infinispan-tree,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false
+                </Embed-Dependency>
+                <Embed-Transitive>
+                  true
+                </Embed-Transitive>
+              </instructions>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
