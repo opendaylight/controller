@@ -9,9 +9,9 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -21,6 +21,7 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -61,12 +62,12 @@ public final class ListenerTree {
 
         try {
             Node walkNode = rootNode;
-            for(PathArgument arg : path.getPath()) {
+            for (final PathArgument arg : path.getPath()) {
                 walkNode = walkNode.ensureChild(arg);
             }
 
             final Node node = walkNode;
-            DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(listener) {
+            DataChangeListenerRegistration<L> reg = new DataChangeListenerRegistrationImpl<L>(listener) {
                 @Override
                 public DataChangeScope getScope() {
                     return scope;
@@ -101,8 +102,8 @@ public final class ListenerTree {
                 }
             };
 
-            node.addListener(listenerReg);
-            return listenerReg;
+            node.addListener(reg);
+            return reg;
         } finally {
             // Always release the lock
             rwLock.writeLock().unlock();
@@ -155,7 +156,7 @@ public final class ListenerTree {
      * unclosed.
      */
     public static final class Node implements StoreTreeNode<Node>, Identifiable<PathArgument> {
-        private final HashSet<DataChangeListenerRegistration<?>> listeners = new HashSet<>();
+        private final Collection<DataChangeListenerRegistration<?>> listeners = new ArrayList<>();
         private final Map<PathArgument, Node> children = new HashMap<>();
         private final PathArgument identifier;
         private final Reference<Node> parent;
@@ -182,13 +183,12 @@ public final class ListenerTree {
          *
          * @return the list of current listeners
          */
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        public Collection<org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<?>> getListeners() {
-            return (Collection) listeners;
+        public Collection<DataChangeListenerRegistration<?>> getListeners() {
+            return listeners;
         }
 
         private Node ensureChild(final PathArgument child) {
-            Node potential = (children.get(child));
+            Node potential = children.get(child);
             if (potential == null) {
                 potential = new Node(this, child);
                 children.put(child, potential);
@@ -201,7 +201,7 @@ public final class ListenerTree {
             LOG.debug("Listener {} registered", listener);
         }
 
-        private void removeListener(final DataChangeListenerRegistration<?> listener) {
+        private void removeListener(final DataChangeListenerRegistrationImpl<?> listener) {
             listeners.remove(listener);
             LOG.debug("Listener {} unregistered", listener);
 
@@ -222,12 +222,10 @@ public final class ListenerTree {
         }
     }
 
-    private abstract static class DataChangeListenerRegistration<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> implements
-    org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<T> {
-
-        public DataChangeListenerRegistration(final T listener) {
+    private abstract static class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> //
+    implements DataChangeListenerRegistration<T> {
+        public DataChangeListenerRegistrationImpl(final T listener) {
             super(listener);
         }
     }
-
 }
