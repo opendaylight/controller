@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import java.util.Collections;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Collections;
 
 public class DefaultCloseSession extends AbstractSingletonNetconfOperation {
     public static final String CLOSE_SESSION = "close-session";

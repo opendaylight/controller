@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
@@ -25,8 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkState;
 
 public class NetconfServerSessionListener implements NetconfSessionListener<NetconfServerSession> {
     public static final String MESSAGE_ID = "message-id";
@@ -46,11 +45,15 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     }
 
     @Override
-    public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception e) {
-        logger.debug("Session {} down, reason: {}", netconfNetconfServerSession, e.getMessage());
+    public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception cause) {
+        logger.debug("Session {} down, reason: {}", netconfNetconfServerSession, cause.getMessage());
         monitoringService.onSessionDown(netconfNetconfServerSession);
 
-        operationRouter.close();
+        try {
+            operationRouter.close();
+        } catch (Exception closingEx) {
+            logger.debug("Ignoring exception while closing operationRouter", closingEx);
+        }
     }
 
     @Override
@@ -60,7 +63,11 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
                 netconfTerminationReason.getErrorMessage());
         monitoringService.onSessionDown(netconfNetconfServerSession);
 
-        operationRouter.close();
+        try {
+            operationRouter.close();
+        } catch (Exception closingEx) {
+            logger.debug("Ignoring exception while closing operationRouter", closingEx);
+        }
     }
 
     @Override

@@ -32,9 +32,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.Capability;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -57,7 +57,7 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -78,7 +78,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(NetconfITTest.getModuleFactoriesS().toArray(
                 new ModuleFactory[0])));
 
-        NetconfMonitoringServiceImpl monitoringService = new NetconfMonitoringServiceImpl(getFactoriesListener());
+        NetconfMonitoringServiceImpl monitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
@@ -178,15 +178,15 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
     }
 
 
-    public NetconfOperationServiceFactoryListener getFactoriesListener() {
-        NetconfOperationServiceFactoryListener factoriesListener = mock(NetconfOperationServiceFactoryListener.class);
-        NetconfOperationServiceSnapshot snap = mock(NetconfOperationServiceSnapshot.class);
+    public NetconfOperationProvider getNetconfOperationProvider() {
+        NetconfOperationProvider factoriesListener = mock(NetconfOperationProvider.class);
+        NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
         NetconfOperationService service = mock(NetconfOperationService.class);
         Set<Capability> caps = Sets.newHashSet();
         doReturn(caps).when(service).getCapabilities();
         Set<NetconfOperationService> services = Sets.newHashSet(service);
         doReturn(services).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).getSnapshot(anyLong());
+        doReturn(snap).when(factoriesListener).getSnapshot(anyString());
 
         return factoriesListener;
     }

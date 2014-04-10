@@ -16,5 +16,5 @@ public interface NetconfOperationServiceFactoryListener {
 
     void onRemoveNetconfOperationServiceFactory(NetconfOperationServiceFactory service);
 
-    NetconfOperationServiceSnapshot getSnapshot(long sessionId);
+
 }

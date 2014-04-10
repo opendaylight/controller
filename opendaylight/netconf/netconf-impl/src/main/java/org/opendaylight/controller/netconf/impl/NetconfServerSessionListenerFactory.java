@@ -11,14 +11,16 @@ package org.opendaylight.controller.netconf.impl;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
+
+import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
 
 public class NetconfServerSessionListenerFactory implements SessionListenerFactory<NetconfServerSessionListener> {
 
-    private final NetconfOperationServiceFactoryListener factoriesListener;
+    private final NetconfOperationProvider netconfOperationProvider;
 
     private final DefaultCommitNotificationProducer commitNotifier;
 
@@ -26,10 +28,10 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
     private final SessionMonitoringService monitor;
 
-    public NetconfServerSessionListenerFactory(NetconfOperationServiceFactoryListener factoriesListener,
+    public NetconfServerSessionListenerFactory(NetconfOperationProvider netconfOperationProvider,
                                                DefaultCommitNotificationProducer commitNotifier,
                                                SessionIdProvider idProvider, SessionMonitoringService monitor) {
-        this.factoriesListener = factoriesListener;
+        this.netconfOperationProvider = netconfOperationProvider;
         this.commitNotifier = commitNotifier;
         this.idProvider = idProvider;
         this.monitor = monitor;
@@ -37,8 +39,8 @@ public class NetconfServerSessionListenerFactory implements SessionListenerFacto
 
     @Override
     public NetconfServerSessionListener getSessionListener() {
-        NetconfOperationServiceSnapshot netconfOperationServiceSnapshot = factoriesListener.getSnapshot(idProvider
-                .getCurrentSessionId());
+        NetconfOperationServiceSnapshot netconfOperationServiceSnapshot = netconfOperationProvider.getSnapshot(
+                getNetconfSessionIdForReporting(idProvider.getCurrentSessionId()));
 
         CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
 

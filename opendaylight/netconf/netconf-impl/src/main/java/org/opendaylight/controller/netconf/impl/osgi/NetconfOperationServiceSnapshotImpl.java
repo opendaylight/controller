@@ -10,62 +10,46 @@ package org.opendaylight.controller.netconf.impl.osgi;
 
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.util.CloseableUtil;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NetconfOperationServiceSnapshot implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(NetconfOperationServiceSnapshot.class);
+public class NetconfOperationServiceSnapshotImpl implements NetconfOperationServiceSnapshot {
 
     private final Set<NetconfOperationService> services;
     private final String netconfSessionIdForReporting;
 
-    public NetconfOperationServiceSnapshot(Set<NetconfOperationServiceFactory> factories, long sessionId) {
+    public NetconfOperationServiceSnapshotImpl(Set<NetconfOperationServiceFactory> factories, String sessionIdForReporting) {
         Set<NetconfOperationService> services = new HashSet<>();
-        netconfSessionIdForReporting = getNetconfSessionIdForReporting(sessionId);
+        netconfSessionIdForReporting = sessionIdForReporting;
         for (NetconfOperationServiceFactory factory : factories) {
             services.add(factory.createService(netconfSessionIdForReporting));
         }
         this.services = Collections.unmodifiableSet(services);
     }
 
-    private static String getNetconfSessionIdForReporting(long sessionId) {
-        return "netconf session id " + sessionId;
-    }
 
+
+    @Override
     public String getNetconfSessionIdForReporting() {
         return netconfSessionIdForReporting;
     }
 
+    @Override
     public Set<NetconfOperationService> getServices() {
         return services;
     }
 
     @Override
-    public void close() {
-        RuntimeException firstException = null;
-        for (NetconfOperationService service : services) {
-            try {
-                service.close();
-            } catch (RuntimeException e) {
-                logger.warn("Got exception while closing {}", service, e);
-                if (firstException == null) {
-                    firstException = e;
-                } else {
-                    firstException.addSuppressed(e);
-                }
-            }
-        }
-        if (firstException != null) {
-            throw firstException;
-        }
+    public void close() throws Exception {
+        CloseableUtil.closeAll(services);
     }
 
     @Override
     public String toString() {
-        return "NetconfOperationServiceSnapshot{" + netconfSessionIdForReporting + '}';
+        return "NetconfOperationServiceSnapshotImpl{" + netconfSessionIdForReporting + '}';
     }
 }
