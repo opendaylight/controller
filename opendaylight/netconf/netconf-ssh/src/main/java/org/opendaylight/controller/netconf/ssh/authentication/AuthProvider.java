@@ -12,6 +12,7 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.UserConfig;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,30 +20,30 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class AuthProvider implements AuthProviderInterface {
 
-    private static IUserManager um; //FIXME static mutable state, no locks
-    private static final String DEFAULT_USER = "netconf";
-    private static final String DEFAULT_PASSWORD = "netconf";
+    private IUserManager um;
     private final String pem;
 
-    public AuthProvider(IUserManager ium, String pemCertificate) throws Exception {
+    public AuthProvider(IUserManager ium, String pemCertificate, String defaultUser, String defaultPassword) throws IllegalArgumentException, IOException {
         checkNotNull(pemCertificate, "Parameter 'pemCertificate' is null");
-        AuthProvider.um = ium;
-        if (AuthProvider.um == null) {
-            throw new Exception("No usermanager service available.");
-        }
+        checkNotNull(defaultUser, "Parameter 'defaultUser' is null");
+        checkNotNull(defaultPassword, "Parameter 'defaultPassword' is null");
+        this.um = ium;
 
+        if (this.um == null) {
+            throw new IllegalArgumentException("No usermanager service available.");
+        }
         List<String> roles = new ArrayList<String>(1);
         roles.add(UserLevel.SYSTEMADMIN.toString());
-        AuthProvider.um.addLocalUser(new UserConfig(DEFAULT_USER, DEFAULT_PASSWORD, roles)); //FIXME hardcoded auth
+        this.um.addLocalUser(new UserConfig(defaultUser, defaultPassword, roles));
         pem = pemCertificate;
     }
 
     @Override
     public boolean authenticated(String username, String password) {
-        if (AuthProvider.um == null) {
+        if (this.um == null) {
             throw new IllegalStateException("No usermanager service available.");
         }
-        AuthResultEnum authResult = AuthProvider.um.authenticate(username, password);
+        AuthResultEnum authResult = this.um.authenticate(username, password);
         return authResult.equals(AuthResultEnum.AUTH_ACCEPT) || authResult.equals(AuthResultEnum.AUTH_ACCEPT_LOC);
     }
 
@@ -53,11 +54,11 @@ public class AuthProvider implements AuthProviderInterface {
 
     @Override
     public void removeUserManagerService() {
-        AuthProvider.um = null;
+        this.um = null;
     }
 
     @Override
     public void addUserManagerService(IUserManager userManagerService) {
-        AuthProvider.um = userManagerService;
+        this.um = userManagerService;
     }
 }
