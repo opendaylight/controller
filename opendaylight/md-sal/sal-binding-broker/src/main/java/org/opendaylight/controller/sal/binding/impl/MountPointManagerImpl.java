@@ -118,6 +118,11 @@ public class MountPointManagerImpl implements MountProviderService {
             super(rpcRegistry, notificationBroker, dataBroker);
             this.identifier = identifier;
         }
+
+        // Needed only for BI Connector
+        public DataBrokerImpl getDataBrokerImpl() {
+            return (DataBrokerImpl) getDataBroker();
+        }
         
         @Override
         public InstanceIdentifier<?> getIdentifier() {
