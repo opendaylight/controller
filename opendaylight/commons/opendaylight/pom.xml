@@ -71,7 +71,7 @@
     <junit.version>4.8.1</junit.version>
     <yangtools.version>0.6.1</yangtools.version>
     <!--versions for bits of the controller -->
-    <controller.version>0.4.1</controller.version>
+    <controller.version>1.4.1</controller.version>
     <hosttracker.api.version>0.5.1</hosttracker.api.version>
     <hosttracker_new.api.version>0.4.1</hosttracker_new.api.version>
     <hosttracker.implementation.version>0.5.1</hosttracker.implementation.version>
