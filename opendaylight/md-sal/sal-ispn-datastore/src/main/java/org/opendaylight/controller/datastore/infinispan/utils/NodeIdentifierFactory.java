@@ -14,6 +14,11 @@ public class NodeIdentifierFactory {
             return nodeWithValueGenerator.getPathArgument();
         }
 
+        final AugmentationIdentifierGenerator augmentationIdentifierGenerator = new AugmentationIdentifierGenerator(id);
+        if(augmentationIdentifierGenerator.matches()){
+            return augmentationIdentifierGenerator.getPathArgument();
+        }
+
         return new NodeIdentifierGenerator(id).getArgument();
     }
 }

@@ -42,8 +42,13 @@ public class NodeIdentifierWithPredicatesGenerator{
 
         for(String keyValue : keyValues){
             int eqIndex = keyValue.lastIndexOf('=');
-            final QName key = QName.create(keyValue.substring(0, eqIndex));
-            nameValues.put(key, getValue(key, keyValue.substring(eqIndex + 1)));
+            try {
+                final QName key = QName.create(keyValue.substring(0, eqIndex));
+                nameValues.put(key, getValue(key, keyValue.substring(eqIndex + 1)));
+            } catch(IllegalArgumentException e){
+                System.out.println("Error processing identifier : " + id);
+                throw e;
+            }
         }
 
         return new InstanceIdentifier.NodeIdentifierWithPredicates(QName.create(matcher.group(1)), nameValues);

@@ -5,6 +5,7 @@ import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.VersioningScheme;
+import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.transaction.LockingMode;
 import org.infinispan.transaction.TransactionMode;
@@ -23,7 +24,7 @@ public class TreeCacheManager implements AutoCloseable {
   DefaultCacheManager dcm = null;
 
   public TreeCacheManager(){
-    this(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC, TransactionMode.TRANSACTIONAL, true);
+    this(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC, TransactionMode.TRANSACTIONAL, false);
   }
 
   /**
@@ -55,12 +56,11 @@ public class TreeCacheManager implements AutoCloseable {
                                       .clustering()
                                       .jmxStatistics().disable()
                                       .clustering()
-
                                       .build();
+
+    GlobalConfiguration configuration;
+
     dcm = new DefaultCacheManager(config);
-
-
-
 
   }
 

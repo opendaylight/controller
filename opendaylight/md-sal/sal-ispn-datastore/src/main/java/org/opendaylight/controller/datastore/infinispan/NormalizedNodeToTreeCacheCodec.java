@@ -3,6 +3,8 @@ package org.opendaylight.controller.datastore.infinispan;
 import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
+import org.opendaylight.controller.datastore.infinispan.utils.PathUtils;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -20,7 +22,7 @@ public class NormalizedNodeToTreeCacheCodec {
         String parentPath = "";
 
         if(id != null){
-            parentPath = id.toString();
+            parentPath = PathUtils.getParentPath(id.toString());
         }
 
         new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache)).navigate(parentPath, node);
@@ -33,7 +35,19 @@ public class NormalizedNodeToTreeCacheCodec {
             currentOp = currentOp.getChild(pathArgument);
         }
 
-        return currentOp.normalize(id.getPath().get(id.getPath().size() - 1).getNodeType(), node);
+        QName nodeType = null;
+
+        if(id.getPath().size() < 1){
+            nodeType = null;
+        } else {
+            final InstanceIdentifier.PathArgument pathArgument = id.getPath().get(id.getPath().size() - 1);
+            if(pathArgument instanceof InstanceIdentifier.AugmentationIdentifier){
+                nodeType = null;
+            } else {
+                nodeType = pathArgument.getNodeType();
+            }
+        }
+        return currentOp.normalize(nodeType , node);
     }
 
 }

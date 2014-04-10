@@ -65,6 +65,17 @@
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-parser-impl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-ispn-datastore</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+
+      <dependency>
+        <groupId>org.jboss.spec.javax.transaction</groupId>
+        <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+      </dependency>
+
     </dependencies>
 
     <build>
@@ -151,6 +162,7 @@
                             org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.dom.impl.rev131028.*
                         </Private-Package>
                         <Import-Package>
+                          javax.transaction.*,
                             *
                         </Import-Package>
                     </instructions>

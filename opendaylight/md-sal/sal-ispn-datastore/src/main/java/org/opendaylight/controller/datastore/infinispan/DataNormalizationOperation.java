@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
+import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierWithPredicatesGenerator;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -32,6 +33,8 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,9 +54,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  * supposed to convert a CompositeNode to NormalizedNode
  * @param <T>
  */
-public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
+public abstract class  DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
     private final T identifier;
+    protected final InfinispanTreeWrapper infinispanTreeWrapper;
+    private static final Logger logger = LoggerFactory.getLogger(DataNormalizationOperation.class);
 
     @Override
     public T getIdentifier() {
@@ -63,13 +68,23 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     protected DataNormalizationOperation(final T identifier) {
         super();
         this.identifier = identifier;
+        this.infinispanTreeWrapper = new InfinispanTreeWrapper();
     }
 
+    /**
+     *
+     * @return Should return true if the node that this operation corresponds to is a mixin
+     */
     public boolean isMixin() {
         return false;
     }
 
 
+    /**
+     *
+     * @return Should return true if the node that this operation corresponds to has a 'key' associated with it. This is
+     * typically true for a list-item or leaf-list entry in yang
+     */
     public boolean isKeyedEntry() {
         return false;
     }
@@ -84,9 +99,15 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     public abstract NormalizedNode<?, ?> normalize(QName nodeType, org.infinispan.tree.Node legacyData);
 
-    protected QName getNodeTypeFromFqn(Fqn fqn){
+    protected PathArgument getNodePathArgument(Fqn fqn){
         final String[] nodeIds = fqn.toString().split("/");
-        return NodeIdentifierFactory.getArgument(nodeIds[nodeIds.length - 1]).getNodeType();
+        if(nodeIds.length > 1)
+            return NodeIdentifierFactory.getArgument(nodeIds[nodeIds.length - 1]);
+        return null;
+    }
+
+    protected QName getNodeTypeFromFqn(Fqn fqn){
+        return getNodePathArgument(fqn).getNodeType();
     }
 
 
@@ -130,7 +151,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         protected NormalizedNode<?, ?> normalizeImpl(final QName nodeType, final Node node) {
-            return ImmutableNodes.leafNode(nodeType, node.get("___data___"));
+            return ImmutableNodes.leafNode(nodeType, infinispanTreeWrapper.readValue(node));
         }
 
     }
@@ -143,7 +164,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         protected NormalizedNode<?, ?> normalizeImpl(final QName nodeType, final Node node) {
-            final Object data = node.get("___data___");
+            final Object data = infinispanTreeWrapper.readValue(node);
             if(data == null){
                 Preconditions.checkArgument(false, "No data available in leaf list entry for " + nodeType);
             }
@@ -170,7 +191,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public final NormalizedNodeContainer<?, ?, ?> normalize(final QName nodeType, final org.infinispan.tree.Node legacyData) {
             checkArgument(legacyData != null);
             checkArgument(legacyData instanceof org.infinispan.tree.Node, "Node %s should be composite", legacyData);
-            org.infinispan.tree.Node treeCacheNode = (org.infinispan.tree.Node) legacyData;
+            org.infinispan.tree.Node treeCacheNode = legacyData;
             NormalizedNodeContainerBuilder builder = createBuilder(treeCacheNode);
 
             Set<DataNormalizationOperation<?>> usedMixins = new HashSet<>();
@@ -178,14 +199,26 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             final Set<Node> children = treeCacheNode.getChildren();
             for (org.infinispan.tree.Node childLegacy : children) {
                 Fqn childFqn = childLegacy.getFqn();
-                QName childNodeType = getNodeTypeFromFqn(childFqn);
-                DataNormalizationOperation childOp = getChild(childNodeType);
+                PathArgument childPathArgument = getNodePathArgument(childFqn);
 
+                QName childNodeType = null;
+                DataNormalizationOperation childOp = null;
+
+
+                if(childPathArgument instanceof AugmentationIdentifier){
+                    childOp = getChild(childPathArgument);
+                } else {
+                    childNodeType = childPathArgument.getNodeType();
+                    childOp = getChild(childNodeType);
+                }
                 // We skip unknown nodes if this node is mixin since
                 // it's nodes and parent nodes are interleaved
                 if (childOp == null && isMixin()) {
                     continue;
+                } else if(childOp == null){
+                    logger.error("childOp is null and this operation is not a mixin : this = {}", this.toString());
                 }
+
 
                 checkArgument(childOp != null, "Node %s is not allowed inside %s", childNodeType,
                         getIdentifier());
@@ -203,7 +236,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                     builder.addChild(childOp.normalize(childNodeType, childLegacy));
                 }
             }
-            return (NormalizedNodeContainer<?, ?, ?>) builder.build();
+
+            final NormalizedNodeContainer<?, ?, ?> normalizedNodeContainer = (NormalizedNodeContainer<?, ?, ?>) builder.build();
+
+            return normalizedNodeContainer;
         }
 
         @SuppressWarnings("rawtypes")
@@ -237,6 +273,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         public DataNormalizationOperation<?> getChild(final QName child) {
+            if(child == null){
+                return null;
+            }
+
             DataNormalizationOperation<?> potential = byQName.get(child);
             if (potential != null) {
                 return potential;
@@ -274,16 +314,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             String[] ids = treeCacheNode.getFqn().toString().split("/");
 
             ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
-            for (QName key : keyDefinition) {
-
-// TODO: FIXMEMOIZ
-//                SimpleNode<?> valueNode = checkNotNull(treeCacheNode.getFirstSimpleByName(key),
-//                        "List node %s MUST contain leaf %s with value.", getIdentifier().getNodeType(), key);
-//                keys.put(key, valueNode.getValue());
-            }
-
-//            return Builders.mapEntryBuilder().withNodeIdentifier(
-//                    new NodeIdentifierWithPredicates(getIdentifier().getNodeType(), keys.build()));
 
             return Builders.mapEntryBuilder().withNodeIdentifier(new NodeIdentifierWithPredicatesGenerator(ids[ids.length-1], this.schemaNode).getPathArgument());
         }
@@ -519,7 +549,13 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                     schema.getChildNodes()).filter(org.opendaylight.yangtools.yang.model.api.ChoiceNode.class);
             potential = findChoice(choices, child);
         }
-        checkArgument(potential != null, "Supplied QName %s is not valid according to schema %s", child, schema);
+        if(potential == null){
+            if(logger.isTraceEnabled()){
+                logger.trace("BAD CHILD = {}", child.toString());
+            }
+        }
+
+        checkArgument(potential != null, "Supplied QName %s is not valid according to schema %s", child , schema);
         if ((schema instanceof DataSchemaNode) && !((DataSchemaNode) schema).isAugmenting() && potential.isAugmenting()) {
             return fromAugmentation(schema, (AugmentationTarget) schema, potential);
         }
