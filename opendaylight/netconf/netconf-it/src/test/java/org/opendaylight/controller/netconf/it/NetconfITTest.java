@@ -411,7 +411,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
                     try {
                         c = sess.getStdout().read(bytes);
                     } catch (IOException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        logger.trace("IO exception while reading data to ssh.",e);
                     }
                     logger.info("got data:" + bytes);
                     if (c == 0) {
