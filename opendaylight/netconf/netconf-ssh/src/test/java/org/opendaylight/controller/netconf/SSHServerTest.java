@@ -40,7 +40,7 @@ public class SSHServerTest {
         try(InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
             pem = IOUtils.toString(is);
         }
-        AuthProvider ap = new AuthProvider(um, pem);
+        AuthProvider ap = new AuthProvider(um, pem,USER,PASSWORD);
         NetconfSSHServer server = NetconfSSHServer.start(PORT,tcpAddress,ap);
         sshServerThread = new Thread(server);
         sshServerThread.setDaemon(true);
