@@ -43,7 +43,7 @@
             <Import-Package>
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
-              org.opendaylight.controller.configuration,
+              org.opendaylight.controller.configuration;version=${configuration.version},
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.usermanager,

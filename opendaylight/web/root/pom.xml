@@ -105,6 +105,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
+      <version>${configuration.manager}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

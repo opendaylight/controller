@@ -36,7 +36,7 @@
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.topology,
-              org.opendaylight.controller.configuration,
+              org.opendaylight.controller.configuration;version=${configuration.version},
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.switchmanager,
               org.osgi.service.component,
@@ -57,6 +57,11 @@
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>configuration</artifactId>
+      <version>${configuration.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
