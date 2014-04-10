@@ -12,7 +12,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -52,9 +51,9 @@ public class DataNormalizer {
                 normalizedArgs.add(currentOp.getIdentifier());
                 currentOp = currentOp.getChild(legacyArg.getNodeType());
             }
-            if(arguments.hasNext() || (!currentOp.isKeyedEntry() || legacyArg instanceof NodeIdentifierWithPredicates || legacyArg instanceof NodeWithValue)) {
-                normalizedArgs.add(legacyArg);
-            }
+            //if(arguments.hasNext() || (!currentOp.isKeyedEntry() || legacyArg instanceof NodeIdentifierWithPredicates || legacyArg instanceof NodeWithValue)) {
+            normalizedArgs.add(legacyArg);
+            //}
         }
         return new InstanceIdentifier(normalizedArgs.build());
     }
