@@ -18,8 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerRegistrationNode;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerRegistrationNode.DataChangeListenerRegistration;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
@@ -59,7 +58,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private final ListeningExecutorService executor;
     private final String name;
     private final AtomicLong txCounter = new AtomicLong(0);
-    private final ListenerRegistrationNode listenerTree;
+    private final ListenerTree listenerTree;
     private final AtomicReference<DataAndMetadataSnapshot> snapshot;
 
     private ModificationApplyOperation operationTree;
@@ -69,7 +68,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService executor) {
         this.name = Preconditions.checkNotNull(name);
         this.executor = Preconditions.checkNotNull(executor);
-        this.listenerTree = ListenerRegistrationNode.createRoot();
+        this.listenerTree = ListenerTree.create();
         this.snapshot = new AtomicReference<DataAndMetadataSnapshot>(DataAndMetadataSnapshot.createEmpty());
         this.operationTree = new AlwaysFailOperation();
     }
@@ -114,12 +113,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         final DataChangeListenerRegistration<L> reg;
         synchronized (this) {
             LOG.debug("{}: Registering data change listener {} for {}",name,listener,path);
-            ListenerRegistrationNode listenerNode = listenerTree;
-            for(PathArgument arg : path.getPath()) {
-                listenerNode = listenerNode.ensureChild(arg);
-            }
 
-            reg = listenerNode.registerDataChangeListener(path, listener, scope);
+            reg = listenerTree.registerDataChangeListener(path, listener, scope);
 
             Optional<StoreMetadataNode> currentState = snapshot.get().read(path);
             if (currentState.isPresent()) {
