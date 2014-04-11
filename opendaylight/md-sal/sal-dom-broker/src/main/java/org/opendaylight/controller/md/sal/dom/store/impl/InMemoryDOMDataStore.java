@@ -120,7 +120,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             if (currentState.isPresent()) {
                 final NormalizedNode<?, ?> data = currentState.get().getData();
 
-                final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder() //
+                final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE) //
                         .setAfter(data) //
                         .addCreated(path, data) //
                         .build();

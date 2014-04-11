@@ -3,6 +3,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -19,6 +20,9 @@ public final class DOMImmutableDataChangeEvent implements
     private final Map<InstanceIdentifier, NormalizedNode<?, ?>> createdData;
     private final Map<InstanceIdentifier, NormalizedNode<?, ?>> updatedData;
     private final Set<InstanceIdentifier> removedPaths;
+    private final DataChangeScope scope;
+
+
 
     private DOMImmutableDataChangeEvent(final Builder change) {
         original = change.before;
@@ -27,10 +31,15 @@ public final class DOMImmutableDataChangeEvent implements
         createdData = change.created.build();
         updatedData = change.updated.build();
         removedPaths = change.removed.build();
+        scope = change.scope;
     }
 
-    public static final Builder builder() {
-        return new Builder();
+    public static final Builder builder(final DataChangeScope scope) {
+        return new Builder(scope);
+    }
+
+    protected DataChangeScope getScope() {
+        return scope;
     }
 
     @Override
@@ -71,6 +80,7 @@ public final class DOMImmutableDataChangeEvent implements
 
     public static class Builder {
 
+        public DataChangeScope scope;
         private NormalizedNode<?, ?> after;
         private NormalizedNode<?, ?> before;
 
@@ -79,8 +89,8 @@ public final class DOMImmutableDataChangeEvent implements
         private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> updated = ImmutableMap.builder();
         private final ImmutableSet.Builder<InstanceIdentifier> removed = ImmutableSet.builder();
 
-        private Builder() {
-
+        private Builder(final DataChangeScope scope) {
+            this.scope = scope;
         }
 
         public Builder setAfter(final NormalizedNode<?, ?> node) {
