@@ -116,7 +116,7 @@ if [ "${dohelp}" -eq 1 ]; then
     usage
 fi
 
-if [ "${jvmMaxMemory}"=="" ]; then
+if [ "${jvmMaxMemory}" == "" ]; then
     jvmMaxMemory="-Xmx1G"
     echo "*****************************************************************"
     echo "JVM maximum memory was not defined. Setting maximum memory to 1G."
