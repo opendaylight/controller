@@ -109,12 +109,14 @@ IF "%~1" NEQ "" (
 )
 
 IF "%debugEnabled%" NEQ "" (
-    REM ECHO "DEBUG enabled"
-    SET extraJVMOpts=%extraJVMOpts% -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=%debugport%
-)
-IF "%debugSuspended%" NEQ "" (
-    REM ECHO "DEBUG enabled suspended"
-    SET extraJVMOpts=%extraJVMOpts% -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%debugport%
+	SET jvmDebugOpts=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=%debugport%
+	
+	IF "%debugSuspended%" NEQ "" (
+		ECHO "DEBUG enabled suspended"
+		SET jvmDebugOpts=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%debugport%
+	)
+
+	SET extraJVMOpts=%extraJVMOpts% !jvmDebugOpts!
 )
 
 IF "%jvmMaxMemory%"=="" (
