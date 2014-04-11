@@ -14,7 +14,6 @@ import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
@@ -72,13 +71,13 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
     }
 
     @Override
-    public <T extends Notification> Registration<NotificationListener<T>> registerNotificationListener(
+    public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
             Class<T> notificationType, NotificationListener<T> listener) {
         return getNotificationBrokerChecked().registerNotificationListener(notificationType, listener);
     }
 
     @Override
-    public Registration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
+    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
             org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         return getNotificationBrokerChecked().registerNotificationListener(listener);
     }
