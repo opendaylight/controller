@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b1c3ca37",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockMonitor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-11T11:31:07Z",
+      "side": 1,
+      "message": "Sonar asks expressions like this to be simplified, please consider using !old.equals(copy)",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_51491e8a",
+        "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/async/AsyncEventBusConfigBeanTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-11T11:31:07Z",
+      "side": 1,
+      "message": "Please remove \\r",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7131c20a",
+        "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/scheduled/ScheduledThreadPoolConfigBeanTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-11T11:31:07Z",
+      "side": 1,
+      "message": "Please remove \\r",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
