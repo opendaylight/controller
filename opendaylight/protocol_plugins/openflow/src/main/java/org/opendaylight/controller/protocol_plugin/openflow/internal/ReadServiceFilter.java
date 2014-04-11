@@ -555,7 +555,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
     public List<NodeTableStatistics> readAllNodeTable(String containerName, Node node, boolean cached) {
         long sid = (Long) node.getID();
         List<OFStatistics> ofList = (cached == true) ?
-                statsMgr.getOFTableStatistics(sid) : statsMgr.queryStatistics(sid, OFStatisticsType.FLOW, null);
+                statsMgr.getOFTableStatistics(sid) : statsMgr.queryStatistics(sid, OFStatisticsType.TABLE, null);
 
         List<OFStatistics> filteredList = filterTableListPerContainer(containerName, sid, ofList);
 
