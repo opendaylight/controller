@@ -21,9 +21,8 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService.NotificationInterestListener
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration
 import org.opendaylight.yangtools.concepts.ListenerRegistration
-import org.opendaylight.yangtools.concepts.Registration
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry
 import org.opendaylight.yangtools.yang.binding.Notification
 import org.slf4j.LoggerFactory
@@ -102,7 +101,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
             announceNotificationSubscription(notifyType)
         }
         val registration = new GeneratedListenerRegistration(listener, invoker,this);
-        return registration as Registration<org.opendaylight.yangtools.yang.binding.NotificationListener>;
+        return registration as ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener>;
     }
 
     protected def unregisterListener(GenericNotificationRegistration<?> reg) {
@@ -129,7 +128,7 @@ class NotificationBrokerImpl implements NotificationProviderService, AutoCloseab
     }
 }
 
-class GenericNotificationRegistration<T extends Notification> extends AbstractObjectRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {
+class GenericNotificationRegistration<T extends Notification> extends AbstractListenerRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {
 
     @Property
     val Class<T> type;
@@ -148,7 +147,7 @@ class GenericNotificationRegistration<T extends Notification> extends AbstractOb
     }
 }
 
-class GeneratedListenerRegistration extends AbstractObjectRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> implements ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> {
+class GeneratedListenerRegistration extends AbstractListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> implements ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> {
 
     @Property
     val NotificationInvoker invoker;

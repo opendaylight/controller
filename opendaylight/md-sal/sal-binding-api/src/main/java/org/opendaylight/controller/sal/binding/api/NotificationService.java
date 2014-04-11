@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationService extends BindingAwareService {
@@ -16,9 +16,9 @@ public interface NotificationService extends BindingAwareService {
      *
      * @param notificationType
      * @param listener
-     * @return Registration for listener. To unregister listener invoke {@link Registration#close()} method.
+     * @return Registration for listener. To unregister listener invoke {@link ListenerRegistration#close()} method.
      */
-    <T extends Notification> Registration<NotificationListener<T>> registerNotificationListener(
+    <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
             Class<T> notificationType, NotificationListener<T> listener);
 
     /**
@@ -27,8 +27,8 @@ public interface NotificationService extends BindingAwareService {
      * Listener is registered for all notifications present in implemented interfaces.
      *
      * @param listener
-     * @return Registration for listener. To unregister listener invoke {@link Registration#close()} method.
+     * @return Registration for listener. To unregister listener invoke {@link ListenerRegistration#close()} method.
      */
-    Registration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
+    ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
             org.opendaylight.yangtools.yang.binding.NotificationListener listener);
 }
