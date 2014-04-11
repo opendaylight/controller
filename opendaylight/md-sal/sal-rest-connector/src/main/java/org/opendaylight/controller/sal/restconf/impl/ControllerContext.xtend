@@ -483,7 +483,7 @@ class ControllerContext implements SchemaContextListener {
                         + "\" cannot contain \"null\" value as a key."
                     )
                 }
-                keyValues.addKeyValue(listNode.getDataChildByName(key), uriKeyValue);
+                keyValues.addKeyValue(listNode.getDataChildByName(key), uriKeyValue, mountPoint);
                 i = i + 1;
             }
             consumed = consumed + i;
@@ -541,13 +541,13 @@ class ControllerContext implements SchemaContextListener {
         }
     }
     
-    private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
+    private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue, MountInstance mountPoint) {
         checkNotNull(uriValue);
         checkArgument(node instanceof LeafSchemaNode);
         val urlDecoded = URLDecoder.decode(uriValue);
         val typedef = (node as LeafSchemaNode).type;
         
-        var decoded = TypeDefinitionAwareCodec.from(typedef)?.deserialize(urlDecoded)
+        var decoded = RestCodec.from(typedef, mountPoint)?.deserialize(urlDecoded)
         var additionalInfo = ""
         if(decoded === null) {
             var baseType = RestUtil.resolveBaseTypeFrom(typedef)
