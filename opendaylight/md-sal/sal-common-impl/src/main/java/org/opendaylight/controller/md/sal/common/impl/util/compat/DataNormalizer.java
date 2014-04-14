@@ -18,8 +18,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -117,25 +115,15 @@ public class DataNormalizer {
                 currentOp.normalize(legacyData));
     }
 
-    public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) {
+    public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) throws DataNormalizationException {
         ImmutableList.Builder<PathArgument> legacyArgs = ImmutableList.builder();
         PathArgument previous = null;
+        DataNormalizationOperation<?> currentOp = operation;
         for (PathArgument normalizedArg : normalized.getPath()) {
-            if (normalizedArg instanceof NodeIdentifier) {
-                if (previous != null) {
-                    legacyArgs.add(previous);
-                }
-                previous = normalizedArg;
-            } else if (normalizedArg instanceof NodeIdentifierWithPredicates) {
-                // We skip previous node, which was mixin.
-                previous = normalizedArg;
-            } else if (normalizedArg instanceof AugmentationIdentifier) {
-                // We ignore argument
+            currentOp = currentOp.getChild(normalizedArg);
+            if(!currentOp.isMixin()) {
+                legacyArgs.add(normalizedArg);
             }
-            // FIXME : Add option for reading choice
-        }
-        if (previous != null) {
-            legacyArgs.add(previous);
         }
         return new InstanceIdentifier(legacyArgs.build());
     }
