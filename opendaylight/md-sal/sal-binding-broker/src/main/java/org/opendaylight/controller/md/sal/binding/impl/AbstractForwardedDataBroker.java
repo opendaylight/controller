@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -36,7 +36,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker, SchemaContextListener {
+import com.google.common.base.Optional;
+
+public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker,
+        SchemaContextListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractForwardedDataBroker.class);
     // The Broker to whom we do all forwarding
@@ -81,11 +84,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = codec.toNormalized(path);
-        ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store, domPath, domDataChangeListener, triggeringScope);
+        ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
+                domPath, domDataChangeListener, triggeringScope);
         return new ListenerRegistrationImpl(listener, domRegistration);
     }
 
-    protected Map<InstanceIdentifier<?>, DataObject> fromDOMToData(
+    protected Map<InstanceIdentifier<?>, DataObject> toBinding(
             final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
         for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized
@@ -94,10 +98,36 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
                 Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = getCodec().toBinding(entry);
                 newMap.put(binding.getKey(), binding.getValue());
             } catch (DeserializationException e) {
-                LOG.debug("Ommiting {}",entry,e);
+                LOG.debug("Ommiting {}", entry, e);
             }
         }
         return newMap;
+    }
+
+    protected Set<InstanceIdentifier<?>> toBinding(
+            final Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> normalized) {
+        Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
+        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath : normalized) {
+            try {
+                InstanceIdentifier<? extends DataObject> binding = getCodec().toBinding(normalizedPath);
+                hashSet.add(binding);
+            } catch (DeserializationException e) {
+                LOG.debug("Ommiting {}", normalizedPath, e);
+            }
+        }
+        return hashSet;
+    }
+
+    protected Optional<DataObject> toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
+        if(path.isWildcarded()) {
+            return Optional.absent();
+        }
+
+        try {
+            return Optional.fromNullable(getCodec().toBinding(path, data));
+        } catch (DeserializationException e) {
+            return Optional.absent();
+        }
     }
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
@@ -117,18 +147,20 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public void onDataChanged(
                 final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> change) {
-            bindingDataChangeListener.onDataChanged(new TranslatedDataChangeEvent(change,path));
+            bindingDataChangeListener.onDataChanged(new TranslatedDataChangeEvent(change, path));
         }
     }
 
     private class TranslatedDataChangeEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {
         private final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> domEvent;
-        private InstanceIdentifier<?> path;
+        private final InstanceIdentifier<?> path;
 
-        public TranslatedDataChangeEvent(
-                final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> change) {
-            this.domEvent = change;
-        }
+        private Map<InstanceIdentifier<?>, DataObject> createdCache;
+        private Map<InstanceIdentifier<?>, DataObject> updatedCache;
+        private Map<InstanceIdentifier<?>, ? extends DataObject> originalCache;
+        private Set<InstanceIdentifier<?>> removedCache;
+        private Optional<DataObject> originalDataCache;
+        private Optional<DataObject> updatedDataCache;
 
         public TranslatedDataChangeEvent(
                 final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> change,
@@ -139,47 +171,53 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
-            return fromDOMToData(domEvent.getCreatedData());
+            if (createdCache == null) {
+                createdCache = Collections.unmodifiableMap(toBinding(domEvent.getCreatedData()));
+            }
+            return createdCache;
         }
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
-            return fromDOMToData(domEvent.getUpdatedData());
+            if (updatedCache == null) {
+                updatedCache = Collections.unmodifiableMap(toBinding(domEvent.getUpdatedData()));
+            }
+            return updatedCache;
 
         }
 
         @Override
         public Set<InstanceIdentifier<?>> getRemovedPaths() {
-            final Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> removedPaths = domEvent
-                    .getRemovedPaths();
-            final Set<InstanceIdentifier<?>> output = new HashSet<>();
-            for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier instanceIdentifier : removedPaths) {
-                try {
-                    output.add(mappingService.fromDataDom(instanceIdentifier));
-                } catch (DeserializationException e) {
-                    Exceptions.sneakyThrow(e);
-                }
+            if (removedCache == null) {
+                removedCache = Collections.unmodifiableSet(toBinding(domEvent.getRemovedPaths()));
             }
-
-            return output;
+            return removedCache;
         }
 
         @Override
         public Map<InstanceIdentifier<?>, ? extends DataObject> getOriginalData() {
-            return fromDOMToData(domEvent.getOriginalData());
+            if (originalCache == null) {
+                originalCache = Collections.unmodifiableMap(toBinding(domEvent.getOriginalData()));
+            }
+            return originalCache;
 
         }
 
         @Override
         public DataObject getOriginalSubtree() {
-
-            return toBindingData(path,domEvent.getOriginalSubtree());
+            if (originalDataCache == null) {
+                originalDataCache = toBindingData(path, domEvent.getOriginalSubtree());
+            }
+            return originalDataCache.orNull();
         }
 
         @Override
         public DataObject getUpdatedSubtree() {
+            if (updatedDataCache == null) {
+                updatedDataCache = toBindingData(path, domEvent.getOriginalSubtree());
+            }
 
-            return toBindingData(path,domEvent.getUpdatedSubtree());
+            return updatedDataCache.orNull();
         }
 
         @Override
@@ -203,15 +241,6 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
     }
 
-    protected DataObject toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
-        try {
-            return getCodec().toBinding(path, data);
-        } catch (DeserializationException e) {
-            return null;
-        }
-    }
-
-
     @Override
     public BindingIndependentConnector getConnector() {
         return this.connector;
@@ -229,15 +258,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     @Override
     public void setDomProviderContext(final ProviderSession domProviderContext) {
-       this.context = domProviderContext;
+        this.context = domProviderContext;
     }
 
     @Override
     public void startForwarding() {
         // NOOP
     }
-
-
-
 
 }
