@@ -7,27 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -63,15 +49,7 @@ import org.opendaylight.controller.sal.core.api.notify.NotificationPublishServic
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ClassLoaderUtils;
-import org.opendaylight.yangtools.yang.binding.Augmentable;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-import org.opendaylight.yangtools.yang.binding.BindingMapping;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Notification;
-import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.opendaylight.yangtools.yang.binding.*;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -84,13 +62,16 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.util.concurrent.Futures;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 public class BindingIndependentConnector implements //
         RuntimeDataProvider, //
@@ -745,7 +726,7 @@ public class BindingIndependentConnector implements //
                             strategy = new DefaultInvocationStrategy(rpc, targetMethod, outputClass.get(), inputClass
                                     .get());
                         } else {
-                            strategy = new NoInputNoOutputInvocationStrategy(rpc, targetMethod);
+                            strategy = new NoInputInvocationStrategy(rpc, targetMethod, outputClass.get());
                         }
                     } else if(inputClass.isPresent()){
                         strategy = new NoOutputInvocationStrategy(rpc,targetMethod, inputClass.get());
@@ -830,7 +811,52 @@ public class BindingIndependentConnector implements //
 
     }
 
-    private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
+    private class NoInputInvocationStrategy extends RpcInvocationStrategy {
+
+      @SuppressWarnings("rawtypes")
+      private final WeakReference<Class> outputClass;
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      public NoInputInvocationStrategy(final QName rpc, final Method targetMethod, final Class<?> outputClass) {
+        super(rpc, targetMethod);
+        this.outputClass = new WeakReference(outputClass);
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput) throws Exception {
+        Future<RpcResult<?>> futureResult = (Future<RpcResult<?>>) targetMethod.invoke(rpcService);
+        if (futureResult == null) {
+          return Rpcs.getRpcResult(false);
+        }
+        RpcResult<?> bindingResult = futureResult.get();
+        final Object resultObj = bindingResult.getResult();
+        if (resultObj instanceof DataObject) {
+          final CompositeNode output = mappingService.toDataDom((DataObject)resultObj);
+          return Rpcs.getRpcResult(true, output, Collections.<RpcError>emptySet());
+        }
+        return Rpcs.getRpcResult(true);
+      }
+
+      @Override
+      public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
+        if(biRpcRegistry != null) {
+          CompositeNode xml = mappingService.toDataDom(input);
+          CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
+          RpcResult<CompositeNode> result = biRpcRegistry.invokeRpc(rpc, wrappedXml);
+          Object baResultValue = null;
+          if (result.getResult() != null) {
+            baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(), result.getResult());
+          }
+          RpcResult<?> baResult = Rpcs.getRpcResult(result.isSuccessful(), baResultValue, result.getErrors());
+          return Futures.<RpcResult<?>> immediateFuture(baResult);
+        }
+        return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
+      }
+    }
+
+
+  private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
 
         public NoInputNoOutputInvocationStrategy(final QName rpc, final Method targetMethod) {
             super(rpc, targetMethod);
