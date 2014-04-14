@@ -10,11 +10,11 @@ package org.opendaylight.controller.netconf.it;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
 import io.netty.channel.ChannelFuture;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.mockito.Mock;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -165,8 +165,13 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
         sock.close();
 
-        org.junit.Assert.assertThat(responseBuilder.toString(), JUnitMatchers.containsString("<capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>"));
-        org.junit.Assert.assertThat(responseBuilder.toString(), JUnitMatchers.containsString("<username>tomas</username>"));
+        String helloMsg = responseBuilder.substring(0, responseBuilder.indexOf(separator));
+        Document doc = XmlUtil.readXmlToDocument(helloMsg);
+        assertContainsElementWithText(doc, "urn:ietf:params:netconf:capability:candidate:1.0");
+
+        String replyMsg = responseBuilder.substring(responseBuilder.indexOf(separator) + separator.length());
+        doc = XmlUtil.readXmlToDocument(replyMsg);
+        assertContainsElementWithText(doc, "tomas");
     }
 
     private void assertSessionElementsInResponse(Document document, int i) {

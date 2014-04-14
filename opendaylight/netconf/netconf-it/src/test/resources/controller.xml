@@ -17,56 +17,56 @@
             <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
                <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:impl-identity-test</type>
-                     <name>id-test</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">prefix:impl-identity-test</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test:impl">id-test</prefix:name>
                      <identities-container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</afi>
+                        <prefix:afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</prefix:afi>
                      </identities-container>
                      <identities xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</safi>
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</afi>
+                        <prefix:safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</prefix:safi>
+                        <prefix:afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</prefix:afi>
                      </identities>
                      <identities xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-                        <safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</safi>
-                        <afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</afi>
+                        <prefix:safi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</prefix:safi>
+                        <prefix:afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity2</prefix:afi>
                      </identities>
-                     <afi xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl" xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</afi>
+                     <prefix:afi xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:test:types">prefix:test-identity1</prefix:afi>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-broker-impl</type>
-                     <name>binding-broker-impl</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-broker-impl</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-broker-impl</prefix:name>
                      <notification-service xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-service</type>
+                        <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-service</prefix:type>
                         <name>ref_binding-notification-broker</name>
                      </notification-service>
                      <data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-broker</type>
+                        <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-broker</prefix:type>
                         <name>ref_binding-data-broker</name>
                      </data-broker>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:runtime-generated-mapping</type>
-                     <name>runtime-mapping-singleton</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:runtime-generated-mapping</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">runtime-mapping-singleton</prefix:name>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</type>
-                     <name>binding-notification-broker</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-notification-broker</prefix:name>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-broker</type>
-                     <name>binding-data-broker</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-broker</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-data-broker</prefix:name>
                      <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
+                        <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</prefix:type>
                         <name>ref_dom-broker</name>
                      </dom-broker>
                      <mapping-service xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-dom-mapping-service</type>
+                        <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-dom-mapping-service</prefix:type>
                         <name>ref_runtime-mapping-singleton</name>
                      </mapping-service>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:logback:config">prefix:logback</type>
-                     <name>singleton</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:logback:config">prefix:logback</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:logback:config">singleton</prefix:name>
                      <console-appenders xmlns="urn:opendaylight:params:xml:ns:yang:controller:logback:config">
                         <threshold-filter>DEBUG</threshold-filter>
                         <name>console</name>
@@ -79,95 +79,95 @@
                      </loggers>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:schema-service-singleton</type>
-                     <name>yang-schema-service</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:schema-service-singleton</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">yang-schema-service</prefix:name>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:hash-map-data-store</type>
-                     <name>hash-map-data-store</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:hash-map-data-store</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">hash-map-data-store</prefix:name>
                   </module>
                   <module>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</type>
-                     <name>dom-broker</name>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</prefix:type>
+                     <prefix:name xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">dom-broker</prefix:name>
                      <data-store xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">
-                        <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-data-store</type>
+                        <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-data-store</prefix:type>
                         <name>ref_hash-map-data-store</name>
                      </data-store>
                   </module>
                </modules>
                <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:schema-service</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:schema-service</prefix:type>
                      <instance>
                         <name>ref_yang-schema-service</name>
                         <provider>/modules/module[type='schema-service-singleton'][name='yang-schema-service']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-data-store</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-data-store</prefix:type>
                      <instance>
                         <name>ref_hash-map-data-store</name>
                         <provider>/modules/module[type='hash-map-data-store'][name='hash-map-data-store']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</prefix:type>
                      <instance>
                         <name>ref_dom-broker</name>
                         <provider>/modules/module[type='dom-broker-impl'][name='dom-broker']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:test">prefix:testing</prefix:type>
                      <instance>
                         <name>ref_id-test</name>
                         <provider>/modules/module[type='impl-identity-test'][name='id-test']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-dom-mapping-service</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-dom-mapping-service</prefix:type>
                      <instance>
                         <name>ref_runtime-mapping-singleton</name>
                         <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-consumer-broker</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-consumer-broker</prefix:type>
                      <instance>
                         <name>ref_binding-data-broker</name>
                         <provider>/modules/module[type='binding-data-broker'][name='binding-data-broker']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-rpc-registry</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-rpc-registry</prefix:type>
                      <instance>
                         <name>ref_binding-broker-impl</name>
                         <provider>/modules/module[type='binding-broker-impl'][name='binding-broker-impl']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-service</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-service</prefix:type>
                      <instance>
                         <name>ref_binding-notification-broker</name>
                         <provider>/modules/module[type='binding-notification-broker'][name='binding-notification-broker']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</prefix:type>
                      <instance>
                         <name>ref_binding-broker-impl</name>
                         <provider>/modules/module[type='binding-broker-impl'][name='binding-broker-impl']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-subscription-service</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-notification-subscription-service</prefix:type>
                      <instance>
                         <name>ref_binding-notification-broker</name>
                         <provider>/modules/module[type='binding-notification-broker'][name='binding-notification-broker']</provider>
                      </instance>
                   </service>
                   <service>
-                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-broker</type>
+                     <prefix:type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-data-broker</prefix:type>
                      <instance>
                         <name>ref_binding-data-broker</name>
                         <provider>/modules/module[type='binding-data-broker'][name='binding-data-broker']</provider>

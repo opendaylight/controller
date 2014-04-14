@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -87,7 +88,7 @@ public class MessageParserTest {
 
         NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();
         assertNotNull(receivedMessage);
-        assertTrue(this.msg.getDocument().isEqualNode(receivedMessage.getDocument()));
+        assertXMLEqual(this.msg.getDocument(), receivedMessage.getDocument());
     }
 
     @Test
@@ -106,6 +107,6 @@ public class MessageParserTest {
         testChunkChannel.writeInbound(recievedOutbound);
         NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();
         assertNotNull(receivedMessage);
-        assertTrue(this.msg.getDocument().isEqualNode(receivedMessage.getDocument()));
+        assertXMLEqual(this.msg.getDocument(), receivedMessage.getDocument());
     }
 }

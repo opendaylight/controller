@@ -8,7 +8,12 @@
 
 package org.opendaylight.controller.config.persist.storage.file.xml;
 
-import com.google.common.base.Charsets;
+import static junit.framework.Assert.assertFalse;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,16 +21,16 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
-import static junit.framework.Assert.assertFalse;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+
+import com.google.common.base.Charsets;
 
 public class FileStorageAdapterTest {
 
@@ -96,8 +101,7 @@ public class FileStorageAdapterTest {
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
-        assertEquals("<config>2</config>",
-                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
+        assertXMLEqual("<config>2</config>", configSnapshotHolder.getConfigSnapshot());
         assertEquals(createCaps(), configSnapshotHolder.getCapabilities());
 
         storage = new XmlFileStorageAdapter();
@@ -147,8 +151,7 @@ public class FileStorageAdapterTest {
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
-        assertEquals("<config>2</config>",
-                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
+        assertXMLEqual("<config>2</config>", configSnapshotHolder.getConfigSnapshot());
     }
 
     @Test
@@ -178,8 +181,7 @@ public class FileStorageAdapterTest {
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
-        assertEquals("<config>3</config>",
-                configSnapshotHolder.getConfigSnapshot().replaceAll("\\s", ""));
+        assertXMLEqual("<config>3</config>", configSnapshotHolder.getConfigSnapshot());
         assertFalse(readLines.contains(holder.getConfigSnapshot()));
     }
 
