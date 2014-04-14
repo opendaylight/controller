@@ -2,6 +2,7 @@ package org.opendaylight.controller.datastore.infinispan;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import junit.framework.Assert;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
@@ -171,7 +172,9 @@ public class DataStoreImplTest {
 
     @Test
     public void testDataStore() throws Exception{
-        final DataStoreImpl dataStore = new DataStoreImpl(tcm);
+        //FixMe:stop the already initialized default cache manager as it gets initialized by DataStoreImpl
+        tcm.close();
+        final DataStoreImpl dataStore = new DataStoreImpl("configuration",schemaContext, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
         dataStore.onGlobalContextUpdated(schemaContext);
         final DOMStoreReadWriteTransaction domStoreReadWriteTransaction = dataStore.newReadWriteTransaction();
 
