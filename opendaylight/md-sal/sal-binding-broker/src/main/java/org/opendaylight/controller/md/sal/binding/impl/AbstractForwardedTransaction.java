@@ -108,27 +108,30 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
                 .toNormalizedNode(path, data);
 
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
-        try {
-            List<PathArgument> currentArguments = new ArrayList<>();
-            DataNormalizationOperation<?> currentOp = codec.getDataNormalizer().getRootOperation();
-            Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
-            while (iterator.hasNext()) {
-                PathArgument currentArg = iterator.next();
-                currentOp = currentOp.getChild(currentArg);
-                currentArguments.add(currentArg);
-                org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
-                        currentArguments);
-                boolean isPresent = writeTransaction.read(store, currentPath).get().isPresent();
-                if (isPresent == false && iterator.hasNext()) {
-                    writeTransaction.put(store, currentPath, currentOp.createDefault(currentArg));
-                }
+        List<PathArgument> currentArguments = new ArrayList<>();
+        DataNormalizationOperation<?> currentOp = codec.getDataNormalizer().getRootOperation();
+        Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
+        while (iterator.hasNext()) {
+            PathArgument currentArg = iterator.next();
+            currentOp = currentOp.getChild(currentArg);
+            currentArguments.add(currentArg);
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
+                    currentArguments);
+
+            final Optional<NormalizedNode<?, ?>> d;
+            try {
+                d = writeTransaction.read(store, currentPath).get();
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
+                throw new IllegalStateException("Failed to read pre-existing data", e);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+
+            if (d.isPresent() && iterator.hasNext()) {
+                writeTransaction.put(store, currentPath, currentOp.createDefault(currentArg));
+            }
         }
         //LOG .info("Tx: {} : Putting data {}",getDelegate().getIdentifier(),normalized.getKey());
         writeTransaction.put(store, normalized.getKey(), normalized.getValue());
-
     }
 
     protected void doMerge(final DOMDataWriteTransaction writeTransaction, final LogicalDatastoreType store,
