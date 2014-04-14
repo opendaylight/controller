@@ -2,6 +2,7 @@ package org.opendaylight.controller.datastore.infinispan;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import junit.framework.Assert;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
@@ -12,6 +13,7 @@ import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFact
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodePrinter;
 import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -97,7 +99,7 @@ public class DataStoreImplTest {
 
         System.out.println(two.toString());
 
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer());
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer(),new WriteDeleteTransactionTracker());
 
 
         Node n1 = treeCache.getNode(Fqn.fromString("/urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"));
@@ -110,7 +112,7 @@ public class DataStoreImplTest {
     public void normalizedNodeToTreeCacheSerialization(){
 
         treeCache = tcm.getCache(DataStoreImpl.DEFAULT_STORE_CACHE_NAME);
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer());
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer(),new WriteDeleteTransactionTracker());
         Node n1 = treeCache.getNode(Fqn.fromString("/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"));
     }
 
@@ -146,7 +148,7 @@ public class DataStoreImplTest {
         final InstanceIdentifier instanceIdentifier = new InstanceIdentifier(pathArguments);
 
         final ContainerNode containerNode = TestModel.createTestContainer();
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(instanceIdentifier, containerNode);
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(instanceIdentifier, containerNode,new WriteDeleteTransactionTracker());
 
         NormalizedNode normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(instanceIdentifier, treeCache.getNode(nodeWithValue));
 
@@ -171,7 +173,8 @@ public class DataStoreImplTest {
 
     @Test
     public void testDataStore() throws Exception{
-        final DataStoreImpl dataStore = new DataStoreImpl(tcm);
+        DataStoreImpl.setTreeCacheManager(TreeCacheManagerSingleton.get());
+        final DataStoreImpl dataStore = new DataStoreImpl("configuration",schemaContext, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
         dataStore.onGlobalContextUpdated(schemaContext);
         final DOMStoreReadWriteTransaction domStoreReadWriteTransaction = dataStore.newReadWriteTransaction();
 
