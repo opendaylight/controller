@@ -120,6 +120,13 @@ public class InterfacesHelper {
         return result;
     }
 
+    public static Set<String> getQNames(Set<ServiceInterfaceAnnotation> siAnnotations) {
+        Set<String> qNames = new HashSet<>();
+        for (ServiceInterfaceAnnotation sia: siAnnotations) {
+            qNames.add(sia.value());
+        }
+        return Collections.unmodifiableSet(qNames);
+    }
 
     public static Set<ServiceInterfaceAnnotation> getServiceInterfaceAnnotations(ModuleFactory factory) {
         Set<Class<? extends AbstractServiceInterface>> implementedServiceIntefaces = Collections.unmodifiableSet(factory.getImplementedServiceIntefaces());
@@ -136,7 +143,7 @@ public class InterfacesHelper {
                 result.add(annotation);
             }
         }
-        return result;
+        return Collections.unmodifiableSet(result);
     }
 
     static Set<Class<? extends AbstractServiceInterface>> getAllAbstractServiceInterfaceClasses(

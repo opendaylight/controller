@@ -31,7 +31,7 @@ public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
     @Before
     public void setUp() {
         factory = new GlobalEventExecutorModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     @Test

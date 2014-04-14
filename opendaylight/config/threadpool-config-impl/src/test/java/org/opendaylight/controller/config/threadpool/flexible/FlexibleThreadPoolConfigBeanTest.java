@@ -38,7 +38,7 @@ public class FlexibleThreadPoolConfigBeanTest extends AbstractConfigTest {
     public void setUp() {
 
         flexibleFactory = new FlexibleThreadPoolModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(flexibleFactory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,flexibleFactory,
                 new NamingThreadFactoryModuleFactory()));
     }
 

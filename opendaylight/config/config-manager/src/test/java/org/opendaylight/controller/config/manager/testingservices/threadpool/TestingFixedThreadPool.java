@@ -53,6 +53,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     @Override
     public void close() throws IOException {
         executorService.shutdown();
+        allExecutors.remove(executorService);
 
     }
 

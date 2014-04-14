@@ -49,7 +49,8 @@ class GroupProvider implements AutoCloseable {
     }
     
     override close() throws Exception {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        if( commitHandlerRegistration != null ) {
+            commitHandlerRegistration.close();
+        }
     }
-    
 }

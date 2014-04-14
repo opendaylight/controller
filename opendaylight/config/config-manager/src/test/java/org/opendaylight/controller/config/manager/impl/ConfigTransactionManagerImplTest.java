@@ -23,7 +23,7 @@ public class ConfigTransactionManagerImplTest extends
 
     @Before
     public void setUp() {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver());
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext));
 
     }
 

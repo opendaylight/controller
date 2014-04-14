@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.it;
 
-import static org.junit.Assert.fail;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,6 +20,11 @@ import org.opendaylight.controller.config.yang.test.impl.DtoA;
 import org.opendaylight.controller.config.yang.test.impl.DtoB;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleMXBean;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.fail;
 
 @Ignore
 // ietf beans are not JMX compliant beans:
@@ -42,7 +42,7 @@ public class ITTest extends AbstractConfigTest {
     public void setUp() {
 
         factory = new TestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 factory));
     }
 
