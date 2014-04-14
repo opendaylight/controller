@@ -107,7 +107,12 @@ public class BeanToOsgiServiceManager {
         @Override
         public void close() {
             if (serviceRegistration != null) {
-                serviceRegistration.unregister();
+                try {
+                    serviceRegistration.unregister();
+                } catch (IllegalStateException e) {
+                    // Ignore - this means the service was already unregistred which can happen normally
+                    // on shutdown.
+                }
             }
         }
     }

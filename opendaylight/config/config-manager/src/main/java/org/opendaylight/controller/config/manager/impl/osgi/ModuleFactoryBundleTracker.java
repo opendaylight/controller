@@ -33,11 +33,9 @@ import org.slf4j.LoggerFactory;
  * Code based on http://www.toedter.com/blog/?p=236
  */
 public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Object> {
-    private final BlankTransactionServiceTracker blankTransactionServiceTracker;
     private static final Logger logger = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
-    public ModuleFactoryBundleTracker(BlankTransactionServiceTracker blankTransactionServiceTracker) {
-        this.blankTransactionServiceTracker = blankTransactionServiceTracker;
+    public ModuleFactoryBundleTracker() {
     }
 
     @Override
@@ -66,8 +64,6 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        // workaround for service tracker not getting removed service event
-        blankTransactionServiceTracker.blankTransaction();
     }
 
     // TODO:test
