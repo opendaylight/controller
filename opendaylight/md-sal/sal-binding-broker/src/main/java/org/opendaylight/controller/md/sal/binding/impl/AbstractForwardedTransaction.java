@@ -21,6 +21,7 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -113,7 +114,11 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
         Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
         while (iterator.hasNext()) {
             PathArgument currentArg = iterator.next();
-            currentOp = currentOp.getChild(currentArg);
+            try {
+                currentOp = currentOp.getChild(currentArg);
+            } catch (DataNormalizationException e) {
+                throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
+            }
             currentArguments.add(currentArg);
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
                     currentArguments);

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -70,9 +77,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return Collections.singleton(identifier.getNodeType());
     }
 
-    public abstract DataNormalizationOperation<?> getChild(final PathArgument child);
+    public abstract DataNormalizationOperation<?> getChild(final PathArgument child) throws DataNormalizationException;
 
-    public abstract DataNormalizationOperation<?> getChild(QName child);
+    public abstract DataNormalizationOperation<?> getChild(QName child) throws DataNormalizationException;
 
     public abstract NormalizedNode<?, ?> normalize(Node<?> legacyData);
 
@@ -162,7 +169,13 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
             Set<DataNormalizationOperation<?>> usedMixins = new HashSet<>();
             for (Node<?> childLegacy : compositeNode.getValue()) {
-                DataNormalizationOperation childOp = getChild(childLegacy.getNodeType());
+                final DataNormalizationOperation childOp;
+
+                try {
+                    childOp = getChild(childLegacy.getNodeType());
+                } catch (DataNormalizationException e) {
+                    throw new IllegalArgumentException(String.format("Failed to normalize data %s", compositeNode.getValue()), e);
+                }
 
                 // We skip unknown nodes if this node is mixin since
                 // it's nodes and parent nodes are interleaved
@@ -175,8 +188,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                 if (childOp.isMixin()) {
                     if (usedMixins.contains(childOp)) {
                         // We already run / processed that mixin, so to avoid
-                        // dupliciry we are
-                        // skiping next nodes.
+                        // duplicity we are skipping next nodes.
                         continue;
                     }
                     builder.addChild(childOp.normalize(compositeNode));
@@ -208,7 +220,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild(final PathArgument child) {
+        public DataNormalizationOperation<?> getChild(final PathArgument child) throws DataNormalizationException {
             DataNormalizationOperation<?> potential = byArg.get(child);
             if (potential != null) {
                 return potential;
@@ -218,7 +230,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild(final QName child) {
+        public DataNormalizationOperation<?> getChild(final QName child) throws DataNormalizationException {
             DataNormalizationOperation<?> potential = byQName.get(child);
             if (potential != null) {
                 return potential;
@@ -486,15 +498,19 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    public static DataNormalizationOperation<?> fromSchemaAndPathArgument(final DataNodeContainer schema,
-            final QName child) {
+    private static DataNormalizationOperation<?> fromSchemaAndPathArgument(final DataNodeContainer schema,
+            final QName child) throws DataNormalizationException {
         DataSchemaNode potential = schema.getDataChildByName(child);
         if (potential == null) {
             Iterable<org.opendaylight.yangtools.yang.model.api.ChoiceNode> choices = FluentIterable.from(
                     schema.getChildNodes()).filter(org.opendaylight.yangtools.yang.model.api.ChoiceNode.class);
             potential = findChoice(choices, child);
         }
-        checkArgument(potential != null, "Supplied QName %s is not valid according to schema %s", child, schema);
+
+        if (potential == null) {
+            throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s", child, schema));
+        }
+
         if ((schema instanceof DataSchemaNode) && !((DataSchemaNode) schema).isAugmenting() && potential.isAugmenting()) {
             return fromAugmentation(schema, (AugmentationTarget) schema, potential);
         }
@@ -541,7 +557,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static DataNormalizationOperation<?> fromSchema(final DataNodeContainer schema, final PathArgument child) {
+    private static DataNormalizationOperation<?> fromSchema(final DataNodeContainer schema, final PathArgument child) throws DataNormalizationException {
         if (child instanceof AugmentationIdentifier) {
             return fromSchemaAndPathArgument(schema, ((AugmentationIdentifier) child).getPossibleChildNames()
                     .iterator().next());
