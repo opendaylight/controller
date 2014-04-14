@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7dada15",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/transactions/TransactionProvider.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "The whole check state could be extracted as method, not only the message string",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_57ecaec7",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProviderInterface.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "Runtime exception not required in declaration #2",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_77dd3214",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/osgi/NetconfSSHActivator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "RuntimeExceptions are not required to be present in method declaration",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_37e7aae6",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/osgi/NetconfSSHActivator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "This should throw exception. Code will continue with privateKeyPEMString as null and fail somewhere else.\n\nSame issue with AuthProvider.",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_97bb16c4",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/handler/NetconfChunkAggregator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "All state changes should be under the switch statement",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_77b692de",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/handler/NetconfChunkAggregator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:38:49Z",
+      "side": 1,
+      "message": "We are using \"\u003d\u003dfalse\" for negative conditions in netconf / config subsystem. I dont think it needs to be fixed",
+      "revId": "e1eb54e07d3b369aa8aeb4d81228426e399aa6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
