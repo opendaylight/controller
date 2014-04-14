@@ -8,21 +8,26 @@
 
 package org.opendaylight.controller.config.persist.storage.directory.xml;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 
-import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.test.PropertiesProviderTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.xml.sax.SAXException;
+
+import com.google.common.base.Optional;
 
 public class DirectoryStorageAdapterTest {
     Persister tested;
@@ -95,8 +100,8 @@ public class DirectoryStorageAdapterTest {
         logger.info("Testing : " + tested.toString());
     }
 
-    private void assertResult(ConfigSnapshotHolder result, String s, String... caps) {
-        assertEquals(s, result.getConfigSnapshot().replaceAll("\\s", ""));
+    private void assertResult(ConfigSnapshotHolder result, String s, String... caps) throws SAXException, IOException {
+        assertXMLEqual(s, result.getConfigSnapshot());
         int i = 0;
         for (String capFromSnapshot : result.getCapabilities()) {
             assertEquals(capFromSnapshot, caps[i++]);

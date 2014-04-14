@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +18,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
+import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +30,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +41,12 @@ import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.StringUtils;
+import org.custommonkey.xmlunit.AbstractNodeTester;
+import org.custommonkey.xmlunit.NodeTest;
+import org.custommonkey.xmlunit.NodeTestException;
+import org.custommonkey.xmlunit.NodeTester;
+import org.custommonkey.xmlunit.XMLAssert;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -95,7 +105,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.w3c.dom.traversal.DocumentTraversal;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Optional;
@@ -110,6 +123,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private static final String INSTANCE_NAME = "instance-from-code";
     private static final String NETCONF_SESSION_ID = "foo";
+    private static final String TEST_NAMESPACE= "urn:opendaylight:params:xml:ns:yang:controller:test:impl";
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
     private IdentityTestModuleFactory factory3;
@@ -182,72 +196,101 @@ public class NetconfMappingTest extends AbstractConfigTest {
         createModule(INSTANCE_NAME);
 
         edit("netconfMessages/editConfig.xml");
-        Element config = getConfigCandidate();
-        assertCorrectServiceNames(config, 6, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        Document config = getConfigCandidate();
+        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
-                "ref_from_code_to_instance-from-code_1");
+                "ref_from_code_to_instance-from-code_1"));
 
 
         edit("netconfMessages/editConfig_addServiceName.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
-                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         edit("netconfMessages/editConfig_addServiceNameOnTest.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
-                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         commit();
         config = getConfigRunning();
         assertCorrectRefNamesForDependencies(config);
-        assertCorrectServiceNames(config, 7, "ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
-                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another");
+                "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         edit("netconfMessages/editConfig_replace_default.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, 2, "ref_dep", "ref_dep2");
+        assertCorrectServiceNames(config, Sets.newHashSet("ref_dep", "ref_dep2"));
 
         edit("netconfMessages/editConfig_remove.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, 0);
+        assertCorrectServiceNames(config, Collections.<String>emptySet());
 
         commit();
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, 0);
+        assertCorrectServiceNames(config, Collections.<String>emptySet());
 
     }
 
-    private void assertCorrectRefNamesForDependencies(Element config) {
+    private void assertCorrectRefNamesForDependencies(Document config) throws NodeTestException {
         NodeList modulesList = config.getElementsByTagName("modules");
         assertEquals(1, modulesList.getLength());
 
-        Element modules = (Element) modulesList.item(0);
+        NodeTest nt = new NodeTest((DocumentTraversal) config, modulesList.item(0));
+        NodeTester tester = new AbstractNodeTester() {
+            private int defaultRefNameCount = 0;
+            private int userRefNameCount = 0;
 
-        String trimmedModules = XmlUtil.toString(modules).replaceAll("\\s", "");
-        int defaultRefNameCount = StringUtils.countMatches(trimmedModules, "ref_dep2");
-        int userRefNameCount = StringUtils.countMatches(trimmedModules, "ref_dep_user_two");
+            @Override
+            public void testText(Text text) throws NodeTestException {
+                if(text.getData().equals("ref_dep2")) {
+                    defaultRefNameCount++;
+                } else if(text.getData().equals("ref_dep_user_two")) {
+                    userRefNameCount++;
+                }
+            }
 
-        assertEquals(0, defaultRefNameCount);
-        assertEquals(2, userRefNameCount);
+            @Override
+            public void noMoreNodes(NodeTest forTest) throws NodeTestException {
+                assertEquals(0, defaultRefNameCount);
+                assertEquals(2, userRefNameCount);
+            }
+        };
+        nt.performTest(tester, Node.TEXT_NODE);
     }
 
-    private void assertCorrectServiceNames(Element configCandidate, int servicesSize, String... refNames) {
-        NodeList elements = configCandidate.getElementsByTagName("provider");
-        assertEquals(servicesSize, elements.getLength());
+    private void assertCorrectServiceNames(Document configCandidate, final Set<String> refNames) throws NodeTestException {
 
-        NodeList servicesList = configCandidate.getElementsByTagName("services");
-        assertEquals(1, servicesList.getLength());
+        NodeList servicesNodes = configCandidate.getElementsByTagName("services");
+        assertEquals(1, servicesNodes.getLength());
 
-        Element services = (Element) servicesList.item(0);
-        String trimmedServices = XmlUtil.toString(services).replaceAll("\\s", "");
+        NodeTest nt = new NodeTest((DocumentTraversal) configCandidate, servicesNodes.item(0));
+        NodeTester tester = new AbstractNodeTester() {
 
-        for (String s : refNames) {
-            assertThat(trimmedServices, JUnitMatchers.containsString(s));
-        }
+            @Override
+            public void testElement(Element element) throws NodeTestException {
+                if(element.getNodeName() != null) {
+                    if(element.getNodeName().equals("name")) {
+                        String elmText = element.getTextContent();
+                        if(refNames.contains(elmText)) {
+                            refNames.remove(elmText);
+                            return;
+                        } else {
+                            throw new NodeTestException("Unexpected services defined: " + elmText);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void noMoreNodes(NodeTest forTest) throws NodeTestException {
+                assertTrue(refNames.isEmpty());
+            }
+        };
+        nt.performTest(tester, Node.ELEMENT_NODE);
     }
 
     @Test
@@ -257,19 +300,18 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         commit();
-        Element response = getConfigRunning();
-        String trimmedResponse = XmlUtil.toString(response).replaceAll("\\s", "");
-        assertContainsString(trimmedResponse, "<ipxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">0:0:0:0:0:0:0:1</ip>");
-        assertContainsString(trimmedResponse, "<union-test-attrxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">456</union-test-attr>");
+        Document response = getConfigRunning();
+        Element ipElement = readXmlToElement("<ip xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">0:0:0:0:0:0:0:1</ip>");
+        assertContainsElement(response, readXmlToElement("<ip xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">0:0:0:0:0:0:0:1</ip>"));
+
+        assertContainsElement(response, readXmlToElement("<union-test-attr xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">456</union-test-attr>"));
 
 
         edit("netconfMessages/editConfig_setUnions.xml");
         commit();
         response = getConfigRunning();
-
-        trimmedResponse = XmlUtil.toString(response).replaceAll("\\s", "");
-        assertContainsString(trimmedResponse, "<ipxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">127.1.2.3</ip>");
-        assertContainsString(trimmedResponse, "<union-test-attrxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">randomStringForUnion</union-test-attr>");
+        assertContainsElement(response, readXmlToElement("<ip xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">127.1.2.3</ip>"));
+        assertContainsElement(response, readXmlToElement("<union-test-attr xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">randomStringForUnion</union-test-attr>"));
 
     }
 
@@ -279,7 +321,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         createModule(INSTANCE_NAME);
 
         edit("netconfMessages/editConfig.xml");
-        Element configCandidate = getConfigCandidate();
+        Document configCandidate = getConfigCandidate();
         checkBinaryLeafEdited(configCandidate);
 
 
@@ -289,7 +331,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         // check after edit
         commit();
-        Element response = getConfigRunning();
+        Document response = getConfigRunning();
 
         checkBinaryLeafEdited(response);
         checkTypeConfigAttribute(response);
@@ -301,17 +343,12 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig_remove.xml");
 
         commit();
-        response = getConfigCandidate();
-        final String responseFromCandidate = XmlUtil.toString(response).replaceAll("\\s+", "");
-        response = getConfigRunning();
-        final String responseFromRunning = XmlUtil.toString(response).replaceAll("\\s+", "");
-        assertEquals(responseFromCandidate, responseFromRunning);
+        assertXMLEqual(getConfigCandidate(), getConfigRunning());
 
-        final String expectedResult = XmlFileLoader.fileToString("netconfMessages/editConfig_expectedResult.xml")
-                .replaceAll("\\s+", "");
-
-        assertEquals(expectedResult, responseFromRunning);
-        assertEquals(expectedResult, responseFromCandidate);
+        final Document expectedResult = XmlFileLoader.xmlFileToDocument("netconfMessages/editConfig_expectedResult.xml");
+        XMLUnit.setIgnoreWhitespace(true);
+        assertXMLEqual(expectedResult, getConfigRunning());
+        assertXMLEqual(expectedResult, getConfigCandidate());
 
         edit("netconfMessages/editConfig_none.xml");
         closeSession();
@@ -320,12 +357,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
         verifyNoMoreInteractions(netconfOperationServiceSnapshot);
     }
 
-    private void checkBigDecimal(Element response) {
-        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
-
-        assertContainsString(responseTrimmed, "<sleep-factorxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.58</sleep-factor>");
+    private void checkBigDecimal(Document response) throws NodeTestException, SAXException, IOException {
+        assertContainsElement(response, readXmlToElement("<sleep-factor xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.58</sleep-factor>"));
         // Default
-        assertContainsString(responseTrimmed, "<sleep-factorxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.00</sleep-factor>");
+        assertContainsElement(response, readXmlToElement("<sleep-factor xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2.00</sleep-factor>"));
 
     }
 
@@ -347,14 +382,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
         executeOp(commitOp, "netconfMessages/commit.xml");
     }
 
-    private Element getConfigCandidate() throws ParserConfigurationException, SAXException, IOException,
+    private Document getConfigCandidate() throws ParserConfigurationException, SAXException, IOException,
             NetconfDocumentedException {
         GetConfig getConfigOp = new GetConfig(yangStoreSnapshot, Optional.<String> absent(), transactionProvider,
                 configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getConfigOp, "netconfMessages/getConfig_candidate.xml");
     }
 
-    private Element getConfigRunning() throws ParserConfigurationException, SAXException, IOException,
+    private Document getConfigRunning() throws ParserConfigurationException, SAXException, IOException,
             NetconfDocumentedException {
         GetConfig getConfigOp = new GetConfig(yangStoreSnapshot, Optional.<String> absent(), transactionProvider,
                 configRegistryClient, NETCONF_SESSION_ID);
@@ -378,7 +413,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         commit();
-        Element response = getConfigRunning();
+        Document response = getConfigRunning();
         final int allInstances = response.getElementsByTagName("module").getLength();
 
         edit("netconfMessages/editConfig_replace_default.xml");
@@ -398,7 +433,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Element simple-long-2 present multiple times with different namespaces");
-            assertContainsString(message, "urn:opendaylight:params:xml:ns:yang:controller:test:impl");
+            assertContainsString(message, TEST_NAMESPACE);
             assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             throw e;
         }
@@ -424,7 +459,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Element binaryLeaf present multiple times with different namespaces");
-            assertContainsString(message, "urn:opendaylight:params:xml:ns:yang:controller:test:impl");
+            assertContainsString(message, TEST_NAMESPACE);
             assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             throw e;
         }
@@ -437,7 +472,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/namespaces/editConfig_typeNameConfigAttributeMatching.xml");
         commit();
 
-        Element response = getConfigRunning();
+        Document response = getConfigRunning();
         checkTypeConfigAttribute(response);
     }
 
@@ -479,7 +514,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         commit();
-        Element response = getConfigRunning();
+        Document response = getConfigRunning();
         final int allInstances = response.getElementsByTagName("instance").getLength();
 
         edit("netconfMessages/editConfig_replace_module.xml");
@@ -508,42 +543,32 @@ public class NetconfMappingTest extends AbstractConfigTest {
         executeOp(discardOp, "netconfMessages/discardChanges.xml");
     }
 
-    private void checkBinaryLeafEdited(final Element response) {
-        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
-        String substring = "<binaryLeafxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">YmluYXJ5</binaryLeaf>";
-        assertContainsString(responseTrimmed, substring);
-        substring = "<binaryLeafxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ZGVmYXVsdEJpbg==</binaryLeaf>";
-        assertContainsString(responseTrimmed, substring);
+    private void checkBinaryLeafEdited(final Document response) throws NodeTestException, SAXException, IOException {
+        assertContainsElement(response, readXmlToElement("<binaryLeaf xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">YmluYXJ5</binaryLeaf>"));
+        assertContainsElement(response, readXmlToElement("<binaryLeaf xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ZGVmYXVsdEJpbg==</binaryLeaf>"));
     }
 
-    private void checkTypedefs(final Element response) {
-        String responseTrimmed = XmlUtil.toString(response).replaceAll("\\s", "");
+    private void checkTypedefs(final Document response) throws NodeTestException, SAXException, IOException {
 
-        String substring = "<extendedxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">10</extended>";
-        assertContainsString(responseTrimmed, substring);
+        assertContainsElement(response, readXmlToElement("<extended xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">10</extended>"));
         // Default
-        assertContainsString(responseTrimmed,
-                "<extendedxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">1</extended>");
+        assertContainsElement(response, readXmlToElement("<extended xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">1</extended>"));
 
-        assertContainsString(responseTrimmed,
-                "<extended-twicexmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">20</extended-twice>");
+        assertContainsElement(response, readXmlToElement("<extended-twice xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">20</extended-twice>"));
         // Default
-        assertContainsString(responseTrimmed,
-                "<extended-twicexmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2</extended-twice>");
+        assertContainsElement(response, readXmlToElement("<extended-twice xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2</extended-twice>"));
 
-        assertContainsString(responseTrimmed,
-                "<extended-enumxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">TWO</extended-enum>");
+        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">TWO</extended-enum>"));
         // Default
-        assertContainsString(responseTrimmed,
-                "<extended-enumxmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ONE</extended-enum>");
+        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ONE</extended-enum>"));
     }
 
     private void assertContainsString(String string, String substring) {
         assertThat(string, JUnitMatchers.containsString(substring));
     }
 
-    private void checkEnum(final Element response) {
-        XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
+    private void checkEnum(final Document response) {
+        XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
         String enumName = "extended-enum";
@@ -554,7 +579,6 @@ public class NetconfMappingTest extends AbstractConfigTest {
             if(name.equals(INSTANCE_NAME)) {
                 XmlElement enumAttr = moduleElement.getOnlyChildElement(enumName);
                 assertEquals(enumContent, enumAttr.getTextContent());
-
                 return;
             }
         }
@@ -562,14 +586,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
         fail("Enum attribute " + enumName + ":" + enumContent + " not present in " + XmlUtil.toString(response));
     }
 
-    private void checkTestingDeps(Element response) {
+    private void checkTestingDeps(Document response) {
         int testingDepsSize = response.getElementsByTagName("testing-deps").getLength();
         assertEquals(2, testingDepsSize);
     }
 
-    private void checkTypeConfigAttribute(Element response) {
+    private void checkTypeConfigAttribute(Document response) {
 
-        XmlElement modulesElement = XmlElement.fromDomElement(response).getOnlyChildElement("data")
+        XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
                 .getOnlyChildElement("modules");
 
         List<String> expectedValues = Lists.newArrayList("default-string", "configAttributeType");
@@ -577,7 +601,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
             for (XmlElement type : moduleElement.getChildElements("type")) {
-                if (type.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY).equals("") == false) {
+                if (type.getNamespace() != null) {
                     configAttributeType.add(type.getTextContent());
                 }
             }
@@ -631,7 +655,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         // check after edit
         commit();
-        Element response = get();
+        Document response = get();
 
         assertEquals(2/*With runtime beans*/ + 2 /*Without runtime beans*/, getElementsSize(response, "module"));
         // data from state
@@ -651,29 +675,31 @@ public class NetconfMappingTest extends AbstractConfigTest {
         RuntimeRpc netconf = new RuntimeRpc(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
 
         response = executeOp(netconf, "netconfMessages/rpc.xml");
-        assertContainsString(XmlUtil.toString(response), "testarg1".toUpperCase());
+        assertContainsElementWithText(response, "testarg1");
 
         response = executeOp(netconf, "netconfMessages/rpcInner.xml");
-        assertContainsString(XmlUtil.toString(response), "ok");
+        Document expectedReplyOk = XmlFileLoader.xmlFileToDocument("netconfMessages/rpc-reply_ok.xml");
+        XMLUnit.setIgnoreWhitespace(true);
+        XMLAssert.assertXMLEqual(expectedReplyOk, response);
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner.xml");
-        assertContainsString(XmlUtil.toString(response), "true");
+        assertContainsElementWithText(response, "true");
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner_complex_output.xml");
-        assertContainsString(XmlUtil.toString(response), "1");
-        assertContainsString(XmlUtil.toString(response), "2");
+        assertContainsElementWithText(response, "1");
+        assertContainsElementWithText(response, "2");
     }
 
-    private Element get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
         Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID, transactionProvider);
         return executeOp(getOp, "netconfMessages/get.xml");
     }
 
-    private int getElementsSize(Element response, String elementName) {
+    private int getElementsSize(Document response, String elementName) {
         return response.getElementsByTagName(elementName).getLength();
     }
 
-    private Element executeOp(final NetconfOperation op, final String filename) throws ParserConfigurationException,
+    private Document executeOp(final NetconfOperation op, final String filename) throws ParserConfigurationException,
             SAXException, IOException, NetconfDocumentedException {
 
         final Document request = XmlFileLoader.xmlFileToDocument(filename);
@@ -685,7 +711,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         final Document response = op.handle(request, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
         logger.debug("Got response\n{}", XmlUtil.toString(response));
-        return response.getDocumentElement();
+        return response;
     }
 
     private List<InputStream> getYangs() throws FileNotFoundException {
