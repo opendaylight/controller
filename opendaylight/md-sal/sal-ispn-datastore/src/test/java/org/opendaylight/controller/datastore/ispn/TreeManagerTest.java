@@ -7,9 +7,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.datastore.infinispan.TreeCacheManagerSingleton;
 
+import javax.transaction.Transaction;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +31,12 @@ public class TreeManagerTest {
   @org.junit.Before
   public void setUp() throws Exception {
     fqn= Fqn.fromString("/");
+
+
+  }
+
+  @org.junit.After
+  public void tearDown() throws Exception {
 
   }
 
@@ -261,6 +269,48 @@ public class TreeManagerTest {
     data = tcNew.getData(Fqn.fromString(fqn));
     Assert.assertNull(data);
     }
+    es.shutdownNow();
+
+
+  }
+
+  //test to check the suspend and resume transaction functionality
+  @Test
+  public void testResumeSuspendTransaction () throws Exception{
+    final TreeCache tc = get9LevelTreeCache("resumeSuspendTransaction");
+
+    //ok here we will start a transaction and then resume the same in another thread and commit
+    //This thread is the main thread that does the adding of the node within transaction but doesn't commit
+    //ExecutorThread is the one that will be  commit
+
+    tc.getCache().getAdvancedCache().getTransactionManager().begin();
+    tc.put(Fqn.fromString("/level1/level2/level3/level4/level5/level6/level7/level8/level9/level10/level11"),"level11","Intern");
+
+    final Transaction transaction = tc.getCache().getAdvancedCache().getTransactionManager().suspend();
+
+    final TreeCache tcOriginal = tc;
+
+
+
+    ExecutorService es = Executors.newSingleThreadExecutor();
+    es.execute(new Runnable() {
+      @Override
+      public void run() {
+
+        try {
+          tcOriginal.getCache().getAdvancedCache().getTransactionManager().resume(transaction);
+          tcOriginal.getCache().getAdvancedCache().getTransactionManager().commit();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    //giving some time for the other thread to commit the transaction
+    Thread.sleep(1000);
+
+    Map<String,String>data;
+    data = tcOriginal.getData(Fqn.fromString("/level1/level2/level3/level4/level5/level6/level7/level8/level9/level10/level11"));
+    Assert.assertEquals(data.get("level11"),"Intern");
     es.shutdownNow();
 
 
