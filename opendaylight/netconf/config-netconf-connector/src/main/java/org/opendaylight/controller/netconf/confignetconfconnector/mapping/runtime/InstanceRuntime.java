@@ -8,18 +8,22 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.management.ObjectName;
+
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 
 public class InstanceRuntime {
 
@@ -104,7 +108,7 @@ public class InstanceRuntime {
 
                 String elementName = jmxToYangChildRbeMapping.get(childMappingEntry.getKey());
 
-                Element innerXml = document.createElement(elementName);
+                Element innerXml = XmlUtil.createElement(document, elementName, Optional.<String>absent());
                 childMappingEntry.getValue().toXml(objectName, innerChildRbeOns, document,
                         runtimeInstanceIndex, innerXml, namespace);
                 xml.appendChild(innerXml);

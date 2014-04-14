@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.util.mapping;
 
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -20,7 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.Map;
+import com.google.common.base.Optional;
 
 public abstract class AbstractNetconfOperation implements NetconfOperation {
     private final String netconfSessionIdForReporting;
@@ -92,13 +94,12 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
         Map<String, Attr> attributes = requestElement.getAttributes();
 
         Element response = handle(document, operationElement, subsequentOperation);
-        Element rpcReply = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
-                XmlNetconfConstants.RPC_REPLY_KEY);
+        Element rpcReply = XmlUtil.createElement(document, XmlNetconfConstants.RPC_REPLY_KEY, Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
 
         if(XmlElement.fromDomElement(response).hasNamespace()) {
             rpcReply.appendChild(response);
         } else {
-            Element responseNS = document.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, response.getNodeName());
+            Element responseNS = XmlUtil.createElement(document, response.getNodeName(), Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
             NodeList list = response.getChildNodes();
             while(list.getLength()!=0) {
                 responseNS.appendChild(list.item(0));

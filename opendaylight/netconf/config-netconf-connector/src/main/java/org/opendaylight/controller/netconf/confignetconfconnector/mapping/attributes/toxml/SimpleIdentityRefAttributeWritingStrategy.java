@@ -14,9 +14,10 @@ import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
-
-import com.google.common.base.Preconditions;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
@@ -41,13 +42,11 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
     }
 
     @Override
-    protected Element createElement(Document doc, String key, String value) {
+    protected Element createElement(Document doc, String key, String value, Optional<String> namespace) {
         QName qName = QName.create(value);
         String identity = qName.getLocalName();
-        Element element = XmlUtil.createPrefixedTextElement(doc, key, PREFIX, identity);
-
         String identityNamespace = qName.getNamespace().toString();
-        XmlUtil.addPrefixedNamespaceAttr(element, PREFIX, identityNamespace);
+        Element element = XmlUtil.createPrefixedTextElement(doc, XmlUtil.createPrefixedValue(PREFIX, key), PREFIX, identity, Optional.<String>of(identityNamespace));
         return element;
     }
 }
