@@ -12,6 +12,7 @@ import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -28,15 +29,18 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     private static final Logger logger = LoggerFactory.getLogger(BlankTransactionServiceTracker.class);
 
     private final ConfigRegistryImpl configRegistry;
+    private final BundleContext bundleContext;
 
-    public BlankTransactionServiceTracker(ConfigRegistryImpl configRegistry) {
+    public BlankTransactionServiceTracker(ConfigRegistryImpl configRegistry,
+                                          BundleContext bundleContext) {
         this.configRegistry = configRegistry;
+        this.bundleContext = bundleContext;
     }
 
     @Override
     public Object addingService(ServiceReference<ModuleFactory> moduleFactoryServiceReference) {
         blankTransaction();
-        return null;
+        return bundleContext.getService(moduleFactoryServiceReference);
     }
 
     synchronized void blankTransaction() {
@@ -75,6 +79,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
 
     @Override
     public void removedService(ServiceReference<ModuleFactory> moduleFactoryServiceReference, Object o) {
-        blankTransaction();
+        // This doesn't work - an IllegalStateEx is thrown (see https://bugs.opendaylight.org/show_bug.cgi?id=716)
+        //blankTransaction();
     }
 }

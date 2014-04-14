@@ -70,7 +70,11 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
             }
         }
         webSocketServerThread.interrupt();
-        session.close();
+
+        if( session != null ) {
+            session.close();
+        }
+
         brokerServiceTrancker.close();
     }
 

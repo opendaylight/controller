@@ -26,7 +26,7 @@ public class NetconfSSHServer implements Runnable {
     private static final AtomicLong sesssionId = new AtomicLong();
     private final InetSocketAddress clientAddress;
     private final AuthProvider authProvider;
-    private boolean up = false;
+    private volatile boolean up = false;
 
     private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws Exception{
 
@@ -67,9 +67,11 @@ public class NetconfSSHServer implements Runnable {
         while (up) {
             logger.trace("Starting new socket thread.");
             try {
-               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
+                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                if( up ) {
+                    logger.error("", e);  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
         }
     }

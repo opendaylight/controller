@@ -53,9 +53,8 @@ public class ConfigManagerActivator implements BundleActivator {
 
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
-                configRegistry);
-        ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
-                blankTransactionServiceTracker);
+                configRegistry, context);
+        ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker();
 
         // start extensible tracker
         ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
