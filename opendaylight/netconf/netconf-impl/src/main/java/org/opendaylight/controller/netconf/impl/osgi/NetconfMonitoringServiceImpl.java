@@ -70,7 +70,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, S
     @Override
     public Schemas getSchemas() {
         // capabilities should be split from operations (it will allow to move getSchema operation to monitoring module)
-        try (NetconfOperationServiceSnapshot snapshot = netconfOperationProvider.getSnapshot("netconf-monitoring")) {
+        try (NetconfOperationServiceSnapshot snapshot = netconfOperationProvider.openSnapshot("netconf-monitoring")) {
             return transformSchemas(snapshot.getServices());
         } catch (RuntimeException e) {
             throw e;

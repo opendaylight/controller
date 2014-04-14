@@ -33,10 +33,13 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionListener.class);
     private final SessionMonitoringService monitoringService;
     private final NetconfOperationRouter operationRouter;
+    private final AutoCloseable onSessionDownCloseable;
 
-    public NetconfServerSessionListener(NetconfOperationRouter operationRouter, SessionMonitoringService monitoringService) {
+    public NetconfServerSessionListener(NetconfOperationRouter operationRouter, SessionMonitoringService monitoringService,
+                                        AutoCloseable onSessionDownCloseable) {
         this.operationRouter = operationRouter;
         this.monitoringService = monitoringService;
+        this.onSessionDownCloseable = onSessionDownCloseable;
     }
 
     @Override
@@ -47,12 +50,21 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     @Override
     public void onSessionDown(NetconfServerSession netconfNetconfServerSession, Exception cause) {
         logger.debug("Session {} down, reason: {}", netconfNetconfServerSession, cause.getMessage());
+        onDown(netconfNetconfServerSession);
+    }
+
+    public void onDown(NetconfServerSession netconfNetconfServerSession) {
         monitoringService.onSessionDown(netconfNetconfServerSession);
 
         try {
             operationRouter.close();
         } catch (Exception closingEx) {
             logger.debug("Ignoring exception while closing operationRouter", closingEx);
+        }
+        try {
+            onSessionDownCloseable.close();
+        } catch(Exception ex){
+            logger.debug("Ignoring exception while closing onSessionDownCloseable", ex);
         }
     }
 
@@ -61,13 +73,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             NetconfTerminationReason netconfTerminationReason) {
         logger.debug("Session {} terminated, reason: {}", netconfNetconfServerSession,
                 netconfTerminationReason.getErrorMessage());
-        monitoringService.onSessionDown(netconfNetconfServerSession);
-
-        try {
-            operationRouter.close();
-        } catch (Exception closingEx) {
-            logger.debug("Ignoring exception while closing operationRouter", closingEx);
-        }
+        onDown(netconfNetconfServerSession);
     }
 
     @Override

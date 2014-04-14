@@ -186,7 +186,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         doReturn(caps).when(service).getCapabilities();
         Set<NetconfOperationService> services = Sets.newHashSet(service);
         doReturn(services).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).getSnapshot(anyString());
+        doReturn(snap).when(factoriesListener).openSnapshot(anyString());
 
         return factoriesListener;
     }

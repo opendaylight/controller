@@ -12,12 +12,11 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
-
-import java.net.InetSocketAddress;
-
 import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.AbstractDispatcher;
+
+import java.net.InetSocketAddress;
 
 public class NetconfServerDispatcher extends AbstractDispatcher<NetconfServerSession, NetconfServerSessionListener> {
 
@@ -44,12 +43,11 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfServerSes
         public static final String DESERIALIZER_EX_HANDLER_KEY = "deserializerExHandler";
 
         private final NetconfServerSessionNegotiatorFactory negotiatorFactory;
-        private final NetconfServerSessionListenerFactory listenerFactory;
 
-        public ServerChannelInitializer(NetconfServerSessionNegotiatorFactory negotiatorFactory,
-                                            NetconfServerSessionListenerFactory listenerFactory) {
+
+        public ServerChannelInitializer(NetconfServerSessionNegotiatorFactory negotiatorFactory) {
             this.negotiatorFactory = negotiatorFactory;
-            this.listenerFactory = listenerFactory;
+
         }
 
         @Override
@@ -60,7 +58,8 @@ public class NetconfServerDispatcher extends AbstractDispatcher<NetconfServerSes
 
         @Override
         protected void initializeSessionNegotiator(SocketChannel ch, Promise<NetconfServerSession> promise) {
-            ch.pipeline().addAfter(DESERIALIZER_EX_HANDLER_KEY, AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR, negotiatorFactory.getSessionNegotiator(listenerFactory, ch, promise));
+            ch.pipeline().addAfter(DESERIALIZER_EX_HANDLER_KEY, AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR,
+                    negotiatorFactory.getSessionNegotiator(null, ch, promise));
         }
     }
 
