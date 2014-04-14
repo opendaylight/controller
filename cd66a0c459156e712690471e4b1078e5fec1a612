@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_97d55645",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/DOMImmutableDataChangeEvent.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-14T07:46:28Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()",
+      "revId": "cd66a0c459156e712690471e4b1078e5fec1a612",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7bdfa04",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/DataChangeEventResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-14T07:46:28Z",
+      "side": 1,
+      "message": "Inconsistent naming. Please get rid of the static imports, this is much more clear.",
+      "revId": "cd66a0c459156e712690471e4b1078e5fec1a612",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d7bafe09",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/DataChangeEventResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-14T07:46:28Z",
+      "side": 1,
+      "message": "parentNodes vs. listeners in other methods. please name things consistently.",
+      "revId": "cd66a0c459156e712690471e4b1078e5fec1a612",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_57cfceb0",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/DataChangeEventResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-14T07:46:28Z",
+      "side": 1,
+      "message": "Shorten to ImmutableList.Builder",
+      "revId": "cd66a0c459156e712690471e4b1078e5fec1a612",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_37ca4aa2",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/DataChangeEventResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-14T07:46:28Z",
+      "side": 1,
+      "message": "Output collections should be the last argument and has to be explicitly documented.",
+      "revId": "cd66a0c459156e712690471e4b1078e5fec1a612",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
