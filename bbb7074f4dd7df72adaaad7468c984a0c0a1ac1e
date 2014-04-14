@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7779b2fb",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/NetconfServerSessionNegotiatorFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:58:19Z",
+      "side": 1,
+      "message": "SessionIdProvider could be merged into NegotiatorFactory, or moved here as inner class. I think it is not used anywhere else.\n\nOne less constructor parameter would be welcome.",
+      "revId": "bbb7074f4dd7df72adaaad7468c984a0c0a1ac1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7765a05",
+        "filename": "opendaylight/netconf/netconf-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T13:58:19Z",
+      "side": 1,
+      "message": "What classes from netconf-impl test-jar are used in netconf-it ?",
+      "revId": "bbb7074f4dd7df72adaaad7468c984a0c0a1ac1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
