@@ -7,15 +7,32 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithName;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
+import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
 import io.netty.channel.ChannelFuture;
-import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
@@ -42,26 +59,12 @@ import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActi
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
@@ -128,15 +131,15 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
                 try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
                     NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
-                    assertResponse(response, "<modules");
-                    assertResponse(response, "<services");
+                    assertContainsElementWithName(response.getDocument(), "modules");
+                    assertContainsElementWithName(response.getDocument(), "services");
                     response = netconfClient.sendMessage(loadCommitMessage());
-                    assertResponse(response, "ok");
+                    assertContainsElementWithName(response.getDocument(), "ok");
 
                     response = netconfClient.sendMessage(loadEditConfigMessage());
-                    assertResponse(response, "ok");
+                    assertContainsElementWithName(response.getDocument(), "ok");
                     response = netconfClient.sendMessage(loadCommitMessage());
-                    assertResponse(response, "ok");
+                    assertContainsElementWithName(response.getDocument(), "ok");
                 }
             }
         }
@@ -159,10 +162,6 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         VerifyingNotificationListener listener = new VerifyingNotificationListener();
         platformMBeanServer.addNotificationListener(DefaultCommitNotificationProducer.OBJECT_NAME, listener, null, null);
         return listener;
-    }
-
-    private void assertResponse(NetconfMessage response, String content) {
-        Assert.assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString(content));
     }
 
     private NetconfMessage loadGetConfigMessage() throws Exception {
@@ -240,15 +239,14 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
             assertEquals(size, snapshots.size());
         }
 
-        void assertSnapshotContent(int notificationIndex, int expectedModulesSize, int expectedServicesSize, int expectedCapsSize) {
+        void assertSnapshotContent(int notificationIndex, int expectedModulesSize, int expectedServicesSize, int expectedCapsSize)
+                throws SAXException, IOException {
             ConfigSnapshotHolder snapshot = snapshots.get(notificationIndex);
             int capsSize = snapshot.getCapabilities().size();
             assertEquals("Expected capabilities count", expectedCapsSize, capsSize);
-            String configSnapshot = snapshot.getConfigSnapshot();
-            int modulesSize = StringUtils.countMatches(configSnapshot, "<module>");
-            assertEquals("Expected modules count", expectedModulesSize, modulesSize);
-            int servicesSize = StringUtils.countMatches(configSnapshot, "<instance>");
-            assertEquals("Expected services count", expectedServicesSize, servicesSize);
+            Document configSnapshot = readXmlToDocument(snapshot.getConfigSnapshot());
+            assertElementsCount(configSnapshot, "module", expectedModulesSize);
+            assertElementsCount(configSnapshot, "instance", expectedServicesSize);
         }
 
         @Override
