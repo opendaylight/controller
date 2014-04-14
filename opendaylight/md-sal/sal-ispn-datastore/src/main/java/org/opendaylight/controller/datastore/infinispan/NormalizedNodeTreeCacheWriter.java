@@ -4,6 +4,7 @@ import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeVisitor;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -11,10 +12,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
     private final InfinispanTreeWrapper treeCacheWrapper;
     private final TreeCache treeCache;
+    private final WriteDeleteTransactionTracker wdtt;
 
-    public NormalizedNodeTreeCacheWriter(TreeCache treeCache){
+    public NormalizedNodeTreeCacheWriter(TreeCache treeCache,WriteDeleteTransactionTracker wdtt){
         this.treeCache = treeCache;
         this.treeCacheWrapper = new InfinispanTreeWrapper();
+        this.wdtt =wdtt;
     }
 
     @Override
@@ -30,6 +33,8 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
             System.out.println("Value : " + normalizedNode.getValue());
 
             treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
+
+            wdtt.track(nodeFqn, WriteDeleteTransactionTracker.Operation.CREATED,normalizedNode);
         }
 
     }
