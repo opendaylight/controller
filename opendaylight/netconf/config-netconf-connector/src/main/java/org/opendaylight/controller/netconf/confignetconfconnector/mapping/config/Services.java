@@ -8,8 +8,14 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -20,12 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 public final class Services {
 
@@ -127,29 +130,27 @@ public final class Services {
     }
 
     public static Element toXml(ServiceRegistryWrapper serviceRegistryWrapper, Document document) {
-        Element root = document.createElement(XmlNetconfConstants.SERVICES_KEY);
-        XmlUtil.addNamespaceAttr(root, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        Element root = XmlUtil.createElement(document, XmlNetconfConstants.SERVICES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
 
         Map<String, Map<String, Map<String, String>>> mappedServices = serviceRegistryWrapper.getMappedServices();
         for (String namespace : mappedServices.keySet()) {
 
             for (Entry<String, Map<String, String>> serviceEntry : mappedServices.get(namespace).entrySet()) {
-                Element serviceElement = document.createElement(SERVICE_KEY);
+                Element serviceElement = XmlUtil.createElement(document, SERVICE_KEY, Optional.<String>absent());
                 root.appendChild(serviceElement);
 
-                Element typeElement = XmlUtil.createPrefixedTextElement(document, TYPE_KEY, XmlNetconfConstants.PREFIX,
-                        serviceEntry.getKey());
-                XmlUtil.addPrefixedNamespaceAttr(typeElement, XmlNetconfConstants.PREFIX, namespace);
+                Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(XmlNetconfConstants.PREFIX, TYPE_KEY), XmlNetconfConstants.PREFIX,
+                        serviceEntry.getKey(), Optional.of(namespace));
                 serviceElement.appendChild(typeElement);
 
                 for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {
-                    Element instanceElement = document.createElement(XmlNetconfConstants.INSTANCE_KEY);
+                    Element instanceElement = XmlUtil.createElement(document, XmlNetconfConstants.INSTANCE_KEY, Optional.<String>absent());
                     serviceElement.appendChild(instanceElement);
 
-                    Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey());
+                    Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey(), Optional.<String>absent());
                     instanceElement.appendChild(nameElement);
 
-                    Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY, instanceEntry.getValue());
+                    Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY, instanceEntry.getValue(), Optional.<String>absent());
                     instanceElement.appendChild(providerElement);
                 }
             }

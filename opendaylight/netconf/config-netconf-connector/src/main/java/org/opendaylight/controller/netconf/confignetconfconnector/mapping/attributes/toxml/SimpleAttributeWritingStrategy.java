@@ -13,6 +13,8 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Optional;
+
 public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy {
 
     private final Document document;
@@ -31,13 +33,15 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
     public void writeElement(Element parentElement, String namespace, Object value) {
         value = preprocess(value);
         Util.checkType(value, String.class);
-        Element innerNode = createElement(document, key, (String) value);
-        XmlUtil.addNamespaceAttr(innerNode, namespace);
+        Element innerNode = createElement(document, key, (String) value, Optional.of(namespace));
         parentElement.appendChild(innerNode);
     }
 
-    protected Element createElement(Document document, String key, String value) {
-        return XmlUtil.createTextElement(document, key, (String) value);
+    protected Element createElement(Document document, String key, String value, Optional<String> namespace) {
+        Element typeElement = XmlUtil.createElement(document, key, namespace);
+
+        typeElement.appendChild(document.createTextNode(value));
+        return typeElement;
     }
 
     protected Object preprocess(Object value) {

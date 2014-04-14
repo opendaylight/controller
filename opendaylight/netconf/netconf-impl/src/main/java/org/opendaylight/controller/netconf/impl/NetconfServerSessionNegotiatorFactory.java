@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
+import java.io.InputStream;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
@@ -27,9 +32,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.InputStream;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
@@ -89,7 +93,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         CapabilityProvider capabilityProvider = new CapabilityProviderImpl(factoriesListener.getSnapshot(sessionId));
 
         for (String capability : capabilityProvider.getCapabilities()) {
-            final Element capabilityElement = helloMessageTemplate.createElement(XmlNetconfConstants.CAPABILITY);
+            final Element capabilityElement = XmlUtil.createElement(helloMessageTemplate, XmlNetconfConstants.CAPABILITY, Optional.<String>absent());
             capabilityElement.setTextContent(capability);
             capabilitiesElement.appendChild(capabilityElement);
         }

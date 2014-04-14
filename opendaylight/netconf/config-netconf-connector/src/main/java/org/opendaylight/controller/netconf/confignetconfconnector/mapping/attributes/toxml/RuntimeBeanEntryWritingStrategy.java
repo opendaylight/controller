@@ -12,8 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
 
 public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingStrategy {
 
@@ -33,7 +36,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, Map.class);
 
-        Element innerNode = document.createElement(key);
+        Element innerNode = XmlUtil.createElement(document, key, Optional.<String>absent());
 
         Map<?, ?> map = (Map<?, ?>) value;
 
@@ -43,8 +46,8 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
             // bean
             Util.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
             Map<?, ?> innerMap = (Map<?, ?>) runtimeBeanInstanceMappingEntry.getValue();
-            Element runtimeInstanceNode = document.createElement("_"
-                    + (String) runtimeBeanInstanceMappingEntry.getKey());
+            Element runtimeInstanceNode = XmlUtil.createElement(document, "_"
+                    + (String) runtimeBeanInstanceMappingEntry.getKey(), Optional.<String>absent());
             innerNode.appendChild(runtimeInstanceNode);
 
             for (Entry<?, ?> innerObjectEntry : innerMap.entrySet()) {

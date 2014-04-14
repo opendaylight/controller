@@ -8,12 +8,20 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
@@ -25,18 +33,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 public class Config {
     private final Logger logger = LoggerFactory.getLogger(Config.class);
@@ -114,12 +116,10 @@ public class Config {
 
         Element root = dataElement;
         if (maybeNamespace.isPresent()) {
-            XmlUtil.addNamespaceAttr(root, maybeNamespace.get());
+            root.setAttributeNS(maybeNamespace.get(), dataElement.getNodeName(), "xmlns");
         }
 
-        Element modulesElement = document.createElement(XmlNetconfConstants.MODULES_KEY);
-        XmlUtil.addNamespaceAttr(modulesElement,
-                XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        Element modulesElement = XmlUtil.createElement(document, XmlNetconfConstants.MODULES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
         root.appendChild(modulesElement);
         for (String moduleNamespace : moduleToInstances.keySet()) {
             for (Entry<String, Collection<ObjectName>> moduleMappingEntry : moduleToInstances.get(moduleNamespace)

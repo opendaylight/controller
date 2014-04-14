@@ -16,7 +16,6 @@ import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
@@ -26,9 +25,11 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -78,7 +79,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     private Element getResponseInternal(final Document document, final ConfigRegistryClient configRegistryClient,
             final Datastore source) throws NetconfDocumentedException {
-        Element dataElement = document.createElement(XmlNetconfConstants.DATA_KEY);
+        Element dataElement = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
         final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
                 .queryInstances(configRegistryClient);
 

@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Optional;
+
 public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
 
     public static final String START_EXI = "start-exi";
@@ -39,12 +41,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
 
-
-        Element getSchemaResult = document
-                .createElement(XmlNetconfConstants.OK);
-        XmlUtil.addNamespaceAttr(getSchemaResult,
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-
+        Element getSchemaResult = XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
 
         throw new UnsupportedOperationException("Not implemented");
 
