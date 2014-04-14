@@ -1,0 +1,60 @@
+module odl-datastore-test-notification {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test";
+    prefix "notification-test";
+
+    revision "2014-04-15" {
+        description "Initial revision.";
+    }
+
+    container notificationtest {
+        leaf desc {
+            type string;
+        }
+        list outer-list {
+            key id;
+            leaf id {
+                type uint16;
+            }
+            choice outer-choice {
+                case one {
+                    leaf one {
+                        type string;
+                    }
+                }
+                case two-three {
+                    leaf two {
+                        type string;
+                    }
+                    leaf three {
+                        type string;
+                    }
+               }
+               case four{
+                     leaf two {
+                        type string;
+                     }
+
+               }
+           }
+           list inner-list {
+                key name;
+                leaf name {
+                    type string;
+                }
+                leaf value {
+                    type string;
+                }
+            }
+        }
+
+        leaf-list multileaf {
+            type string;
+        }
+
+        leaf-list multiid {
+            type uint8;
+        }
+
+    }
+}

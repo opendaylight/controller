@@ -18,9 +18,8 @@ import org.infinispan.util.concurrent.IsolationLevel;
  * Date: 4/1/14
  */
 public class TreeCacheManager implements AutoCloseable {
-  public
-  Configuration config = null;
-  DefaultCacheManager dcm = null;
+  private Configuration config = null;
+  private DefaultCacheManager dcm = null;
 
   public TreeCacheManager(){
     this(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC, TransactionMode.TRANSACTIONAL, true);
@@ -44,6 +43,7 @@ public class TreeCacheManager implements AutoCloseable {
                                       .transaction()
                                       .transactionManagerLookup(new JBossStandaloneJTAManagerLookup())
                                       .transactionMode(transactionMode)  //transaction or no transaction
+
                                       .lockingMode(lm) //optmistic or pessimistic -- ISPN default is optimistic
                                       .clustering()
                                       .locking().isolationLevel(isolation)  //read-committed or repeatable reads
@@ -63,8 +63,6 @@ public class TreeCacheManager implements AutoCloseable {
 
 
   }
-
-
 
   /**
    * Returns the treecache based on the cache configuration
