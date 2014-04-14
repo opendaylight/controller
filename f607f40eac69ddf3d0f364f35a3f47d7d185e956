@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1722a6b9",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/exception/StrategyInvocationException.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T15:14:28Z",
+      "side": 1,
+      "message": "Too general name for exception dedicated to failures during netconf edit-config execution.\n\nCould be subclass of NetconfDocumentedException ? in every catch statement, it is wrapped and rethrown as NetconfDocumentedException. (Same for all new netconf exceptions)",
+      "revId": "f607f40eac69ddf3d0f364f35a3f47d7d185e956",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b72e5aa4",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/InstanceConfigElementResolved.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T15:14:28Z",
+      "side": 1,
+      "message": "This check could be moved into EditStrategyType. Along with OperationNotPermittedException.",
+      "revId": "f607f40eac69ddf3d0f364f35a3f47d7d185e956",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f724e2c7",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/ModuleElementDefinition.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T15:14:28Z",
+      "side": 1,
+      "message": "Should be more than TRACE, since user provided options are overriden. \n\nMore information should be logged.\n\n{} in log message template is unnecessary for Exception.",
+      "revId": "f607f40eac69ddf3d0f364f35a3f47d7d185e956",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_17094631",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/exception/UnexpectedNamespaceException.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T15:14:28Z",
+      "side": 1,
+      "message": "All these unexpected Exceptions should extend one common super Exception e.g. MessageParsingException or NetconfDocumentedException",
+      "revId": "f607f40eac69ddf3d0f364f35a3f47d7d185e956",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b705fa15",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/XmlElement.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-14T15:14:28Z",
+      "side": 1,
+      "message": "Too many different exception types thrown all over this class, all indicating message format/parsing problems. Should be united.",
+      "revId": "f607f40eac69ddf3d0f364f35a3f47d7d185e956",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
