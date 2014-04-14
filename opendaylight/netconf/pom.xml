@@ -225,6 +225,61 @@
                         </instructions>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.opendaylight.yangtools</groupId>
+                    <artifactId>yang-maven-plugin</artifactId>
+                    <version>${yangtools.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate-sources</goal>
+                            </goals>
+                            <configuration>
+                                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                                <codeGenerators>
+                                    <generator>
+                                        <codeGeneratorClass>
+                                            org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                        </codeGeneratorClass>
+                                        <outputBaseDir>
+                                            ${salGeneratorPath}
+                                        </outputBaseDir>
+                                    </generator>
+                                    <generator>
+                                        <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
+                                        <outputBaseDir>${project.build.directory}/site/models</outputBaseDir>
+                                    </generator>
+                                </codeGenerators>
+                                <inspectDependencies>true</inspectDependencies>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.opendaylight.yangtools</groupId>
+                            <artifactId>maven-sal-api-gen-plugin</artifactId>
+                            <version>${yangtools.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.7</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${salGeneratorPath}</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
 
         </pluginManagement>
