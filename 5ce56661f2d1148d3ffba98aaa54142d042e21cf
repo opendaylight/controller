@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_976316b1",
+        "filename": "opendaylight/config/netconf-config-api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-14T08:20:34Z",
+      "side": 1,
+      "message": "Please remove \\r",
+      "revId": "5ce56661f2d1148d3ffba98aaa54142d042e21cf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b76bba84",
+        "filename": "opendaylight/config/netconf-config-dispatcher/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-04-14T08:20:34Z",
+      "side": 1,
+      "message": "Please remove \\r",
+      "revId": "5ce56661f2d1148d3ffba98aaa54142d042e21cf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
