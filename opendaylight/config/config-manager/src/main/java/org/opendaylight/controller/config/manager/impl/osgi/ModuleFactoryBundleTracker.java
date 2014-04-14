@@ -66,7 +66,6 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        // workaround for service tracker not getting removed service event
         blankTransactionServiceTracker.blankTransaction();
     }
 

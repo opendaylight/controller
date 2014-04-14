@@ -49,7 +49,7 @@ class MeterProvider implements AutoCloseable {
     }
     
     override close() throws Exception {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        LOG.warn( "MeterProvider#close is not yet implemented" );
     }
     
 }

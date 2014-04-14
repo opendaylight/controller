@@ -83,28 +83,40 @@ public final class SchemaServiceImplSingletonModule extends
         public void close() throws Exception {
             if (delegate != null) {
                 delegate = null;
-                bundleContext.ungetService(reference);
+
+                try {
+                    bundleContext.ungetService(reference);
+                } catch (IllegalStateException e) {
+                    // Ignore - this means the service was already unregistred which can happen normally
+                    // on shutdown.
+                }
+
                 reference = null;
                 bundleContext = null;
             }
         }
 
+        @Override
         public void addModule(Module arg0) {
             delegate.addModule(arg0);
         }
 
+        @Override
         public SchemaContext getGlobalContext() {
             return delegate.getGlobalContext();
         }
 
+        @Override
         public SchemaContext getSessionContext() {
             return delegate.getSessionContext();
         }
 
+        @Override
         public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener arg0) {
             return delegate.registerSchemaServiceListener(arg0);
         }
 
+        @Override
         public void removeModule(Module arg0) {
             delegate.removeModule(arg0);
         }
