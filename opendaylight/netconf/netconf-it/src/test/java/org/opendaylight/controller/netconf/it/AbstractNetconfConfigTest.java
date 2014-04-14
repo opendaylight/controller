@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
@@ -39,14 +38,10 @@ public class AbstractNetconfConfigTest extends AbstractConfigTest {
         SessionIdProvider idProvider = new SessionIdProvider();
 
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, 5000);
-
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNotifier, idProvider,
-                sessionMonitoringService);
+                hashedWheelTimer, factoriesListener, idProvider, 5000, commitNotifier, sessionMonitoringService);
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
-                serverNegotiatorFactory, listenerFactory);
+                serverNegotiatorFactory);
         return new NetconfServerDispatcher(serverChannelInitializer, nettyThreadgroup, nettyThreadgroup);
     }
 

@@ -140,6 +140,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-impl</artifactId>
+                <version>${netconf.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-monitoring</artifactId>
                 <version>${netconf.version}</version>
             </dependency>

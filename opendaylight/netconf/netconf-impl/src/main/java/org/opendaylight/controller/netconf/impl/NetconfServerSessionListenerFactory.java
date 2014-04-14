@@ -12,42 +12,31 @@ import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
-import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
-
 public class NetconfServerSessionListenerFactory implements SessionListenerFactory<NetconfServerSessionListener> {
 
-    private final NetconfOperationProvider netconfOperationProvider;
-
     private final DefaultCommitNotificationProducer commitNotifier;
-
-    private final SessionIdProvider idProvider;
-
     private final SessionMonitoringService monitor;
+    private final NetconfOperationServiceSnapshot netconfOperationServiceSnapshot;
+    private final CapabilityProvider capabilityProvider;
 
-    public NetconfServerSessionListenerFactory(NetconfOperationProvider netconfOperationProvider,
-                                               DefaultCommitNotificationProducer commitNotifier,
-                                               SessionIdProvider idProvider, SessionMonitoringService monitor) {
-        this.netconfOperationProvider = netconfOperationProvider;
+    public NetconfServerSessionListenerFactory(DefaultCommitNotificationProducer commitNotifier,
+                                               SessionMonitoringService monitor,
+                                               NetconfOperationServiceSnapshot netconfOperationServiceSnapshot,
+                                               CapabilityProvider capabilityProvider) {
+
         this.commitNotifier = commitNotifier;
-        this.idProvider = idProvider;
         this.monitor = monitor;
+        this.netconfOperationServiceSnapshot = netconfOperationServiceSnapshot;
+        this.capabilityProvider = capabilityProvider;
     }
 
     @Override
     public NetconfServerSessionListener getSessionListener() {
-        NetconfOperationServiceSnapshot netconfOperationServiceSnapshot = netconfOperationProvider.getSnapshot(
-                getNetconfSessionIdForReporting(idProvider.getCurrentSessionId()));
-
-        CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
-
         NetconfOperationRouter operationRouter = NetconfOperationRouterImpl.createOperationRouter(
-                netconfOperationServiceSnapshot, capabilityProvider,
-                commitNotifier);
-
-        return new NetconfServerSessionListener(operationRouter, monitor);
+                netconfOperationServiceSnapshot, capabilityProvider, commitNotifier);
+        return new NetconfServerSessionListener(operationRouter, monitor, netconfOperationServiceSnapshot);
     }
 }

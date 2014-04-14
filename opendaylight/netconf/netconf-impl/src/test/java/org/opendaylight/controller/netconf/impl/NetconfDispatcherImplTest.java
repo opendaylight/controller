@@ -27,6 +27,7 @@ public class NetconfDispatcherImplTest {
     private DefaultCommitNotificationProducer commitNot;
     private HashedWheelTimer hashedWheelTimer;
 
+
     @Before
     public void setUp() throws Exception {
         nettyGroup = new NioEventLoopGroup();
@@ -38,11 +39,9 @@ public class NetconfDispatcherImplTest {
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, 5000);
+                hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, ConcurrentClientsTest.createMockedMonitoringService());
 
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider, null);
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory, listenerFactory);
+        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory);
 
         dispatch = new NetconfServerDispatcher(
                 serverChannelInitializer, nettyGroup, nettyGroup);

@@ -28,7 +28,7 @@ public class NetconfOperationServiceFactoryListenerImpl implements NetconfOperat
     }
 
     @Override
-    public synchronized NetconfOperationServiceSnapshotImpl getSnapshot(String sessionIdForReporting) {
+    public synchronized NetconfOperationServiceSnapshotImpl openSnapshot(String sessionIdForReporting) {
         return new NetconfOperationServiceSnapshotImpl(allFactories, sessionIdForReporting);
     }
 

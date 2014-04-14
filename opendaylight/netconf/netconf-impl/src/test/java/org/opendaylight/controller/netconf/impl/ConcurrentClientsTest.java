@@ -18,7 +18,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
@@ -53,7 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.mock;
 
 public class ConcurrentClientsTest {
 
@@ -68,14 +67,20 @@ public class ConcurrentClientsTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
-    @Mock
-    private SessionMonitoringService monitoring;
+
 
     HashedWheelTimer hashedWheelTimer;
 
+    public static SessionMonitoringService createMockedMonitoringService() {
+        SessionMonitoringService monitoring = mock(SessionMonitoringService.class);
+        doNothing().when(monitoring).onSessionUp(any(NetconfServerSession.class));
+        doNothing().when(monitoring).onSessionDown(any(NetconfServerSession.class));
+        return monitoring;
+    }
+
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
+
         nettyGroup = new NioEventLoopGroup();
         NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp", "client");
         netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, additionalHeader, 5000);
@@ -86,16 +91,13 @@ public class ConcurrentClientsTest {
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, 5000);
+                hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, createMockedMonitoringService());
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        doNothing().when(monitoring).onSessionUp(any(NetconfServerSession.class));
-        doNothing().when(monitoring).onSessionDown(any(NetconfServerSession.class));
 
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider, monitoring);
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory, listenerFactory);
+
+        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory);
         dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
 
         ChannelFuture s = dispatch.createServer(netconfAddress);

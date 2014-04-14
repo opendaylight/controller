@@ -14,7 +14,9 @@ import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
@@ -43,13 +45,18 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final SessionIdProvider idProvider;
     private final NetconfOperationProvider netconfOperationProvider;
     private final long connectionTimeoutMillis;
+    private final DefaultCommitNotificationProducer commitNotificationProducer;
+    private final SessionMonitoringService monitoringService;
 
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
-            SessionIdProvider idProvider, long connectionTimeoutMillis) {
+                                                 SessionIdProvider idProvider, long connectionTimeoutMillis,
+                                                 DefaultCommitNotificationProducer commitNot, SessionMonitoringService monitoringService) {
         this.timer = timer;
         this.netconfOperationProvider = netconfOperationProvider;
         this.idProvider = idProvider;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
+        this.commitNotificationProducer = commitNot;
+        this.monitoringService = monitoringService;
     }
 
     private static Document loadHelloMessageTemplate() {
@@ -60,13 +67,30 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         return NetconfUtil.createMessage(resourceAsStream).getDocument();
     }
 
+    /**
+     *
+     * @param defunctSessionListenerFactory will not be taken into account as session listener factory can
+     *                                      only be created after snapshot is opened, thus this method constructs
+     *                                      proper session listener factory.
+     * @param channel Underlying channel
+     * @param promise Promise to be notified
+     * @return session negotiator
+     */
     @Override
-    public SessionNegotiator<NetconfServerSession> getSessionNegotiator(SessionListenerFactory<NetconfServerSessionListener> sessionListenerFactory, Channel channel,
-            Promise<NetconfServerSession> promise) {
+    public SessionNegotiator<NetconfServerSession> getSessionNegotiator(SessionListenerFactory<NetconfServerSessionListener> defunctSessionListenerFactory,
+                                                                        Channel channel, Promise<NetconfServerSession> promise) {
         long sessionId = idProvider.getNextSessionId();
+        NetconfOperationServiceSnapshot netconfOperationServiceSnapshot = netconfOperationProvider.openSnapshot(
+                getNetconfSessionIdForReporting(sessionId));
+        CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationServiceSnapshot);
 
-        NetconfServerSessionPreferences proposal = new NetconfServerSessionPreferences(createHelloMessage(sessionId),
-                sessionId);
+        NetconfServerSessionPreferences proposal = new NetconfServerSessionPreferences(
+                createHelloMessage(sessionId, capabilityProvider), sessionId);
+
+        NetconfServerSessionListenerFactory sessionListenerFactory = new NetconfServerSessionListenerFactory(
+                commitNotificationProducer, monitoringService,
+                netconfOperationServiceSnapshot, capabilityProvider);
+
         return new NetconfServerSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener(), connectionTimeoutMillis);
     }
@@ -76,7 +100,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private static final XPathExpression capabilitiesXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:capabilities");
 
-    private NetconfHelloMessage createHelloMessage(long sessionId) {
+    private NetconfHelloMessage createHelloMessage(long sessionId, CapabilityProvider capabilityProvider) {
         Document helloMessageTemplate = getHelloTemplateClone();
 
         // change session ID
@@ -87,9 +111,6 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         // add capabilities from yang store
         final Element capabilitiesElement = (Element) XmlUtil.evaluateXPath(capabilitiesXPath, helloMessageTemplate,
                 XPathConstants.NODE);
-
-        CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationProvider.getSnapshot(
-                getNetconfSessionIdForReporting(sessionId)));
 
         for (String capability : capabilityProvider.getCapabilities()) {
             final Element capabilityElement = helloMessageTemplate.createElement(XmlNetconfConstants.CAPABILITY);
