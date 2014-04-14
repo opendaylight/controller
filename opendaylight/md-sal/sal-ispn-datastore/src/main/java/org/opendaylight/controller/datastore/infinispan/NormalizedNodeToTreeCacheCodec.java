@@ -3,6 +3,7 @@ package org.opendaylight.controller.datastore.infinispan;
 import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -16,7 +17,7 @@ public class NormalizedNodeToTreeCacheCodec {
         this.treeCache = treeCache;
     }
 
-    public void encode(InstanceIdentifier id, NormalizedNode node){
+    public void encode(InstanceIdentifier id, NormalizedNode node,final WriteDeleteTransactionTracker wdtt){
         String parentPath = "";
 
         if(id != null){
@@ -33,7 +34,8 @@ public class NormalizedNodeToTreeCacheCodec {
             }
         }
 
-        new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache)).navigate(parentPath, node);
+        new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache,wdtt)).navigate(parentPath, node);
+
     }
 
     public NormalizedNode<?,?> decode(InstanceIdentifier id, Node node){
@@ -42,8 +44,11 @@ public class NormalizedNodeToTreeCacheCodec {
         for(InstanceIdentifier.PathArgument pathArgument : id.getPath()){
             currentOp = currentOp.getChild(pathArgument);
         }
-
-        return currentOp.normalize(id.getPath().get(id.getPath().size() - 1).getNodeType(), node);
+        if(!id.getPath().isEmpty())
+          return currentOp.normalize(id.getPath().get(id.getPath().size() - 1).getNodeType(), node);
+        else
+          return currentOp.normalize(null,node);
     }
+
 
 }
