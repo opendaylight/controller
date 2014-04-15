@@ -141,7 +141,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
 
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
-                    logger.warn("TopologyNotify interrupted {}",
+                    logger.trace("TopologyNotify interrupted {}",
                             e1.getMessage());
                     if (shuttingDown) {
                         return;
@@ -200,7 +200,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
                         }
                     }
                 } catch (InterruptedException e1) {
-                    logger.warn(
+                    logger.trace(
                             "Edge Bandwidth Utilization Notify Thread interrupted {}",
                             e1.getMessage());
                     if (shuttingDown) {
@@ -235,10 +235,9 @@ public class TopologyServiceShim implements IDiscoveryListener,
                         logger.debug("Bulk Notify container:{}", containerName);
                         TopologyBulkUpdate(containerName);
                     } catch (InterruptedException e) {
-                        logger.warn("Topology Bulk update thread interrupted");
+                        logger.trace("Topology Bulk update thread interrupted");
                         if (shuttingDown) {
-                            return;
-                        }
+                            return;                        }
                     }
                 }
             }
@@ -265,6 +264,10 @@ public class TopologyServiceShim implements IDiscoveryListener,
     protected void pollTxBitRates() {
         Map<NodeConnector, Pair<Edge, Set<Property>>> globalContainerEdges = edgeMap
                 .get(GlobalConstants.DEFAULT.toString());
+        if (shuttingDown) {
+            logger.trace("Getting out the pollTxBitRates because bundle going down");
+            return;
+        }
         if (globalContainerEdges == null) {
             return;
         }
@@ -357,6 +360,9 @@ public class TopologyServiceShim implements IDiscoveryListener,
         logger.trace("STOP called!");
         shuttingDown = true;
         notifyThread.interrupt();
+        bwUtilNotifyThread.interrupt();
+        ofPluginTopoBulkUpdate.interrupt();
+        pollTimer.cancel();
     }
 
     void setTopologyServiceShimListener(Map<?, ?> props,
