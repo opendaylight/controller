@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c1228b3",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1569
+      },
+      "writtenOn": "2014-04-15T12:28:10Z",
+      "side": 1,
+      "message": "If commenting out the blankTransaction() is better than leaving it, please assert why so that a reader doesn\u0027t have to reconstruct the logic.  Does this deserve a TODO?",
+      "revId": "1b8d09d6bff2a9e2b0c162d769e1b470d357f3ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
