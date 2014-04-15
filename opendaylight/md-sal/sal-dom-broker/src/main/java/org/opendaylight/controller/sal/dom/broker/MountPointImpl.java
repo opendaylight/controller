@@ -123,9 +123,8 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         return rpcs.getSupportedRpcs();
     }
 
-
     @Override
-    public RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
         return rpcs.invokeRpc(rpc, input);
     }
 
@@ -133,7 +132,6 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener) {
         return rpcs.addRpcRegistrationListener(listener);
     }
-
 
     @Override
     public ListenableFuture<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
@@ -228,6 +226,4 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
             L listener) {
         return rpcs.registerRouteChangeListener(listener);
     }
-
-
 }

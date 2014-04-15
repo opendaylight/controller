@@ -15,6 +15,8 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /**
  * {@link Provider}'s implementation of an RPC.
  *
@@ -42,8 +44,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * {@link RpcResult}
  * <li> {@link Broker} returns the {@link RpcResult} to {@link Consumer}
  * </ol>
- *
- *
  */
 public interface RpcImplementation extends Provider.ProviderFunctionality {
 
@@ -59,13 +59,12 @@ public interface RpcImplementation extends Provider.ProviderFunctionality {
     Set<QName> getSupportedRpcs();
 
     /**
-     * Invokes a implementation of specified rpc.
-     *
+     * Invokes a implementation of specified RPC asynchronously.
      *
      * @param rpc
-     *            Rpc to be invoked
+     *            RPC to be invoked
      * @param input
-     *            Input data for rpc.
+     *            Input data for the RPC.
      *
      * @throws IllegalArgumentException
      *             <ul>
@@ -73,9 +72,9 @@ public interface RpcImplementation extends Provider.ProviderFunctionality {
      *             <li>If input is not <code>null</code> and
      *             <code>false == rpc.equals(input.getNodeType)</code>
      *             </ul>
-     * @return RpcResult containing the output of rpc if was executed
-     *         successfully, the list of errors otherwise.
+     * @return Future promising an RpcResult containing the output of
+     *         the RPC if was executed successfully, the list of errors
+     *         otherwise.
      */
-    RpcResult<CompositeNode> invokeRpc(QName rpc, CompositeNode input);
-
+    ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input);
 }
