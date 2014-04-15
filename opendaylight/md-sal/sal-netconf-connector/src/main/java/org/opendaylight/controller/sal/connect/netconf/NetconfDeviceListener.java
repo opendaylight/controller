@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
+import com.google.common.collect.Sets;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 
@@ -39,6 +40,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 class NetconfDeviceListener implements NetconfClientSessionListener {
+
     private static final class Request {
         final UncancellableFuture<RpcResult<CompositeNode>> future;
         final NetconfMessage request;
@@ -77,9 +79,15 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
             delegate = SchemaSourceProviders.<String>noopProvider();
         }
 
-        device.bringUp(delegate, caps);
+        device.bringUp(delegate, caps, isRollbackSupported(session.getServerCapabilities()));
 
         this.session = session;
+    }
+
+    private static boolean isRollbackSupported(final Collection<String> serverCapabilities) {
+        // TODO rollback capability cannot be searched for in Set<QName> caps
+        // since this set does not contain module-less capabilities
+        return Sets.newHashSet(serverCapabilities).contains(NetconfMapping.NETCONF_ROLLBACK_ON_ERROR_URI.toString());
     }
 
     private synchronized void tearDown(final Exception e) {
@@ -136,9 +144,22 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
             requests.poll();
             LOG.debug("Matched {} to {}", r.request, message);
 
-            // FIXME: this can throw exceptions, which should result
-            // in the future failing
-            NetconfMapping.checkValidReply(r.request, message);
+            try {
+                NetconfMapping.checkValidReply(r.request, message);
+            } catch (IllegalStateException e) {
+                LOG.warn("Invalid request-reply match, reply message contains different message-id", e);
+                r.future.setException(e);
+                return;
+            }
+
+            try {
+                NetconfMapping.checkSuccessReply(message);
+            } catch (IllegalStateException e) {
+                LOG.warn("Error reply from remote device", e);
+                r.future.setException(e);
+                return;
+            }
+
             r.future.set(Rpcs.getRpcResult(true, NetconfMapping.toNotificationNode(message, device.getSchemaContext()),
                     Collections.<RpcError>emptyList()));
         } else {

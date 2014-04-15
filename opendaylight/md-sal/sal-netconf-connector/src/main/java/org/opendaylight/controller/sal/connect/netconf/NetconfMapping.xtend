@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.connect.netconf
 
 import com.google.common.base.Optional
-import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableList
 import java.net.URI
 import java.util.ArrayList
@@ -33,12 +32,15 @@ import org.opendaylight.yangtools.yang.model.api.NotificationDefinition
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil
+import org.opendaylight.controller.netconf.util.xml.XmlUtil
 
 class NetconfMapping {
 
     public static val NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0")
     public static val NETCONF_MONITORING_URI = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"
     public static val NETCONF_NOTIFICATION_URI = URI.create("urn:ietf:params:xml:ns:netconf:notification:1.0")
+    public static val NETCONF_ROLLBACK_ON_ERROR_URI = URI.create("urn:ietf:params:netconf:capability:rollback-on-error:1.0")
 
 
     public static val NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
@@ -59,6 +61,8 @@ class NetconfMapping {
     public static val NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
     public static val NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
 
+    public static val NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
+    public static val ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
     public static val NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
     public static val NETCONF_OK_QNAME = QName.create(NETCONF_QNAME, "ok");
@@ -210,8 +214,16 @@ class NetconfMapping {
     public static def checkValidReply(NetconfMessage input, NetconfMessage output) {
         val inputMsgId = input.document.documentElement.getAttribute("message-id")
         val outputMsgId = output.document.documentElement.getAttribute("message-id")
-        Preconditions.checkState(inputMsgId == outputMsgId,"Rpc request and reply message IDs must be same.");
 
+        if(inputMsgId != outputMsgId) {
+            throw new IllegalStateException('''Rpc request and reply message IDs must be same. Request message: <<XmlUtil.toString(input.document)>>, Response: <<XmlUtil.toString(output.document)>>''');
+        }
     }
 
+
+    public static def checkSuccessReply(NetconfMessage output) {
+        if(NetconfMessageUtil.isErrorMEssage(output)) {
+            throw new IllegalStateException('''Error reply <<XmlUtil.toString(output.document)>> to request <<XmlUtil.toString(input.document)>>''');
+        }
+    }
 }
