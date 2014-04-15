@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -96,6 +97,7 @@ public abstract class LegacyDataChangeEvent implements
     private final static class OperationalChangeEvent extends LegacyDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
+        private Map<InstanceIdentifier<?>, DataObject> updatedCache;
 
         public OperationalChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
             this.delegate = change;
@@ -128,7 +130,15 @@ public abstract class LegacyDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedOperationalData() {
-            return delegate.getUpdatedData();
+            if(updatedCache == null) {
+                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                updatedComposite.putAll(created);
+                updatedComposite.putAll(updated);
+                updatedCache = Collections.unmodifiableMap(updatedComposite);
+            }
+            return updatedCache;
         }
 
         @Override
@@ -142,6 +152,7 @@ public abstract class LegacyDataChangeEvent implements
     private final static class ConfigurationChangeEvent extends LegacyDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
+        private Map<InstanceIdentifier<?>, DataObject> updatedCache;
 
         public ConfigurationChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
             this.delegate = change;
@@ -174,7 +185,15 @@ public abstract class LegacyDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedConfigurationData() {
-            return delegate.getUpdatedData();
+            if(updatedCache == null) {
+                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                updatedComposite.putAll(created);
+                updatedComposite.putAll(updated);
+                updatedCache = Collections.unmodifiableMap(updatedComposite);
+            }
+            return updatedCache;
         }
 
         @Override
