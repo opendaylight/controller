@@ -14,7 +14,7 @@ import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
@@ -31,6 +31,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import java.io.InputStream;
 
+import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
+
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
     public static final String SERVER_HELLO_XML_LOCATION = "/server_hello.xml";
@@ -39,13 +41,13 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
 
     private static final Document helloMessageTemplate = loadHelloMessageTemplate();
     private final SessionIdProvider idProvider;
-    private final NetconfOperationServiceFactoryListener factoriesListener;
+    private final NetconfOperationProvider netconfOperationProvider;
     private final long connectionTimeoutMillis;
 
-    public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationServiceFactoryListener factoriesListener,
+    public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
             SessionIdProvider idProvider, long connectionTimeoutMillis) {
         this.timer = timer;
-        this.factoriesListener = factoriesListener;
+        this.netconfOperationProvider = netconfOperationProvider;
         this.idProvider = idProvider;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
@@ -86,7 +88,8 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         final Element capabilitiesElement = (Element) XmlUtil.evaluateXPath(capabilitiesXPath, helloMessageTemplate,
                 XPathConstants.NODE);
 
-        CapabilityProvider capabilityProvider = new CapabilityProviderImpl(factoriesListener.getSnapshot(sessionId));
+        CapabilityProvider capabilityProvider = new CapabilityProviderImpl(netconfOperationProvider.getSnapshot(
+                getNetconfSessionIdForReporting(sessionId)));
 
         for (String capability : capabilityProvider.getCapabilities()) {
             final Element capabilityElement = helloMessageTemplate.createElement(XmlNetconfConstants.CAPABILITY);

@@ -25,6 +25,7 @@ import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,11 +108,11 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             String errorMessage = String.format("Unable to handle rpc %s on session %s", messageAsString, session);
             Map<String, String> errorInfo = Maps.newHashMap();
 
-            NetconfDocumentedException.ErrorTag tag = null;
+            NetconfDocumentedException.ErrorTag tag;
             if (e instanceof IllegalArgumentException) {
                 errorInfo.put(NetconfDocumentedException.ErrorTag.operation_not_supported.toString(), e.getMessage());
                 tag = NetconfDocumentedException.ErrorTag.operation_not_supported;
-            } else if (e instanceof IllegalStateException) {
+            } else {
                 errorInfo.put(NetconfDocumentedException.ErrorTag.operation_failed.toString(), e.getMessage());
                 tag = NetconfDocumentedException.ErrorTag.operation_failed;
             }
@@ -130,7 +131,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         netconfOperationServiceSnapshot.close();
     }
 

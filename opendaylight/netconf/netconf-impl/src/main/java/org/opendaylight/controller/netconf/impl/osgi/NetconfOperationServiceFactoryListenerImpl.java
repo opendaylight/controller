@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-
-public class NetconfOperationServiceFactoryListenerImpl implements NetconfOperationServiceFactoryListener {
+public class NetconfOperationServiceFactoryListenerImpl implements NetconfOperationServiceFactoryListener,
+        NetconfOperationProvider {
     private final Set<NetconfOperationServiceFactory> allFactories = new HashSet<>();
 
     @Override
@@ -26,8 +28,8 @@ public class NetconfOperationServiceFactoryListenerImpl implements NetconfOperat
     }
 
     @Override
-    public synchronized NetconfOperationServiceSnapshot getSnapshot(long sessionId) {
-        return new NetconfOperationServiceSnapshot(allFactories, sessionId);
+    public synchronized NetconfOperationServiceSnapshotImpl getSnapshot(String sessionIdForReporting) {
+        return new NetconfOperationServiceSnapshotImpl(allFactories, sessionIdForReporting);
     }
 
 }

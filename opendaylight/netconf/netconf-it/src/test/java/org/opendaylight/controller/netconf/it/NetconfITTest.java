@@ -35,9 +35,9 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshot;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
@@ -71,7 +71,7 @@ import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -118,11 +118,11 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     }
 
     static NetconfMonitoringServiceImpl getNetconfMonitoringListenerService() {
-        NetconfOperationServiceFactoryListener factoriesListener = mock(NetconfOperationServiceFactoryListener.class);
-        NetconfOperationServiceSnapshot snap = mock(NetconfOperationServiceSnapshot.class);
+        NetconfOperationProvider netconfOperationProvider = mock(NetconfOperationProvider.class);
+        NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
         doReturn(Collections.<NetconfOperationService>emptySet()).when(snap).getServices();
-        doReturn(snap).when(factoriesListener).getSnapshot(anyLong());
-        return new NetconfMonitoringServiceImpl(factoriesListener);
+        doReturn(snap).when(netconfOperationProvider).getSnapshot(anyString());
+        return new NetconfMonitoringServiceImpl(netconfOperationProvider);
     }
 
     @After
