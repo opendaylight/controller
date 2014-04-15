@@ -7,26 +7,15 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
-import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
-import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- *
- */
+import java.util.Collections;
+import java.util.List;
+
 public class AbstractModuleTemplate extends GeneralClassTemplate {
 
     private final List<ModuleField> moduleFields;
@@ -50,53 +39,12 @@ public class AbstractModuleTemplate extends GeneralClassTemplate {
         return moduleFields;
     }
 
-    public String getInstanceType() {
-        return AutoCloseable.class.getCanonicalName();
-    }
-
-    public String getModuleNameType() {
-        return ModuleIdentifier.class.getCanonicalName();
-    }
-
-    public String getAbstractServiceInterfaceType() {
-        return AbstractServiceInterface.class.getCanonicalName();
-    }
-
-    public String getModuleType() {
-        return Module.class.getCanonicalName();
-    }
-
     public String getRegistratorType() {
         return registratorType;
     }
 
     public boolean isRuntime() {
         return runtime;
-    }
-
-    public String getDependencyResolverType() {
-        return DependencyResolver.class.getCanonicalName();
-    }
-
-    public String getDynamicMBeanWithInstanceType() {
-        return DynamicMBeanWithInstance.class.getCanonicalName();
-    }
-
-    public String getRootRuntimeRegistratorType() {
-        return RootRuntimeBeanRegistrator.class.getCanonicalName();
-    }
-
-    @Override
-    public String getFtlTempleteLocation() {
-        return "module_abs_template_new.ftl";
-    }
-
-    public String getLoggerType() {
-        return Logger.class.getCanonicalName();
-    }
-
-    public String getLoggerFactoryType() {
-        return LoggerFactory.class.getCanonicalName();
     }
 
 }

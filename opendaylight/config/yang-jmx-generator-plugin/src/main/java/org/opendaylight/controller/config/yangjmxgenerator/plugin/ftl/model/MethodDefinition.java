@@ -93,4 +93,9 @@ public class MethodDefinition implements Method {
     public List<String> getModifiers() {
         return modifiers;
     }
+
+    @Override
+    public String toString() {
+        return MethodSerializer.toString(this);
+    }
 }

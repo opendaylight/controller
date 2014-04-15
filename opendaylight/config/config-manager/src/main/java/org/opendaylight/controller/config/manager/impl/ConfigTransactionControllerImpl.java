@@ -44,6 +44,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -380,7 +381,8 @@ class ConfigTransactionControllerImpl implements
             try {
                 logger.debug("About to commit {} in transaction {}",
                         name, getTransactionIdentifier());
-                module.getInstance();
+                AutoCloseable instance = module.getInstance();
+                checkNotNull(instance, "Instance is null:{} in transaction {}", name, getTransactionIdentifier());
             } catch (Exception e) {
                 logger.error("Commit failed on {} in transaction {}", name,
                         getTransactionIdentifier(), e);

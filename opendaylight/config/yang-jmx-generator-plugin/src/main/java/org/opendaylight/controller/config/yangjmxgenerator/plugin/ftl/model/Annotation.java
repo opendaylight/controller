@@ -7,18 +7,21 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
+import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
+import org.opendaylight.yangtools.yang.common.QName;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Annotation {
     final String name;
@@ -37,11 +40,27 @@ public class Annotation {
         return params;
     }
 
+    public static Annotation createFromMap(Class<?> annotationClass, Map<String, String> parameters) {
+        List<Parameter> parameterList = new ArrayList<>();
+        for(Entry<String, String> entry: parameters.entrySet()) {
+            parameterList.add(new Parameter(entry.getKey(), entry.getValue()));
+        }
+        return new Annotation(annotationClass.getCanonicalName(), parameterList);
+    }
+
     public static Annotation createDescriptionAnnotation(String description) {
         Preconditions.checkNotNull(description,
                 "Cannot create annotation from null description");
         return new Annotation(Description.class.getCanonicalName(),
                 Lists.newArrayList(new Parameter("value", q(description))));
+    }
+
+    public static Annotation createModuleQNameANnotation(QName qName) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("namespace", q(qName.getNamespace().toString()));
+        parameters.put("revision", q(qName.getFormattedRevision()));
+        parameters.put("name", q(qName.getLocalName()));
+        return Annotation.createFromMap(ModuleQName.class, parameters);
     }
 
     public static Collection<Annotation> createSieAnnotations(ServiceInterfaceEntry sie){
@@ -85,7 +104,7 @@ public class Annotation {
 
     private static final String quote = "\"";
 
-    private static String q(String nullableDescription) {
+    public static String q(String nullableDescription) {
         return nullableDescription == null ? null : quote + nullableDescription
                 + quote;
     }
@@ -107,4 +126,8 @@ public class Annotation {
         }
     }
 
+    @Override
+    public String toString() {
+        return AnnotationSerializer.toString(this);
+    }
 }

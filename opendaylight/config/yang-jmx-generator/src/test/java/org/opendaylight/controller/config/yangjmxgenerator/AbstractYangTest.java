@@ -7,8 +7,17 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.format;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import org.junit.Assert;
+import org.junit.Before;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
+import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,15 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.base.Preconditions;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.format;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public abstract class AbstractYangTest {
     protected SchemaContext context;
@@ -34,6 +38,14 @@ public abstract class AbstractYangTest {
     protected Module configModule, rpcContextModule, threadsModule,
             threadsJavaModule, bgpListenerJavaModule, ietfInetTypesModule,
             jmxModule, jmxImplModule, testFilesModule, testFiles1Module;
+
+    public static final String EVENTBUS_MXB_NAME = "eventbus";
+    public static final String ASYNC_EVENTBUS_MXB_NAME = "async-eventbus";
+    public static final String THREADFACTORY_NAMING_MXB_NAME = "threadfactory-naming";
+    public static final String THREADPOOL_DYNAMIC_MXB_NAME = "threadpool-dynamic";
+    public static final String THREADPOOL_REGISTRY_IMPL_NAME = "threadpool-registry-impl";
+
+    public static final String BGP_LISTENER_IMPL_MXB_NAME = "bgp-listener-impl";
 
     @Before
     public void loadYangFiles() throws Exception {
@@ -97,4 +109,22 @@ public abstract class AbstractYangTest {
         }
         return result;
     }
+
+    protected Map<QName, ServiceInterfaceEntry>  loadThreadsServiceInterfaceEntries(String packageName) {
+        Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
+        return ServiceInterfaceEntry.create(threadsModule, packageName,identitiesToSIs);
+    }
+
+    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(Map<QName, ServiceInterfaceEntry> modulesToSIEs, String packageName) {
+        Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
+                .create(threadsJavaModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl
+                        (context)), packageName);
+        Assert.assertNotNull(namesToMBEs);
+        Set<String> expectedMXBeanNames = Sets.newHashSet(EVENTBUS_MXB_NAME,
+                ASYNC_EVENTBUS_MXB_NAME, THREADFACTORY_NAMING_MXB_NAME,
+                THREADPOOL_DYNAMIC_MXB_NAME, THREADPOOL_REGISTRY_IMPL_NAME);
+        assertThat(namesToMBEs.keySet(), is(expectedMXBeanNames));
+        return namesToMBEs;
+    }
+
 }

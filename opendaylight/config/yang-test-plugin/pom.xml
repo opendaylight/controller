@@ -22,5 +22,9 @@
             <artifactId>maven-plugin-api</artifactId>
             <version>3.0.5</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
 </project>

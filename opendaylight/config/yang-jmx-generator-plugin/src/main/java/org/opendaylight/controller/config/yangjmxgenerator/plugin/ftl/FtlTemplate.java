@@ -7,22 +7,24 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.io.File;
-import java.util.List;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Method;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.TypeDeclaration;
 
+import java.util.List;
+
 public interface FtlTemplate {
 
     Header getHeader();
+    Optional<String> getHeaderString();
 
     String getPackageName();
 
-    String getJavadoc();
+    Optional<String> getMaybeJavadoc();
 
     public List<Annotation> getAnnotations();
 
@@ -34,14 +36,5 @@ public interface FtlTemplate {
 
     List<? extends Method> getMethods();
 
-    /**
-     * @return relative path to file to be created.
-     */
-    public File getRelativeFile();
-
-    /**
-     *
-     * @return ftl template location
-     */
-    public String getFtlTempleteLocation();
+    List<Constructor> getConstructors();
 }

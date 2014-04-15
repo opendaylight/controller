@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class Field {
     private final String type;
     private final String name;
@@ -36,11 +38,11 @@ public class Field {
     }
 
     public Field(List<String> modifiers, String type, String name,
-            String definition, boolean needsDepResolver) {
-        this.modifiers = modifiers;
-        this.type = type;
-        this.name = name;
-        this.definition = definition;
+            String nullableDefinition, boolean needsDepResolver) {
+        this.modifiers = checkNotNull(modifiers);
+        this.type = checkNotNull(type);
+        this.name = checkNotNull(name);
+        this.definition = nullableDefinition;
         this.needsDepResolver = needsDepResolver;
     }
 
@@ -54,6 +56,10 @@ public class Field {
 
     public String getType() {
         return type;
+    }
+
+    public String getGenericInnerType() {
+        return type.substring(type.indexOf("<") + 1, type.indexOf(">"));
     }
 
     public List<String> getModifiers() {
@@ -70,5 +76,10 @@ public class Field {
 
     public boolean isArray() {
         return type.endsWith("[]");
+    }
+
+    @Override
+    public String toString() {
+        return FieldSerializer.toString(this);
     }
 }

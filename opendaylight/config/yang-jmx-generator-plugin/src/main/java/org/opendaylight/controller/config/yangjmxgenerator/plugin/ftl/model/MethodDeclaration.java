@@ -63,4 +63,9 @@ public class MethodDeclaration implements Method {
     public List<String> getModifiers() {
         return Collections.emptyList();
     }
+
+    @Override
+    public String toString() {
+        return MethodSerializer.toString(this);
+    }
 }
