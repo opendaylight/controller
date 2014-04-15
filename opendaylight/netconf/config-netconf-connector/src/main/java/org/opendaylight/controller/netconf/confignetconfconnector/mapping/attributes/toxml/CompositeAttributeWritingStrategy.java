@@ -16,6 +16,8 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Optional;
+
 public class CompositeAttributeWritingStrategy implements AttributeWritingStrategy {
 
     protected final String key;
@@ -33,8 +35,7 @@ public class CompositeAttributeWritingStrategy implements AttributeWritingStrate
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, Map.class);
 
-        Element innerNode = document.createElement(key);
-        XmlUtil.addNamespaceAttr(innerNode, namespace);
+        Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));
 
         Map<?, ?> map = (Map<?, ?>) value;
 

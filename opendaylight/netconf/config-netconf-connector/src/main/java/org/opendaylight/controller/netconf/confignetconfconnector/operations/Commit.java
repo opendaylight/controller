@@ -22,10 +22,13 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
 
 public class Commit extends AbstractConfigNetconfOperation {
 
@@ -73,7 +76,7 @@ public class Commit extends AbstractConfigNetconfOperation {
         }
         logger.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
 
-        return document.createElement(XmlNetconfConstants.OK);
+        return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
 }

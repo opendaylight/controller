@@ -20,11 +20,13 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 public class Validate extends AbstractConfigNetconfOperation {
@@ -100,6 +102,6 @@ public class Validate extends AbstractConfigNetconfOperation {
 
         logger.trace("Datastore {} validated successfully", Datastore.candidate);
 
-        return document.createElement(XmlNetconfConstants.OK);
+        return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 }

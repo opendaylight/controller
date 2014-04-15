@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
@@ -20,10 +23,10 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 public class Runtime {
 
@@ -61,11 +64,9 @@ public class Runtime {
     }
 
     public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, ServiceRegistryWrapper serviceRegistry) {
-        Element root = document.createElement(XmlNetconfConstants.DATA_KEY);
+        Element root = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
 
-        Element modulesElement = document.createElement(XmlNetconfConstants.MODULES_KEY);
-        XmlUtil.addNamespaceAttr(modulesElement,
-                XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        Element modulesElement = XmlUtil.createElement(document, XmlNetconfConstants.MODULES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
         root.appendChild(modulesElement);
 
         Map<String, Multimap<String, ObjectName>> moduleToRuntimeInstance = mapInstancesToModules(instancesToMap);

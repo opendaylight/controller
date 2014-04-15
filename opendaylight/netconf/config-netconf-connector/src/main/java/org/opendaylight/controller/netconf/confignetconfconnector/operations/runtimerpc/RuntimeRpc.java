@@ -14,7 +14,6 @@ import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
 
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
@@ -30,9 +29,11 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Mo
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -66,7 +67,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         // Either allow List of Elements to be returned from NetconfOperation or
         // pass reference to parent output xml element for netconf operations to
         // append result(s) on their own
-        Element tempParent = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, "output");
+        Element tempParent = XmlUtil.createElement(doc, "output", Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
         new ObjectXmlWriter().prepareWritingStrategy(elementName, returnType, doc).writeElement(tempParent, namespace, mappedAttributeOpt.get());
 
         XmlElement xmlElement = XmlElement.fromDomElement(tempParent);
@@ -179,7 +180,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
                 execution.on, execution.attributes, result);
 
         if (execution.isVoid()) {
-            return document.createElement("ok");
+            return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
         } else {
             return toXml(document, result, execution.returnType, execution.namespace,
                     execution.returnType.getAttributeYangName());

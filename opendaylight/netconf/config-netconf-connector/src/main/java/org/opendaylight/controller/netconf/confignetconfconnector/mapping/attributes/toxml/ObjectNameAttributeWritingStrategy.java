@@ -15,6 +15,8 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Optional;
+
 public class ObjectNameAttributeWritingStrategy implements AttributeWritingStrategy {
 
     private final Document document;
@@ -32,19 +34,17 @@ public class ObjectNameAttributeWritingStrategy implements AttributeWritingStrat
     @Override
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
-        Element innerNode = document.createElement(key);
-        XmlUtil.addNamespaceAttr(innerNode, namespace);
+        Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));
 
         String moduleName = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getServiceName();
         String refName = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getRefName();
         String namespaceForType = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getNamespace();
 
-        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlNetconfConstants.TYPE_KEY, XmlNetconfConstants.PREFIX,
-                moduleName);
-        XmlUtil.addPrefixedNamespaceAttr(typeElement, XmlNetconfConstants.PREFIX, namespaceForType);
+        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(XmlNetconfConstants.PREFIX, XmlNetconfConstants.TYPE_KEY), XmlNetconfConstants.PREFIX,
+                moduleName, Optional.<String>of(namespaceForType));
         innerNode.appendChild(typeElement);
 
-        final Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, refName);
+        final Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, refName, Optional.<String>absent());
         innerNode.appendChild(nameElement);
 
         parentElement.appendChild(innerNode);

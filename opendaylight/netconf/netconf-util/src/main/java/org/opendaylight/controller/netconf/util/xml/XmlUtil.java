@@ -40,10 +40,12 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 
 public final class XmlUtil {
 
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
+    private static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -101,25 +103,30 @@ public final class XmlUtil {
         }
     }
 
-    public static Element createTextElement(Document document, String name, String content) {
-        Element typeElement = document.createElement(name);
+    public static Element createElement(final Document document, String qName, Optional<String> namespaceURI) {
+        if(namespaceURI.isPresent()) {
+            final Element element = document.createElementNS(namespaceURI.get(), qName);
+            String name = XMLNS_ATTRIBUTE_KEY;
+            if(element.getPrefix() != null) {
+                name += ":" + element.getPrefix();
+            }
+            element.setAttributeNS(XMLNS_URI, name, namespaceURI.get());
+            return element;
+        }
+        return document.createElement(qName);
+    }
+
+    public static Element createTextElement(Document document, String qName, String content, Optional<String> namespaceURI) {
+        Element typeElement = createElement(document, qName, namespaceURI);
         typeElement.appendChild(document.createTextNode(content));
         return typeElement;
     }
 
-    public static void addNamespaceAttr(Element root, String namespace) {
-        root.setAttribute(XMLNS_ATTRIBUTE_KEY, namespace);
+    public static Element createPrefixedTextElement(Document document, String qName, String prefix, String content, Optional<String> namespace) {
+        return createTextElement(document, qName, createPrefixedValue(prefix, content), namespace);
     }
 
-    public static void addPrefixedNamespaceAttr(Element root, String prefix, String namespace) {
-        root.setAttribute(concat(XMLNS_ATTRIBUTE_KEY, prefix), namespace);
-    }
-
-    public static Element createPrefixedTextElement(Document document, String key, String prefix, String content) {
-        return createTextElement(document, key, concat(prefix, content));
-    }
-
-    private static String concat(String prefix, String value) {
+    public static String createPrefixedValue(String prefix, String value) {
         return prefix + ":" + value;
     }
 

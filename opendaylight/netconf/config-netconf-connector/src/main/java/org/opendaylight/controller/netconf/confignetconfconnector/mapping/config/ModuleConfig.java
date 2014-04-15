@@ -8,8 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+
+import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
@@ -20,10 +24,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public class ModuleConfig {
 
@@ -57,19 +60,18 @@ public class ModuleConfig {
     }
 
     public Element toXml(ObjectName instanceON, ServiceRegistryWrapper depTracker, Document document, String namespace) {
-        Element root = document.createElement(XmlNetconfConstants.MODULE_KEY);
+        Element root = XmlUtil.createElement(document, XmlNetconfConstants.MODULE_KEY, Optional.<String>absent());
         // Xml.addNamespaceAttr(document, root, namespace);
 
         final String prefix = getPrefix(namespace);
-        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlNetconfConstants.TYPE_KEY, prefix,
-                moduleName);
-        XmlUtil.addPrefixedNamespaceAttr(typeElement, prefix, namespace);
+        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(prefix, XmlNetconfConstants.TYPE_KEY), prefix,
+                moduleName, Optional.<String>of(namespace));
         // Xml.addNamespaceAttr(document, typeElement,
         // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         root.appendChild(typeElement);
 
-        Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY,
-                ObjectNameUtil.getInstanceName(instanceON));
+        Element nameElement = XmlUtil.createTextElement(document, XmlUtil.createPrefixedValue(prefix, XmlNetconfConstants.NAME_KEY),
+                ObjectNameUtil.getInstanceName(instanceON), Optional.<String>of(namespace));
         // Xml.addNamespaceAttr(document, nameElement,
         // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         root.appendChild(nameElement);

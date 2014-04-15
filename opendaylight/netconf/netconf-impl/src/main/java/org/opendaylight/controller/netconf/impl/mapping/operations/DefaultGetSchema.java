@@ -8,8 +8,9 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
@@ -21,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 public final class DefaultGetSchema extends AbstractLastNetconfOperation {
     public static final String GET_SCHEMA = "get-schema";
@@ -82,10 +83,8 @@ public final class DefaultGetSchema extends AbstractLastNetconfOperation {
         }
 
         Element getSchemaResult;
-        getSchemaResult = XmlUtil.createTextElement(document, XmlNetconfConstants.DATA_KEY, schema);
-        XmlUtil.addNamespaceAttr(getSchemaResult,
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING);
-
+        getSchemaResult = XmlUtil.createTextElement(document, XmlNetconfConstants.DATA_KEY, schema,
+                Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING));
         logger.trace("{} operation successful", GET_SCHEMA);
 
         return getSchemaResult;
