@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6cb004f5",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DeadlockMonitor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-15T11:13:05Z",
+      "side": 1,
+      "message": "I don\u0027t agree with sonar on this one :)",
+      "parentUuid": "fa82b9bf_b1c3ca37",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_51491e8a",
         "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/async/AsyncEventBusConfigBeanTest.java",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ec9bb470",
+        "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/async/AsyncEventBusConfigBeanTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-15T11:13:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_51491e8a",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7131c20a",
         "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/scheduled/ScheduledThreadPoolConfigBeanTest.java",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-11T11:31:07Z",
       "side": 1,
       "message": "Please remove \\r",
+      "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c88e823",
+        "filename": "opendaylight/config/threadpool-config-impl/src/test/java/org/opendaylight/controller/config/threadpool/scheduled/ScheduledThreadPoolConfigBeanTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-15T11:13:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7131c20a",
       "revId": "b3a02f900a54b570b58498d2239f87a9585c69d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
