@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -9,8 +9,7 @@ package org.opendaylight.controller.frm.group;
 
 public class GroupTransactionValidator {
 
-    public static void validate(GroupTransaction transaction) throws IllegalStateException {
+    public static void validate(GroupChangeListener transaction) throws IllegalStateException {
         // NOOP
     }
-
 }
