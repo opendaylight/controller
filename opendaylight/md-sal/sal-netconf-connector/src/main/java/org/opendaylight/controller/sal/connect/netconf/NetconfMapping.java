@@ -19,6 +19,8 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Nullable;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -52,6 +54,7 @@ public class NetconfMapping {
     public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
     public static String NETCONF_MONITORING_URI = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
     public static URI NETCONF_NOTIFICATION_URI = URI.create("urn:ietf:params:xml:ns:netconf:notification:1.0");
+    public static URI NETCONF_ROLLBACK_ON_ERROR_URI = URI.create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
 
     public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
     public static QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
@@ -70,6 +73,9 @@ public class NetconfMapping {
 
     public static QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
     public static QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
+
+    public static QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
+    public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
     public static QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
     public static QName NETCONF_OK_QNAME = QName.create(NETCONF_QNAME, "ok");
@@ -248,7 +254,17 @@ public class NetconfMapping {
     public static void checkValidReply(NetconfMessage input, NetconfMessage output) {
         String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
         String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
-        Preconditions.checkState(inputMsgId.equals(outputMsgId), "Rpc request and reply message IDs must be same.");
+
+        if(inputMsgId.equals(outputMsgId) == false) {
+            String requestXml = XmlUtil.toString(input.getDocument());
+            String responseXml = XmlUtil.toString(output.getDocument());
+            throw new IllegalStateException(String.format("Rpc request and reply message IDs must be same. Request: %s, response: %s", requestXml, responseXml));
+        }
     }
 
+    public static void checkSuccessReply(NetconfMessage output) {
+        if(NetconfMessageUtil.isErrorMessage(output)) {
+            throw new IllegalStateException(String.format("Response contains error: %s", XmlUtil.toString(output.getDocument())));
+        }
+    }
 }

@@ -119,6 +119,9 @@ public class NetconfDevice implements Provider, //
 
     NetconfDeviceListener listener;
 
+    private boolean rollbackSupported;
+
+
     public NetconfDevice(String name) {
         this.name = name;
         this.logger = LoggerFactory.getLogger(NetconfDevice.class + "#" + name);
@@ -172,7 +175,7 @@ public class NetconfDevice implements Provider, //
         }
     }
 
-    void bringUp(final SchemaSourceProvider<String> delegate, final Set<QName> capabilities) {
+    void bringUp(final SchemaSourceProvider<String> delegate, final Set<QName> capabilities, final boolean rollbackSupported) {
         // This has to be called from separate thread, not from netty thread calling onSessionUp in DeviceListener.
         // Reason: delegate.getSchema blocks thread when waiting for response
         // however, if the netty thread is blocked, no incoming message can be processed
@@ -181,6 +184,7 @@ public class NetconfDevice implements Provider, //
         processingExecutor.submit(new Runnable() {
             @Override
             public void run() {
+                NetconfDevice.this.rollbackSupported = rollbackSupported;
                 remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
                 deviceContextProvider = new NetconfDeviceSchemaContextProvider(NetconfDevice.this, remoteSourceProvider);
                 deviceContextProvider.createContextFromCapabilities(capabilities);
@@ -363,7 +367,7 @@ public class NetconfDevice implements Provider, //
     public DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
             DataModification<InstanceIdentifier, CompositeNode> modification) {
         NetconfDeviceTwoPhaseCommitTransaction twoPhaseCommit = new NetconfDeviceTwoPhaseCommitTransaction(this,
-                modification, true);
+                modification, true, rollbackSupported);
         try {
             twoPhaseCommit.prepare();
         } catch (InterruptedException e) {

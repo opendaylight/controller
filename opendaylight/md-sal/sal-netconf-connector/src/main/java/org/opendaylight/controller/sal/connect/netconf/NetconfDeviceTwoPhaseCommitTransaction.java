@@ -11,9 +11,11 @@ import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NET
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_EDIT_CONFIG_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_ERROR_OPTION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.NETCONF_TARGET_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.NetconfMapping.ROLLBACK_ON_ERROR_OPTION;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifie
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +50,15 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
     private final DataModification<InstanceIdentifier, CompositeNode> modification;
     private final NetconfDevice device;
     private final boolean candidateSupported;
+    private final boolean rollbackSupported;
 
     public NetconfDeviceTwoPhaseCommitTransaction(NetconfDevice device,
             DataModification<InstanceIdentifier, CompositeNode> modification,
-            boolean candidateSupported) {
+            boolean candidateSupported, boolean rollbackOnErrorSupported) {
         this.device = Preconditions.checkNotNull(device);
         this.modification = Preconditions.checkNotNull(modification);
         this.candidateSupported = candidateSupported;
+        this.rollbackSupported = rollbackOnErrorSupported;
     }
 
     void prepare() throws InterruptedException, ExecutionException {
@@ -91,7 +96,14 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
         } else {
             targetNode = ImmutableCompositeNode.create(NETCONF_RUNNING_QNAME, ImmutableList.<Node<?>>of());
         }
+
         Node<?> targetWrapperNode = ImmutableCompositeNode.create(NETCONF_TARGET_QNAME, ImmutableList.<Node<?>>of(targetNode));
+
+        if(rollbackSupported) {
+            LOG.debug("Rollback-on-error supported, setting {} to {}", NETCONF_ERROR_OPTION_QNAME, ROLLBACK_ON_ERROR_OPTION);
+            ret.addLeaf(NETCONF_ERROR_OPTION_QNAME, ROLLBACK_ON_ERROR_OPTION);
+        }
+
         ret.add(targetWrapperNode);
         return ret;
     }
