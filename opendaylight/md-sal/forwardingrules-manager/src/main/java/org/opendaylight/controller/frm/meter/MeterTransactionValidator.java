@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -9,8 +9,7 @@ package org.opendaylight.controller.frm.meter;
 
 public class MeterTransactionValidator {
 
-    public static void validate(MeterTransaction transaction) throws IllegalStateException {
+    public static void validate(MeterChangeListener transaction) throws IllegalStateException {
         // NOOP
     }
-
 }

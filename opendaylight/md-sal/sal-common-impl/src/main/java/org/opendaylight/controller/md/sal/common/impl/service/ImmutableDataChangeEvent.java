@@ -11,6 +11,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public final class ImmutableDataChangeEvent<P extends Path<P>, D> implements DataChangeEvent<P,D> {
 
@@ -127,6 +128,8 @@ public final class ImmutableDataChangeEvent<P extends Path<P>, D> implements Dat
             originalOperational.putAll(Maps.filterKeys(data.getOriginalOperationalData(), keyFilter));
             createdOperational.putAll(Maps.filterKeys(data.getCreatedOperationalData(), keyFilter));
             createdConfiguration.putAll(Maps.filterKeys(data.getCreatedConfigurationData(), keyFilter));
+            removedOperational.addAll(Sets.filter(data.getRemovedOperationalData(), keyFilter));
+            removedConfiguration.addAll(Sets.filter(data.getRemovedConfigurationData(), keyFilter));
             return this;
         }
 
