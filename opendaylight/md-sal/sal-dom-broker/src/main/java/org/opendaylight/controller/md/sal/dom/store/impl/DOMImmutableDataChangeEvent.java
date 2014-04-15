@@ -1,5 +1,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,10 +35,10 @@ public final class DOMImmutableDataChangeEvent implements
     private DOMImmutableDataChangeEvent(final Builder change) {
         original = change.before;
         updated = change.after;
-        originalData = change.original.build();
-        createdData = change.created.build();
-        updatedData = change.updated.build();
-        removedPaths = change.removed.build();
+        originalData = ImmutableMap.copyOf(change.original);
+        createdData = ImmutableMap.copyOf(change.created);
+        updatedData = ImmutableMap.copyOf(change.updated);
+        removedPaths = ImmutableSet.copyOf(change.removed);
         scope = change.scope;
     }
 
@@ -125,10 +127,10 @@ public final class DOMImmutableDataChangeEvent implements
         private NormalizedNode<?, ?> after;
         private NormalizedNode<?, ?> before;
 
-        private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> original = ImmutableMap.builder();
-        private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> created = ImmutableMap.builder();
-        private final ImmutableMap.Builder<InstanceIdentifier, NormalizedNode<?, ?>> updated = ImmutableMap.builder();
-        private final ImmutableSet.Builder<InstanceIdentifier> removed = ImmutableSet.builder();
+        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> original = new HashMap<>();
+        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> created = new HashMap<>();
+        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> updated = new HashMap<>();
+        private final Set<InstanceIdentifier> removed = new HashSet<>();
 
         private Builder(final DataChangeScope scope) {
             Preconditions.checkNotNull(scope, "Data change scope should not be null.");

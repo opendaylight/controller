@@ -201,6 +201,10 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> original = new HashMap<>();
         private TransactionStatus status = TransactionStatus.NEW;
 
+        private final Set<InstanceIdentifier<? extends DataObject>> posponedRemovedOperational = new HashSet<>();
+        private final Set<InstanceIdentifier<? extends DataObject>> posponedRemovedConfiguration = new HashSet<>();
+
+
         @Override
         public final TransactionStatus getStatus() {
             return status;
@@ -214,12 +218,13 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-
+            posponedRemovedOperational.remove(path);
             doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
         }
 
         @Override
         public void putConfigurationData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
+            posponedRemovedConfiguration.remove(path);
             DataObject originalObj = readConfigurationData(path);
             if (originalObj != null) {
                 original.put(path, originalObj);
@@ -233,13 +238,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public void removeOperationalData(final InstanceIdentifier<? extends DataObject> path) {
-            doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
-
+            posponedRemovedOperational.add(path);
         }
 
         @Override
         public void removeConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
-            doDelete(getDelegate(), LogicalDatastoreType.CONFIGURATION, path);
+            posponedRemovedConfiguration.add(path);
         }
 
         @Override
@@ -307,25 +311,34 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             return getDelegate().getIdentifier();
         }
 
-        private void changeStatus(TransactionStatus status) {
+        private void changeStatus(final TransactionStatus status) {
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
         }
 
         @Override
         public ListenableFuture<RpcResult<TransactionStatus>> commit() {
+
+            for(InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
+                doDelete(getDelegate(), LogicalDatastoreType.CONFIGURATION, path);
+            }
+
+            for(InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
+                doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
+            }
+
             final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
 
             changeStatus(TransactionStatus.SUBMITED);
 
             Futures.addCallback(f, new FutureCallback<RpcResult<TransactionStatus>>() {
                 @Override
-                public void onSuccess(RpcResult<TransactionStatus> result) {
+                public void onSuccess(final RpcResult<TransactionStatus> result) {
                     changeStatus(result.getResult());
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void onFailure(final Throwable t) {
                     LOG.error("Transaction {} failed to complete", getIdentifier(), t);
                     changeStatus(TransactionStatus.FAILED);
                 }
