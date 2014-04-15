@@ -15,10 +15,13 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public final class NetconfConfigUtil {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
+
+    public static final InetSocketAddress DEFAULT_NETCONF_TCP_ADDRESS
+            = new InetSocketAddress("127.0.0.1", 8383);
+    public static final InetSocketAddress DEFAULT_NETCONF_SSH_ADDRESS
+            = new InetSocketAddress("0.0.0.0", 1830);
 
     private static final String PREFIX_PROP = "netconf.";
 
@@ -36,89 +39,135 @@ public final class NetconfConfigUtil {
     private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
     private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
 
-    public static long extractTimeoutMillis(BundleContext bundleContext) {
-        String key = PREFIX_PROP + CONNECTION_TIMEOUT_MILLIS_PROP;
-        String timeoutString = bundleContext.getProperty(key);
+    public static long extractTimeoutMillis(final BundleContext bundleContext) {
+        final String key = PREFIX_PROP + CONNECTION_TIMEOUT_MILLIS_PROP;
+        final String timeoutString = bundleContext.getProperty(key);
         if (timeoutString == null || timeoutString.length() == 0) {
             return DEFAULT_TIMEOUT_MILLIS;
         }
         try {
             return Long.parseLong(timeoutString);
-        }catch(NumberFormatException e) {
+        }catch(final NumberFormatException e) {
             logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
             return DEFAULT_TIMEOUT_MILLIS;
         }
     }
 
-    public static InetSocketAddress extractTCPNetconfAddress(BundleContext context, String exceptionMessageIfNotFound, boolean forClient) {
-
-        Optional<InetSocketAddress> inetSocketAddressOptional = extractSomeNetconfAddress(context, InfixProp.tcp, exceptionMessageIfNotFound, forClient);
-
-        if (inetSocketAddressOptional.isPresent() == false) {
-            throw new IllegalStateException("Netconf tcp address not found." + exceptionMessageIfNotFound);
-        }
-        InetSocketAddress inetSocketAddress = inetSocketAddressOptional.get();
-        if (inetSocketAddress.getAddress().isAnyLocalAddress()) {
+    public static InetSocketAddress extractTCPNetconfServerAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
+        final Optional<InetSocketAddress> extracted = extractNetconfServerAddress(context, InfixProp.tcp);
+        final InetSocketAddress netconfTcpAddress = getNetconfAddress(defaultAddress, extracted, InfixProp.tcp);
+        if (netconfTcpAddress.getAddress().isAnyLocalAddress()) {
             logger.warn("Unprotected netconf TCP address is configured to ANY local address. This is a security risk. " +
                     "Consider changing {} to 127.0.0.1", PREFIX_PROP + InfixProp.tcp + ADDRESS_SUFFIX_PROP);
         }
+        return netconfTcpAddress;
+    }
+
+    public static InetSocketAddress extractTCPNetconfClientAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
+        final Optional<InetSocketAddress> extracted = extractNetconfClientAddress(context, InfixProp.tcp);
+        return getNetconfAddress(defaultAddress, extracted, InfixProp.tcp);
+    }
+
+    /**
+     * Get extracted address or default.
+     *
+     * @throws java.lang.IllegalStateException if neither address is present.
+     */
+    private static InetSocketAddress getNetconfAddress(final InetSocketAddress defaultAddress, Optional<InetSocketAddress> extractedAddress, InfixProp infix) {
+        InetSocketAddress inetSocketAddress;
+
+        if (extractedAddress.isPresent() == false) {
+            logger.debug("Netconf {} address not found, falling back to default {}", infix, defaultAddress);
+
+            if(defaultAddress == null) {
+                logger.warn("Netconf {} address not found, default address not provided", infix);
+                throw new IllegalStateException("Netconf " + infix + " address not found, default address not provided");
+            }
+            inetSocketAddress = defaultAddress;
+        } else {
+            inetSocketAddress = extractedAddress.get();
+        }
+
         return inetSocketAddress;
     }
 
-    public static Optional<InetSocketAddress> extractSSHNetconfAddress(BundleContext context, String exceptionMessage) {
-        return extractSomeNetconfAddress(context, InfixProp.ssh, exceptionMessage, false);
+    public static InetSocketAddress extractSSHNetconfAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
+        Optional<InetSocketAddress> extractedAddress = extractNetconfServerAddress(context, InfixProp.ssh);
+        return getNetconfAddress(defaultAddress, extractedAddress, InfixProp.ssh);
     }
 
-    public static String getPrivateKeyPath(BundleContext context){
+    public static String getPrivateKeyPath(final BundleContext context){
         return getPropertyValue(context,PREFIX_PROP + InfixProp.ssh +PRIVATE_KEY_PATH_PROP);
     }
-    private static String getPropertyValue(BundleContext context, String propertyName){
-        String propertyValue = context.getProperty(propertyName);
+
+    private static String getPropertyValue(final BundleContext context, final String propertyName){
+        final String propertyValue = context.getProperty(propertyName);
         if (propertyValue == null){
             throw new IllegalStateException("Cannot find initial property with name '"+propertyName+"'");
         }
         return propertyValue;
     }
+
     /**
      * @param context
      *            from which properties are being read.
      * @param infixProp
      *            either tcp or ssh
-     * @return value if address and port are valid.
+     * @return value if address and port are present and valid, Optional.absent otherwise.
      * @throws IllegalStateException
      *             if address or port are invalid, or configuration is missing
      */
-    private static Optional<InetSocketAddress> extractSomeNetconfAddress(BundleContext context,
-                                                                         InfixProp infixProp,
-                                                                         String exceptionMessage,
-                                                                         boolean client) {
-        String address = "";
-        if (client) {
-            address = context.getProperty(PREFIX_PROP + infixProp + CLIENT_PROP + ADDRESS_SUFFIX_PROP);
+    private static Optional<InetSocketAddress> extractNetconfServerAddress(final BundleContext context,
+                                                                           final InfixProp infixProp) {
+
+        final Optional<String> address = getProperty(context, PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
+        final Optional<String> port = getProperty(context, PREFIX_PROP + infixProp + PORT_SUFFIX_PROP);
+
+        if (address.isPresent() && port.isPresent()) {
+            try {
+                return parseAddress(address, port);
+            } catch (final RuntimeException e) {
+                logger.warn("Unable to parse {} netconf address from {}:{}, should fall back to default", infixProp,
+                        address, port);
+                return Optional.absent();
+            }
+        } else {
+            logger.debug("{} netconf address not present, should fallback to default");
+            return Optional.absent();
         }
-        if (address == null || address.equals("")){
-            address = context.getProperty(PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
+    }
+
+    private static Optional<InetSocketAddress> parseAddress(final Optional<String> address, final Optional<String> port) {
+        final int portNumber = Integer.valueOf(port.get());
+        return Optional.of(new InetSocketAddress(address.get(), portNumber));
+    }
+
+    private static Optional<InetSocketAddress> extractNetconfClientAddress(final BundleContext context,
+                                                                           final InfixProp infixProp) {
+        final Optional<String> address = getProperty(context,
+                PREFIX_PROP + infixProp + CLIENT_PROP + ADDRESS_SUFFIX_PROP);
+        final Optional<String> port = getProperty(context,
+                PREFIX_PROP + infixProp + CLIENT_PROP + PORT_SUFFIX_PROP);
+
+        if(address.isPresent() && port.isPresent()) {
+            try {
+                return parseAddress(address, port);
+            } catch (final RuntimeException e) {
+                logger.warn("Unable to parse client {} netconf address from {}:{}, fallback to server address",
+                        infixProp, address, port);
+                return extractNetconfServerAddress(context, infixProp);
+            }
+        } else {
+            logger.debug("Client {} netconf address not present, fallback to server address");
+                return extractNetconfServerAddress(context, infixProp);
         }
-        if (address == null || address.equals("")) {
-            throw new IllegalStateException("Cannot find initial netconf configuration for parameter    "
-                    +PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP
-                    +" in config.ini. "+exceptionMessage);
+    }
+
+    private static Optional<String> getProperty(final BundleContext context, final String propKey) {
+        String value = context.getProperty(propKey);
+        if(value != null && value.equals("")) {
+            value = null;
         }
-        String portKey = "";
-        if (client) {
-            portKey = PREFIX_PROP + infixProp + CLIENT_PROP + PORT_SUFFIX_PROP;
-        }
-        if (portKey == null || portKey.equals("")){
-            portKey = PREFIX_PROP + infixProp + PORT_SUFFIX_PROP;
-        }
-        String portString = context.getProperty(portKey);
-        checkNotNull(portString, "Netconf port must be specified in properties file with " + portKey);
-        try {
-            int port = Integer.valueOf(portString);
-            return Optional.of(new InetSocketAddress(address, port));
-        } catch (RuntimeException e) {
-            throw new IllegalStateException("Cannot create " + infixProp + " netconf address from address:" + address
-                    + " and port:" + portString, e);
-        }
+        return Optional.fromNullable(value);
     }
 }

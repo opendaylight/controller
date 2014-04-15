@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.netconf.ssh.osgi;
 
-import com.google.common.base.Optional;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
@@ -41,29 +40,28 @@ public class NetconfSSHActivator implements BundleActivator{
 
     private NetconfSSHServer server;
     private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHActivator.class);
-    private static final String EXCEPTION_MESSAGE = "Netconf ssh bridge is not available.";
     private IUserManager iUserManager;
     private BundleContext context = null;
 
     ServiceTrackerCustomizer<IUserManager, IUserManager> customizer = new ServiceTrackerCustomizer<IUserManager, IUserManager>(){
         @Override
-        public IUserManager addingService(ServiceReference<IUserManager> reference) {
+        public IUserManager addingService(final ServiceReference<IUserManager> reference) {
             logger.trace("Service {} added, let there be SSH bridge.", reference);
             iUserManager =  context.getService(reference);
             try {
                 onUserManagerFound(iUserManager);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.trace("Can't start SSH server due to {}",e);
             }
             return iUserManager;
         }
         @Override
-        public void modifiedService(ServiceReference<IUserManager> reference, IUserManager service) {
+        public void modifiedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
             logger.trace("Replacing modified service {} in netconf SSH.", reference);
             server.addUserManagerService(service);
         }
         @Override
-        public void removedService(ServiceReference<IUserManager> reference, IUserManager service) {
+        public void removedService(final ServiceReference<IUserManager> reference, final IUserManager service) {
             logger.trace("Removing service {} from netconf SSH. " +
                     "SSH won't authenticate users until IUserManager service will be started.", reference);
             removeUserManagerService();
@@ -72,13 +70,13 @@ public class NetconfSSHActivator implements BundleActivator{
 
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         this.context = context;
         listenForManagerService();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         if (server != null){
             server.stop();
             logger.trace("Netconf SSH bridge is down ...");
@@ -86,44 +84,42 @@ public class NetconfSSHActivator implements BundleActivator{
     }
     private void startSSHServer() throws Exception {
         logger.trace("Starting netconf SSH  bridge.");
-        Optional<InetSocketAddress> sshSocketAddressOptional = NetconfConfigUtil.extractSSHNetconfAddress(context, EXCEPTION_MESSAGE);
-        InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                EXCEPTION_MESSAGE, true);
+        final InetSocketAddress sshSocketAddress = NetconfConfigUtil.extractSSHNetconfAddress(context,
+                NetconfConfigUtil.DEFAULT_NETCONF_SSH_ADDRESS);
+        final InetSocketAddress tcpSocketAddress = NetconfConfigUtil.extractTCPNetconfClientAddress(context,
+               NetconfConfigUtil.DEFAULT_NETCONF_TCP_ADDRESS);
 
-        if (sshSocketAddressOptional.isPresent()){
-            String path = NetconfConfigUtil.getPrivateKeyPath(context);
-            path = path.replace("\\", "/");  // FIXME: shouldn't this convert lines to system dependent path separator?
-            if (path.equals("")){
-                throw new Exception("Missing netconf.ssh.pk.path key in configuration file.");
-            }
-
-            File privateKeyFile = new File(path);
-            String privateKeyPEMString;
-            if (privateKeyFile.exists() == false) {
-                // generate & save to file
-                privateKeyPEMString = PEMGenerator.generateTo(privateKeyFile);
-            } else {
-                // read from file
-                try (FileInputStream fis = new FileInputStream(path)) {
-                    privateKeyPEMString = IOUtils.toString(fis);
-                } catch (IOException e) {
-                    logger.error("Error reading RSA key from file '{}'", path);
-                    throw new IllegalStateException("Error reading RSA key from file " + path);
-                }
-            }
-            AuthProvider authProvider = new AuthProvider(iUserManager, privateKeyPEMString);
-            this.server = NetconfSSHServer.start(sshSocketAddressOptional.get().getPort(),tcpSocketAddress,authProvider);
-
-            Thread serverThread = new  Thread(server,"netconf SSH server thread");
-            serverThread.setDaemon(true);
-            serverThread.start();
-            logger.trace("Netconf SSH  bridge up and running.");
-        } else {
-            logger.trace("No valid connection configuration for SSH bridge found.");
-            throw new Exception("No valid connection configuration for SSH bridge found.");
+        String path = NetconfConfigUtil.getPrivateKeyPath(context);
+        path = path.replace("\\", "/"); // FIXME: shouldn't this convert lines
+                                        // to system dependent path separator?
+        if (path.equals("")) {
+            throw new Exception("Missing netconf.ssh.pk.path key in configuration file.");
         }
+
+        final File privateKeyFile = new File(path);
+        final String privateKeyPEMString;
+        if (privateKeyFile.exists() == false) {
+            // generate & save to file
+            privateKeyPEMString = PEMGenerator.generateTo(privateKeyFile);
+        } else {
+            // read from file
+            try (FileInputStream fis = new FileInputStream(path)) {
+                privateKeyPEMString = IOUtils.toString(fis);
+            } catch (final IOException e) {
+                logger.error("Error reading RSA key from file '{}'", path);
+                throw new IllegalStateException("Error reading RSA key from file " + path);
+            }
+        }
+        final AuthProvider authProvider = new AuthProvider(iUserManager, privateKeyPEMString);
+        this.server = NetconfSSHServer.start(sshSocketAddress.getPort(), tcpSocketAddress, authProvider);
+
+        final Thread serverThread = new Thread(server, "netconf SSH server thread");
+        serverThread.setDaemon(true);
+        serverThread.start();
+        logger.trace("Netconf SSH  bridge up and running.");
     }
-    private void onUserManagerFound(IUserManager userManager) throws Exception{
+
+    private void onUserManagerFound(final IUserManager userManager) throws Exception{
         if (server!=null && server.isUp()){
            server.addUserManagerService(userManager);
         } else {
@@ -134,7 +130,7 @@ public class NetconfSSHActivator implements BundleActivator{
         this.server.removeUserManagerService();
     }
     private void listenForManagerService(){
-        ServiceTracker<IUserManager, IUserManager> listenerTracker = new ServiceTracker<>(context, IUserManager.class,customizer);
+        final ServiceTracker<IUserManager, IUserManager> listenerTracker = new ServiceTracker<>(context, IUserManager.class,customizer);
         listenerTracker.open();
     }
 }

@@ -41,28 +41,28 @@ public class NetconfImplActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfAddress(context,
-                "TCP is not configured, netconf not available.", false);
+        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfServerAddress(context,
+                NetconfConfigUtil.DEFAULT_NETCONF_TCP_ADDRESS);
 
-        NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+        final NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         startOperationServiceFactoryTracker(context, factoriesListener);
 
-        SessionIdProvider idProvider = new SessionIdProvider();
+        final SessionIdProvider idProvider = new SessionIdProvider();
         timer = new HashedWheelTimer();
-        long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
+        final long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
+        final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 timer, factoriesListener, idProvider, connectionTimeoutMillis);
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        NetconfMonitoringServiceImpl monitoringService = startMonitoringService(context, factoriesListener);
+        final NetconfMonitoringServiceImpl monitoringService = startMonitoringService(context, factoriesListener);
 
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
+        final NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
                 factoriesListener, commitNot, idProvider, monitoringService);
 
         eventLoopGroup = new NioEventLoopGroup();
 
-        NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
+        final NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory, listenerFactory);
         NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
@@ -73,14 +73,14 @@ public class NetconfImplActivator implements BundleActivator {
 
     }
 
-    private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private void startOperationServiceFactoryTracker(final BundleContext context, final NetconfOperationServiceFactoryListenerImpl factoriesListener) {
         factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
         factoriesTracker.open();
     }
 
-    private NetconfMonitoringServiceImpl startMonitoringService(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl(factoriesListener);
-        Dictionary<String, ?> dic = new Hashtable<>();
+    private NetconfMonitoringServiceImpl startMonitoringService(final BundleContext context, final NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+        final NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl(factoriesListener);
+        final Dictionary<String, ?> dic = new Hashtable<>();
         regMonitoring = context.registerService(NetconfMonitoringService.class, netconfMonitoringServiceImpl, dic);
 
         return netconfMonitoringServiceImpl;
