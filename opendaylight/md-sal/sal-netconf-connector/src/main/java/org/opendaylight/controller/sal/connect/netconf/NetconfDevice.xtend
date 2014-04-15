@@ -107,6 +107,8 @@ AutoCloseable {
     DataBrokerService dataBroker
 
     var NetconfDeviceListener listener;
+	
+	boolean rollbackSupported
 
     public new(String name) {
         this._name = name;
@@ -151,7 +153,9 @@ AutoCloseable {
         updateDeviceState(false, Collections.emptySet())
     }
 
-    def bringUp(SchemaSourceProvider<String> delegate, Set<QName> capabilities) {
+    def bringUp(SchemaSourceProvider<String> delegate, Set<QName> capabilities, boolean rollbackSupported) {
+        this.rollbackSupported = rollbackSupported;
+        
         remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
         deviceContextProvider = new NetconfDeviceSchemaContextProvider(this, remoteSourceProvider);
         deviceContextProvider.createContextFromCapabilities(capabilities);
@@ -283,7 +287,7 @@ AutoCloseable {
     }
 
     override requestCommit(DataModification<InstanceIdentifier, CompositeNode> modification) {
-        val twoPhaseCommit = new NetconfDeviceTwoPhaseCommitTransaction(this, modification, true);
+        val twoPhaseCommit = new NetconfDeviceTwoPhaseCommitTransaction(this, modification, true, rollbackSupported);
         twoPhaseCommit.prepare()
         return twoPhaseCommit;
     }
