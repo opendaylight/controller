@@ -220,6 +220,13 @@ public final class ListenerTree {
             children.remove(arg);
             removeThisIfUnused();
         }
+
+        @Override
+        public String toString() {
+            return "Node [identifier=" + identifier + ", listeners=" + listeners.size() + ", children=" + children.size() + "]";
+        }
+
+
     }
 
     private abstract static class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> //

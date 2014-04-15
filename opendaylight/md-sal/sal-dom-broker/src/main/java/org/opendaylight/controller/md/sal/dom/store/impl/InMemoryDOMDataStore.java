@@ -120,7 +120,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             if (currentState.isPresent()) {
                 final NormalizedNode<?, ?> data = currentState.get().getData();
 
-                final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder() //
+                final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE) //
                         .setAfter(data) //
                         .addCreated(path, data) //
                         .build();
@@ -149,7 +149,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private void commit(final DataAndMetadataSnapshot currentSnapshot,
-            final StoreMetadataNode newDataTree, final DataChangeEventResolver listenerResolver) {
+            final StoreMetadataNode newDataTree, final ResolveDataChangeEventsTask listenerResolver) {
         LOG.debug("Updating Store snaphot version: {} with version:{}",currentSnapshot.getMetadataTree().getSubtreeVersion(),newDataTree.getSubtreeVersion());
 
         if(LOG.isTraceEnabled()) {
@@ -168,7 +168,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             final boolean success = snapshot.compareAndSet(currentSnapshot, newSnapshot);
             checkState(success, "Store snapshot and transaction snapshot differ. This should never happen.");
 
-            for (ChangeListenerNotifyTask task : listenerResolver.resolve()) {
+            for (ChangeListenerNotifyTask task : listenerResolver.call()) {
                 executor.submit(task);
             }
         }
@@ -306,7 +306,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         private DataAndMetadataSnapshot storeSnapshot;
         private Optional<StoreMetadataNode> proposedSubtree;
-        private DataChangeEventResolver listenerResolver;
+        private ResolveDataChangeEventsTask listenerResolver;
 
         public ThreePhaseCommitImpl(final SnaphostBackedWriteTransaction writeTransaction) {
             this.transaction = writeTransaction;
@@ -347,7 +347,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                     proposedSubtree = operationTree.apply(modification, Optional.of(metadataTree),
                             increase(metadataTree.getSubtreeVersion()));
 
-                    listenerResolver = DataChangeEventResolver.create() //
+                    listenerResolver = ResolveDataChangeEventsTask.create() //
                             .setRootPath(PUBLIC_ROOT_PATH) //
                             .setBeforeRoot(Optional.of(metadataTree)) //
                             .setAfterRoot(proposedSubtree) //

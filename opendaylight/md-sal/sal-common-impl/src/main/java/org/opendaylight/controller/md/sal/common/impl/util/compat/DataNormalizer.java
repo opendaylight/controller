@@ -20,7 +20,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -54,17 +53,17 @@ public class DataNormalizer {
         Iterator<PathArgument> arguments = legacy.getPath().iterator();
 
         try {
-            while ( arguments.hasNext() ) {
+            while (arguments.hasNext()) {
                 PathArgument legacyArg = arguments.next();
                 currentOp = currentOp.getChild(legacyArg);
-                checkArgument(currentOp != null, "Legacy Instance Identifier %s is not correct. Normalized Instance Identifier so far %s",legacy,normalizedArgs.build());
+                checkArgument(currentOp != null,
+                        "Legacy Instance Identifier %s is not correct. Normalized Instance Identifier so far %s",
+                        legacy, normalizedArgs.build());
                 while (currentOp.isMixin()) {
                     normalizedArgs.add(currentOp.getIdentifier());
                     currentOp = currentOp.getChild(legacyArg.getNodeType());
                 }
-                if(arguments.hasNext() || (!currentOp.isKeyedEntry() || legacyArg instanceof NodeIdentifierWithPredicates || legacyArg instanceof NodeWithValue)) {
-                    normalizedArgs.add(legacyArg);
-                }
+                normalizedArgs.add(legacyArg);
             }
         } catch (DataNormalizationException e) {
             throw new IllegalArgumentException(String.format("Failed to normalize path %s", legacy), e);
@@ -73,11 +72,13 @@ public class DataNormalizer {
         return new InstanceIdentifier(normalizedArgs.build());
     }
 
-    public Map.Entry<InstanceIdentifier,NormalizedNode<?, ?>> toNormalized(final Map.Entry<InstanceIdentifier,CompositeNode> legacy) {
+    public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
+            final Map.Entry<InstanceIdentifier, CompositeNode> legacy) {
         return toNormalized(legacy.getKey(), legacy.getValue());
     }
 
-    public Map.Entry<InstanceIdentifier,NormalizedNode<?, ?>> toNormalized(final InstanceIdentifier legacyPath, final CompositeNode legacyData) {
+    public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(final InstanceIdentifier legacyPath,
+            final CompositeNode legacyData) {
 
         InstanceIdentifier normalizedPath = toNormalized(legacyPath);
 
@@ -86,7 +87,8 @@ public class DataNormalizer {
             try {
                 currentOp = currentOp.getChild(arg);
             } catch (DataNormalizationException e) {
-                throw new IllegalArgumentException(String.format("Failed to validate normalized path %s", normalizedPath), e);
+                throw new IllegalArgumentException(String.format("Failed to validate normalized path %s",
+                        normalizedPath), e);
             }
         }
 
@@ -101,7 +103,7 @@ public class DataNormalizer {
                 throw new IllegalArgumentException(String.format("Failed to get child operation for %s", legacyData), e);
             }
 
-            if(potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
+            if (potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
                 currentOp = potentialOp;
                 ArrayList<PathArgument> reworkedArgs = new ArrayList<>(normalizedPath.getPath());
                 reworkedArgs.add(potentialOp.getIdentifier());
@@ -111,7 +113,8 @@ public class DataNormalizer {
 
         Preconditions.checkArgument(currentOp != null,
                 "Instance Identifier %s does not reference correct schema Node.", normalizedPath);
-        return new AbstractMap.SimpleEntry<InstanceIdentifier,NormalizedNode<?, ?>>(normalizedPath,currentOp.normalize(legacyData));
+        return new AbstractMap.SimpleEntry<InstanceIdentifier, NormalizedNode<?, ?>>(normalizedPath,
+                currentOp.normalize(legacyData));
     }
 
     public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) {
@@ -149,9 +152,8 @@ public class DataNormalizer {
     public static Node<?> toLegacy(final NormalizedNode<?, ?> node) {
         if (node instanceof MixinNode) {
             /**
-             * Direct reading of MixinNodes is not supported,
-             * since it is not possible in legacy APIs create pointer
-             * to Mixin Nodes.
+             * Direct reading of MixinNodes is not supported, since it is not
+             * possible in legacy APIs create pointer to Mixin Nodes.
              *
              */
             return null;
@@ -193,8 +195,8 @@ public class DataNormalizer {
             final NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> mixin) {
         ArrayList<Node<?>> ret = new ArrayList<>();
         for (NormalizedNode<?, ?> child : mixin.getValue()) {
-            if(child instanceof MixinNode && child instanceof NormalizedNodeContainer<?, ?, ?>) {
-                Iterables.addAll(ret,toLegacyNodesFromMixin((NormalizedNodeContainer) child));
+            if (child instanceof MixinNode && child instanceof NormalizedNodeContainer<?, ?, ?>) {
+                Iterables.addAll(ret, toLegacyNodesFromMixin((NormalizedNodeContainer) child));
             } else {
                 ret.add(toLegacy(child));
             }
