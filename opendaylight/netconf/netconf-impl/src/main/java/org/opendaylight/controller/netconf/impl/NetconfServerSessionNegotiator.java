@@ -8,8 +8,10 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import java.net.InetSocketAddress;
-
+import com.google.common.base.Optional;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -17,11 +19,7 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAddi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import java.net.InetSocketAddress;
 
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
@@ -52,4 +50,4 @@ public class NetconfServerSessionNegotiator extends
         return new NetconfServerSession(sessionListener, channel, getSessionPreferences().getSessionId(), parsedHeader);
     }
 
-   }
+}

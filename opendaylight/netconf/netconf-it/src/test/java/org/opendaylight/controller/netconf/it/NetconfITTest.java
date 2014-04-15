@@ -121,7 +121,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         NetconfOperationProvider netconfOperationProvider = mock(NetconfOperationProvider.class);
         NetconfOperationServiceSnapshotImpl snap = mock(NetconfOperationServiceSnapshotImpl.class);
         doReturn(Collections.<NetconfOperationService>emptySet()).when(snap).getServices();
-        doReturn(snap).when(netconfOperationProvider).getSnapshot(anyString());
+        doReturn(snap).when(netconfOperationProvider).openSnapshot(anyString());
         return new NetconfMonitoringServiceImpl(netconfOperationProvider);
     }
 

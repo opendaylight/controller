@@ -9,13 +9,12 @@ package org.opendaylight.controller.netconf.impl.osgi;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -50,20 +49,19 @@ public class NetconfImplActivator implements BundleActivator {
         SessionIdProvider idProvider = new SessionIdProvider();
         timer = new HashedWheelTimer();
         long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                timer, factoriesListener, idProvider, connectionTimeoutMillis);
+
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
-        NetconfMonitoringServiceImpl monitoringService = startMonitoringService(context, factoriesListener);
+        SessionMonitoringService monitoringService = startMonitoringService(context, factoriesListener);
 
-        NetconfServerSessionListenerFactory listenerFactory = new NetconfServerSessionListenerFactory(
-                factoriesListener, commitNot, idProvider, monitoringService);
+        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
+                timer, factoriesListener, idProvider, connectionTimeoutMillis, commitNot, monitoringService);
 
         eventLoopGroup = new NioEventLoopGroup();
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
-                serverNegotiatorFactory, listenerFactory);
+                serverNegotiatorFactory);
         NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
         logger.info("Starting TCP netconf server at {}", address);
