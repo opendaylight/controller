@@ -167,8 +167,10 @@ AutoCloseable {
             commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this);
 
             val rpcs = new ArrayList<RpcRegistration>();
-            for (rpc : mountInstance.schemaContext.operations) {
-                rpcs.add(mountInstance.addRpcImplementation(rpc.QName, this));
+            if (mountInstance != null && schemaContext.isPresent) {
+                for (rpc : mountInstance.schemaContext.operations) {
+                    rpcs.add(mountInstance.addRpcImplementation(rpc.QName, this));
+                }
             }
             rpcReg = rpcs
         }
