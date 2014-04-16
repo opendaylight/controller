@@ -223,7 +223,7 @@ public class UserConfig extends ConfigurationObject implements Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
-    private Status validateClearTextPassword(String password) {
+    public static Status validateClearTextPassword(String password) {
         if (password == null || password.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Password cannot be empty");
         }
@@ -247,7 +247,7 @@ public class UserConfig extends ConfigurationObject implements Serializable {
 
         // To make any changes to a user configured profile, current password
         // must always be provided
-        if (!this.password.equals(hash(this.salt, currentPassword))) {
+        if (!isPasswordMatch(currentPassword)) {
             return new Status(StatusCode.BADREQUEST, "Current password is incorrect");
         }
 
@@ -271,9 +271,13 @@ public class UserConfig extends ConfigurationObject implements Serializable {
         return status;
     }
 
+    public boolean isPasswordMatch(String otherPass) {
+        return this.password.equals(hash(this.salt, otherPass));
+    }
+
     public AuthResponse authenticate(String clearTextPassword) {
         AuthResponse locResponse = new AuthResponse();
-        if (password.equals(hash(this.salt, clearTextPassword))) {
+        if (isPasswordMatch(clearTextPassword)) {
             locResponse.setStatus(AuthResultEnum.AUTH_ACCEPT_LOC);
             locResponse.addData(getRolesString());
         } else {
