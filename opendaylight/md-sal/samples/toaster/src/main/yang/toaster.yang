@@ -1,26 +1,35 @@
+  //This file contains a YANG data definition. This data model defines
+  //a toaster, which is based on the SNMP MIB Toaster example 
   module toaster {
 
-    yang-version 1;
+    //The yang version - today only 1 version exists. If ommited defaults to 1.
+    yang-version 1; 
 
+    //a unique prefix for this toaster module, to unique identify it from other modules that may have the same name.
     namespace
-      "http://netconfcentral.org/ns/toaster";
+      "http://netconfcentral.org/ns/toaster"; 
 
+    //a shorter prefix for references used below
     prefix toast;
 
+    //Defines the organization which defined / owns this .yang file.
     organization "Netconf Central";
 
+    //defines the primary contact of this yang file.
     contact
       "Andy Bierman <andy@netconfcentral.org>";
 
+    //provides a description of this .yang file.
     description
       "YANG version of the TOASTER-MIB.";
 
+    //defines the dates of revisions for this yang file
     revision "2009-11-20" {
       description
         "Toaster module in progress.";
     }
 
-
+    //declares a base identity, in this case a base type for different types of toast.
     identity toast-type {
       description
         "Base for all bread types supported by the toaster.
@@ -28,9 +37,10 @@
            future.";
     }
 
+    //the below identity section is used to define globally unique identities
     identity white-bread {
-      base toast:toast-type;
-      description "White bread.";
+      base toast:toast-type;       //logically extending the declared toast-type above.
+      description "White bread.";  //free text description of this type.
     }
 
     identity wheat-bread {
@@ -58,6 +68,7 @@
       description "Hash browned potatos.";
     }
 
+    //defines a new "Type" which can be used to describe the type of data / inputs etc
     typedef DisplayString {
       type string {
         length "0 .. 255";
@@ -69,11 +80,19 @@
 
     }
 
+    //This definition is the root "item". There can only be one instance of this item in
+    //the system because of the "presence" flag. That flag states that if this thing exists
+    //then the service is considered available, otherwise it is considered not available.
     container toaster {
       presence
         "Indicates the toaster service is available";
       description
         "Top-level container for all toaster database objects.";
+        
+      //This is 1 of 3 attributes which define the attributes of a toaster.
+
+      //QUESTION: Should config = true here? Manufacturer and model number do not change
+      //at run time - they are more configuration than state....
       leaf toasterManufacturer {
         type DisplayString;
         config false;
@@ -92,6 +111,9 @@
                Radiant Automatic.";
       }
 
+      //notice how we restrict the allowed values in this attribute
+      //Config = false indicates that this is state data - i.e. data that
+      //can change which the system is running.
       leaf toasterStatus {
         type enumeration {
           enum "up" {
@@ -115,6 +137,8 @@
       }
     }  // container toaster
 
+    //This defines a Remote Procedure Call (rpc). RPC provide the ability to initiate an action
+    //on the data model. In this case the initating action takes two optional inputs (because default value is defined)
     rpc make-toast {
       description
         "Make some toast.
@@ -154,6 +178,7 @@
       }
     }  // rpc make-toast
 
+    //an action that takes no input parameters
     rpc cancel-toast {
       description
         "Stop making toast, if any is being made.
@@ -161,6 +186,8 @@
            if the toaster service is disabled.";
     }  // rpc cancel-toast
 
+    //This defines a message that the client can register to to get notifications from the implementors of the model.
+    //The symantics (meaning) of what the notification is telling you defined by each model.
     notification toastDone {
       description
         "Indicates that the toast in progress has completed.";
