@@ -7,12 +7,6 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>clustering.services</artifactId>
   <version>0.5.1-SNAPSHOT</version>
@@ -34,16 +28,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.opendaylight.controller.clustering.services
-            </Export-Package>
-            <Import-Package>
-              javax.transaction
-            </Import-Package>
+            <Export-Package>org.opendaylight.controller.clustering.services</Export-Package>
+            <Import-Package>javax.transaction</Import-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

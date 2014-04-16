@@ -1,312 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.2-SNAPSHOT</version>
-        <relativePath>../commons/opendaylight</relativePath>
-    </parent>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.opendaylight</artifactId>
+    <version>1.4.2-SNAPSHOT</version>
+    <relativePath>../commons/opendaylight</relativePath>
+  </parent>
 
-    <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <scm>
-        <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-        <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-      <tag>HEAD</tag>
-  </scm>
+  <artifactId>sal-parent</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <modules>
-        <!-- Common APIs & Implementation -->
-        <module>sal-common</module>
-        <module>sal-common-api</module>
-        <module>sal-common-impl</module>
-        <module>sal-common-util</module>
+  <modules>
+    <!-- Common APIs & Implementation -->
+    <module>sal-common</module>
+    <module>sal-common-api</module>
+    <module>sal-common-impl</module>
+    <module>sal-common-util</module>
 
-        <!-- Binding Independent -->
-        <module>sal-dom-api</module>
-        <module>sal-dom-broker</module>
-        <module>sal-dom-spi</module>
+    <!-- Binding Independent -->
+    <module>sal-dom-api</module>
+    <module>sal-dom-broker</module>
+    <module>sal-dom-spi</module>
 
-        <!-- Binding Aware -->
-        <module>sal-binding-api</module>
-        <module>sal-binding-config</module>
-        <module>sal-binding-broker</module>
+    <!-- Binding Aware -->
+    <module>sal-binding-api</module>
+    <module>sal-binding-config</module>
+    <module>sal-binding-broker</module>
 
-        <module>sal-binding-util</module>
+    <module>sal-binding-util</module>
 
+    <!-- Samples -->
+    <module>samples</module>
 
-        <!-- Samples -->
-        <module>samples</module>
+    <!-- Base Models -->
+    <module>model</module>
+    <module>sal-remote</module>
+    <module>sal-restconf-broker</module>
 
-        <!-- Base Models -->
-        <module>model</module>
-        <module>sal-remote</module>
-        <module>sal-restconf-broker</module>
+    <!-- Connectors -->
+    <module>sal-connector-api</module>
+    <module>sal-rest-connector</module>
+    <module>sal-netconf-connector</module>
 
+    <module>inventory-manager</module>
+    <module>statistics-manager</module>
+    <module>topology-manager</module>
+    <module>forwardingrules-manager</module>
+    <module>topology-lldp-discovery</module>
 
-        <!-- Connectors -->
-        <module>sal-connector-api</module>
-        <module>sal-rest-connector</module>
-        <module>sal-netconf-connector</module>
+    <!-- Compability Packages -->
+    <module>compatibility</module>
 
-
-        <module>inventory-manager</module>
-        <module>statistics-manager</module>
-        <module>topology-manager</module>
-        <module>forwardingrules-manager</module>
-        <module>topology-lldp-discovery</module>
-
-        <!-- Compability Packages -->
-        <module>compatibility</module>
-
-	<!-- Clustering -->
-	      <module>remoterpc-routingtable/implementation</module>
-        <module>sal-remoterpc-connector/implementation</module>
-        <!--module>clustered-data-store/implementation</module>
+    <!-- Clustering -->
+    <module>remoterpc-routingtable/implementation</module>
+    <module>sal-remoterpc-connector/implementation</module>
+    <!--module>clustered-data-store/implementation</module>
 	 -->
 
-    </modules>
+  </modules>
 
+  <properties>
 
-    <profiles>
-        <profile>
-            <id>integrationtests</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>sal-binding-it</module>
-                <module>sal-binding-dom-it</module>
-                <!--module>clustered-data-store/integrationtest</module -->
-                <!--module>zeromq-routingtable/integrationtest</module -->
-                <!--module>sal-remoterpc-connector/integrationtest</module -->
-                <!--module>test/sal-rest-connector-it</modulei -->
-            </modules>
-        </profile>
-    </profiles>
+    <!-- Plugin Versions -->
+    <bundle.plugin.version>2.4.0</bundle.plugin.version>
+    <exam.version>3.0.0</exam.version>
+    <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Dependency Versions -->
+    <mockito.version>1.9.5</mockito.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <sal.version>0.8.1-SNAPSHOT</sal.version>
+    <sonar.branch>${user.name}-private-view</sonar.branch>
+    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
+    <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
+    <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-        <!-- Plugin Versions -->
-        <bundle.plugin.version>2.4.0</bundle.plugin.version>
-        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
+    <!-- Sonar properties using jacoco to retrieve integration test results -->
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.language>java</sonar.language>
+  </properties>
 
-        <!-- Dependency Versions -->
-        <mockito.version>1.9.5</mockito.version>
+  <dependencyManagement>
+    <dependencies>
 
+      <!-- SAL Dependencies -->
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>sal-connector-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal</artifactId>
+        <version>${sal.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-util</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-remote</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-generator-impl</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-parser-impl</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
 
-        <!-- Sonar properties using jacoco to retrieve integration test results -->
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
-        <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
-        <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
-        <sonar.branch>${user.name}-private-view</sonar.branch>
-        <sonar.language>java</sonar.language>
-        <exam.version>3.0.0</exam.version>
-        <sal.version>0.8.1-SNAPSHOT</sal.version>
-    </properties>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>${osgi.core.version}</version>
+      </dependency>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>xml-apis</groupId>
-                <artifactId>xml-apis</artifactId>
-                <version>1.4.01</version>
-            </dependency>
-
-            <!-- SAL Dependencies -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-connector-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-binding-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal</artifactId>
-                <version>${sal.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-remote</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-binding-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <!-- Supporting Libraries -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>${osgi.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>binding-generator-impl</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yang-parser-impl</artifactId>
-                <version>${yangtools.version}</version>
-            </dependency>
-            <!-- Testing Dependencies -->
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>${bundle.plugin.version}</version>
-                    <extensions>true</extensions>
-                    <!--executions> <execution> <id>bundle-manifest</id>
+      <!-- Supporting Libraries -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>1.4.01</version>
+      </dependency>
+      <!-- Testing Dependencies -->
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${bundle.plugin.version}</version>
+          <extensions>true</extensions>
+          <!--executions> <execution> <id>bundle-manifest</id>
                         <phase>process-classes</phase> <goals> <goal>manifest</goal> </goals> </execution>
                         </executions -->
-                    <configuration>
-                        <instructions>
-                            <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        </instructions>
-                        <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.eclipse.xtend</groupId>
-                    <artifactId>xtend-maven-plugin</artifactId>
-                    <version>${xtend.version}</version>
-                </plugin>
-                <plugin>
+          <configuration>
+            <instructions>
+              <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+            </instructions>
+            <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+          </configuration>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse
+                    m2e settings only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.opendaylight.yangtools</groupId>
+                    <artifactId>yang-maven-plugin</artifactId>
+                    <versionRange>[0,)</versionRange>
+                    <goals>
+                      <goal>generate-sources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <versionRange>[0,)</versionRange>
+                    <goals>
+                      <goal>compile</goal>
+                      <goal>testCompile</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
-                </plugin>
-                <!--This plugin's configuration is used to store Eclipse
-                    m2e settings only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.opendaylight.yangtools</groupId>
-                                        <artifactId>yang-maven-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>generate-sources</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>net.alchim31.maven</groupId>
-                                        <artifactId>scala-maven-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>compile</goal>
-                                            <goal>testCompile</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.jacoco</groupId>
-                                        <artifactId>jacoco-maven-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>prepare-agent</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
+                    <versionRange>[0,)</versionRange>
+                    <goals>
+                      <goal>prepare-agent</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.xtend</groupId>
+          <artifactId>xtend-maven-plugin</artifactId>
+          <version>${xtend.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+        </plugin>
+      </plugins>
 
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-            </plugin>
-            <plugin>
-                <!-- FIXME: BUG-272: remove this configuration override -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle.version}</version>
-                <executions>
-                  <execution>
-                    <phase>none</phase>
-                  </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>2.4.0</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <goal>site</goal>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jdepend-maven-plugin</artifactId>
-                <version>2.0-beta-2</version>
-            </plugin>
-        </plugins>
-    </reporting>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <!-- FIXME: BUG-272: remove this configuration override -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <executions>
+          <execution>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+      </plugin>
+    </plugins>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.4.0</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <goal>site</goal>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jdepend-maven-plugin</artifactId>
+        <version>2.0-beta-2</version>
+      </plugin>
+    </plugins>
+  </reporting>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+  </scm>
+
+  <profiles>
+    <profile>
+      <id>integrationtests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>sal-binding-it</module>
+        <module>sal-binding-dom-it</module>
+        <!--module>clustered-data-store/integrationtest</module -->
+        <!--module>zeromq-routingtable/integrationtest</module -->
+        <!--module>sal-remoterpc-connector/integrationtest</module -->
+        <!--module>test/sal-rest-connector-it</modulei -->
+      </modules>
+    </profile>
+  </profiles>
 </project>

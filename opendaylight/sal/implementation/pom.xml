@@ -7,16 +7,25 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>sal.implementation</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -27,8 +36,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.slf4j,
+            <Import-Package>org.slf4j,
               org.apache.commons.lang3.builder,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.packet,
@@ -41,32 +49,19 @@
               org.opendaylight.controller.sal.utils,
               org.apache.felix.dm,
               org.eclipse.osgi.framework.console,
-              org.osgi.framework
-            </Import-Package>
-            <Export-Package>
-            </Export-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.sal.implementation.internal.Activator
-            </Bundle-Activator>
+              org.osgi.framework</Import-Package>
+            <Export-Package></Export-Package>
+            <Bundle-Activator>org.opendaylight.controller.sal.implementation.internal.Activator</Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

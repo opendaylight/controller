@@ -7,16 +7,24 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>clustering.stub</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -27,34 +35,22 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              javax.transaction,
+            <Import-Package>javax.transaction,
               org.apache.felix.dm,
               org.slf4j,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.clustering.stub.internal.Activator
-            </Bundle-Activator>
+              org.opendaylight.controller.sal.core</Import-Package>
+            <Bundle-Activator>org.opendaylight.controller.clustering.stub.internal.Activator</Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

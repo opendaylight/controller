@@ -7,16 +7,48 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>forwardingrulesmanager.implementation</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>configuration</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>containermanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>forwardingrulesmanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal.connection</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>switchmanager</artifactId>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -27,13 +59,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Include-Resource>
-            </Include-Resource>
-            <Export-Package>
-              org.opendaylight.controller.forwardingrulesmanager.implementation.data
-            </Export-Package>
-            <Import-Package>
-              org.opendaylight.controller.clustering.services,
+            <Include-Resource></Include-Resource>
+            <Export-Package>org.opendaylight.controller.forwardingrulesmanager.implementation.data</Export-Package>
+            <Import-Package>org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.switchmanager,
@@ -52,58 +80,20 @@
               org.apache.felix.service.command,
               org.osgi.service.component,
               org.slf4j,
-              org.osgi.framework
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.forwardingrulesmanager.internal.Activator
-            </Bundle-Activator>
-            <Require-Bundle>
-              org.opendaylight.controller.hosttracker
-            </Require-Bundle>
-            <Service-Component>
-            </Service-Component>
+              org.osgi.framework</Import-Package>
+            <Bundle-Activator>org.opendaylight.controller.forwardingrulesmanager.internal.Activator</Bundle-Activator>
+            <Require-Bundle>org.opendaylight.controller.hosttracker</Require-Bundle>
+            <Service-Component></Service-Component>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>configuration</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>switchmanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.connection</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>forwardingrulesmanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.apache.felix.gogo.runtime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>connectionmanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager</artifactId>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

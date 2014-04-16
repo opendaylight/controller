@@ -7,69 +7,16 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>commons.httpclient</artifactId>
   <version>0.1.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>${bundle.plugin.version}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Import-Package>
-            javax.crypto,
-            javax.crypto.spec,
-            javax.net,
-            javax.net.ssl,
-            javax.security.auth.x500,
-            javax.servlet,
-            org.apache.log4j,
-            org.ietf.jgss,
-            !org.apache.commons.codec.*,
-            !org.apache.log,
-            !org.apache.avalon.framework.*
-            </Import-Package>
-            <Export-Package>
-              org.opendaylight.controller.commons.httpclient
-            </Export-Package>
-            <Embed-Dependency>
-              httpclient,httpcore,commons-logging
-            </Embed-Dependency>
-            <Embed-Transitive>false</Embed-Transitive>
-          </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <failsOnError>true</failsOnError>
-          <configLocation>controller/checkstyle.xml</configLocation>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.3</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -82,12 +29,59 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
-    <version>4.3</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.3</version>
+      <version>4.3</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>javax.crypto,
+            javax.crypto.spec,
+            javax.net,
+            javax.net.ssl,
+            javax.security.auth.x500,
+            javax.servlet,
+            org.apache.log4j,
+            org.ietf.jgss,
+            !org.apache.commons.codec.*,
+            !org.apache.log,
+            !org.apache.avalon.framework.*</Import-Package>
+            <Export-Package>org.opendaylight.controller.commons.httpclient</Export-Package>
+            <Embed-Dependency>httpclient,httpcore,commons-logging</Embed-Dependency>
+            <Embed-Transitive>false</Embed-Transitive>
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <failsOnError>true</failsOnError>
+          <configLocation>controller/checkstyle.xml</configLocation>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

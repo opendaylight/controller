@@ -7,50 +7,15 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>connectionmanager.implementation</artifactId>
   <version>0.1.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>${bundle.plugin.version}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Import-Package>
-              org.opendaylight.controller.connectionmanager,
-              org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.utils,
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.connection,
-              org.opendaylight.controller.sal.inventory,
-              org.eclipse.osgi.framework.console,
-              org.osgi.framework,
-              org.slf4j,
-              org.apache.felix.dm
-            </Import-Package>
-            <Export-Package>
-            </Export-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.connectionmanager.internal.Activator
-            </Bundle-Activator>
-          </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
@@ -67,9 +32,39 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.connection</artifactId>
     </dependency>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>org.opendaylight.controller.connectionmanager,
+              org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.connection,
+              org.opendaylight.controller.sal.inventory,
+              org.eclipse.osgi.framework.console,
+              org.osgi.framework,
+              org.slf4j,
+              org.apache.felix.dm</Import-Package>
+            <Export-Package></Export-Package>
+            <Bundle-Activator>org.opendaylight.controller.connectionmanager.internal.Activator</Bundle-Activator>
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

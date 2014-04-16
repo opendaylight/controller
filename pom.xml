@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
@@ -19,6 +10,9 @@
   <artifactId>releasepom</artifactId>
   <version>0.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
   <modules>
     <module>opendaylight/distribution/opendaylight</module>
     <module>opendaylight/forwarding/staticrouting</module>
@@ -129,36 +123,42 @@
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
   </modules>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 
-    <profiles>
-        <profile>
-           <id>integrationtests</id>
-           <activation>
-               <activeByDefault>false</activeByDefault>
-           </activation>
-            <modules>
-                <module>opendaylight/clustering/integrationtest</module>
-                <module>opendaylight/configuration/integrationtest</module>
-                <module>opendaylight/forwardingrulesmanager/integrationtest</module>
-                <module>opendaylight/hosttracker/integrationtest</module>
-                <module>opendaylight/switchmanager/integrationtest</module>
-                <module>opendaylight/topologymanager/integrationtest</module>
-                <!-- Northbound integration tests -->
-                <module>opendaylight/northbound/integrationtest</module>
-                <module>opendaylight/statisticsmanager/integrationtest</module>
-                <module>opendaylight/commons/integrationtest</module>
-                <module>opendaylight/containermanager/it.implementation</module>
-                <module>opendaylight/distribution/sanitytest/</module>
-            </modules>
-        </profile>
-        <profile>
-           <id>docs</id>
-           <activation>
-               <activeByDefault>false</activeByDefault>
-           </activation>
-            <modules>
-              <module>opendaylight/northbound/java-client</module>
-            </modules>
-        </profile>
-    </profiles>
+  <profiles>
+    <profile>
+      <id>integrationtests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>opendaylight/clustering/integrationtest</module>
+        <module>opendaylight/configuration/integrationtest</module>
+        <module>opendaylight/forwardingrulesmanager/integrationtest</module>
+        <module>opendaylight/hosttracker/integrationtest</module>
+        <module>opendaylight/switchmanager/integrationtest</module>
+        <module>opendaylight/topologymanager/integrationtest</module>
+        <!-- Northbound integration tests -->
+        <module>opendaylight/northbound/integrationtest</module>
+        <module>opendaylight/statisticsmanager/integrationtest</module>
+        <module>opendaylight/commons/integrationtest</module>
+        <module>opendaylight/containermanager/it.implementation</module>
+        <module>opendaylight/distribution/sanitytest/</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>docs</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>opendaylight/northbound/java-client</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
