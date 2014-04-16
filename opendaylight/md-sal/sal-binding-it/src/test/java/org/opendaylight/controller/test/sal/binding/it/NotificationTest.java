@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -36,7 +37,8 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
-public class NoficationTest extends AbstractTest {
+@Ignore
+public class NotificationTest extends AbstractTest {
 
     private final FlowListener listener1 = new FlowListener();
     private final FlowListener listener2 = new FlowListener();
