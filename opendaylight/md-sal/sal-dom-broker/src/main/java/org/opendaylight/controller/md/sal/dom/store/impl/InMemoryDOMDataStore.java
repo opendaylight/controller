@@ -90,7 +90,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnaphostBackedWriteTransaction(nextIdentifier(), snapshot.get(), this, operationTree);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot.get(), this, operationTree);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private synchronized DOMStoreThreePhaseCommitCohort submit(
-            final SnaphostBackedWriteTransaction writeTx) {
+            final SnapshotBackedWriteTransaction writeTx) {
         LOG.debug("Tx: {} is submitted. Modifications: {}",writeTx.getIdentifier(),writeTx.getMutatedView());
         return new ThreePhaseCommitImpl(writeTx);
     }
@@ -226,12 +226,12 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
     }
 
-    private static class SnaphostBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
+    private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
         private MutableDataTree mutableTree;
         private InMemoryDOMDataStore store;
         private boolean ready = false;
 
-        public SnaphostBackedWriteTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot,
+        public SnapshotBackedWriteTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot,
                 final InMemoryDOMDataStore store, final ModificationApplyOperation applyOper) {
             super(identifier);
             mutableTree = MutableDataTree.from(snapshot, applyOper);
@@ -298,7 +298,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
     }
 
-    private static class SnapshotBackedReadWriteTransaction extends SnaphostBackedWriteTransaction implements
+    private static class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction implements
             DOMStoreReadWriteTransaction {
 
         protected SnapshotBackedReadWriteTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot,
@@ -320,14 +320,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
 
-        private final SnaphostBackedWriteTransaction transaction;
+        private final SnapshotBackedWriteTransaction transaction;
         private final NodeModification modification;
 
         private DataAndMetadataSnapshot storeSnapshot;
         private Optional<StoreMetadataNode> proposedSubtree;
         private ResolveDataChangeEventsTask listenerResolver;
 
-        public ThreePhaseCommitImpl(final SnaphostBackedWriteTransaction writeTransaction) {
+        public ThreePhaseCommitImpl(final SnapshotBackedWriteTransaction writeTransaction) {
             this.transaction = writeTransaction;
             this.modification = transaction.getMutatedView().getRootModification();
         }
