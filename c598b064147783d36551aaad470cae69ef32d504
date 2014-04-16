@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_62400b57",
+        "filename": "opendaylight/usermanager/api/src/main/java/org/opendaylight/controller/usermanager/UserConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-04-16T21:30:03Z",
+      "side": 1,
+      "message": "Should we change this line to use your new isPasswordMatch() method ?",
+      "revId": "c598b064147783d36551aaad470cae69ef32d504",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_02257fc1",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-04-16T21:30:03Z",
+      "side": 1,
+      "message": "Does this mean a user is allowed to set the default admin\u0027s password to DEFAULT_ADMIN_PASSWORD, regardless of the value of DISALLOW_DEFAULT_ADMIN_PASSWORD ?\nvalidateClearTextPassword() does not guarantee the string DEFAULT_ADMIN_PASSWORD will be rejected, because the strong password check may or may not be enforced.",
+      "revId": "c598b064147783d36551aaad470cae69ef32d504",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_222203ba",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-04-16T21:30:03Z",
+      "side": 1,
+      "message": "space after \u0027framework\u0027",
+      "revId": "c598b064147783d36551aaad470cae69ef32d504",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
