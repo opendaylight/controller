@@ -45,6 +45,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -153,6 +154,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         case DELETE:
             return modification.storeSnapshot(Optional.<StoreMetadataNode>absent());
         case SUBTREE_MODIFIED:
+            Preconditions.checkArgument(currentMeta.isPresent(),"Metadata not available for modification",modification);
             return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(), subtreeVersion)));
         case WRITE:
             return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, subtreeVersion)));

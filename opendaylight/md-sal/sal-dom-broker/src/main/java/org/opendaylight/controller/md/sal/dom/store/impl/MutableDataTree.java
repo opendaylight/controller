@@ -80,7 +80,7 @@ class MutableDataTree {
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
                     StoreUtils.increase(snapshot.getMetadataTree().getSubtreeVersion()));
         } catch (Exception e) {
-            LOG.error("Could not create snapshot for {}", path,e);
+            LOG.error("Could not create snapshot for {}:{}", path,modification,e);
             throw e;
         }
     }

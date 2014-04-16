@@ -31,4 +31,9 @@ class ChangeListenerNotifyTask implements Runnable {
 
     }
 
+    @Override
+    public String toString() {
+        return "ChangeListenerNotifyTask [listeners=" + listeners + ", event=" + event + "]";
+    }
+
 }

@@ -169,6 +169,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             checkState(success, "Store snapshot and transaction snapshot differ. This should never happen.");
 
             for (ChangeListenerNotifyTask task : listenerResolver.call()) {
+                LOG.trace("Scheduling invocation of listeners: {}",task);
                 executor.submit(task);
             }
         }
@@ -248,13 +249,25 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         @Override
         public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
             checkNotReady();
-            mutableTree.write(path, data);
+            try {
+                LOG.trace("Tx: {} Write: {}:{}",getIdentifier(),path,data);
+                mutableTree.write(path, data);
+              // FIXME: Add checked exception
+            } catch (Exception e) {
+                LOG.error("Tx: {}, failed to write {}:{} in {}",getIdentifier(),path,data,mutableTree,e);
+            }
         }
 
         @Override
         public void delete(final InstanceIdentifier path) {
             checkNotReady();
-            mutableTree.delete(path);
+            try {
+                LOG.trace("Tx: {} Delete: {}",getIdentifier(),path);
+                mutableTree.delete(path);
+             // FIXME: Add checked exception
+            } catch (Exception e) {
+                LOG.error("Tx: {}, failed to delete {} in {}",getIdentifier(),path,mutableTree,e);
+            }
         }
 
         protected final boolean isReady() {
@@ -295,7 +308,13 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
-            return Futures.immediateFuture(getMutatedView().read(path));
+            LOG.trace("Tx: {} Read: {}",getIdentifier(),path);
+            try {
+                return Futures.immediateFuture(getMutatedView().read(path));
+            } catch (Exception e) {
+                LOG.error("Tx: {} Failed Read of {}",getIdentifier(),path,e);
+                throw e;
+            }
         }
     }
 

@@ -508,7 +508,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         if (potential == null) {
-            throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s", child, schema));
+            throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child, schema,schema.getChildNodes()));
         }
 
         if ((schema instanceof DataSchemaNode) && !((DataSchemaNode) schema).isAugmenting() && potential.isAugmenting()) {
