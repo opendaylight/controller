@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2209a331",
+        "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-04-16T22:21:32Z",
+      "side": 1,
+      "message": "Good eye. Will take care of it :)",
+      "parentUuid": "fa82b9bf_6217ab52",
+      "revId": "c598b064147783d36551aaad470cae69ef32d504",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_222203ba",
         "filename": "opendaylight/usermanager/implementation/src/main/java/org/opendaylight/controller/usermanager/internal/UserManager.java",
         "patchSetId": 1
