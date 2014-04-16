@@ -7,12 +7,6 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>sanitytest</artifactId>
   <version>0.4.2-SNAPSHOT</version>
@@ -33,26 +27,26 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.opendaylight.controller.sanitytest
-            </Export-Package>
-            <Import-Package>
-              javax.xml.bind.annotation,
+            <Export-Package>org.opendaylight.controller.sanitytest</Export-Package>
+            <Import-Package>javax.xml.bind.annotation,
               org.osgi.service.component,
               org.slf4j,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
               org.eclipse.osgi.baseadaptor,
               org.eclipse.osgi.framework.adaptor,
-              org.osgi.framework.wiring
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.sanitytest.internal.Activator
-            </Bundle-Activator>
+              org.osgi.framework.wiring</Import-Package>
+            <Bundle-Activator>org.opendaylight.controller.sanitytest.internal.Activator</Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

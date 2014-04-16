@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -10,8 +11,8 @@
 
   <artifactId>httpservice-bridge</artifactId>
   <version>0.0.2-SNAPSHOT</version>
-  <description>HttpService bridge web application</description>
   <packaging>bundle</packaging>
+  <description>HttpService bridge web application</description>
 
   <build>
     <plugins>
@@ -22,17 +23,14 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-            </Export-Package>
-            <Import-Package>
-                javax.servlet,
+            <Export-Package></Export-Package>
+            <Import-Package>javax.servlet,
                 javax.servlet.http,
                 org.eclipse.equinox.http.servlet,
                 org.opendaylight.controller.web,
                 org.osgi.framework,
                 org.osgi.service.http,
-                org.slf4j,
-            </Import-Package>
+                org.slf4j,</Import-Package>
             <Web-ContextPath>/controller/osgi</Web-ContextPath>
           </instructions>
         </configuration>

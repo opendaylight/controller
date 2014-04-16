@@ -7,16 +7,28 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>forwardingrulesmanager</artifactId>
   <version>0.6.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>configuration</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>switchmanager</artifactId>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -27,13 +39,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Include-Resource>
-            </Include-Resource>
-            <Export-Package>
-              org.opendaylight.controller.forwardingrulesmanager
-            </Export-Package>
-            <Import-Package>
-              org.opendaylight.controller.configuration,
+            <Include-Resource></Include-Resource>
+            <Export-Package>org.opendaylight.controller.forwardingrulesmanager</Export-Package>
+            <Import-Package>org.opendaylight.controller.configuration,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.sal.action,
               org.opendaylight.controller.sal.core,
@@ -48,35 +56,19 @@
               org.osgi.service.component,
               org.slf4j,
               org.eclipse.osgi.framework.console,
-              org.osgi.framework
-            </Import-Package>
-            <Require-Bundle>
-              org.opendaylight.controller.hosttracker
-            </Require-Bundle>
-            <Service-Component>
-            </Service-Component>
+              org.osgi.framework</Import-Package>
+            <Require-Bundle>org.opendaylight.controller.hosttracker</Require-Bundle>
+            <Service-Component></Service-Component>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>configuration</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>switchmanager</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>
