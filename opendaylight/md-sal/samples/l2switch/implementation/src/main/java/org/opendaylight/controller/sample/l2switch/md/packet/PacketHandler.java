@@ -86,8 +86,8 @@ public class PacketHandler implements PacketProcessingListener {
 
       handleEthernetPacket(packet, ingress);
 
-    } catch(Throwable _e) {
-      _e.printStackTrace();
+    } catch(Exception e) {
+      _logger.error("Failed to handle packet {}", packetReceived, e);
     }
   }
 
