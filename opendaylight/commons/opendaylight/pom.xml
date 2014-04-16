@@ -120,7 +120,8 @@
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
 
     <!-- OpenEXI third party lib for netconf-->
-    <exi.nagasena.version>0000.0002.0035.0</exi.nagasena.version>
+    <openexi.version>0000.0002.0035.0</openexi.version>
+    <exi.nagasena.version>0000.0002.0035.0-SNAPSHOT</exi.nagasena.version>
   </properties>
 
   <dependencyManagement>
