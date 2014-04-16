@@ -325,7 +325,7 @@ public class BindingIndependentConnector implements //
     }
 
     public void startRpcForwarding() {
-        if (baRpcRegistry != null && biRpcRegistry != null && baRpcRegistry instanceof RouteChangePublisher<?, ?>) {
+        if (biRpcRegistry != null && baRpcRegistry instanceof RouteChangePublisher<?, ?>) {
             checkState(!rpcForwarding, "Connector is already forwarding RPCs");
             domToBindingRpcManager = baRpcRegistry.registerRouteChangeListener(new DomToBindingRpcForwardingManager());
             if (baRpcRegistry instanceof RpcProviderRegistryImpl) {
