@@ -90,10 +90,10 @@ class ConfigPersisterNotificationListener implements NotificationListener {
         if (notification instanceof CommitJMXNotification) {
             try {
                 handleAfterCommitNotification((CommitJMXNotification) notification);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 // log exceptions from notification Handler here since
                 // notificationBroadcastSupport logs only DEBUG level
-                logger.warn("Exception occured during notification handling: ", e);
+                logger.warn("Failed to handle notification {}", notification, e);
                 throw e;
             }
         } else {
