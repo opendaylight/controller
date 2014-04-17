@@ -31,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Node
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeExperimenterErrorNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -99,7 +100,7 @@ public class NoficationTest extends AbstractTest {
          *
          */
         assertEquals(1, listener1.addedFlows.size());
-        assertEquals(0, listener1.addedFlows.get(0).getCookie().intValue());
+        assertEquals(0, listener1.addedFlows.get(0).getCookie().getValue().intValue());
 
         /**
          * The registration of the Consumer 2. SalFlowListener is registered
@@ -196,7 +197,7 @@ public class NoficationTest extends AbstractTest {
      */
     public static FlowAdded flowAdded(int i) {
         FlowAddedBuilder ret = new FlowAddedBuilder();
-        ret.setCookie(BigInteger.valueOf(i));
+        ret.setCookie(new FlowCookie(BigInteger.valueOf(i)));
         return ret.build();
     }
 

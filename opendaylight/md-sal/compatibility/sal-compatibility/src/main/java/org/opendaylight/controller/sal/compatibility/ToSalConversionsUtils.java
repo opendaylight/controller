@@ -148,7 +148,7 @@ public class ToSalConversionsUtils {
             target.setActions(actionFrom(actions, node));
         }
 
-        target.setId(source.getCookie().longValue());
+        target.setId(source.getCookie().getValue().longValue());
         return target;
     }
 
