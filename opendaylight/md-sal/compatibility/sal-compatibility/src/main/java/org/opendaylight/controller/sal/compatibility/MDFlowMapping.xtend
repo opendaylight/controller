@@ -113,6 +113,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie
 
 public class MDFlowMapping {
 
@@ -127,7 +128,7 @@ public class MDFlowMapping {
 
         hardTimeout = sourceFlow.hardTimeout as int
         idleTimeout = sourceFlow.idleTimeout as int
-        cookie = BigInteger.valueOf(sourceFlow.id)
+        cookie = new FlowCookie(BigInteger.valueOf(sourceFlow.id))
         priority = sourceFlow.priority as int
 
         val sourceActions = sourceFlow.actions;
@@ -150,7 +151,7 @@ public class MDFlowMapping {
        val it = new FlowBuilder();
        hardTimeout = sourceFlow.hardTimeout as int
        idleTimeout = sourceFlow.idleTimeout as int
-       cookie = BigInteger.valueOf(sourceFlow.id)
+       cookie = new FlowCookie(BigInteger.valueOf(sourceFlow.id))
        priority = sourceFlow.priority as int
        id = new FlowId(flowId)
     
@@ -404,7 +405,7 @@ public class MDFlowMapping {
 
         hardTimeout = sourceFlow.hardTimeout as int
         idleTimeout = sourceFlow.idleTimeout as int
-        cookie = BigInteger.valueOf(sourceFlow.id)
+        cookie = new FlowCookie(BigInteger.valueOf(sourceFlow.id))
         priority = sourceFlow.priority as int
 
         val sourceActions = sourceFlow.actions;

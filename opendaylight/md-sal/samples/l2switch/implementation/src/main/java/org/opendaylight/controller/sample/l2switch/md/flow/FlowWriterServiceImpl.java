@@ -9,6 +9,7 @@ package org.opendaylight.controller.sample.l2switch.md.flow;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+
 import org.opendaylight.controller.sample.l2switch.md.topology.NetworkGraphService;
 import org.opendaylight.controller.sample.l2switch.md.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -25,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowModFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
@@ -261,7 +263,7 @@ public class FlowWriterServiceImpl implements FlowWriterService {
         .setBufferId(0L) //
         .setHardTimeout(0) //
         .setIdleTimeout(0) //
-        .setCookie(BigInteger.valueOf(flowCookieInc.getAndIncrement()))
+        .setCookie(new FlowCookie(BigInteger.valueOf(flowCookieInc.getAndIncrement())))
         .setFlags(new FlowModFlags(false, false, false, false, false));
 
     return macToMacFlow.build();
