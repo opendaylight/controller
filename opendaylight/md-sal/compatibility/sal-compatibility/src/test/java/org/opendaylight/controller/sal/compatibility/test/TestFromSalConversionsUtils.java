@@ -177,7 +177,7 @@ public class TestFromSalConversionsUtils {
     }
 
     private void checkOdFlow(NodeFlow odNodeFlow) {
-        assertEquals("Cookie is incorrect.", 9223372036854775807L, odNodeFlow.getCookie().longValue());
+        assertEquals("Cookie is incorrect.", 9223372036854775807L, odNodeFlow.getCookie().getValue().longValue());
         assertEquals("Hard timeout is incorrect.", 32765, odNodeFlow.getHardTimeout().shortValue());
         assertEquals("Iddle timeout is incorrect.", 32766, odNodeFlow.getIdleTimeout().shortValue());
         assertEquals("Priority is incorrect.", 32767, odNodeFlow.getPriority().shortValue());
