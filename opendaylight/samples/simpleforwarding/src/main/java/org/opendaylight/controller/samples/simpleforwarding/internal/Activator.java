@@ -92,7 +92,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     IForwardingRulesManager.class).setCallbacks(
                     "setForwardingRulesManager", "unsetForwardingRulesManager")
-                    .setRequired(false));
+                    .setRequired(true));
 
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyManager.class).setCallbacks("setTopologyManager",
