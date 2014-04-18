@@ -23,15 +23,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-						<Export-Package>
-                            org.opendaylight.controller.sample.toaster.provider.api,
-                            org.opendaylight.controller.config.yang.toaster-consumer,
-                        </Export-Package>
-                        <Import-Package>*</Import-Package>
-					</instructions>
-				</configuration>
 			</plugin>
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
@@ -57,7 +48,7 @@
                                 </generator>
                                 <generator>
                                     <codeGeneratorClass>
-                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                       org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                     </codeGeneratorClass>
                                     <outputBaseDir>
                                         ${salGeneratorPath}
@@ -79,6 +70,7 @@
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
                         <version>${yangtools.version}</version>
                     </dependency>
+
                 </dependencies>
             </plugin>
 
