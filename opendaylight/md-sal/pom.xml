@@ -165,7 +165,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+        <version>${yangtools.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-jmx-generator-plugin</artifactId>
+            <version>${config.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
