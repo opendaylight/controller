@@ -70,6 +70,7 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
     <netty.version>4.0.17.Final</netty.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
@@ -1520,6 +1521,12 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
