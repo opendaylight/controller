@@ -63,6 +63,10 @@
       <artifactId>mockito-configuration</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -74,14 +78,12 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-manager</artifactId>
-      <version>${config.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-util</artifactId>
-      <version>${config.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

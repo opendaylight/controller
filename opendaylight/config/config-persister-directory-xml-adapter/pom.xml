@@ -83,6 +83,7 @@
                             com.google.common.collect,
                             javax.xml.bind,
                             javax.xml.bind.annotation,
+                            javax.xml.bind.annotation.adapters,
                             javax.xml.transform,
                             javax.xml.transform.stream,
                             org.eclipse.persistence.jaxb,

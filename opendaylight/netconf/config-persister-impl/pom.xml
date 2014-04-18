@@ -6,6 +6,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
     <version>0.2.5-SNAPSHOT</version>
+    <relativePath>../</relativePath>
   </parent>
   <artifactId>config-persister-impl</artifactId>
   <packaging>bundle</packaging>

@@ -17,8 +17,6 @@
         <jackson.version>2.3.0</jackson.version>
         <exam.version>3.0.0</exam.version>
         <url.version>1.5.0</url.version>
-        <config.version>0.2.3-SNAPSHOT</config.version>
-        <netconf.version>0.2.3-SNAPSHOT</netconf.version>
     </properties>
 
     <dependencyManagement>
@@ -318,9 +316,8 @@
             <version>0.5.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>ietf-netconf-monitoring</artifactId>
-        <version>${netconf.version}</version>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>ietf-netconf-monitoring</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
@@ -440,33 +437,27 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-netconf-connector</artifactId>
-            <version>${netconf.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>logback-config</artifactId>
-            <version>${config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-persister-impl</artifactId>
-            <version>${config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-persister-file-xml-adapter</artifactId>
-            <version>${config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>netconf-impl</artifactId>
-            <version>${netconf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>netconf-client</artifactId>
-            <version>${netconf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
