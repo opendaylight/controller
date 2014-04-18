@@ -6,7 +6,7 @@ module toaster-provider-impl {
     prefix "toaster-provider-impl";
 
     import config { prefix config; revision-date 2013-04-05; }
-    import toaster-provider { prefix toaster-provider; revision-date 2014-01-31; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
 
     description
@@ -21,7 +21,6 @@ module toaster-provider-impl {
     // This is the definition of a service implementation
     identity toaster-provider-impl {
             base config:module-type;
-            config:provided-service toaster-provider:toaster-provider;
             config:java-name-prefix ToasterProvider;
     }
 
@@ -61,11 +60,27 @@ module toaster-provider-impl {
     augment "/config:modules/config:module/config:state" {
         case toaster-provider-impl {
             when "/config:modules/config:module/config:type = 'toaster-provider-impl'";
-
+            
             leaf toasts-made {
                 type uint32;
             }
+            
+            rpcx:rpc-context-instance "clear-toasts-made-rpc";
+        }
+    }
 
+    identity clear-toasts-made-rpc;
+
+    rpc clear-toasts-made  {
+        description
+          "JMX call to clear the toasts-made counter.";
+          
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance clear-toasts-made-rpc;
+                }
+            }
         }
     }
 }

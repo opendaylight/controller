@@ -11,8 +11,6 @@ package org.opendaylight.controller.config.yang.config.toaster_provider.impl;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterData;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,7 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
 
         // Wrap toaster as AutoCloseable and close registrations to md-sal at
         // close()
-        final class AutoCloseableToaster implements AutoCloseable, ToasterData {
+        final class AutoCloseableToaster implements AutoCloseable {
 
             @Override
             public void close() throws Exception {
@@ -64,11 +62,6 @@ public final class ToasterProviderModule extends org.opendaylight.controller.con
                 runtimeReg.close();
                 opendaylightToaster.close();
                 log.info("Toaster provider (instance {}) torn down.", this);
-            }
-
-            @Override
-            public Toaster getToaster() {
-                return opendaylightToaster.getToaster();
             }
         }
 
