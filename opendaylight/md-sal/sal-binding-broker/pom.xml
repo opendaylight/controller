@@ -190,19 +190,6 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>yang-jmx-generator-plugin</artifactId>
-            <version>${config.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>${yangtools.version}</version>
-            <type>jar</type>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <goals>

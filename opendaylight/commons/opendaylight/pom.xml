@@ -950,12 +950,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-binding-it</artifactId>
-        <version>${mdsal.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-binding-broker-impl</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1549,6 +1543,12 @@
         <scope>test</scope>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-it</artifactId>
+        <version>${mdsal.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>mockito-configuration</artifactId>
         <version>${yangtools.version}</version>
@@ -1873,6 +1873,12 @@
           <artifactId>yang-maven-plugin</artifactId>
           <version>${yangtools.version}</version>
           <dependencies>
+            <dependency>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>maven-sal-api-gen-plugin</artifactId>
+              <version>${yangtools.version}</version>
+              <type>jar</type>
+            </dependency>
             <dependency>
               <groupId>org.osgi</groupId>
               <artifactId>org.osgi.core</artifactId>
