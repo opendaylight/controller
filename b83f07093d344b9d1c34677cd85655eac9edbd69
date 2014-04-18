@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d8754a33",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-04-18T16:53:00Z",
+      "side": 1,
+      "message": "Earlier, i thought this ClusterSessionService can use different implementation such as memcache based, but you are right. Infinispan is hidden behind Cluster Global Service, which is not visible to user. I\u0027ll update the name of this class",
+      "parentUuid": "fa82b9bf_18417239",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b8796695",
         "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_187c1220",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-04-18T16:53:00Z",
+      "side": 1,
+      "message": "I actually thought about temporary data cache in memory, but then, say once user login on one server in cluster, home page of UI then sends multiple requests to the cluster via ajax, once any of those requests hit the second server, which does not have session details, it will resend user back to login page, so loop continues. If we have bigger UI application, with some caching layer, perhaps using memcache on one dedicated machine, we could have dealt with it in better manner",
+      "parentUuid": "fa82b9bf_b8796695",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9874a29d",
         "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-18T07:55:48Z",
       "side": 1,
       "message": "This should not be an error, indeed this race condition could happen as part of normal condition, given the lifecycle of this object cannot be driven by the presence of clusterGlobalServices as being a mandatory dependency. \nThis is one of the few cases (the fragment-host) where the service has to be threated optional and code need to be designed accordingly. See my other note on createSession method (but applicable also to addSession)",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3879d62f",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-04-18T16:53:00Z",
+      "side": 1,
+      "message": "I\u0027ll change it to trace",
+      "parentUuid": "fa82b9bf_9874a29d",
       "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
