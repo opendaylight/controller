@@ -515,7 +515,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
         long sid = (Long) node.getID();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFPortStatistics(sid) : statsMgr.queryStatistics(sid,
-                        OFStatisticsType.FLOW, null);
+                        OFStatisticsType.PORT, null);
 
         List<OFStatistics> filteredList = filterPortListPerContainer(containerName, sid, ofList);
 
