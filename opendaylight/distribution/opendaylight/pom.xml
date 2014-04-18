@@ -1232,7 +1232,7 @@
               <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>sanitytest</artifactId>
-                <version>${controller.version}</version>
+                <version>${sanitytest.version}</version>
               </dependency>
             </dependencies>
             <executions>
