@@ -10,7 +10,8 @@ package org.opendaylight.controller.sample.toaster.it;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
+import org.opendaylight.controller.sample.kitchen.api.EggsType;
+import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.HashBrown;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WhiteBread;
 import org.ops4j.pax.exam.Configuration;
@@ -23,6 +24,7 @@ import org.ops4j.pax.exam.util.PathUtils;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+
 import java.lang.management.ManagementFactory;
 
 import static org.junit.Assert.assertEquals;
@@ -42,7 +44,7 @@ public class ToasterTest {
 
     @Inject
     @Filter(timeout=60*1000)
-    ToastConsumer toastConsumer;
+    KitchenService kitchenService;
 
     @Configuration
     public Option[] config() {
@@ -86,7 +88,6 @@ public class ToasterTest {
     public void testToaster() throws Exception {
 
         MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-        ObjectName consumerOn = new ObjectName("org.opendaylight.controller:instanceName=toaster-consumer-impl,type=RuntimeBean,moduleFactoryName=toaster-consumer-impl");
         ObjectName providerOn = new ObjectName("org.opendaylight.controller:instanceName=toaster-provider-impl,type=RuntimeBean,moduleFactoryName=toaster-provider-impl");
 
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
@@ -95,17 +96,14 @@ public class ToasterTest {
         boolean toasts = true;
 
         // Make toasts using OSGi service
-        toasts &= toastConsumer.createToast(HashBrown.class, 4);
-        toasts &= toastConsumer.createToast(WhiteBread.class, 8);
+        toasts &= kitchenService.makeBreakfast( EggsType.SCRAMBLED, HashBrown.class, 4);
+        toasts &= kitchenService.makeBreakfast( EggsType.POACHED, WhiteBread.class, 8 );
 
-        // Make toast using JMX/config-subsystem
-        toasts &= (Boolean)platformMBeanServer.invoke(consumerOn, "makeHashBrownToast", new Object[]{4}, new String[]{Integer.class.getName()});
-
-        Assert.assertTrue("Not all toasts done by " + toastConsumer, toasts);
+        Assert.assertTrue("Not all toasts done by " + kitchenService, toasts);
 
         // Verify toasts made count on provider via JMX/config-subsystem
         toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
-        assertEquals(3, toastsMade);
+        assertEquals(2, toastsMade);
     }
 
 }

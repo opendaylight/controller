@@ -7,12 +7,14 @@
 *
 * Do not modify this file unless it is present under src/main directory
 */
-package org.opendaylight.controller.config.yang.config.toaster_consumer.impl;
+package org.opendaylight.controller.config.yang.config.kitchen_service.impl;
+
+import org.opendaylight.controller.config.yang.config.kitchen_service.impl.AbstractKitchenServiceModuleFactory;
 
 /**
 *
 */
-public class ToasterConsumerModuleFactory extends org.opendaylight.controller.config.yang.config.toaster_consumer.impl.AbstractToasterConsumerModuleFactory
+public class KitchenServiceModuleFactory extends AbstractKitchenServiceModuleFactory
 {
 
 
