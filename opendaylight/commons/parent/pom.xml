@@ -47,11 +47,6 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>${releaseplugin.version}</version>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>${releaseplugin.version}</version>
-      </plugin>
     </plugins>
   </build>
   <scm>

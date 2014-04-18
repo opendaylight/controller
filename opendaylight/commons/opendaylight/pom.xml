@@ -54,6 +54,7 @@
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
     <jackson.version>2.3.0</jackson.version>
     <jacoco.version>0.6.2.201302030002</jacoco.version>
+    <jar.plugin.version>2.4</jar.plugin.version>
     <java.version.source>1.7</java.version.source>
     <java.version.target>1.7</java.version.target>
     <javassist.version>3.17.1-GA</javassist.version>
@@ -118,6 +119,7 @@
 
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ietf-netconf-monitoring</artifactId>
@@ -631,11 +633,23 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-manager</artifactId>
         <version>${config.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-manager</artifactId>
+        <version>${config.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-netconf-connector</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-persister-api</artifactId>
+        <version>${config.version}</version>
+        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -656,6 +670,18 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-persister-impl</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-util</artifactId>
+        <version>${config.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-util</artifactId>
+        <version>${config.version}</version>
+        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -803,6 +829,12 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-impl</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-mapping-api</artifactId>
         <version>${netconf.version}</version>
       </dependency>
@@ -818,8 +850,20 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-ssh</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-util</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-util</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1148,6 +1192,17 @@
         <version>${config.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>yang-jmx-generator</artifactId>
+        <version>${config.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>yang-test</artifactId>
+        <version>${config.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.controller.md</groupId>
         <artifactId>forwardingrules-manager</artifactId>
         <version>${mdsal.version}</version>
@@ -1235,6 +1290,26 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-generator-impl</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-generator-spi</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-generator-util</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-type-provider</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>concepts</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
@@ -1277,12 +1352,22 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin-spi</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-model-api</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-model-util</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-parser-impl</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
       <!-- yang model dependencies -->
@@ -1315,6 +1400,16 @@
         <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>yang-ext</artifactId>
         <version>${yang-ext.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>${osgi.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>${osgi.core.version}</version>
       </dependency>
 
       <dependency>
@@ -1422,12 +1517,6 @@
         <version>3.8.0.I20120518-2145</version>
       </dependency>
       <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <version>${osgi.core.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
@@ -1497,6 +1586,12 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${bundle.plugin.version}</version>
+          <extensions>true</extensions>
+        </plugin>
+        <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <configuration>
             <filesets>
@@ -1531,6 +1626,11 @@
             <testSource>${java.version.source}</testSource>
             <testTarget>${java.version.target}</testTarget>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${jar.plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -1759,6 +1859,13 @@
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-maven-plugin</artifactId>
           <version>${yangtools.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.osgi</groupId>
+              <artifactId>org.osgi.core</artifactId>
+              <version>${osgi.core.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>
