@@ -13,7 +13,6 @@
 
   <properties>
     <stax.version>1.0.1</stax.version>
-    <yang.jmx.plugin>0.2.4-SNAPSHOT</yang.jmx.plugin>
     <zeromq.version>0.3.1</zeromq.version>
   </properties>
 
@@ -143,7 +142,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-jmx-generator-plugin</artifactId>
-            <version>${yang.jmx.plugin}</version>
+            <version>${config.version}</version>
           </dependency>
           <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
