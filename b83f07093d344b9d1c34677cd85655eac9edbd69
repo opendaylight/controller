@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_18417239",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T07:55:48Z",
+      "side": 1,
+      "message": "Please don\u0027t call it InfinispanSessionServiceImpl, there is nothing specific to infinispan here, from an user point of view this is simply a concurrent hashmap.",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b8796695",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T07:55:48Z",
+      "side": 1,
+      "message": "If the caches cannot be created i just wonder if wouldn\u0027t make sense to temporarely cache the data and then when (if) the cluster service come up you can sync those data. Just a thought. Else i believe this way you are effectively speaking blocking login till the clusterService is not available, it\u0027s definitively a safe option, just looking to see if you have evaluated also another strategy.",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9874a29d",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T07:55:48Z",
+      "side": 1,
+      "message": "This should not be an error, indeed this race condition could happen as part of normal condition, given the lifecycle of this object cannot be driven by the presence of clusterGlobalServices as being a mandatory dependency. \nThis is one of the few cases (the fragment-host) where the service has to be threated optional and code need to be designed accordingly. See my other note on createSession method (but applicable also to addSession)",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_586e1acb",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/InfinispanSessionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T07:55:48Z",
+      "side": 1,
+      "message": "This should not be error, it could happen based on timing and the issue could clear as soon as the servicetracker find the service. I would add this as trace",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_383eb6b9",
+        "filename": "opendaylight/samples/clustersession/src/test/java/org/opendaylight/controller/clustersession/InfinispanSessionServiceImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T07:55:48Z",
+      "side": 1,
+      "message": "Same here, please remove Infinispan name from this class",
+      "revId": "b83f07093d344b9d1c34677cd85655eac9edbd69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
