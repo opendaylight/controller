@@ -65,6 +65,7 @@
     <jolokia.version>1.1.4</jolokia.version>
     <junit.version>4.8.1</junit.version>
     <logback.version>1.0.9</logback.version>
+    <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
     <!-- Java Versions -->
     <maven.compiler.source>1.7</maven.compiler.source>
@@ -809,7 +810,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>logging.bridge</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${logging.bridge.version}</version>
       </dependency>
 
       <!-- Netconf -->
