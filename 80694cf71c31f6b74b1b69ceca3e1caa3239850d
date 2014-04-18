@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_58a5ba02",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.bat",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-18T08:01:12Z",
+      "side": 1,
+      "message": "Please remove the whitespaces else the build will keep failing because of checkstyle failure. In fact we have a rule that prevent checkstyle from accepting changes with TAB in its",
+      "revId": "80694cf71c31f6b74b1b69ceca3e1caa3239850d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
