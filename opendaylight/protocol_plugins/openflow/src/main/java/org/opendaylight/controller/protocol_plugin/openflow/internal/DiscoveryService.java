@@ -148,7 +148,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                         Thread.sleep(10);
                     }
                 } catch (InterruptedException e1) {
-                    logger.warn("DiscoveryTransmit interupted", e1.getMessage());
+                    logger.trace("DiscoveryTransmit interupted", e1.getMessage());
                     if (shuttingDown) {
                         return;
                     }
