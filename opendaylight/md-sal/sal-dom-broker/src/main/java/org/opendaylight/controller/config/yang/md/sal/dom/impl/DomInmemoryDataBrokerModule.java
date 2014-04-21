@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.osgi.framework.BundleContext;
 
 import java.util.Hashtable;
+import java.util.concurrent.Executors;
 
 /**
 *
@@ -49,8 +50,8 @@ public final class DomInmemoryDataBrokerModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         TreeCacheManager treeCacheManager = new TreeCacheManager();
-        DataStoreImpl operStore = new DataStoreImpl(treeCacheManager);
-        DataStoreImpl configStore = new DataStoreImpl(treeCacheManager);
+        DataStoreImpl operStore = new DataStoreImpl(treeCacheManager.getCache("operational-datastore"), "operational", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
+        DataStoreImpl configStore = new DataStoreImpl(treeCacheManager.getCache("config-datastore"), "config", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
 
 //        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
 //        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);

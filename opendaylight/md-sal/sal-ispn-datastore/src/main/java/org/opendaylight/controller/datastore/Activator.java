@@ -1,5 +1,6 @@
 package org.opendaylight.controller.datastore;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.datastore.infinispan.DataStoreImpl;
 import org.opendaylight.controller.datastore.infinispan.InfinispanDataStoreManager;
 import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
@@ -7,6 +8,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Executors;
 
 public class Activator implements BundleActivator{
     TreeCacheManager treeCacheManager = null;
@@ -29,12 +32,13 @@ public class Activator implements BundleActivator{
 
         @Override
         public DataStoreImpl getConfigurationDataStore() {
-            return new DataStoreImpl(treeCacheManager);
+            return new DataStoreImpl("config", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
+
         }
 
         @Override
         public DataStoreImpl getOperationalDataStore() {
-            return new DataStoreImpl(treeCacheManager);
+            return new DataStoreImpl("operational", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
         }
     }
 }

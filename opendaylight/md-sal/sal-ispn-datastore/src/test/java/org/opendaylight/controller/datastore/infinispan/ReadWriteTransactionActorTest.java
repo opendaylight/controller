@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
+import org.opendaylight.controller.datastore.notification.ListenerRegistrationManager;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -38,7 +39,7 @@ public class ReadWriteTransactionActorTest {
                 treeCache,
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                1);
+                1,new ListenerRegistrationManager(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())),false);
 
         List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
 
@@ -64,7 +65,7 @@ public class ReadWriteTransactionActorTest {
                 treeCache,
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                2);
+                2, new ListenerRegistrationManager(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())),false);
 
 
         actor2.write(null, TestModel.createTestContainer());

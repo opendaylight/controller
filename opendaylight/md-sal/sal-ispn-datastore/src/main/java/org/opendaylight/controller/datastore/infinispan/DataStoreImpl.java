@@ -1,11 +1,14 @@
 package org.opendaylight.controller.datastore.infinispan;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.infinispan.tree.TreeCache;
-import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
+import org.opendaylight.controller.datastore.notification.ListenerRegistrationManager;
+import org.opendaylight.controller.datastore.notification.RegisterListenerNode;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -19,6 +22,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -30,52 +37,84 @@ public class DataStoreImpl implements DOMStore, Identifiable<String>, SchemaCont
     private static final Logger logger = LoggerFactory.getLogger(DataStoreImpl.class);
     private final ListeningExecutorService crudExecutor;
     private final ListeningExecutorService commitExecutor;
+    private final ListeningExecutorService notifyExecutor;
+    private final String name;
 
-    public DataStoreImpl(TreeCacheManager treeCacheManager){
-        this.store = treeCacheManager.getCache(DEFAULT_STORE_CACHE_NAME);
+    //this will manage the notification events listeners
+    private final ListenerRegistrationManager listenerManager;
+
+    private static final Logger LOG = LoggerFactory.getLogger(DataStoreImpl.class);
+
+    public DataStoreImpl(TreeCache store, String storeName, SchemaContext schemaContext, final ListeningExecutorService asyncExecutor) {
+        this.notifyExecutor = Preconditions.checkNotNull(asyncExecutor);
+        name = Preconditions.checkNotNull(storeName);
+        Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+        this.schemaContext = schemaContext;
+        this.store = store;
+        listenerManager = new ListenerRegistrationManager(this.notifyExecutor);
         this.crudExecutor = createExecutor();
         this.commitExecutor = createExecutor();
     }
 
-    private ListeningExecutorService createExecutor(){
-        return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-    }
-
-    private DOMStoreReadWriteTransaction createTransaction(){
-        return new ReadWriteTransactionActor(schemaContext, store, crudExecutor, commitExecutor, counter.incrementAndGet());
-    }
-
-
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        final DOMStoreReadWriteTransaction transaction = createTransaction();
+        final DOMStoreReadWriteTransaction transaction = createTransaction(true);
         logger.info("READ-ONLY TRANSACTION : {}", transaction.getIdentifier());
         return transaction;
     }
 
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        final DOMStoreReadWriteTransaction transaction = createTransaction();
+        final DOMStoreReadWriteTransaction transaction = createTransaction(false);
         logger.info("WRITE-ONLY TRANSACTION : {}", transaction.getIdentifier());
         return transaction;
 
     }
 
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        final DOMStoreReadWriteTransaction transaction = createTransaction();
+        final DOMStoreReadWriteTransaction transaction = createTransaction(false);
         logger.info("READ-WRITE TRANSACTION : {}", transaction.getIdentifier());
         return transaction;
 
     }
+  private ListeningExecutorService createExecutor() {
+    return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+  }
 
-    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(InstanceIdentifier path, L listener, AsyncDataBroker.DataChangeScope scope) {
-        return null;
-    }
+  private DOMStoreReadWriteTransaction createTransaction(boolean readOnly) {
 
-    public String getIdentifier() {
-        return "ispn-datastore";
-    }
+    ReadWriteTransactionActor rwta = new ReadWriteTransactionActor(schemaContext, store, crudExecutor, commitExecutor, counter.incrementAndGet(),listenerManager, readOnly);
+    return rwta;
+  }
 
-    public void onGlobalContextUpdated(SchemaContext context) {
-        this.schemaContext = context;
+
+  @Override
+  public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L>
+  registerChangeListener(final InstanceIdentifier path, final L listener, final AsyncDataBroker.DataChangeScope scope) {
+    LOG.debug("{}: Registering data change listener {} for {}", name, listener, path);
+
+    return this.listenerManager.register(path, listener, scope, store, schemaContext);
+  }
+
+  //for testing purpose only -- need to removed later
+  public Map<String, Collection<?>> listeners() {
+    Map<String, RegisterListenerNode> pathListeners = this.listenerManager.listeners();
+    Map<String, Collection<?>> listenersMapping = new HashMap<String, Collection<?>>();
+    for (Map.Entry<String, RegisterListenerNode> registration : pathListeners.entrySet()) {
+      Collection<DataChangeListenerRegistration<?>> listeners = registration.getValue().getListeners();
+      Collection<AsyncDataChangeListener> actualOnes = new ArrayList<AsyncDataChangeListener>();
+      for (DataChangeListenerRegistration dclr : listeners) {
+        actualOnes.add(dclr.getInstance());
+      }
+      listenersMapping.put(registration.getKey(), actualOnes);
     }
+    return listenersMapping;
+  }
+
+  public String getIdentifier() {
+    return name;
+  }
+
+  public void onGlobalContextUpdated(SchemaContext context) {
+    this.schemaContext = context;
+  }
 
 }
