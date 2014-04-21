@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -60,6 +61,7 @@ public class JMXGenerator implements CodeGenerator {
     private File resourceBaseDir;
     private File projectBaseDir;
     private boolean generateModuleFactoryFile = true;
+    private String persistenSourcesPath;
 
     public JMXGenerator() {
         this.codeWriter = new CodeWriter();
@@ -123,7 +125,14 @@ public class JMXGenerator implements CodeGenerator {
             }
         }
 
-        File mainBaseDir = concatFolders(projectBaseDir, "src", "main", "java");
+        File mainBaseDir;
+        if (persistenSourcesPath != null) {
+            mainBaseDir = new File(persistenSourcesPath);
+        }
+        else {
+            mainBaseDir = concatFolders(projectBaseDir, "src", "main", "java");
+        }
+
         Preconditions.checkNotNull(resourceBaseDir,
                 "resource base dir attribute was null");
 
@@ -190,6 +199,7 @@ public class JMXGenerator implements CodeGenerator {
                     additionalCfg.toString());
         this.namespaceToPackageMapping = extractNamespaceMapping(additionalCfg);
         this.generateModuleFactoryFile = extractModuleFactoryBoolean(additionalCfg);
+        this.persistenSourcesPath = additionalCfg.get("persistentSourcesDir");
     }
 
     private boolean extractModuleFactoryBoolean(

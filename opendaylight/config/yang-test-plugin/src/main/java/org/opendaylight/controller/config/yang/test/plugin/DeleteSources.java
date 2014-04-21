@@ -30,19 +30,7 @@ public class DeleteSources extends AbstractMojo{
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (directory == null || !directory.exists()) {
-            super.getLog().error("Directory does not exists.");
-        }
-        File sourceDirectory = new File(directory.getPath() + Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
-        if (sourceDirectory == null || !sourceDirectory.exists()) {
-            super.getLog().error("Source directory does not exists " + sourceDirectory.getPath());
-        }
-        File[] sourceFiles = sourceDirectory.listFiles();
-        for (File sourceFile: sourceFiles) {
-            if(sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
-                super.getLog().debug("Source file deleted: " + sourceFile.getName());
-                sourceFile.delete();
-            }
-        }
+        // We now generate the persistent source files under src/main/yang-gen-config
+        // so nothing currently nothing needs to be done here to cleanup.
     }
 }

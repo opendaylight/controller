@@ -1,1 +1,0 @@
-return NetconfTestImplModuleUtil.registerRuntimeBeans(this);
