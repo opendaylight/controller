@@ -12,8 +12,6 @@ public class PathUtils {
                         parentPath += "/" + parentPaths[i];
                     }
                 }
-            } else {
-                parentPath = "/";
             }
         }
         return parentPath;

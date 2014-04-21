@@ -4,6 +4,7 @@ import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeVisitor;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -11,29 +12,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
-    private final InfinispanTreeWrapper treeCacheWrapper;
-    private final TreeCache treeCache;
-    private static final Logger logger = LoggerFactory.getLogger(NormalizedNodeTreeCacheWriter.class);
 
-    public NormalizedNodeTreeCacheWriter(TreeCache treeCache){
-        this.treeCache = treeCache;
-        this.treeCacheWrapper = new InfinispanTreeWrapper();
-    }
+  private final InfinispanTreeWrapper treeCacheWrapper;
+  private final TreeCache treeCache;
+  private final WriteDeleteTransactionTracker wdtt;
+  private static final Logger logger = LoggerFactory.getLogger(NormalizedNodeTreeCacheWriter.class);
 
-    @Override
-    public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
+  public NormalizedNodeTreeCacheWriter(TreeCache treeCache, WriteDeleteTransactionTracker wdtt) {
+    this.treeCache = treeCache;
+    this.treeCacheWrapper = new InfinispanTreeWrapper();
+    this.wdtt = wdtt;
+  }
 
-        if(normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode){
-            Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+  @Override
+  public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
 
-            if(logger.isTraceEnabled()){
-                traceNode(nodeFqn, normalizedNode);
-            }
+    if (normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode) {
+      Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
 
-            treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
+        if(logger.isTraceEnabled()){
+            traceNode(nodeFqn, normalizedNode);
         }
 
+      treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
+
+      wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.UPDATED, normalizedNode);
+    } else {
+      if (parentPath == null) {
+        parentPath = "";
+      }
+      Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+      wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.VISITED, normalizedNode);
     }
+
+  }
 
     private void traceNode(Fqn nodeFqn, NormalizedNode normalizedNode) {
         logger.trace("\nPutting data");
@@ -42,4 +54,5 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
         logger.trace("Key : {}", normalizedNode.getKey().toString());
         logger.trace("Value : {}", normalizedNode.getValue().toString());
     }
+
 }
