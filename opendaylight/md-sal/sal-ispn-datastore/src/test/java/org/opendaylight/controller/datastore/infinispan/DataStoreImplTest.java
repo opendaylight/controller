@@ -2,17 +2,18 @@ package org.opendaylight.controller.datastore.infinispan;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import junit.framework.Assert;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.datastore.infinispan.utils.InfinispanNodeNavigator;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodePrinter;
 import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -24,12 +25,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
+import static junit.framework.Assert.*;
+
 
 public class DataStoreImplTest {
     private TreeCache treeCache;
@@ -99,7 +98,7 @@ public class DataStoreImplTest {
 
         System.out.println(two.toString());
 
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer());
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer(),new WriteDeleteTransactionTracker(1));
 
 
         Node n1 = treeCache.getNode(Fqn.fromString("/urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"));
@@ -112,7 +111,7 @@ public class DataStoreImplTest {
     public void normalizedNodeToTreeCacheSerialization(){
 
         treeCache = tcm.getCache(DataStoreImpl.DEFAULT_STORE_CACHE_NAME);
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer());
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(null, TestModel.createTestContainer(),new WriteDeleteTransactionTracker(1));
         Node n1 = treeCache.getNode(Fqn.fromString("/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"));
     }
 
@@ -148,7 +147,7 @@ public class DataStoreImplTest {
         final InstanceIdentifier instanceIdentifier = new InstanceIdentifier(pathArguments);
 
         final ContainerNode containerNode = TestModel.createTestContainer();
-        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(instanceIdentifier, containerNode);
+        new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(instanceIdentifier, containerNode,new WriteDeleteTransactionTracker(1));
 
         NormalizedNode normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(instanceIdentifier, treeCache.getNode(nodeWithValue));
 
@@ -173,7 +172,7 @@ public class DataStoreImplTest {
 
     @Test
     public void testDataStore() throws Exception{
-        final DataStoreImpl dataStore = new DataStoreImpl(tcm);
+        final DataStoreImpl dataStore = new DataStoreImpl(TreeCacheManagerSingleton.get().getCache("DataStoreImplTest-test1"), "configuration",schemaContext, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
         dataStore.onGlobalContextUpdated(schemaContext);
         final DOMStoreReadWriteTransaction domStoreReadWriteTransaction = dataStore.newReadWriteTransaction();
 
@@ -226,68 +225,9 @@ public class DataStoreImplTest {
 
         final NormalizedNodeToTreeCacheCodec normalizedNodeToTreeCacheCodec = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache);
 
-        normalizedNodeToTreeCacheCodec.encode(InstanceIdentifier.builder().build(), documentOne);
+        normalizedNodeToTreeCacheCodec.encode(InstanceIdentifier.builder().build(), documentOne, new WriteDeleteTransactionTracker(1));
 
         final NormalizedNode<?, ?> decode = normalizedNodeToTreeCacheCodec.decode(InstanceIdentifier.builder().build(), (Node) treeCache.getNode(Fqn.fromString("/")).getChildren().toArray()[0]);
-
-
-    }
-
-
-
-    @Test
-    public void testFamily(){
-        treeCache =  tcm.getCache("testFamily");
-
-        final NormalizedNodeToTreeCacheCodec normalizedNodeToTreeCacheCodec = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache);
-
-        final InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder().node(TestModel.FAMILY_QNAME).build();
-        final String sId = instanceIdentifier.toString();
-        normalizedNodeToTreeCacheCodec.encode(null, TestModel.createFamily());
-
-
-        final Set<Node> children = ((Node) treeCache.getNode("/").getChildren().toArray()[0]).getChildren();
-        System.out.println(sId);
-        for(Node node : children){
-            System.out.println(node.getFqn());
-        }
-
-        new InfinispanNodeNavigator().navigate(treeCache.getNode("/"));
-
-        normalizedNodeToTreeCacheCodec.decode(instanceIdentifier, treeCache.getNode(Fqn.fromString(sId)));
-
-
-
-
-
-
-    }
-
-
-    @Test
-    public void testBasheersFamilyModel(){
-
-
-        treeCache =  tcm.getCache("testFamily");
-
-        final NormalizedNodeToTreeCacheCodec normalizedNodeToTreeCacheCodec = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache);
-
-        final InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder().node(TestModel.FAMILY_QNAME).build();
-        final String sId = instanceIdentifier.toString();
-        normalizedNodeToTreeCacheCodec.encode(null, FamilyModel.createTestContainer());
-
-
-        final Set<Node> children = ((Node) treeCache.getNode("/").getChildren().toArray()[0]).getChildren();
-        System.out.println(sId);
-        for(Node node : children){
-            System.out.println(node.getFqn());
-        }
-
-        normalizedNodeToTreeCacheCodec.decode(instanceIdentifier, treeCache.getNode(Fqn.fromString(sId)));
-
-
-        new InfinispanNodeNavigator().navigate(treeCache.getNode("/"));
-
 
 
     }

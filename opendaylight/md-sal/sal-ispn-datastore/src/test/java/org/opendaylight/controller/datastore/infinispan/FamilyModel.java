@@ -4,7 +4,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -15,9 +14,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.*;
 
 
 public class FamilyModel {
@@ -138,13 +135,7 @@ public class FamilyModel {
      *
      * @return
      */
-    public static NormalizedNode<?, ?> createDocumentOne(SchemaContext schemaContext) {
-        return ImmutableContainerNodeBuilder
-                .create()
-                .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(schemaContext.getQName()))
-                .withChild(createTestContainer()).build();
 
-    }
 
     public static ContainerNode createTestContainer() {
 

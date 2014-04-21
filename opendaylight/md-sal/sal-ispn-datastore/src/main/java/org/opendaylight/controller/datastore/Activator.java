@@ -29,12 +29,13 @@ public class Activator implements BundleActivator{
 
         @Override
         public DataStoreImpl getConfigurationDataStore() {
-            return new DataStoreImpl(treeCacheManager);
+            return null ; //new DataStoreImpl("config", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
+
         }
 
         @Override
         public DataStoreImpl getOperationalDataStore() {
-            return new DataStoreImpl(treeCacheManager);
+            return null; //new DataStoreImpl("operational", null, MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
         }
     }
 }

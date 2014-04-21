@@ -5,6 +5,7 @@ import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.datastore.infinispan.utils.PathUtils;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -18,14 +19,15 @@ public class NormalizedNodeToTreeCacheCodec {
         this.treeCache = treeCache;
     }
 
-    public void encode(InstanceIdentifier id, NormalizedNode node){
+    public void encode(InstanceIdentifier id, NormalizedNode node,final WriteDeleteTransactionTracker wdtt){
         String parentPath = "";
 
         if(id != null){
             parentPath = PathUtils.getParentPath(id.toString());
         }
 
-        new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache)).navigate(parentPath, node);
+        new NormalizedNodeNavigator(new NormalizedNodeTreeCacheWriter(treeCache,wdtt)).navigate(parentPath, node);
+
     }
 
     public NormalizedNode<?,?> decode(InstanceIdentifier id, Node node){
@@ -49,5 +51,6 @@ public class NormalizedNodeToTreeCacheCodec {
         }
         return currentOp.normalize(nodeType , node);
     }
+
 
 }
