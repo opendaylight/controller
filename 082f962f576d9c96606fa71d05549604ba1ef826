@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_53827b01",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/ClusterSessionServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-04-21T16:20:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_735c5f26",
+      "revId": "082f962f576d9c96606fa71d05549604ba1ef826",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_13415339",
         "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/ClusterSessionServiceImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-19T17:15:34Z",
       "side": 1,
       "message": "Please make it trace level else will get unnecessary errors raised. This could happen during init time and not necessarely an error",
+      "revId": "082f962f576d9c96606fa71d05549604ba1ef826",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73877f10",
+        "filename": "opendaylight/samples/clustersession/src/main/java/org/opendaylight/controller/clustersession/impl/ClusterSessionServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-04-21T16:20:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_13415339",
       "revId": "082f962f576d9c96606fa71d05549604ba1ef826",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
