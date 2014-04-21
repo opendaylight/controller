@@ -37,15 +37,27 @@ public class ProcessSources extends AbstractMojo{
         if (directory == null || !directory.exists()) {
             super.getLog().error("Directory does not exists.");
         }
-        File sourceDirectory = new File(directory.getPath() + Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
+        File sourceDirectory = new File(directory.getPath() + "/../yang-gen-config" +
+                       Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
         if (!sourceDirectory.exists()) {
             super.getLog().error("Source directory does not exists " + sourceDirectory.getPath());
         }
 
+        File stubDirectory = new File(directory.getPath() +
+                             Util.replaceDots(".org.opendaylight.controller.config.yang.test.stub"));
+        if (!stubDirectory.exists()) {
+            super.getLog().error("Stub directory does not exists " + stubDirectory.getPath());
+        }
+
+        super.getLog().debug("directory: " + directory + ", sourceDirectory: " + sourceDirectory +
+                            ", stubDirectory: "+stubDirectory);
+
         File[] sourceFiles = sourceDirectory.listFiles();
         for (File sourceFile: sourceFiles) {
             if(sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
-                File stubFile = new File(sourceFile.getPath().replace(".java", "Stub.txt"));
+                File stubFile = new File( stubDirectory,
+                                          sourceFile.getName().replace(".java", "Stub.txt"));
+                super.getLog().debug("Styb file: " + stubFile + ", " + stubFile.exists());
                 if (stubFile.exists()) {
                     try {
                         rewrite(sourceFile, FileUtils.readFileToString(stubFile));
