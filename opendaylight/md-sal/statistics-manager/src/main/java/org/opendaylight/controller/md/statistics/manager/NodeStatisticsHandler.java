@@ -88,8 +88,12 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     private final TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            requestPeriodicStatistics();
-            cleanStaleStatistics();
+            try{
+                requestPeriodicStatistics();
+                cleanStaleStatistics();
+            }catch(Exception e){
+                logger.warn("Exception occured while sending statistics request : {}",e);
+            }
         }
     };
 
