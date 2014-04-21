@@ -8,6 +8,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
+import org.opendaylight.controller.datastore.notification.ChangeListenerNotifyTask;
+import org.opendaylight.controller.datastore.notification.ListenerRegistrationManager;
+import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -15,233 +18,313 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, AutoCloseable{
+public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, AutoCloseable {
 
-    private final ListeningExecutorService executor;
-    private final SchemaContext schemaContext;
+  private final ListeningExecutorService executor;
+  private final SchemaContext schemaContext;
+  private final TreeCache treeCache;
+  private final String transactionId;
+  private final WriteDeleteTransactionTracker transactionLog;
+  private ListenerRegistrationManager listenerManager;
+
+
+  public ReadWriteTransactionActor(SchemaContext schemaContext, TreeCache treeCache, ListeningExecutorService executor, long transactionNo,boolean readOnly) {
+    this.schemaContext = schemaContext;
+    this.treeCache = treeCache;
+    this.executor = executor;
+    this.transactionId = "ispn-txn-" + transactionNo;
+
+    if(!readOnly) {  //only for write transaction
+      transactionLog = new WriteDeleteTransactionTracker();
+
+    }else{           //read-only will not have LRM.
+      transactionLog = null;
+
+    }
+    executor.submit(new BeginTransactionAction(treeCache, schemaContext, transactionLog));
+  }
+
+
+  @Override
+  public Object getIdentifier() {
+    return this.transactionId;
+  }
+
+  @Override
+  public void close() {
+    final ListenableFuture future = executor.submit(new RollbackTransactionAction(treeCache, transactionLog));
+    try {
+      future.get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+
+    executor.shutdown();
+  }
+
+  @Override
+  public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(InstanceIdentifier path) {
+    if (path != null) {
+      System.out.println("Read : " + path.toString());
+    } else {
+      System.out.println("Reading from null path");
+    }
+    final ListenableFuture future = executor.submit(new ReadAction(schemaContext, treeCache, path));
+    return Futures.transform(future, new Function<NormalizedNode<?, ?>, Optional<NormalizedNode<?, ?>>>() {
+      @Nullable
+      @Override
+      public Optional<NormalizedNode<?, ?>> apply(@Nullable NormalizedNode<?, ?> o) {
+        final Optional<NormalizedNode<?, ?>> of = Optional.<NormalizedNode<?, ?>>of(o);
+        return of;
+      }
+    });
+  }
+
+  @Override
+  public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+    if (path != null) {
+      System.out.println("Write : " + path.toString());
+    } else {
+      System.out.println("Writing to null path");
+    }
+
+    final ListenableFuture future = executor.submit(new WriteAction(schemaContext, treeCache, path, data, transactionLog));
+    try {
+      future.get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void delete(InstanceIdentifier path) {
+    final ListenableFuture future = executor.submit(new DeleteAction(schemaContext, treeCache, path, transactionLog));
+    try {
+      future.get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  @Override
+  public DOMStoreThreePhaseCommitCohort ready() {
+    //TODO: we should seal the transactions here
+    transactionLog.lockTransactionLog();
+
+    return new DOMStoreThreePhaseCommitImpl(transactionLog, listenerManager);
+  }
+
+  public void setListenerManager(ListenerRegistrationManager listenerManager) {
+    this.listenerManager = listenerManager;
+  }
+
+
+  private static class BeginTransactionAction implements Callable {
+    public static int INFINISPAN_TRANSACTION_TIMEOUT = 120; //2 minutes;
     private final TreeCache treeCache;
-    private final String transactionId;
+    private final WriteDeleteTransactionTracker wdtt;
+    private final SchemaContext schemaContext;
 
-    public ReadWriteTransactionActor(SchemaContext schemaContext, TreeCache treeCache, ListeningExecutorService executor, long transactionNo){
-        this.schemaContext = schemaContext;
-        this.treeCache = treeCache;
-        this.executor = executor;
-        this.transactionId = "ispn-txn-" + transactionNo;
-
-        executor.submit(new BeginTransactionAction(treeCache));
+    public BeginTransactionAction(TreeCache treeCache, SchemaContext sc, final WriteDeleteTransactionTracker wdt) {
+      this.treeCache = treeCache;
+      this.wdtt = wdt;
+      this.schemaContext = sc;
     }
 
     @Override
-    public Object getIdentifier() {
-        return this.transactionId;
+    public Object call() throws Exception {
+      if(wdtt != null) {
+        treeCache.getCache().getAdvancedCache().getTransactionManager().setTransactionTimeout(INFINISPAN_TRANSACTION_TIMEOUT);    //TODO: REMOVE THIS
+        treeCache.getCache().getAdvancedCache().getTransactionManager().begin();
+        Node node = treeCache.getNode(Fqn.fromString("/"));
+        final NormalizedNode<?, ?> normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(InstanceIdentifier.builder().build(), node);
+        wdtt.setSnapshotTree(normalizedNode);
+      }
+      return null;
+    }
+  }
+
+  private static class RollbackTransactionAction implements Callable {
+    private final TreeCache treeCache;
+    private final WriteDeleteTransactionTracker transactionLog;
+
+    public RollbackTransactionAction(TreeCache treeCache, WriteDeleteTransactionTracker transactionLog) {
+      this.treeCache = treeCache;
+      this.transactionLog = transactionLog;
     }
 
     @Override
-    public void close(){
-        final ListenableFuture future = executor.submit(new RollbackTransactionAction(treeCache));
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+    public Object call() throws Exception {
+      treeCache.getCache().getAdvancedCache().getTransactionManager().rollback();
+      if(transactionLog != null) {
+        transactionLog.clear();
+      }
+      return null;
+    }
+  }
 
-        executor.shutdown();
+  private static class CommitTransactionAction implements Callable {
+    private final TreeCache treeCache;
+
+
+    public CommitTransactionAction(TreeCache treeCache) {
+      this.treeCache = treeCache;
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(InstanceIdentifier path) {
-        if(path != null){
-            System.out.println("Read : " + path.toString());
-        } else {
-            System.out.println("Reading from null path");
-        }
-        final ListenableFuture future = executor.submit(new ReadAction(schemaContext, treeCache, path));
-        return Futures.transform(future, new Function<NormalizedNode<?,?>, Optional< NormalizedNode <?,?>>>() {
-            @Nullable
-            @Override
-            public Optional<NormalizedNode<?, ?>> apply(@Nullable NormalizedNode<?,?> o) {
-                final Optional<NormalizedNode<?, ?>> of = Optional.<NormalizedNode<?,?>>of(o);
-                return of;
-            }
-        });
+    public Object call() throws Exception {
+      treeCache.getCache().getAdvancedCache().getTransactionManager().commit();
+      return null;
+    }
+  }
+
+  private static class ReadAction implements Callable<NormalizedNode<?, ?>> {
+    private final TreeCache treeCache;
+    private final InstanceIdentifier path;
+    private final SchemaContext schemaContext;
+
+    public ReadAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path) {
+      this.schemaContext = schemaContext;
+      this.treeCache = treeCache;
+      this.path = path;
     }
 
     @Override
-    public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-        if(path != null){
-            System.out.println("Write : " + path.toString());
-        } else {
-            System.out.println("Writing to null path");
-        }
+    public NormalizedNode<?, ?> call() throws Exception {
+      Node node = treeCache.getNode(Fqn.fromString(path.toString()));
 
-        final ListenableFuture future = executor.submit(new WriteAction(schemaContext, treeCache, path, data));
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+      final NormalizedNode<?, ?> normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(path, node);
+      return normalizedNode;
+    }
+  }
+
+  private static class WriteAction implements Callable {
+
+    private final TreeCache treeCache;
+    private final InstanceIdentifier path;
+    private final NormalizedNode<?, ?> normalizedNode;
+    private final SchemaContext schemaContext;
+    private final WriteDeleteTransactionTracker transactionLog;
+
+    public WriteAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, NormalizedNode<?, ?> normalizedNode, final WriteDeleteTransactionTracker transactionLog) {
+      this.schemaContext = schemaContext;
+      this.treeCache = treeCache;
+      this.path = path;
+      this.normalizedNode = normalizedNode;
+      this.transactionLog = transactionLog;
     }
 
     @Override
-    public void delete(InstanceIdentifier path) {
-        final ListenableFuture future = executor.submit(new DeleteAction(treeCache, path));
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+    public Object call() throws Exception {
+      new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(path, normalizedNode, transactionLog);
+      return null;
+    }
+  }
+
+  private static class DeleteAction implements Callable {
+
+    private final TreeCache treeCache;
+    private final InstanceIdentifier path;
+
+    private final SchemaContext schemaContext;
+    private final WriteDeleteTransactionTracker transactionLog;
+
+    public DeleteAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, WriteDeleteTransactionTracker transactionLog) {
+
+      this.treeCache = treeCache;
+      this.path = path;
+      this.transactionLog = transactionLog;
+      this.schemaContext = schemaContext;
+    }
+
+    @Override
+    public Object call() throws Exception {
+      Fqn removeFqn = Fqn.fromString(path.toString());
+      NormalizedNode<?, ?> trackRemovedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(path, treeCache.getNode(removeFqn));
+      treeCache.removeNode(removeFqn);
+      transactionLog.track(path.toString(), WriteDeleteTransactionTracker.Operation.REMOVED, trackRemovedNode);
+      return null;
+    }
+  }
+
+
+  private class DOMStoreThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
+
+    private final WriteDeleteTransactionTracker transactionLog;
+    private final ListenerRegistrationManager lrm;
+
+
+    private List<ChangeListenerNotifyTask> listenerTasks;
+
+    public DOMStoreThreePhaseCommitImpl(final WriteDeleteTransactionTracker transactionLog, ListenerRegistrationManager lrm) {
+      this.transactionLog = transactionLog;
+      this.lrm = lrm;
 
     }
 
     @Override
-    public DOMStoreThreePhaseCommitCohort ready() {
-        return new DOMStoreThreePhaseCommitCohort(){
+    public ListenableFuture<Boolean> canCommit() {
 
-            @Override
-            public ListenableFuture<Boolean> canCommit() {
-                return Futures.immediateFuture(true);
-            }
-
-            @Override
-            public ListenableFuture<Void> preCommit() {
-                return Futures.immediateFuture(null);
-            }
-
-            @Override
-            public ListenableFuture<Void> abort() {
-                final ListenableFuture future = executor.submit(new RollbackTransactionAction(treeCache));
-                return Futures.transform(future, new Function<Object, Void>() {
-
-                    @Nullable
-                    @Override
-                    public Void apply(@Nullable Object o) {
-                        return null;
-                    }
-                });
-            }
-
-            @Override
-            public ListenableFuture<Void> commit() {
-                final ListenableFuture future = executor.submit(new CommitTransactionAction(treeCache));
-                return Futures.transform(future, new Function<Object, Void>() {
-
-                    @Nullable
-                    @Override
-                    public Void apply(@Nullable Object o) {
-                        return null;
-                    }
-                });
-
-            }
-        };
+      //ok here we need to compute
+      return Futures.immediateFuture(true);
     }
 
-    private static class BeginTransactionAction implements Callable {
-        private final TreeCache treeCache;
+    @Override
+    public ListenableFuture<Void> preCommit() {
 
-        public BeginTransactionAction(TreeCache treeCache){
-            this.treeCache = treeCache;
-        }
+      listenerTasks = lrm.prepareNotifyTasks(transactionLog);
+      return null;
+    }
 
+    @Override
+    public ListenableFuture<Void> abort() {
+      final ListenableFuture future = executor.submit(new RollbackTransactionAction(treeCache, transactionLog));
+      return Futures.transform(future, new Function<Object, Void>() {
+
+        @Nullable
         @Override
-        public Object call() throws Exception {
-            treeCache.getCache().getAdvancedCache().getTransactionManager().begin();
-            return null;
+        public Void apply(@Nullable Object o) {
+          return null;
         }
+      });
     }
 
-    private static class RollbackTransactionAction implements Callable {
-        private final TreeCache treeCache;
+    @Override
+    public ListenableFuture<Void> commit() {
 
-        public RollbackTransactionAction(TreeCache treeCache){
-            this.treeCache = treeCache;
-        }
 
+      ListenableFuture future = executor.submit(new CommitTransactionAction(treeCache));
+      future.addListener(new Runnable() {
         @Override
-        public Object call() throws Exception {
-            treeCache.getCache().getAdvancedCache().getTransactionManager().rollback();
-            return null;
+        public void run() {
+
+          // here we need to call the notify listeners
+          lrm.notifyListeners(listenerTasks);
+
+
         }
-    }
+      }, executor);
+      return Futures.transform(future, new Function<Object, Void>() {
 
-    private static class CommitTransactionAction implements Callable {
-        private final TreeCache treeCache;
-
-        public CommitTransactionAction(TreeCache treeCache){
-            this.treeCache = treeCache;
-        }
-
+        @Nullable
         @Override
-        public Object call() throws Exception {
-            treeCache.getCache().getAdvancedCache().getTransactionManager().commit();
-            return null;
+        public Void apply(@Nullable Object o) {
+          return null;
         }
+      });
     }
 
-    private static class ReadAction implements Callable<NormalizedNode<?,?>> {
-        private final TreeCache treeCache;
-        private final InstanceIdentifier path;
-        private final SchemaContext schemaContext;
-
-        public ReadAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path){
-            this.schemaContext = schemaContext;
-            this.treeCache = treeCache;
-            this.path = path;
-        }
-
-        @Override
-        public NormalizedNode<?,?> call() throws Exception {
-            Node node = treeCache.getNode(Fqn.fromString(path.toString()));
-            final NormalizedNode<?, ?> normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(path, node);
-            return normalizedNode;
-        }
-    }
-
-    private static class WriteAction implements Callable {
-
-        private final TreeCache treeCache;
-        private final InstanceIdentifier path;
-        private final NormalizedNode<?, ?> normalizedNode;
-        private final SchemaContext schemaContext;
-
-        public WriteAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, NormalizedNode<?,?> normalizedNode){
-            this.schemaContext = schemaContext;
-            this.treeCache = treeCache;
-            this.path = path;
-            this.normalizedNode = normalizedNode;
-        }
-
-        @Override
-        public Object call() throws Exception {
-            new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(path, normalizedNode);
-            return null;
-        }
-    }
-
-    private static class DeleteAction implements Callable {
-
-        private final TreeCache treeCache;
-        private final InstanceIdentifier path;
-
-        public DeleteAction(TreeCache treeCache, InstanceIdentifier path){
-
-            this.treeCache = treeCache;
-            this.path = path;
-        }
-        @Override
-        public Object call() throws Exception {
-            treeCache.removeNode(Fqn.fromString(path.toString()));
-            return null;
-        }
-    }
+  }
 
 }

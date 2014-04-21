@@ -37,7 +37,7 @@ public class ReadWriteTransactionActorTest {
         final ReadWriteTransactionActor actor1 = new ReadWriteTransactionActor(schemaContext,
                 treeCache,
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                1);
+                1,false);
 
         List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
 
@@ -62,7 +62,7 @@ public class ReadWriteTransactionActorTest {
         final ReadWriteTransactionActor actor2 = new ReadWriteTransactionActor(schemaContext,
                 treeCache,
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                2);
+                2,false);
 
 
         actor2.write(null, TestModel.createTestContainer());
