@@ -34,7 +34,6 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
     private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
-    private ProviderSession session;
     private Thread webSocketServerThread;
 
     @Override
@@ -70,7 +69,6 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
             }
         }
         webSocketServerThread.interrupt();
-        session.close();
         brokerServiceTrancker.close();
     }
 
