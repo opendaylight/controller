@@ -82,7 +82,6 @@ class Impl implements ShutdownService {
 
 class StopSystemBundleThread extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(StopSystemBundleThread.class);
-    public static final String CONFIG_MANAGER_SYMBOLIC_NAME = "org.opendaylight.controller.config-manager";
     private final Bundle systemBundle;
 
     StopSystemBundleThread(Bundle systemBundle) {
@@ -95,13 +94,6 @@ class StopSystemBundleThread extends Thread {
         try {
             // wait so that JMX response is received
             Thread.sleep(1000);
-            // first try to stop config-manager
-            Bundle configManager = findConfigManager();
-            if (configManager != null){
-                logger.debug("Stopping config-manager");
-                configManager.stop();
-                Thread.sleep(1000);
-            }
             logger.debug("Stopping system bundle");
             systemBundle.stop();
         } catch (BundleException e) {
@@ -110,16 +102,6 @@ class StopSystemBundleThread extends Thread {
             logger.warn("Shutdown process interrupted", e);
         }
     }
-
-    private Bundle findConfigManager() {
-        for(Bundle bundle: systemBundle.getBundleContext().getBundles()){
-            if (CONFIG_MANAGER_SYMBOLIC_NAME.equals(bundle.getSymbolicName())) {
-                return bundle;
-            }
-        }
-        return null;
-    }
-
 }
 
 class CallSystemExitThread extends Thread {

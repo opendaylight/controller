@@ -159,8 +159,19 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
         };
 
-        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = new HashMap<>(
                 resolver.getAllFactories());
+
+        // add all factories that disappeared from SR but are still committed
+        for (ModuleInternalInfo moduleInternalInfo : currentConfig.getEntries()) {
+            String name = moduleInternalInfo.getModuleFactory().getImplementationName();
+            if (allCurrentFactories.containsKey(name) == false) {
+                logger.trace("Factory {} not found in SR, using reference from previous commit", name);
+                allCurrentFactories.put(name,
+                        Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
+            }
+        }
+        allCurrentFactories = Collections.unmodifiableMap(allCurrentFactories);
 
         // closed by transaction controller
         ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
@@ -216,16 +227,14 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // non recoverable from here:
         try {
             return secondPhaseCommit(configTransactionController, commitInfo, configTransactionControllerEntry.getValue());
-        } catch (Throwable t) { // some libs throw Errors: e.g.
+        } catch (Error | RuntimeException t) { // some libs throw Errors: e.g.
             // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
             logger.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
             } else {
-                throw new RuntimeException(t);
+                throw (Error) t;
             }
         }
     }
@@ -364,7 +373,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             ModuleInternalInfo newInfo = new ModuleInternalInfo(
                     entry.getIdentifier(), newReadableConfigBean, osgiRegistration,
                     runtimeBeanRegistrator, newModuleJMXRegistrator,
-                    orderingIdx, entry.isDefaultBean());
+                    orderingIdx, entry.isDefaultBean(), entry.getModuleFactory(), entry.getBundleContext());
 
             newConfigEntries.put(realModule, newInfo);
             orderingIdx++;

@@ -16,6 +16,7 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
 import javax.annotation.Nullable;
+import org.osgi.framework.BundleContext;
 
 public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {
     private final ModuleIdentifier name;
@@ -25,12 +26,13 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     private final ModuleInternalInfo maybeOldInternalInfo;
     private final TransactionModuleJMXRegistration transactionModuleJMXRegistration;
     private final boolean isDefaultBean;
+    private final BundleContext bundleContext;
 
     public ModuleInternalTransactionalInfo(ModuleIdentifier name, Module proxiedModule,
                                            ModuleFactory moduleFactory,
                                            ModuleInternalInfo maybeOldInternalInfo,
                                            TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-                                           boolean isDefaultBean, Module realModule) {
+                                           boolean isDefaultBean, Module realModule, BundleContext bundleContext) {
         this.name = name;
         this.proxiedModule = proxiedModule;
         this.moduleFactory = moduleFactory;
@@ -38,6 +40,7 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
         this.transactionModuleJMXRegistration = transactionModuleJMXRegistration;
         this.isDefaultBean = isDefaultBean;
         this.realModule = realModule;
+        this.bundleContext = bundleContext;
     }
 
 
@@ -89,5 +92,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
 
     public Module getRealModule() {
         return realModule;
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
     }
 }

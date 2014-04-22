@@ -56,7 +56,7 @@ import static org.junit.Assert.fail;
  * dependencies.
  */
 public class SimpleConfigurationTest extends AbstractConfigTest {
-    private final int numberOfThreads = 5;
+    private static final int numberOfThreads = 5;
     private final int numberOfThreads2 = 10;
     private static final String fixed1 = "fixed1";
     private static final List<ObjectName> emptyONs = Collections
@@ -96,7 +96,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         return fixed1names;
     }
 
-    private ObjectName createFixedThreadPool(
+    static ObjectName createFixedThreadPool(
             ConfigTransactionJMXClient transaction)
             throws InstanceAlreadyExistsException, InstanceNotFoundException {
         transaction.assertVersion(0, 1);
@@ -246,8 +246,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
         // 4, check
         assertEquals(2, configRegistryClient.getVersion());
-        assertEquals(1, TestingFixedThreadPool.allExecutors.size());
-        assertTrue(TestingFixedThreadPool.allExecutors.get(0).isShutdown());
+        assertEquals(0, TestingFixedThreadPool.allExecutors.size());
 
         // dynamic config should be removed from platform
         try {
@@ -278,7 +277,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         // commit
         transaction.commit();
         // check that first threadpool is closed
-        checkThreadPools(2, numberOfThreads2);
+        checkThreadPools(1, numberOfThreads2);
     }
 
     private void checkThreadPools(int expectedTotalNumberOfExecutors,
@@ -308,7 +307,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         // commit
         CommitStatus commitStatus = transaction.commit();
         // check that new threadpool is created and old one is closed
-        checkThreadPools(2, numberOfThreads);
+        checkThreadPools(1, numberOfThreads);
         CommitStatus expected = new CommitStatus(emptyONs, emptyONs, fixed1List);
         assertEquals(expected, commitStatus);
     }
@@ -337,6 +336,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
             platformMBeanServer.getMBeanInfo(transaction.getObjectName());
             fail();
         }catch(InstanceNotFoundException e){
+            assertEquals("org.opendaylight.controller:TransactionName=ConfigTransaction-0-1,type=ConfigTransaction", e.getMessage());
         }
     }
 
