@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3044817",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronRoutersNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 553,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2014-04-22T21:24:18Z",
+      "side": 1,
+      "message": "Fix typo \"jas\"",
+      "revId": "3dfd0bc844212fc122b87d4691a75e4f55da22bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
