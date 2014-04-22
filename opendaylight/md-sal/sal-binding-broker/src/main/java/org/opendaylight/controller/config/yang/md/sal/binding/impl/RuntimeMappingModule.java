@@ -26,6 +26,8 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -35,6 +37,8 @@ import com.google.common.base.Preconditions;
 */
 public final class RuntimeMappingModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractRuntimeMappingModule {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeMappingModule.class);
 
     private BundleContext bundleContext;
 
@@ -163,10 +167,17 @@ public final class RuntimeMappingModule extends
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             if(delegate != null) {
                 delegate = null;
-                bundleContext.ungetService(reference);
+
+                try {
+                    bundleContext.ungetService(reference);
+                } catch (IllegalStateException e) {
+                    // Indicates the BundleContext is no longer valid which can happen normally on shutdown.
+                    LOG.debug( "Error unregistering service", e );
+                }
+
                 bundleContext= null;
                 reference = null;
             }
