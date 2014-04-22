@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_503eeeb9",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-flow.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2014-04-22T19:39:40Z",
+      "side": 1,
+      "message": "Can you remove the trailing blanks.",
+      "revId": "c97952b5c7f9c8665f8c81ca422fe3513300dbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f04aa254",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-flow.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2014-04-22T19:39:40Z",
+      "side": 1,
+      "message": "Can you remove the trailing blanks.",
+      "revId": "c97952b5c7f9c8665f8c81ca422fe3513300dbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
