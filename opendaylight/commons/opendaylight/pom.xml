@@ -693,7 +693,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>configuration.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>0.4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
