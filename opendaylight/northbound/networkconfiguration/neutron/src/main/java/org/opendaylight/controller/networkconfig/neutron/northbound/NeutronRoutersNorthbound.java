@@ -546,6 +546,12 @@ public class NeutronRoutersNorthbound {
         if (input.getPortUUID() != null &&
                 input.getSubnetUUID() != null) {
             NeutronPort port = portInterface.getPort(input.getPortUUID());
+            if (port == null) {
+                throw new ResourceNotFoundException("Port UUID not found");
+            }
+            if (port.getFixedIPs() == null) {
+                throw new ResourceNotFoundException("Port UUID has no fixed IPs");
+            }
             NeutronSubnet subnet = subnetInterface.getSubnet(input.getSubnetUUID());
             if (subnet == null) {
                 throw new ResourceNotFoundException("Subnet UUID not found");
