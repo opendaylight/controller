@@ -26,6 +26,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+    <groupId>org.opendaylight.yangtools</groupId>
+    <artifactId>yang-binding</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-management</artifactId>
       <scope>test</scope>
@@ -50,10 +54,26 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
-      </plugin>
+    <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-sources</goal>
+            </goals>
+            <configuration>
+              <codeGenerators>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                  <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                </generator>
+              </codeGenerators>
+              <inspectDependencies>true</inspectDependencies>
+            </configuration>
+          </execution>
+        </executions>
+    </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

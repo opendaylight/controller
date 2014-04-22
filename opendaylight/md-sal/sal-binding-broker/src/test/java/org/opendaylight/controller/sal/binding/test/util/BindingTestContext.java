@@ -118,6 +118,10 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
         return schemaContext;
     }
 
+    public DOMDataBroker getDomAsyncDataBroker() {
+        return newDOMDataBroker;
+    }
+
     protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool, final boolean startWithSchema) {
         this.executor = executor;
         this.classPool = classPool;

@@ -25,13 +25,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -165,11 +166,21 @@ public class DataNormalizer {
         for (NormalizedNode<?, ?> child : node.getValue()) {
             if (child instanceof MixinNode && child instanceof NormalizedNodeContainer<?, ?, ?>) {
                 builder.addAll(toLegacyNodesFromMixin((NormalizedNodeContainer) child));
+            } else if( child instanceof UnkeyedListNode) {
+                builder.addAll(toLegacyNodesFromUnkeyedList((UnkeyedListNode) child));
             } else {
                 addToBuilder(builder, toLegacy(child));
             }
         }
         return builder.toInstance();
+    }
+
+    private static Iterable<? extends Node<?>> toLegacyNodesFromUnkeyedList(final UnkeyedListNode mixin) {
+        ArrayList<Node<?>> ret = new ArrayList<>();
+        for (NormalizedNode<?, ?> child : mixin.getValue()) {
+            ret.add(toLegacy(child));
+        }
+        return FluentIterable.from(ret).filter(Predicates.notNull());
     }
 
     private static void addToBuilder(final CompositeNodeBuilder<ImmutableCompositeNode> builder, final Node<?> legacy) {
@@ -189,13 +200,7 @@ public class DataNormalizer {
                 ret.add(toLegacy(child));
             }
         }
-        return FluentIterable.from(ret).filter(new Predicate<Node<?>>() {
-
-            @Override
-            public boolean apply(final Node<?> input) {
-                return input != null;
-            }
-        });
+        return FluentIterable.from(ret).filter(Predicates.notNull());
     }
 
     public DataNormalizationOperation<?> getRootOperation() {

@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -10,6 +11,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreNodeCompositeBuilder;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
@@ -24,6 +26,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
+import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
@@ -32,6 +36,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableUnkeyedListEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -60,7 +66,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         if (schemaNode instanceof ContainerSchemaNode) {
             return new ContainerModificationStrategy((ContainerSchemaNode) schemaNode);
         } else if (schemaNode instanceof ListSchemaNode) {
-            return new ListMapModificationStrategy((ListSchemaNode) schemaNode);
+            return fromListSchemaNode((ListSchemaNode) schemaNode);
         } else if (schemaNode instanceof ChoiceNode) {
             return new ChoiceModificationStrategy((ChoiceNode) schemaNode);
         } else if (schemaNode instanceof LeafListSchemaNode) {
@@ -71,25 +77,35 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         throw new IllegalArgumentException("Not supported schema node type for " + schemaNode.getClass());
     }
 
+    private static SchemaAwareApplyOperation fromListSchemaNode(final ListSchemaNode schemaNode) {
+        List<QName> keyDefinition = schemaNode.getKeyDefinition();
+        if (keyDefinition == null || keyDefinition.isEmpty()) {
+            return new UnkeyedListModificationStrategy(schemaNode);
+        }
+        if (schemaNode.isUserOrdered()) {
+            return new OrderedMapModificationStrategy(schemaNode);
+        }
+
+        return new UnorderedMapModificationStrategy(schemaNode);
+    }
+
     public static SchemaAwareApplyOperation from(final DataNodeContainer resolvedTree,
             final AugmentationTarget augSchemas, final AugmentationIdentifier identifier) {
         AugmentationSchema augSchema = null;
-        allAugments : for (AugmentationSchema potential : augSchemas.getAvailableAugmentations()) {
+        allAugments: for (AugmentationSchema potential : augSchemas.getAvailableAugmentations()) {
             boolean containsAll = true;
-            for(DataSchemaNode child : potential.getChildNodes()) {
-                if(identifier.getPossibleChildNames().contains(child.getQName())) {
+            for (DataSchemaNode child : potential.getChildNodes()) {
+                if (identifier.getPossibleChildNames().contains(child.getQName())) {
                     augSchema = potential;
                     break allAugments;
                 }
             }
         }
-        if(augSchema != null) {
-            return new AugmentationModificationStrategy(augSchema,resolvedTree);
+        if (augSchema != null) {
+            return new AugmentationModificationStrategy(augSchema, resolvedTree);
         }
         return null;
     }
-
-
 
     protected final ModificationApplyOperation resolveChildOperation(final PathArgument child) {
         Optional<ModificationApplyOperation> potential = getChild(child);
@@ -152,10 +168,12 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         switch (modification.getModificationType()) {
         case DELETE:
-            return modification.storeSnapshot(Optional.<StoreMetadataNode>absent());
+            return modification.storeSnapshot(Optional.<StoreMetadataNode> absent());
         case SUBTREE_MODIFIED:
-            Preconditions.checkArgument(currentMeta.isPresent(),"Metadata not available for modification",modification);
-            return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(), subtreeVersion)));
+            Preconditions.checkArgument(currentMeta.isPresent(), "Metadata not available for modification",
+                    modification);
+            return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(),
+                    subtreeVersion)));
         case WRITE:
             return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, subtreeVersion)));
         case UNMODIFIED:
@@ -374,8 +392,8 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             NormalizedNodeContainerModificationStrategy {
 
         private final T schema;
-        private final LoadingCache<PathArgument, ModificationApplyOperation> childCache = CacheBuilder.newBuilder().build(
-                CacheLoader.from(new Function<PathArgument, ModificationApplyOperation>() {
+        private final LoadingCache<PathArgument, ModificationApplyOperation> childCache = CacheBuilder.newBuilder()
+                .build(CacheLoader.from(new Function<PathArgument, ModificationApplyOperation>() {
 
                     @Override
                     public ModificationApplyOperation apply(final PathArgument identifier) {
@@ -438,6 +456,22 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     }
 
+    public static class UnkeyedListItemModificationStrategy extends
+            DataNodeContainerModificationStrategy<ListSchemaNode> {
+
+        public UnkeyedListItemModificationStrategy(final ListSchemaNode schemaNode) {
+            super(schemaNode, UnkeyedListEntryNode.class);
+        }
+
+        @Override
+        @SuppressWarnings("rawtypes")
+        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
+            checkArgument(identifier instanceof NodeIdentifier);
+            return ImmutableUnkeyedListEntryNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        }
+
+    }
+
     public static class AugmentationModificationStrategy extends
             DataNodeContainerModificationStrategy<AugmentationSchema> {
 
@@ -446,7 +480,6 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             // FIXME: Use resolved children instead of unresolved.
 
         }
-
 
         @Override
         protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
@@ -458,17 +491,17 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     public static class ChoiceModificationStrategy extends NormalizedNodeContainerModificationStrategy {
 
         private final ChoiceNode schema;
-        private final Map<PathArgument,ModificationApplyOperation> childNodes;
+        private final Map<PathArgument, ModificationApplyOperation> childNodes;
 
         public ChoiceModificationStrategy(final ChoiceNode schemaNode) {
             super(org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode.class);
             this.schema = schemaNode;
             ImmutableMap.Builder<PathArgument, ModificationApplyOperation> child = ImmutableMap.builder();
 
-            for(ChoiceCaseNode caze : schemaNode.getCases()) {
-                for(DataSchemaNode cazeChild : caze.getChildNodes()) {
+            for (ChoiceCaseNode caze : schemaNode.getCases()) {
+                for (DataSchemaNode cazeChild : caze.getChildNodes()) {
                     SchemaAwareApplyOperation childNode = from(cazeChild);
-                    child.put(new NodeIdentifier(cazeChild.getQName()),childNode);
+                    child.put(new NodeIdentifier(cazeChild.getQName()), childNode);
                 }
             }
             childNodes = child.build();
@@ -528,11 +561,54 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     }
 
-    public static class ListMapModificationStrategy extends NormalizedNodeContainerModificationStrategy {
+    public static class UnkeyedListModificationStrategy extends SchemaAwareApplyOperation {
 
         private final Optional<ModificationApplyOperation> entryStrategy;
 
-        protected ListMapModificationStrategy(final ListSchemaNode schema) {
+        protected UnkeyedListModificationStrategy(final ListSchemaNode schema) {
+            entryStrategy = Optional.<ModificationApplyOperation> of(new UnkeyedListItemModificationStrategy(schema));
+        }
+
+
+
+        @Override
+        protected StoreMetadataNode applySubtreeChange(final NodeModification modification,
+                final StoreMetadataNode currentMeta, final UnsignedLong subtreeVersion) {
+            throw new UnsupportedOperationException("UnkeyedList does not support subtree change.");
+        }
+
+        @Override
+        protected StoreMetadataNode applyWrite(final NodeModification modification,
+                final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
+            return StoreMetadataNode.createRecursively(modification.getWritenValue(), subtreeVersion);
+        }
+
+        @Override
+        public Optional<ModificationApplyOperation> getChild(final PathArgument child) {
+            if (child instanceof NodeIdentifier) {
+                return entryStrategy;
+            }
+            return Optional.absent();
+        }
+
+        @Override
+        protected void verifyWritenStructure(final NormalizedNode<?, ?> writenValue) {
+
+        }
+
+        @Override
+        protected boolean isSubtreeModificationApplicable(final NodeModification modification,
+                final Optional<StoreMetadataNode> current) {
+            return false;
+        }
+
+    }
+
+    public static class UnorderedMapModificationStrategy extends NormalizedNodeContainerModificationStrategy {
+
+        private final Optional<ModificationApplyOperation> entryStrategy;
+
+        protected UnorderedMapModificationStrategy(final ListSchemaNode schema) {
             super(MapNode.class);
             entryStrategy = Optional.<ModificationApplyOperation> of(new ListEntryModificationStrategy(schema));
         }
@@ -553,7 +629,36 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         public String toString() {
-            return "ListMapModificationStrategy [entry=" + entryStrategy + "]";
+            return "UnorderedMapModificationStrategy [entry=" + entryStrategy + "]";
+        }
+    }
+
+    public static class OrderedMapModificationStrategy extends NormalizedNodeContainerModificationStrategy {
+
+        private final Optional<ModificationApplyOperation> entryStrategy;
+
+        protected OrderedMapModificationStrategy(final ListSchemaNode schema) {
+            super(OrderedMapNode.class);
+            entryStrategy = Optional.<ModificationApplyOperation> of(new ListEntryModificationStrategy(schema));
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
+            return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        }
+
+        @Override
+        public Optional<ModificationApplyOperation> getChild(final PathArgument identifier) {
+            if (identifier instanceof NodeIdentifierWithPredicates) {
+                return entryStrategy;
+            }
+            return Optional.absent();
+        }
+
+        @Override
+        public String toString() {
+            return "OrderedMapModificationStrategy [entry=" + entryStrategy + "]";
         }
     }
 

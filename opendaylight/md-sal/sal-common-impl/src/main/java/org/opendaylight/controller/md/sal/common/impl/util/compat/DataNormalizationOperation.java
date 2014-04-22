@@ -30,7 +30,6 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
@@ -110,7 +109,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
-            // TODO Auto-generated method stub
             return null;
         }
 
@@ -148,16 +146,16 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static abstract class CompositeNodeNormalizationOpertation<T extends PathArgument> extends
+    private static abstract class CompositeNodeNormalizationOperation<T extends PathArgument> extends
             DataNormalizationOperation<T> {
 
-        protected CompositeNodeNormalizationOpertation(final T identifier) {
+        protected CompositeNodeNormalizationOperation(final T identifier) {
             super(identifier);
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         @Override
-        public final NormalizedNodeContainer<?, ?, ?> normalize(final Node<?> legacyData) {
+        public final NormalizedNode<?, ?> normalize(final Node<?> legacyData) {
             checkArgument(legacyData != null);
             if (!isMixin() && getIdentifier().getNodeType() != null) {
                 checkArgument(getIdentifier().getNodeType().equals(legacyData.getNodeType()),
@@ -197,7 +195,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                     builder.addChild(childOp.normalize(childLegacy));
                 }
             }
-            return (NormalizedNodeContainer<?, ?, ?>) builder.build();
+            return builder.build();
         }
 
         @SuppressWarnings("rawtypes")
@@ -206,7 +204,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static abstract class DataContainerNormalizationOperation<T extends PathArgument> extends
-            CompositeNodeNormalizationOpertation<T> {
+            CompositeNodeNormalizationOperation<T> {
 
         private final DataNodeContainer schema;
         private final Map<QName, DataNormalizationOperation<?>> byQName;
@@ -295,6 +293,24 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
+    private static final class UnkeyedListItemNormalization extends DataContainerNormalizationOperation<NodeIdentifier> {
+
+        protected UnkeyedListItemNormalization(final ListSchemaNode schema) {
+            super(new NodeIdentifier(schema.getQName()), schema);
+        }
+
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+            return Builders.unkeyedListEntryBuilder().withNodeIdentifier(getIdentifier());
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
+            return Builders.unkeyedListEntryBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
+        }
+
+    }
+
     private static final class ContainerNormalization extends DataContainerNormalizationOperation<NodeIdentifier> {
 
         protected ContainerNormalization(final ContainerSchemaNode schema) {
@@ -314,7 +330,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static abstract class MixinNormalizationOp<T extends PathArgument> extends
-            CompositeNodeNormalizationOpertation<T> {
+            CompositeNodeNormalizationOperation<T> {
 
         protected MixinNormalizationOp(final T identifier) {
             super(identifier);
@@ -327,11 +343,30 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     }
 
-    private static final class LeafListMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
+
+    private static final class OrderedLeafListMixinNormalization extends UnorderedLeafListMixinNormalization {
+
+
+        public OrderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
+            super(potential);
+        }
+
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+            return Builders.orderedLeafSetBuilder().withNodeIdentifier(getIdentifier());
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
+            return Builders.orderedLeafSetBuilder().withNodeIdentifier(getIdentifier()).build();
+        }
+    }
+
+    private static class UnorderedLeafListMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
 
         private final DataNormalizationOperation<?> innerOp;
 
-        public LeafListMixinNormalization(final LeafListSchemaNode potential) {
+        public UnorderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
             super(new NodeIdentifier(potential.getQName()));
             innerOp = new LeafListEntryNormalization(potential);
         }
@@ -415,11 +450,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     }
 
-    private static final class ListMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
+    private static class UnorderedMapMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
 
         private final ListItemNormalization innerNode;
 
-        public ListMixinNormalization(final ListSchemaNode list) {
+        public UnorderedMapMixinNormalization(final ListSchemaNode list) {
             super(new NodeIdentifier(list.getQName()));
             this.innerNode = new ListItemNormalization(new NodeIdentifierWithPredicates(list.getQName(),
                     Collections.<QName, Object> emptyMap()), list);
@@ -450,6 +485,64 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                 return innerNode;
             }
             return null;
+        }
+
+    }
+
+
+    private static class UnkeyedListMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
+
+        private final UnkeyedListItemNormalization innerNode;
+
+        public UnkeyedListMixinNormalization(final ListSchemaNode list) {
+            super(new NodeIdentifier(list.getQName()));
+            this.innerNode = new UnkeyedListItemNormalization(list);
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+            return Builders.unkeyedListBuilder().withNodeIdentifier(getIdentifier());
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
+            return Builders.unkeyedListBuilder().withNodeIdentifier(getIdentifier()).build();
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild(final PathArgument child) {
+            if (child.getNodeType().equals(getIdentifier().getNodeType())) {
+                return innerNode;
+            }
+            return null;
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild(final QName child) {
+            if (getIdentifier().getNodeType().equals(child)) {
+                return innerNode;
+            }
+            return null;
+        }
+
+    }
+
+    private static final class OrderedMapMixinNormalization extends UnorderedMapMixinNormalization {
+
+        public OrderedMapMixinNormalization(final ListSchemaNode list) {
+            super(list);
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+            return Builders.orderedMapBuilder().withNodeIdentifier(getIdentifier());
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
+            return Builders.orderedMapBuilder().withNodeIdentifier(getIdentifier()).build();
         }
 
     }
@@ -569,16 +662,36 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         if (potential instanceof ContainerSchemaNode) {
             return new ContainerNormalization((ContainerSchemaNode) potential);
         } else if (potential instanceof ListSchemaNode) {
-            return new ListMixinNormalization((ListSchemaNode) potential);
+
+            return fromListSchemaNode((ListSchemaNode) potential);
         } else if (potential instanceof LeafSchemaNode) {
             return new LeafNormalization(new NodeIdentifier(potential.getQName()));
         } else if (potential instanceof org.opendaylight.yangtools.yang.model.api.ChoiceNode) {
             return new ChoiceNodeNormalization((org.opendaylight.yangtools.yang.model.api.ChoiceNode) potential);
         } else if (potential instanceof LeafListSchemaNode) {
-            return new LeafListMixinNormalization((LeafListSchemaNode) potential);
+            return fromLeafListSchemaNode((LeafListSchemaNode) potential);
         }
         return null;
     }
+
+    private static DataNormalizationOperation<?> fromListSchemaNode(final ListSchemaNode potential) {
+        List<QName> keyDefinition = potential.getKeyDefinition();
+        if(keyDefinition == null || keyDefinition.isEmpty()) {
+            return new UnkeyedListMixinNormalization(potential);
+        }
+        if(potential.isUserOrdered()) {
+            return new OrderedMapMixinNormalization(potential);
+        }
+        return new UnorderedMapMixinNormalization(potential);
+    }
+
+    private static DataNormalizationOperation<?> fromLeafListSchemaNode(final LeafListSchemaNode potential) {
+        if(potential.isUserOrdered()) {
+            return new OrderedLeafListMixinNormalization(potential);
+        }
+        return new UnorderedLeafListMixinNormalization(potential);
+    }
+
 
     public static DataNormalizationOperation<?> from(final SchemaContext ctx) {
         return new ContainerNormalization(ctx);
