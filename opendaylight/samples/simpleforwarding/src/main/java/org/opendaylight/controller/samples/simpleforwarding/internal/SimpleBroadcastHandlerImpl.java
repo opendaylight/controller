@@ -93,6 +93,7 @@ public class SimpleBroadcastHandlerImpl implements IBroadcastHandler, IListenDat
         lock.readLock().lock();
         if (topoManager == null || dataPacketService == null
             || swMgr == null) {
+            lock.readLock().unlock();
             return false;
         }
 
@@ -124,6 +125,7 @@ public class SimpleBroadcastHandlerImpl implements IBroadcastHandler, IListenDat
                     log.error("Mode set to "
                               + BroadcastMode.EXTERNAL_QUERY
                               + ", but no external source of broadcast ports was provided.");
+                    lock.readLock().unlock();
                     return false;
                 }
                 break;
