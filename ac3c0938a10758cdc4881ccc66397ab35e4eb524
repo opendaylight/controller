@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee540423",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-04-22T17:56:25Z",
+      "side": 1,
+      "message": "It\u0027s probably my fault for not having comments explaining what\u0027s going on here, but we could use a comment about what we\u0027re doing and why.\n\nSomething like:\n// forward the packet directly if\n// * we know the destination host and\n// * there is a route (assuming routing exists)\n// * this includes the trivial route if they are on the same switch even if routing does not exist",
+      "revId": "ac3c0938a10758cdc4881ccc66397ab35e4eb524",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
