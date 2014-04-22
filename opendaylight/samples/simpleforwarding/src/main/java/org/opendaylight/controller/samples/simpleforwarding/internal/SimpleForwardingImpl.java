@@ -999,12 +999,18 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             return;
         }
         HostNodeConnector destHost = hostTracker.hostFind(dIP);
+        /*
+         * In cases when incoming and outgoing connectors are in the same node, there is no need
+         * to verify that there is a route. Because of that, we will only need routing.getRoute()
+         * if we know that src and dst nodes are different.
+         */
         if (destHost != null
-                && (routing == null ||
+                && (incomingNodeConnector.getNode().equals(destHost.getnodeconnectorNode()) ||
+                    routing == null ||
                     routing.getRoute(incomingNodeConnector.getNode(), destHost.getnodeconnectorNode()) != null)) {
 
             log.trace("Host {} is at {}", dIP, destHost.getnodeConnector());
-            HostNodePair key = new HostNodePair(destHost, incomingNodeConnector.getNode());
+            HostNodePair key = new HostNodePair(destHost, destHost.getnodeconnectorNode());
 
             // If SimpleForwarding is aware of this host, it will try to install
             // a path. Forward packet until it's done.
