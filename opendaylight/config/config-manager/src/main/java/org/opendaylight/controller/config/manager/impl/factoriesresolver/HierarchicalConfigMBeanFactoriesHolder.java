@@ -8,17 +8,16 @@
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
 
-import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.osgi.framework.BundleContext;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.management.InstanceNotFoundException;
+import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
 /**
  * Hold sorted ConfigMBeanFactories by their module names. Check that module
@@ -56,10 +55,10 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      * @throws IllegalArgumentException
      *             if factory is not found
      */
-    public ModuleFactory findByModuleName(String moduleName) {
+    public ModuleFactory findByModuleName(String moduleName) throws InstanceNotFoundException {
         Map.Entry<ModuleFactory, BundleContext> result = moduleNamesToConfigBeanFactories.get(moduleName);
         if (result == null) {
-            throw new IllegalArgumentException(
+            throw new InstanceNotFoundException(
                     "ModuleFactory not found with module name: " + moduleName);
         }
         return result.getKey();
@@ -73,7 +72,4 @@ public class HierarchicalConfigMBeanFactoriesHolder {
         return moduleFactories;
     }
 
-    public Map<String, Entry<ModuleFactory, BundleContext>> getModuleNamesToConfigBeanFactories() {
-        return moduleNamesToConfigBeanFactories;
-    }
 }

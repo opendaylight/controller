@@ -8,18 +8,18 @@
 
 package org.opendaylight.controller.config.manager.impl;
 
+import java.util.Map;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-
-import java.util.Map;
 
 public interface SearchableServiceReferenceWritableRegistry extends ServiceReferenceWritableRegistry {
     /**
      * Return mapping between service ref names and service interface annotation for given
      * module.
+     *
      * @throws java.lang.IllegalArgumentException if any of service qNames is not found
-     * @throws java.lang.NullPointerException if parameter is null
+     * @throws java.lang.NullPointerException     if parameter is null
      */
     Map<String /* service ref */, ServiceInterfaceAnnotation> findServiceInterfaces(ModuleIdentifier moduleIdentifier);
 

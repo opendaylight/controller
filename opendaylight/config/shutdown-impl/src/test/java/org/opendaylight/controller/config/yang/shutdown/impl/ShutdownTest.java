@@ -7,6 +7,17 @@
  */
 package org.opendaylight.controller.config.yang.shutdown.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.config.yang.shutdown.impl.ShutdownModuleFactory.NAME;
+
+import java.util.Collections;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,22 +31,10 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleF
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.osgi.framework.Bundle;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.JMX;
-import javax.management.ObjectName;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.config.yang.shutdown.impl.ShutdownModuleFactory.NAME;
-
 public class ShutdownTest extends AbstractConfigTest {
     private final ShutdownModuleFactory factory = new ShutdownModuleFactory();
     @Mock
-    private Bundle mockedSysBundle, mockedConfigManager;
+    private Bundle mockedSysBundle;
 
 
     @Before
@@ -46,11 +45,10 @@ public class ShutdownTest extends AbstractConfigTest {
         doReturn(mockedSysBundle).when(mockedContext).getBundle(0);
         mockedContext.getBundle(0);
         doNothing().when(mockedSysBundle).stop();
-        doNothing().when(mockedConfigManager).stop();
         doReturn(mockedContext).when(mockedSysBundle).getBundleContext();
-        doReturn(new Bundle[]{mockedSysBundle, mockedConfigManager}).when(mockedContext).getBundles();
+        doReturn(new Bundle[]{mockedSysBundle}).when(mockedContext).getBundles();
         doReturn("system bundle").when(mockedSysBundle).getSymbolicName();
-        doReturn(StopSystemBundleThread.CONFIG_MANAGER_SYMBOLIC_NAME).when(mockedConfigManager).getSymbolicName();
+
 
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
@@ -129,7 +127,6 @@ public class ShutdownTest extends AbstractConfigTest {
 
     private void assertStopped() throws Exception {
         Thread.sleep(3000); // happens on another thread
-        verify(mockedConfigManager).stop();
         verify(mockedSysBundle).stop();
     }
 }

@@ -7,22 +7,21 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkState;
 
-import javax.annotation.concurrent.GuardedBy;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
+import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registers instantiated beans as OSGi services and unregisters these services
@@ -87,7 +86,11 @@ public class BeanToOsgiServiceManager {
         @Override
         public synchronized void close() {
             for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-                serviceRegistration.unregister();
+                try {
+                    serviceRegistration.unregister();
+                } catch(IllegalStateException e) {
+                    logger.trace("Cannot unregister {}", serviceRegistration, e);
+                }
             }
             serviceRegistrations.clear();
         }

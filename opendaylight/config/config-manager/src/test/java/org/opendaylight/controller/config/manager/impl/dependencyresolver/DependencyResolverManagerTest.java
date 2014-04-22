@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -19,15 +27,7 @@ import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
+import org.osgi.framework.BundleContext;
 
 public class DependencyResolverManagerTest {
 
@@ -101,7 +101,7 @@ public class DependencyResolverManagerTest {
          moduleFactory,
          maybeOldInternalInfo,
          transactionModuleJMXRegistration,
-         isDefaultBean);
+         isDefaultBean, mock(BundleContext.class));
     }
 
     private static Module mockedModule() {

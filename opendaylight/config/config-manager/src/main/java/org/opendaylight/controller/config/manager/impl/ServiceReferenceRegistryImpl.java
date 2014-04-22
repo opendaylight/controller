@@ -7,6 +7,17 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
@@ -25,18 +36,6 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceReadableRegistry, SearchableServiceReferenceWritableRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ServiceReferenceRegistryImpl.class);
@@ -211,10 +210,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                 throw new IllegalArgumentException("Possible error in code: Mismatch between supplied and actual name of " + entry);
             }
             Set<ServiceInterfaceAnnotation> siAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(entry.getValue());
-            Set<String> qNames = new HashSet<>();
-            for (ServiceInterfaceAnnotation sia: siAnnotations) {
-                qNames.add(sia.value());
-            }
+            Set<String> qNames = InterfacesHelper.getQNames(siAnnotations);
             allAnnotations.addAll(siAnnotations);
             allQNames.addAll(qNames);
             modifiableFactoryNamesToQNames.put(entry.getKey(), Collections.unmodifiableSet(qNames));
@@ -501,21 +497,28 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
     @Override
     public synchronized boolean removeServiceReferences(ObjectName moduleObjectName) throws InstanceNotFoundException {
+        lookupRegistry.checkConfigBeanExists(moduleObjectName);
+        String factoryName = ObjectNameUtil.getFactoryName(moduleObjectName);
+        // check that service interface name exist
+        Set<String> serviceInterfaceQNames = factoryNamesToQNames.get(factoryName);
+        return removeServiceReferences(moduleObjectName, serviceInterfaceQNames);
+    }
+
+
+    private boolean removeServiceReferences(ObjectName moduleObjectName, Set<String> qNames) throws InstanceNotFoundException {
+        ObjectNameUtil.checkType(moduleObjectName, ObjectNameUtil.TYPE_MODULE);
         assertWritable();
-        Set<ServiceReference> serviceReferencesLinkingTo = findServiceReferencesLinkingTo(moduleObjectName);
+        Set<ServiceReference> serviceReferencesLinkingTo = findServiceReferencesLinkingTo(moduleObjectName, qNames);
         for (ServiceReference sr : serviceReferencesLinkingTo) {
             removeServiceReference(sr);
         }
         return serviceReferencesLinkingTo.isEmpty() == false;
     }
 
-    private synchronized Set<ServiceReference> findServiceReferencesLinkingTo(ObjectName moduleObjectName)  throws InstanceNotFoundException {
-        lookupRegistry.checkConfigBeanExists(moduleObjectName);
+    private Set<ServiceReference> findServiceReferencesLinkingTo(ObjectName moduleObjectName, Set<String> serviceInterfaceQNames) {
         String factoryName = ObjectNameUtil.getFactoryName(moduleObjectName);
-        // check that service interface name exist
-        Set<String> serviceInterfaceQNames = factoryNamesToQNames.get(factoryName);
         if (serviceInterfaceQNames == null) {
-            logger.error("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName, factoryNamesToQNames, moduleObjectName);
+            logger.warn("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName, factoryNamesToQNames, moduleObjectName);
             throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory " + factoryName);
         }
         String instanceName = ObjectNameUtil.getInstanceName(moduleObjectName);
@@ -528,7 +531,6 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
         return result;
     }
-
 
     @Override
     public String toString() {
