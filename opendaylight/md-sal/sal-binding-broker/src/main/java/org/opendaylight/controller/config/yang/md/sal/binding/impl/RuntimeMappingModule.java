@@ -166,7 +166,13 @@ public final class RuntimeMappingModule extends
         public void close() throws Exception {
             if(delegate != null) {
                 delegate = null;
-                bundleContext.ungetService(reference);
+
+                try {
+                    bundleContext.ungetService(reference);
+                } catch (IllegalStateException e) {
+                    // Ignore - indicates the BundleContext is no longer valid which can happen normally on shutdown.
+                }
+
                 bundleContext= null;
                 reference = null;
             }

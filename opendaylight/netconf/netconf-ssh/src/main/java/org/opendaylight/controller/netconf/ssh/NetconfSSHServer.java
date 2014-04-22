@@ -27,7 +27,7 @@ public final class NetconfSSHServer implements Runnable {
     private static final AtomicLong sesssionId = new AtomicLong();
     private final InetSocketAddress clientAddress;
     private final AuthProvider authProvider;
-    private boolean up = false;
+    private volatile boolean up = false;
 
     private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws IllegalStateException, IOException {
 
@@ -68,9 +68,11 @@ public final class NetconfSSHServer implements Runnable {
         while (up) {
             logger.trace("Starting new socket thread.");
             try {
-               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(), authProvider);
+                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(), authProvider);
             } catch (IOException e) {
-                logger.error("Exception occurred during socket thread initialization {}", e);
+                if( up ) {
+                    logger.error("Exception occurred during socket thread initialization {}",e);
+                }
             }
         }
     }
