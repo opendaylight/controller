@@ -2,7 +2,7 @@ package org.opendaylight.controller.datastore.notification;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -18,9 +18,9 @@ public class RegisterListenerNode {
   private final InstanceIdentifier identifier;
 
 
-  private final HashSet<DataChangeListenerRegistration<?>> baseScopeListeners;
-  private final HashSet<DataChangeListenerRegistration<?>> firstLevelListeners;
-  private final HashSet<DataChangeListenerRegistration<?>> subTreeLevelListeners;
+  private final HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> baseScopeListeners;
+  private final HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> firstLevelListeners;
+  private final HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> subTreeLevelListeners;
 
 
   RegisterListenerNode(final InstanceIdentifier identifier) {
@@ -32,7 +32,7 @@ public class RegisterListenerNode {
 
 
   public Collection<DataChangeListenerRegistration<?>> getListeners() {
-    HashSet<DataChangeListenerRegistration<?>> listeners = new HashSet<>();
+    HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> listeners = new HashSet<>();
     listeners.addAll(baseScopeListeners);
     listeners.addAll(firstLevelListeners);
     listeners.addAll(subTreeLevelListeners);
@@ -71,49 +71,48 @@ public class RegisterListenerNode {
 
   }
 
-  public HashSet<DataChangeListenerRegistration<?>> getBaseScopeListeners() {
+  public HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> getBaseScopeListeners() {
     return baseScopeListeners;
   }
 
-  public HashSet<DataChangeListenerRegistration<?>> getFirstLevelListeners() {
+  public HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> getFirstLevelListeners() {
     return firstLevelListeners;
   }
 
-  public HashSet<DataChangeListenerRegistration<?>> getSubTreeLevelListeners() {
+  public HashSet<org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration<?>> getSubTreeLevelListeners() {
     return subTreeLevelListeners;
   }
 
+    public interface DataChangeListenerRegistrationFoo<L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
+    extends ListenerRegistration<L> {
+
+
+        @Override
+        public L getInstance();
+
+        InstanceIdentifier getPath();
+
+        DataChangeScope getScope();
+
+
+
+    }
+
 
   public static class DataChangeListenerRegistration<T extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
-      extends AbstractObjectRegistration<T> implements
-      org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration<T> {
+      extends org.opendaylight.controller.datastore.notification.DataChangeListenerRegistration {
 
-    private final DataChangeScope scope;
-    private RegisterListenerNode node;
-    private final InstanceIdentifier path;
+      private RegisterListenerNode node;
 
-    public DataChangeListenerRegistration(final InstanceIdentifier path, final T listener, final DataChangeScope scope,
+      public DataChangeListenerRegistration(final InstanceIdentifier path, final T listener, final DataChangeScope scope,
                                           final RegisterListenerNode node) {
-      super(listener);
-      this.path = path;
-      this.scope = scope;
+      super(path, listener, scope);
       this.node = node;
     }
 
-    @Override
-    public DataChangeScope getScope() {
-      return scope;
-    }
-
-    @Override
     protected void removeRegistration() {
       node.removeListener(this);
       node = null;
-    }
-
-    @Override
-    public InstanceIdentifier getPath() {
-      return path;
     }
   }
 }

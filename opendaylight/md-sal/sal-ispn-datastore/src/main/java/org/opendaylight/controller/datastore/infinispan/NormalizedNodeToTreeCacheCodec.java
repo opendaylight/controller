@@ -52,7 +52,6 @@ public class NormalizedNodeToTreeCacheCodec {
         try {
             return currentOp.normalize(nodeType , node);
         } catch(RuntimeException e){
-            System.out.println("Instance Identifier : " + id.toString());
             throw e;
         }
     }

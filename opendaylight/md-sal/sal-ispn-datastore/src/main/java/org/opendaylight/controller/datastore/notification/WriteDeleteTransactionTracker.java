@@ -3,7 +3,6 @@ package org.opendaylight.controller.datastore.notification;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -113,11 +112,13 @@ public class WriteDeleteTransactionTracker {
   }
 
   private void printTree(TreeMap<String, TransactionLog> transactionLog) {
-    for(Map.Entry<String,TransactionLog>entry:transactionLog.entrySet()){
-         System.out.println("----");
-         System.out.println(entry.getKey());
-         System.out.println(entry.getValue().getInstanceIdentifier()) ;
-         System.out.println("----");
+    if(LOG.isTraceEnabled()){
+        for(Map.Entry<String,TransactionLog>entry:transactionLog.entrySet()){
+             LOG.trace("----");
+             LOG.trace(entry.getKey());
+             LOG.trace(entry.getValue().getInstanceIdentifier().toString()) ;
+             LOG.trace("----");
+        }
     }
   }
 

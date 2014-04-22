@@ -9,8 +9,6 @@ import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.NormalizedNodeToTreeCacheCodec;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
-import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -44,9 +42,10 @@ public class ListenerRegistrationManager {
     if ((rln = registeredListenersMap.get(instanceIdPath)) == null) {
       rln = new RegisterListenerNode(path);
     }
+
     final DataChangeListenerRegistration<L> reg = rln.registerDataChangeListener(path, listener, scope);
 
-    //here we are holding the reference to the rln node before we return the registered
+      //here we are holding the reference to the rln node before we return the registered
     registeredListenersMap.put(instanceIdPath, rln);
 
     //we want to register listener and check that if the path is in cache to send the initial snapshot
@@ -112,7 +111,7 @@ public class ListenerRegistrationManager {
     return notifyTasks;
   }
 
-  private void  prepareNotificationTasksAtLevel (String path,HashSet<RegisterListenerNode.DataChangeListenerRegistration<?>> lSet,
+  private void  prepareNotificationTasksAtLevel (String path,HashSet<DataChangeListenerRegistration<?>> lSet,
                                                                            boolean eventScope,
                                                                            AsyncDataBroker.DataChangeScope level,
                                                                           List<ChangeListenerNotifyTask> notifyTasks,

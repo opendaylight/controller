@@ -21,6 +21,7 @@ import org.infinispan.util.concurrent.IsolationLevel;
 public class TreeCacheManager implements AutoCloseable {
   private Configuration config = null;
   private DefaultCacheManager dcm = null;
+  private static TreeCacheManager instance = null;
 
   public TreeCacheManager(){
     this(CacheMode.LOCAL, IsolationLevel.REPEATABLE_READ, LockingMode.OPTIMISTIC, TransactionMode.TRANSACTIONAL, false);
@@ -85,5 +86,12 @@ public class TreeCacheManager implements AutoCloseable {
     if(dcm != null){
      dcm.stop();
     }
+  }
+
+  public static TreeCacheManager get(){
+    if(instance == null) {
+        instance = new TreeCacheManager();
+    }
+    return instance;
   }
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.infinispan.tree.TreeCache;
+import org.opendaylight.controller.datastore.ispn.TreeCacheManager;
 import org.opendaylight.controller.datastore.notification.ListenerRegistrationManager;
 import org.opendaylight.controller.datastore.notification.RegisterListenerNode;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -47,13 +48,17 @@ public class DataStoreImpl implements DOMStore, Identifiable<String>, SchemaCont
     public DataStoreImpl(TreeCache store, String storeName, SchemaContext schemaContext, final ListeningExecutorService asyncExecutor) {
         this.notifyExecutor = Preconditions.checkNotNull(asyncExecutor);
         name = Preconditions.checkNotNull(storeName);
-        Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
         this.schemaContext = schemaContext;
         this.store = store;
         listenerManager = new ListenerRegistrationManager(this.notifyExecutor);
         this.crudExecutor = createExecutor();
         this.commitExecutor = createExecutor();
     }
+
+    public DataStoreImpl(String storeName, SchemaContext schemaContext, final ListeningExecutorService asyncExecutor) {
+        this(TreeCacheManager.get().getCache(DEFAULT_STORE_CACHE_NAME + "-" + storeName), storeName, schemaContext, asyncExecutor);
+    }
+
 
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         final DOMStoreReadWriteTransaction transaction = createTransaction(true);
@@ -80,7 +85,7 @@ public class DataStoreImpl implements DOMStore, Identifiable<String>, SchemaCont
 
   private DOMStoreReadWriteTransaction createTransaction(boolean readOnly) {
 
-    ReadWriteTransactionActor rwta = new ReadWriteTransactionActor(schemaContext, store, crudExecutor, commitExecutor, counter.incrementAndGet(),listenerManager, readOnly);
+    ReadWriteTransactionActor rwta = new ReadWriteTransactionActor(name, schemaContext, store, crudExecutor, commitExecutor, counter.incrementAndGet(),listenerManager, readOnly);
     return rwta;
   }
 

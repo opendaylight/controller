@@ -230,16 +230,25 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
                         continue;
                     }
                     //builder.addChild(childOp.normalize(nodeType, treeCacheNode));
-                    builder.addChild(childOp.normalize(childNodeType, childLegacy));
+                    final NormalizedNode childNode = childOp.normalize(childNodeType, childLegacy);
+                    if(childNode != null)
+                        builder.addChild(childNode);
                     usedMixins.add(childOp);
                 } else {
-                    builder.addChild(childOp.normalize(childNodeType, childLegacy));
+                    final NormalizedNode childNode = childOp.normalize(childNodeType, childLegacy);
+                    if(childNode != null)
+                        builder.addChild(childNode);
                 }
             }
 
-            final NormalizedNodeContainer<?, ?, ?> normalizedNodeContainer = (NormalizedNodeContainer<?, ?, ?>) builder.build();
+            try {
+                return (NormalizedNodeContainer<?, ?, ?>) builder.build();
+            } catch (Exception e){
+                //throw new RuntimeException(e);
+                logger.error("Error : {}", e.getMessage());
+                return null;
+            }
 
-            return normalizedNodeContainer;
         }
 
         @SuppressWarnings("rawtypes")
@@ -323,6 +332,9 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
             DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
             for (Entry<QName, Object> keyValue : ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
+                if(keyValue.getValue() == null){
+                    throw new NullPointerException("Null value found for path : " + currentArg);
+                }
                 builder.addChild(Builders.leafBuilder()
                         //
                         .withNodeIdentifier(new NodeIdentifier(keyValue.getKey())).withValue(keyValue.getValue())
@@ -562,6 +574,13 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
         return fromDataSchemaNode(potential);
     }
 
+    /**
+     * Given a bunch of choice nodes and a the name of child find a choice node for that child which has a non-null value
+     *
+     * @param choices
+     * @param child
+     * @return
+     */
     private static org.opendaylight.yangtools.yang.model.api.ChoiceNode findChoice(
             final Iterable<org.opendaylight.yangtools.yang.model.api.ChoiceNode> choices, final QName child) {
         org.opendaylight.yangtools.yang.model.api.ChoiceNode foundChoice = null;
@@ -576,6 +595,13 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
         return foundChoice;
     }
 
+
+    /**
+     * Create an AugmentationIdentifier based on the AugmentationSchema
+     *
+     * @param augmentation
+     * @return
+     */
     public static AugmentationIdentifier augmentationIdentifierFrom(final AugmentationSchema augmentation) {
         ImmutableSet.Builder<QName> potentialChildren = ImmutableSet.builder();
         for (DataSchemaNode child : augmentation.getChildNodes()) {
@@ -584,6 +610,15 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
         return new AugmentationIdentifier(null, potentialChildren.build());
     }
 
+    /**
+     * Create an AugmentationNormalization based on the schema of the DataContainer, the AugmentationTarget and the
+     * potential schema node
+     *
+     * @param schema
+     * @param augments
+     * @param potential
+     * @return
+     */
     private static AugmentationNormalization fromAugmentation(final DataNodeContainer schema,
             final AugmentationTarget augments, final DataSchemaNode potential) {
         AugmentationSchema augmentation = null;
@@ -602,6 +637,12 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
         }
     }
 
+    /**
+     *
+     * @param schema
+     * @param child
+     * @return
+     */
     private static DataNormalizationOperation<?> fromSchema(final DataNodeContainer schema, final PathArgument child) {
         if (child instanceof AugmentationIdentifier) {
             return fromSchemaAndPathArgument(schema, ((AugmentationIdentifier) child).getPossibleChildNames()

@@ -44,11 +44,17 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     public ReadWriteTransactionActor(SchemaContext schemaContext, TreeCache treeCache,
                                      ListeningExecutorService crudExecutor, ListeningExecutorService commitExecutor,
                                      long transactionNo, ListenerRegistrationManager listenerManager, boolean readOnly){
+        this("ispn", schemaContext, treeCache, crudExecutor, commitExecutor, transactionNo, listenerManager, readOnly);
+    }
+
+    public ReadWriteTransactionActor(String storeName, SchemaContext schemaContext, TreeCache treeCache,
+                                     ListeningExecutorService crudExecutor, ListeningExecutorService commitExecutor,
+                                     long transactionNo, ListenerRegistrationManager listenerManager, boolean readOnly){
         this.schemaContext = schemaContext;
         this.treeCache = treeCache;
         this.crudExecutor = crudExecutor;
         this.commitExecutor = commitExecutor;
-        this.transactionId = "ispn-txn-" + transactionNo;
+        this.transactionId = storeName + "-txn-" + transactionNo;
         this.listenerManager = listenerManager;
 
         if(!readOnly) {  //only for write transaction
@@ -67,7 +73,6 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
             throw new RuntimeException(e);
         }
     }
-
   @Override
   public Object getIdentifier() {
     return this.transactionId;
@@ -121,7 +126,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
           logger.error("Writing to null path");
       }
 
-      final ListenableFuture future = crudExecutor.submit(createInfinispanTransactionWrapper(new WriteAction(schemaContext, treeCache, path, data, transactionLog)));
+      final ListenableFuture future = crudExecutor.submit(createInfinispanTransactionWrapper(new WriteAction(transactionId, schemaContext, treeCache, path, data, transactionLog)));
       try {
           future.get();
       } catch (InterruptedException e) {
@@ -140,7 +145,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
 
     @Override
     public void delete(InstanceIdentifier path) {
-        final ListenableFuture future = crudExecutor.submit(createInfinispanTransactionWrapper(new DeleteAction(schemaContext, treeCache, path, transactionLog)));
+        final ListenableFuture future = crudExecutor.submit(createInfinispanTransactionWrapper(new DeleteAction(transactionId, schemaContext, treeCache, path, transactionLog)));
         try {
             future.get();
         } catch (InterruptedException e) {
@@ -263,8 +268,10 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     private final NormalizedNode<?, ?> normalizedNode;
     private final SchemaContext schemaContext;
     private final WriteDeleteTransactionTracker transactionLog;
+    private final String transactionId;
 
-    public WriteAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, NormalizedNode<?, ?> normalizedNode, final WriteDeleteTransactionTracker transactionLog) {
+    public WriteAction(String transactionId, SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, NormalizedNode<?, ?> normalizedNode, final WriteDeleteTransactionTracker transactionLog) {
+      this.transactionId = transactionId;
       this.schemaContext = schemaContext;
       this.treeCache = treeCache;
       this.path = path;
@@ -274,6 +281,8 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
 
     @Override
     public Object call() throws Exception {
+      if(path != null)
+        logger.info("******************* Transaction {} Writing node : {}", transactionId, path.toString());
       new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(path, normalizedNode, transactionLog);
       return null;
     }
@@ -287,8 +296,11 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     private final SchemaContext schemaContext;
     private final WriteDeleteTransactionTracker transactionLog;
 
-    public DeleteAction(SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, WriteDeleteTransactionTracker transactionLog) {
+    private final String transactionId;
 
+    public DeleteAction(String transactionId, SchemaContext schemaContext, TreeCache treeCache, InstanceIdentifier path, WriteDeleteTransactionTracker transactionLog) {
+
+      this.transactionId = transactionId;
       this.treeCache = treeCache;
       this.path = path;
       this.transactionLog = transactionLog;
@@ -299,7 +311,14 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     public Object call() throws Exception {
       Fqn removeFqn = Fqn.fromString(path.toString());
       NormalizedNode<?, ?> trackRemovedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(path, treeCache.getNode(removeFqn));
-      treeCache.removeNode(removeFqn);
+      logger.info("###################### Transaction {} Removing node : {}", transactionId, removeFqn.toString());
+      final boolean removed = treeCache.removeNode(removeFqn);
+      logger.info("###################### Transaction {} Remove node : {}, successful : {}", transactionId, removeFqn.toString(), removed);
+
+      final boolean exists = treeCache.exists(removeFqn);
+
+      logger.info("###################### Transaction {} Removed node still there? : {}, successful : {}", transactionId, removeFqn.toString(), exists);
+
       transactionLog.track(path.toString(), WriteDeleteTransactionTracker.Operation.REMOVED, trackRemovedNode);
       return null;
     }
@@ -328,7 +347,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     @Override
     public ListenableFuture<Void> preCommit() {
       listenerTasks = lrm.prepareNotifyTasks(transactionLog);
-      return null;
+      return Futures.immediateFuture(null);
     }
 
       @Override
@@ -382,6 +401,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
                 }
                 return wrappedCallable.call();
             } catch(Exception e){
+                logger.info("Exception occurred in transaction : {}", getIdentifier());
                 logger.error("Wrapped Call failed", e);
                 throw e;
             } finally {

@@ -1,6 +1,7 @@
 package org.opendaylight.controller.datastore.ispn;
 
 import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -320,5 +321,19 @@ public class TreeManagerTest {
   public static void start() throws Exception {
 
 
+  }
+
+
+  @Test
+  public void testRemoveNode() throws Exception{
+      final TreeCache tc = get9LevelTreeCache("deleteNde");
+
+      final Node nodeBefore = tc.getNode("/level1/level2");
+      final boolean removed = tc.removeNode("/level1/level2");
+      final Node nodeAfter = tc.getNode("/level1/level2");
+
+      Assert.assertTrue(removed);
+      Assert.assertNotNull(nodeBefore);
+      Assert.assertNull(nodeAfter);
   }
 }
