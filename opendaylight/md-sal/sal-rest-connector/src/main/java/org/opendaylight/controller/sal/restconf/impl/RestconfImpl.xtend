@@ -53,7 +53,7 @@ class RestconfImpl implements RestconfService {
     val static RestconfImpl INSTANCE = new RestconfImpl
     val static MOUNT_POINT_MODULE_NAME = "ietf-netconf"
     val static REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
-    val static RESTCONF_MODULE_DRAFT02_REVISION = "2013-10-19"
+    val static RESTCONF_MODULE_DRAFT02_REVISION = "2013-09-04"
     val static RESTCONF_MODULE_DRAFT02_NAME = "ietf-restconf"
     val static RESTCONF_MODULE_DRAFT02_NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-restconf"
     val static RESTCONF_MODULE_DRAFT02_RESTCONF_GROUPING_SCHEMA_NODE = "restconf"
