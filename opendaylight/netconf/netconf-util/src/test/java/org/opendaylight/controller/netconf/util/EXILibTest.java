@@ -75,18 +75,12 @@ public class EXILibTest {
 
     public static byte[] encodeEXITransformer(final Element xml) throws Exception {
         final Transmogrifier transmogrifier = new Transmogrifier();
-
         transmogrifier.setAlignmentType(ALIGNMENT_TYPE);
-
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
         transmogrifier.setGrammarCache(getGrammarCache());
-
         transmogrifier.setOutputStream(out);
-
         final Transformer transformer = saxTransformerFactory.newTransformer();
         transformer.transform(new DOMSource(xml), new SAXResult(transmogrifier.getSAXTransmogrifier()));
-
         return out.toByteArray();
     }
 
@@ -112,7 +106,7 @@ public class EXILibTest {
         short go = GrammarOptions.DEFAULT_OPTIONS;
 
         // This option on or off, nagasena still fails
-//        go = GrammarOptions.addNS(go);
+        go = GrammarOptions.addNS(go);
 
         return new GrammarCache(null, go);
     }
