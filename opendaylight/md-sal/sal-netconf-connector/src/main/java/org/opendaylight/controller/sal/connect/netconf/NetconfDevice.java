@@ -172,30 +172,40 @@ public class NetconfDevice implements Provider, //
         }
     }
 
-    void bringUp(SchemaSourceProvider<String> delegate, Set<QName> capabilities) {
-        remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
-        deviceContextProvider = new NetconfDeviceSchemaContextProvider(this, remoteSourceProvider);
-        deviceContextProvider.createContextFromCapabilities(capabilities);
-        if (mountInstance != null && getSchemaContext().isPresent()) {
-            mountInstance.setSchemaContext(getSchemaContext().get());
-        }
+    void bringUp(final SchemaSourceProvider<String> delegate, final Set<QName> capabilities) {
+        // This has to be called from separate thread, not from netty thread calling onSessionUp in DeviceListener.
+        // Reason: delegate.getSchema blocks thread when waiting for response
+        // however, if the netty thread is blocked, no incoming message can be processed
+        // ... netty should pick another thread from pool to process incoming message, but it does not http://netty.io/wiki/thread-model.html
+        // TODO redesign +refactor
+        processingExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                remoteSourceProvider = schemaSourceProvider.createInstanceFor(delegate);
+                deviceContextProvider = new NetconfDeviceSchemaContextProvider(NetconfDevice.this, remoteSourceProvider);
+                deviceContextProvider.createContextFromCapabilities(capabilities);
+                if (mountInstance != null && getSchemaContext().isPresent()) {
+                    mountInstance.setSchemaContext(getSchemaContext().get());
+                }
 
-        updateDeviceState(true, capabilities);
+                updateDeviceState(true, capabilities);
 
-        if (mountInstance != null) {
-            confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, this);
-            operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, this);
-            commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, this);
+                if (mountInstance != null) {
+                    confReaderReg = mountInstance.registerConfigurationReader(ROOT_PATH, NetconfDevice.this);
+                    operReaderReg = mountInstance.registerOperationalReader(ROOT_PATH, NetconfDevice.this);
+                    commitHandlerReg = mountInstance.registerCommitHandler(ROOT_PATH, NetconfDevice.this);
 
-            List<RpcRegistration> rpcs = new ArrayList<>();
-            // TODO same condition twice
-            if (mountInstance != null && getSchemaContext().isPresent()) {
-                for (RpcDefinition rpc : mountInstance.getSchemaContext().getOperations()) {
-                    rpcs.add(mountInstance.addRpcImplementation(rpc.getQName(), this));
+                    List<RpcRegistration> rpcs = new ArrayList<>();
+                    // TODO same condition twice
+                    if (mountInstance != null && getSchemaContext().isPresent()) {
+                        for (RpcDefinition rpc : mountInstance.getSchemaContext().getOperations()) {
+                            rpcs.add(mountInstance.addRpcImplementation(rpc.getQName(), NetconfDevice.this));
+                        }
+                    }
+                    rpcReg = rpcs;
                 }
             }
-            rpcReg = rpcs;
-        }
+        });
     }
 
     private void updateDeviceState(boolean up, Set<QName> capabilities) {

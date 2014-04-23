@@ -143,8 +143,7 @@ public class NetconfMapping {
         try {
             w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, XmlDocumentUtils.defaultValueCodecProvider());
         } catch (UnsupportedDataTypeException e) {
-            // FIXME Ex handling
-            e.printStackTrace();
+            throw new IllegalArgumentException("Unable to create message", e);
         }
         w3cPayload.getDocumentElement().setAttribute("message-id", "m-" + messageId.getAndIncrement());
         return new NetconfMessage(w3cPayload);
@@ -249,7 +248,7 @@ public class NetconfMapping {
     public static void checkValidReply(NetconfMessage input, NetconfMessage output) {
         String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
         String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
-        Preconditions.checkState(inputMsgId == outputMsgId, "Rpc request and reply message IDs must be same.");
+        Preconditions.checkState(inputMsgId.equals(outputMsgId), "Rpc request and reply message IDs must be same.");
     }
 
 }
