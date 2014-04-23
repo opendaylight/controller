@@ -34,7 +34,10 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.client.NetconfSshClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
@@ -50,9 +53,11 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 
 import ch.ethz.ssh2.Connection;
 import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
@@ -60,7 +65,6 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
     private DefaultCommitNotificationProducer commitNot;
-    private NetconfServerDispatcher dispatchS;
     private NetconfSSHServer sshServer;
     private NetconfMessage getConfig;
 
@@ -77,7 +81,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
 
-        dispatchS = createDispatcher(factoriesListener);
+        final NetconfServerDispatcher dispatchS = createDispatcher(factoriesListener);
         ChannelFuture s = dispatchS.createServer(tcpAddress);
         s.await();
 
@@ -108,14 +112,34 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testSecure() throws Exception {
-        NetconfClientDispatcher dispatch = new NetconfSshClientDispatcher(getAuthHandler(), nettyThreadgroup, nettyThreadgroup, 5000);
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("tls-client", tlsAddress, 4000, dispatch)) {
+        NetconfClientDispatcher dispatch = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("testing-ssh-client", dispatch, getClientConfiguration())) {
             NetconfMessage response = netconfClient.sendMessage(getConfig);
             Assert.assertFalse("Unexpected error message " + XmlUtil.toString(response.getDocument()),
                     NetconfMessageUtil.isErrorMessage(response));
-        }
 
-        dispatch.close();
+            NetconfMessage gs = new NetconfMessage(XmlUtil.readXmlToDocument("<rpc message-id=\"2\"\n" +
+                    "     xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+                    "    <get-schema xmlns=\"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring\">\n" +
+                    "        <identifier>config</identifier>\n" +
+                    "    </get-schema>\n" +
+                    "</rpc>\n"));
+
+            response = netconfClient.sendMessage(gs);
+            Assert.assertFalse("Unexpected error message " + XmlUtil.toString(response.getDocument()),
+                    NetconfMessageUtil.isErrorMessage(response));
+        }
+    }
+
+    public NetconfClientConfiguration getClientConfiguration() throws IOException {
+        final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+        b.withAddress(tlsAddress);
+        b.withSessionListener(new SimpleNetconfClientSessionListener());
+        b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000));
+        b.withProtocol(NetconfClientConfiguration.NetconfClientProtocol.SSH);
+        b.withConnectionTimeoutMillis(5000);
+        b.withAuthHandler(getAuthHandler());
+        return b.build();
     }
 
     public AuthProvider getAuthProvider() throws Exception {
@@ -138,6 +162,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
                 return null;
             }
         }).when(authHandler).authenticate(any(Connection.class));
+        doReturn("auth handler").when(authHandler).toString();
         return authHandler;
     }
 }

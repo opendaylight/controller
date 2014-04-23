@@ -68,7 +68,7 @@ public final class NetconfSSHServer implements Runnable {
         while (up) {
             logger.trace("Starting new socket thread.");
             try {
-               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
+               SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(), authProvider);
             } catch (IOException e) {
                 logger.error("Exception occurred during socket thread initialization {}", e);
             }

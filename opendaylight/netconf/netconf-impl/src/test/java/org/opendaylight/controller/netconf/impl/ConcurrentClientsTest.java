@@ -15,10 +15,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import io.netty.channel.EventLoopGroup;
-import io.netty.util.HashedWheelTimer;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,13 +26,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,6 +44,10 @@ import org.junit.runners.Parameterized;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
@@ -63,14 +63,20 @@ import org.opendaylight.controller.netconf.util.messages.NetconfStartExiMessage;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 @RunWith(Parameterized.class)
 public class ConcurrentClientsTest {
@@ -138,10 +144,9 @@ public class ConcurrentClientsTest {
 
     @Before
     public void setUp() throws Exception {
-
+        hashedWheelTimer = new HashedWheelTimer();
         nettyGroup = new NioEventLoopGroup(nettyThreads);
-        NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp", "client");
-        netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, additionalHeader, 5000);
+        netconfClientDispatcher = new NetconfClientDispatcherImpl(nettyGroup, nettyGroup, hashedWheelTimer);
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
 
@@ -149,7 +154,6 @@ public class ConcurrentClientsTest {
         factoriesListener.onAddNetconfOperationServiceFactory(new TestingOperationServiceFactory(testingNetconfOperation));
 
         SessionIdProvider idProvider = new SessionIdProvider();
-        hashedWheelTimer = new HashedWheelTimer();
 
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
                 hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, createMockedMonitoringService(), serverCaps);
@@ -333,8 +337,8 @@ public class ConcurrentClientsTest {
         @Override
         public void run() {
             try {
-                final TestingNetconfClient netconfClient = new TestingNetconfClient(Thread.currentThread().getName(),
-                        netconfAddress, netconfClientDispatcher);
+                final TestingNetconfClient netconfClient =
+                        new TestingNetconfClient(Thread.currentThread().getName(), netconfClientDispatcher, getClientConfig());
                 long sessionId = netconfClient.getSessionId();
                 logger.info("Client with session id {}: hello exchanged", sessionId);
 
@@ -352,6 +356,17 @@ public class ConcurrentClientsTest {
             } catch (final Exception e) {
                 throw new IllegalStateException(Thread.currentThread().getName(), e);
             }
+        }
+
+        private NetconfClientConfiguration getClientConfig() {
+            final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+            b.withAddress(netconfAddress);
+            b.withAdditionalHeader(new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp",
+                    "client"));
+            b.withSessionListener(new SimpleNetconfClientSessionListener());
+            b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                    NetconfClientConfigurationBuilder.DEFAULT_CONNECTION_TIMEOUT_MILLIS));
+            return b.build();
         }
     }
 }

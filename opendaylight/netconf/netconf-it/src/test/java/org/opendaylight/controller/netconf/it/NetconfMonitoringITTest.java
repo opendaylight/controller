@@ -7,11 +7,24 @@
  */
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -19,7 +32,7 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
@@ -40,21 +53,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 
 public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
@@ -66,7 +68,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
-    private NetconfClientDispatcher clientDispatcher;
+    private NetconfClientDispatcherImpl clientDispatcher;
 
     private NetconfMonitoringServiceImpl monitoringService;
 
@@ -88,7 +90,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
     }
 
     private HardcodedYangStoreService getYangStore() throws YangStoreException, IOException {
@@ -120,8 +122,8 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testGetResponseFromMonitoring() throws Exception {
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client-monitoring", tcpAddress, 4000, clientDispatcher)) {
-        try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("client-monitoring2", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client-monitoring", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
+        try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("client-monitoring2", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
             NetconfMessage response = netconfClient.sendMessage(loadGetMessage());
             assertSessionElementsInResponse(response.getDocument(), 2);
         }
