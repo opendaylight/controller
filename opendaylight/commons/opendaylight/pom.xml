@@ -248,11 +248,6 @@
         <version>${jersey.version}</version>
       </dependency>
       <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
-        <version>${jsr311.api.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>${jersey.version}</version>
@@ -428,6 +423,11 @@
         <groupId>io.netty</groupId>
         <artifactId>netty-transport</artifactId>
         <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
@@ -868,6 +868,13 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-client</artifactId>
+        <version>${netconf.version}</version>
+      </dependency>
+
+      <!--Netconf config-->
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-config-dispatcher</artifactId>
         <version>${netconf.version}</version>
       </dependency>
       <dependency>

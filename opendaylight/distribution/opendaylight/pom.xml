@@ -865,6 +865,12 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-client</artifactId>
         </dependency>
+
+        <!--Netconf config-->
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-config-dispatcher</artifactId>
+        </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-impl</artifactId>
