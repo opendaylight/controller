@@ -99,6 +99,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <projectinfo>2.6</projectinfo>
+
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
     <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
@@ -387,7 +388,8 @@
         <artifactId>netty-common</artifactId>
         <version>${netty.version}</version>
       </dependency>
-      <!--Netty -->
+
+      <!--Netty-->
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
@@ -515,12 +517,6 @@
         <version>4.2.0</version>
         <!-- the all bundle includes all the necessary plugins -->
         <classifier>all</classifier>
-      </dependency>
-      <!-- Karaf Shell Dependency -->
-      <dependency>
-        <groupId>org.apache.karaf.shell</groupId>
-        <artifactId>org.apache.karaf.shell.console</artifactId>
-        <version>${karaf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
@@ -806,7 +802,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>hosttracker.northbound</artifactId>
-        <version>${controller.version}</version>
+        <version>0.4.2-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
