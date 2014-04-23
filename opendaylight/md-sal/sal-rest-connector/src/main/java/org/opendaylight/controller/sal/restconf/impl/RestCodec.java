@@ -89,6 +89,9 @@ public class RestCodec {
                             input == null ? "null" : input.getClass(), String.valueOf(input));
                     return null;
                 } else if (type instanceof LeafrefTypeDefinition) {
+                    if (input instanceof IdentityValuesDTO) {
+                        return LEAFREF_DEFAULT_CODEC.deserialize(((IdentityValuesDTO)input).getOriginValue());
+                    }
                     return LEAFREF_DEFAULT_CODEC.deserialize(input);
                 } else if (type instanceof InstanceIdentifierTypeDefinition) {
                     if (input instanceof IdentityValuesDTO) {
@@ -102,6 +105,9 @@ public class RestCodec {
                     TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> typeAwarecodec = TypeDefinitionAwareCodec
                             .from(type);
                     if (typeAwarecodec != null) {
+                        if (input instanceof IdentityValuesDTO) {
+                            return typeAwarecodec.deserialize(((IdentityValuesDTO)input).getOriginValue());
+                        }
                         return typeAwarecodec.deserialize(String.valueOf(input));
                     } else {
                         logger.debug("Codec for type \"" + type.getQName().getLocalName()
@@ -162,7 +168,7 @@ public class RestCodec {
 
         @Override
         public IdentityValuesDTO serialize(QName data) {
-            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix());
+            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix(),null);
         }
 
         @Override
