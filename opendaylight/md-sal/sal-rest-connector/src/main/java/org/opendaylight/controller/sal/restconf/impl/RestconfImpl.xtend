@@ -669,7 +669,7 @@ class RestconfImpl implements RestconfService {
 
             if (schema.typeDefinition instanceof IdentityrefTypeDefinition) {
                 if (value instanceof String) {
-                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null)
+                    inputValue = new IdentityValuesDTO(nodeBuilder.namespace.toString, value as String, null,value as String);
                 } // else value is already instance of IdentityValuesDTO
             }
             

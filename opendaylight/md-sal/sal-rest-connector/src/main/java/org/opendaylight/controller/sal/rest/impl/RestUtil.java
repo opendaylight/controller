@@ -42,7 +42,7 @@ public final class RestUtil {
         if (xPathParts.length < 2) { // must be at least "/pr:node"
             return null;
         }
-        IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO();
+        IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
         for (int i = 1; i < xPathParts.length; i++) {
             String xPathPartTrimmed = xPathParts[i].trim();
             
