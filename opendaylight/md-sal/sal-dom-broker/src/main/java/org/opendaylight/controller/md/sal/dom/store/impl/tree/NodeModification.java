@@ -176,6 +176,14 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
         this.value = value;
     }
 
+    public synchronized void merge(final NormalizedNode<?, ?> data) {
+        checkSealed();
+        clearSnapshot();
+        updateModificationType(ModificationType.MERGE);
+        // FIXME: Probably merge with previous value.
+        this.value = data;
+    }
+
     @GuardedBy("this")
     private void checkSealed() {
         checkState(!sealed, "Node Modification is sealed. No further changes allowed.");

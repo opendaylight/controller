@@ -132,7 +132,7 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
             }
 
             if (!d.isPresent() && iterator.hasNext()) {
-                writeTransaction.put(store, currentPath, currentOp.createDefault(currentArg));
+                writeTransaction.merge(store, currentPath, currentOp.createDefault(currentArg));
             }
         }
         //LOG .info("Tx: {} : Putting data {}",getDelegate().getIdentifier(),normalized.getKey());
