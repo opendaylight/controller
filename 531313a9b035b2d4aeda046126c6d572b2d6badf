@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e54dfac5",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/AbstractStatsTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-23T16:15:48Z",
+      "side": 1,
+      "message": "Can we just remove this?",
+      "revId": "531313a9b035b2d4aeda046126c6d572b2d6badf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_45514661",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/AbstractStatsTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-23T16:15:48Z",
+      "side": 1,
+      "message": "I think we need a description of the algorithm which dictates the use of the \"2\" magic number.",
+      "revId": "531313a9b035b2d4aeda046126c6d572b2d6badf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
