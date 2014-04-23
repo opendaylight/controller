@@ -105,6 +105,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.addr
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
@@ -347,7 +348,7 @@ public class TestToSalConversionsUtils {
     private FlowAddedBuilder prepareOdFlowCommon() {
         FlowAddedBuilder odNodeFlowBuilder = new FlowAddedBuilder();
 
-        odNodeFlowBuilder.setCookie(new BigInteger("9223372036854775807"));
+        odNodeFlowBuilder.setCookie(new FlowCookie(new BigInteger("9223372036854775807")));
         odNodeFlowBuilder.setHardTimeout(32767);
         odNodeFlowBuilder.setIdleTimeout(32767);
         odNodeFlowBuilder.setPriority(32767);

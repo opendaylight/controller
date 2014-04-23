@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
@@ -209,7 +210,7 @@ public class RoutedServiceTest extends AbstractTest {
     static AddFlowInput createSampleAddFlow(NodeRef node, int cookie) {
         AddFlowInputBuilder ret = new AddFlowInputBuilder();
         ret.setNode(node);
-        ret.setCookie(BigInteger.valueOf(cookie));
+        ret.setCookie(new FlowCookie(BigInteger.valueOf(cookie)));
         return ret.build();
     }
 }
