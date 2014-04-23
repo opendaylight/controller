@@ -32,21 +32,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransaction> implements
@@ -249,7 +241,7 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
                 InstanceIdentifier currentPath = new InstanceIdentifier(currentArguments);
                 boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
                 if(isPresent == false && iterator.hasNext()) {
-                    getDelegate().put(store, currentPath, currentOp.createDefault(currentArg));
+                    getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
                 }
             }
             } catch (InterruptedException | ExecutionException e) {
@@ -257,48 +249,6 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
             }
 
             getDelegate().put(store, normalizedPath, normalizedData);
-        }
-
-        private boolean isAugmentationChild(final InstanceIdentifier normalizedPath) {
-            List<PathArgument> parentArgs = parentPath(normalizedPath).getPath();
-            if(parentArgs.isEmpty()) {
-                return false;
-            }
-            return Iterables.getLast(parentArgs) instanceof AugmentationIdentifier;
-        }
-
-        private void ensureParentNode(final LogicalDatastoreType store, final InstanceIdentifier normalizedPath,
-                final NormalizedNode<?, ?> normalizedData) {
-            InstanceIdentifier parentPath = parentPath(normalizedPath);
-            PathArgument parentType = Iterables.getLast(parentPath.getPath());
-            if(parentType instanceof AugmentationIdentifier) {
-                AugmentationNode node = Builders.augmentationBuilder()
-                        .withNodeIdentifier((AugmentationIdentifier) parentType)
-                        .build();
-                getDelegate().put(store, parentPath, node);
-            }
-            if(normalizedData instanceof MapEntryNode) {
-                MapNode mapNode = Builders.mapBuilder().withNodeIdentifier(new NodeIdentifier(normalizedData.getNodeType())).build();
-                getDelegate().put(store, parentPath, mapNode);
-            } else if (normalizedData instanceof LeafSetNode<?>){
-                LeafSetNode<Object> leafNode = Builders.leafSetBuilder().withNodeIdentifier(new NodeIdentifier(normalizedData.getNodeType())).build();
-                getDelegate().put(store, parentPath, leafNode);
-            }
-
-
-        }
-
-        private InstanceIdentifier parentPath(final InstanceIdentifier normalizedPath) {
-            List<PathArgument> childArgs = normalizedPath.getPath();
-            return new InstanceIdentifier(childArgs.subList(0, childArgs.size() -1));
-        }
-
-        private boolean parentNodeDoesNotExists(final LogicalDatastoreType store, final InstanceIdentifier normalizedPath) {
-            try {
-                return !getDelegate().read(store, parentPath(normalizedPath)).get().isPresent();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new IllegalStateException(e);
-            }
         }
 
         @Override

@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
@@ -10,6 +11,7 @@ import com.google.common.primitives.UnsignedLong;
 public class OperationWithModification {
 
     private final NodeModification modification;
+
     private final ModificationApplyOperation applyOperation;
 
     private OperationWithModification(final ModificationApplyOperation op, final NodeModification mod) {
@@ -28,6 +30,14 @@ public class OperationWithModification {
         return this;
     }
 
+    public NodeModification getModification() {
+        return modification;
+    }
+
+    public ModificationApplyOperation getApplyOperation() {
+        return applyOperation;
+    }
+
     public boolean isApplicable(final Optional<StoreMetadataNode> data) {
         return applyOperation.isApplicable(modification, data);
     }
@@ -40,5 +50,17 @@ public class OperationWithModification {
             final NodeModification modification) {
         return new OperationWithModification(operation, modification);
 
+    }
+
+    public void merge(final NormalizedNode<?, ?> data) {
+        modification.merge(data);
+        applyOperation.verifyStructure(modification);
+
+    }
+
+    public OperationWithModification forChild(final PathArgument childId) {
+        NodeModification childMod = modification.modifyChild(childId);
+        Optional<ModificationApplyOperation> childOp = applyOperation.getChild(childId);
+        return from(childOp.get(),childMod);
     }
 }

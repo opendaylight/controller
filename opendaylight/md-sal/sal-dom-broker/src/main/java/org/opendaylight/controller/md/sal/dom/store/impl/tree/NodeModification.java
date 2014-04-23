@@ -20,7 +20,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.primitives.UnsignedLong;
 
 /**
  * Node Modification Node and Tree
@@ -37,7 +36,9 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
     public static final Predicate<NodeModification> IS_TERMINAL_PREDICATE = new Predicate<NodeModification>() {
         @Override
         public boolean apply(final NodeModification input) {
-            return input.getModificationType() == ModificationType.WRITE || input.getModificationType() == ModificationType.DELETE;
+            return input.getModificationType() == ModificationType.WRITE //
+                    || input.getModificationType() == ModificationType.DELETE //
+                    || input.getModificationType() == ModificationType.MERGE;
         }
     };
     private final PathArgument identifier;
@@ -48,7 +49,6 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
 
     private NormalizedNode<?, ?> value;
 
-    private UnsignedLong subtreeVersion;
     private Optional<StoreMetadataNode> snapshotCache;
 
     private final Map<PathArgument, NodeModification> childModification;
@@ -174,6 +174,14 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
         updateModificationType(ModificationType.WRITE);
         childModification.clear();
         this.value = value;
+    }
+
+    public synchronized void merge(final NormalizedNode<?, ?> data) {
+        checkSealed();
+        clearSnapshot();
+        updateModificationType(ModificationType.MERGE);
+        // FIXME: Probably merge with previous value.
+        this.value = data;
     }
 
     @GuardedBy("this")

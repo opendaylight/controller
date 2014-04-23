@@ -259,6 +259,18 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
 
         @Override
+        public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            checkNotReady();
+            try {
+                LOG.trace("Tx: {} Merge: {}:{}",getIdentifier(),path,data);
+                mutableTree.merge(path, data);
+              // FIXME: Add checked exception
+            } catch (Exception e) {
+                LOG.error("Tx: {}, failed to write {}:{} in {}",getIdentifier(),path,data,mutableTree,e);
+            }
+        }
+
+        @Override
         public void delete(final InstanceIdentifier path) {
             checkNotReady();
             try {

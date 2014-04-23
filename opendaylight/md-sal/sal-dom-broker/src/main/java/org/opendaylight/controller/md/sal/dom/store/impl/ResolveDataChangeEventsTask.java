@@ -308,6 +308,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
         switch (modification.getModificationType()) {
         case SUBTREE_MODIFIED:
             return resolveSubtreeChangeEvent(path, listeners, modification, before.get(), after.get());
+        case MERGE:
         case WRITE:
             if (before.isPresent()) {
                 return resolveReplacedEvent(path, listeners, before.get().getData(), after.get().getData());
@@ -487,6 +488,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
 
             switch (childMod.getModificationType()) {
             case WRITE:
+            case MERGE:
             case DELETE:
                 one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod, childBefore, childAfter));
                 break;

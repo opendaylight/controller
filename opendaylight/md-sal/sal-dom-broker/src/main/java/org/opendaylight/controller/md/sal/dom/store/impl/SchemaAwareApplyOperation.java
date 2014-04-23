@@ -131,11 +131,23 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             return isSubtreeModificationApplicable(modification, current);
         case WRITE:
             return isWriteApplicable(modification, current);
+        case MERGE:
+            return isMergeApplicable(modification,current);
         case UNMODIFIED:
             return true;
         default:
             return false;
         }
+    }
+
+    private boolean isMergeApplicable(final NodeModification modification, final Optional<StoreMetadataNode> current) {
+        Optional<StoreMetadataNode> original = modification.getOriginal();
+        if (original.isPresent() && current.isPresent()) {
+            return isNotConflicting(original.get(), current.get());
+        } else if (current.isPresent()) {
+            return true;
+        }
+        return true;
     }
 
     protected boolean isWriteApplicable(final NodeModification modification, final Optional<StoreMetadataNode> current) {
@@ -174,6 +186,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
                     modification);
             return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(),
                     subtreeVersion)));
+        case MERGE:
+            if(currentMeta.isPresent()) {
+                return modification.storeSnapshot(Optional.of(applyMerge(modification,currentMeta.get(),subtreeVersion)));
+            } // Fallback to write is intentional - if node is not preexisting merge is same as write
         case WRITE:
             return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, subtreeVersion)));
         case UNMODIFIED:
@@ -182,6 +198,9 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             throw new IllegalArgumentException("Provided modification type is not supported.");
         }
     }
+
+    protected abstract StoreMetadataNode applyMerge(NodeModification modification,
+            StoreMetadataNode currentMeta, UnsignedLong subtreeVersion);
 
     protected abstract StoreMetadataNode applyWrite(NodeModification modification,
             Optional<StoreMetadataNode> currentMeta, UnsignedLong subtreeVersion);
@@ -220,13 +239,15 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
 
         @Override
+        protected StoreMetadataNode applyMerge(final NodeModification modification, final StoreMetadataNode currentMeta,
+                final UnsignedLong subtreeVersion) {
+            return applyWrite(modification, Optional.of(currentMeta), subtreeVersion);
+        }
+
+        @Override
         protected StoreMetadataNode applyWrite(final NodeModification modification,
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
             UnsignedLong nodeVersion = subtreeVersion;
-            if (currentMeta.isPresent()) {
-                nodeVersion = StoreUtils.increase(currentMeta.get().getNodeVersion());
-            }
-
             return StoreMetadataNode.builder().setNodeVersion(nodeVersion).setSubtreeVersion(subtreeVersion)
                     .setData(modification.getWritenValue()).build();
         }
@@ -312,6 +333,13 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
             return builder.build();
 
+        }
+
+        @Override
+        protected StoreMetadataNode applyMerge(final NodeModification modification, final StoreMetadataNode currentMeta,
+                final UnsignedLong subtreeVersion) {
+            // For Node Containers - merge is same as subtree change - we only replace children.
+            return applySubtreeChange(modification, currentMeta, subtreeVersion);
         }
 
         @Override
@@ -569,7 +597,11 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             entryStrategy = Optional.<ModificationApplyOperation> of(new UnkeyedListItemModificationStrategy(schema));
         }
 
-
+        @Override
+        protected StoreMetadataNode applyMerge(final NodeModification modification, final StoreMetadataNode currentMeta,
+                final UnsignedLong subtreeVersion) {
+            return applyWrite(modification, Optional.of(currentMeta), subtreeVersion);
+        }
 
         @Override
         protected StoreMetadataNode applySubtreeChange(final NodeModification modification,

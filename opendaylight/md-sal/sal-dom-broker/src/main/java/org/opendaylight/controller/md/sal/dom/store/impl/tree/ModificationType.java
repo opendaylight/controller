@@ -32,5 +32,12 @@ public enum ModificationType {
      * Tree node is to be deleted.
      *
      */
-    DELETE
+    DELETE,
+
+    /**
+     *
+     * Tree node is to be merged with existing one.
+     *
+     */
+    MERGE
 }

@@ -34,6 +34,25 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
     void write(InstanceIdentifier path, NormalizedNode<?, ?> data);
 
     /**
+     * Store a provided data at specified path. This acts as a add / replace
+     * operation, which is to say that whole subtree will be replaced by
+     * specified path.
+     *
+     * If you need add or merge of current object with specified use
+     * {@link #merge(LogicalDatastoreType, Path, Object)}
+     *
+     *
+     * @param path
+     * @param data
+     *            Data object to be written
+     *
+     * @throws IllegalStateException
+     *             if the client code already sealed transaction and invoked
+     *             {@link #ready()}
+     */
+    void merge(InstanceIdentifier path, NormalizedNode<?, ?> data);
+
+    /**
      *
      * Deletes data and whole subtree located at provided path.
      *
