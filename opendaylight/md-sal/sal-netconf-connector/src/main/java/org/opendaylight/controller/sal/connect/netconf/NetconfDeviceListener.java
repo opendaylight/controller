@@ -39,8 +39,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-class NetconfDeviceListener implements NetconfClientSessionListener {
-
+public class NetconfDeviceListener implements NetconfClientSessionListener {
     private static final class Request {
         final UncancellableFuture<RpcResult<CompositeNode>> future;
         final NetconfMessage request;

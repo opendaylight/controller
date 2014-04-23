@@ -8,34 +8,11 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
-import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
-import org.opendaylight.controller.netconf.mapping.api.Capability;
-import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
-import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -48,19 +25,50 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
+import org.opendaylight.controller.netconf.mapping.api.Capability;
+import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
+import org.opendaylight.controller.netconf.util.messages.NetconfStartExiMessage;
+import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class ConcurrentClientsTest {
 
     private static final int CONCURRENCY = 16;
     private EventLoopGroup nettyGroup;
-    private NetconfClientDispatcher netconfClientDispatcher;
+    private NetconfClientDispatcherImpl netconfClientDispatcher;
 
-    private final InetSocketAddress netconfAddress = new InetSocketAddress("127.0.0.1", 8303);
+    private final InetSocketAddress netconfAddress = new InetSocketAddress("127.0.0.1", 9303);
 
     static final Logger logger = LoggerFactory.getLogger(ConcurrentClientsTest.class);
 
@@ -82,11 +90,10 @@ public class ConcurrentClientsTest {
     public void setUp() throws Exception {
 
         nettyGroup = new NioEventLoopGroup();
-        NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp", "client");
-        netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, additionalHeader, 5000);
+        netconfClientDispatcher = new NetconfClientDispatcherImpl( nettyGroup, nettyGroup);
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
-        factoriesListener.onAddNetconfOperationServiceFactory(mockOpF());
+//        factoriesListener.onAddNetconfOperationServiceFactory(mockOpF());
 
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();
@@ -125,7 +132,9 @@ public class ConcurrentClientsTest {
                         return Sets.<NetconfOperation> newHashSet(new NetconfOperation() {
                             @Override
                             public HandlingPriority canHandle(Document message) {
-                                return HandlingPriority.getHandlingPriority(Integer.MAX_VALUE);
+                                return XmlUtil.toString(message).contains(NetconfStartExiMessage.START_EXI) ?
+                                        HandlingPriority.CANNOT_HANDLE :
+                                        HandlingPriority.HANDLE_WITH_MAX_PRIORITY;
                             }
 
                             @Override
@@ -261,7 +270,7 @@ public class ConcurrentClientsTest {
         @Override
         public void run() {
             try {
-                final TestingNetconfClient netconfClient = new TestingNetconfClient(clientId, netconfAddress, netconfClientDispatcher);
+                final TestingNetconfClient netconfClient = new TestingNetconfClient(clientId, netconfClientDispatcher, getClientConfig());
                 long sessionId = netconfClient.getSessionId();
                 logger.info("Client with sessionid {} hello exchanged", sessionId);
 
@@ -275,6 +284,17 @@ public class ConcurrentClientsTest {
             } catch (final Exception e) {
                 thrownException = Optional.of(e);
             }
+        }
+
+        private NetconfClientConfiguration getClientConfig() {
+            final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+            b.withAddress(netconfAddress);
+            b.withAdditionalHeader(new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp",
+                    "client"));
+            b.withSessionListener(new SimpleNetconfClientSessionListener());
+            b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                    NetconfClientConfigurationBuilder.DEFAULT_CONNECTION_TIMEOUT_MILLIS));
+            return b.build();
         }
     }
 }
