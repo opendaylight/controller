@@ -83,6 +83,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     private static Logger log = LoggerFactory.getLogger(SimpleForwardingImpl.class);
     private static short DEFAULT_IPSWITCH_PRIORITY = 1;
     static final String FORWARDING_RULES_CACHE_NAME = "forwarding.ipswitch.rules";
+    static boolean doStrictForwardingCheck = false;
     private IfIptoHost hostTracker;
     private IForwardingRulesManager frm;
     private ITopologyManager topologyManager;
@@ -161,6 +162,19 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         if (this.frm == forwardingRulesManager) {
             this.frm = null;
         }
+    }
+
+    /*
+     *  Accessors
+     */
+    public void setStrictForwardingCheck() {
+        doStrictForwardingCheck = true;
+    }
+    public void unsetStrictForwardingCheck() {
+        doStrictForwardingCheck = false;
+    }
+    public boolean getStrictForwardingCheck() {
+        return doStrictForwardingCheck;
     }
 
     /**
@@ -1012,11 +1026,12 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             log.trace("Host {} is at {}", dIP, destHost.getnodeConnector());
             HostNodePair key = new HostNodePair(destHost, destHost.getnodeconnectorNode());
 
-            // If SimpleForwarding is aware of this host, it will try to install
-            // a path. Forward packet until it's done.
-            if (dataPacketService != null && this.rulesDB.containsKey(key)) {
-
-
+            /* If SimpleForwarding is aware of this host, it will try to install
+             * a path. Forward packet until then. If doStrictForwardingCheck is true,
+             * we will only transmit if rulesDB is in 'sync' with hostTracker.
+             */
+            if (dataPacketService != null &&
+                    (!doStrictForwardingCheck || this.rulesDB.containsKey(key))) {
                 /*
                  * if we know where the host is and there's a path from where this
                  * packet was punted to where the host is, then attempt best effort delivery to the host
