@@ -64,6 +64,7 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
                 device.getName(), device.getSocketAddress(), session.getSessionId());
 
         this.session = session;
+
         final Set<QName> caps = device.getCapabilities(session.getServerCapabilities());
         LOG.trace("Server {} advertized capabilities {}", device.getName(), caps);
 
@@ -71,16 +72,15 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
         final SchemaSourceProvider<String> delegate;
         if (NetconfRemoteSchemaSourceProvider.isSupportedFor(caps)) {
             delegate = new NetconfRemoteSchemaSourceProvider(device);
-            // FIXME parsed caps contain only module-based capabilities
+            // FIXME caps do not contain urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring, since it is filtered out in getCapabilitites
         } else if(session.getServerCapabilities().contains(NetconfRemoteSchemaSourceProvider.IETF_NETCONF_MONITORING.getNamespace().toString())) {
             delegate = new NetconfRemoteSchemaSourceProvider(device);
         } else {
             LOG.info("Netconf server {} does not support IETF Netconf Monitoring", device.getName());
-            delegate = SchemaSourceProviders.<String>noopProvider();
+            delegate = SchemaSourceProviders.noopProvider();
         }
 
         device.bringUp(delegate, caps);
-
     }
 
     private synchronized void tearDown(final Exception e) {
