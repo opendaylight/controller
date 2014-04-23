@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>org.openexi</artifactId>
-        <version>0000.0002.0035.0-SNAPSHOT</version>
+        <version>0000.0002.0037.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -21,7 +21,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <archive>nagasena-rta-0000.0002.0035.0.jar</archive>
+        <archive>nagasena-rta-0000.0002.0037.0.jar</archive>
     </properties>
 
     <build>

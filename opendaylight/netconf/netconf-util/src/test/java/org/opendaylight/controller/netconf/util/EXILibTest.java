@@ -75,18 +75,12 @@ public class EXILibTest {
 
     public static byte[] encodeEXITransformer(final Element xml) throws Exception {
         final Transmogrifier transmogrifier = new Transmogrifier();
-
         transmogrifier.setAlignmentType(ALIGNMENT_TYPE);
-
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
         transmogrifier.setGrammarCache(getGrammarCache());
-
         transmogrifier.setOutputStream(out);
-
         final Transformer transformer = saxTransformerFactory.newTransformer();
         transformer.transform(new DOMSource(xml), new SAXResult(transmogrifier.getSAXTransmogrifier()));
-
         return out.toByteArray();
     }
 
