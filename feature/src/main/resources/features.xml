@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="controller-${controller.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <feature name="felix-dm" description="Felix Dependency Manager"
+      version="${felix.dependencymanager.version}">
+      <bundle start-level="30">mvn:org.apache.felix/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
+      <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.dependencymanager.shell/${felix.dependencymanager.shell.version}</bundle>
+   </feature>
+   <feature name="jackson" description="Jackson JAX-RS" version="${jackson.version}">
+      <bundle start="true" start-level="30">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+      <bundle start="true" start-level="30">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+      <bundle start="true" start-level="30">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+      <bundle start="true" start-level="30">mvn:org.codehaus.jettison/jettison/${jettison.version}</bundle>
+      <bundle start="true" start-level="30">mvn:javax.ws.rs/jsr311-api/${jsr311.api.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+   </feature>
+   <feature name="slf4j" description="SLF4J Logging" version="${slf4j.version}">
+      <bundle start-level="30">mvn:org.slf4j/slf4j-jdk14/1.7.2</bundle>
+      <bundle start-level="30">mvn:org.slf4j/slf4j-nop/1.7.2</bundle>
+      <bundle start-level="30">mvn:org.slf4j/slf4j-simple/1.7.2</bundle>
+      <bundle start="true" start-level="30">mvn:org.slf4j/slf4j-api/1.7.2</bundle>
+   </feature>
+   <feature name="commons" description="Apache Commons Libraries"
+      version="${controller.version}">
+      <bundle start="true" start-level="30">mvn:com.google.guava/guava/${guava.version}</bundle>
+      <bundle start="true" start-level="30">mvn:org.javassist/javassist/${javassist.version}</bundle>
+      <bundle start="true" start-level="30">mvn:commons-io/commons-io/${commons.io.version}</bundle>
+      <bundle start="true" start-level="30">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
+      <bundle start="true" start-level="30">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
+      <bundle start="true" start-level="30">mvn:commons-net/commons-net/${commons.net.version}</bundle>
+   </feature>
+   <feature name="gemini-web" description="Gemini Web" version="${geminiweb.version}">
+      <feature>slf4j</feature>
+      <feature>http</feature>
+      <feature>felix-dm</feature>
+      <feature>jackson</feature>
+      <feature>commons</feature>
+      <feature>transaction</feature>
+      <bundle start="true" start-level="30">mvn:com.google.code.gson/gson/${gson.version}</bundle>
+      <bundle start="true" start-level="30">mvn:commons-fileupload/commons-fileupload/${commons.fileupload.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.gemini.web.core/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.gemini.web.extender/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.common/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.io/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.math/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.osgi/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.osgi.manifest/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.parser.manifest/${virgo.version}</bundle>
+      <bundle start="true" start-level="30">mvn:org.apache.felix/org.apache.felix.fileinstall/3.1.6</bundle>
+      <bundle start="true" start-level="30">mvn:equinoxSDK381/org.eclipse.equinox.console/1.0.0.v20120522-1841</bundle>
+      <bundle start="true" start-level="30">mvn:eclipselink/javax.persistence/2.0.4.v201112161009</bundle>
+      <bundle start="true" start-level="30">mvn:eclipselink/javax.resource/1.5.0.v200906010428</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.activation/1.1.0.v201211130549</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.annotation/1.1.0.v201209060031</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.ejb/3.1.1.v201204261316</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.el/2.2.0.v201108011116</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.mail.glassfish/1.4.1.v201108011116</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.xml.rpc/1.1.0.v201005080400</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.catalina/7.0.32.v201211201336</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.catalina.ha/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.catalina.tribes/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.coyote/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.el/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.jasper/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.tomcat.api/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/org.apache.tomcat.util/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="30">mvn:org.eclipse.jetty.orbit/javax.servlet.jsp/2.2.0.v201112011158</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.servlet.jsp.jstl/1.2.0.v201105211821</bundle>
+      <bundle start="true" start-level="30">mvn:orbit/javax.servlet.jsp.jstl.impl/1.2.0.v201210211230</bundle>
+   </feature>
+   <feature name="sal" description="Service Abstraction Layer"
+      version="${sal.version}">
+      <bundle>mvn:org.apache.felix/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal/${sal.version}</bundle>
+      <!-- The SAL Implementation doesn't follow API versioning, should be
+         revisited in the bundle -->
+      <bundle>mvn:org.opendaylight.controller/sal.implementation/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration/${sal.networkconfiguration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration.implementation/${sal.networkconfiguration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.connection/${sal.connection.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.connection.implementation/${sal.connection.version}</bundle>
+   </feature>
+   <feature name="controller-web" description="Controller Web Interface"
+      version="${controller.version}">
+      <feature>controller-services</feature>
+      <bundle>mvn:org.opendaylight.controller/web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/flows.web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/devices.web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/troubleshoot.web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/topology.web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/${controller.version}</bundle>
+   </feature>
+   <feature name="controller-services" description="Base Controller Services"
+      version="${controller.version}">
+      <feature>transaction</feature>
+      <feature>sal</feature>
+      <bundle>mvn:org.opendaylight.controller/forwarding.staticrouting</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/configuration</bundle>
+      <bundle>mvn:org.opendaylight.controller/configuration.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/arphandler</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/appauth</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/statisticsmanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/topologymanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/connectionmanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/connectionmanager.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/security</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation</bundle>
+   </feature>
+</features>
