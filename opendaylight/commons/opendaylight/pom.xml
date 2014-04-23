@@ -1720,6 +1720,7 @@
               <phase>generate-sources</phase>
               <configuration>
                 <sources>
+                  <source>src/main/yang</source>
                   <source>${jmxGeneratorPath}</source>
                   <source>${salGeneratorPath}</source>
                   <source>${xtend.dstdir}</source>
@@ -1816,7 +1817,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <execute></execute>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
