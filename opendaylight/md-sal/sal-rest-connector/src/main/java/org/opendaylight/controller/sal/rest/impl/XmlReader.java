@@ -205,7 +205,7 @@ public class XmlReader {
         if (namespaceAndValue.length == 2) {
             String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
             if (namespace != null && !namespace.isEmpty()) {
-                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0]);
+                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0],value);
             }
         }
         // it is not "prefix:value" but just "value"
