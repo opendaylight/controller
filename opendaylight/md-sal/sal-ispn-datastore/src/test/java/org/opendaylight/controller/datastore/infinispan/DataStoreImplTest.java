@@ -9,6 +9,8 @@ import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.datastore.infinispan.utils.InfinispanNodeNavigator;
+import org.opendaylight.controller.datastore.infinispan.utils.NamespacePrefixMapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodePrinter;
@@ -149,7 +151,7 @@ public class DataStoreImplTest {
         final ContainerNode containerNode = TestModel.createTestContainer();
         new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).encode(instanceIdentifier, containerNode,new WriteDeleteTransactionTracker(1));
 
-        NormalizedNode normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(instanceIdentifier, treeCache.getNode(nodeWithValue));
+        NormalizedNode normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(instanceIdentifier, treeCache.getNode(NamespacePrefixMapper.get().fromInstanceIdentifier(nodeWithValue)));
 
         assertTrue(compareNodes(containerNode, normalizedNode));
 
@@ -230,6 +232,7 @@ public class DataStoreImplTest {
         final NormalizedNode<?, ?> decode = normalizedNodeToTreeCacheCodec.decode(InstanceIdentifier.builder().build(), (Node) treeCache.getNode(Fqn.fromString("/")));
 
 
+        new InfinispanNodeNavigator().navigate(treeCache.getNode("/"));
     }
 
 }

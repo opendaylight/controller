@@ -3,6 +3,7 @@ package org.opendaylight.controller.datastore.infinispan;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
 import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
+import org.opendaylight.controller.datastore.infinispan.utils.NamespacePrefixMapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NormalizedNodeVisitor;
 import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -26,9 +27,11 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
 
   @Override
   public void visitNode(int level, String parentPath, NormalizedNode normalizedNode) {
+    String fixedParentPath = NamespacePrefixMapper.get().fromInstanceIdentifier(parentPath);
+    String fixedIdentifier = NamespacePrefixMapper.get().fromInstanceIdentifier(normalizedNode.getIdentifier().toString());
 
     if (normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode) {
-      Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+      Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(fixedParentPath), Fqn.fromString(fixedIdentifier));
 
         if(logger.isTraceEnabled()){
             traceNode(nodeFqn, normalizedNode);

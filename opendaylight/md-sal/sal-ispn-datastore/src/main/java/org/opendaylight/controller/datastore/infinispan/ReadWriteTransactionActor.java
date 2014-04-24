@@ -8,6 +8,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
+import org.opendaylight.controller.datastore.infinispan.utils.NamespacePrefixMapper;
 import org.opendaylight.controller.datastore.notification.ChangeListenerNotifyTask;
 import org.opendaylight.controller.datastore.notification.ListenerRegistrationManager;
 import org.opendaylight.controller.datastore.notification.WriteDeleteTransactionTracker;
@@ -242,7 +243,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
 
       @Override
       public Object call() throws Exception {
-          Node node = treeCache.getNode(Fqn.fromString(path.toString()));
+          Node node = treeCache.getNode(Fqn.fromString(NamespacePrefixMapper.get().fromInstanceIdentifier(path.toString())));
           if(node == null){
               return null;
           }

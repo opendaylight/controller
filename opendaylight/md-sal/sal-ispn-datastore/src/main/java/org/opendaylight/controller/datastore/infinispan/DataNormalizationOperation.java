@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 import org.opendaylight.controller.datastore.infinispan.utils.InfinispanTreeWrapper;
+import org.opendaylight.controller.datastore.infinispan.utils.NamespacePrefixMapper;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
-import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierWithPredicatesGenerator;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
@@ -100,16 +100,10 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
     public abstract NormalizedNode<?, ?> normalize(QName nodeType, org.infinispan.tree.Node legacyData);
 
     protected PathArgument getNodePathArgument(Fqn fqn){
-        final String[] nodeIds = fqn.toString().split("/");
-        if(nodeIds.length > 1)
-            return NodeIdentifierFactory.getArgument(nodeIds[nodeIds.length - 1]);
-        return null;
+        String lastPath = fqn.getLastElement().toString();
+        String id = NamespacePrefixMapper.get().fromFqn(lastPath);
+        return NodeIdentifierFactory.getArgument(id);
     }
-
-    protected QName getNodeTypeFromFqn(Fqn fqn){
-        return getNodePathArgument(fqn).getNodeType();
-    }
-
 
     private static abstract class SimpleTypeNormalization<T extends PathArgument> extends DataNormalizationOperation<T> {
 
@@ -320,11 +314,7 @@ public abstract class  DataNormalizationOperation<T extends PathArgument> implem
 
         @Override
         protected NormalizedNodeContainerBuilder createBuilder(final org.infinispan.tree.Node treeCacheNode) {
-            String[] ids = treeCacheNode.getFqn().toString().split("/");
-
-            ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
-
-            return Builders.mapEntryBuilder().withNodeIdentifier(new NodeIdentifierWithPredicatesGenerator(ids[ids.length-1], this.schemaNode).getPathArgument());
+            return Builders.mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) getNodePathArgument(treeCacheNode.getFqn()));
         }
 
         @Override
