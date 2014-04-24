@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -13,6 +13,7 @@
 
   <properties>
     <stax.version>1.0.1</stax.version>
+    <yang.jmx.plugin>0.2.4-SNAPSHOT</yang.jmx.plugin>
     <zeromq.version>0.3.1</zeromq.version>
   </properties>
 
@@ -138,6 +139,19 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-jmx-generator-plugin</artifactId>
+            <version>${yang.jmx.plugin}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>maven-sal-api-gen-plugin</artifactId>
+            <version>${yangtools.version}</version>
+            <type>jar</type>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <goals>
