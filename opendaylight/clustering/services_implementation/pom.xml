@@ -3,15 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>clustering.services-implementation</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
+  <!--<version>0.4.3-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
   <properties>
+    <jacoco.version>0.5.3.201107060350</jacoco.version>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
@@ -29,12 +30,10 @@
     <dependency>
       <groupId>org.infinispan</groupId>
       <artifactId>infinispan-core</artifactId>
-      <version>6.0.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.jbossts.jta</groupId>
       <artifactId>narayana-jta</artifactId>
-      <version>4.17.7.Final</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -75,7 +74,7 @@
               !org.jboss.*,
               javax.transaction,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core,*</Import-Package>
+              org.opendaylight.controller.sal.core</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.clustering.services_implementation.internal.Activator</Bundle-Activator>
             <!-- Add in the DynamicImport-Package ONLY the packages that -->
             <!-- contains types that MUST be unmarshalled by the -->
@@ -121,9 +120,7 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
+          <includes>org.opendaylight.controller.*</includes>
         </configuration>
         <executions>
           <execution>
@@ -143,10 +140,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>
