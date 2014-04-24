@@ -4,12 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>compatibility-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-compatibility</artifactId>
   <packaging>bundle</packaging>
   <name>MD-SAL to AD-SAL Adaptation</name>
-
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -26,7 +25,6 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-topology</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -46,30 +44,31 @@
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <phase>test</phase>
-          </execution>
-        </executions>
-      </plugin>
+      <!--<plugin>-->
+      <!--<groupId>org.jacoco</groupId>-->
+      <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+      <!--&lt;!&ndash;<version>${jacoco.version}</version>&ndash;&gt;-->
+      <!--<configuration>-->
+      <!--<includes>-->
+      <!--<include>org.opendaylight.controller.*</include>-->
+      <!--</includes>-->
+      <!--</configuration>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<id>pre-test</id>-->
+      <!--<goals>-->
+      <!--<goal>prepare-agent</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>post-test</id>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--<phase>test</phase>-->
+      <!--</execution>-->
+      <!--</executions>-->
+      <!--</plugin>-->
     </plugins>
   </build>
   <scm>

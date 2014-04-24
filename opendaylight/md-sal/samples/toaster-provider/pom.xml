@@ -4,14 +4,10 @@
   <parent>
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>sal-samples</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sample-toaster-provider</artifactId>
   <packaging>bundle</packaging>
-
-  <properties>
-    <sal-binding-api.version>1.1-SNAPSHOT</sal-binding-api.version>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -35,10 +31,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -56,6 +48,18 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-jmx-generator-plugin</artifactId>
+            <version>${config.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>maven-sal-api-gen-plugin</artifactId>
+            <version>${yangtools.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>config</id>
@@ -83,10 +87,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>

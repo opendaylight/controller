@@ -3,12 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath>../parent</relativePath>
   </parent>
   <artifactId>dummy-console</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>Dummy Console Interfaces for Equinox-specific CLI</description>
   <build>
@@ -26,10 +25,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>

@@ -3,13 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>concepts</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -31,28 +30,22 @@
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <configuration>
-          <failsOnError>true</failsOnError>
-          <configLocation>controller/checkstyle.xml</configLocation>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+      <!--<plugin>-->
+      <!--<groupId>org.apache.maven.plugins</groupId>-->
+      <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+      <!--<version>${checkstyle.version}</version>-->
+      <!--<dependencies>-->
+      <!--<dependency>-->
+      <!--<groupId>org.opendaylight.controller</groupId>-->
+      <!--<artifactId>checkstyle</artifactId>-->
+      <!--<version>0.0.3-SNAPSHOT</version>-->
+      <!--</dependency>-->
+      <!--</dependencies>-->
+      <!--<configuration>-->
+      <!--<failsOnError>true</failsOnError>-->
+      <!--<configLocation>controller/checkstyle.xml</configLocation>-->
+      <!--</configuration>-->
+      <!--</plugin>-->
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>

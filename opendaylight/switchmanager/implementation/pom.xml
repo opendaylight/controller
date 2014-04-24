@@ -3,21 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
-
   <artifactId>switchmanager.implementation</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <!--<version>0.4.2-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
 
-  <properties>
-    <!-- Sonar properties using jacoco to retrieve integration test results -->
-    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
-    <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>equinoxSDK381</groupId>
