@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,24 @@ class MutableDataTree {
     public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
         checkSealed();
         resolveModificationFor(path).write(value);
+    }
+
+    public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkSealed();
+        mergeImpl(resolveModificationFor(path),data);
+    }
+
+    private void mergeImpl(final OperationWithModification op,final NormalizedNode<?,?> data) {
+
+        if(data instanceof NormalizedNodeContainer<?,?,?>) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            NormalizedNodeContainer<?,?,NormalizedNode<PathArgument, ?>> dataContainer = (NormalizedNodeContainer) data;
+            for(NormalizedNode<PathArgument, ?> child : dataContainer.getValue()) {
+                PathArgument childId = child.getIdentifier();
+                mergeImpl(op.forChild(childId), child);
+            }
+        }
+        op.merge(data);
     }
 
     public void delete(final InstanceIdentifier path) {

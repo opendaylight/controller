@@ -217,8 +217,7 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
         @Override
         public void merge(final LogicalDatastoreType store, final InstanceIdentifier path,
                 final NormalizedNode<?, ?> data) {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Not implemented yet.");
+            getSubtransaction(store).merge(path,data);
         }
 
         @Override
@@ -250,12 +249,6 @@ public class DOMDataBrokerImpl implements DOMDataBroker, AutoCloseable {
         public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store,
                 final InstanceIdentifier path) {
             return getSubtransaction(store).read(path);
-        }
-
-        @Override
-        public void merge(final LogicalDatastoreType store, final InstanceIdentifier path,
-                final NormalizedNode<?, ?> data) {
-
         }
     }
 
