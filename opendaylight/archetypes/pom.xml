@@ -6,9 +6,9 @@
   </prerequisites>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
-    <relativePath>../commons/parent</relativePath>
+    <artifactId>controller.parent</artifactId>
+    <version>1.4.2-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
   </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -18,7 +18,6 @@
   </scm>
   <groupId>org.opendaylight.controller.archetypes</groupId>
   <artifactId>archetypes-parent</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
     <distributionManagement>
     <!-- OpenDayLight Released artifact -->
