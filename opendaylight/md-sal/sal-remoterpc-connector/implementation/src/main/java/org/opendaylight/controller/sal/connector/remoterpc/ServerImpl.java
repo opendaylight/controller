@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
@@ -64,6 +65,7 @@ public class ServerImpl implements RemoteRpcServer {
 
   private String serverAddress;
   private int port;
+  private SchemaContext schemaContext;
 
   public static enum State {
     STARTING, STARTED, STOPPED;
@@ -100,6 +102,14 @@ public class ServerImpl implements RemoteRpcServer {
   public String getHandlerAddress() {
     return HANDLER_INPROC_ADDRESS;
   }
+
+  /**
+   * sets the schemaContext
+   * @param schemaContext
+   */
+//  public void setSchemaContext(SchemaContext schemaContext){
+//    this.schemaContext = schemaContext;
+//  }
 
   /**
    *

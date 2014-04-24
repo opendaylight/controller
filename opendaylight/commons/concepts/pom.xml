@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>controller-parent</artifactId>
+        <version>1.4.2-SNAPSHOT</version>
+        <relativePath>../../parent</relativePath>
+    </parent>
 
   <artifactId>concepts</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -27,33 +20,35 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.opendaylight.controller.concepts.transform</Export-Package>
+            <Export-Package>
+              org.opendaylight.controller.concepts.transform
+            </Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <configuration>
-          <failsOnError>true</failsOnError>
-          <configLocation>controller/checkstyle.xml</configLocation>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+        <!--<version>${checkstyle.version}</version>-->
+        <!--<dependencies>-->
+          <!--<dependency>-->
+            <!--<groupId>org.opendaylight.controller</groupId>-->
+            <!--<artifactId>checkstyle</artifactId>-->
+            <!--<version>0.0.3-SNAPSHOT</version>-->
+          <!--</dependency>-->
+        <!--</dependencies>-->
+        <!--<configuration>-->
+          <!--<failsOnError>true</failsOnError>-->
+          <!--<configLocation>controller/checkstyle.xml</configLocation>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+  </dependencies>
 </project>

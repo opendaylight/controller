@@ -17,6 +17,8 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+//import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+//import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
@@ -40,6 +42,9 @@ public class ServerRequestHandler implements AutoCloseable{
   private int workerCount;
   private ZMQ.Context context;
   private Broker.ProviderSession broker;
+//  private SchemaService schemaService ;
+//
+//  private SchemaContext schemaContext ;
 
   private RequestHandlerThreadPool workerPool;
   private final AtomicInteger threadId = new AtomicInteger();
@@ -54,6 +59,8 @@ public class ServerRequestHandler implements AutoCloseable{
     this.serverAddress = serverAddress;
     this.broker        = session;
     this.workerCount   = workerCount;
+//    this.schemaService = broker.getService(SchemaService.class);
+//    this.schemaContext = schemaService.getGlobalContext();
   }
 
   public ThreadPoolExecutor getWorkerPool(){
@@ -118,7 +125,7 @@ public class ServerRequestHandler implements AutoCloseable{
             try {
               rpc = broker.rpc(
                   (QName) request.getRoute().getType(),
-                  XmlUtils.xmlToCompositeNode((String) request.getPayload()));
+                  XmlUtils.xmlToCompositeNode((String) request.getPayload()/*, schemaContext*/));
 
               result = (rpc != null) ? rpc.get() : null;
 
@@ -248,7 +255,7 @@ public class ServerRequestHandler implements AutoCloseable{
           .sender(serverAddress)
           .recipient(recipient)
           .route(routeId)
-          .payload(XmlUtils.compositeNodeToXml(payload))
+          .payload(XmlUtils.compositeNodeToXml(payload/*, schemaContext*/))
           .build();
 
       send(response);

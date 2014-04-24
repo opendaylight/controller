@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
+ <!-- <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
     <version>1.0.2-SNAPSHOT</version>
     <relativePath>opendaylight/commons/parent</relativePath>
-  </parent>
+  </parent>-->
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>releasepom</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>1.4.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
   <modules>
+      <module>third-party/commons/thirdparty</module>
+      <module>opendaylight/commons/checkstyle</module>
     <module>opendaylight/distribution/opendaylight</module>
     <module>opendaylight/forwarding/staticrouting</module>
     <module>opendaylight/clustering/services</module>
@@ -49,9 +52,9 @@
     <!-- <module>third-party/net.sf.jung2</module> -->
     <!-- <module>third-party/jersey-servlet</module> -->
     <!-- <module>third-party/org.apache.catalina.filters.CorsFilter</module> -->
-    <module>third-party/ganymed</module>
+    <!--<module>third-party/ganymed</module>-->
 
-    <module>third-party/commons/thirdparty</module>
+    <!--<module>third-party/commons/thirdparty</module>-->
 
     <!-- SAL bundles -->
     <module>opendaylight/sal/api</module>
@@ -118,8 +121,8 @@
     <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/protocol-framework</module>
     <module>opendaylight/commons/httpclient</module>
-    <module>opendaylight/commons/checkstyle</module>
-    <module>opendaylight/commons/opendaylight</module>
+
+    <module>opendaylight/parent</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
 
