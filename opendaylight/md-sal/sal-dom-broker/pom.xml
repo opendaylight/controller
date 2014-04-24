@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-broker-impl</artifactId>
   <packaging>bundle</packaging>
@@ -65,6 +65,11 @@
       <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
+    <!--<dependency>-->
+    <!--<groupId>org.osgi</groupId>-->
+    <!--<artifactId>org.osgi.core</artifactId>-->
+    <!--<version>${osgi.core.version}</version>-->
+    <!--</dependency>-->
   </dependencies>
 
   <build>
@@ -97,10 +102,35 @@
           </instructions>
         </configuration>
       </plugin>
+      <!--<dependencies>-->
+      <!--&lt;!&ndash;<dependency>&ndash;&gt;-->
+      <!--&lt;!&ndash;<groupId>equinoxSDK381</groupId>&ndash;&gt;-->
+      <!--&lt;!&ndash;<artifactId>org.eclipse.osgi</artifactId>&ndash;&gt;-->
+      <!--&lt;!&ndash;<version>3.8.1.v20120830-144521</version>&ndash;&gt;-->
+      <!--&lt;!&ndash;</dependency>&ndash;&gt;-->
+      <!--<dependency>-->
+      <!--<groupId>org.osgi</groupId>-->
+      <!--<artifactId>org.osgi.core</artifactId>-->
+      <!--<version>${osgi.core.version}</version>-->
+      <!--</dependency>-->
+      <!--</dependencies>-->
       <!-- TODO - unite yang-maven-plugin configuration in md-sal-->
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-jmx-generator-plugin</artifactId>
+            <version>${config.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>maven-sal-api-gen-plugin</artifactId>
+            <version>${yangtools.version}</version>
+            <type>jar</type>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <goals>
@@ -131,10 +161,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>
