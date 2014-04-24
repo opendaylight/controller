@@ -58,10 +58,10 @@ public class NetconfClientSessionNegotiator extends
         NetconfClientSession session = super.getSessionForHelloMessage(netconfMessage);
 
         if (shouldUseExi(netconfMessage.getDocument())){
-            logger.info("Netconf session: {} should use exi.", session);
+            logger.debug("Netconf session: {} should use exi.", session);
             tryToStartExi(session);
         } else {
-            logger.info("Netconf session {} isn't capable using exi.", session);
+            logger.debug("Netconf session {} isn't capable using exi.", session);
             negotiationSuccessful(session);
         }
     }
