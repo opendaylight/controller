@@ -39,12 +39,23 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
 
       treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
 
+      System.out.println("\nvisting data in TreeCache");
+      System.out.println("----------------------------");
+      System.out.println("Fqn : " + nodeFqn.toString());
+     // System.out.println("Key : " + normalizedNode.getKey());
+     // System.out.println("Value : " + normalizedNode.getValue());
+
       wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.UPDATED, normalizedNode);
     } else {
       if (parentPath == null) {
         parentPath = "";
       }
       Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+      System.out.println("\nvisting data in snapshot");
+      System.out.println("----------------------------");
+      System.out.println("Fqn : " + nodeFqn.toString());
+      //System.out.println("Key : " + normalizedNode.getKey());
+      //System.out.println("Value : " + normalizedNode.getValue());
       wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.VISITED, normalizedNode);
     }
 

@@ -56,9 +56,9 @@ public class WriteDeleteTransactionTracker {
       }
       //creating instance identifier
       final InstanceIdentifier instanceIdentifier = new InstanceIdentifier(pathArguments);
-      transactionLog.put(fqnPath, new TransactionLog(fqnPath,instanceIdentifier, operation, node));
+      transactionLog.put(fqnPath.trim(), new TransactionLog(fqnPath,instanceIdentifier, operation, node));
     } else {
-      LOG.error("transaction log update after the transaction is locked? {},{},{}", fqnPath, operation, node);
+      LOG.error("transaction log update after the transaction is locked? {},{},{}", fqnPath.trim(), operation, node);
     }
   }
 
@@ -124,7 +124,7 @@ public class WriteDeleteTransactionTracker {
 
   private void prepareSnapshotTransactionLog() {
     if(snapshotTree != null) {
-      String parentPath = "/";
+      String parentPath = "";
       snapshotTransactions = new WriteDeleteTransactionTracker();
       new NormalizedNodeNavigator(new SnapshotNormalizedNodeTransactionLogMapper(snapshotTransactions)).navigate(parentPath, snapshotTree);
     }else{
@@ -168,7 +168,7 @@ public class WriteDeleteTransactionTracker {
                             DOMImmutableDataChangeEvent.Builder builder
                             ) {
     boolean changed = true;
-    TransactionLog oldOne = transactionLog.get(path);
+    TransactionLog oldOne = transactionLog.get(path.toString().trim());
 
     if (oldOne == null) {
       LOG.debug("Node was added at path {}", path);
@@ -180,7 +180,17 @@ public class WriteDeleteTransactionTracker {
 
     } else if ((newOne.getOp() == Operation.UPDATED) && (oldOne.getOp() == Operation.VISITED)) {
       LOG.debug("Node was added at path {}", path);
-      builder.addUpdated(newOne.getInstanceIdentifier(), oldOne.getNode(), newOne.getNode());
+      //ok here we need to check if it was a leaf entry so compare the value.
+      if(newOne.getNode().getNodeType().equals(oldOne.getNode().getNodeType())){
+         if((newOne.getNode().getValue() != null) && (oldOne.getNode().getValue()!=null)) {
+           if(!newOne.getNode().getValue().equals(oldOne.getNode().getValue())){
+             builder.addUpdated(newOne.getInstanceIdentifier(), oldOne.getNode(), newOne.getNode());
+           }else{
+             changed = false;
+           }
+         }
+      }
+
 
     } else if ((newOne.getOp() == Operation.VISITED) && (oldOne.getOp() == Operation.VISITED)) {
       LOG.debug("Not change found at the node level {} - before and after", path);
@@ -217,13 +227,22 @@ public class WriteDeleteTransactionTracker {
       if ((oldOne != null)) {
         builder.setBefore(oldOne.getNode());
       }
-
+      int count = 0;
       //we assume that the potential changes are less hence start looping using it
       for (Map.Entry<String, TransactionLog> potential : potentials.entrySet()) {
 
         boolean changed = resolveLeaf(potential.getKey(), potential.getValue(), builder);
+
         if(changed && potential.getKey().equals(path)){
           resultScope[0]=true;
+          count +=1;
+        }else if (changed & potential.getKey().startsWith(path)){
+          count +=1;
+          if(count <=2 ){
+              resultScope[1]=true;
+          }else{
+            resultScope[2]=true;
+          }
         }
       }
     }

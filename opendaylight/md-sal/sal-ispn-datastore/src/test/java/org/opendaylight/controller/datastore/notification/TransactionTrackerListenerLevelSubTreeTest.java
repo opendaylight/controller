@@ -14,8 +14,6 @@ import org.opendaylight.controller.datastore.infinispan.NormalizedNodeToTreeCach
 import org.opendaylight.controller.datastore.infinispan.TreeCacheManagerSingleton;
 import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -24,10 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertNotNull;
@@ -36,7 +31,7 @@ import static org.junit.Assert.assertNotNull;
  * @author: syedbahm
  * Date: 4/17/14
  */
-public class WriteDeleteTransactionTrackerTest {
+public class TransactionTrackerListenerLevelSubTreeTest {
 
 
   private SchemaContext schemaContext;
@@ -50,22 +45,22 @@ public class WriteDeleteTransactionTrackerTest {
 
 
   @Test
-  public void testBasic(){
-      final TreeCache treeCache = TreeCacheManagerSingleton.get().getCache("WriteDeleteTransactionTrackerTest-testBasic");
-      final NormalizedNodeToTreeCacheCodec codec = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache);
-      codec.encode(InstanceIdentifier.builder().build(), FamilyModel.createTestContainer(), new WriteDeleteTransactionTracker(1));
+  public void testBasic() {
+    final TreeCache treeCache = TreeCacheManagerSingleton.get().getCache("WriteDeleteTransactionTrackerTest-testBasic");
+    final NormalizedNodeToTreeCacheCodec codec = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache);
+    codec.encode(InstanceIdentifier.builder().build(), FamilyModel.createTestContainer(), new WriteDeleteTransactionTracker(1));
 
-      Node node = treeCache.getNode(Fqn.fromString("/")) ;
+    Node node = treeCache.getNode(Fqn.fromString("/"));
 //      if(node.getChildren().toArray().length != 0) {
 //        node = (Node) node.getChildren().toArray()[0];
 //      }
 
-      codec.decode(InstanceIdentifier.builder().build(), node);
+    codec.decode(InstanceIdentifier.builder().build(), node);
   }
 
 
   @Test
-  public void  RegisterBaseListenerOnChildAndUpdateChildName() throws Exception{
+  public void RegisterBaseListenerOnChildAndUpdateChildName() throws Exception {
 
     final DataStoreImpl dataStore = new DataStoreImpl(TreeCacheManagerSingleton.get().getCache("WriteDeleteTransactionTrackerTest-test1"), "configuration", schemaContext, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
     dataStore.onGlobalContextUpdated(schemaContext);
@@ -73,7 +68,7 @@ public class WriteDeleteTransactionTrackerTest {
     NormalizedNode normalizedNode = prepareFamilyTree(dataStore);
 
     String firstChildNamePath =
-     "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)family/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)children/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)children[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)child-number=1}]/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)child-name";
+        "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)family/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)children/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)children[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)child-number=1}]/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)child-name";
     String familyPath = "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)family";
 
     //ok here we will register listener on one of children
@@ -91,7 +86,7 @@ public class WriteDeleteTransactionTrackerTest {
     //ok here we will register listener on one of children
     //spliting this and creating list
     List<InstanceIdentifier.PathArgument> pathArguments1 = new ArrayList<>();
-   ids = familyPath.split("/");
+    ids = familyPath.split("/");
     for (String nodeId : ids) {
       if (!"".equals(nodeId)) {
         pathArguments1.add(NodeIdentifierFactory.getArgument(nodeId));
@@ -118,7 +113,10 @@ public class WriteDeleteTransactionTrackerTest {
 
     //here we want to register a single listener at the OUTER_LIST_PATH instance identifer level
 
-    FamilyModelBaseNodeChangeListener dcl1 = new FamilyModelBaseNodeChangeListener(normalizedNode, FamilyModelBaseNodeChangeListener.ExpectedOperation.ADDED, instanceIdentifier);
+    FamilyModelDataChangeListener dcl1 = new FamilyModelDataChangeListener(normalizedNode,
+        FamilyModelDataChangeListener.ExpectedOperation.ADDED,
+        instanceIdentifier,
+        AsyncDataBroker.DataChangeScope.BASE, "RegisterBaseListenerOnChildAndUpdateChildName");
 
     //ok let us register listener here
     dataStore.registerChangeListener(instanceIdentifier, dcl1, AsyncDataBroker.DataChangeScope.BASE);
@@ -128,20 +126,21 @@ public class WriteDeleteTransactionTrackerTest {
 
     final DOMStoreReadWriteTransaction domStoreReadWriteTransaction = dataStore.newReadWriteTransaction();
 
-    domStoreReadWriteTransaction.write(instanceIdentifierFamily,FamilyModel.createTestContainerWithFirstChildNameChanged("first child of the family"));
+    domStoreReadWriteTransaction.write(instanceIdentifierFamily, FamilyModel.createTestContainerWithFirstChildNameChanged("first child of the family"));
 
     //let us set what we are expecting from the listener side
     dcl1.setExpectedInstanceIdentifier(instanceIdentifier);
     dcl1.setExpectedOne(normalizedNode);
-    dcl1.setExpectedOperation(FamilyModelBaseNodeChangeListener.ExpectedOperation.UPDATED);
-
+    dcl1.setExpectedOperation(FamilyModelDataChangeListener.ExpectedOperation.UPDATED);
 
 
     DOMStoreThreePhaseCommitCohort t = domStoreReadWriteTransaction.ready();
     t.preCommit();
     t.commit();
 
-    Thread.sleep(1000);
+    synchronized (dcl1) {
+      dcl1.wait(10000);
+    }
 
   }
 
@@ -179,9 +178,8 @@ public class WriteDeleteTransactionTrackerTest {
       normalizedNode = null;
     }
 
-    //here we want to register a single listener at the OUTER_LIST_PATH instance identifer level
 
-    FamilyModelBaseNodeChangeListener dcl1 = new FamilyModelBaseNodeChangeListener(normalizedNode, FamilyModelBaseNodeChangeListener.ExpectedOperation.ADDED, instanceIdentifier);
+    FamilyModelDataChangeListener dcl1 = new FamilyModelDataChangeListener(normalizedNode, FamilyModelDataChangeListener.ExpectedOperation.ADDED, instanceIdentifier, AsyncDataBroker.DataChangeScope.BASE, "prepareFamilyTree");
 
     dataStore.registerChangeListener(instanceIdentifier, dcl1, AsyncDataBroker.DataChangeScope.BASE);
 
@@ -189,13 +187,20 @@ public class WriteDeleteTransactionTrackerTest {
     t.preCommit();
     t.commit();
 
+    Thread.sleep(1000);
     DOMStoreReadTransaction domStoreReadTransaction = dataStore.newReadOnlyTransaction();
 
-    Thread.sleep(1000);
+
     final ListenableFuture<Optional<NormalizedNode<?, ?>>> readNode = domStoreReadTransaction.read(instanceIdentifier);
 
     final NormalizedNode<?, ?> readNormalizedNode = readNode.get().get();
     Assert.assertNotNull(readNormalizedNode);
+    synchronized (dcl1) {
+
+      dcl1.wait(10000);
+
+    }
+
     return readNormalizedNode;
 
   }
@@ -207,134 +212,5 @@ public class WriteDeleteTransactionTrackerTest {
     prepareFamilyTree(dataStore);
   }
 
-
-  private Node prepareTree(TreeCache tc) {
-    Map personA = new HashMap<>();
-    personA.put("person", "a");
-    tc.put(Fqn.fromString("/a"), personA);
-    Map childrenOfA = new HashMap<>();
-    childrenOfA.put("child 1", "B");
-    tc.put(Fqn.fromString("/a/b"), childrenOfA);
-    childrenOfA.clear();
-    childrenOfA.put("child 2", "C");
-    tc.put(Fqn.fromString("/a/c"), childrenOfA);
-    childrenOfA.clear();
-    childrenOfA.put("child 3", "D");
-    tc.put(Fqn.fromString("/a/d"), childrenOfA);
-
-    Map childrenOfB = new HashMap<>();
-    childrenOfB.put("child 1", "E");
-    tc.put(Fqn.fromString("/a/b/e"), childrenOfB);
-    childrenOfB.clear();
-    childrenOfB.put("child 2", "F");
-    tc.put(Fqn.fromString("/a/b/f"), childrenOfB);
-    childrenOfB.clear();
-    childrenOfB.put("child 3", "G");
-    tc.put(Fqn.fromString("/a/b/g"), childrenOfB);
-
-
-    Map personH = new HashMap<>();
-    personH.put("person", "H");
-    tc.put(Fqn.fromString("/h"), personH);
-    Map childrenOfH = new HashMap<>();
-    childrenOfH.put("child 1", "I");
-    tc.put(Fqn.fromString("/h/i"), childrenOfH);
-    childrenOfH.clear();
-    childrenOfH.put("child 2", "J");
-    tc.put(Fqn.fromString("/h/j"), childrenOfH);
-    childrenOfH.clear();
-
-
-    Map childrenOfJ = new HashMap<>();
-    childrenOfJ.put("child 1", "K");
-    tc.put(Fqn.fromString("/h/j/k"), childrenOfJ);
-
-    Node root = tc.getRoot();
-    return prepareSnapshot(root);
-  }
-
-  Node prepareSnapshot(Node root) {
-    Set<Node> children = root.getChildren();
-    for (Node child : children) {
-      if (child != null) {
-        prepareSnapshot(child);
-      }
-    }
-    return root;
-  }
-
-
-}
-
-
-class FamilyModelBaseNodeChangeListener implements AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
-  public static enum ExpectedOperation {ADDED, UPDATED, REMOVED}
-
-  ;
-  ExpectedOperation expectedOperation;
-  NormalizedNode<?, ?> expectedOne;
-
-  InstanceIdentifier expectedInstanceIdentifier;
-
-  public FamilyModelBaseNodeChangeListener(NormalizedNode<?, ?> expected, ExpectedOperation operation, InstanceIdentifier id) {
-    expectedOne = expected;
-    expectedOperation = operation;
-    expectedInstanceIdentifier = id;
-  }
-
-  @Override
-  public void onDataChanged(
-      final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
-
-    try {
-      //here we will compare with the execpted one and the original one.
-      if (expectedOperation == ExpectedOperation.ADDED) {
-        Map<InstanceIdentifier, NormalizedNode<?, ?>> added = (Map<InstanceIdentifier, NormalizedNode<?, ?>>) change.getCreatedData();
-        for (Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> entry : added.entrySet()) {
-          System.out.println("Path identifying the InstanceIdenetifier:" + entry.getKey().getPath());
-
-          Assert.assertNull(change.getOriginalSubtree());
-          Assert.assertNotNull(change.getUpdatedSubtree());
-          if (change.getOriginalData() != null && !change.getOriginalData().isEmpty()) {
-            Assert.fail("failure original data found");
-          }
-        }
-      } else if (expectedOperation == ExpectedOperation.UPDATED) {
-        Map<InstanceIdentifier, NormalizedNode<?, ?>> updated = (Map<InstanceIdentifier, NormalizedNode<?, ?>>) change.getUpdatedData();
-        for (Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> entry : updated.entrySet()) {
-          System.out.println("Path identifying the InstanceIdenetifier:" + entry.getKey().getPath());
-          Assert.assertEquals(entry.getKey().getPath(), expectedInstanceIdentifier.getPath());
-          System.out.println("expected nodetype:" + expectedOne.getNodeType());
-          System.out.println("actual nodetype:" + entry.getValue().getNodeType());
-
-          Assert.assertNotNull(change.getOriginalSubtree());
-          Assert.assertNotNull(change.getUpdatedSubtree());
-          Assert.assertNull(change.getCreatedData());
-          Assert.assertNotNull(change.getOriginalData());
-          Assert.assertNull(change.getRemovedPaths());
-          Assert.assertEquals(entry.getValue().getValue(),"first child of family");
-
-        }
-      }
-      else
-      {
-        throw new UnsupportedOperationException();
-      }
-    } catch (Throwable t) {
-      t.printStackTrace();
-      Assert.assertNull(t);
-    }
-  }
-  public void setExpectedOperation(ExpectedOperation expectedOperation) {
-    this.expectedOperation = expectedOperation;
-  }
-
-  public void setExpectedOne(NormalizedNode<?, ?> expectedOne) {
-    this.expectedOne = expectedOne;
-  }
-
-  public void setExpectedInstanceIdentifier(InstanceIdentifier expectedInstanceIdentifier) {
-    this.expectedInstanceIdentifier = expectedInstanceIdentifier;
-  }
 }
 
