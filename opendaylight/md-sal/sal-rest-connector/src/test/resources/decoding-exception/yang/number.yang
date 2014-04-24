@@ -1,0 +1,17 @@
+ module number {
+
+   namespace "number";
+   prefix "number";
+
+   revision 2014-04-24 {
+   }
+
+    
+
+    container cont {
+        leaf lf {
+            type uint8;
+        }
+        
+    }    
+ }
