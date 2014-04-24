@@ -4,18 +4,16 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>0.5.2-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/integrationtest</relativePath>
   </parent>
-
   <artifactId>switchmanager.integrationtest</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <!--<version>0.4.2-SNAPSHOT</version>-->
   <properties>
     <sonar.jacoco.itReportPath>../implementation/target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <!-- Sonar jacoco plugin to get integration test coverage info -->
     <sonar.jacoco.reportPath>../implementation/target/jacoco.exec</sonar.jacoco.reportPath>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>

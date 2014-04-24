@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-binding-broker-impl</artifactId>
   <packaging>bundle</packaging>
@@ -121,7 +121,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
 
@@ -168,7 +167,9 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <includes>
-            <include>org.opendaylight.controller.*</include>
+              <include>
+                  org.opendaylight.controller.*
+              </include>
           </includes>
         </configuration>
         <executions>
@@ -190,6 +191,19 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>yang-jmx-generator-plugin</artifactId>
+            <version>${config.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>maven-sal-api-gen-plugin</artifactId>
+            <version>${yangtools.version}</version>
+            <type>jar</type>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <goals>
@@ -222,10 +236,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>
