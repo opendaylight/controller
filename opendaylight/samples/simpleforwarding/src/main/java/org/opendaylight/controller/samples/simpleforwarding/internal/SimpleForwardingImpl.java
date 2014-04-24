@@ -1010,12 +1010,10 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     routing.getRoute(incomingNodeConnector.getNode(), destHost.getnodeconnectorNode()) != null)) {
 
             log.trace("Host {} is at {}", dIP, destHost.getnodeConnector());
-            HostNodePair key = new HostNodePair(destHost, destHost.getnodeconnectorNode());
 
             // If SimpleForwarding is aware of this host, it will try to install
             // a path. Forward packet until it's done.
-            if (dataPacketService != null && this.rulesDB.containsKey(key)) {
-
+            if (dataPacketService != null) {
 
                 /*
                  * if we know where the host is and there's a path from where this
