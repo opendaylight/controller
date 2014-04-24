@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -49,6 +50,7 @@ public class ServerImpl implements RemoteRpcServer {
 
   private String serverAddress;
   private final int port;
+  private SchemaContext schemaContext;
 
   public static enum State {
     STARTING, STARTED, STOPPED;
@@ -85,6 +87,14 @@ public class ServerImpl implements RemoteRpcServer {
   public String getHandlerAddress() {
     return HANDLER_INPROC_ADDRESS;
   }
+
+  /**
+   * sets the schemaContext
+   * @param schemaContext
+   */
+//  public void setSchemaContext(SchemaContext schemaContext){
+//    this.schemaContext = schemaContext;
+//  }
 
   /**
    *

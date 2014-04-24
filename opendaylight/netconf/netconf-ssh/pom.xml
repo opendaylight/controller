@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>netconf-ssh</artifactId>
@@ -23,6 +23,10 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -77,7 +81,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
         <executions>
           <execution>
             <goals>

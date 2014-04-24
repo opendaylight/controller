@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>statisticsmanager.implementation</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <!--<version>0.4.2-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
   <properties>
     <!-- Sonar properties using jacoco to retrieve integration test results -->

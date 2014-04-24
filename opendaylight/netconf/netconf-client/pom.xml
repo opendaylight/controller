@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>netconf-client</artifactId>
   <packaging>bundle</packaging>
@@ -31,6 +31,16 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>protocol-framework</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena</artifactId>
+      <version>${exi.nagasena.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena-rta</artifactId>
+      <version>${exi.nagasena.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -72,7 +82,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
+        <!--<version>2.4</version>-->
         <executions>
           <execution>
             <goals>
