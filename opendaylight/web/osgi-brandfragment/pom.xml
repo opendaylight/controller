@@ -4,13 +4,13 @@
 
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>osgi-brandfragment.web</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <!--<version>0.0.2-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
   <description>OSGi management web application brand fragment</description>
 
