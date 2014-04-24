@@ -4,10 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-remote</artifactId>
   <packaging>bundle</packaging>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -57,10 +58,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>

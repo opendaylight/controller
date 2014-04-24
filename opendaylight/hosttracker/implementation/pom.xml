@@ -3,15 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
   <artifactId>hosttracker.implementation</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <!--<version>0.5.2-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
+  <!--<scm>-->
+  <!--<connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>-->
+  <!--<developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>-->
+  <!--<url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>-->
+  <!--<tag>HEAD</tag>-->
+  <!--</scm>-->
 
   <properties>
+    <jacoco.version>0.5.3.201107060350</jacoco.version>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
@@ -89,9 +96,7 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
+          <includes>org.opendaylight.controller.*</includes>
         </configuration>
         <executions>
           <execution>
@@ -111,10 +116,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>
