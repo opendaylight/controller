@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a90e0eb",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/SynchronizedTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2014-04-24T18:30:27Z",
+      "side": 1,
+      "message": "Remove trailing blanks",
+      "revId": "87a4fbd300c92d715e2d84aebe92f9da93f2c514",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dabc546f",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/SynchronizedTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2014-04-24T18:30:27Z",
+      "side": 1,
+      "message": "Remove trailing blanks",
+      "revId": "87a4fbd300c92d715e2d84aebe92f9da93f2c514",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fac118e5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/SynchronizedTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2014-04-24T18:30:27Z",
+      "side": 1,
+      "message": "Remove trailing blanks",
+      "revId": "87a4fbd300c92d715e2d84aebe92f9da93f2c514",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
