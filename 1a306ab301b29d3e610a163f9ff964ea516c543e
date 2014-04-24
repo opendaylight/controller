@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7adae879",
+        "filename": "opendaylight/config/netconf-config-dispatcher/src/main/java/org/opendaylight/controller/config/yang/config/netconf/client/dispatcher/NetconfClientDispatcherModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-24T20:08:53Z",
+      "side": 1,
+      "message": "Replace header with copyright header.",
+      "revId": "1a306ab301b29d3e610a163f9ff964ea516c543e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5adda46f",
+        "filename": "opendaylight/config/netconf-config-dispatcher/src/main/java/org/opendaylight/controller/config/yang/config/netconf/client/dispatcher/NetconfClientDispatcherModuleFactory.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-24T20:08:53Z",
+      "side": 1,
+      "message": "Replace header with copyright header.",
+      "revId": "1a306ab301b29d3e610a163f9ff964ea516c543e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
