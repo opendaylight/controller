@@ -4,8 +4,8 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>compatibility-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
-  </parent>
+    <version>1.4.2-SNAPSHOT</version>
+   </parent>
   <artifactId>flow-management-compatibility</artifactId>
   <packaging>bundle</packaging>
 

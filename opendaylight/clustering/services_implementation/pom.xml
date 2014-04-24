@@ -1,54 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>controller-parent</artifactId>
+        <version>1.4.2-SNAPSHOT</version>
+        <relativePath>../../parent</relativePath>
+    </parent>
 
   <artifactId>clustering.services-implementation</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
+  <!--<version>0.4.3-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
   <properties>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
     <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <jacoco.version>0.5.3.201107060350</jacoco.version>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.apache.felix.gogo.runtime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.infinispan</groupId>
-      <artifactId>infinispan-core</artifactId>
-      <version>6.0.2.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.jbossts.jta</groupId>
-      <artifactId>narayana-jta</artifactId>
-      <version>4.17.7.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>commons.logback_settings</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-  </dependencies>
   <build>
     <pluginManagement>
       <plugins>
@@ -67,7 +36,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.slf4j,
+            <Import-Package>
+              org.slf4j,
               !org.apache.logging.log4j.*,
               !bsh*,
               !net.jcip.*,
@@ -77,8 +47,11 @@
               javax.transaction,
               *,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core</Import-Package>
-            <Bundle-Activator>org.opendaylight.controller.clustering.services_implementation.internal.Activator</Bundle-Activator>
+              org.opendaylight.controller.sal.core
+            </Import-Package>
+            <Bundle-Activator>
+              org.opendaylight.controller.clustering.services_implementation.internal.Activator
+            </Bundle-Activator>
             <!-- Add in the DynamicImport-Package ONLY the packages that -->
             <!-- contains types that MUST be unmarshalled by the -->
             <!-- infinispan. They need to be wired at runtime even during -->
@@ -86,12 +59,40 @@
             <!-- those are missing the bundle will still come up, this is -->
             <!-- why those dependencies ends in the DynamicImport-Package -->
             <!-- rather in the Import-Package -->
-            <DynamicImport-Package>*</DynamicImport-Package>
-            <Embed-Dependency>infinispan-core,infinispan-commons,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
+            <DynamicImport-Package>
+              *
+            </DynamicImport-Package>
+            <Embed-Dependency>
+              infinispan-core,infinispan-commons,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false
+            </Embed-Dependency>
+            <Embed-Transitive>
+              true
+            </Embed-Transitive>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <includes>org.opendaylight.controller.*</includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pre-test</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -119,36 +120,36 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <phase>test</phase>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossts.jta</groupId>
+      <artifactId>narayana-jta</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.logback_settings</artifactId>
+    </dependency>
+  </dependencies>
 </project>

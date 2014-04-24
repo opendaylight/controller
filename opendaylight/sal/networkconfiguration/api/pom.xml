@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../../commons/opendaylight</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>controller-parent</artifactId>
+        <version>1.4.2-SNAPSHOT</version>
+        <relativePath>../../../parent</relativePath>
+    </parent>
+
 
   <artifactId>sal.networkconfiguration</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
+  <!--<version>0.0.3-SNAPSHOT</version>-->
   <packaging>bundle</packaging>
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -27,22 +22,26 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.slf4j,
+            <Import-Package>
+              org.slf4j,
               org.osgi.framework,
               org.apache.felix.dm,
               org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.utils</Import-Package>
-            <Export-Package>org.opendaylight.controller.sal.networkconfig.bridgedomain</Export-Package>
+              org.opendaylight.controller.sal.utils
+            </Import-Package>
+            <Export-Package>
+              org.opendaylight.controller.sal.networkconfig.bridgedomain
+             </Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+    </dependency>
+  </dependencies>
 </project>

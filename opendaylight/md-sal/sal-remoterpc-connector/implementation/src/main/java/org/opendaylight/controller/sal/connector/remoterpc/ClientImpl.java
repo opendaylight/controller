@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
@@ -51,6 +52,7 @@ public class ClientImpl implements RemoteRpcClient {
   private final ZMQ.Context context = ZMQ.context(1);
   private final ClientRequestHandler handler;
   private RoutingTableProvider routingTableProvider;
+  private SchemaContext schemaContext;
 
   public ClientImpl(){
     handler = new ClientRequestHandler(context);
@@ -86,6 +88,13 @@ public class ClientImpl implements RemoteRpcClient {
     stop();
   }
 
+  /**
+   * sets the schemaContext
+   * @param schemaContext
+   */
+//  public void setSchemaContext(SchemaContext schemaContext){
+//   this.schemaContext = schemaContext;
+//  }
   /**
    * Finds remote server that can execute this rpc and sends a message to it
    * requesting execution.
@@ -135,7 +144,7 @@ public class ClientImpl implements RemoteRpcClient {
         .sender(Context.getInstance().getLocalUri())
         .recipient(address)
         .route(routeId)
-        .payload(XmlUtils.compositeNodeToXml(input))
+        .payload(XmlUtils.compositeNodeToXml(input/*, schemaContext*/))
         .build();
 
     List<RpcError> errors = new ArrayList<RpcError>();
@@ -156,7 +165,7 @@ public class ClientImpl implements RemoteRpcClient {
               break;
 
           case RESPONSE:
-            payload = XmlUtils.xmlToCompositeNode((String) rawPayload);
+            payload = XmlUtils.xmlToCompositeNode((String) rawPayload/*, schemaContext*/);
             break;
 
           default:

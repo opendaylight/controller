@@ -34,6 +34,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -69,6 +70,11 @@ public class RemoteRpcProvider implements
     this.routingTableProvider = provider;
     client.setRoutingTableProvider(provider);
   }
+
+//  public void setSchemaContext(SchemaContext schemaContext){
+//    server.setSchemaContext(schemaContext);
+//    client.setSchemaContext(schemaContext);
+//  }
 
   public void setContext(BundleContext context){
     this.context = context;

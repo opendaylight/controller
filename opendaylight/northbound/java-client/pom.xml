@@ -3,19 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>northbound.client</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <!--<version>0.0.1-SNAPSHOT</version>-->
   <packaging>pom</packaging>
 
   <properties>
