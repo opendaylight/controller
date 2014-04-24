@@ -7,16 +7,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <artifactId>netty-threadgroup-config</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Configuration Wrapper around netty's event group</description>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
 
   <dependencies>
     <dependency>
@@ -73,11 +70,19 @@
             <Export-Package>org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.threadgroup.rev131107.*,</Export-Package>
           </instructions>
         </configuration>
+
       </plugin>
 
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>equinoxSDK381</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>3.8.1.v20120830-144521</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

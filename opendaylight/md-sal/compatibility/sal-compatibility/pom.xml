@@ -4,12 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>compatibility-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-compatibility</artifactId>
   <packaging>bundle</packaging>
   <name>MD-SAL to AD-SAL Adaptation</name>
-
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -26,7 +25,6 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-topology</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>config-netconf-connector</artifactId>
   <packaging>bundle</packaging>
@@ -130,7 +130,7 @@
                             com.google.common.io,
                             org.opendaylight.yangtools.yang.model.api.type,
                             org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.sal.binding.yang.types,</Import-Package>
+                            org.opendaylight.yangtools.sal.binding.yang.types</Import-Package>
             <Export-Package></Export-Package>
           </instructions>
         </configuration>
