@@ -61,7 +61,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
     @Override
     public ChannelFuture sendMessage(final NetconfMessage netconfMessage) {
         final ChannelFuture future = channel.writeAndFlush(netconfMessage);
-        if (delayedEncoder !=null) {
+        if (delayedEncoder != null) {
                 replaceMessageEncoder(delayedEncoder);
                 delayedEncoder = null;
         }

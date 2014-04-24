@@ -24,6 +24,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -44,10 +45,12 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
     private static final class Request {
         final UncancellableFuture<RpcResult<CompositeNode>> future;
         final NetconfMessage request;
+        final QName rpc;
 
-        private Request(UncancellableFuture<RpcResult<CompositeNode>> future, NetconfMessage request) {
+        private Request(UncancellableFuture<RpcResult<CompositeNode>> future, NetconfMessage request, final QName rpc) {
             this.future = future;
             this.request = request;
+            this.rpc = rpc;
         }
     }
 
@@ -162,14 +165,13 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
                 return;
             }
 
-            r.future.set(Rpcs.getRpcResult(true, NetconfMapping.toNotificationNode(message, device.getSchemaContext()),
-                    Collections.<RpcError>emptyList()));
+            r.future.set(NetconfMapping.toRpcResult(message, r.rpc, device.getSchemaContext()));
         } else {
             LOG.warn("Ignoring unsolicited message", message);
         }
     }
 
-    synchronized ListenableFuture<RpcResult<CompositeNode>> sendRequest(final NetconfMessage message) {
+    synchronized ListenableFuture<RpcResult<CompositeNode>> sendRequest(final NetconfMessage message, final QName rpc) {
         if (session == null) {
             LOG.debug("Session to {} is disconnected, failing RPC request {}", device.getName(), message);
             return Futures.<RpcResult<CompositeNode>>immediateFuture(new RpcResult<CompositeNode>() {
@@ -191,7 +193,7 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
             });
         }
 
-        final Request req = new Request(new UncancellableFuture<RpcResult<CompositeNode>>(true), message);
+        final Request req = new Request(new UncancellableFuture<RpcResult<CompositeNode>>(true), message, rpc);
         requests.add(req);
 
         session.sendMessage(req.request).addListener(new FutureListener<Void>() {
@@ -199,7 +201,7 @@ class NetconfDeviceListener implements NetconfClientSessionListener {
             public void operationComplete(final Future<Void> future) throws Exception {
                 if (!future.isSuccess()) {
                     // We expect that a session down will occur at this point
-                    LOG.debug("Failed to send request {}", req.request, future.cause());
+                    LOG.debug("Failed to send request {}", XmlUtil.toString(req.request.getDocument()), future.cause());
                     req.future.setException(future.cause());
                 } else {
                     LOG.trace("Finished sending request {}", req.request);
