@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7a40958",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-04-24T09:05:44Z",
+      "side": 1,
+      "message": "Please use bug references in format BUG 652 and BUG 720.\n\nIf you use such format automatic linking to bugzilla will be added.",
+      "revId": "2e2f49af8c5d45986d479a386a2637e9b266fe47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5789fdc8",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/leafref/yang/leafref-module.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-04-24T09:05:44Z",
+      "side": 1,
+      "message": "Import for referenced module is missing.",
+      "revId": "2e2f49af8c5d45986d479a386a2637e9b266fe47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
