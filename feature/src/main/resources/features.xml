@@ -4,7 +4,7 @@
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
    <feature name="felix-dm" description="Felix Dependency Manager"
       version="${felix.dependencymanager.version}">
-      <bundle start-level="30">mvn:org.apache.felix/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <bundle start-level="30">mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
       <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
       <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.dependencymanager.shell/${felix.dependencymanager.shell.version}</bundle>
    </feature>
@@ -52,7 +52,6 @@
       <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.osgi.manifest/${virgo.version}</bundle>
       <bundle start="true" start-level="30">mvn:geminiweb/org.eclipse.virgo.util.parser.manifest/${virgo.version}</bundle>
       <bundle start="true" start-level="30">mvn:org.apache.felix/org.apache.felix.fileinstall/3.1.6</bundle>
-      <bundle start="true" start-level="30">mvn:equinoxSDK381/org.eclipse.equinox.console/1.0.0.v20120522-1841</bundle>
       <bundle start="true" start-level="30">mvn:eclipselink/javax.persistence/2.0.4.v201112161009</bundle>
       <bundle start="true" start-level="30">mvn:eclipselink/javax.resource/1.5.0.v200906010428</bundle>
       <bundle start="true" start-level="30">mvn:orbit/javax.activation/1.1.0.v201211130549</bundle>
@@ -76,7 +75,9 @@
    </feature>
    <feature name="sal" description="Service Abstraction Layer"
       version="${sal.version}">
-      <bundle>mvn:org.apache.felix/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <feature>felix-dm</feature>
+      <bundle start="true" start-level="30">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
+      <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
       <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal/${sal.version}</bundle>
       <!-- The SAL Implementation doesn't follow API versioning, should be
@@ -87,9 +88,20 @@
       <bundle>mvn:org.opendaylight.controller/sal.connection/${sal.connection.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal.connection.implementation/${sal.connection.version}</bundle>
    </feature>
+   <feature name="md-sal" description="Model-Driven Service Abstraction Layer">
+      <feature>transaction</feature>
+      <bundle>mvn:org.eclipse.xtend/org.eclipse.xtend.lib/${xtend.version}</bundle>
+      <bundle>mvn:org.javassist/javassist/${javassist.version}</bundle>
+      <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/appauth/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/arphandler/${arphandler.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/bundlescanner/${bundlescanner.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/bundlescanner.implementation/${bundlescanner.version}</bundle>
+   </feature>
    <feature name="controller-web" description="Controller Web Interface"
       version="${controller.version}">
       <feature>controller-services</feature>
+      <feature>gemini-web</feature>
       <bundle>mvn:org.opendaylight.controller/web/${controller.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/flows.web/${controller.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/devices.web/${controller.version}</bundle>
@@ -97,32 +109,78 @@
       <bundle>mvn:org.opendaylight.controller/topology.web/${controller.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/${controller.version}</bundle>
    </feature>
+   <feature name="service-hosttracker" description="Controller Service: Host Tracker">
+      <feature>service-clustering</feature>
+      <bundle>mvn:org.opendaylight.controller/hosttracker/${hosttracker.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.implementation/${hosttracker.implementation.version}</bundle>
+   </feature>
+   <feature name="service-clustering" description="Controller Service: Clustering">
+      <feature>transaction</feature>
+      <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.stub/${clustering.stub.version}</bundle>
+   </feature>
+   <feature name="service-configuration" description="Controller Service: Configuration">
+      <bundle>mvn:org.opendaylight.controller/config-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-manager/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-netconf-connector/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-directory-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-directory-autodetect-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-directory-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-file-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-impl/${netconf.version}</bundle>
+   </feature>
+   <feature name="legacy-configuration">
+      <bundle>mvn:org.opendaylight.controller/configuration/${configuration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/configuration.implementation/${controller.version}</bundle>
+   </feature>
+   <feature name="service-switchmanager" description="">
+      <feature>legacy-configuration</feature>
+      <feature>service-statisticsmanager</feature>
+      <bundle>mvn:org.opendaylight.controller/switchmanager/${switchmanager.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager.implementation/${controller.version}</bundle>
+   </feature>
+   <feature name="service-statisticsmanager" description="Controller Service : Statistics Manager">
+      <feature>service-forwardingrulesmanager</feature>
+      <bundle>mvn:org.opendaylight.controller/statisticsmanager/${statisticsmanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/statisticsmanager.implementation/${controller.version}</bundle>
+   </feature>
+   <feature name="service-forwardingrulesmanager" description="Controller Service : Forwarding Rules Manager">
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager/${forwardingrulesmanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation/${controller.version}</bundle>
+   </feature>
+   <feature name="service-security">
+      <feature>spring-security</feature>
+      <bundle>mvn:org.opendaylight.controller/appauth/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager/${containermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager.implementation/${containermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/topologymanager</bundle>
+   </feature>
+   <feature name="spring-security" description="Spring Security Support">
+      <bundle>mvn:org.springframework.security/spring-security-config/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-core/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-taglibs/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-web/${spring-security.version}</bundle>
+   </feature>
    <feature name="controller-services" description="Base Controller Services"
       version="${controller.version}">
       <feature>transaction</feature>
       <feature>sal</feature>
+      <feature>service-clustering</feature>
+      <feature>service-hosttracker</feature>
+      <feature>service-switchmanager</feature>
+      <feature>service-forwardingrulesmanager</feature>
+      <feature>service-statisticsmanager</feature>
+      <feature>service-security</feature>
+      <feature>legacy-configuration</feature>
       <bundle>mvn:org.opendaylight.controller/forwarding.staticrouting</bundle>
-      <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${controller.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/configuration</bundle>
-      <bundle>mvn:org.opendaylight.controller/configuration.implementation</bundle>
       <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
-      <bundle>mvn:org.opendaylight.controller/arphandler</bundle>
-      <bundle>mvn:org.opendaylight.controller/hosttracker</bundle>
-      <bundle>mvn:org.opendaylight.controller/hosttracker.implementation</bundle>
-      <bundle>mvn:org.opendaylight.controller/containermanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/containermanager.implementation</bundle>
-      <bundle>mvn:org.opendaylight.controller/appauth</bundle>
-      <bundle>mvn:org.opendaylight.controller/switchmanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/switchmanager.implementation</bundle>
-      <bundle>mvn:org.opendaylight.controller/statisticsmanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/topologymanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/usermanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/usermanager.implementation</bundle>
       <bundle>mvn:org.opendaylight.controller/connectionmanager</bundle>
       <bundle>mvn:org.opendaylight.controller/connectionmanager.implementation</bundle>
       <bundle>mvn:org.opendaylight.controller/security</bundle>
-      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager</bundle>
-      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation</bundle>
    </feature>
 </features>
