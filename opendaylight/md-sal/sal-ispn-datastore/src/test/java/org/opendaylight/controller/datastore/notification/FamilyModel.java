@@ -1,5 +1,14 @@
 package org.opendaylight.controller.datastore.notification;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+import junit.framework.Assert;
+import org.opendaylight.controller.datastore.infinispan.DataStoreImpl;
+import org.opendaylight.controller.datastore.infinispan.utils.NodeIdentifierFactory;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -16,7 +25,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
@@ -24,6 +35,7 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 
 
 public class FamilyModel {
+  public static int DEBUG_TIMEOUT=60000;
 
   public static final QName TEST_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test", "2014-04-17",
       "family");
@@ -47,9 +59,11 @@ public class FamilyModel {
 
   public static final String FIRST_CHILD_NAME = "first child";
   private static final String SECOND_CHILD_NAME = "second child";
-
+  public static final String THIRD_CHILD_NAME = "third child";
+  private static final Integer THIRD_CHILD_ID = 3;
   private static final Integer FIRST_GRAND_CHILD_ID = 1;
   private static final Integer SECOND_GRAND_CHILD_ID = 2;
+
 
   private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
   private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
@@ -104,7 +118,7 @@ public class FamilyModel {
 
   }
 
-  public static ContainerNode createTestContainer() {
+  public static ContainerNode createTestContainerWithThirdChildAdded() {
     final DataContainerNodeAttrBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder = ImmutableContainerNodeBuilder
         .create()
         .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(TEST_QNAME));
@@ -113,6 +127,7 @@ public class FamilyModel {
 
     final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
     final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> thirdChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, THIRD_CHILD_ID);
 
     final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID);
     final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID);
@@ -130,10 +145,15 @@ public class FamilyModel {
 
     secondChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
         .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
-        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(secondGrandChildBuilder.build()).build());
+
+
+    thirdChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, THIRD_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, THIRD_CHILD_NAME)).build();
 
     childrenBuilder.withChild(firstChildBuilder.build());
     childrenBuilder.withChild(secondChildBuilder.build());
+    childrenBuilder.withChild(thirdChildBuilder.build());
 
     return familyContainerBuilder.withChild(childrenBuilder.build()).build();
   }
@@ -165,7 +185,7 @@ public class FamilyModel {
 
     secondChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
         .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
-        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(secondGrandChildBuilder.build()).build());
 
     childrenBuilder.withChild(firstChildBuilder.build());
     childrenBuilder.withChild(secondChildBuilder.build());
@@ -173,4 +193,138 @@ public class FamilyModel {
     return familyContainerBuilder.withChild(childrenBuilder.build()).build();
   }
 
+
+  public static ContainerNode createTestContainer () {
+    final DataContainerNodeAttrBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder = ImmutableContainerNodeBuilder
+        .create()
+        .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(TEST_QNAME));
+
+    final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder = mapNodeBuilder(CHILDREN_QNAME);
+
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
+
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID);
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID);
+
+    firstGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME));
+
+    secondGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, SECOND_GRAND_CHILD_NAME));
+
+    firstChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
+
+
+    secondChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(secondGrandChildBuilder.build()).build());
+
+    childrenBuilder.withChild(firstChildBuilder.build());
+    childrenBuilder.withChild(secondChildBuilder.build());
+
+    return familyContainerBuilder.withChild(childrenBuilder.build()).build();
+  }
+
+
+  static public NormalizedNode<?, ?> prepareFamilyTree(final SchemaContext schemaContext, final DataStoreImpl dataStore) throws Exception {
+
+
+    dataStore.onGlobalContextUpdated(schemaContext);
+    final DOMStoreReadWriteTransaction domStoreReadWriteTransaction = dataStore.newReadWriteTransaction();
+
+    List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
+
+    //this seems to be root of the test container
+    String nodeWithValue = "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test?revision=2014-04-17)family";
+
+    //spliting this and creating list
+    String[] ids = nodeWithValue.split("/");
+    for (String nodeId : ids) {
+      if (!"".equals(nodeId)) {
+        pathArguments.add(NodeIdentifierFactory.getArgument(nodeId));
+      }
+    }
+    //creating instance identifier
+    final InstanceIdentifier instanceIdentifier = new InstanceIdentifier(pathArguments);
+
+    domStoreReadWriteTransaction.write(InstanceIdentifier.builder().build(), FamilyModel.createTestContainer());
+
+
+    final ListenableFuture<Optional<NormalizedNode<?, ?>>> optionalListenableFuture = domStoreReadWriteTransaction.read(instanceIdentifier);
+
+    final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = optionalListenableFuture.get();
+    NormalizedNode<?, ?> normalizedNode;
+    if (normalizedNodeOptional.isPresent()) {
+      normalizedNode = normalizedNodeOptional.get();
+    } else {
+      normalizedNode = null;
+    }
+
+
+    FamilyModelDataChangeListener dcl1 = new FamilyModelDataChangeListener(normalizedNode, FamilyModelDataChangeListener.ExpectedOperation.ADDED, instanceIdentifier, AsyncDataBroker.DataChangeScope.BASE, "prepareFamilyTree");
+
+    dataStore.registerChangeListener(instanceIdentifier, dcl1, AsyncDataBroker.DataChangeScope.BASE);
+
+    DOMStoreThreePhaseCommitCohort t = domStoreReadWriteTransaction.ready();
+    t.preCommit();
+    t.commit();
+
+    Thread.sleep(100);
+    DOMStoreReadTransaction domStoreReadTransaction = dataStore.newReadOnlyTransaction();
+
+
+    final ListenableFuture<Optional<NormalizedNode<?, ?>>> readNode = domStoreReadTransaction.read(instanceIdentifier);
+
+    final NormalizedNode<?, ?> readNormalizedNode = readNode.get().get();
+    Assert.assertNotNull(readNormalizedNode);
+    synchronized (dcl1) {
+
+      dcl1.wait(1000);
+
+    }
+    Assert.assertTrue(dcl1.createdEventReceived);
+
+    return readNormalizedNode;
+
+  }
+
+
+  public static NormalizedNode<?, ?> createTestContainerWithSecondChildRemoved() {
+    final DataContainerNodeAttrBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder = ImmutableContainerNodeBuilder
+        .create()
+        .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(TEST_QNAME));
+
+    final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder = mapNodeBuilder(CHILDREN_QNAME);
+
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
+
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID);
+    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID);
+
+    firstGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME));
+
+    secondGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, SECOND_GRAND_CHILD_NAME));
+
+    firstChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
+
+
+    secondChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
+        .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
+        .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(secondGrandChildBuilder.build()).build());
+
+    childrenBuilder.withChild(firstChildBuilder.build());
+//    childrenBuilder.withChild(secondChildBuilder.build());
+
+    return familyContainerBuilder.withChild(childrenBuilder.build()).build();
+
+
+  }
 }
