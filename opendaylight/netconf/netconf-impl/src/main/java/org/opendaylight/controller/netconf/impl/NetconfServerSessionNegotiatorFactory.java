@@ -32,7 +32,8 @@ import io.netty.util.concurrent.Promise;
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
     private static final Set<String> DEFAULT_CAPABILITIES = Sets.newHashSet(
-            XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0);
 
     private final Timer timer;
