@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
   <artifactId>distribution.opendaylight</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <!--<version>0.1.2-SNAPSHOT</version>-->
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
@@ -642,6 +642,15 @@
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
     </dependency>
+    <!-- nagasena -->
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena-rta</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.ow2.asm</groupId>
@@ -1080,7 +1089,6 @@
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-topology</artifactId>
-          <version>1.1-SNAPSHOT</version>
         </dependency>
 
         <!-- toaster example I'm pretty sure we should trim -->
