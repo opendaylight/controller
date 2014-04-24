@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <artifactId>yang-test-plugin</artifactId>
@@ -12,10 +12,6 @@
   <name>${project.artifactId}</name>
 
   <description>Remove generated source files, after new files generation, implementation is inserted.</description>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
-
   <dependencies>
     <dependency>
       <groupId>commons-io</groupId>
@@ -24,7 +20,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.0.5</version>
     </dependency>
   </dependencies>
 </project>

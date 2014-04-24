@@ -4,17 +4,20 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>compatibility-parent</artifactId>
   <packaging>pom</packaging>
   <name>MD-SAL to AD-SAL Adaptation Parent</name>
-
   <modules>
     <module>sal-compatibility</module>
     <module>inventory-topology-compatibility</module>
     <module>flow-management-compatibility</module>
   </modules>
+  <properties>
+    <jacoco.version>0.5.3.201107060350</jacoco.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -67,10 +70,9 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
         <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
+          <includes>org.opendaylight.controller.*</includes>
         </configuration>
         <executions>
           <execution>
@@ -90,10 +92,5 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
+
 </project>

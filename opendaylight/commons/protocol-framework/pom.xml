@@ -5,13 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>protocol-framework</artifactId>
-  <version>0.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Common protocol framework</description>
@@ -27,6 +26,11 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.8.1.v20120830-144521</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
@@ -63,10 +67,6 @@
       <artifactId>mockito-configuration</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -78,12 +78,14 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-manager</artifactId>
+      <version>${config.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-util</artifactId>
+      <version>${config.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -141,6 +143,11 @@
         <artifactId>yang-maven-plugin</artifactId>
         <dependencies>
           <dependency>
+            <groupId>equinoxSDK381</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>3.8.1.v20120830-144521</version>
+          </dependency>
+          <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-jmx-generator-plugin</artifactId>
             <version>${config.version}</version>
@@ -177,10 +184,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>
