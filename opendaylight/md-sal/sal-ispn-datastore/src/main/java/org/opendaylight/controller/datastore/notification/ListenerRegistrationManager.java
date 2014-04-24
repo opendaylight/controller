@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.Executor;
 
 /**
  * @author: syedbahm
@@ -138,4 +139,7 @@ public class ListenerRegistrationManager {
     return lastListenableFuture;
   }
 
+  public Executor getNotifyExecutor() {
+    return asyncNotificationService;
+  }
 }

@@ -34,6 +34,8 @@ public class WriteDeleteTransactionTracker {
 
   WriteDeleteTransactionTracker snapshotTransactions = null;
 
+  boolean snapshotPrepared = false;
+
 
   private WriteDeleteTransactionTracker(){
         transactionNo = 0;
@@ -45,6 +47,7 @@ public class WriteDeleteTransactionTracker {
 
   public synchronized void track(String fqnPath, Operation operation, NormalizedNode<?, ?> node) {
     if (!locked) {
+      LOG.debug("Tracking:FqnPath={} Operation={}, node info= {}",fqnPath,operation.toString(),node);
       //building the instance identifier
       //spliting this and creating list
       List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
@@ -56,9 +59,9 @@ public class WriteDeleteTransactionTracker {
       }
       //creating instance identifier
       final InstanceIdentifier instanceIdentifier = new InstanceIdentifier(pathArguments);
-      transactionLog.put(fqnPath, new TransactionLog(fqnPath,instanceIdentifier, operation, node));
+      transactionLog.put(fqnPath.trim(), new TransactionLog(fqnPath,instanceIdentifier, operation, node));
     } else {
-      LOG.error("transaction log update after the transaction is locked? {},{},{}", fqnPath, operation, node);
+      LOG.error("transaction log update after the transaction is locked? {},{},{}", fqnPath.trim(), operation, node);
     }
   }
 
@@ -123,10 +126,11 @@ public class WriteDeleteTransactionTracker {
   }
 
   private void prepareSnapshotTransactionLog() {
-    if(snapshotTree != null) {
-      String parentPath = "/";
+    if(snapshotTree != null && !snapshotPrepared) {
+      String parentPath = "";
       snapshotTransactions = new WriteDeleteTransactionTracker();
       new NormalizedNodeNavigator(new SnapshotNormalizedNodeTransactionLogMapper(snapshotTransactions)).navigate(parentPath, snapshotTree);
+      snapshotPrepared =true;
     }else{
       LOG.warn("Snapshot tree was found to be empty for the transaction " + transactionNo);
     }
@@ -168,7 +172,7 @@ public class WriteDeleteTransactionTracker {
                             DOMImmutableDataChangeEvent.Builder builder
                             ) {
     boolean changed = true;
-    TransactionLog oldOne = transactionLog.get(path);
+    TransactionLog oldOne = transactionLog.get(path.toString().trim());
 
     if (oldOne == null) {
       LOG.debug("Node was added at path {}", path);
@@ -179,11 +183,21 @@ public class WriteDeleteTransactionTracker {
       builder.addRemoved(newOne.getInstanceIdentifier(), oldOne.getNode());
 
     } else if ((newOne.getOp() == Operation.UPDATED) && (oldOne.getOp() == Operation.VISITED)) {
-      LOG.debug("Node was added at path {}", path);
-      builder.addUpdated(newOne.getInstanceIdentifier(), oldOne.getNode(), newOne.getNode());
-
+      //ok here we need to check if it was a leaf entry so compare the value.
+      if(newOne.getNode().getNodeType().equals(oldOne.getNode().getNodeType())){
+         if((newOne.getNode().getValue() != null) && (oldOne.getNode().getValue()!=null)) {
+           if(!newOne.getNode().getValue().equals(oldOne.getNode().getValue())){
+             LOG.debug("Node was updated at path {}", path);
+             builder.addUpdated(newOne.getInstanceIdentifier(), oldOne.getNode(), newOne.getNode());
+           }else{
+             changed = false;
+           }
+         }
+      }else{
+        LOG.debug("newOne and the oldOne were found to be null!");
+      }
     } else if ((newOne.getOp() == Operation.VISITED) && (oldOne.getOp() == Operation.VISITED)) {
-      LOG.debug("Not change found at the node level {} - before and after", path);
+      LOG.debug("No change found at the node level {} - before and after", path);
       changed = false;
     }
     return changed;
@@ -199,7 +213,8 @@ public class WriteDeleteTransactionTracker {
            resolveLeaf(path,potentials.get(path),builder);
       }else {
         if (potentials.size() <= 2) {
-          resultScope[1] = true;
+          resultScope[1] = true;//one level changed
+          resultScope[2] = true;//subtree changed
         } else {
           resultScope[2] = true;
         }
@@ -222,12 +237,28 @@ public class WriteDeleteTransactionTracker {
       for (Map.Entry<String, TransactionLog> potential : potentials.entrySet()) {
 
         boolean changed = resolveLeaf(potential.getKey(), potential.getValue(), builder);
+
         if(changed && potential.getKey().equals(path)){
           resultScope[0]=true;
+
+        }else if (changed){
+          //anything below gets changed then subtree is changed.
+          resultScope[2]=true;
+          if(resultScope[1] ==false) {
+            //here we should find whether one level path has changed.
+            String currentPath = potential.getKey();
+            String[] origPath =   path.split("/");
+            String[] splitPaths = currentPath.split("/");
+            if((splitPaths.length-origPath.length)==1){
+                resultScope[1] = true;
+              }
+            }
+
+          }
+
         }
       }
     }
-  }
 
   private TransactionLog getTransactionLog(String fqnPath) {
     return transactionLog.get(fqnPath);

@@ -31,6 +31,8 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
     String fixedIdentifier = NamespacePrefixMapper.get().fromInstanceIdentifier(normalizedNode.getIdentifier().toString());
 
     if (normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode) {
+      //capturing the paths here.
+      Fqn original =  Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
       Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(fixedParentPath), Fqn.fromString(fixedIdentifier));
 
         if(logger.isTraceEnabled()){
@@ -39,12 +41,14 @@ public class NormalizedNodeTreeCacheWriter implements NormalizedNodeVisitor {
 
       treeCacheWrapper.writeValue(treeCache, nodeFqn, normalizedNode.getValue());
 
-      wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.UPDATED, normalizedNode);
+
+      wdtt.track(original.toString(), WriteDeleteTransactionTracker.Operation.UPDATED, normalizedNode);
     } else {
       if (parentPath == null) {
         parentPath = "";
       }
       Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+
       wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.VISITED, normalizedNode);
     }
 

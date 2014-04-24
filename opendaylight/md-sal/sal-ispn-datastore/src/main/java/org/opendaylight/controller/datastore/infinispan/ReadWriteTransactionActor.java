@@ -179,7 +179,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
     @Override
     public Object call() throws Exception {
       if(wdtt != null) {
-        treeCache.getCache().getAdvancedCache().getTransactionManager().setTransactionTimeout(INFINISPAN_TRANSACTION_TIMEOUT);    //TODO: REMOVE THIS
+
         treeCache.getCache().getAdvancedCache().getTransactionManager().begin();
         Node node = treeCache.getNode(Fqn.fromString("/")) ;
         final NormalizedNode<?, ?> normalizedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(InstanceIdentifier.builder().build(), node);
@@ -374,7 +374,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
               public void run() {
                   // here we need to call the notify listeners
                   lrm.notifyListeners(listenerTasks);
-              } }, crudExecutor);
+              } }, lrm.getNotifyExecutor());
           return Futures.transform(future, new Function<Object, Void>() {
               @Nullable
               @Override

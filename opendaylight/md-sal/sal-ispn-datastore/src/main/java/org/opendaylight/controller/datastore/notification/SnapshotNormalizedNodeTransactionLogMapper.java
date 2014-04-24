@@ -19,11 +19,10 @@ public class SnapshotNormalizedNodeTransactionLogMapper implements NormalizedNod
     if (normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode) {
       Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
 
-      System.out.println("\nvisting data in snapshot");
-      System.out.println("----------------------------");
-      System.out.println("Fqn : " + nodeFqn.toString());
-      System.out.println("Key : " + normalizedNode.getKey());
-      System.out.println("Value : " + normalizedNode.getValue());
+
+      if(nodeFqn.toString().startsWith("/(urn:ietf:params:xml:ns:netconf:base:1.0)data")) {
+        nodeFqn=nodeFqn.fromString(nodeFqn.toString().substring("/(urn:ietf:params:xml:ns:netconf:base:1.0)data".length()));
+      }
 
       wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.VISITED, normalizedNode);
     } else {
@@ -31,6 +30,11 @@ public class SnapshotNormalizedNodeTransactionLogMapper implements NormalizedNod
         parentPath = "";
       }
       Fqn nodeFqn = Fqn.fromRelativeFqn(Fqn.fromString(parentPath), Fqn.fromString(normalizedNode.getIdentifier().toString()));
+      if(nodeFqn.toString().startsWith("/(urn:ietf:params:xml:ns:netconf:base:1.0)data")) {
+        nodeFqn=nodeFqn.fromString(nodeFqn.toString().substring("/(urn:ietf:params:xml:ns:netconf:base:1.0)data".length()));
+      }
+
+
       wdtt.track(nodeFqn.toString(), WriteDeleteTransactionTracker.Operation.VISITED, normalizedNode);
     }
 
