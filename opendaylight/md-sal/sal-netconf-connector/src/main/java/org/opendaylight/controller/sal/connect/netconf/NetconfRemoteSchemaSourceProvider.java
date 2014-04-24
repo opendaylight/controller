@@ -20,6 +20,8 @@ import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> {
 
@@ -30,8 +32,11 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
 
     private final NetconfDevice device;
 
+    private final Logger logger;
+
     public NetconfRemoteSchemaSourceProvider(NetconfDevice device) {
         this.device = Preconditions.checkNotNull(device);
+        logger = LoggerFactory.getLogger(NetconfDevice.class + "#" + device.getName());
     }
 
     @Override
@@ -44,7 +49,7 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
             request.addLeaf("version", revision.get());
         }
 
-        device.logger.trace("Loading YANG schema source for {}:{}", moduleName, revision);
+        logger.trace("Loading YANG schema source for {}:{}", moduleName, revision);
         try {
             RpcResult<CompositeNode> schemaReply = device.invokeRpc(GET_SCHEMA_QNAME, request.toInstance()).get();
             if (schemaReply.isSuccessful()) {
@@ -54,9 +59,9 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
                     return Optional.of(schemaBody);
                 }
             }
-            device.logger.warn("YANG shcema was not successfully retrieved.");
+            logger.warn("YANG shcema was not successfully retrieved.");
         } catch (InterruptedException | ExecutionException e) {
-            device.logger.warn("YANG shcema was not successfully retrieved.", e);
+            logger.warn("YANG shcema was not successfully retrieved.", e);
         }
         return Optional.absent();
     }
