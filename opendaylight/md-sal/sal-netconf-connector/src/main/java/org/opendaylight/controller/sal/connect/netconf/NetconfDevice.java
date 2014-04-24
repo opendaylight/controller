@@ -289,7 +289,7 @@ public class NetconfDevice implements Provider, //
 
     @Override
     public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
-        return listener.sendRequest(toRpcMessage(rpc, input, getSchemaContext()));
+        return listener.sendRequest(toRpcMessage(rpc, input, getSchemaContext()), rpc);
     }
 
     @Override
