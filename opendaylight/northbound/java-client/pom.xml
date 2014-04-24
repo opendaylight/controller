@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>controller-parent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>../../parent</relativePath>
   </parent>
 
   <artifactId>northbound.client</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <!--<version>0.0.1-SNAPSHOT</version>-->
   <packaging>pom</packaging>
 
   <properties>

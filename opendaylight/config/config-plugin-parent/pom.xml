@@ -5,16 +5,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
-    <relativePath>../</relativePath>
+    <version>1.4.2-SNAPSHOT</version>
   </parent>
   <artifactId>config-plugin-parent</artifactId>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
-
   <build>
     <pluginManagement>
       <plugins>
