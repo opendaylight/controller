@@ -588,7 +588,11 @@ class RestconfImpl implements RestconfService {
         }
         if (node instanceof CompositeNodeWrapper) {
             if ((node  as CompositeNodeWrapper).changeAllowed) {
-                normalizeNode(node as CompositeNodeWrapper, schema, null, mountPoint)
+                try {
+                    normalizeNode(node as CompositeNodeWrapper, schema, null, mountPoint)
+                } catch (NumberFormatException e) {
+                    throw new ResponseException(BAD_REQUEST,e.message)
+                }
             }
             return (node as CompositeNodeWrapper).unwrap()
         }
