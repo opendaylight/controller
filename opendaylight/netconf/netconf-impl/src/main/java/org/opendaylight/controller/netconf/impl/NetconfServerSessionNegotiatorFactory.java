@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl;
 
 import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
@@ -31,9 +32,12 @@ import io.netty.util.concurrent.Promise;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
-    private static final Set<String> DEFAULT_CAPABILITIES = Sets.newHashSet(
-            XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0,
-            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0);
+    private static final Set<String> DEFAULT_BASE_CAPABILITIES = ImmutableSet.of(
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
+            // FIXME, Chunk framing causes ConcurrentClientsTest to fail, investigate
+//            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0
+    );
 
     private final Timer timer;
 
@@ -43,9 +47,11 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final DefaultCommitNotificationProducer commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
 
+    // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
                                                  SessionIdProvider idProvider, long connectionTimeoutMillis,
-                                                 DefaultCommitNotificationProducer commitNot, SessionMonitoringService monitoringService) {
+                                                 DefaultCommitNotificationProducer commitNot,
+                                                 SessionMonitoringService monitoringService) {
         this.timer = timer;
         this.netconfOperationProvider = netconfOperationProvider;
         this.idProvider = idProvider;
@@ -83,7 +89,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     private NetconfHelloMessage createHelloMessage(long sessionId, CapabilityProvider capabilityProvider) {
-        return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), DEFAULT_CAPABILITIES), sessionId);
+        return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), DEFAULT_BASE_CAPABILITIES), sessionId);
     }
 
 }
