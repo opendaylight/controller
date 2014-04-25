@@ -15,39 +15,64 @@
   </prerequisites>
 
   <properties>
+    <aopalliance.version>1.0.0</aopalliance.version>
+    <appauth.version>0.4.2-SNAPSHOT</appauth.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Plugin Versions -->
+    <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.10</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
+    <clustering.test.version>0.4.2-SNAPSHOT</clustering.test.version>
+    <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
+    <!-- Third Party Versions -->
+    <commons.codec.version>1.7</commons.codec.version>
+    <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang.version>3.1</commons.lang.version>
+    <commons.net.version>3.0.1</commons.net.version>
     <compiler.version>2.3.2</compiler.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
+    <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
+    <containermanager.northbound.version>0.4.2-SNAPSHOT</containermanager.northbound.version>
     <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
-    <!--versions for bits of the controller -->
+    <controllermanager.northbound.version>0.0.2-SNAPSHOT</controllermanager.northbound.version>
     <corsfilter.version>7.0.42</corsfilter.version>
+    <devices.web.version>0.4.2-SNAPSHOT</devices.web.version>
+    <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
     <enunciate.version>1.26.2</enunciate.version>
     <exam.version>3.0.0</exam.version>
-
     <!-- OpenEXI third party lib for netconf-->
     <exi.nagasena.version>0000.0002.0038.0-SNAPSHOT</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
+    <feature.transaction.version>1.0.1</feature.transaction.version>
+    <felix.dependencymanager.shell.version>3.0.1</felix.dependencymanager.shell.version>
+    <felix.dependencymanager.version>3.1.0</felix.dependencymanager.version>
+    <felix.fileinstall.version>3.1.6</felix.fileinstall.version>
+    <felix.webconsole.version>4.2.0</felix.webconsole.version>
+    <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
+    <flows.web.version>0.4.2-SNAPSHOT</flows.web.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
+    <forwarding.staticrouting.northbound.version>0.4.2-SNAPSHOT</forwarding.staticrouting.northbound.version>
+    <forwardingrulesmanager.implementation.version>0.4.2-SNAPSHOT</forwardingrulesmanager.implementation.version>
     <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
+    <gson.version>2.2.4</gson.version>
     <guava.version>14.0.1</guava.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
+    <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
@@ -61,8 +86,11 @@
     <!-- Third party version -->
     <jersey-servlet.version>1.17</jersey-servlet.version>
     <jersey.version>1.17</jersey.version>
+    <jettison.version>1.3.3</jettison.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia.version>1.1.4</jolokia.version>
+    <jsr305.api.version>2.0.1</jsr305.api.version>
+    <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
@@ -71,28 +99,40 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <messaging.clustering.version>0.1.0-SNAPSHOT</messaging.clustering.version>
+    <messaging.datastore.version>0.1.0-SNAPSHOT</messaging.datastore.version>
     <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
     <netty.version>4.0.17.Final</netty.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
+    <networkconfig.neutron.implementation.version>0.4.2-SNAPSHOT</networkconfig.neutron.implementation.version>
+    <networkconfig.neutron.northbound.version>0.4.2-SNAPSHOT</networkconfig.neutron.northbound.version>
+    <networkconfig.neutron.version>0.4.2-SNAPSHOT</networkconfig.neutron.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
+    <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
+    <osgi.compendium.version>5.0.0</osgi.compendium.version>
     <osgi.core.version>5.0.0</osgi.core.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <projectinfo>2.6</projectinfo>
-
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
-    <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
+    <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
+    <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
+    <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
+    <sal.implementation.version>0.4.2-SNAPSHOT</sal.implementation.version>
     <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
     <sal.version>0.8.1-SNAPSHOT</sal.version>
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
     <samples.loadbalancer>0.5.2-SNAPSHOT</samples.loadbalancer>
+    <samples.loadbalancer.northbound.version>0.4.2-SNAPSHOT</samples.loadbalancer.northbound.version>
+    <samples.simpleforwarding.version>0.4.2-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
+    <security.version>0.4.2-SNAPSHOT</security.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
     <slf4j.version>1.7.2</slf4j.version>
@@ -105,14 +145,25 @@
     <spring-osgi.version>1.2.1</spring-osgi.version>
     <spring-security.version>3.1.3.RELEASE</spring-security.version>
     <spring.version>3.1.3.RELEASE</spring.version>
+    <statistics.northbound.version>0.4.2-SNAPSHOT</statistics.northbound.version>
+    <statisticsmanager.implementation.version>0.5.1-SNAPSHOT</statisticsmanager.implementation.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
+    <subnets.northbound.version>0.4.2-SNAPSHOT</subnets.northbound.version>
     <surefire.version>2.15</surefire.version>
     <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
+    <switchmanager.implementation.version>0.4.2-SNAPSHOT</switchmanager.implementation.version>
+    <switchmanager.northbound.version>0.4.2-SNAPSHOT</switchmanager.northbound.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
+    <topology.northbound.version>0.4.2-SNAPSHOT</topology.northbound.version>
+    <topology.web.version>0.4.2-SNAPSHOT</topology.web.version>
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
+    <troubleshoot.web.version>0.4.2-SNAPSHOT</troubleshoot.web.version>
     <url.version>1.5.0</url.version>
+    <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
+    <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
     <virgo.version>3.6.0.RELEASE</virgo.version>
+    <web.version>0.4.2-SNAPSHOT</web.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
@@ -142,37 +193,31 @@
         <artifactId>logback-core</artifactId>
         <version>${logback.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-base</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-json-provider</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
         <artifactId>jackson-module-jaxb-annotations</artifactId>
@@ -181,12 +226,12 @@
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
-        <version>2.0.1</version>
+        <version>${jsr305.api.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
-        <version>2.2.4</version>
+        <version>${gson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -212,12 +257,12 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.7</version>
+        <version>${commons.codec.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
-        <version>1.2.2</version>
+        <version>${commons.fileupload.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -227,7 +272,7 @@
       <dependency>
         <groupId>commons-net</groupId>
         <artifactId>commons-net</artifactId>
-        <version>3.0.1</version>
+        <version>${commons.net.version}</version>
       </dependency>
       <dependency>
         <groupId>eclipselink</groupId>
@@ -370,8 +415,7 @@
         <artifactId>netty-common</artifactId>
         <version>${netty.version}</version>
       </dependency>
-
-      <!--Netty-->
+      <!-- Netty -->
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
@@ -470,7 +514,7 @@
       <dependency>
         <groupId>org.aopalliance</groupId>
         <artifactId>com.springsource.org.aopalliance</artifactId>
-        <version>1.0.0</version>
+        <version>${aopalliance.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -480,46 +524,45 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.dependencymanager</artifactId>
-        <version>3.1.0</version>
+        <version>${felix.dependencymanager.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.dependencymanager.shell</artifactId>
-        <version>3.0.1</version>
+        <version>${felix.dependencymanager.shell.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.fileinstall</artifactId>
-        <version>3.1.6</version>
+        <version>${felix.fileinstall.version}</version>
       </dependency>
       <!-- felix webconsole -->
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.webconsole</artifactId>
-        <version>4.2.0</version>
+        <version>${felix.webconsole.version}</version>
         <!-- the all bundle includes all the necessary plugins -->
         <classifier>all</classifier>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk15on</artifactId>
-        <version>1.50</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.50</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>enunciate-core-annotations</artifactId>
         <version>${enunciate.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
-        <version>1.3.3</version>
+        <version>${jettison.version}</version>
       </dependency>
 
       <!-- equinox http service bridge -->
@@ -568,7 +611,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>appauth</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${appauth.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -605,7 +648,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>clustering.test</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${clustering.test.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -617,7 +660,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${commmons.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -693,7 +736,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>configuration.implementation</artifactId>
-        <version>0.4.3-SNAPSHOT</version>
+        <version>${configuration.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -728,27 +771,27 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>containermanager.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${containermanager.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>controllermanager.northbound</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${controllermanager.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>devices.web</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${devices.web.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>flowprogrammer.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${flowprogrammer.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>flows.web</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${flows.web.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -758,7 +801,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>forwarding.staticrouting.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${forwarding.staticrouting.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -768,7 +811,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>forwardingrulesmanager.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${forwardingrulesmanager.implementation.version}</version>
       </dependency>
 
       <dependency>
@@ -784,7 +827,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>hosttracker.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${hosttracker.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -897,24 +940,23 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${networkconfig.neutron.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${networkconfig.neutron.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${networkconfig.neutron.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>osgi-brandfragment.web</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${osgi-brandfragment.web.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol-framework</artifactId>
@@ -925,17 +967,17 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol_plugins.openflow</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${protocol_plugins.openflow.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol_plugins.stub</artifactId>
-        <version>${protocol_plugin.stub.version}</version>
+        <version>${protocol_plugins.stub.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>routing.dijkstra_implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${routing.dijkstra_implementation.version}</version>
       </dependency>
 
       <!-- SAL bundles -->
@@ -1049,7 +1091,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${sal.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1071,12 +1113,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>samples.loadbalancer.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${samples.loadbalancer.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>samples.simpleforwarding</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${samples.simpleforwarding.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1086,7 +1128,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>security</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${security.version}</version>
       </dependency>
 
       <dependency>
@@ -1102,7 +1144,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>statistics.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${statistics.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1112,12 +1154,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>statisticsmanager.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${statisticsmanager.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>subnets.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${subnets.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1127,12 +1169,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>switchmanager.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${switchmanager.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>switchmanager.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${switchmanager.northbound.version}</version>
       </dependency>
 
       <!-- threadpool -->
@@ -1149,12 +1191,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>topology.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${topology.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>topology.web</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${topology.web.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1164,7 +1206,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>troubleshoot.web</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${troubleshoot.web.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1174,19 +1216,19 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>usermanager.implementation</artifactId>
-        <version>${usermanager.version}</version>
+        <version>${usermanager.implementation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>usermanager.northbound</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${usermanager.northbound.version}</version>
       </dependency>
 
       <!--  Web bundles -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>web</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>${web.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
