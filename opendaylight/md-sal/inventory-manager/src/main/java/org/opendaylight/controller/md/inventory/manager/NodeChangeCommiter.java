@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 
-@SuppressWarnings("all")
 public class NodeChangeCommiter implements OpendaylightInventoryListener {
     private final static Logger LOG = LoggerFactory.getLogger(NodeChangeCommiter.class);
 
@@ -75,7 +74,7 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
         final NodeConnectorRef ref = connector.getNodeConnectorRef();
         final FlowCapableNodeConnectorUpdated flowConnector = connector
                 .getAugmentation(FlowCapableNodeConnectorUpdated.class);
-        final DataModificationTransaction it = this.getManager().startChange();
+        final DataModificationTransaction it = this.manager.startChange();
         final NodeConnectorBuilder data = new NodeConnectorBuilder(connector);
         NodeConnectorId id = connector.getId();
         NodeConnectorKey nodeConnectorKey = new NodeConnectorKey(id);
@@ -86,12 +85,9 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
             data.addAugmentation(FlowCapableNodeConnector.class, augment);
         }
         InstanceIdentifier<? extends Object> value = ref.getValue();
-        String string = value.toString();
-        String plus = ("updating node connector : " + string);
-        NodeChangeCommiter.LOG.debug(plus);
-        InstanceIdentifier<? extends Object> value1 = ref.getValue();
+        NodeChangeCommiter.LOG.debug("updating node connector : " + value.toString());
         NodeConnector build = data.build();
-        it.putOperationalData((value1), build);
+        it.putOperationalData((value), build);
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
         try {
             commitResult.get();
@@ -105,14 +101,9 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
     public synchronized void onNodeRemoved(final NodeRemoved node) {
 
         final NodeRef ref = node.getNodeRef();
-        FlowCapableInventoryProvider manager = this.getManager();
-        final DataModificationTransaction it = manager.startChange();
-        InstanceIdentifier<? extends Object> value = ref.getValue();
-        String string = value.toString();
-        String plus = ("removing node : " + string);
-        NodeChangeCommiter.LOG.debug(plus);
-        InstanceIdentifier<? extends Object> value1 = ref.getValue();
-        it.removeOperationalData((value1));
+        final DataModificationTransaction it = this.manager.startChange();
+        NodeChangeCommiter.LOG.debug("removing node : " + ref.getValue().toString());
+        it.removeOperationalData((ref.getValue()));
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
         try {
             commitResult.get();
@@ -127,19 +118,15 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
         final NodeRef ref = node.getNodeRef();
         final FlowCapableNodeUpdated flowNode = node
                 .<FlowCapableNodeUpdated> getAugmentation(FlowCapableNodeUpdated.class);
-        FlowCapableInventoryProvider manager = this.getManager();
-        final DataModificationTransaction it = manager.startChange();
-        NodeBuilder nodeBuilder = new NodeBuilder(node);
-        final NodeBuilder data = nodeBuilder;
-        NodeId id = node.getId();
-        NodeKey nodeKey = new NodeKey(id);
-        data.setKey(nodeKey);
+        final DataModificationTransaction it = this.manager.startChange();
+        final NodeBuilder nodeBuilder = new NodeBuilder(node);
+        nodeBuilder.setKey(new NodeKey(node.getId()));
         boolean equals = Objects.equal(flowNode, null);
         if (equals) {
             return;
         }
         final FlowCapableNode augment = InventoryMapping.toInventoryAugment(flowNode);
-        data.addAugmentation(FlowCapableNode.class, augment);
+        nodeBuilder.addAugmentation(FlowCapableNode.class, augment);
         InstanceIdentifier<? extends Object> value = ref.getValue();
         InstanceIdentifierBuilder<Node> builder = InstanceIdentifier.<Node> builder(((InstanceIdentifier<Node>) value));
         InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder
