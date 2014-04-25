@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c6bc796f",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "Nearly all the rest are broken out (e.g appauth.version, clusteretc). While many are 0.4.2-SNAPSHOT...there\u0027s not currently a single controller.version.  I think we want to get there (more or less) as part of the root parent refactor.  In meantime, I suppose safer choice is break out by artifact (as ugly as that is)",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e6f3bd71",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "And this too",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_26e205a0",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "And looks like this snuck in too",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a6edb58d",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "Since you made the effort already...also ad space before \u0027Netty\u0027?",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c6eeb98b",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "This looks like it should go w/ Karaf introduction",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_06aa6119",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T22:39:53Z",
+      "side": 1,
+      "message": "This is not a valid change.  controller.version is 0.4.2-SNAPSHOT, and you\u0027re replacing 0.4.3-SNAPSHOT",
+      "revId": "4af61cd0df4a98671cccfe518a672dc728bb9396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
