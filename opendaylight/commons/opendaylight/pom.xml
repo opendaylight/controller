@@ -515,6 +515,12 @@
         <!-- the all bundle includes all the necessary plugins -->
         <classifier>all</classifier>
       </dependency>
+      <!-- Karaf Shell Dependency -->
+      <dependency>
+        <groupId>org.apache.karaf.shell</groupId>
+        <artifactId>org.apache.karaf.shell.console</artifactId>
+        <version>${karaf.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk15on</artifactId>
@@ -524,12 +530,6 @@
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk15on</artifactId>
         <version>1.50</version>
-      </dependency>
-      <!-- Karaf Shell Dependency -->
-      <dependency>
-        <groupId>org.apache.karaf.shell</groupId>
-        <artifactId>org.apache.karaf.shell.console</artifactId>
-        <version>${karaf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.enunciate</groupId>

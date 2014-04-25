@@ -2,6 +2,30 @@
 <features name="controller-${controller.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+   <feature name="odl-all" description="OpenDaylight Controller" version="1.0.0-SNAPSHOT">
+      <feature>slf4j</feature>
+      <feature>http</feature>
+      <feature>felix-dm</feature>
+      <feature>jackson</feature>
+      <feature>commons</feature>
+      <feature>transaction</feature>
+      <feature>sal</feature>
+      <feature>md-sal</feature>
+      <feature>gemini-web</feature>
+      <feature>controller-web</feature>
+      <feature>service-hosttracker</feature>
+      <feature>service-clustering</feature>
+      <feature>service-configuration</feature>
+      <feature>legacy-configuration</feature>
+      <feature>service-switchmanager</feature>
+      <feature>service-statisticsmanager</feature>
+      <feature>service-forwardingrulesmanager</feature>
+      <feature>service-security</feature>
+      <feature>spring-security</feature>
+      <feature>controller-services</feature>
+   </feature>
+
    <feature name="felix-dm" description="Felix Dependency Manager"
       version="${felix.dependencymanager.version}">
       <bundle start-level="30">mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
@@ -90,7 +114,7 @@
    </feature>
    <feature name="md-sal" description="Model-Driven Service Abstraction Layer">
       <feature>transaction</feature>
-      <bundle>mvn:org.eclipse.xtend/org.eclipse.xtend.lib/${xtend.version}</bundle>
+      <bundle>wrap:mvn:org.eclipse.xtend/org.eclipse.xtend.lib/${xtend.version}</bundle>
       <bundle>mvn:org.javassist/javassist/${javassist.version}</bundle>
       <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/appauth/${controller.version}</bundle>
@@ -107,7 +131,7 @@
       <bundle>mvn:org.opendaylight.controller/devices.web/${controller.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/troubleshoot.web/${controller.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/topology.web/${controller.version}</bundle>
-      <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/${controller.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/0.0.2-SNAPSHOT</bundle>
    </feature>
    <feature name="service-hosttracker" description="Controller Service: Host Tracker">
       <feature>service-clustering</feature>
