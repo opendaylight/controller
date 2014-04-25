@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_26ef65b2",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T20:50:53Z",
+      "side": 1,
+      "message": "This change looks unrelated",
+      "revId": "d6d20bf916ad772b0b101829f2b329607159b5b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c62b19ea",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T20:50:53Z",
+      "side": 1,
+      "message": "As does this, and in general the move from hardcoded versions to properties...this looks like a generic (good) change that could go\nin ahead of pure karaf.",
+      "revId": "d6d20bf916ad772b0b101829f2b329607159b5b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e6309d58",
+        "filename": "opendaylight/distribution/opendaylight-karaf/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T20:50:53Z",
+      "side": 1,
+      "message": "Does that say \"any version\"?  In which case, Is it needed?",
+      "revId": "d6d20bf916ad772b0b101829f2b329607159b5b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_86351148",
+        "filename": "opendaylight/distribution/opendaylight-karaf/src/main/resources/configuration/initial/00-netty.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-25T20:50:53Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "d6d20bf916ad772b0b101829f2b329607159b5b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
