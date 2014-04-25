@@ -1,0 +1,7 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Jason Ye <yisye@cisco.com>
+Submitted-by: Jason Ye <yisye@cisco.com>
+Submitted-at: Fri, 25 Apr 2014 22:00:25 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/6402
+Project: controller
+Branch: refs/heads/stable/hydrogen
