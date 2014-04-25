@@ -9,14 +9,12 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.collect.Multimap;
+import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigStrategy;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
-
-import java.util.Map;
 
 /**
  * Parsed xml element containing whole configuration for an instance of some
@@ -44,16 +42,6 @@ public class InstanceConfigElementResolved {
 
 
     static EditStrategyType parseStrategy(String currentStrategy, EditStrategyType defaultStrategy) throws OperationNotPermittedException {
-        if (null == currentStrategy || currentStrategy.equals("")){
-            throw new OperationNotPermittedException(String.format("With "
-                    + defaultStrategy
-                    + " as "
-                    + EditConfigXmlParser.DEFAULT_OPERATION_KEY
-                    + " operations on module elements are not permitted since the default option is restrictive"),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
-        }
         EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
         EditStrategyType.compareParsedStrategyToDefaultEnforcing(parsedStrategy,defaultStrategy);
         return parsedStrategy;

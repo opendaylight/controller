@@ -27,20 +27,22 @@ public class ModuleElementDefinition {
 
     public ModuleElementDefinition(String instanceName, String currentStrategy, EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
-        EditStrategyType _edStrategy = null;
-        try {
-            _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
-        } catch (OperationNotPermittedException e) {
-            _edStrategy = defaultStrategy;
-            logger.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
-                    currentStrategy,
-                    defaultStrategy,
-                    e);
+        if (currentStrategy == null || currentStrategy.isEmpty()) {
+            this.editStrategy = defaultStrategy;
+        } else {
+            EditStrategyType _edStrategy = null;
+            try {
+                _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
+            } catch (OperationNotPermittedException e) {
+                _edStrategy = defaultStrategy;
+                logger.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
+                        currentStrategy,
+                        defaultStrategy,
+                        e);
+            }
+            this.editStrategy = _edStrategy;
         }
-        if (currentStrategy == null || currentStrategy.isEmpty())
-            _edStrategy = defaultStrategy;
 
-        this.editStrategy = _edStrategy;
     }
 
     public String getInstanceName() {
