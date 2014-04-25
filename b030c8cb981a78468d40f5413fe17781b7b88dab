@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_665b2d55",
+        "filename": "opendaylight/md-sal/topology-lldp-discovery/src/main/java/org/opendaylight/md/controller/topology/lldp/LLDPActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-04-25T23:36:52Z",
+      "side": 1,
+      "message": "remove the LLDPActivator as it may not be needed to access static variables",
+      "revId": "b030c8cb981a78468d40f5413fe17781b7b88dab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_06582155",
+        "filename": "opendaylight/md-sal/topology-lldp-discovery/src/main/java/org/opendaylight/md/controller/topology/lldp/LLDPDiscoveryProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-04-25T23:36:52Z",
+      "side": 1,
+      "message": "combine the previous 2 lines if possible",
+      "revId": "b030c8cb981a78468d40f5413fe17781b7b88dab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2655251d",
+        "filename": "opendaylight/md-sal/topology-lldp-discovery/src/main/java/org/opendaylight/md/controller/topology/lldp/LLDPDiscoveryProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-04-25T23:36:52Z",
+      "side": 1,
+      "message": "combine the previous 2 lines",
+      "revId": "b030c8cb981a78468d40f5413fe17781b7b88dab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
