@@ -11,6 +11,8 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.slf4j.Logger;
@@ -36,17 +38,24 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, ServiceRegistryWrapper services) {
-        throw new IllegalStateException("Unable to delete " + module + ":" + instance + " , ServiceInstance not found");
+                               String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
+        throw new NetconfConfigHandlingException(String.format("Unable to delete %s : %s , ServiceInstance not found", module ,instance),
+                NetconfDocumentedException.ErrorType.application,
+                NetconfDocumentedException.ErrorTag.operation_failed,
+                NetconfDocumentedException.ErrorSeverity.error);
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         try {
             ta.destroyModule(on);
             logger.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
-            throw new IllegalStateException("Unable to delete " + on, e);
+            throw new NetconfConfigHandlingException(
+                    String.format("Unable to delete %s because of exception %s" + on, e.getMessage()),
+                    NetconfDocumentedException.ErrorType.application,
+                    NetconfDocumentedException.ErrorTag.operation_failed,
+                    NetconfDocumentedException.ErrorSeverity.error);
         }
     }
 }

@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -147,7 +148,7 @@ public class Config {
     // TODO refactor, replace Map->Multimap with e.g. ConfigElementResolved
     // class
 
-    public Map<String, Multimap<String, ModuleElementResolved>> fromXmlModulesResolved(XmlElement xml, EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) {
+    public Map<String, Multimap<String, ModuleElementResolved>> fromXmlModulesResolved(XmlElement xml, EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) throws NetconfDocumentedException {
         Optional<XmlElement> modulesElement = getModulesElement(xml);
         List<XmlElement> moduleElements = getModulesElementList(modulesElement);
 
@@ -156,7 +157,7 @@ public class Config {
         for (XmlElement moduleElement : moduleElements) {
             ResolvingStrategy<ModuleElementResolved> resolvingStrategy = new ResolvingStrategy<ModuleElementResolved>() {
                 @Override
-                public ModuleElementResolved resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) {
+                public ModuleElementResolved resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) throws NetconfDocumentedException {
                     return moduleMapping.fromXml(moduleElement, serviceTracker,
                             instanceName, moduleNamespace, defaultStrategy, identityMap);
                 }
@@ -171,7 +172,7 @@ public class Config {
      * return a map containing namespace -> moduleName -> instanceName map. Attribute parsing is omitted.
      */
     public Map<String, Multimap<String, ModuleElementDefinition>> fromXmlModulesMap(XmlElement xml,
-            EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) {
+            EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) throws NetconfDocumentedException {
         Optional<XmlElement> modulesElement = getModulesElement(xml);
         List<XmlElement> moduleElements = getModulesElementList(modulesElement);
 
@@ -201,7 +202,7 @@ public class Config {
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
     }
 
-    private List<XmlElement> getModulesElementList(Optional<XmlElement> modulesElement) {
+    private List<XmlElement> getModulesElementList(Optional<XmlElement> modulesElement) throws NetconfDocumentedException {
         List<XmlElement> moduleElements;
 
         if (modulesElement.isPresent()) {
@@ -214,11 +215,13 @@ public class Config {
     }
 
     private <T> void resolveModule(Map<String, Multimap<String, T>> retVal, ServiceRegistryWrapper serviceTracker,
-            XmlElement moduleElement, EditStrategyType defaultStrategy, ResolvingStrategy<T> resolvingStrategy) {
-        XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+            XmlElement moduleElement, EditStrategyType defaultStrategy, ResolvingStrategy<T> resolvingStrategy) throws NetconfDocumentedException {
+        XmlElement typeElement = null;
+        typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
         Entry<String, String> prefixToNamespace = typeElement.findNamespaceOfTextContent();
         String moduleNamespace = prefixToNamespace.getValue();
-        XmlElement nameElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        XmlElement nameElement = null;
+        nameElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
         String instanceName = nameElement.getTextContent();
         String factoryNameWithPrefix = typeElement.getTextContent();
         String prefixOrEmptyString = prefixToNamespace.getKey();
@@ -238,7 +241,7 @@ public class Config {
         innerMap.put(factoryName, resolvedElement);
     }
 
-    public Services fromXmlServices(XmlElement xml) {
+    public Services fromXmlServices(XmlElement xml) throws NetconfDocumentedException {
         Optional<XmlElement> servicesElement = getServicesElement(xml);
 
         Services services;
@@ -256,7 +259,7 @@ public class Config {
                     XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
     }
 
-    public static void checkUnrecognisedChildren(XmlElement parent) {
+    public static void checkUnrecognisedChildren(XmlElement parent) throws NetconfDocumentedException {
         Optional<XmlElement> servicesOpt = getServicesElement(parent);
         Optional<XmlElement> modulesOpt = getModulesElement(parent);
 
@@ -298,6 +301,6 @@ public class Config {
 
     private interface ResolvingStrategy<T> {
         public T resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker,
-                String instanceName, String moduleNamespace, EditStrategyType defaultStrategy);
+                String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) throws NetconfDocumentedException;
     }
 }

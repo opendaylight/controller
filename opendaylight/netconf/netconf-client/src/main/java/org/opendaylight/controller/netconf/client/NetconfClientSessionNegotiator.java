@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
@@ -26,13 +31,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 
 public class NetconfClientSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfClientSessionPreferences, NetconfClientSession, NetconfClientSessionListener>
@@ -54,7 +54,7 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected void handleMessage(NetconfHelloMessage netconfMessage) {
+    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
         NetconfClientSession session = super.getSessionForHelloMessage(netconfMessage);
 
         if (shouldUseExi(netconfMessage.getDocument())){
@@ -109,7 +109,7 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfHelloMessage message) {
+    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException {
         return new NetconfClientSession(sessionListener, channel, extractSessionId(message.getDocument()),
                 NetconfMessageUtil.extractCapabilitiesFromHello(message.getDocument()));
     }
