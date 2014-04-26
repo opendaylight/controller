@@ -184,6 +184,43 @@ module opendaylight-table-types {
         base match-field;
         description "Match for Logical Port Metadata";
     }
+
+
+
+
+
+
+
+
+
+    identity foo {
+        base match-field;
+        description "Match for Logical Port Metadata";
+    }
+
+    identity foobar_id {
+        base match-field;
+        description "FooBar Match for Logical Port Metadata";
+    }
+
+
+    identity bar_dst {
+        base match-field;
+        description "Bar source IPv4 address.";
+    }
+    identity bar_src {
+        base match-field;
+        description "Bar target IPv4 address.";
+    }
+
+
+
+
+
+
+
+
+
     identity ipv6_exthdr {
         base match-field;
         description "Match for IPv6 Extension Header pseudo-field";
@@ -312,12 +349,12 @@ module opendaylight-table-types {
                 description "Bits of metadata table can match";
                 type uint64;                
             }
-            
+
             leaf metadata-write {
                 description "Bits of metadata table can write";
-                type uint64;                
+                type uint64;
             }
-            
+
             leaf max-entries {
                 description "Max number of entries supported";
                 type uint32;                

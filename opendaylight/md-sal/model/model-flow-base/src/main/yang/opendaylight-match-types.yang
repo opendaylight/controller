@@ -269,6 +269,55 @@ module opendaylight-match-types {
         }
     }
 
+
+    grouping "bar-match-fields" {
+        leaf bar-source-transport-address {
+            description "bar source IPv4 address.";
+            type inet:ipv4-prefix;
+        }
+
+        leaf bar-target-transport-address {
+            description "bar target IPv4 address.";
+            type inet:ipv4-prefix;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    grouping "foo-match-fields" {
+        leaf foo-source {
+            description "foo IPv4 source address.";
+            type inet:ipv4-prefix;
+        }
+
+        leaf foo-destination {
+            description "foo IPv4 destination address.";
+            type inet:ipv4-prefix;
+        }
+
+    }
+
+
+
+    container "foo" {
+        uses "foo-match-fields";
+    }
+
+
+
+
+
+
+
+
+
     grouping match {
         leaf in-port {
             type inv:node-connector-id;
@@ -293,6 +342,8 @@ module opendaylight-match-types {
             }
         }
 
+
+
         container "ethernet-match" {
             uses "ethernet-match-fields";
         }
@@ -314,6 +365,12 @@ module opendaylight-match-types {
             }
             case "arp-match" {
                 uses "arp-match-fields";
+            }
+            case "foo-match" {
+                uses "foo-match-fields";
+            }
+            case "bar-match" {
+                uses "bar-match-fields";
             }
         }
 
