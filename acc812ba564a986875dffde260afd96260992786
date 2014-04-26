@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e1872760",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-26T20:45:48Z",
+      "side": 1,
+      "message": "Appears unused",
+      "revId": "acc812ba564a986875dffde260afd96260992786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_817c1b74",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-26T20:45:48Z",
+      "side": 1,
+      "message": "Appears unused",
+      "revId": "acc812ba564a986875dffde260afd96260992786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a1811f4c",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-26T20:45:48Z",
+      "side": 1,
+      "message": "Appears unused",
+      "revId": "acc812ba564a986875dffde260afd96260992786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_41961396",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-26T20:45:48Z",
+      "side": 1,
+      "message": "Appears unused",
+      "revId": "acc812ba564a986875dffde260afd96260992786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
