@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_61f6b7d9",
+        "filename": "feature/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "controller.version variable was recently removed in one of the gerrits.\nIs it better to not use a controller.version given the fact there is no such thing like a controller version from a maven artifact standpoint ?",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e10ac7d1",
+        "filename": "feature/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "Will it make sense to call this odl-controller rather than odl-all ?\nTo me, odl-all includes \"all\" of the ODL features that includes other projects that is outside of the scope of the controller project.\nA more appropriate place to define an odl-all feature would be on the integration project.",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_810f3be1",
+        "filename": "feature/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "All these Web bundles that are specific to a given service should ideally be wrapped along with the service-x feature rather than bundled under the controller-web feature. Can you please move these under its own service-x feature ?",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a114bff5",
+        "filename": "feature/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "Please add the web bundles and Northbound bundles corresponding to switchmanager service here. Same comment is applicable for other appropriate services as well.",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_41f933c7",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "With the changes made to the commons/pom.xml in other gerrit (https://git.opendaylight.org/gerrit/6407), I guess all the changes done to this file using this gerrit can be reverted ?\n\nAlso, controller.version variable was recently removed from the commons/pom.xml. Consider changing the name of this variable ?",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_01032bb9",
+        "filename": "opendaylight/distribution/opendaylight-karaf/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-27T15:02:44Z",
+      "side": 1,
+      "message": "Consider changing the name of this variable ?",
+      "revId": "66e8d692c9efa1831b88cfcd2917fdbd57d9c075",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
