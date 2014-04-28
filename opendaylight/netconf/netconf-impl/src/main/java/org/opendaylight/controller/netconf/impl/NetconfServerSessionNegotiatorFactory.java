@@ -35,12 +35,11 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
+    // TODO make this configurable
     private static final Set<String> DEFAULT_BASE_CAPABILITIES = ImmutableSet.of(
-            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0
-            // FIXME, Chunk framing causes ConcurrentClientsTest to fail, investigate
-//            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
-            // FIXME, EXI causing issues with sal-netconf-connector, investigate
-//            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0
     );
 
     private final Timer timer;

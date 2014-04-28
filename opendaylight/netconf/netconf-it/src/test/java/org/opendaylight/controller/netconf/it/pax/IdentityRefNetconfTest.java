@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
+* Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v1.0 which accompanies this distribution,
+* and is available at http://www.eclipse.org/legal/epl-v10.html
+*/
 package org.opendaylight.controller.netconf.it.pax;
 
 import static org.junit.Assert.fail;
@@ -26,7 +26,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Assert;
@@ -59,7 +58,11 @@ public class IdentityRefNetconfTest {
     public static final int CLIENT_CONNECTION_TIMEOUT_MILLIS = 15000;
 
     // Wait for controller to start
-    @Inject
+
+    // FIXME move this (pax) test to different module
+    // pax jars contain guava classes that clash with real guava dependencies in non-pax tests
+    //
+    //@Inject
     @Filter(timeout = 60 * 1000)
     BindingAwareBroker broker;
 

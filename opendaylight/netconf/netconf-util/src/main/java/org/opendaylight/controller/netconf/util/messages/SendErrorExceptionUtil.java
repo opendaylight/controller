@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -38,13 +40,15 @@ public final class SendErrorExceptionUtil {
             final NetconfDocumentedException sendErrorException) {
         logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
-        session.sendMessage(new NetconfMessage(errorDocument));
+        ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
+        f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
     public static void sendErrorMessage(Channel channel, NetconfDocumentedException sendErrorException) {
         logger.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
-        channel.writeAndFlush(new NetconfMessage(errorDocument));
+        ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
+        f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
     public static void sendErrorMessage(NetconfSession session, NetconfDocumentedException sendErrorException,
@@ -52,7 +56,8 @@ public final class SendErrorExceptionUtil {
         final Document errorDocument = createDocument(sendErrorException);
         logger.trace("Sending error {}", XmlUtil.toString(errorDocument));
         tryToCopyAttributes(incommingMessage.getDocument(), errorDocument, sendErrorException);
-        session.sendMessage(new NetconfMessage(errorDocument));
+        ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
+        f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
     private static void tryToCopyAttributes(final Document incommingDocument, final Document errorDocument,
@@ -133,4 +138,20 @@ public final class SendErrorExceptionUtil {
         return errorDocument;
     }
 
+    /**
+     * Checks if netconf error was sent successfully.
+     */
+    private static final class SendErrorVerifyingListener implements ChannelFutureListener {
+        private final NetconfDocumentedException sendErrorException;
+
+        public SendErrorVerifyingListener(final NetconfDocumentedException sendErrorException) {
+            this.sendErrorException = sendErrorException;
+        }
+
+        @Override
+        public void operationComplete(final ChannelFuture channelFuture) throws Exception {
+            Preconditions.checkState(channelFuture.isSuccess(), "Unable to send exception {}", sendErrorException,
+                    channelFuture.cause());
+        }
+    }
 }

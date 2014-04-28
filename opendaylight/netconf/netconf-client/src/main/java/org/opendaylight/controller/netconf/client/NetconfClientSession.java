@@ -8,7 +8,8 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import io.netty.channel.Channel;
+import java.util.Collection;
+
 import org.opendaylight.controller.netconf.util.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
 import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
@@ -18,7 +19,7 @@ import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecod
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import io.netty.channel.Channel;
 
 public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
@@ -35,7 +36,6 @@ public final class NetconfClientSession extends AbstractNetconfSession<NetconfCl
     public Collection<String> getServerCapabilities() {
         return capabilities;
     }
-
 
     @Override
     protected NetconfClientSession thisInstance() {

@@ -93,23 +93,19 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         return sb.toString();
     }
 
-    protected <T extends ChannelHandler> T removeHandler(final Class<T> handlerType) {
-        return this.channel.pipeline().remove(handlerType);
-    }
-
-    protected void replaceMessageDecoder(final ChannelHandler handler) {
+    protected final void replaceMessageDecoder(final ChannelHandler handler) {
         replaceChannelHandler(AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, handler);
     }
 
-    protected void replaceMessageEncoder(final ChannelHandler handler) {
+    protected final void replaceMessageEncoder(final ChannelHandler handler) {
         replaceChannelHandler(AbstractChannelInitializer.NETCONF_MESSAGE_ENCODER, handler);
     }
 
-    protected void replaceMessageEncoderAfterNextMessage(final ChannelHandler handler) {
+    protected final void replaceMessageEncoderAfterNextMessage(final ChannelHandler handler) {
         this.delayedEncoder = handler;
     }
 
-    protected void replaceChannelHandler(final String handlerName, final ChannelHandler handler) {
+    protected final void replaceChannelHandler(final String handlerName, final ChannelHandler handler) {
         channel.pipeline().replace(handlerName, handlerName, handler);
     }
 
@@ -124,7 +120,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
         }
         final NetconfEXICodec exiCodec = new NetconfEXICodec(exiParams.getOptions());
         addExiHandlers(exiCodec);
-        logger.debug("EXI handlers added to pipeline on session {}", this);
+        logger.debug("Session {} EXI handlers added to pipeline", this);
     }
 
     protected abstract void addExiHandlers(NetconfEXICodec exiCodec);
