@@ -4,7 +4,7 @@ module packet-processing {
 
     import yang-ext {prefix ext; revision-date "2013-07-09";}
     import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
-    import ietf-yang-types {prefix yang;revision-date "2010-09-24";} 
+    import ietf-yang-types {prefix yang;revision-date "2013-07-15";} 
     import opendaylight-l2-types {prefix types;revision-date "2013-08-27";}
     import opendaylight-match-types {prefix match-type;revision-date "2013-10-26";}
     import opendaylight-table-types {prefix table-type;revision-date "2013-10-26";}

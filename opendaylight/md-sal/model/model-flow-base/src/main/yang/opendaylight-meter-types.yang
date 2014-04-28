@@ -2,7 +2,7 @@ module opendaylight-meter-types {
     namespace "urn:opendaylight:meter:types";
     prefix meter;
 
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2013-07-15";}
 
 
     revision "2013-09-18" {
