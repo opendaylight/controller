@@ -19,6 +19,57 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e1b5e4cd",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-28T14:15:32Z",
+      "side": 1,
+      "message": "use checkNotNull",
+      "revId": "f4f5441f4aa93ac33d3b39e39dcc0c7a0315a9d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_81cad84d",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/authentication/AuthProvider.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-28T14:15:32Z",
+      "side": 1,
+      "message": "make sure we are removing this user on bundle shutdown",
+      "revId": "f4f5441f4aa93ac33d3b39e39dcc0c7a0315a9d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c1b0e0df",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/osgi/NetconfSSHActivator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-04-28T14:15:32Z",
+      "side": 1,
+      "message": "do not pass potentially nullable reference",
+      "revId": "f4f5441f4aa93ac33d3b39e39dcc0c7a0315a9d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_21c0ac4f",
         "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/osgi/NetconfConfigUtil.java",
         "patchSetId": 9
