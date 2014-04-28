@@ -192,12 +192,6 @@ public class NetconfMapping {
                 rawRpc = it.toInstance();
                 // sys(xmlData)
             } else {
-                RpcDefinition rpcSchema = Iterables.find(context.get().getOperations(), new Predicate<RpcDefinition>() {
-                    @Override
-                    public boolean apply(final RpcDefinition input) {
-                        return rpc == input.getQName();
-                    }
-                });
                 rawRpc = (CompositeNode) toCompositeNode(message.getDocument());
             }
         else {
