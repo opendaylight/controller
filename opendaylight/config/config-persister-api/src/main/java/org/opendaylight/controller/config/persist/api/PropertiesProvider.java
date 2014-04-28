@@ -18,4 +18,7 @@ public interface PropertiesProvider {
      * @return prefix + key as used in getProperty method.
      */
     String getFullKeyForReporting(String key);
+
+    String getPrefix();
+    String getPropertyWithoutPrefix(String fullKey);
 }

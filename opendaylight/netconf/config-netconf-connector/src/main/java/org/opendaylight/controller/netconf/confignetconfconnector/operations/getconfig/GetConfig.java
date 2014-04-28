@@ -66,9 +66,10 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         Datastore sourceDatastore = Datastore.valueOf(sourceParsed);
 
         // Filter option - unsupported
-        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0)
+        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0){
             throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for "
                     + GET_CONFIG);
+        }
 
         return sourceDatastore;
 
@@ -104,6 +105,6 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
         Datastore source;
         source = fromXml(xml);
-        return getResponseInternal(document, configRegistryClient, source);
+        return getResponseInternal(document, getConfigRegistryClient(), source);
     }
 }

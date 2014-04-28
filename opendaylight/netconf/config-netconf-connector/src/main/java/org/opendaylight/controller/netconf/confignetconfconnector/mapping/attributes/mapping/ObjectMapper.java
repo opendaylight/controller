@@ -112,7 +112,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
             SimpleType<?> openType) {
-        return new ObjectNameAttributeMappingStrategy(openType, dependencyTracker,
+        return new ObjectNameAttributeMappingStrategy(openType,
                 serviceNameOfDepAttr, namespaceOfDepAttr);
     }
 
@@ -120,10 +120,10 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseTOAttribute(CompositeType openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
-        Preconditions.checkState(lastAttribute instanceof TOAttribute);
-        TOAttribute lastTO = (TOAttribute) lastAttribute;
+        Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
+        TOAttribute lastTO = (TOAttribute) getLastAttribute();
 
-        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute)lastAttribute).getJmxPropertiesToTypesMap().entrySet()) {
+        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute)getLastAttribute()).getJmxPropertiesToTypesMap().entrySet()) {
             innerStrategies.put(innerAttrEntry.getKey(), prepareStrategy(innerAttrEntry.getValue()));
         }
 
@@ -133,14 +133,14 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
         return new ArrayAttributeMappingStrategy(openType,
-                prepareStrategy(((ListAttribute) lastAttribute).getInnerAttribute()));
+                prepareStrategy(((ListAttribute) getLastAttribute()).getInnerAttribute()));
     }
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
-        Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
+        Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeMappingStrategy(openType, caseDependencyAttribute(SimpleType.OBJECTNAME));
     }
 

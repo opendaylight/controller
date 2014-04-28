@@ -65,7 +65,7 @@ public enum EditStrategyType {
         case replace:
             return new ReplaceEditConfigStrategy(providedServices);
         case delete:
-            return new DeleteEditConfigStrategy(providedServices);
+            return new DeleteEditConfigStrategy();
         case remove:
             return new RemoveEditConfigStrategy();
         case none:

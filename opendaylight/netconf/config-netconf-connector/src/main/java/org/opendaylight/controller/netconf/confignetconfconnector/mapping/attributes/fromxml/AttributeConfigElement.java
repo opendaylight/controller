@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Optional;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
 
 import javax.management.openmbean.OpenType;
@@ -39,7 +40,7 @@ public class AttributeConfigElement {
     }
 
     public void resolveValue(AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy,
-            String attrName) {
+            String attrName) throws NetconfDocumentedException {
         resolvedValue = attributeResolvingStrategy.parseAttribute(attrName, value);
         Optional<?> resolvedDefault = attributeResolvingStrategy.parseAttribute(attrName, dafaultValue);
         resolvedDefaultValue = resolvedDefault.isPresent() ? resolvedDefault.get() : null;

@@ -8,15 +8,14 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingStrategy {
 
@@ -36,7 +35,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
     public void writeElement(Element parentElement, String namespace, Object value) {
         Util.checkType(value, Map.class);
 
-        Element innerNode = XmlUtil.createElement(document, key, Optional.<String>absent());
+        Element innerNode = XmlUtil.createElement(getDocument(), getKey(), Optional.<String>absent());
 
         Map<?, ?> map = (Map<?, ?>) value;
 
@@ -46,7 +45,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
             // bean
             Util.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
             Map<?, ?> innerMap = (Map<?, ?>) runtimeBeanInstanceMappingEntry.getValue();
-            Element runtimeInstanceNode = XmlUtil.createElement(document, "_"
+            Element runtimeInstanceNode = XmlUtil.createElement(getDocument(), "_"
                     + (String) runtimeBeanInstanceMappingEntry.getKey(), Optional.<String>absent());
             innerNode.appendChild(runtimeInstanceNode);
 
@@ -57,7 +56,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
                 String innerKey = (String) innerObjectEntry.getKey();
                 Object innerValue = innerObjectEntry.getValue();
 
-                innerStrats.get(innerKey).writeElement(runtimeInstanceNode, namespace, innerValue);
+                getInnerStrats().get(innerKey).writeElement(runtimeInstanceNode, namespace, innerValue);
             }
         }
         parentElement.appendChild(innerNode);

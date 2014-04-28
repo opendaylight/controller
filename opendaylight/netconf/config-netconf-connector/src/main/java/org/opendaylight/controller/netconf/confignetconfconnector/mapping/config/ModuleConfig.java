@@ -8,12 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-
-import javax.management.ObjectName;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
@@ -25,9 +22,10 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import javax.management.ObjectName;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 public class ModuleConfig {
 
@@ -64,7 +62,7 @@ public class ModuleConfig {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.MODULE_KEY, Optional.<String>absent());
         // Xml.addNamespaceAttr(document, root, namespace);
 
-        final String prefix = getPrefix(namespace);
+        final String prefix = getPrefix();
         Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(prefix, XmlNetconfConstants.TYPE_KEY), prefix,
                 moduleName, Optional.<String>of(namespace));
         // Xml.addNamespaceAttr(document, typeElement,
@@ -82,12 +80,8 @@ public class ModuleConfig {
         return root;
     }
 
-    private String getPrefix(String namespace) {
-        // if(namespace.contains(":")==false)
+    private String getPrefix() {
         return XmlNetconfConstants.PREFIX;
-        // return namespace.substring(namespace.lastIndexOf(':') + 1,
-        // namespace.length());
-
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
