@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dea44159",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/flow/FlowProvider.xtend",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-04-28T12:27:34Z",
+      "side": 1,
+      "message": "Actually... this should unregister the commit handler.",
+      "revId": "f8583b4a09a6c3917fbfceb1d860106441fe9f00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3e93edfb",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/group/GroupProvider.xtend",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-04-28T12:27:34Z",
+      "side": 1,
+      "message": "Actually, this should unregister the commit handler.",
+      "revId": "f8583b4a09a6c3917fbfceb1d860106441fe9f00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e9031ec",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/meter/MeterProvider.xtend",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-04-28T12:27:34Z",
+      "side": 1,
+      "message": "Actually, this should unregister the commit handler.",
+      "revId": "f8583b4a09a6c3917fbfceb1d860106441fe9f00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
