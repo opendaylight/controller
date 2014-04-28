@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4c7ea44",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2014-04-28T17:11:39Z",
+      "side": 1,
+      "message": "New line",
+      "revId": "ded418417ded0a215df41f47606ad0390d596364",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44c4de3f",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2014-04-28T17:11:39Z",
+      "side": 1,
+      "message": "New line",
+      "revId": "ded418417ded0a215df41f47606ad0390d596364",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_04ded611",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationBrokerImpl.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2014-04-28T17:11:39Z",
+      "side": 1,
+      "message": "Remove white space",
+      "revId": "ded418417ded0a215df41f47606ad0390d596364",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
