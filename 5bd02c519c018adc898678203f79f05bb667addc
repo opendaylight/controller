@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_241e7a71",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-28T19:00:35Z",
+      "side": 1,
+      "message": "I believe we are sorting pom files by default which means this file will look up as changed in everyones environment after doing a build. We need to check in a sorted file.",
+      "revId": "5bd02c519c018adc898678203f79f05bb667addc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
