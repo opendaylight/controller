@@ -14,13 +14,19 @@ import java.util.List;
 public final class IdentityValuesDTO {
 
     private final List<IdentityValue> elementData = new ArrayList<>();
+    private final String originValue;
 
-    public IdentityValuesDTO(String namespace, String value, String prefix) {
+    public IdentityValuesDTO(String namespace, String value, String prefix,String originValue) {
         elementData.add(new IdentityValue(namespace, value, prefix));
+        this.originValue = originValue;
+    }
+    
+    public IdentityValuesDTO(String originValue) {
+        this.originValue = originValue;
     }
     
     public IdentityValuesDTO() {
-        
+        originValue = null;
     }
 
     public void add(String namespace, String value, String prefix) {
@@ -39,6 +45,10 @@ public final class IdentityValuesDTO {
     @Override
     public String toString() {
         return elementData.toString();
+    }
+    
+    public String getOriginValue() {
+        return originValue;
     }
 
     public static final class IdentityValue {

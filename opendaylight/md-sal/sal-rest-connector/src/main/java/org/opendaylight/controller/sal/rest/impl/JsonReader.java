@@ -122,7 +122,7 @@ class JsonReader {
         // it could be identityref Built-In Type
         URI namespace = getNamespaceFor(value);
         if (namespace != null) {
-            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null);
+            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null,value);
         }
         // it is not "prefix:value" but just "value"
         return value;
