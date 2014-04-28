@@ -74,7 +74,7 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
             throw new IllegalStateException(e);
         }
 
-        NetconfClientSessionPreferences proposal = new NetconfClientSessionPreferences(helloMessage,startExiMessage);
+        NetconfClientSessionPreferences proposal = new NetconfClientSessionPreferences(helloMessage, startExiMessage);
         return new NetconfClientSessionNegotiator(proposal, promise, channel, timer,
                 sessionListenerFactory.getSessionListener(),connectionTimeoutMillis);
     }

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.netconf.util.handler;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,7 +38,12 @@ import org.xml.sax.SAXException;
  * Customized NetconfXMLToMessageDecoder that reads additional header with
  * session metadata from
  * {@link org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage}
- * . Used by netconf server to retrieve information about session metadata.
+ *
+ *
+ * This handler should be replaced in pipeline by regular message handler as last step of negotiation.
+ * It serves as a message barrier and halts all non-hello netconf messages.
+ * Netconf messages after hello should be processed once the negotiation succeeded.
+ *
  */
 public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfXMLToHelloMessageDecoder.class);
@@ -48,6 +55,12 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
             new byte[] { '[' },
             new byte[] { '\r', '\n', '[' },
             new byte[] { '\n', '[' });
+
+    // State variables do not have to by synchronized
+    // Netty uses always the same (1) thread per pipeline
+    // We use instance of this per pipeline
+    private List<NetconfMessage> nonHelloMessages = Lists.newArrayList();
+    private boolean helloReceived = false;
 
     @Override
     @VisibleForTesting
@@ -79,16 +92,37 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
 
             Document doc = XmlUtil.readXmlToDocument(new ByteArrayInputStream(bytes));
 
-            final NetconfMessage message;
-            if (additionalHeader != null) {
-                message = new NetconfHelloMessage(doc, NetconfHelloMessageAdditionalHeader.fromString(additionalHeader));
+            final NetconfMessage message = getNetconfMessage(additionalHeader, doc);
+            if (message instanceof NetconfHelloMessage) {
+                Preconditions.checkState(helloReceived == false,
+                        "Multiple hello messages received, unexpected hello: %s",
+                        XmlUtil.toString(message.getDocument()));
+                out.add(message);
+                helloReceived = true;
+            // Non hello message, suspend the message and insert into cache
             } else {
-                message = new NetconfHelloMessage(doc);
+                Preconditions.checkState(helloReceived, "Hello message not received, instead received: %s",
+                        XmlUtil.toString(message.getDocument()));
+                LOG.debug("Netconf message received during negotiation, caching {}",
+                        XmlUtil.toString(message.getDocument()));
+                nonHelloMessages.add(message);
             }
-            out.add(message);
         } finally {
             in.discardReadBytes();
         }
+    }
+
+    private NetconfMessage getNetconfMessage(final String additionalHeader, final Document doc) throws NetconfDocumentedException {
+        NetconfMessage msg = new NetconfMessage(doc);
+        if(NetconfHelloMessage.isHelloMessage(msg)) {
+            if (additionalHeader != null) {
+                return new NetconfHelloMessage(doc, NetconfHelloMessageAdditionalHeader.fromString(additionalHeader));
+            } else {
+                return new NetconfHelloMessage(doc);
+            }
+        }
+
+        return msg;
     }
 
     private int getAdditionalHeaderEndIndex(byte[] bytes) {
@@ -155,4 +189,10 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
+    /**
+     * @return Collection of NetconfMessages that were not hello, but were received during negotiation
+     */
+    public Iterable<NetconfMessage> getPostHelloNetconfMessages() {
+        return nonHelloMessages;
+    }
 }

@@ -16,6 +16,18 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sal-binding-it</artifactId>
+      <exclusions>
+        <!-- FIXME see IdentityRefNetconfTest  -->
+        <!-- Pax-url-aether contains guava classes e.g. ImmutableSet that clashes with guava and causes tests to fail-->
+        <exclusion>
+          <groupId>org.ops4j.pax.url</groupId>
+          <artifactId>pax-url-aether</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.logback_settings</artifactId>
     </dependency>
@@ -126,10 +138,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>netty-config-api</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>sal-binding-it</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

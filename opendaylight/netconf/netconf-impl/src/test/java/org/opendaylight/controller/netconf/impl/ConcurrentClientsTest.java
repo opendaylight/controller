@@ -9,11 +9,13 @@
 package org.opendaylight.controller.netconf.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.base.Preconditions;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,9 +27,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -42,6 +46,7 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedEx
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.messages.NetconfStartExiMessage;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -59,7 +64,9 @@ import io.netty.util.HashedWheelTimer;
 
 public class ConcurrentClientsTest {
 
-    private static final int CONCURRENCY = 16;
+    private static final int CONCURRENCY = 64;
+    public static final int NETTY_THREADS = 4;
+
     private EventLoopGroup nettyGroup;
     private NetconfClientDispatcher netconfClientDispatcher;
 
@@ -68,11 +75,9 @@ public class ConcurrentClientsTest {
     static final Logger logger = LoggerFactory.getLogger(ConcurrentClientsTest.class);
 
     private DefaultCommitNotificationProducer commitNot;
-    private NetconfServerDispatcher dispatch;
-
-
 
     HashedWheelTimer hashedWheelTimer;
+    private TestingNetconfOperation testingNetconfOperation;
 
     public static SessionMonitoringService createMockedMonitoringService() {
         SessionMonitoringService monitoring = mock(SessionMonitoringService.class);
@@ -81,15 +86,18 @@ public class ConcurrentClientsTest {
         return monitoring;
     }
 
+    // TODO refactor and test with different configurations
+
     @Before
     public void setUp() throws Exception {
 
-        nettyGroup = new NioEventLoopGroup();
+        nettyGroup = new NioEventLoopGroup(NETTY_THREADS);
         NetconfHelloMessageAdditionalHeader additionalHeader = new NetconfHelloMessageAdditionalHeader("uname", "10.10.10.1", "830", "tcp", "client");
         netconfClientDispatcher = new NetconfClientDispatcher( nettyGroup, nettyGroup, additionalHeader, 5000);
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
-        factoriesListener.onAddNetconfOperationServiceFactory(mockOpF());
+        testingNetconfOperation = new TestingNetconfOperation();
+        factoriesListener.onAddNetconfOperationServiceFactory(mockOpF(testingNetconfOperation));
 
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();
@@ -100,7 +108,7 @@ public class ConcurrentClientsTest {
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(serverNegotiatorFactory);
-        dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
+        final NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, nettyGroup, nettyGroup);
 
         ChannelFuture s = dispatch.createServer(netconfAddress);
         s.await();
@@ -112,43 +120,8 @@ public class ConcurrentClientsTest {
         nettyGroup.shutdownGracefully();
     }
 
-    private NetconfOperationServiceFactory mockOpF() {
-        return new NetconfOperationServiceFactory() {
-            @Override
-            public NetconfOperationService createService(String netconfSessionIdForReporting) {
-                return new NetconfOperationService() {
-                    @Override
-                    public Set<Capability> getCapabilities() {
-                        return Collections.emptySet();
-                    }
-
-                    @Override
-                    public Set<NetconfOperation> getNetconfOperations() {
-                        return Sets.<NetconfOperation> newHashSet(new NetconfOperation() {
-                            @Override
-                            public HandlingPriority canHandle(Document message) {
-                                return XmlUtil.toString(message).contains(NetconfStartExiMessage.START_EXI) ?
-                                        HandlingPriority.CANNOT_HANDLE :
-                                        HandlingPriority.HANDLE_WITH_MAX_PRIORITY;
-                            }
-
-                            @Override
-                            public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
-                                try {
-                                    return XmlUtil.readXmlToDocument("<test/>");
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void close() {
-                    }
-                };
-            }
-        };
+    private NetconfOperationServiceFactory mockOpF(final NetconfOperation... operations) {
+        return new TestingOperationServiceFactory(operations);
     }
 
     @After
@@ -175,13 +148,23 @@ public class ConcurrentClientsTest {
                 fail("Client thread " + thread + " failed: " + exception.getMessage());
             }
         }
+
+        assertEquals(CONCURRENCY, testingNetconfOperation.getMessageCount());
     }
 
+    /**
+     * Cannot handle CHUNK, make server configurable
+     */
+    @Ignore
     @Test(timeout = 30 * 1000)
     public void synchronizationTest() throws Exception {
         new BlockingThread("foo").run2();
     }
 
+    /**
+     * Cannot handle CHUNK, make server configurable
+     */
+    @Ignore
     @Test(timeout = 30 * 1000)
     public void multipleBlockingClients() throws Exception {
         List<BlockingThread> threads = new ArrayList<>();
@@ -198,6 +181,60 @@ public class ConcurrentClientsTest {
                 logger.error("Thread for testing client failed", exception);
                 fail("Client thread " + thread + " failed: " + exception.getMessage());
             }
+        }
+    }
+
+    private static class TestingNetconfOperation implements NetconfOperation {
+
+        private final AtomicLong counter = new AtomicLong();
+
+        @Override
+        public HandlingPriority canHandle(Document message) {
+            return XmlUtil.toString(message).contains(NetconfStartExiMessage.START_EXI) ?
+                    HandlingPriority.CANNOT_HANDLE :
+                    HandlingPriority.HANDLE_WITH_MAX_PRIORITY;
+        }
+
+        @Override
+        public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+            try {
+                logger.info("Handling netconf message from test {}", XmlUtil.toString(requestMessage));
+                counter.getAndIncrement();
+                return XmlUtil.readXmlToDocument("<test/>");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public long getMessageCount() {
+            return counter.get();
+        }
+    }
+
+    private static class TestingOperationServiceFactory implements NetconfOperationServiceFactory {
+        private final NetconfOperation[] operations;
+
+        public TestingOperationServiceFactory(final NetconfOperation... operations) {
+            this.operations = operations;
+        }
+
+        @Override
+        public NetconfOperationService createService(String netconfSessionIdForReporting) {
+            return new NetconfOperationService() {
+                @Override
+                public Set<Capability> getCapabilities() {
+                    return Collections.emptySet();
+                }
+
+                @Override
+                public Set<NetconfOperation> getNetconfOperations() {
+                    return Sets.<NetconfOperation> newHashSet(operations);
+                }
+
+                @Override
+                public void close() {
+                }
+            };
         }
     }
 
@@ -273,6 +310,11 @@ public class ConcurrentClientsTest {
                         .xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
                 NetconfMessage result = netconfClient.sendRequest(getMessage).get();
                 logger.info("Client with sessionid {} got result {}", sessionId, result);
+
+                Preconditions.checkState(NetconfMessageUtil.isErrorMessage(result) == false,
+                        "Received error response: " + XmlUtil.toString(result.getDocument()) +
+                                " to request: " + XmlUtil.toString(getMessage.getDocument()));
+
                 netconfClient.close();
                 logger.info("Client with session id {} ended", sessionId);
                 thrownException = Optional.absent();
