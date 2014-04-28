@@ -7,8 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.InstanceAlreadyExistsException;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -24,18 +35,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.InstanceAlreadyExistsException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkState;
+import org.osgi.framework.BundleContext;
 
 /**
  * Holds information about modules being created and destroyed within this
@@ -117,7 +117,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
             ModuleFactory moduleFactory,
             ModuleInternalInfo maybeOldInternalInfo,
             TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-            boolean isDefaultBean) {
+            boolean isDefaultBean, BundleContext bundleContext) {
         transactionStatus.checkNotCommitted();
 
         Class<? extends Module> moduleClass = Module.class;
@@ -159,7 +159,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
 
         ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = new ModuleInternalTransactionalInfo(
                 moduleIdentifier, proxiedModule, moduleFactory,
-                maybeOldInternalInfo, transactionModuleJMXRegistration, isDefaultBean, module);
+                maybeOldInternalInfo, transactionModuleJMXRegistration, isDefaultBean, module, bundleContext);
         modulesHolder.put(moduleInternalTransactionalInfo);
     }
 

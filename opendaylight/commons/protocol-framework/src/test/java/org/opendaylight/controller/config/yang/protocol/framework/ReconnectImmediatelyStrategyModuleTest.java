@@ -29,7 +29,7 @@ public class ReconnectImmediatelyStrategyModuleTest extends AbstractConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new ReconnectImmediatelyStrategyFactoryModuleFactory(), new GlobalEventExecutorModuleFactory()));
     }
 

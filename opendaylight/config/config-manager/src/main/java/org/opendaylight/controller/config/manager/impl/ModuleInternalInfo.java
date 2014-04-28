@@ -15,7 +15,9 @@ import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReada
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.osgi.framework.BundleContext;
 
 /**
  * Provides metadata about Module from controller to registry.
@@ -37,13 +39,15 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     private final ModuleJMXRegistrator moduleJMXRegistrator;
     private final int orderingIdx;
     private final boolean isDefaultBean;
+    private final ModuleFactory moduleFactory;
+    private final BundleContext bundleContext;
 
     public ModuleInternalInfo(ModuleIdentifier name,
             @Nullable DynamicReadableWrapper readableModule,
             OsgiRegistration osgiRegistration,
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
             ModuleJMXRegistrator moduleJMXRegistrator, int orderingIdx,
-            boolean isDefaultBean) {
+            boolean isDefaultBean, ModuleFactory moduleFactory, BundleContext bundleContext) {
 
         if (osgiRegistration == null) {
             throw new IllegalArgumentException(
@@ -60,6 +64,8 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
         this.moduleJMXRegistrator = moduleJMXRegistrator;
         this.orderingIdx = orderingIdx;
         this.isDefaultBean = isDefaultBean;
+        this.moduleFactory = moduleFactory;
+        this.bundleContext = bundleContext;
     }
 
     public DynamicReadableWrapper getReadableModule() {
@@ -119,5 +125,13 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
 
     public boolean isDefaultBean() {
         return isDefaultBean;
+    }
+
+    public ModuleFactory getModuleFactory() {
+        return moduleFactory;
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
     }
 }

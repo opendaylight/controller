@@ -11,8 +11,8 @@ import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
@@ -159,13 +159,24 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
         };
 
-        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = Collections.unmodifiableMap(
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = new HashMap<>(
                 resolver.getAllFactories());
+
+        // add all factories that disappeared from SR but are still committed
+        for (ModuleInternalInfo moduleInternalInfo : currentConfig.getEntries()) {
+            String name = moduleInternalInfo.getModuleFactory().getImplementationName();
+            if (allCurrentFactories.containsKey(name) == false) {
+                logger.trace("Factory {} not found in SR, using reference from previous commit", name);
+                allCurrentFactories.put(name,
+                        Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
+            }
+        }
+        allCurrentFactories = Collections.unmodifiableMap(allCurrentFactories);
 
         // closed by transaction controller
         ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
                 transactionName), factory, allCurrentFactories);
-        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
@@ -216,16 +227,14 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // non recoverable from here:
         try {
             return secondPhaseCommit(configTransactionController, commitInfo, configTransactionControllerEntry.getValue());
-        } catch (Throwable t) { // some libs throw Errors: e.g.
+        } catch (Error | RuntimeException t) { // some libs throw Errors: e.g.
             // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
             logger.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
             } else {
-                throw new RuntimeException(t);
+                throw (Error) t;
             }
         }
     }
@@ -344,24 +353,20 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
             // register to JMX
             try {
-                newModuleJMXRegistrator.registerMBean(newReadableConfigBean,
-                        primaryReadOnlyON);
+                newModuleJMXRegistrator.registerMBean(newReadableConfigBean, primaryReadOnlyON);
             } catch (InstanceAlreadyExistsException e) {
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("Possible code error, already registered:" + primaryReadOnlyON,e);
             }
 
-            // register to OSGi
+            // register services to OSGi
+            Map<String, ServiceInterfaceAnnotation> annotationMapping = configTransactionController.getWritableRegistry().findServiceInterfaces(moduleIdentifier);
+            BundleContext bc = configTransactionController.getModuleFactoryBundleContext(
+                    entry.getModuleFactory().getImplementationName());
             if (osgiRegistration == null) {
-                ModuleFactory moduleFactory = entry.getModuleFactory();
-                if (moduleFactory != null) {
-                    BundleContext bc = configTransactionController.
-                            getModuleFactoryBundleContext(moduleFactory.getImplementationName());
-                    osgiRegistration = beanToOsgiServiceManager.registerToOsgi(realModule.getClass(),
-                            newReadableConfigBean.getInstance(), entry.getIdentifier(), bc);
-                } else {
-                    throw new NullPointerException(entry.getIdentifier().getFactoryName() + " ModuleFactory not found.");
-                }
-
+                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(
+                        newReadableConfigBean.getInstance(), moduleIdentifier, bc, annotationMapping);
+            } else {
+                osgiRegistration.updateRegistrations(annotationMapping, bc, instance);
             }
 
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
@@ -369,7 +374,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             ModuleInternalInfo newInfo = new ModuleInternalInfo(
                     entry.getIdentifier(), newReadableConfigBean, osgiRegistration,
                     runtimeBeanRegistrator, newModuleJMXRegistrator,
-                    orderingIdx, entry.isDefaultBean());
+                    orderingIdx, entry.isDefaultBean(), entry.getModuleFactory(), entry.getBundleContext());
 
             newConfigEntries.put(realModule, newInfo);
             orderingIdx++;

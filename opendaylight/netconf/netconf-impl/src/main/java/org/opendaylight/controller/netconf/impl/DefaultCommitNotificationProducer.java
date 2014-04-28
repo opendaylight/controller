@@ -35,6 +35,7 @@ public class DefaultCommitNotificationProducer extends NotificationBroadcasterSu
 
     public DefaultCommitNotificationProducer(MBeanServer mBeanServer) {
         this.mbeanServer = mBeanServer;
+        logger.debug("Registering to JMX under {}", on);
         registerMBean(this, mbeanServer, on);
     }
 

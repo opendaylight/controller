@@ -40,7 +40,7 @@ public class AsyncEventBusConfigBeanTest extends AbstractConfigTest {
                 TestingScheduledThreadPoolModule.class, poolImplName);
 
         factory = new AsyncEventBusModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory,
                 scheduledThreadPoolConfigFactory));
     }
 
