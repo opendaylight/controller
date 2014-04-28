@@ -2,7 +2,7 @@ module opendaylight-port-types {
     namespace "urn:opendaylight:flow:types:port";
     prefix port-types;
 
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import ietf-yang-types {prefix yang; revision-date "2013-07-15";}
     import opendaylight-queue-types {prefix queue-types; revision-date "2013-09-25";}
     
     revision "2013-09-25" {

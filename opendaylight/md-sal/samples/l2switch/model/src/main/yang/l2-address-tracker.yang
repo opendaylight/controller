@@ -5,7 +5,7 @@ module l2-address-tracker {
 
   import ietf-yang-types {
     prefix yang;
-    revision-date 2010-09-24;
+    revision-date 2013-07-15;
   }
   import opendaylight-inventory {
     prefix inv;
