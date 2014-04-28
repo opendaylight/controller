@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.impl;
 
 import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider.NetconfOperationProviderUtil.getNetconfSessionIdForReporting;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
@@ -35,8 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfHelloMessage, NetconfServerSession, NetconfServerSessionListener> {
 
-    // TODO make this configurable
-    private static final Set<String> DEFAULT_BASE_CAPABILITIES = ImmutableSet.of(
+    public static final Set<String> DEFAULT_BASE_CAPABILITIES = ImmutableSet.of(
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0
@@ -50,18 +50,42 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final DefaultCommitNotificationProducer commitNotificationProducer;
     private final SessionMonitoringService monitoringService;
     private static final Logger logger = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
+    private final Set<String> baseCapabilities;
 
     // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
                                                  SessionIdProvider idProvider, long connectionTimeoutMillis,
                                                  DefaultCommitNotificationProducer commitNot,
                                                  SessionMonitoringService monitoringService) {
+        this(timer, netconfOperationProvider, idProvider, connectionTimeoutMillis, commitNot, monitoringService, DEFAULT_BASE_CAPABILITIES);
+    }
+
+    // TODO too many params, refactor
+    public NetconfServerSessionNegotiatorFactory(Timer timer, NetconfOperationProvider netconfOperationProvider,
+                                                 SessionIdProvider idProvider, long connectionTimeoutMillis,
+                                                 DefaultCommitNotificationProducer commitNot,
+                                                 SessionMonitoringService monitoringService, Set<String> baseCapabilities) {
         this.timer = timer;
         this.netconfOperationProvider = netconfOperationProvider;
         this.idProvider = idProvider;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
         this.commitNotificationProducer = commitNot;
         this.monitoringService = monitoringService;
+        this.baseCapabilities = validateBaseCapabilities(baseCapabilities);
+    }
+
+    private ImmutableSet<String> validateBaseCapabilities(final Set<String> baseCapabilities) {
+        // Check base capabilities to be supported by the server
+        Sets.SetView<String> unknownBaseCaps = Sets.difference(baseCapabilities, DEFAULT_BASE_CAPABILITIES);
+        Preconditions.checkArgument(unknownBaseCaps.isEmpty(),
+                "Base capabilities that will be supported by netconf server have to be subset of %s, unknown base capabilities: %s",
+                DEFAULT_BASE_CAPABILITIES, unknownBaseCaps);
+
+        ImmutableSet.Builder<String> b = ImmutableSet.builder();
+        b.addAll(baseCapabilities);
+        // Base 1.0 capability is supported by default
+        b.add(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0);
+        return b.build();
     }
 
     /**
@@ -99,7 +123,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     }
 
     private NetconfHelloMessage createHelloMessage(long sessionId, CapabilityProvider capabilityProvider) throws NetconfDocumentedException {
-        return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), DEFAULT_BASE_CAPABILITIES), sessionId);
+        return NetconfHelloMessage.createServerHello(Sets.union(capabilityProvider.getCapabilities(), baseCapabilities), sessionId);
     }
 
 }
