@@ -8,8 +8,6 @@ module config-jmx-it-impl {
     import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
     import config-threads { prefix th; revision-date 2013-04-09; }
 
-
-
     description
         "Testing IMPL";
 
@@ -67,19 +65,7 @@ module config-jmx-it-impl {
             }
 
         }
-    }
 
-    augment "/config:modules/config:module/config:state" {
-        case impl {
-            when "/config:modules/config:module/config:type = 'impl'";
-            // root runtime bean
-            leaf created-sessions {
-                type uint32;
-            }
-        }
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
 
@@ -205,6 +191,14 @@ module config-jmx-it-impl {
     }
 
     augment "/config:modules/config:module/config:state" {
+        case impl {
+            when "/config:modules/config:module/config:type = 'impl'";
+            // root runtime bean
+            leaf created-sessions {
+                type uint32;
+            }
+        }
+
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
             // root runtime bean
@@ -212,6 +206,11 @@ module config-jmx-it-impl {
                 type uint32;
             }
 
+            leaf created-sessions-2 {
+                type uint32;
+            }
+
         }
     }
+
 }
