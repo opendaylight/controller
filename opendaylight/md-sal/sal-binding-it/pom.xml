@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-parent</artifactId>
+        <version>1.0-1-SNAPSHOT</version>
+    </parent>
   <artifactId>sal-binding-it</artifactId>
-
   <properties>
     <exam.version>3.0.0</exam.version>
     <sonar.jacoco.itReportPath>../sal-binding-broker/target/jacoco-it.exec</sonar.jacoco.itReportPath>
