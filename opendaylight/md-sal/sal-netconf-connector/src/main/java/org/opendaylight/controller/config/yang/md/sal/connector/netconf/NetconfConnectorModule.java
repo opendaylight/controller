@@ -10,9 +10,7 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.GlobalEventExecutor;
-
+import com.google.common.util.concurrent.ListeningExecutorService;
 import java.io.File;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -25,8 +23,11 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
+import org.opendaylight.controller.sal.connect.api.RemoteDeviceSalFacade;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
-import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceListener;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
+import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
+import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
@@ -39,6 +40,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.net.InetAddresses;
 
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.GlobalEventExecutor;
+
 /**
  *
  */
@@ -50,11 +54,11 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
     private BundleContext bundleContext;
 
-    public NetconfConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public NetconfConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, NetconfConnectorModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final NetconfConnectorModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -89,32 +93,36 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     @Override
     public java.lang.AutoCloseable createInstance() {
 
-        getDomRegistryDependency();
-        NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
+        final RemoteDeviceId id = new RemoteDeviceId(getIdentifier());
 
-        device.setClientConfig(getClientConfig(device));
+        RemoteDeviceSalFacade salFacade = new NetconfDeviceSalFacade(id, getDomRegistryDependency(), bundleContext);
+        final NetconfDevice device =
+                NetconfDevice.createNetconfDevice(id, getGlobalNetconfSchemaProvider(), getGlobalProcessingExecutor(), salFacade);
+        final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(id, device, device);
+        final NetconfClientConfiguration clientConfig = getClientConfig(listener);
 
-        device.setProcessingExecutor(getGlobalProcessingExecutor());
+        // FIXME BUG-944 remove backwards compatibility
+        final NetconfClientDispatcher dispatcher = getClientDispatcher() == null ? createDispatcher() : getClientDispatcherDependency();
+        listener.initializeRemoteConnection(dispatcher, clientConfig);
 
-        device.setEventExecutor(getEventExecutorDependency());
-        device.setDispatcher(getClientDispatcher() == null ? createDispatcher() : getClientDispatcherDependency());
-        device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
-
-        getDomRegistryDependency().registerProvider(device, bundleContext);
-        device.start();
-        return device;
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                device.close();
+            }
+        };
     }
 
     private ExecutorService getGlobalProcessingExecutor() {
         return GLOBAL_PROCESSING_EXECUTOR == null ? Executors.newCachedThreadPool() : GLOBAL_PROCESSING_EXECUTOR;
     }
 
-    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider(BundleContext bundleContext) {
+    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider() {
         if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
-            String storageFile = "cache/schema";
+            final String storageFile = "cache/schema";
             //            File directory = bundleContext.getDataFile(storageFile);
-            File directory = new File(storageFile);
-            SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
+            final File directory = new File(storageFile);
+            final SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
             GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
         }
         return GLOBAL_NETCONF_SOURCE_PROVIDER;
@@ -130,20 +138,20 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         return new NetconfClientDispatcherImpl(getBossThreadGroupDependency(), getWorkerThreadGroupDependency(), new HashedWheelTimer());
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    public NetconfClientConfiguration getClientConfig(final NetconfDevice device) {
-        InetSocketAddress socketAddress = getSocketAddress();
-        ReconnectStrategy strategy = getReconnectStrategy();
-        long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
+    public NetconfClientConfiguration getClientConfig(final NetconfDeviceCommunicator listener) {
+        final InetSocketAddress socketAddress = getSocketAddress();
+        final ReconnectStrategy strategy = getReconnectStrategy();
+        final long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
 
         return NetconfClientConfigurationBuilder.create()
         .withAddress(socketAddress)
         .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
         .withReconnectStrategy(strategy)
-        .withSessionListener(new NetconfDeviceListener(device))
+        .withSessionListener(listener)
         .withAuthHandler(new LoginPassword(getUsername(),getPassword()))
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
@@ -152,17 +160,17 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     }
 
     private ReconnectStrategy getReconnectStrategy() {
-        Long connectionAttempts;
+        final Long connectionAttempts;
         if (getMaxConnectionAttempts() != null && getMaxConnectionAttempts() > 0) {
             connectionAttempts = getMaxConnectionAttempts();
         } else {
             logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
             connectionAttempts = null;
         }
-        double sleepFactor = 1.0;
-        int minSleep = 1000;
-        Long maxSleep = null;
-        Long deadline = null;
+        final double sleepFactor = 1.0;
+        final int minSleep = 1000;
+        final Long maxSleep = null;
+        final Long deadline = null;
 
         return new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, getBetweenAttemptsTimeoutMillis(),
                 minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
@@ -177,7 +185,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             addressValue = getAddress().getIpv6Address().getValue();
         }
          */
-        InetAddress inetAddress = InetAddresses.forString(getAddress());
+        final InetAddress inetAddress = InetAddresses.forString(getAddress());
         return new InetSocketAddress(inetAddress, getPort().intValue());
     }
 }
