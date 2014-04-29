@@ -1,0 +1,18 @@
+module test-module {
+    yang-version 1;
+    namespace "test:namespace";
+    prefix "tt";
+
+    description
+        "Types for testing";
+
+    revision "2013-07-22";
+
+
+    container c {
+        leaf a {
+            type string;
+        }
+    }
+
+}
