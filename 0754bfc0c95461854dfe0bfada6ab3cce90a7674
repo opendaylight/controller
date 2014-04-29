@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0dbb59e6",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/osgi/NetconfConfigUtil.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-29T08:21:50Z",
+      "side": 1,
+      "message": "This might throw a NullPointerException. This solutioon would be better:\n\nreturn Strings.isNullOrEmpty(propertyValue) ? Optional.absent() : Optional.of(propertyValue)",
+      "revId": "0754bfc0c95461854dfe0bfada6ab3cce90a7674",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
