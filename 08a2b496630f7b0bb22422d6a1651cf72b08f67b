@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_78aae571",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/FlowCapableInventoryProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "Do not catch Throwables!",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_18b719da",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/FlowCapableInventoryProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "Add a message, e.g.:\nRuntimeException(\"Failed to stop Flow Capable Inventory Provider\", e);",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8b0d1df",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/InventoryActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "Trailing whitespace, please fix your editor",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_38bc5dbb",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/InventoryActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "is this @Override? Please configure your IDE to add annotations.",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b8a06d91",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "NodeChangeCommiter.LOG.debug(\"updating node connector : {}\", value);",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f89ef555",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-29T14:19:28Z",
+      "side": 1,
+      "message": "NodeChangeCommiter.LOG.debug(\"removing node : {}\", ref.getValue());",
+      "revId": "08a2b496630f7b0bb22422d6a1651cf72b08f67b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
