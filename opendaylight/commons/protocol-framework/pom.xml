@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.2-1-SNAPSHOT</version>
+        <version>1.4.1-1-SNAPSHOT</version>
         <relativePath>../../commons/opendaylight</relativePath>
     </parent>
     <scm>
@@ -17,7 +17,7 @@
     </scm>
 
     <artifactId>protocol-framework</artifactId>
-    <version>0.4.1-1-SNAPSHOT</version>
+    <version>0.4.0-1-SNAPSHOT</version>
     <description>Common protocol framework</description>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>
