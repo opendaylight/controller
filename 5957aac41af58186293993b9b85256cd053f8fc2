@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ad482d2e",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/osgi/NetconfConfigUtil.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-04-29T07:55:16Z",
+      "side": 1,
+      "message": "This should be Optional.fromNullable (depends on what is returned by context.getPropert, if null or empty string) + it should also return Optional.absent if the string is empty string",
+      "revId": "5957aac41af58186293993b9b85256cd053f8fc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
