@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5334a2dd",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Thanks for heads up. I will take care of this during rebase before merging.",
+      "parentUuid": "fa82b9bf_d858d1fc",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f814b5f6",
         "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-29T13:58:26Z",
       "side": 1,
       "message": "Unless you specifically need version 1.0 I would remove the version tag and let it pick up the version from the parent dependency management",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7331a6eb",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fa82b9bf_f814b5f6",
       "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_134e1a70",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Makes sense. Its an oversight on my part.",
+      "parentUuid": "fa82b9bf_380bfdd7",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_98f9e9ca",
         "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-29T13:58:26Z",
       "side": 1,
       "message": "Same comments here and above - let it pick up version and scope from parents unless you need to override.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f35cd627",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "fa82b9bf_98f9e9ca",
       "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9341ca3b",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/.DS_Store",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Didnt intend to check this in. Will take care of it. Thanks for the link.",
+      "parentUuid": "fa82b9bf_580361b8",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f8b915ea",
         "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/DocGeneratorTest.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-04-29T13:58:26Z",
       "side": 1,
       "message": "I would love to see some more JUnit tests here that have an expanded scope - for example if we could load up the toaster yang and check that the correct documentation is returned for the RPC calls etc.\n\nRight now all we appear to be validating is that the root call returns a documentation object ( we should also validate that it has the right content). Junits make refactoring much safer and quicker.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b33e4eb7",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/DocGeneratorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-04-29T21:15:28Z",
+      "side": 1,
+      "message": "Agree. I do plan to add more tests.",
+      "parentUuid": "fa82b9bf_f8b915ea",
       "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
