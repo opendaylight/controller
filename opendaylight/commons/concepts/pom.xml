@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.1-1-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <scm>
@@ -15,7 +15,7 @@
   </scm>
 
   <artifactId>concepts</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.1-1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>
@@ -42,7 +42,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.2-1-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <configuration>

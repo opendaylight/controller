@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-core-api</artifactId>
     <scm>
@@ -69,7 +69,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
-                        <version>${config.version}</version>
+                        <version>0.2.3-1-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
@@ -104,10 +104,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-api</artifactId>
+            <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
