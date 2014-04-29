@@ -12,6 +12,7 @@ module opendaylight-flow-types {
     }
     
     typedef flow-ref {
+    	description "A reference to a flow";
         type instance-identifier;
     }
     
@@ -21,32 +22,41 @@ module opendaylight-flow-types {
     }
     
     typedef output-port-values {
+        description "Enumeration of the logical port values";
         type enumeration {
             enum MAX {
                 value 1;
             }
             enum IN_PORT {
+	        description "Represents the packet ingress port";
                 value 2;
             }
             enum TABLE {
+	       description "Represents the start of the pipeline.";
                 value 3;
             }
             enum NORMAL {
+	        description "Represents the traditional pipeline in the switch";
                 value 4;
             }
             enum FLOOD {
+	        description "Represents flooding using the traditional pipeline of the swtich";
                 value 5;
             }
             enum ALL {
+	        description "Represents all ports the switch can use for forwarding a specific packet";
                 value 6;
             }
             enum CONTROLLER {
+	        description "Represents the control channel";
                 value 7;
             }
             enum LOCAL {
+	    	description "Represents the switches local control and management stack"; 
                 value 8;
             }
             enum ANY {
+                description "Wildcard port";
                 value 9;
             }
 	     enum NONE {
