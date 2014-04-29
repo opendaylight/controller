@@ -3,7 +3,7 @@
     <parent>
         <artifactId>sal-parent</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-binding-it</artifactId>
     <scm>
@@ -19,6 +19,8 @@
         <!-- Sonar jacoco plugin to get integration test coverage info -->
         <sonar.jacoco.reportPath>../sal-binding-broker/target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.itReportPath>../sal-binding-broker/target/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <netconf.version>0.2.3-1-SNAPSHOT</netconf.version>
+        <config.version>0.2.3-1-SNAPSHOT</config.version>
     </properties>
 
     <build>
@@ -145,6 +147,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
@@ -229,15 +232,18 @@
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-manager</artifactId>
+            <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-management</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

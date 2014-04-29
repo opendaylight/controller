@@ -5,12 +5,12 @@
     <maven>3.0</maven>
   </prerequisites>
   <artifactId>commons.opendaylight</artifactId>
-  <version>1.4.2-SNAPSHOT</version>
+  <version>1.4.1-1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.1-1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   <scm>
@@ -70,38 +70,38 @@
     <junit.version>4.8.1</junit.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <!--versions for bits of the controller -->
-    <controller.version>0.4.2-SNAPSHOT</controller.version>
-    <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
-    <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
-    <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
-    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
-    <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
-    <samples.loadbalancer>0.5.2-SNAPSHOT</samples.loadbalancer>
-    <config.version>0.2.5-SNAPSHOT</config.version>
-    <netconf.version>0.2.5-SNAPSHOT</netconf.version>
-    <mdsal.version>1.1-SNAPSHOT</mdsal.version>
-    <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
-    <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
-    <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
-    <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
-    <sal.version>0.8.1-SNAPSHOT</sal.version>
-    <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
-    <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
-    <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
-    <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
-    <concepts.version>0.5.2-SNAPSHOT</concepts.version>
-    <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
+    <controller.version>0.4.1-1-SNAPSHOT</controller.version>
+    <hosttracker.api.version>0.5.1-1-SNAPSHOT</hosttracker.api.version>
+    <hosttracker_new.api.version>0.4.1-1-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker.implementation.version>0.5.1-1-SNAPSHOT</hosttracker.implementation.version>
+    <arphandler.version>0.5.1-1-SNAPSHOT</arphandler.version>
+    <forwarding.staticrouting>0.5.1-1-SNAPSHOT</forwarding.staticrouting>
+    <samples.loadbalancer>0.5.1-1-SNAPSHOT</samples.loadbalancer>
+    <config.version>0.2.3-1-SNAPSHOT</config.version>
+    <netconf.version>0.2.3-1-SNAPSHOT</netconf.version>
+    <mdsal.version>1.0-1-SNAPSHOT</mdsal.version>
+    <containermanager.version>0.5.1-1-SNAPSHOT</containermanager.version>
+    <containermanager.it.version>0.5.1-1-SNAPSHOT</containermanager.it.version>
+    <switchmanager.api.version>0.7.0-1-SNAPSHOT</switchmanager.api.version>
+    <connectionmanager.version>0.1.1-1-SNAPSHOT</connectionmanager.version>
+    <sal.version>0.7.0-1-SNAPSHOT</sal.version>
+    <sal.networkconfiguration.version>0.0.2-1-SNAPSHOT</sal.networkconfiguration.version>
+    <sal.connection.version>0.1.1-1-SNAPSHOT</sal.connection.version>
+    <networkconfig.bridgedomain.northbound.version>0.0.2-1-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
+    <commons.httpclient.version>0.1.1-1-SNAPSHOT</commons.httpclient.version>
+    <concepts.version>0.5.1-1-SNAPSHOT</concepts.version>
+    <protocol-framework.version>0.4.0-1-SNAPSHOT</protocol-framework.version>
     <netty.version>4.0.17.Final</netty.version>
     <commons.io.version>2.4</commons.io.version>
-    <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
-    <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
-    <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
-    <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
-    <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
-    <configuration.version>0.4.3-SNAPSHOT</configuration.version>
-    <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
-    <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
-    <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
+    <bundlescanner.version>0.4.1-1-SNAPSHOT</bundlescanner.version>
+    <usermanager.version>0.4.1-1-SNAPSHOT</usermanager.version>
+    <forwardingrulesmanager.version>0.5.0-1-SNAPSHOT</forwardingrulesmanager.version>
+    <statisticsmanager.version>0.5.0-1-SNAPSHOT</statisticsmanager.version>
+    <clustering.services.version>0.5.0-1-SNAPSHOT</clustering.services.version>
+    <configuration.version>0.4.1-1-SNAPSHOT</configuration.version>
+    <topologymanager.version>0.4.1-1-SNAPSHOT</topologymanager.version>
+    <protocol_plugin.stub.version>0.4.1-1-SNAPSHOT</protocol_plugin.stub.version>
+    <clustering.stub.version>0.4.1-1-SNAPSHOT</clustering.stub.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <!-- Third party version -->
     <jersey-servlet.version>1.17</jersey-servlet.version>
@@ -647,7 +647,7 @@
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>ganymed</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
@@ -976,7 +976,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>osgi-brandfragment.web</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
       </dependency>
 
       <!--  Neutron -->
@@ -1060,12 +1060,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>httpservice-bridge</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>jolokia-bridge</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1075,12 +1075,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>usermanager.northbound</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>controllermanager.northbound</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
       </dependency>
       <!-- Debug and logging -->
       <dependency>
@@ -1157,7 +1157,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.logback_settings</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1-1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -1699,7 +1699,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.2-1-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <executions>
@@ -1941,7 +1941,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
+              <version>0.0.1-1-SNAPSHOT</version>
             </dependency>
           </dependencies>
         </plugin>
