@@ -10,29 +10,27 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
-import com.google.common.net.InetAddresses;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.File;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
-import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceListener;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
+import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
+import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.inventory.rev140108.NetconfNode;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
@@ -42,29 +40,32 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
+import io.netty.util.HashedWheelTimer;
+
 /**
  *
  */
 public final class NetconfConnectorModule extends org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModule
 {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConnectorModule.class);
+    public static final double CONNECTION_ATTEMPT_SLEEP_FACTOR = 1.5;
 
-    private static ExecutorService GLOBAL_PROCESSING_EXECUTOR = null;
     private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
     private BundleContext bundleContext;
 
-    public NetconfConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public NetconfConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, NetconfConnectorModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final NetconfConnectorModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override
     protected void customValidation() {
         checkNotNull(getAddress(), addressJmxAttribute);
-        //checkState(getAddress().getIpv4Address() != null || getAddress().getIpv6Address() != null,"Address must be set.");
         checkNotNull(getPort(), portJmxAttribute);
         checkNotNull(getDomRegistry(), portJmxAttribute);
         checkNotNull(getDomRegistry(), domRegistryJmxAttribute);
@@ -87,41 +88,83 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             checkNotNull(getPassword(), passwordJmxAttribute);
         }
 
+        // FIXME BUG 944 remove this warning
+        if(getBindingRegistry() == null) {
+            logger.warn("Configuration property: \"binding-registry\" not set for sal-netconf-connector (" + getIdentifier() + "). " +
+                    "Netconf-connector now requires a dependency on \"binding-broker-osgi-registry\". " +
+                    "The dependency is optional for now to preserve backwards compatibility, but will be mandatory in the future. " +
+                    "Please set the property as in \"01-netconf-connector\" initial config file. " +
+                    "The service will be retrieved from OSGi service registry now.");
+        }
+
+        // FIXME BUG 944 remove this warning
+        if(getProcessingExecutor() == null) {
+            logger.warn("Configuration property: \"processing-executor\" not set for sal-netconf-connector (" + getIdentifier() + "). " +
+                    "Netconf-connector now requires a dependency on \"threadpool\". " +
+                    "The dependency is optional for now to preserve backwards compatibility, but will be mandatory in the future. " +
+                    "Please set the property as in \"01-netconf-connector\" initial config file. " +
+                    "New instance will be created for the executor.");
+        }
     }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ServiceReference<DataProviderService> serviceReference = bundleContext.getServiceReference(DataProviderService.class);
+        final RemoteDeviceId id = new RemoteDeviceId(getIdentifier());
 
-        DataProviderService dataProviderService =
-                bundleContext.getService(serviceReference);
+        final ExecutorService globalProcessingExecutor = getGlobalProcessingExecutor();
 
-        getDomRegistryDependency();
-        NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
+        final Broker domBroker = getDomRegistryDependency();
+        final BindingAwareBroker bindingBroker = getBindingRegistryBackwards();
 
-        device.setClientConfig(getClientConfig(device));
+        final RemoteDeviceHandler salFacade = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
+        final NetconfDevice device =
+                NetconfDevice.createNetconfDevice(id, getGlobalNetconfSchemaProvider(), globalProcessingExecutor, salFacade);
+        final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(id, device);
+        final NetconfClientConfiguration clientConfig = getClientConfig(listener);
 
-        device.setProcessingExecutor(getGlobalProcessingExecutor());
+        // FIXME BUG-944 remove backwards compatibility
+        final NetconfClientDispatcher dispatcher = getClientDispatcher() == null ? createDispatcher() : getClientDispatcherDependency();
+        listener.initializeRemoteConnection(dispatcher, clientConfig);
 
-        device.setEventExecutor(getEventExecutorDependency());
-        device.setDispatcher(getClientDispatcher() == null ? createDispatcher() : getClientDispatcherDependency());
-        device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
-        device.setDataProviderService(dataProviderService);
-        getDomRegistryDependency().registerProvider(device, bundleContext);
-        device.start();
-        return device;
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                listener.close();
+                salFacade.close();
+            }
+        };
+    }
+
+    private BindingAwareBroker getBindingRegistryBackwards() {
+        if(getBindingRegistry() != null) {
+            return getBindingRegistryDependency();
+        } else {
+            // FIXME BUG 944 remove backwards compatibility
+            final ServiceReference<BindingAwareBroker> serviceReference = bundleContext.getServiceReference(BindingAwareBroker.class);
+            Preconditions
+                    .checkNotNull(
+                            serviceReference,
+                            "Unable to retrieve %s from OSGi service registry, use binding-registry config property to inject %s with config subsystem",
+                            BindingAwareBroker.class, BindingAwareBroker.class);
+            return bundleContext.getService(serviceReference);
+        }
     }
 
     private ExecutorService getGlobalProcessingExecutor() {
-        return GLOBAL_PROCESSING_EXECUTOR == null ? Executors.newCachedThreadPool() : GLOBAL_PROCESSING_EXECUTOR;
+        if(getProcessingExecutor() != null) {
+            return getProcessingExecutorDependency().getExecutor();
+        } else {
+            // FIXME BUG 944 remove backwards compatibility
+            return Executors.newCachedThreadPool();
+        }
     }
 
-    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider(BundleContext bundleContext) {
+    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider() {
         if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
-            String storageFile = "cache/schema";
+            final String storageFile = "cache/schema";
             //            File directory = bundleContext.getDataFile(storageFile);
-            File directory = new File(storageFile);
-            SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
+            final File directory = new File(storageFile);
+            final SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
             GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
         }
         return GLOBAL_NETCONF_SOURCE_PROVIDER;
@@ -137,20 +180,20 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         return new NetconfClientDispatcherImpl(getBossThreadGroupDependency(), getWorkerThreadGroupDependency(), new HashedWheelTimer());
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    public NetconfClientConfiguration getClientConfig(final NetconfDevice device) {
-        InetSocketAddress socketAddress = getSocketAddress();
-        ReconnectStrategy strategy = getReconnectStrategy();
-        long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
+    public NetconfClientConfiguration getClientConfig(final NetconfDeviceCommunicator listener) {
+        final InetSocketAddress socketAddress = getSocketAddress();
+        final ReconnectStrategy strategy = getReconnectStrategy();
+        final long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
 
         return NetconfClientConfigurationBuilder.create()
         .withAddress(socketAddress)
         .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
         .withReconnectStrategy(strategy)
-        .withSessionListener(new NetconfDeviceListener(device))
+        .withSessionListener(listener)
         .withAuthHandler(new LoginPassword(getUsername(),getPassword()))
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
@@ -159,19 +202,19 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     }
 
     private ReconnectStrategy getReconnectStrategy() {
-        Long connectionAttempts;
+        final Long connectionAttempts;
         if (getMaxConnectionAttempts() != null && getMaxConnectionAttempts() > 0) {
             connectionAttempts = getMaxConnectionAttempts();
         } else {
             logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
             connectionAttempts = null;
         }
-        double sleepFactor = 1.0;
-        int minSleep = 1000;
-        Long maxSleep = null;
-        Long deadline = null;
+        final double sleepFactor = CONNECTION_ATTEMPT_SLEEP_FACTOR;
+        final int minSleep = getBetweenAttemptsTimeoutMillis();
+        final Long maxSleep = null;
+        final Long deadline = null;
 
-        return new TimedReconnectStrategy(GlobalEventExecutor.INSTANCE, getBetweenAttemptsTimeoutMillis(),
+        return new TimedReconnectStrategy(getEventExecutorDependency(), getBetweenAttemptsTimeoutMillis(),
                 minSleep, sleepFactor, maxSleep, connectionAttempts, deadline);
     }
 
@@ -184,7 +227,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             addressValue = getAddress().getIpv6Address().getValue();
         }
          */
-        InetAddress inetAddress = InetAddresses.forString(getAddress());
+        final InetAddress inetAddress = InetAddresses.forString(getAddress());
         return new InetSocketAddress(inetAddress, getPort().intValue());
     }
 }

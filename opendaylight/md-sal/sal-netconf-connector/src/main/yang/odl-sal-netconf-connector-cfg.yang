@@ -3,10 +3,11 @@ module odl-sal-netconf-connector-cfg {
     namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf";
     prefix "sal-netconf";
 
-	import config { prefix config; revision-date 2013-04-05; }
-	import threadpool {prefix th;}
-	import netty {prefix netty;}
- 	import opendaylight-md-sal-dom {prefix dom;}
+    import config { prefix config; revision-date 2013-04-05; }
+    import threadpool {prefix th;}
+    import netty {prefix netty;}
+    import opendaylight-md-sal-dom {prefix dom;}
+    import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
     import odl-netconf-cfg { prefix cfg-net; revision-date 2014-04-08; }
 
     description
@@ -22,7 +23,6 @@ module odl-sal-netconf-connector-cfg {
         config:java-name-prefix NetconfConnector;
     }
 
-
     grouping server {
         leaf address {
             type string;
@@ -32,7 +32,6 @@ module odl-sal-netconf-connector-cfg {
             type uint32;
         }
     }
-
 
     augment "/config:modules/config:module/config:configuration" {
         case sal-netconf-connector {
@@ -67,6 +66,16 @@ module odl-sal-netconf-connector-cfg {
                 }
             }
 
+            container binding-registry {
+                uses config:service-ref {
+                    refine type {
+                        // FIXME BUG-944 make mandatory (remove backwards compatibility)
+                        mandatory false;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+
             // FIXME BUG-944 remove backwards compatibility
             // Deprecated, replaced by client dispatcher.
             // This dependency will be removed in near future and all configurations of netconf-connector need to be changed to use dispatcher dependency.
@@ -97,6 +106,18 @@ module odl-sal-netconf-connector-cfg {
                         config:required-identity netty:netty-event-executor;
                     }
                 }
+            }
+
+            container processing-executor {
+                uses config:service-ref {
+                    refine type {
+                        // FIXME BUG-944 make mandatory (remove backwards compatibility)
+                        mandatory false;
+                        config:required-identity th:threadpool;
+                    }
+                }
+
+                description "Makes up for flaws in netty threading design";
             }
 
             // Replaces thread group dependencies
