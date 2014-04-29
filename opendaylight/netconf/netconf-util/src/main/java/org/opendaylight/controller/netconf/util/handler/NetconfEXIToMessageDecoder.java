@@ -34,8 +34,6 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfEXIToMessageDecoder.class);
 
-//    private static final SAXTransformerFactory saxTransformerFactory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
-
     private final NetconfEXICodec codec;
 
     public NetconfEXIToMessageDecoder(final NetconfEXICodec codec) {
@@ -50,9 +48,9 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
          * the use of EXI, which means the next message needs to be decoded not by us, but rather
          * by the XML decoder.
          */
-        // If empty Byte buffer is passed to r.parse, EOFException is thrown
 
-        if (in.readableBytes() == 0) {
+        // If empty Byte buffer is passed to r.parse, EOFException is thrown
+        if (in.isReadable() == false) {
             LOG.debug("No more content in incoming buffer.");
             return;
         }
@@ -68,7 +66,6 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
         final DOMResult domResult = new DOMResult();
         handler.setResult(domResult);
-
 
         try (final InputStream is = new ByteBufInputStream(in)) {
             r.parse(new InputSource(is));

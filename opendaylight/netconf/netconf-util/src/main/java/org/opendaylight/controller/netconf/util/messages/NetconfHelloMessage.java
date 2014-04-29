@@ -8,17 +8,21 @@
 
 package org.opendaylight.controller.netconf.util.messages;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+
+import java.util.Set;
+
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 /**
  * NetconfMessage that can carry additional header with session metadata. See {@link org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader}
@@ -43,10 +47,10 @@ public final class NetconfHelloMessage extends NetconfMessage {
         return additionalHeader== null ? Optional.<NetconfHelloMessageAdditionalHeader>absent() : Optional.of(additionalHeader);
     }
 
-    private static void checkHelloMessage(Document doc) throws NetconfDocumentedException {
-        XmlElement.fromDomElementWithExpected(doc.getDocumentElement(), HELLO_TAG,
-                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-
+    private static void checkHelloMessage(Document doc) {
+        Preconditions.checkArgument(isHelloMessage(doc),
+                "Hello message invalid format, should contain %s tag from namespace %s, but is: %s", HELLO_TAG,
+                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlUtil.toString(doc));
     }
 
     public static NetconfHelloMessage createClientHello(Iterable<String> capabilities,
@@ -80,5 +84,22 @@ public final class NetconfHelloMessage extends NetconfMessage {
         sessionIdElement.setTextContent(Long.toString(sessionId));
         doc.getDocumentElement().appendChild(sessionIdElement);
         return new NetconfHelloMessage(doc);
+    }
+
+    public static boolean isHelloMessage(final NetconfMessage msg) {
+        Document document = msg.getDocument();
+        return isHelloMessage(document);
+    }
+
+    private static boolean isHelloMessage(final Document document) {
+        XmlElement element = XmlElement.fromDomElement(document.getDocumentElement());
+        try {
+            return element.getName().equals(HELLO_TAG) &&
+                   element.hasNamespace() &&
+                   element.getNamespace().equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        } catch (MissingNameSpaceException e) {
+            // Cannot happen, since we check for hasNamespace
+            throw new IllegalStateException(e);
+        }
     }
 }

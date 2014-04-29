@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Optional;
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
+import java.net.InetSocketAddress;
+
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -19,7 +18,11 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAddi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
+import com.google.common.base.Optional;
+
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {
@@ -30,6 +33,14 @@ public class NetconfServerSessionNegotiator extends
             Promise<NetconfServerSession> promise, Channel channel, Timer timer, NetconfServerSessionListener sessionListener,
             long connectionTimeoutMillis) {
         super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
+    }
+
+    @Override
+    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
+        NetconfServerSession session = getSessionForHelloMessage(netconfMessage);
+        replaceHelloMessageInboundHandler(session);
+        // Negotiation successful after all non hello messages were processed
+        negotiationSuccessful(session);
     }
 
     @Override

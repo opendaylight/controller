@@ -28,6 +28,7 @@ import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
 import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.util.handler.NetconfChunkAggregator;
 import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.util.handler.NetconfXMLToHelloMessageDecoder;
 import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
@@ -74,7 +75,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     @Override
-    protected void startNegotiation() {
+    protected final void startNegotiation() {
         final Optional<SslHandler> sslHandler = getSslHandler(channel);
         if (sslHandler.isPresent()) {
             Future<Channel> future = sslHandler.get().handshakeFuture();
@@ -125,26 +126,21 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
         // FIXME, make sessionPreferences return HelloMessage, move NetconfHelloMessage to API
         sendMessage((NetconfHelloMessage)helloMessage);
+
+        replaceHelloMessageOutboundHandler();
         changeState(State.OPEN_WAIT);
     }
+
     private void cancelTimeout() {
         if(timeout!=null) {
             timeout.cancel();
         }
     }
 
-    @Override
-    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
-        S session = getSessionForHelloMessage(netconfMessage)   ;
-        negotiationSuccessful(session);
-    }
-
     protected final S getSessionForHelloMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
         Preconditions.checkNotNull(netconfMessage, "netconfMessage");
 
         final Document doc = netconfMessage.getDocument();
-
-        replaceHelloMessageHandlers();
 
         if (shouldUseChunkFraming(doc)) {
             insertChunkFramingToPipeline();
@@ -157,23 +153,44 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     /**
      * Insert chunk framing handlers into the pipeline
      */
-    protected void insertChunkFramingToPipeline() {
+    private void insertChunkFramingToPipeline() {
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_FRAME_ENCODER,
                 FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK));
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_AGGREGATOR,
                 new NetconfChunkAggregator());
     }
 
-    protected boolean shouldUseChunkFraming(Document doc) {
+    private boolean shouldUseChunkFraming(Document doc) {
         return containsBase11Capability(doc)
                 && containsBase11Capability(sessionPreferences.getHelloMessage().getDocument());
     }
 
     /**
-     * Remove special handlers for hello message. Insert regular netconf xml message (en|de)coders.
+     * Remove special inbound handler for hello message. Insert regular netconf xml message (en|de)coders.
+     *
+     * Inbound hello message handler should be kept until negotiation is successful
+     * It caches any non-hello messages while negotiation is still in progress
      */
-    protected void replaceHelloMessageHandlers() {
-        replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, new NetconfXMLToMessageDecoder());
+    protected final void replaceHelloMessageInboundHandler(final S session) {
+        ChannelHandler helloMessageHandler = replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, new NetconfXMLToMessageDecoder());
+
+        Preconditions.checkState(helloMessageHandler instanceof NetconfXMLToHelloMessageDecoder,
+                "Pipeline handlers misplaced on session: %s, pipeline: %s", session, channel.pipeline());
+        Iterable<NetconfMessage> netconfMessagesFromNegotiation =
+                ((NetconfXMLToHelloMessageDecoder) helloMessageHandler).getPostHelloNetconfMessages();
+
+        // Process messages received during negotiation
+        // The hello message handler does not have to be synchronized, since it is always call from the same thread by netty
+        // It means, we are now using the thread now
+        for (NetconfMessage message : netconfMessagesFromNegotiation) {
+            session.handleMessage(message);
+        }
+    }
+
+    /**
+     * Remove special outbound handler for hello message. Insert regular netconf xml message (en|de)coders.
+     */
+    private void replaceHelloMessageOutboundHandler() {
         replaceChannelHandler(channel, AbstractChannelInitializer.NETCONF_MESSAGE_ENCODER, new NetconfMessageToXMLEncoder());
     }
 
@@ -183,7 +200,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException;
 
-    protected synchronized void changeState(final State newState) {
+    private synchronized void changeState(final State newState) {
         logger.debug("Changing state from : {} to : {}", state, newState);
         Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s", state,
                 newState);
