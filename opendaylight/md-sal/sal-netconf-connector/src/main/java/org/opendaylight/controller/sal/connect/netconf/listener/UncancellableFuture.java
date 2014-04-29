@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.connect.netconf;
+package org.opendaylight.controller.sal.connect.netconf.listener;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
@@ -17,7 +17,7 @@ final class UncancellableFuture<V> extends AbstractFuture<V> {
     @GuardedBy("this")
     private boolean uncancellable = false;
 
-    public UncancellableFuture(boolean uncancellable) {
+    public UncancellableFuture(final boolean uncancellable) {
         this.uncancellable = uncancellable;
     }
 
@@ -35,23 +35,19 @@ final class UncancellableFuture<V> extends AbstractFuture<V> {
     }
 
     @Override
-    public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-        if (uncancellable) {
-            return false;
-        }
-
-        return super.cancel(mayInterruptIfRunning);
+    public synchronized boolean cancel(final boolean mayInterruptIfRunning) {
+        return uncancellable ? false : super.cancel(mayInterruptIfRunning);
     }
 
     @Override
-    public synchronized boolean set(@Nullable V value) {
-        Preconditions.checkState(uncancellable == true);
+    public synchronized boolean set(@Nullable final V value) {
+        Preconditions.checkState(uncancellable);
         return super.set(value);
     }
 
     @Override
-    protected boolean setException(Throwable throwable) {
-        Preconditions.checkState(uncancellable == true);
+    protected boolean setException(final Throwable throwable) {
+        Preconditions.checkState(uncancellable);
         return super.setException(throwable);
     }
 }
