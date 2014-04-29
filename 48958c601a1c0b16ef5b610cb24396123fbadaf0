@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d858d1fc",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "Not really a problem since you have it right here - (just an FYI) you will may have conflict with https://git.opendaylight.org/gerrit/6588 which fixes the unordered pom file dependency.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f814b5f6",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "Unless you specifically need version 1.0 I would remove the version tag and let it pick up the version from the parent dependency management",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_380bfdd7",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "While technically not incorrect I would remove the version lines here and below and let them get pick up the version via the dependency management. Just makes this pom.xml easier to read.\n\nNote: Same comment applies to versions below as well.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_98f9e9ca",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "Same comments here and above - let it pick up version and scope from parents unless you need to override.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_580361b8",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/.DS_Store",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "Did you intent to check this file in? I believe this is a MAC specific file which should not be checked in.\n\nConsider this apple KB ticket: http://support.apple.com/kb/ht1629",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f8b915ea",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/DocGeneratorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-04-29T13:58:26Z",
+      "side": 1,
+      "message": "I would love to see some more JUnit tests here that have an expanded scope - for example if we could load up the toaster yang and check that the correct documentation is returned for the RPC calls etc.\n\nRight now all we appear to be validating is that the root call returns a documentation object ( we should also validate that it has the right content). Junits make refactoring much safer and quicker.",
+      "revId": "48958c601a1c0b16ef5b610cb24396123fbadaf0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
