@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <groupId>org.opendaylight.controller.md</groupId>
     <artifactId>forwardingrules-manager</artifactId>
@@ -46,19 +46,22 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>flow-management-compatibility</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.0-1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-service</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-management</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -67,6 +70,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-broker-impl</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
