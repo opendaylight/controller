@@ -44,22 +44,53 @@ public class ProcessSources extends AbstractMojo{
 
         File[] sourceFiles = sourceDirectory.listFiles();
         for (File sourceFile: sourceFiles) {
-            if(sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
-                File stubFile = new File(sourceFile.getPath().replace(".java", "Stub.txt"));
-                if (stubFile.exists()) {
-                    try {
-                        rewrite(sourceFile, FileUtils.readFileToString(stubFile));
-                    } catch (IOException e) {
-                        getLog().error("Error while reading/writing to files.", e);
+            if (sourceFile.getName().endsWith(".java")) {
+                String sourceContent;
+                try {
+                    sourceContent = FileUtils.readFileToString(sourceFile);
+                } catch (IOException e) {
+                    getLog().error("Cannot read " + sourceFile.getAbsolutePath(), e);
+                    continue;
+                }
+                if (sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
+                    File stubFile = new File(sourceFile.getPath().replace(".java", "Stub.txt"));
+                    if (stubFile.exists()) {
+                        String stubContent = null;
+                        try {
+                            stubContent = FileUtils.readFileToString(stubFile);
+                        } catch (IOException e) {
+                            getLog().error("Cannot read " + stubFile.getAbsolutePath(), e);
+                        }
+                        if (stubContent != null) {
+                            sourceContent = rewriteStub(sourceContent, stubContent);
+                        }
                     }
                 }
+                // remove copyright headers as they can contain timestamp
+                sourceContent = removeCopyrights(sourceContent);
+
+                // replace the file content
+                try {
+                    FileUtils.write(sourceFile, sourceContent);
+                } catch (IOException e) {
+                    getLog().error("Cannot write " + sourceFile.getAbsolutePath(), e);
+                }
             }
+
         }
     }
 
-    private static void rewrite(File sourceFile, String replaceTODOWith) throws IOException {
-        String source = FileUtils.readFileToString(sourceFile);
-        String target = Pattern.compile("^.*TODO.*\n.*throw new java.lang.UnsupportedOperationException.*$", Pattern.MULTILINE).matcher(source).replaceFirst(replaceTODOWith);
-        FileUtils.write(sourceFile, target);
+    private static Pattern MULTILINE_COMMENT_PATTERN = Pattern.compile("/\\*.*\\*/", Pattern.MULTILINE | Pattern.DOTALL);
+    private static String removeCopyrights(String source) {
+        String target = MULTILINE_COMMENT_PATTERN.matcher(source).replaceAll("\n");
+        //FileUtils.write(sourceFile, target);
+        return target;
+    }
+
+    private static Pattern UNSUPPORTED_OP_PATTERN = Pattern.compile("^.*TODO.*\n.*throw new java.lang.UnsupportedOperationException.*$", Pattern.MULTILINE);
+
+    private static String rewriteStub(String source, String replaceTODOWith) {
+        String target = UNSUPPORTED_OP_PATTERN.matcher(source).replaceFirst(replaceTODOWith);
+        return target;
     }
 }
