@@ -36,6 +36,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedMapNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableUnkeyedListEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
@@ -70,7 +71,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         } else if (schemaNode instanceof ChoiceNode) {
             return new ChoiceModificationStrategy((ChoiceNode) schemaNode);
         } else if (schemaNode instanceof LeafListSchemaNode) {
-            return new LeafSetEntryModificationStrategy((LeafListSchemaNode) schemaNode);
+            return fromLeafListSchemaNode((LeafListSchemaNode) schemaNode);
         } else if (schemaNode instanceof LeafSchemaNode) {
             return new LeafModificationStrategy((LeafSchemaNode) schemaNode);
         }
@@ -88,6 +89,15 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         return new UnorderedMapModificationStrategy(schemaNode);
     }
+
+    private static SchemaAwareApplyOperation fromLeafListSchemaNode(final LeafListSchemaNode schemaNode) {
+        if(schemaNode.isUserOrdered()) {
+            return new OrderedLeafSetModificationStrategy(schemaNode);
+        } else {
+            return new UnorderedLeafSetModificationStrategy(schemaNode);
+        }
+    }
+
 
     public static SchemaAwareApplyOperation from(final DataNodeContainer resolvedTree,
             final AugmentationTarget augSchemas, final AugmentationIdentifier identifier) {
@@ -563,12 +573,12 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     }
 
-    public static class LeafSetModificationStrategy extends NormalizedNodeContainerModificationStrategy {
+    public static class UnorderedLeafSetModificationStrategy extends NormalizedNodeContainerModificationStrategy {
 
         private final Optional<ModificationApplyOperation> entryStrategy;
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        protected LeafSetModificationStrategy(final LeafListSchemaNode schema) {
+        protected UnorderedLeafSetModificationStrategy(final LeafListSchemaNode schema) {
             super((Class) LeafSetNode.class);
             entryStrategy = Optional.<ModificationApplyOperation> of(new LeafSetEntryModificationStrategy(schema));
         }
@@ -577,6 +587,32 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         @Override
         protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
             return ImmutableLeafSetNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        }
+
+        @Override
+        public Optional<ModificationApplyOperation> getChild(final PathArgument identifier) {
+            if (identifier instanceof NodeWithValue) {
+                return entryStrategy;
+            }
+            return Optional.absent();
+        }
+
+    }
+
+    public static class OrderedLeafSetModificationStrategy extends NormalizedNodeContainerModificationStrategy {
+
+        private final Optional<ModificationApplyOperation> entryStrategy;
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        protected OrderedLeafSetModificationStrategy(final LeafListSchemaNode schema) {
+            super((Class) LeafSetNode.class);
+            entryStrategy = Optional.<ModificationApplyOperation> of(new LeafSetEntryModificationStrategy(schema));
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
+            return ImmutableOrderedLeafSetNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
         }
 
         @Override

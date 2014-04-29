@@ -218,13 +218,17 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            posponedRemovedOperational.remove(path);
-            doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            boolean previouslyRemoved = posponedRemovedOperational.remove(path);
+            if(previouslyRemoved) {
+                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            } else {
+                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            }
         }
 
         @Override
         public void putConfigurationData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            posponedRemovedConfiguration.remove(path);
+            boolean previouslyRemoved = posponedRemovedConfiguration.remove(path);
             DataObject originalObj = readConfigurationData(path);
             if (originalObj != null) {
                 original.put(path, originalObj);
@@ -233,7 +237,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 created.put(path, data);
             }
             updated.put(path, data);
-            doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            if(previouslyRemoved) {
+                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            } else {
+                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            }
         }
 
         @Override
