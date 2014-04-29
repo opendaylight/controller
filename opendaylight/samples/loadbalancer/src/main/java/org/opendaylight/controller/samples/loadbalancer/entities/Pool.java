@@ -164,7 +164,7 @@ public class Pool {
     public boolean removeVIP(String name){
         for(VIP vip: this.vips){
             if(vip.getName().equals(name)){
-                this.members.remove(vip);
+                this.vips.remove(vip);
                 return true;
             }
         }
