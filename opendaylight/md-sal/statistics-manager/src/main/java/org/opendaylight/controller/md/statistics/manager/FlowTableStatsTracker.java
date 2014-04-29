@@ -30,8 +30,8 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
     private final Set<TableKey> tables = Collections.unmodifiableSet(privateTables);
     private final OpendaylightFlowTableStatisticsService flowTableStatsService;
 
-    FlowTableStatsTracker(OpendaylightFlowTableStatisticsService flowTableStatsService, final FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    FlowTableStatsTracker(OpendaylightFlowTableStatisticsService flowTableStatsService, final FlowCapableContext context) {
+        super(context);
         this.flowTableStatsService = flowTableStatsService;
     }
 
@@ -61,6 +61,7 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
         return item;
     }
 
+    @Override
     public void request() {
         if (flowTableStatsService != null) {
             final GetFlowTablesStatisticsInputBuilder input = new GetFlowTablesStatisticsInputBuilder();

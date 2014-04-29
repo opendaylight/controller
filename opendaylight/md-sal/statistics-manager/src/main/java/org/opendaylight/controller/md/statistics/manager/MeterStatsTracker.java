@@ -29,8 +29,8 @@ final class MeterStatsTracker extends AbstractListeningStatsTracker<MeterStats, 
     private static final Logger logger = LoggerFactory.getLogger(MeterStatsTracker.class);
     private final OpendaylightMeterStatisticsService meterStatsService;
 
-    MeterStatsTracker(OpendaylightMeterStatisticsService meterStatsService, final FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    MeterStatsTracker(OpendaylightMeterStatisticsService meterStatsService, final FlowCapableContext context) {
+        super(context);
         this.meterStatsService = meterStatsService;
     }
 
@@ -61,6 +61,7 @@ final class MeterStatsTracker extends AbstractListeningStatsTracker<MeterStats, 
         return item;
     }
 
+    @Override
     public void request() {
         if (meterStatsService != null) {
             GetAllMeterStatisticsInputBuilder input = new GetAllMeterStatisticsInputBuilder();

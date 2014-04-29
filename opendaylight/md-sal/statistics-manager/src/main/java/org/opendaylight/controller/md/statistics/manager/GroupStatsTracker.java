@@ -31,8 +31,8 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
     private static final Logger logger = LoggerFactory.getLogger(GroupStatsTracker.class);
     private final OpendaylightGroupStatisticsService groupStatsService;
 
-    GroupStatsTracker(OpendaylightGroupStatisticsService groupStatsService, FlowCapableContext context, long lifetimeNanos) {
-        super(context, lifetimeNanos);
+    GroupStatsTracker(OpendaylightGroupStatisticsService groupStatsService, FlowCapableContext context) {
+        super(context);
         this.groupStatsService = Preconditions.checkNotNull(groupStatsService);
     }
 
@@ -72,6 +72,7 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
         return "Group";
     }
 
+    @Override
     public void request() {
         final GetAllGroupStatisticsInputBuilder input = new GetAllGroupStatisticsInputBuilder();
         input.setNode(getNodeRef());
