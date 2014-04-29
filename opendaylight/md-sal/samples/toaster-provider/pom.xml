@@ -3,7 +3,7 @@
     <parent>
         <artifactId>sal-samples</artifactId>
         <groupId>org.opendaylight.controller.samples</groupId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>sample-toaster-provider</artifactId>
     <packaging>bundle</packaging>
@@ -113,10 +113,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
 	<dependency>
             <groupId>org.opendaylight.controller</groupId>

@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>compatibility-parent</artifactId>
     <packaging>pom</packaging>
@@ -25,18 +25,22 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
+            <version>0.7.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

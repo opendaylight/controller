@@ -14,11 +14,11 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.2-SNAPSHOT</version>
+        <version>1.4.1-1-SNAPSHOT</version>
         <relativePath>../../commons/opendaylight</relativePath>
     </parent>
     <artifactId>distribution.opendaylight</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.1-1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
 
@@ -135,7 +135,7 @@
                 <dependency>
                     <groupId>org.opendaylight.controller.model</groupId>
                     <artifactId>model-topology</artifactId>
-                    <version>1.1-SNAPSHOT</version>
+            <version>1.0-1-SNAPSHOT</version>
                 </dependency>
                 <dependency>
                     <groupId>org.opendaylight.yangtools.model</groupId>
@@ -144,6 +144,7 @@
                 <dependency>
                     <groupId>org.opendaylight.controller</groupId>
                     <artifactId>sal-binding-util</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
                 </dependency>
                 <dependency>
                     <groupId>org.opendaylight.controller.md</groupId>

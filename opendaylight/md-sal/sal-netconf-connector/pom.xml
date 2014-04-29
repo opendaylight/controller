@@ -3,9 +3,11 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
-
+    <properties>
+        <netconf.version>0.2.3-1-SNAPSHOT</netconf.version>
+    </properties>
     <artifactId>sal-netconf-connector</artifactId>
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -22,7 +24,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>1.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.xtend</groupId>
@@ -31,6 +33,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>netty-threadgroup-config</artifactId>
+            <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -48,6 +51,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-broker-impl</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>
@@ -140,17 +144,20 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
+            <version>1.0-1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
            <groupId>org.opendaylight.controller</groupId>
            <artifactId>sal-binding-broker-impl</artifactId>
+           <version>1.0-1-SNAPSHOT</version>
            <type>test-jar</type>
            <scope>test</scope>
         </dependency>
         <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>ietf-netconf-monitoring</artifactId>
+        <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
@@ -159,10 +166,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>threadpool-config-api</artifactId>
+            <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>netty-config-api</artifactId>
+            <version>0.2.3-1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -224,7 +233,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
-                        <version>${config.version}</version>
+                        <version>0.2.3-1-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
