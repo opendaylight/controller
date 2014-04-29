@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>sal-parent</artifactId>
-		<version>1.1-1-SNAPSHOT</version>
+		<version>1.0-1-SNAPSHOT</version>
 		<groupId>org.opendaylight.controller</groupId>
 	</parent>
 	<packaging>pom</packaging>
