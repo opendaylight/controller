@@ -103,7 +103,7 @@ AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
                         "Only one simple node for key $s is allowed in node $s",
                         keyValue.getKey(), node);
                 checkState(
-                        simpleNode.get(0).getValue() == keyValue.getValue(),
+                        simpleNode.get(0).getValue().equals(keyValue.getValue()),
                         "Key node must equal to instance identifier value in node $s",
                         node);
                 ret.put(keyValue.getKey(), simpleNode.get(0));
