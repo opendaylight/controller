@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.connect.netconf;
+package org.opendaylight.controller.sal.connect.util;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -14,11 +14,9 @@ import java.util.Date;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InventoryUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(InventoryUtils.class);
+
     private static final URI INVENTORY_NAMESPACE = URI.create("urn:opendaylight:inventory");
     private static final URI NETCONF_INVENTORY_NAMESPACE = URI.create("urn:opendaylight:netconf-node-inventory");
     private static final Date INVENTORY_REVISION = dateFromString("2013-08-19");
@@ -33,7 +31,6 @@ public class InventoryUtils {
 
     public static final InstanceIdentifier INVENTORY_PATH = InstanceIdentifier.builder().node(INVENTORY_NODES)
             .toInstance();
-    public static final QName NETCONF_INVENTORY_MOUNT = null;
 
     private InventoryUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -50,8 +47,7 @@ public class InventoryUtils {
         try {
             return formatter.parse(date);
         } catch (ParseException e) {
-            LOG.error("Failed to parse date {}", date, e);
-            return null;
+            throw new IllegalArgumentException("Unable to parse date " + date, e);
         }
     }
 }
