@@ -149,11 +149,11 @@
                                  !!! IN-MEMORY DATASTORE !!!
 
                                  Remove this declaration and uncomment the following one to
-                                 activate the use of in-memory prototype in the BA world.
+                                 activate the use of legacy datastore in the BA world.
                             -->
-                            <provider>/modules/module[type='dom-broker-impl'][name='legacy-dom-broker']</provider>
-                            <!--
                             <provider>/modules/module[type='dom-broker-impl'][name='inmemory-dom-broker']</provider>
+                            <!--
+                            <provider>/modules/module[type='dom-broker-impl'][name='legacy-dom-broker']</provider>
                             -->
                         </instance>
                     </service>
@@ -166,11 +166,11 @@
                                  !!! IN-MEMORY DATASTORE !!!
 
                                  Remove this declaration and uncomment the following one to
-                                 activate the use of in-memory prototype in the BI world.
+                                 activate the use of legacy datastore in the BI world.
                             -->
-                            <provider>/modules/module[type='binding-data-broker'][name='legacy-binding-data-broker']</provider>
-                            <!--
                             <provider>/modules/module[type='binding-data-compatible-broker'][name='inmemory-binding-data-broker']</provider>
+                            <!--
+                            <provider>/modules/module[type='binding-data-broker'][name='legacy-binding-data-broker']</provider>
                             -->
                         </instance>
                     </service>
