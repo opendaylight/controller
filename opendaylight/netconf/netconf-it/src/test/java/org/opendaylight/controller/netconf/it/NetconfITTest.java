@@ -13,6 +13,20 @@ import ch.ethz.ssh2.Session;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -52,22 +66,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -411,7 +409,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
                     try {
                         c = sess.getStdout().read(bytes);
                     } catch (IOException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        throw new IllegalStateException("IO exception while reading data on ssh bridge.");
                     }
                     logger.info("got data:" + bytes);
                     if (c == 0) {
