@@ -135,7 +135,7 @@ public class NetconfMapping {
             SchemaContext schemaContext = ctx.get();
             Set<NotificationDefinition> notifications = schemaContext.getNotifications();
             Document document = message.getDocument();
-            return XmlDocumentUtils.notificationToDomNodes(document, Optional.fromNullable(notifications));
+            return XmlDocumentUtils.notificationToDomNodes(document, Optional.fromNullable(notifications), ctx.get());
         }
         return null;
     }
@@ -192,7 +192,7 @@ public class NetconfMapping {
                 rawRpc = it.toInstance();
                 // sys(xmlData)
             } else {
-                rawRpc = (CompositeNode) toCompositeNode(message.getDocument());
+                rawRpc = (CompositeNode) toCompositeNode(message, context);
             }
         else {
             rawRpc = (CompositeNode) toCompositeNode(message.getDocument());
