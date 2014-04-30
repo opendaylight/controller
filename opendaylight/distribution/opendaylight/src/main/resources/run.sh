@@ -161,7 +161,7 @@ fi
 ########################################
 # Now add to classpath the OSGi JAR
 ########################################
-CLASSPATH="${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
+CLASSPATH=${CLASSPATH}:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
 FWCLASSPATH=file:"${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
 
 ########################################
