@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b3c16e82",
+        "filename": "opendaylight/config/netconf-config-dispatcher/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Copyright header",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53bee200",
+        "filename": "opendaylight/config/netconf-config-dispatcher/src/main/yang/odl-netconf-cfg.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Description should contain copyright, too.",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73bbe60e",
+        "filename": "opendaylight/config/netconf-config-dispatcher/src/main/yang/odl-netconfig-client-cfg.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Missing copyright here",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_333d5e90",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/DepTestImplModuleFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Let\u0027s drop the \u0027generated file\u0027 comment. It is confusing people who browse the repo.",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d341920c",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/IdentityTestModuleFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Drop this comment, too.",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3461623",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/NetconfTestImplModuleFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Drop this.",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_934b0a2b",
+        "filename": "opendaylight/config/yang-test/src/main/java/org/opendaylight/controller/config/yang/test/impl/TestImplModuleFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Drop this",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b3488e2e",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "- file a follow-up bug\n- mark it as @Deprecated\n- add a javadoc @deprecated comment, explaining which API should be used instead\n- leave a marker in the form of:\n// FIXME: BUG-XXX: remove backwards compatibility",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_535582c4",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Pointer to follow-up bug here, too, e.g.:\n// FIXME: BUG-XXX ...",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_135ffae6",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientDispatcherImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "We probably want to have this timer injected via config instead of having our own instance.",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_33647eb8",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientDispatcherImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "coding style: please keep the case statement on its own line",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d358b2fc",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientDispatcherImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "remove the default statement and move the throw out of the switch statement -- since each case returns, the functionality will be the same, but if someone changes the enum, they will get a warning about unhandled case ...",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_735206df",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientDispatcherImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "This should be a logger.warn(), as the exception is not generally expected",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f35db6ea",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/conf/NetconfClientConfiguration.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()?",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93722a7b",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/conf/NetconfClientConfiguration.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-04-30T05:44:50Z",
+      "side": 1,
+      "message": "is the fall-through from SSH to TCP intentional? if so, add a comment about the fact. again, keep \u0027case foo\u0027 on a dedicated line",
+      "revId": "b3223ed80b76ce8210742f6c7bc79e89f0f0491b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
