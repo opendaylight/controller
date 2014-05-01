@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMa
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedMapNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableUnkeyedListEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.AugmentationSchemaProxy;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -514,7 +516,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             DataNodeContainerModificationStrategy<AugmentationSchema> {
 
         protected AugmentationModificationStrategy(final AugmentationSchema schema, final DataNodeContainer resolved) {
-            super(schema, AugmentationNode.class);
+            super(createAugmentProxy(schema,resolved), AugmentationNode.class);
             // FIXME: Use resolved children instead of unresolved.
 
         }
@@ -732,6 +734,14 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     public void verifyIdentifier(final PathArgument identifier) {
 
+    }
+
+    public static AugmentationSchema createAugmentProxy(final AugmentationSchema schema, final DataNodeContainer resolved) {
+        Set<DataSchemaNode> realChildSchemas = new HashSet<>();
+        for(DataSchemaNode augChild : schema.getChildNodes()) {
+            realChildSchemas.add(resolved.getDataChildByName(augChild.getQName()));
+        }
+        return new AugmentationSchemaProxy(schema, realChildSchemas);
     }
 
 }
