@@ -234,6 +234,7 @@ public class FlowWriterServiceImpl implements FlowWriterService {
     Uri destPortUri = destPort.getValue().firstKeyOf(NodeConnector.class, NodeConnectorKey.class).getId();
 
     Action outputToControllerAction = new ActionBuilder() //
+        .setOrder(0)
         .setAction(new OutputActionCaseBuilder() //
             .setOutputAction(new OutputActionBuilder() //
                 .setMaxLength(new Integer(0xffff)) //
@@ -248,6 +249,7 @@ public class FlowWriterServiceImpl implements FlowWriterService {
 
     // Wrap our Apply Action in an Instruction
     Instruction applyActionsInstruction = new InstructionBuilder() //
+        .setOrder(0)
         .setInstruction(new ApplyActionsCaseBuilder()//
             .setApplyActions(applyActions) //
             .build()) //
