@@ -195,6 +195,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     private class ForwardedBackwardsCompatibleTransacion extends
             AbstractForwardedTransaction<DOMDataReadWriteTransaction> implements DataModificationTransaction {
 
+        private final ListenerRegistry<DataTransactionListener> listeners = ListenerRegistry.create();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> updated = new HashMap<>();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> created = new HashMap<>();
         private final Set<InstanceIdentifier<? extends DataObject>> removed = new HashSet<>();
@@ -218,13 +219,17 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            posponedRemovedOperational.remove(path);
-            doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            boolean previouslyRemoved = posponedRemovedOperational.remove(path);
+            if(previouslyRemoved) {
+                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            } else {
+                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+            }
         }
 
         @Override
         public void putConfigurationData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            posponedRemovedConfiguration.remove(path);
+            boolean previouslyRemoved = posponedRemovedConfiguration.remove(path);
             DataObject originalObj = readConfigurationData(path);
             if (originalObj != null) {
                 original.put(path, originalObj);
@@ -233,7 +238,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 created.put(path, data);
             }
             updated.put(path, data);
-            doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            if(previouslyRemoved) {
+                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            } else {
+                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+            }
         }
 
         @Override
@@ -314,6 +323,14 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         private void changeStatus(final TransactionStatus status) {
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
+
+            for(ListenerRegistration<DataTransactionListener> listener : listeners) {
+                try {
+                    listener.getInstance().onStatusUpdated(this, status);
+                } catch (Exception e) {
+                    LOG.error("Error during invoking transaction listener {}",listener.getInstance(),e);
+                }
+            }
         }
 
         @Override
@@ -327,9 +344,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
             }
 
-            final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
-
             changeStatus(TransactionStatus.SUBMITED);
+
+            final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
 
             Futures.addCallback(f, new FutureCallback<RpcResult<TransactionStatus>>() {
                 @Override
@@ -349,7 +366,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public ListenerRegistration<DataTransactionListener> registerListener(final DataTransactionListener listener) {
-            throw new UnsupportedOperationException();
+            return listeners.register(listener);
         }
 
     }

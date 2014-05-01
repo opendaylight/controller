@@ -82,7 +82,7 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
                 try {
                     final DataObject dataObject = normalizedNode.isPresent() ? codec.toBinding(path,
                             normalizedNode.get()) : null;
-                    if(dataObject != null) {
+                    if (dataObject != null) {
                         updateCache(store, path, dataObject);
                     }
                     return Optional.fromNullable(dataObject);
@@ -109,6 +109,27 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
                 .toNormalizedNode(path, data);
 
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
+        ensureParentsByMerge(writeTransaction, store, normalized.getKey(), path);
+        LOG.debug("Tx: {} : Putting data {}",getDelegate().getIdentifier(),normalized.getKey());
+        writeTransaction.put(store, normalized.getKey(), normalized.getValue());
+    }
+
+    protected void doMergeWithEnsureParents(final DOMDataReadWriteTransaction writeTransaction,
+            final LogicalDatastoreType store, final InstanceIdentifier<?> path, final DataObject data) {
+        invalidateCache(store, path);
+        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = codec
+                .toNormalizedNode(path, data);
+
+        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
+        ensureParentsByMerge(writeTransaction, store, normalized.getKey(), path);
+        LOG.debug("Tx: {} : Merge data {}",getDelegate().getIdentifier(),normalized.getKey());
+        writeTransaction.merge(store, normalized.getKey(), normalized.getValue());
+    }
+
+    private void ensureParentsByMerge(final DOMDataReadWriteTransaction writeTransaction,
+            final LogicalDatastoreType store,
+            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath,
+            final InstanceIdentifier<?> path) {
         List<PathArgument> currentArguments = new ArrayList<>();
         DataNormalizationOperation<?> currentOp = codec.getDataNormalizer().getRootOperation();
         Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
@@ -135,8 +156,6 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
                 writeTransaction.merge(store, currentPath, currentOp.createDefault(currentArg));
             }
         }
-        //LOG .info("Tx: {} : Putting data {}",getDelegate().getIdentifier(),normalized.getKey());
-        writeTransaction.put(store, normalized.getKey(), normalized.getValue());
     }
 
     protected void doMerge(final DOMDataWriteTransaction writeTransaction, final LogicalDatastoreType store,

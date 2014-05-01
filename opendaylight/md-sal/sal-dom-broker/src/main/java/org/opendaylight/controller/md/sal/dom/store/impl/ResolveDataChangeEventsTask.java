@@ -394,7 +394,8 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
 
         Builder eventBuilder = builder(potentialScope) //
                 .setBefore(beforeCont) //
-                .setAfter(afterCont);
+                .setAfter(afterCont)
+                .addUpdated(path, beforeCont, afterCont);
         for (DOMImmutableDataChangeEvent childChange : childChanges) {
             eventBuilder.merge(childChange);
         }
@@ -447,27 +448,34 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
             final Collection<Node> listeners, final NormalizedNode<PathArgument, ?> node,
             final SimpleEventFactory eventFactory) {
 
-        DOMImmutableDataChangeEvent event = eventFactory.create(path, node);
-
-        if (!listeners.isEmpty()) {
+        final DOMImmutableDataChangeEvent event = eventFactory.create(path, node);
+        DOMImmutableDataChangeEvent propagateEvent = event;
             // We have listeners for this node or it's children, so we will try
             // to do additional processing
-            if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
-                // Node has children, so we will try to resolve it's children
-                // changes.
-                @SuppressWarnings("unchecked")
-                NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
-                for (NormalizedNode<PathArgument, ?> child : container.getValue()) {
-                    PathArgument childId = child.getIdentifier();
-                    Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
-                    if (!childListeners.isEmpty()) {
-                        resolveSameEventRecursivelly(append(path, childId), childListeners, child, eventFactory);
-                    }
-                }
+        if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
+            Builder eventBuilder = builder(DataChangeScope.BASE);
+            eventBuilder.merge(event);
+            eventBuilder.setBefore(event.getOriginalSubtree());
+            eventBuilder.setAfter(event.getUpdatedSubtree());
+
+            // Node has children, so we will try to resolve it's children
+            // changes.
+            @SuppressWarnings("unchecked")
+            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
+            for (NormalizedNode<PathArgument, ?> child : container.getValue()) {
+                PathArgument childId = child.getIdentifier();
+                Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
+                eventBuilder.merge(resolveSameEventRecursivelly(append(path, childId), childListeners, child, eventFactory));
             }
+            propagateEvent = eventBuilder.build();
+        } else {
+            // We do not dispatch leaf events since Binding Aware components do not support them.
+            propagateEvent = builder(DataChangeScope.BASE).build();
+        }
+        if (!listeners.isEmpty()) {
             addPartialTask(listeners, event);
         }
-        return event;
+        return propagateEvent;
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final InstanceIdentifier path,
@@ -476,7 +484,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
 
         Builder one = builder(DataChangeScope.ONE).setBefore(before.getData()).setAfter(after.getData());
 
-        Builder subtree = builder(DataChangeScope.SUBTREE);
+        Builder subtree = builder(DataChangeScope.SUBTREE).setBefore(before.getData()).setAfter(after.getData());
 
         for (NodeModification childMod : modification.getModifications()) {
             PathArgument childId = childMod.getIdentifier();
