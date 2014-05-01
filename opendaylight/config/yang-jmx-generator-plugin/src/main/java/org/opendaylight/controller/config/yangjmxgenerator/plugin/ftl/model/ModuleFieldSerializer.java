@@ -16,7 +16,7 @@ public class ModuleFieldSerializer {
     public static String toString(ModuleField moduleField) {
         StringBuilder builder = new StringBuilder();
         builder.append("    ");
-        builder.append("protected final "
+        builder.append("public static final "
                 + JmxAttribute.class.getCanonicalName() + " "
                 + moduleField.getName() + "JmxAttribute = new "
                 + JmxAttribute.class.getCanonicalName() + "(\""
