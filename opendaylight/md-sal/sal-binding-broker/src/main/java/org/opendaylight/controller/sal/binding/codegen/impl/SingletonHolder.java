@@ -33,6 +33,8 @@ public class SingletonHolder {
 
     public static final int CORE_NOTIFICATION_THREADS = 4;
     public static final int MAX_NOTIFICATION_THREADS = 32;
+    // block caller thread after MAX_NOTIFICATION_THREADS + MAX_NOTIFICATION_QUEUE_SIZE pending notifications
+    public static final int MAX_NOTIFICATION_QUEUE_SIZE = 10;
     public static final int NOTIFICATION_THREAD_LIFE = 15;
 
     private static ListeningExecutorService NOTIFICATION_EXECUTOR = null;
@@ -47,19 +49,15 @@ public class SingletonHolder {
     public static synchronized final ListeningExecutorService getDefaultNotificationExecutor() {
 
         if (NOTIFICATION_EXECUTOR == null) {
-            // Overriding the queue since we need an unbounded queue
-            // and threadpoolexecutor would not create new threads if the queue is not full
-            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>() {
+            // Overriding the queue:
+            // ThreadPoolExecutor would not create new threads if the queue is not full, thus adding
+            // occurs in RejectedExecutionHandler.
+            // This impl saturates threadpool first, then queue. When both are full caller will get blocked.
+            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(MAX_NOTIFICATION_QUEUE_SIZE) {
                 @Override
                 public boolean offer(Runnable r) {
-                    if (size() <= 1) {
-                        // if the queue is empty (or has just 1), no need to rampup the threads
-                        return super.offer(r);
-                    } else {
-                        // if the queue is not empty, force the queue to return false.
-                        // threadpoolexecutor will spawn a new thread if the queue.offer returns false.
-                        return false;
-                    }
+                    // ThreadPoolExecutor will spawn a new thread after core size is reached only if the queue.offer returns false.
+                    return false;
                 }
             };
 
@@ -74,7 +72,8 @@ public class SingletonHolder {
                             try {
                                 executor.getQueue().put(r);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Thread.currentThread().interrupt();// set interrupt flag after clearing
+                                throw new IllegalStateException(e);
                             }
                         }
                     });
