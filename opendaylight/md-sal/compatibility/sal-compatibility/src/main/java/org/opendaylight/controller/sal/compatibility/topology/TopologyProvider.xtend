@@ -15,10 +15,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.yangtools.concepts.Registration
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link
 import org.slf4j.LoggerFactory
+import org.opendaylight.yangtools.concepts.ListenerRegistration
+import org.opendaylight.controller.sal.binding.api.data.DataChangeListener
 
 class TopologyProvider implements AutoCloseable{
     static val LOG = LoggerFactory.getLogger(TopologyProvider);
@@ -30,8 +30,9 @@ class TopologyProvider implements AutoCloseable{
     @Property
     DataProviderService dataService;
     
-    Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>,DataObject>> commitHandlerRegistration;
-
+    ListenerRegistration<DataChangeListener> listenerRegistration
+    
+    
     def void start() {
 
     }
@@ -40,18 +41,17 @@ class TopologyProvider implements AutoCloseable{
             LOG.error("dataService not set");
             return;
         }
-        commitHandler = new TopologyCommitHandler(dataService)
-        commitHandler.setTopologyPublisher(topologyPublisher)
+        commitHandler = new TopologyCommitHandler(dataService,topologyPublisher);
         val InstanceIdentifier<? extends DataObject> path = InstanceIdentifier.builder(NetworkTopology)
             .child(Topology,new TopologyKey(new TopologyId("flow:1")))
             .child(Link)
             .toInstance();
-        commitHandlerRegistration = dataService.registerCommitHandler(path,commitHandler);
+        listenerRegistration = dataService.registerDataChangeListener(path,commitHandler);
         LOG.info("TopologyProvider started")
     }
     
     override close() throws Exception {
-        commitHandlerRegistration.close
+        listenerRegistration.close
     }
     
     def setTopologyPublisher(IPluginOutTopologyService topologyPublisher) {
