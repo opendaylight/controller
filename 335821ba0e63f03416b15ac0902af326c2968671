@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_883c3431",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-01T21:11:50Z",
+      "side": 1,
+      "message": "This actually introduces a concurrency issue. rpcReg needs to be volatile (or rather you need to synchronize around it) here and in the bringDown to ensure safe unregistration",
+      "revId": "335821ba0e63f03416b15ac0902af326c2968671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
