@@ -195,6 +195,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     private class ForwardedBackwardsCompatibleTransacion extends
             AbstractForwardedTransaction<DOMDataReadWriteTransaction> implements DataModificationTransaction {
 
+        private final ListenerRegistry<DataTransactionListener> listeners = ListenerRegistry.create();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> updated = new HashMap<>();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> created = new HashMap<>();
         private final Set<InstanceIdentifier<? extends DataObject>> removed = new HashSet<>();
@@ -322,6 +323,14 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         private void changeStatus(final TransactionStatus status) {
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
+
+            for(ListenerRegistration<DataTransactionListener> listener : listeners) {
+                try {
+                    listener.getInstance().onStatusUpdated(this, status);
+                } catch (Exception e) {
+                    LOG.error("Error during invoking transaction listener {}",listener.getInstance(),e);
+                }
+            }
         }
 
         @Override
@@ -335,9 +344,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
             }
 
-            final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
-
             changeStatus(TransactionStatus.SUBMITED);
+
+            final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
 
             Futures.addCallback(f, new FutureCallback<RpcResult<TransactionStatus>>() {
                 @Override
@@ -357,7 +366,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
         @Override
         public ListenerRegistration<DataTransactionListener> registerListener(final DataTransactionListener listener) {
-            throw new UnsupportedOperationException();
+            return listeners.register(listener);
         }
 
     }
