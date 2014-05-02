@@ -23,7 +23,7 @@ import org.osgi.service.log.LogReaderService;
 
 public class Activator implements BundleActivator {
     private static final String UNCAUGHT_EXCEPTION_POLICY_PROP = "controller.uncaughtExceptionPolicy";
-    private static final UncaughtExceptionPolicy DEFAULT_UNCAUGHT_EXCEPTION_POLICY = UncaughtExceptionPolicy.IGNORE;
+    private static final UncaughtExceptionPolicy DEFAULT_UNCAUGHT_EXCEPTION_POLICY = UncaughtExceptionPolicy.ABORT;
 
     private LogListenerImpl listener = null;
     private ShutdownHandler shutdownHandler = null;
