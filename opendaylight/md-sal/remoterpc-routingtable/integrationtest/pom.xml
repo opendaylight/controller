@@ -176,7 +176,7 @@
       <dependency>
           <groupId>equinoxSDK381</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-          <version>3.8.1.v20120830-144521</version>
+          <version>3.8.2.v20130124-134944</version>
           <scope>test</scope>
       </dependency>
       <dependency>
@@ -219,7 +219,7 @@
       <dependency>
           <groupId>equinoxSDK381</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-          <version>3.8.1.v20120830-144521</version>
+          <version>3.8.2.v20130124-134944</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.exam</groupId>

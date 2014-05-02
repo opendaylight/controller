@@ -161,8 +161,8 @@ fi
 ########################################
 # Now add to classpath the OSGi JAR
 ########################################
-CLASSPATH="${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
-FWCLASSPATH=file:"${basedir}"/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar
+CLASSPATH="${basedir}"/lib/org.eclipse.osgi-3.8.2.v20130124-134944.jar
+FWCLASSPATH=file:"${basedir}"/lib/org.eclipse.osgi-3.8.2.v20130124-134944.jar
 
 ########################################
 # Now add the extensions
@@ -230,7 +230,7 @@ if [ "${startdaemon}" -eq 1 ]; then
         -Dosgi.install.area="${bdir}" \
         -Dosgi.configuration.area="${confarea}/configuration" \
         -Dosgi.frameworkClassPath="${fwclasspath}" \
-        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar" \
+        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.2.v20130124-134944.jar" \
         -Djava.awt.headless=true \
         -classpath "${CLASSPATH}" \
         org.eclipse.equinox.launcher.Main \
@@ -249,7 +249,7 @@ elif [ "${consolestart}" -eq 1 ]; then
         -Dosgi.install.area="${bdir}" \
         -Dosgi.configuration.area="${confarea}/configuration" \
         -Dosgi.frameworkClassPath="${fwclasspath}" \
-        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar" \
+        -Dosgi.framework=file:"${bdir}/lib/org.eclipse.osgi-3.8.2.v20130124-134944.jar" \
         -Djava.awt.headless=true \
         -classpath "${CLASSPATH}" \
         org.eclipse.equinox.launcher.Main \

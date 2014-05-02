@@ -63,7 +63,7 @@
 <unit id="javax.servlet" version="3.0.0.v201112011016"/>
 <unit id="org.eclipse.equinox.launcher" version="1.3.0.v20120522-1813"/>
 <unit id="javax.persistence" version="2.0.4.v201112161009"/>
-<unit id="org.eclipse.osgi" version="3.8.1.v20120830-144521"/>
+<unit id="org.eclipse.osgi" version="3.8.2.v20130124-134944"/>
 <unit id="ch.qos.logback.core" version="1.0.9"/>
 <unit id="javax.ejb" version="3.1.1.v201204261316"/>
 <unit id="org.apache.catalina.ha" version="7.0.32.v201211201952"/>

@@ -128,7 +128,7 @@
                   <override>false</override>
                 </artfiact>
                 <artfiact>
-                  <id>equinoxSDK381:org.eclipse.osgi:3.8.1.v20120830-144521</id>
+                  <id>equinoxSDK381:org.eclipse.osgi:3.8.2.v20130124-134944</id>
                   <transitive>false</transitive>
                   <override>false</override>
                 </artfiact>
