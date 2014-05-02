@@ -218,16 +218,7 @@ public class NeutronPortsNorthbound {
             if (portInterface.macInUse(singleton.getMacAddress())) {
                 throw new ResourceConflictException("MAC Address is in use.");
             }
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
-            if (instances != null) {
-                for (Object instance : instances) {
-                    INeutronPortAware service = (INeutronPortAware) instance;
-                    int status = service.canCreatePort(singleton);
-                    if (status < 200 || status > 299) {
-                        return Response.status(status).build();
-                    }
-                }
-            }
+
             /*
              * if fixed IPs are specified, each one has to have an existing subnet ID
              * that is in the same scoping network as the port.  In addition, if an IP
@@ -259,6 +250,18 @@ public class NeutronPortsNorthbound {
                     }
                 }
             }
+
+            Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+            if (instances != null) {
+                for (Object instance : instances) {
+                    INeutronPortAware service = (INeutronPortAware) instance;
+                    int status = service.canCreatePort(singleton);
+                    if (status < 200 || status > 299) {
+                        return Response.status(status).build();
+                    }
+                }
+            }
+
 
             // add the port to the cache
             portInterface.addPort(singleton);
@@ -309,15 +312,7 @@ public class NeutronPortsNorthbound {
                 if (portInterface.macInUse(test.getMacAddress())) {
                     throw new ResourceConflictException("MAC address in use");
                 }
-                if (instances != null) {
-                    for (Object instance : instances) {
-                        INeutronPortAware service = (INeutronPortAware) instance;
-                        int status = service.canCreatePort(test);
-                        if (status < 200 || status > 299) {
-                            return Response.status(status).build();
-                        }
-                    }
-                }
+
                 /*
                  * if fixed IPs are specified, each one has to have an existing subnet ID
                  * that is in the same scoping network as the port.  In addition, if an IP
@@ -348,6 +343,15 @@ public class NeutronPortsNorthbound {
                             if (subnet.isIPInUse(ip.getIpAddress())) {
                                 throw new ResourceConflictException("IP address in use");
                             }
+                        }
+                    }
+                }
+                if (instances != null) {
+                    for (Object instance : instances) {
+                        INeutronPortAware service = (INeutronPortAware) instance;
+                        int status = service.canCreatePort(test);
+                        if (status < 200 || status > 299) {
+                            return Response.status(status).build();
                         }
                     }
                 }
