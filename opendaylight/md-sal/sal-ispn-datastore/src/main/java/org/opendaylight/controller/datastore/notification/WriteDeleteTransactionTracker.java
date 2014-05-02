@@ -93,15 +93,25 @@ public class WriteDeleteTransactionTracker {
   }
 
   public Set<String> filterTransactionsPaths(Set<String> instanceIdentifiers) {
+
     //ok here we will prepare the subtrees for all interested transactions
     filteredSubTrees = new TreeMap<>();
 
     printTree(transactionLog);
 
     for (String id : instanceIdentifiers) {
-      LOG.debug("Registered listener for path {}", id);
+      LOG.trace("Registered listener for path {}", id);
       //let us check if its present in the transactionLog
-      if (transactionLog.containsKey(id)) {
+      boolean bFound = false;
+      for(String key:transactionLog.keySet()) {
+         bFound = key.contains(id);
+         if(bFound){
+           LOG.trace("found listener path in transaction log");
+           break;
+         }
+      }
+
+      if(bFound) {
         filteredSubTrees.put(id, transactionLog.tailMap(id));
       }
     }

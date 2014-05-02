@@ -51,6 +51,9 @@ public class RegisterListenerNode {
   public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(final InstanceIdentifier path,
                                                                                                                                                     final L listener, final DataChangeScope scope) {
 
+    LOG.info("RegisterListenerNode:registering listener for path InstanceIdentifier="+path.toString());
+    LOG.info("listener="+listener);
+    LOG.info("scope ="+scope) ;
     DataChangeListenerRegistration<L> listenerReg = new DataChangeListenerRegistration<L>(path, listener, scope, this);
     if (scope == DataChangeScope.BASE) {
       baseScopeListeners.add(listenerReg);

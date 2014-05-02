@@ -85,7 +85,7 @@ public class DataStoreImpl implements DOMStore, Identifiable<String>, SchemaCont
 
   private DOMStoreReadWriteTransaction createTransaction(boolean readOnly) {
 
-    ReadWriteTransactionActor rwta = new ReadWriteTransactionActor(name, schemaContext, store, crudExecutor, commitExecutor, counter.incrementAndGet(),listenerManager, readOnly);
+    ReadWriteTransactionActor rwta = new ReadWriteTransactionActor(name, schemaContext, store, MoreExecutors.sameThreadExecutor(),commitExecutor, counter.incrementAndGet(),listenerManager, readOnly);
     return rwta;
   }
 

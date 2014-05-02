@@ -73,7 +73,7 @@ public class TreeCacheManager implements AutoCloseable {
 
     Cache flatCache = dcm.getCache(name);
 
-    TreeCache<String,String> treeCache =  new TreeCacheImpl<String,String>(flatCache);
+    TreeCache<?,?> treeCache =  new TreeCacheImpl<String,String>(flatCache);
 
 
     return treeCache;

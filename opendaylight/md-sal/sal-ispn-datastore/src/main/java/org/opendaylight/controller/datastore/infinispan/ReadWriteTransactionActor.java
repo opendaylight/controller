@@ -310,7 +310,7 @@ public class ReadWriteTransactionActor implements DOMStoreReadWriteTransaction, 
 
     @Override
     public Object call() throws Exception {
-      Fqn removeFqn = Fqn.fromString(path.toString());
+      Fqn removeFqn = Fqn.fromString(NamespacePrefixMapper.get().fromInstanceIdentifier(path.toString()));
       NormalizedNode<?, ?> trackRemovedNode = new NormalizedNodeToTreeCacheCodec(schemaContext, treeCache).decode(path, treeCache.getNode(removeFqn));
       logger.info("###################### Transaction {} Removing node : {}", transactionId, removeFqn.toString());
       final boolean removed = treeCache.removeNode(removeFqn);

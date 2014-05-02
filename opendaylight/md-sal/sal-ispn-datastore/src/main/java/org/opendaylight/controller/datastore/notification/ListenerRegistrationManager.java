@@ -39,7 +39,12 @@ public class ListenerRegistrationManager {
   public synchronized <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> register(
       final InstanceIdentifier path, L listener, final AsyncDataBroker.DataChangeScope scope, final TreeCache store, final SchemaContext schemaContext) {
     RegisterListenerNode rln = null;
+
     String instanceIdPath = path.toString();
+    LOG.info("registering listener at path -after" +instanceIdPath );
+    //TODO: for now we will be taking the instance identifier to the path
+    instanceIdPath = instanceIdPath.substring(0,instanceIdPath.lastIndexOf("/"));
+    LOG.info("registering listener at path -before" +instanceIdPath );
     if ((rln = registeredListenersMap.get(instanceIdPath)) == null) {
       rln = new RegisterListenerNode(path);
     }
@@ -91,6 +96,8 @@ public class ListenerRegistrationManager {
     Set<String> potentialSet = new HashSet<>();
 
     potentialSet = transactionLog.filterTransactionsPaths(registeredListenersMap.keySet());
+
+    LOG.info("LRM:The size of potential set to notify is found to be ="+potentialSet.size());
 
     //prepare list of base, first and subtree listeners
     for (String path : potentialSet) {
