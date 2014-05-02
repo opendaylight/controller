@@ -16,6 +16,24 @@
       "revId": "335821ba0e63f03416b15ac0902af326c2968671",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_88ad1434",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-05-02T06:09:00Z",
+      "side": 1,
+      "message": "I agree, thank you for the comment. This was just a quick fix to make netconf-connector work again and I missed this problem.\n\nWill fix in next commit.",
+      "parentUuid": "fa82b9bf_883c3431",
+      "revId": "335821ba0e63f03416b15ac0902af326c2968671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
