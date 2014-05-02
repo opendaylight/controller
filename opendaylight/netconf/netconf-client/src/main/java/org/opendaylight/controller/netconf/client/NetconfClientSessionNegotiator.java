@@ -69,7 +69,7 @@ public class NetconfClientSessionNegotiator extends
             tryToInitiateExi(session, startExiMessage);
         // Exi is not supported, release session immediately
         } else {
-            logger.debug("Netconf session {} isn't capable using exi.", session);
+            logger.debug("Netconf session {} isn't capable of using exi.", session);
             negotiationSuccessful(session);
         }
     }
@@ -80,16 +80,18 @@ public class NetconfClientSessionNegotiator extends
      * @param startExiMessage
      */
     void tryToInitiateExi(final NetconfClientSession session, final NetconfStartExiMessage startExiMessage) {
+        channel.pipeline().addAfter(AbstractChannelInitializer.NETCONF_MESSAGE_DECODER,
+                ExiConfirmationInboundHandler.EXI_CONFIRMED_HANDLER,
+                new ExiConfirmationInboundHandler(session, startExiMessage));
+
         session.sendMessage(startExiMessage).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(final ChannelFuture f) {
                 if (!f.isSuccess()) {
                     logger.warn("Failed to send start-exi message {} on session {}", startExiMessage, this, f.cause());
+                    channel.pipeline().remove(ExiConfirmationInboundHandler.EXI_CONFIRMED_HANDLER);
                 } else {
                     logger.trace("Start-exi message {} sent to socket on session {}", startExiMessage, this);
-                    channel.pipeline().addAfter(
-                            AbstractChannelInitializer.NETCONF_MESSAGE_DECODER, ExiConfirmationInboundHandler.EXI_CONFIRMED_HANDLER,
-                            new ExiConfirmationInboundHandler(session, startExiMessage));
                 }
             }
         });
