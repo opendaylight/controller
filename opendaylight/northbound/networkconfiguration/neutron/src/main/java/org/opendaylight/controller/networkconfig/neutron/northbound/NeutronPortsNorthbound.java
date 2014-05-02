@@ -421,17 +421,6 @@ public class NeutronPortsNorthbound {
             throw new BadRequestException("attribute change blocked by Neutron");
         }
 
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
-        if (instances != null) {
-            for (Object instance : instances) {
-                INeutronPortAware service = (INeutronPortAware) instance;
-                int status = service.canUpdatePort(singleton, original);
-                if (status < 200 || status > 299) {
-                    return Response.status(status).build();
-                }
-            }
-        }
-
         // Verify the new fixed ips are valid
         List<Neutron_IPs> fixedIPs = singleton.getFixedIPs();
         if (fixedIPs != null && fixedIPs.size() > 0) {
@@ -459,6 +448,16 @@ public class NeutronPortsNorthbound {
             }
         }
 
+        Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
+        if (instances != null) {
+            for (Object instance : instances) {
+                INeutronPortAware service = (INeutronPortAware) instance;
+                int status = service.canUpdatePort(singleton, original);
+                if (status < 200 || status > 299) {
+                    return Response.status(status).build();
+                }
+            }
+        }
         //        TODO: Support change of security groups
         // update the port and return the modified object
         portInterface.updatePort(portUUID, singleton);
