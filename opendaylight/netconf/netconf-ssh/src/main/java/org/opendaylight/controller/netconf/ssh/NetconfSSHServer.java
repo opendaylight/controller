@@ -70,7 +70,7 @@ public final class NetconfSSHServer implements Runnable {
             try {
                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(),authProvider);
             } catch (IOException e) {
-                logger.error("Exception occurred during socket thread initialization {}",e);
+                logger.error("Exception occurred during socket thread initialization {}", e);
             }
         }
     }
