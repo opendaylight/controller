@@ -647,6 +647,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                     foundChoice = choice;
                     break choiceLoop;
                 }
+                // For case augmentations, the QName's namespace may differ but localname is the same
+                else if (caze.isAugmenting()  &&  caze.getDataChildByName(child.getLocalName()) != null) {
+                    foundChoice = choice;
+                }
             }
         }
         return foundChoice;
