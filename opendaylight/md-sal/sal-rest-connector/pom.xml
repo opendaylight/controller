@@ -28,10 +28,6 @@
       <artifactId>netty-codec-http</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
-      <artifactId>org.eclipse.xtend.lib</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-remote</artifactId>
     </dependency>
@@ -92,20 +88,13 @@
           <instructions>
             <Bundle-Name>MD SAL Restconf Connector</Bundle-Name>
             <Private-Package>org.opendaylight.controller.sal.rest.*,
-              org.opendaylight.controller.sal.restconf.impl,
-              org.eclipse.xtend2.lib,
-              org.eclipse.xtend.lib,
-              org.eclipse.xtext.xbase.*,</Private-Package>
+              org.opendaylight.controller.sal.restconf.impl,</Private-Package>
             <Import-Package>*,
             com.sun.jersey.spi.container.servlet</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.impl.RestconfProvider</Bundle-Activator>
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
