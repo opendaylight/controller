@@ -19,4 +19,9 @@ public class ResponseException extends WebApplicationException {
     public ResponseException(Status status, String msg) {
         super(Response.status(status).type(MediaType.TEXT_PLAIN_TYPE).entity(msg).build());
     }
+
+    public ResponseException(Throwable cause, String msg) {
+        super(cause, Response.status(Status.INTERNAL_SERVER_ERROR).
+                                         type(MediaType.TEXT_PLAIN_TYPE).entity(msg).build());
+    }
 }
