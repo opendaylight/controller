@@ -122,6 +122,11 @@
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
+
+    <!-- Karaf Distribution 
+    <module>feature</module>
+    <module>opendaylight/dummy-console</module> -->
+    <module>opendaylight/distribution/opendaylight-karaf</module>
   </modules>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
