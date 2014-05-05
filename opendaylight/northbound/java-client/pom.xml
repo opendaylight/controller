@@ -7,12 +7,6 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
 
   <artifactId>northbound.client</artifactId>
   <version>0.0.1-SNAPSHOT</version>
@@ -22,147 +16,8 @@
     <docs.output.dir>${project.build.directory}/rest-api-docs</docs.output.dir>
     <java-client>${project.build.directory}/enunciate/build/java-client/full-client.jar</java-client>
     <java-client-sources>${project.build.directory}/enunciate/build/java-client/full-client-sources.jar</java-client-sources>
-    <json-client>${project.build.directory}/enunciate/build/java-client/full-json-client.jar</json-client>
-    <json-client-sources>${project.build.directory}/enunciate/build/java-client/full-json-client-sources.jar</json-client-sources>
   </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <target>
-            <taskdef resource="net/sf/antcontrib/antcontrib.properties"
-                     classpathref="maven.plugin.classpath" />
-            <patternset id="rest.paths">
-              <include name="**/target/site/wsdocs/**"/>
-              <exclude name="**/java-client/**"/>
-            </patternset>
-
-            <echo message="======== Assembling enunciate docs ========"/>
-            <!-- cleanup existing generated files -->
-            <delete dir="${docs.output.dir}"/>
-            <delete file="${docs.output.dir}.zip"/>
-            <mkdir dir="${docs.output.dir}"/>
-            <!-- copy enunciate docs to stage -->
-            <copy todir="${docs.output.dir}">
-              <fileset dir="${basedir}/../../..">
-                <patternset refid="rest.paths"/>
-              </fileset>
-              <mapper type="regexp"
-                      from="^(.*)/([^/]+)/target/site/wsdocs/(.*)$$"
-                      to="\2/\3"/>
-            </copy>
-            <!-- generate index.html -->
-            <!-- append header -->
-            <echo file="${docs.output.dir}/index.html" append="true">
-              &lt;![CDATA[
-              &lt;html&gt;
-              &lt;head&gt;
-              &lt;title&gt; OpenDaylight REST API Documentation &lt;/title&gt;
-              &lt;/head&gt;
-              &lt;body&gt;
-              &lt;h2&gt;OpenDaylight REST API Documentation&lt;/h2&gt;
-              &lt;p&gt; OpenDaylight supports the following &lt;a href="http://en.wikipedia.org/wiki/Representational_State_Transfer"&gt;Representational State Transfer (REST)&lt;/a&gt; APIs: &lt;/p&gt;
-              &lt;h4&gt;
-              ]]&gt;
-            </echo>
-            <dirset id="nbset" dir="${docs.output.dir}">
-              <include name="*"/>
-            </dirset>
-            <pathconvert pathsep="&amp;#36;{line.separator}"
-                         property="nbs"
-                         refid="nbset"/>
-            <echo file="${docs.output.dir}/index.html"
-                  append="true"
-                  message="${nbs}"/>
-            <replaceregexp file="${docs.output.dir}/index.html"
-                           match="^\${docs.output.dir}/(.*)$"
-                           replace="&amp;lt;li&amp;gt;&amp;lt;a href=\1/index.html&amp;gt; \1 &amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;"
-                           byline="true"/>
-
-            <!-- append footer -->
-            <echo file="${docs.output.dir}/index.html" append="true">
-              &lt;![CDATA[
-              &lt;/h4&gt;
-              &lt;i&gt;---&lt;/i&gt;
-              &lt;/body&gt;
-              &lt;/html&gt;
-              ]]&gt;
-            </echo>
-            <!-- archive all the docs excluding whatever is not needed -->
-            <echo message="======== Archiving enunciate docs ========"/>
-            <zip destfile="${docs.output.dir}.zip">
-              <zipfileset dir="${docs.output.dir}"/>
-            </zip>
-
-            <echo message="======== Build successful ========"/>
-            <echo message="REST docs archive: ${docs.output.dir}.zip"/>
-          </target>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>ant-contrib</groupId>
-            <artifactId>ant-contrib</artifactId>
-            <version>20020829</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${java-client}</file>
-                  <type>jar</type>
-                  <classifier>full-java-client</classifier>
-                </artifact>
-                <artifact>
-                  <file>${java-client-sources}</file>
-                  <type>jar</type>
-                  <classifier>full-java-client-sources</classifier>
-                </artifact>
-                <artifact>
-                  <file>${json-client}</file>
-                  <type>jar</type>
-                  <classifier>full-json-client</classifier>
-                </artifact>
-                <artifact>
-                  <file>${json-client-sources}</file>
-                  <type>jar</type>
-                  <classifier>full-json-client-sources</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -184,6 +39,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>forwarding.staticrouting.northbound</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>hosttracker.northbound</artifactId>
     </dependency>
     <dependency>
@@ -193,10 +52,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.neutron.northbound</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>forwarding.staticrouting.northbound</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -219,4 +74,129 @@
       <artifactId>usermanager.northbound</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <configuration>
+          <target>
+            <taskdef classpathref="maven.plugin.classpath" resource="net/sf/antcontrib/antcontrib.properties"></taskdef>
+            <patternset id="rest.paths">
+              <include name="**/target/site/wsdocs/**"></include>
+              <exclude name="**/java-client/**"></exclude>
+            </patternset>
+
+            <echo message="======== Assembling enunciate docs ========"></echo>
+            <!-- cleanup existing generated files -->
+            <delete dir="${docs.output.dir}"></delete>
+            <delete file="${docs.output.dir}.zip"></delete>
+            <mkdir dir="${docs.output.dir}"></mkdir>
+            <!-- copy enunciate docs to stage -->
+            <copy todir="${docs.output.dir}">
+              <fileset dir="${basedir}/../../..">
+                <patternset refid="rest.paths"></patternset>
+              </fileset>
+              <mapper from="^(.*)/([^/]+)/target/site/wsdocs/(.*)$$" to="\2/\3" type="regexp"></mapper>
+            </copy>
+            <!-- Remove Swagger doc link from enunciate generated index.html -->
+            <replaceregexp byline="false" match="&lt;h2&gt;Swagger&lt;/h2&gt;${line.separator}\s*&lt;p&gt;${line.separator}.*${line.separator}\s*&lt;/p&gt;" replace="">
+              <fileset dir="${docs.output.dir}">
+                <include name="**/index.html"></include>
+              </fileset>
+            </replaceregexp>
+            <!-- generate index.html -->
+            <!-- append header -->
+            <echo append="true" file="${docs.output.dir}/index.html">&lt;![CDATA[
+              &lt;html&gt;
+              &lt;head&gt;
+              &lt;title&gt; OpenDaylight REST API Documentation &lt;/title&gt;
+              &lt;/head&gt;
+              &lt;body&gt;
+              &lt;h2&gt;OpenDaylight REST API Documentation&lt;/h2&gt;
+              &lt;p&gt; OpenDaylight supports the following &lt;a href="http://en.wikipedia.org/wiki/Representational_State_Transfer"&gt;Representational State Transfer (REST)&lt;/a&gt; APIs: &lt;/p&gt;
+              &lt;h4&gt;
+              ]]&gt;</echo>
+            <dirset dir="${docs.output.dir}" id="nbset">
+              <include name="*"></include>
+            </dirset>
+            <pathconvert pathsep="&amp;#36;{line.separator}" property="nbs" refid="nbset"></pathconvert>
+            <echo append="true" file="${docs.output.dir}/index.html" message="${nbs}"></echo>
+            <replaceregexp byline="true" file="${docs.output.dir}/index.html" match="^\${docs.output.dir}/(.*)$" replace="&amp;lt;li&amp;gt;&amp;lt;a href=\1/index.html&amp;gt; \1 &amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;"></replaceregexp>
+
+            <!-- append footer -->
+            <echo append="true" file="${docs.output.dir}/index.html">&lt;![CDATA[
+              &lt;/h4&gt;
+              &lt;i&gt;---&lt;/i&gt;
+              &lt;/body&gt;
+              &lt;/html&gt;
+              ]]&gt;</echo>
+            <!-- archive all the docs excluding whatever is not needed -->
+            <echo message="======== Archiving enunciate docs ========"></echo>
+            <zip destfile="${docs.output.dir}.zip">
+              <zipfileset dir="${docs.output.dir}"></zipfileset>
+            </zip>
+
+            <echo message="======== Build successful ========"></echo>
+            <echo message="REST docs archive: ${docs.output.dir}.zip"></echo>
+          </target>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>20020829</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.enunciate</groupId>
+        <artifactId>maven-enunciate-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${java-client}</file>
+                  <type>jar</type>
+                  <classifier>full-java-client</classifier>
+                </artifact>
+                <artifact>
+                  <file>${java-client-sources}</file>
+                  <type>jar</type>
+                  <classifier>full-java-client-sources</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>
