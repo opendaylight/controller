@@ -222,7 +222,7 @@ public class NetconfDevice implements Provider, //
 
         logger.debug("Client capabilities {}", capabilities);
         for (QName capability : capabilities) {
-            it.addLeaf(NETCONF_INVENTORY_INITIAL_CAPABILITY, capability);
+            it.addLeaf(NETCONF_INVENTORY_INITIAL_CAPABILITY, capability.toString());
         }
 
         logger.debug("Update device state transaction " + transaction.getIdentifier()
