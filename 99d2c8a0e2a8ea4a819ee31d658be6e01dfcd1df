@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3ea76251",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-05T15:26:05Z",
+      "side": 1,
+      "message": "remove {}, otherwise we\u0027re losing the stack trace",
+      "revId": "99d2c8a0e2a8ea4a819ee31d658be6e01dfcd1df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
