@@ -34,6 +34,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messaging.datastore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
     </dependency>
     <dependency>
@@ -81,7 +85,8 @@
               org.springframework.security.authentication,
               org.springframework.security.core.authority,
               org.springframework.security.core.userdetails,
-              org.opendaylight.controller.usermanager</Import-Package>
+              org.opendaylight.controller.usermanager,
+              org.opendaylight.controller.messaging.datastore.memory</Import-Package>
             <Export-Package>
               <!--
               org.opendaylight.controller.usermanager,
