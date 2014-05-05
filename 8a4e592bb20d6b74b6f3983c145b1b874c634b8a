@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3e5202de",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.bat",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-05-05T08:22:18Z",
+      "side": 1,
+      "message": "-debugsuspend should actually be mutually exclusive to -debug, so can you add code that will pick only one of the two? suspend being higher prio. Also the bug you reported is also on the unix launcher. Could you fix that to?",
+      "revId": "8a4e592bb20d6b74b6f3983c145b1b874c634b8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
