@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7972e47d",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1773,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-05-05T18:57:58Z",
+      "side": 1,
+      "message": "This is overriding https://git.opendaylight.org/gerrit/6662. Please undo it.",
+      "revId": "e3daf1ddbf5754e751bac846b2f2948d99afb215",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f95ef4e8",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1870,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-05-05T18:57:58Z",
+      "side": 1,
+      "message": "This is overriding https://git.opendaylight.org/gerrit/6662 Please undo it.",
+      "revId": "e3daf1ddbf5754e751bac846b2f2948d99afb215",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
