@@ -68,6 +68,14 @@
                       from="^(.*)/([^/]+)/target/site/wsdocs/(.*)$$"
                       to="\2/\3"/>
             </copy>
+            <!-- Remove Swagger doc link from enunciate generated index.html -->
+            <replaceregexp
+            match="&lt;h2&gt;Swagger&lt;/h2&gt;${line.separator}\s*&lt;p&gt;${line.separator}.*${line.separator}\s*&lt;/p&gt;"
+            replace="" byline="false" >
+            <fileset dir="${docs.output.dir}">
+               <include name="**/index.html" />
+            </fileset>
+            </replaceregexp>
             <!-- generate index.html -->
             <!-- append header -->
             <echo file="${docs.output.dir}/index.html" append="true">
