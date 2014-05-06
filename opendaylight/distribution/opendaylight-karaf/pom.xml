@@ -22,6 +22,11 @@
       <version>${karaf.version}</version>
       <type>kar</type>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>karaf.branding</artifactId>
+      <scope>compile</scope>
+    </dependency>
     <!-- scope is runtime so the feature repo is listed in the features
       service config file, and features may be installed using the
       karaf-maven-plugin configuration -->
