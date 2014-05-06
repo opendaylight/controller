@@ -116,16 +116,17 @@
 
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
-    <module>opendaylight/commons/protocol-framework</module>
+    <module>oSpendaylight/commons/protocol-framework</module>
     <module>opendaylight/commons/httpclient</module>
     <module>opendaylight/commons/checkstyle</module>
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
 
-    <!-- Karaf Distribution -->
-    <module>features/base</module>
-    <module>opendaylight/dummy-console</module>
+    <!-- Karaf Distribution 
+    <module>feature</module>
+    <module>opendaylight/dummy-console</module> -->
+    <module>opendaylight/karaf-branding</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
   </modules>
   <scm>
