@@ -59,7 +59,8 @@
     <module>sal-remoterpc-connector/implementation</module>
     <!--module>clustered-data-store/implementation</module>
 	 -->
-
+    <!-- Documentation -->
+    <module>sal-rest-docgen</module>
   </modules>
 
   <build>

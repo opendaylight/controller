@@ -40,6 +40,11 @@
     </dependency>
 
     <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-json-org</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-jaxrs-base</artifactId>
     </dependency>
@@ -53,6 +58,7 @@
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -340,6 +346,11 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-osgi</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -986,6 +997,10 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-rest-connector</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-rest-docgen</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
