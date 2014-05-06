@@ -19,8 +19,9 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import io.netty.channel.nio.NioEventLoopGroup;
 
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
@@ -34,11 +35,15 @@ import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
+import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -50,6 +55,9 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 @Ignore
 @RunWith(PaxExam.class)
@@ -121,15 +129,15 @@ public class IdentityRefNetconfTest {
     public void testIdRef() throws Exception {
         Preconditions.checkNotNull(broker, "Controller not initialized");
 
-        NioEventLoopGroup nettyThreadgroup = new NioEventLoopGroup();
-        NetconfClientDispatcher clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup,
-                CLIENT_CONNECTION_TIMEOUT_MILLIS);
 
         NetconfMessage edit = xmlFileToNetconfMessage("netconfMessages/editConfig_identities.xml");
         NetconfMessage commit = xmlFileToNetconfMessage("netconfMessages/commit.xml");
         NetconfMessage getConfig = xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
 
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, CLIENT_CONNECTION_TIMEOUT_MILLIS, clientDispatcher)) {
+        NioEventLoopGroup nettyThreadgroup = new NioEventLoopGroup();
+        Timer timer = new HashedWheelTimer();
+        NetconfClientDispatcherImpl clientDispatcher = new NetconfClientDispatcherImpl(nettyThreadgroup, nettyThreadgroup, timer);
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", clientDispatcher, getClientConfiguration(tcpAddress))) {
             sendMessage(edit, netconfClient);
             sendMessage(commit, netconfClient);
             sendMessage(getConfig, netconfClient, "id-test",
@@ -141,6 +149,9 @@ public class IdentityRefNetconfTest {
             clientDispatcher.close();
         } catch (Exception e) {
             fail(Throwables.getStackTraceAsString(e));
+        } finally {
+            nettyThreadgroup.shutdownGracefully().get();
+            timer.stop();
         }
     }
 
@@ -159,5 +170,15 @@ public class IdentityRefNetconfTest {
     public static NetconfMessage xmlFileToNetconfMessage(final String fileName) throws IOException, SAXException,
             ParserConfigurationException {
         return XmlFileLoader.xmlFileToNetconfMessage(fileName);
+    }
+
+    public NetconfClientConfiguration getClientConfiguration(final InetSocketAddress tcpAddress) {
+        final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+        b.withAddress(tcpAddress);
+        b.withSessionListener(new SimpleNetconfClientSessionListener());
+        b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                CLIENT_CONNECTION_TIMEOUT_MILLIS));
+        b.withConnectionTimeoutMillis(CLIENT_CONNECTION_TIMEOUT_MILLIS);
+        return b.build();
     }
 }

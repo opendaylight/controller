@@ -59,7 +59,7 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
                     return Optional.of(schemaBody);
                 }
             }
-            logger.warn("YANG shcema was not successfully retrieved.");
+            logger.warn("YANG shcema was not successfully retrieved. Errors: {}", schemaReply.getErrors());
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("YANG shcema was not successfully retrieved.", e);
         }

@@ -8,12 +8,8 @@
 
 package org.opendaylight.controller.netconf.client.test;
 
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -25,11 +21,11 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
-import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import io.netty.util.concurrent.Future;
 
 
 /**
@@ -44,11 +40,11 @@ public class TestingNetconfClient implements Closeable {
     private final NetconfClientSessionListener sessionListener;
     private final long sessionId;
 
-    private TestingNetconfClient(String clientLabel, InetSocketAddress address, ReconnectStrategy strat,
-            NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
+    public TestingNetconfClient(String clientLabel,
+                                 NetconfClientDispatcher netconfClientDispatcher, final NetconfClientConfiguration config) throws InterruptedException {
         this.label = clientLabel;
-        sessionListener = new SimpleNetconfClientSessionListener();
-        Future<NetconfClientSession> clientFuture = netconfClientDispatcher.createClient(address, sessionListener, strat);
+        sessionListener = config.getSessionListener();
+        Future<NetconfClientSession> clientFuture = netconfClientDispatcher.createClient(config);
         clientSession = get(clientFuture);
         this.sessionId = clientSession.getSessionId();
     }
@@ -61,18 +57,6 @@ public class TestingNetconfClient implements Closeable {
         } catch (ExecutionException e) {
             throw new IllegalStateException("Unable to create " + this, e);
         }
-    }
-
-    public TestingNetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
-                                NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this(clientLabelForLogging, address,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), netconfClientDispatcher);
-    }
-
-    public TestingNetconfClient(String clientLabelForLogging, InetSocketAddress address,
-                                NetconfClientDispatcher netconfClientDispatcher) throws InterruptedException {
-        this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
-                DEFAULT_CONNECT_TIMEOUT), netconfClientDispatcher);
     }
 
     public Future<NetconfMessage> sendRequest(NetconfMessage message) {

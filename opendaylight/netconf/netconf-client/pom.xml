@@ -41,7 +41,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Export-Package>org.opendaylight.controller.netconf.client,</Export-Package>
+            <Export-Package>org.opendaylight.controller.netconf.client.*,</Export-Package>
             <Import-Package>com.google.common.base,
                             com.google.common.collect,
                             io.netty.channel,

@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
+import static java.util.Collections.emptyList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -25,9 +28,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
+
 import junit.framework.Assert;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +49,7 @@ import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
@@ -66,13 +72,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-import static java.util.Collections.emptyList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 
 public class NetconfITTest extends AbstractNetconfConfigTest {
 
@@ -90,7 +96,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
-    private NetconfClientDispatcher clientDispatcher;
+    private NetconfClientDispatcherImpl clientDispatcher;
 
     @Before
     public void setUp() throws Exception {
@@ -109,7 +115,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
     }
 
     private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
@@ -176,7 +182,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
 
             Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
             long sessionId = netconfClient.getSessionId();
@@ -191,8 +197,8 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @Test
     public void testTwoSessions() throws Exception {
-        try (TestingNetconfClient netconfClient = new TestingNetconfClient("1", tcpAddress, 10000, clientDispatcher))  {
-            try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("2", tcpAddress, 10000, clientDispatcher)) {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient("1", clientDispatcher, getClientConfiguration(tcpAddress, 10000)))  {
+            try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("2", clientDispatcher, getClientConfiguration(tcpAddress, 10000))) {
             }
         }
     }
@@ -365,7 +371,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     }
 
     private TestingNetconfClient createSession(final InetSocketAddress address, final String expected) throws Exception {
-        final TestingNetconfClient netconfClient = new TestingNetconfClient("test " + address.toString(), address, 5000, clientDispatcher);
+        final TestingNetconfClient netconfClient = new TestingNetconfClient("test " + address.toString(), clientDispatcher, getClientConfiguration(address, 5000));
         assertEquals(expected, Long.toString(netconfClient.getSessionId()));
         return netconfClient;
     }

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.mapping.api;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
@@ -51,13 +52,13 @@ public final class HandlingPriority implements Comparable<HandlingPriority> {
 
     @Override
     public int compareTo(HandlingPriority o) {
-        if (this == o){
+        if (this == o) {
             return 0;
         }
-        if (this.equals(CANNOT_HANDLE)){
+        if (isCannotHandle()) {
             return -1;
         }
-        if (o.equals(CANNOT_HANDLE)){
+        if (o.isCannotHandle()) {
             return 1;
         }
 
@@ -70,7 +71,8 @@ public final class HandlingPriority implements Comparable<HandlingPriority> {
         if (priority < o.priority){
             return -1;
         }
-        throw new IllegalStateException("Unexpected state");
+
+        throw new IllegalStateException("Unexpected state comparing " + this + " with " + o);
     }
 
     @Override
@@ -94,5 +96,12 @@ public final class HandlingPriority implements Comparable<HandlingPriority> {
     @Override
     public int hashCode() {
         return priority != null ? priority.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("priority", priority)
+                .toString();
     }
 }

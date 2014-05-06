@@ -17,7 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithName;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
 import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
-import io.netty.channel.ChannelFuture;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +42,7 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.test.TestingNetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreException;
@@ -65,16 +65,14 @@ import org.xml.sax.SAXException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
-
-
     private NetconfClientDispatcher clientDispatcher;
-
-    DefaultCommitNotificationProducer commitNotifier;
+    private DefaultCommitNotificationProducer commitNotifier;
 
     @Before
     public void setUp() throws Exception {
@@ -95,7 +93,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         ChannelFuture s = dispatch.createServer(tcpAddress);
         s.await();
 
-        clientDispatcher = new NetconfClientDispatcher(nettyThreadgroup, nettyThreadgroup, 5000);
+        clientDispatcher = new NetconfClientDispatcherImpl(getNettyThreadgroup(), getNettyThreadgroup(), getHashedWheelTimer());
     }
 
     @After
@@ -124,12 +122,12 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         VerifyingNotificationListener notificationVerifier = createCommitNotificationListener();
         VerifyingPersister mockedAggregator = mockAggregator();
 
-        try (TestingNetconfClient persisterClient = new TestingNetconfClient("persister", tcpAddress, 4000, clientDispatcher)) {
+        try (TestingNetconfClient persisterClient = new TestingNetconfClient("persister", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
             try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
                     platformMBeanServer, mockedAggregator)) {
 
 
-                try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", tcpAddress, 4000, clientDispatcher)) {
+                try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", clientDispatcher, getClientConfiguration(tcpAddress, 4000))) {
                     NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
                     assertContainsElementWithName(response.getDocument(), "modules");
                     assertContainsElementWithName(response.getDocument(), "services");
