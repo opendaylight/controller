@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8f6af618",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-05-06T14:00:16Z",
+      "side": 1,
+      "message": "Probably on stopping event or destroy of the bundle you want to set off this timers, just in case they are still around.",
+      "revId": "9daf24aef2fe9cf0fec25bf3e32b17f7a37cd5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
