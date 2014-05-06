@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -37,10 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
 
 public class NodeChangeCommiter implements OpendaylightInventoryListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(NodeChangeCommiter.class);
+    protected final static Logger LOG = LoggerFactory.getLogger(NodeChangeCommiter.class);
 
     private final FlowCapableInventoryProvider manager;
 
@@ -57,15 +59,10 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         final NodeConnectorRef ref = connector.getNodeConnectorRef();
         final DataModificationTransaction it = this.getManager().startChange();
-        NodeChangeCommiter.LOG.debug("removing node connector {} ", ref.getValue());
+        LOG.debug("removing node connector {} ", ref.getValue());
         it.removeOperationalData(ref.getValue());
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
-        try {
-            commitResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Node Connector {} not removed.", ref.getValue(), e);
-        }
-
+        listenOnTransactionState(it.getIdentifier(), commitResult, "nodeConnector removal", ref.getValue());
     }
 
     @Override
@@ -85,16 +82,11 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
             data.addAugmentation(FlowCapableNodeConnector.class, augment);
         }
         InstanceIdentifier<? extends Object> value = ref.getValue();
-        NodeChangeCommiter.LOG.debug("updating node connector : {}.", value);
+        LOG.debug("updating node connector : {}.", value);
         NodeConnector build = data.build();
         it.putOperationalData((value), build);
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
-        try {
-            commitResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Node Connector {} not updated.", ref.getValue(), e);
-        }
-
+        listenOnTransactionState(it.getIdentifier(), commitResult, "nodeConnector update", ref.getValue());
     }
 
     @Override
@@ -102,14 +94,10 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
 
         final NodeRef ref = node.getNodeRef();
         final DataModificationTransaction it = this.manager.startChange();
-        NodeChangeCommiter.LOG.debug("removing node : {}", ref.getValue());
+        LOG.debug("removing node : {}", ref.getValue());
         it.removeOperationalData((ref.getValue()));
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
-        try {
-            commitResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Node {} not removed.", ref.getValue(), e);
-        }
+        listenOnTransactionState(it.getIdentifier(), commitResult, "node removal", ref.getValue());
     }
 
     @Override
@@ -128,19 +116,39 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
         final FlowCapableNode augment = InventoryMapping.toInventoryAugment(flowNode);
         nodeBuilder.addAugmentation(FlowCapableNode.class, augment);
         InstanceIdentifier<? extends Object> value = ref.getValue();
-        InstanceIdentifierBuilder<Node> builder = InstanceIdentifier.<Node> builder(((InstanceIdentifier<Node>) value));
+        InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) value).builder();
         InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder
                 .<FlowCapableNode> augmentation(FlowCapableNode.class);
         final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
-        NodeChangeCommiter.LOG.debug("updating node :{} ", path);
+        LOG.debug("updating node :{} ", path);
         it.putOperationalData(path, augment);
 
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
-        try {
-            commitResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Node  {} not updated.", ref.getValue(), e);
-        }
-
+        listenOnTransactionState(it.getIdentifier(), commitResult, "node update", ref.getValue());
+    }
+    
+    /**
+     * @param txId transaction identificator
+     * @param future transaction result
+     * @param action performed by transaction
+     * @param nodeConnectorPath target value
+     */
+    private static void listenOnTransactionState(final Object txId, Future<RpcResult<TransactionStatus>> future,
+            final String action, final InstanceIdentifier<?> nodeConnectorPath) {
+        Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),new FutureCallback<RpcResult<TransactionStatus>>() {
+            
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.error("Action {} [{}] failed for Tx:{}", action, nodeConnectorPath, txId, t);
+                
+            }
+            
+            @Override
+            public void onSuccess(RpcResult<TransactionStatus> result) {
+                if(!result.isSuccessful()) {
+                    LOG.error("Action {} [{}] failed for Tx:{}", action, nodeConnectorPath, txId);
+                }
+            }
+        });
     }
 }
