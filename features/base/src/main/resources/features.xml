@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="base-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+   <feature name="base-all" description="OpenDaylight Controller"
+      version="${project.version}">
+      <feature>http</feature>       
+      <feature>transaction</feature>
+      <feature>base-slf4j</feature>
+      <feature>base-felix-dm</feature>
+      <feature>base-aries-spi-fly</feature>
+      <feature>base-jackson</feature>
+      <feature>base-dummy-console</feature>
+      <feature>base-apache-commons</feature>
+      <feature>base-eclipselink-persistence</feature>
+      <feature>base-gemini-web</feature>
+      <feature>base-tomcat</feature>
+      <feature>base-netty</feature>
+      <feature>base-jersey</feature>
+   </feature>
+   <feature name="base-dummy-console" description="Temporary Dummy Console">
+      <bundle>mvn:org.opendaylight.controller/dummy-console/1.1.0</bundle>
+   </feature>
+   <feature name="base-felix-dm" description="Felix Dependency Manager"
+      version="${felix.dependencymanager.version}">
+      <bundle start-level="35">mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <bundle start-level="35">mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
+      <bundle start-level="35">mvn:org.apache.felix/org.apache.felix.dependencymanager.shell/${felix.dependencymanager.shell.version}</bundle>
+   </feature>
+   <feature name="base-aries-spi-fly" description="Aries SPI Fly"
+      version="${spifly.version}">
+      <bundle start-level="35">mvn:org.apache.aries/org.apache.aries.util/1.1.0</bundle>
+      <bundle start-level="35">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${spifly.version}</bundle>
+      <bundle start-level="35">mvn:org.ow2.asm/asm-all/4.0</bundle>
+   </feature>
+     <feature name='base-netty' version='${project.version}'>
+        <bundle>wrap:mvn:io.netty/netty-buffer/4.0.10.Final</bundle>
+        <bundle>wrap:mvn:io.netty/netty-codec/4.0.10.Final</bundle>
+        <bundle>wrap:mvn:io.netty/netty-transport/4.0.10.Final</bundle>
+        <bundle>wrap:mvn:io.netty/netty-common/4.0.10.Final</bundle>
+        <bundle>wrap:mvn:io.netty/netty-handler/4.0.10.Final</bundle>
+        <bundle>wrap:mvn:io.netty/netty-codec-http/4.0.10.Final</bundle>
+        <bundle>mvn:org.opendaylight.controller/netty-config-api/${config.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/netty-event-executor-config/${config.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/netty-threadgroup-config/${config.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/netty-timer-config/${config.version}</bundle>
+     <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.1-SNAPSHOT</bundle>
+    </feature>
+    <feature name="base-jersey">
+        <feature>base-gemini-web</feature>
+        <bundle>mvn:org.opendaylight.controller.thirdparty/com.sun.jersey.jersey-servlet/1.17</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-server/1.17.1</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-core/1.17.1</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-client/1.17.1</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-servlet/1.17.1</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlets/7.6.8.v20121106</bundle>
+    </feature>
+   <feature name="base-jackson" description="Jackson JAX-RS" version="${jackson.version}">
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:org.codehaus.jettison/jettison/${jettison.version}</bundle>
+      <bundle start="true" start-level="35">mvn:javax.ws.rs/jsr311-api/${jsr311.api.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+   </feature>
+   <feature name="base-slf4j" description="SLF4J Logging" version="${slf4j.version}">
+      <bundle start-level="35">mvn:org.slf4j/slf4j-jdk14/1.7.2</bundle>
+      <bundle start-level="35">mvn:org.slf4j/slf4j-nop/1.7.2</bundle>
+      <bundle start-level="35">mvn:org.slf4j/slf4j-simple/1.7.2</bundle>
+      <bundle start="true" start-level="35">mvn:org.slf4j/slf4j-api/1.7.2</bundle>
+   </feature>
+   <feature name="base-apache-commons" description="Apache Commons Libraries"
+      version="${project.version}">
+      <bundle start="true" start-level="35">mvn:com.google.guava/guava/${guava.version}</bundle>
+      <bundle start="true" start-level="35">mvn:org.javassist/javassist/${javassist.version}</bundle>
+      <bundle start="true" start-level="35">mvn:commons-io/commons-io/${commons.io.version}</bundle>
+      <bundle start="true" start-level="35">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
+      <bundle start="true" start-level="35">mvn:org.apache.commons/commons-lang3/${commons.lang.version}</bundle>
+      <bundle start="true" start-level="35">mvn:commons-net/commons-net/${commons.net.version}</bundle>
+   </feature>
+   <feature name="base-eclipselink-persistence" description="EclipseLink Persistence API">
+      <bundle start="true" start-level="35">mvn:eclipselink/javax.persistence/2.0.4.v201112161009</bundle>
+      <bundle start="true" start-level="35">mvn:eclipselink/javax.resource/1.5.0.v200906010428</bundle>
+   </feature>
+   <feature name="base-gemini-web" description="Gemini Web" version="${geminiweb.version}">
+      <feature>http</feature>
+      <feature>transaction</feature>
+      <feature>base-slf4j</feature>
+      <feature>base-felix-dm</feature>
+      <feature>base-jackson</feature>
+      <feature>base-apache-commons</feature>
+      <bundle start="true" start-level="35">mvn:com.google.code.gson/gson/${gson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:commons-fileupload/commons-fileupload/${commons.fileupload.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.core/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.extender/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.common/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.io/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.math/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.osgi/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.osgi.manifest/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.virgo.util.parser.manifest/${virgo.version}</bundle>
+      <bundle start="true" start-level="35">mvn:org.apache.felix/org.apache.felix.fileinstall/3.1.6</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.activation/1.1.0.v201211130549</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.annotation/1.1.0.v201209060031</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.ejb/3.1.1.v201204261316</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.el/2.2.0.v201108011116</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.mail.glassfish/1.4.1.v201108011116</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.xml.rpc/1.1.0.v201005080400</bundle>
+      <bundle start="true" start-level="35">mvn:org.eclipse.jetty.orbit/javax.servlet.jsp/2.2.0.v201112011158</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.servlet.jsp.jstl/1.2.0.v201105211821</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/javax.servlet.jsp.jstl.impl/1.2.0.v201210211230</bundle>
+   </feature>
+   <feature name="base-tomcat" description="OpenDaylight Tomcat">
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina/7.0.32.v201211201336</bundle>
+      <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.ha/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.tribes/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.coyote/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.el/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.jasper/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.api/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.util/7.0.32.v201211201952</bundle>
+   </feature>
+   <feature name="base-spring" description="Opendaylight Spring Support">
+      <bundle>mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+      <bundle>mvn:org.aopalliance/com.springsource.org.aopalliance/${aopalliance.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.aop/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.asm/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.beans/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.context/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.context.support/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.core/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.expression/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.transaction/${spring.version}</bundle>
+   </feature>
+   <feature name="base-spring-web" description="OpenDaylight Spring Web">
+      <bundle>mvn:org.springframework/org.springframework.web/${spring.version}</bundle>
+      <bundle>mvn:org.springframework/org.springframework.web.servlet/${spring.version}</bundle>
+   </feature>
+   <feature name="base-spring-security" description="OpenDaylight Spring Security">
+      <feature>base-spring</feature>
+      <feature>gemini-web</feature>
+      <feature>base-spring-web</feature>
+      <bundle>mvn:org.springframework.security/spring-security-config/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-core/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-taglibs/${spring-security.version}</bundle>
+      <bundle>mvn:org.springframework.security/spring-security-web/${spring-security.version}</bundle>
+   </feature>
+</features>
