@@ -99,7 +99,11 @@ public class NetconfMapping {
 
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument component : Lists
                 .reverse(identifier.getPath())) {
-            previous = toNode(component, previous);
+            if (component instanceof NodeIdentifierWithPredicates) {
+                previous = toNode((NodeIdentifierWithPredicates)component, previous);
+            } else {
+                previous = toNode(component, previous);
+            }
         }
         return filter("subtree", previous);
     }
