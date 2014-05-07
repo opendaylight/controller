@@ -152,7 +152,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     }
                 }
             } catch (IllegalStateException e) {
-                log.debug("IllegalStateException Received by PendingPacketsAgerTimerHandler from: {}",
+                log.warn("IllegalStateException Received by PendingPacketsAgerTimerHandler from: {}",
                         e.getMessage());
             }
         }
