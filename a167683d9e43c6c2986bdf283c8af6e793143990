@@ -16,6 +16,24 @@
       "revId": "a167683d9e43c6c2986bdf283c8af6e793143990",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2c4ad580",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-07T18:09:21Z",
+      "side": 1,
+      "message": "That is right, Devin. I will bump that.\nThanks!",
+      "parentUuid": "fa82b9bf_ac4b45af",
+      "revId": "a167683d9e43c6c2986bdf283c8af6e793143990",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
