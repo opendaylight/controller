@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac4b45af",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleForwardingImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-07T15:32:53Z",
+      "side": 1,
+      "message": "Seems like this is a case that should NOT happen, and if it does happen that is an indication of a logic problem (correct?). If so, debug is a little low of a log level in my book. I would suggest warning or error.",
+      "revId": "a167683d9e43c6c2986bdf283c8af6e793143990",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
