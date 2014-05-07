@@ -65,6 +65,7 @@
     <felix.dependencymanager.version>3.1.0</felix.dependencymanager.version>
     <felix.fileinstall.version>3.1.6</felix.fileinstall.version>
     <felix.webconsole.version>4.2.0</felix.webconsole.version>
+    <filtervalve.version>1.4.2-SNAPSHOT</filtervalve.version>
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
     <flows.web.version>0.4.2-SNAPSHOT</flows.web.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
@@ -816,6 +817,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>devices.web</artifactId>
         <version>${devices.web.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>filter-valve</artifactId>
+        <version>${filtervalve.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

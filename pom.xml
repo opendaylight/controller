@@ -122,6 +122,7 @@
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
+    <module>opendaylight/commons/filter-valve</module>
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
