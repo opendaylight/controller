@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement
-abstract public class DataLinkAddress implements Serializable {
+abstract public class DataLinkAddress implements Serializable,Cloneable {
     private static final long serialVersionUID = 1L;
     private String name;
 

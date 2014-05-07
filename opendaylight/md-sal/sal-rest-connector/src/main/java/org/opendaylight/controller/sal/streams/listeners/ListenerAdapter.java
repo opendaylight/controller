@@ -543,11 +543,11 @@ public class ListenerAdapter implements DataChangeListener {
 	 */
 	private static String generateNewPrefix(Collection<String> prefixes) {
 		StringBuilder result = null;
-		Random random = new Random();
+       Random random = new Random();
 		do {
 			result = new StringBuilder();
 			for (int i = 0; i < 4; i++) {
-				int randomNumber = 0x61 + (Math.abs(random.nextInt()) % 26);
+				int randomNumber = 0x61 + ((random.nextInt(Integer.MAX_VALUE)) % 26);
 				result.append(Character.toChars(randomNumber));
 			}
 		} while (prefixes.contains(result.toString()));

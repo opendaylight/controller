@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);
         RemoteNotificationListener remoteNotificationListener = new RemoteNotificationListener(listener);
 
-        final ListenerRegistration<?> listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName)))
+        final ListenerRegistration<?> listenerRegistration = restconfClientContext.getEventStreamContext(desiredEventStream.get(notificationStreamName))
                 .registerNotificationListener(remoteNotificationListener);
 
         return new AbstractListenerRegistration<NotificationListener<T>>(listener) {
@@ -57,6 +57,6 @@ public class NotificationServiceImpl implements NotificationService {
         //TODO implementation using sal-remote
         String notificationStreamName = RemoteStreamTools.createNotificationStream(salRemoteService, null);
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);
-        return restconfClientContext.getEventStreamContext(desiredEventStream.get(desiredEventStream.get(notificationStreamName))).registerNotificationListener(listener);
+        return restconfClientContext.getEventStreamContext(desiredEventStream.get(notificationStreamName)).registerNotificationListener(listener);
     }
 }
