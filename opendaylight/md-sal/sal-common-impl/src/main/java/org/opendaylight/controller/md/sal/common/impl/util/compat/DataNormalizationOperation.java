@@ -604,7 +604,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child, schema,schema.getChildNodes()));
         }
 
-        if ((schema instanceof DataSchemaNode) && !((DataSchemaNode) schema).isAugmenting() && potential.isAugmenting()) {
+        // We try to look up if this node was added by augmentation
+        if ((schema instanceof DataSchemaNode) && potential.isAugmenting()) {
             return fromAugmentation(schema, (AugmentationTarget) schema, potential);
         }
         return fromDataSchemaNode(potential);
@@ -632,21 +633,35 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return new AugmentationIdentifier(null, potentialChildren.build());
     }
 
-    private static AugmentationNormalization fromAugmentation(final DataNodeContainer schema,
-            final AugmentationTarget augments, final DataSchemaNode potential) {
+    /**
+     * Returns a DataNormalizationOperation for provided child node
+     *
+     * If supplied child is added by Augmentation this operation returns
+     * a DataNormalizationOperation for augmentation,
+     * otherwise returns a DataNormalizationOperation for child as
+     * call for {@link #fromDataSchemaNode(DataSchemaNode)}.
+     *
+     *
+     * @param parent
+     * @param parentAug
+     * @param child
+     * @return
+     */
+    private static DataNormalizationOperation<?> fromAugmentation(final DataNodeContainer parent,
+            final AugmentationTarget parentAug, final DataSchemaNode child) {
         AugmentationSchema augmentation = null;
-        for (AugmentationSchema aug : augments.getAvailableAugmentations()) {
-            DataSchemaNode child = aug.getDataChildByName(potential.getQName());
-            if (child != null) {
+        for (AugmentationSchema aug : parentAug.getAvailableAugmentations()) {
+            DataSchemaNode potential = aug.getDataChildByName(child.getQName());
+            if (potential != null) {
                 augmentation = aug;
                 break;
             }
 
         }
         if (augmentation != null) {
-            return new AugmentationNormalization(augmentation, schema);
+            return new AugmentationNormalization(augmentation, parent);
         } else {
-            return null;
+            return fromDataSchemaNode(child);
         }
     }
 
