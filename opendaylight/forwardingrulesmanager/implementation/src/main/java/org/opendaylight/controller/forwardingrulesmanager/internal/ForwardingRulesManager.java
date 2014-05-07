@@ -2342,7 +2342,7 @@ public class ForwardingRulesManager implements
         for (FlowConfig flowConfig : flowConfigForNode) {
             if (doesFlowContainNodeConnector(flowConfig.getFlow(), nodeConnector)) {
                 if (flowConfig.installInHw() && !flowConfig.getStatus().equals(StatusCode.SUCCESS.toString())) {
-                    Status status = this.installFlowEntry(flowConfig.getFlowEntry());
+                    Status status = this.installFlowEntryAsync(flowConfig.getFlowEntry());
                     if (!status.isSuccess()) {
                         flowConfig.setStatus(status.getDescription());
                     } else {
