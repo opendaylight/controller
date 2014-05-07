@@ -10,34 +10,37 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
+import com.google.common.net.InetAddresses;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
 import java.io.File;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceListener;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.inventory.rev140108.NetconfNode;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.net.InetAddresses;
 
 /**
  *
@@ -88,6 +91,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     @Override
     public java.lang.AutoCloseable createInstance() {
+        ServiceReference<DataProviderService> serviceReference = bundleContext.getServiceReference(DataProviderService.class);
+
+        DataProviderService dataProviderService =
+                bundleContext.getService(serviceReference);
+
+        dataProviderService.readOperationalData(InstanceIdentifier.builder(
+                Nodes.class).child(Node.class).augmentation(NetconfNode.class).build());
 
         getDomRegistryDependency();
         NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
