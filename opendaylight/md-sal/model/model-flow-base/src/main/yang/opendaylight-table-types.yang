@@ -184,43 +184,18 @@ module opendaylight-table-types {
         base match-field;
         description "Match for Logical Port Metadata";
     }
-
-
-
-
-
-
-
-
-
-    identity foo {
+    identity tunnel_ipv4_dst {
         base match-field;
-        description "Match for Logical Port Metadata";
+        description "IPv4 destination tunnel endpoint address.";
     }
-
-    identity foobar_id {
+    identity tunnel_ipv4_src {
         base match-field;
-        description "FooBar Match for Logical Port Metadata";
+        description "IPv4 source tunnel endpoint address.";
     }
-
-
-    identity bar_dst {
+    identity tcp_flag {
         base match-field;
-        description "Bar source IPv4 address.";
+        description "IPv4 source tunnel endpoint address.";
     }
-    identity bar_src {
-        base match-field;
-        description "Bar target IPv4 address.";
-    }
-
-
-
-
-
-
-
-
-
     identity ipv6_exthdr {
         base match-field;
         description "Match for IPv6 Extension Header pseudo-field";

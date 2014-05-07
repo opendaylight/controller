@@ -269,60 +269,32 @@ module opendaylight-match-types {
         }
     }
 
-
-    grouping "bar-match-fields" {
-        leaf bar-source-transport-address {
-            description "bar source IPv4 address.";
+    grouping "tunnel-ipv4-match-fields" {
+        leaf tunnel-ipv4-source {
+            description "IPv4 source tunnel endpoint address.";
             type inet:ipv4-prefix;
         }
-
-        leaf bar-target-transport-address {
-            description "bar target IPv4 address.";
+        leaf tunnel-ipv4-destination {
+            description "IPv4 destination tunnel endpoint address.";
             type inet:ipv4-prefix;
         }
     }
-
-
-
-
-
-
-
-
-
-
-    grouping "foo-match-fields" {
-        leaf foo-source {
-            description "foo IPv4 source address.";
-            type inet:ipv4-prefix;
+    grouping "tcp-flag-match-fields" {
+        leaf tcp-flag {
+            type uint8;
         }
-
-        leaf foo-destination {
-            description "foo IPv4 destination address.";
-            type inet:ipv4-prefix;
+        leaf tunnel-mask {
+            type uint8;
         }
-
     }
-
-
-
-    container "foo" {
-        uses "foo-match-fields";
-    }
-
-
-
-
-
-
-
-
 
     grouping match {
+        container tcp-flag-match {
+            uses "tcp-flag-match-fields";
+        }
         leaf in-port {
             type inv:node-connector-id;
         }
-
         leaf in-phy-port {
             type inv:node-connector-id;
         }
@@ -341,9 +313,6 @@ module opendaylight-match-types {
                 type uint64;
             }
         }
-
-
-
         container "ethernet-match" {
             uses "ethernet-match-fields";
         }
@@ -366,11 +335,8 @@ module opendaylight-match-types {
             case "arp-match" {
                 uses "arp-match-fields";
             }
-            case "foo-match" {
-                uses "foo-match-fields";
-            }
-            case "bar-match" {
-                uses "bar-match-fields";
+            case "tunnel-ipv4-match" {
+                uses "tunnel-ipv4-match-fields";
             }
         }
 
