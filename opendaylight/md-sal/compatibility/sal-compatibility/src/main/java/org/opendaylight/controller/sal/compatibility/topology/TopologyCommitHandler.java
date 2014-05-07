@@ -68,7 +68,7 @@ public class TopologyCommitHandler implements DataChangeListener {
             for (InstanceIdentifier<? extends DataObject> path : modification.getRemovedOperationalData()) {
                 if (path.getTargetType() == Link.class) {
                     Link link = (Link) modification.getOriginalOperationalData().get(path);
-                    msg.add(toTopoEdgeUpdate(toAdEdge(link, topology), UpdateType.CHANGED, reader));
+                    msg.add(toTopoEdgeUpdate(toAdEdge(link, topology), UpdateType.REMOVED, reader));
                 }
 
             }
