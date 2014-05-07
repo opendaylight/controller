@@ -49,7 +49,6 @@ import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.DaylightWebUtil;
-import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
