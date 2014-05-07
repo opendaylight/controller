@@ -457,7 +457,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         try {
         listener.onRouteChange(initial);
         } catch (Exception e) {
-            LOG.error("Unhandled exception during sending initial route change event {} to {}",initial,listener);
+            LOG.error("Unhandled exception during sending initial route change event {} to {}",initial,listener, e);
         }
         return reg;
     }
