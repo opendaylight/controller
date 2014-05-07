@@ -45,6 +45,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -223,8 +224,16 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             if (potential != null) {
                 return potential;
             }
-            potential = fromSchema(schema, child);
+            potential = fromLocalSchema(child);
             return register(potential);
+        }
+
+        private DataNormalizationOperation<?> fromLocalSchema(final PathArgument child) throws DataNormalizationException {
+            if (child instanceof AugmentationIdentifier) {
+                return fromSchemaAndQNameChecked(schema, ((AugmentationIdentifier) child).getPossibleChildNames()
+                        .iterator().next());
+            }
+            return fromSchemaAndQNameChecked(schema, child.getNodeType());
         }
 
         @Override
@@ -233,8 +242,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             if (potential != null) {
                 return potential;
             }
-            potential = fromSchemaAndPathArgument(schema, child);
+            potential = fromLocalSchemaAndQName(schema, child);
             return register(potential);
+        }
+
+        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema2, final QName child) throws DataNormalizationException {
+            return fromSchemaAndQNameChecked(schema2, child);
         }
 
         private DataNormalizationOperation<?> register(final DataNormalizationOperation<?> potential) {
@@ -398,38 +411,34 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static final class AugmentationNormalization extends MixinNormalizationOp<AugmentationIdentifier> {
-
-        private final Map<QName, DataNormalizationOperation<?>> byQName;
-        private final Map<PathArgument, DataNormalizationOperation<?>> byArg;
+    private static final class AugmentationNormalization extends DataContainerNormalizationOperation<AugmentationIdentifier> {
 
         public AugmentationNormalization(final AugmentationSchema augmentation, final DataNodeContainer schema) {
-            super(augmentationIdentifierFrom(augmentation));
+            //super();
+            super(augmentationIdentifierFrom(augmentation), augmentationProxy(augmentation,schema));
+        }
 
-            ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
-            ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
+        @Override
+        public boolean isMixin() {
+            return true;
+        }
 
-            for (DataSchemaNode augNode : augmentation.getChildNodes()) {
-                DataSchemaNode resolvedNode = schema.getDataChildByName(augNode.getQName());
-                DataNormalizationOperation<?> resolvedOp = fromDataSchemaNode(resolvedNode);
-                byArgBuilder.put(resolvedOp.getIdentifier(), resolvedOp);
-                for (QName resQName : resolvedOp.getQNameIdentifiers()) {
-                    byQNameBuilder.put(resQName, resolvedOp);
-                }
+
+
+        @Override
+        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema, final QName child)
+                throws DataNormalizationException {
+            Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
+            if (!potential.isPresent()) {
+                return null;
             }
-            byQName = byQNameBuilder.build();
-            byArg = byArgBuilder.build();
 
-        }
-
-        @Override
-        public DataNormalizationOperation<?> getChild(final PathArgument child) {
-            return byArg.get(child);
-        }
-
-        @Override
-        public DataNormalizationOperation<?> getChild(final QName child) {
-            return byQName.get(child);
+            DataSchemaNode result = potential.get();
+            // We try to look up if this node was added by augmentation
+            if ((schema instanceof DataSchemaNode) && result.isAugmenting()) {
+                return fromAugmentation(schema, (AugmentationTarget) schema, result);
+            }
+            return fromDataSchemaNode(result);
         }
 
         @Override
@@ -591,23 +600,30 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static DataNormalizationOperation<?> fromSchemaAndPathArgument(final DataNodeContainer schema,
-            final QName child) throws DataNormalizationException {
-        DataSchemaNode potential = schema.getDataChildByName(child);
+    private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
+        DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
             Iterable<org.opendaylight.yangtools.yang.model.api.ChoiceNode> choices = FluentIterable.from(
-                    schema.getChildNodes()).filter(org.opendaylight.yangtools.yang.model.api.ChoiceNode.class);
+                    parent.getChildNodes()).filter(org.opendaylight.yangtools.yang.model.api.ChoiceNode.class);
             potential = findChoice(choices, child);
         }
+        return Optional.fromNullable(potential);
+    }
 
-        if (potential == null) {
+    private static DataNormalizationOperation<?> fromSchemaAndQNameChecked(final DataNodeContainer schema,
+            final QName child) throws DataNormalizationException {
+
+        Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
+        if (!potential.isPresent()) {
             throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child, schema,schema.getChildNodes()));
         }
 
-        if ((schema instanceof DataSchemaNode) && !((DataSchemaNode) schema).isAugmenting() && potential.isAugmenting()) {
-            return fromAugmentation(schema, (AugmentationTarget) schema, potential);
+        DataSchemaNode result = potential.get();
+        // We try to look up if this node was added by augmentation
+        if ((schema instanceof DataSchemaNode) && result.isAugmenting()) {
+            return fromAugmentation(schema, (AugmentationTarget) schema, result);
         }
-        return fromDataSchemaNode(potential);
+        return fromDataSchemaNode(result);
     }
 
     private static org.opendaylight.yangtools.yang.model.api.ChoiceNode findChoice(
@@ -615,7 +631,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         org.opendaylight.yangtools.yang.model.api.ChoiceNode foundChoice = null;
         choiceLoop: for (org.opendaylight.yangtools.yang.model.api.ChoiceNode choice : choices) {
             for (ChoiceCaseNode caze : choice.getCases()) {
-                if (caze.getDataChildByName(child) != null) {
+                if (findChildSchemaNode(caze, child).isPresent()) {
                     foundChoice = choice;
                     break choiceLoop;
                 }
@@ -632,30 +648,44 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return new AugmentationIdentifier(null, potentialChildren.build());
     }
 
-    private static AugmentationNormalization fromAugmentation(final DataNodeContainer schema,
-            final AugmentationTarget augments, final DataSchemaNode potential) {
+    private static DataNodeContainer augmentationProxy(final AugmentationSchema augmentation, final DataNodeContainer schema) {
+        Set<DataSchemaNode> children = new HashSet<>();
+        for (DataSchemaNode augNode : augmentation.getChildNodes()) {
+            children.add(schema.getDataChildByName(augNode.getQName()));
+        }
+        return new DataSchemaContainerProxy(children);
+    }
+
+    /**
+     * Returns a DataNormalizationOperation for provided child node
+     *
+     * If supplied child is added by Augmentation this operation returns
+     * a DataNormalizationOperation for augmentation,
+     * otherwise returns a DataNormalizationOperation for child as
+     * call for {@link #fromDataSchemaNode(DataSchemaNode)}.
+     *
+     *
+     * @param parent
+     * @param parentAug
+     * @param child
+     * @return
+     */
+    private static DataNormalizationOperation<?> fromAugmentation(final DataNodeContainer parent,
+            final AugmentationTarget parentAug, final DataSchemaNode child) {
         AugmentationSchema augmentation = null;
-        for (AugmentationSchema aug : augments.getAvailableAugmentations()) {
-            DataSchemaNode child = aug.getDataChildByName(potential.getQName());
-            if (child != null) {
+        for (AugmentationSchema aug : parentAug.getAvailableAugmentations()) {
+            DataSchemaNode potential = aug.getDataChildByName(child.getQName());
+            if (potential != null) {
                 augmentation = aug;
                 break;
             }
 
         }
         if (augmentation != null) {
-            return new AugmentationNormalization(augmentation, schema);
+            return new AugmentationNormalization(augmentation, parent);
         } else {
-            return null;
+            return fromDataSchemaNode(child);
         }
-    }
-
-    private static DataNormalizationOperation<?> fromSchema(final DataNodeContainer schema, final PathArgument child) throws DataNormalizationException {
-        if (child instanceof AugmentationIdentifier) {
-            return fromSchemaAndPathArgument(schema, ((AugmentationIdentifier) child).getPossibleChildNames()
-                    .iterator().next());
-        }
-        return fromSchemaAndPathArgument(schema, child.getNodeType());
     }
 
     public static DataNormalizationOperation<?> fromDataSchemaNode(final DataSchemaNode potential) {
