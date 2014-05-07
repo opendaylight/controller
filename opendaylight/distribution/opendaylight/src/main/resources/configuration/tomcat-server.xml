@@ -56,6 +56,9 @@
                         rotatable="true" fileDateFormat="yyyy-MM"
                         pattern="%{yyyy-MM-dd HH:mm:ss.SSS z}t - [%a] - %r"/>
 
+          <Valve className="org.opendaylight.controller.filtervalve.cors.FilterValve"
+                 configurationFile="configuration/cors-config.xml"
+                  />
       </Host>
     </Engine>
   </Service>

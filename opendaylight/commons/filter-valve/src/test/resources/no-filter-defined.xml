@@ -1,0 +1,61 @@
+<!--
+  ~ Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<Host>
+    <!-- Filters are allowed here, only serving as a template -->
+    <filter-template>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.opendaylight.controller.filtervalve.cors.jaxb.MockedFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value>*</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.allowed.methods</param-name>
+            <param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.allowed.headers</param-name>
+            <param-value>Content-Type,X-Requested-With,accept,authorization,
+                origin,Origin,Access-Control-Request-Method,Access-Control-Request-Headers
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.exposed.headers</param-name>
+            <param-value>Access-Control-Allow-Origin,Access-Control-Allow-Credentials</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.support.credentials</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.preflight.maxage</param-name>
+            <param-value>10</param-value>
+        </init-param>
+    </filter-template>
+
+    <Context path="/restconf">
+        <!-- Filters are also allowed here. -->
+        <filter>
+            <filter-name>CorsFilter</filter-name>
+            <!-- init params can be added/overriden if template is used -->
+        </filter>
+        <!-- only local references are allowed -->
+        <filter-mapping>
+            <filter-name>CorsFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+        </filter-mapping>
+    </Context>
+
+    <Context path="/controller/nb/v2/connectionmanager">
+        <filter-mapping>
+            <filter-name>CorsFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+        </filter-mapping>
+    </Context>
+</Host>
