@@ -152,7 +152,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     }
                 }
             } catch (IllegalStateException e) {
-                log.debug("IllegalStateException Received by PendingPacketsAgerTimerHandler from: {}",
+                log.warn("IllegalStateException Received by PendingPacketsAgerTimerHandler from: {}",
                         e.getMessage());
             }
         }
@@ -186,7 +186,6 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
      * hope that the destination is known by hostTracker.
      */
     private void sendPendingPacket(InetAddress dIP) {
-        pendingPacketDestinations.get(dIP);
         PendingPacketData pendingPacketData = pendingPacketDestinations.get(dIP);
         if (pendingPacketData != null) {
             handlePuntedIPPacket(pendingPacketData.pkt, pendingPacketData.incomingNodeConnector, false);
