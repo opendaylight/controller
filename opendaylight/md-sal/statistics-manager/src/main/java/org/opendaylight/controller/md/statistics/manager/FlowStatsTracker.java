@@ -41,17 +41,17 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     private FlowTableStatsTracker flowTableStats;
     private int unaccountedFlowsCounter = 1;
 
-    FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context) {
+    FlowStatsTracker(final OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context) {
         super(context);
         this.flowStatsService = flowStatsService;
     }
-    FlowStatsTracker(OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, FlowTableStatsTracker flowTableStats) {
+    FlowStatsTracker(final OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context, final FlowTableStatsTracker flowTableStats) {
         this(flowStatsService, context);
         this.flowTableStats = flowTableStats;
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, FlowStatsEntry item) {
+    protected void cleanupSingleStat(final DataModificationTransaction trans, final FlowStatsEntry item) {
         InstanceIdentifier<?> flowRef = getNodeIdentifierBuilder()
                             .augmentation(FlowCapableNode.class)
                             .child(Table.class, new TableKey(item.getTableId()))
@@ -61,7 +61,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     @Override
-    protected FlowStatsEntry updateSingleStat(DataModificationTransaction trans, FlowAndStatisticsMapList map) {
+    protected FlowStatsEntry updateSingleStat(final DataModificationTransaction trans, final FlowAndStatisticsMapList map) {
         short tableId = map.getTableId();
 
         FlowBuilder flowBuilder = new FlowBuilder();
@@ -221,7 +221,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         }
 
         this.requestAllFlowsAllTables();
-        
+
     }
     public void requestAllFlowsAllTables() {
         if (flowStatsService != null) {
@@ -254,7 +254,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
             if (Flow.class.equals(e.getKey().getTargetType())) {
                 final Flow flow = (Flow) e.getValue();
@@ -270,11 +270,8 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
             if (Flow.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 final InstanceIdentifier<Flow> flow = (InstanceIdentifier<Flow>)key;
-                final InstanceIdentifier<?> del = InstanceIdentifier.builder(flow)
-                        .augmentation(FlowStatisticsData.class).build();
-                logger.debug("Key {} triggered remove of augmentation {}", key, del);
-
-                trans.removeOperationalData(del);
+                logger.debug("Key {} triggered remove of Flow from operational space.", key);
+                trans.removeOperationalData(flow);
             }
         }
         trans.commit();
