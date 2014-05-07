@@ -68,8 +68,8 @@ public class TestHelper {
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
-                mavenBundle(CONTROLLER + ".thirdparty", "nagasena").versionAsInProject(), //
-                mavenBundle(CONTROLLER + ".thirdparty", "nagasena-rta").versionAsInProject(), //
+                mavenBundle("org.openexi", "nagasena").versionAsInProject(), //
+                mavenBundle("org.openexi", "nagasena-rta").versionAsInProject(), //
                 mavenBundle(CONTROLLER + ".thirdparty", "ganymed").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 

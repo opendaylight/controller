@@ -29,7 +29,6 @@
     <module>netconf-monitoring</module>
     <module>ietf-netconf-monitoring</module>
     <module>ietf-netconf-monitoring-extension</module>
-    <module>../../third-party/org.openexi</module>
   </modules>
 
   <dependencies>

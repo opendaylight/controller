@@ -56,7 +56,7 @@
     <exam.version>3.0.0</exam.version>
 
     <!-- OpenEXI third party lib for netconf-->
-    <exi.nagasena.version>0000.0002.0038.0-SNAPSHOT</exi.nagasena.version>
+    <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
     <feature.transaction.version>1.0.1</feature.transaction.version>
     <felix.dependencymanager.shell.version>3.0.1</felix.dependencymanager.shell.version>
@@ -1339,16 +1339,6 @@
         <artifactId>ganymed</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>nagasena</artifactId>
-        <version>${exi.nagasena.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>nagasena-rta</artifactId>
-        <version>${exi.nagasena.version}</version>
-      </dependency>
       <!-- Third parties from opendaylight released -->
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -1482,6 +1472,16 @@
         <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>yang-ext</artifactId>
         <version>${yang-ext.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openexi</groupId>
+        <artifactId>nagasena</artifactId>
+        <version>${exi.nagasena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openexi</groupId>
+        <artifactId>nagasena-rta</artifactId>
+        <version>${exi.nagasena.version}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
