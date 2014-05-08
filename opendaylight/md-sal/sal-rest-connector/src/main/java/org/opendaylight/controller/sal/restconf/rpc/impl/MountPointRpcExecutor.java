@@ -9,10 +9,8 @@ package org.opendaylight.controller.sal.restconf.rpc.impl;
 
 import java.util.concurrent.ExecutionException;
 
-import javax.ws.rs.core.Response.Status;
-
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
@@ -35,14 +33,14 @@ public class MountPointRpcExecutor extends AbstractRpcExecutor {
     }
 
     @Override
-    public RpcResult<CompositeNode> invokeRpc( CompositeNode rpcRequest ) throws ResponseException {
+    public RpcResult<CompositeNode> invokeRpc( CompositeNode rpcRequest )
+                                                   throws RestconfDocumentedException {
         ListenableFuture<RpcResult<CompositeNode>> rpcFuture =
                 mountPoint.rpc( getRpcDefinition().getQName(), rpcRequest);
         try {
             return rpcFuture.get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new ResponseException(Status.INTERNAL_SERVER_ERROR,
-                                        e.getCause().getMessage() );
+            throw new RestconfDocumentedException( e.getMessage(), e.getCause() );
         }
     }
 }

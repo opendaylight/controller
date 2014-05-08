@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +21,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -170,7 +168,7 @@ public class JsonToCnSnTest {
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
         assertTrue(compositeNode instanceof CompositeNode);
-        List<Node<?>> children = ((CompositeNode) compositeNode).getChildren();
+        List<Node<?>> children = compositeNode.getChildren();
         assertEquals(1, children.size());
         assertEquals("lflst2", children.get(0).getNodeType().getLocalName());
         assertEquals("45", children.get(0).getValue());
@@ -190,7 +188,7 @@ public class JsonToCnSnTest {
      * Tests whether namespace <b>stay unchanged</b> if concrete values are
      * present in composite or simple node and if the method for update is
      * called.
-     * 
+     *
      */
     @Test
     public void notSupplyNamespaceIfAlreadySupplied() {
@@ -274,19 +272,13 @@ public class JsonToCnSnTest {
         assertEquals("iden_local", ((QName) lf14.getValue()).getLocalName());
         assertEquals("identity:module", ((QName) lf14.getValue()).getNamespace().toString());
     }
-    
+
     @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
-        boolean exceptionCaught = false;
-        try {
-            loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");
-            loadAndNormalizeData("/common/augment/json/datab.json", "/common/augment/yang", "cont", "main");
-        } catch (ResponseException e) {
-            exceptionCaught = true;
-        }
-        
-        assertFalse(exceptionCaught);
+
+        loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");
+        loadAndNormalizeData("/common/augment/json/datab.json", "/common/augment/yang", "cont", "main");
     }
 
     private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace,

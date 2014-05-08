@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -99,6 +100,7 @@ public class RestPostOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
@@ -116,7 +118,7 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         uri = "/operations/test-module:rpc-wrongtest";
-        assertEquals(404, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+        assertEquals(400, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
     }
 
     @Test
