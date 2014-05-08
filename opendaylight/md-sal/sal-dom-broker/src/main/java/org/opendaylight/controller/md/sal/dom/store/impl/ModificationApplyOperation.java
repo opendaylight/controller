@@ -87,8 +87,5 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
      *    if suboperation is not supported for specified tree node.
      */
     @Override
-    public Optional<ModificationApplyOperation> getChild(PathArgument child);
-
-
-
+    Optional<ModificationApplyOperation> getChild(PathArgument child);
 }
