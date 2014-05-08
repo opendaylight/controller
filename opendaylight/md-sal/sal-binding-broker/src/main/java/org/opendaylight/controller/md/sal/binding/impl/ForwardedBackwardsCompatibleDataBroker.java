@@ -18,7 +18,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -29,12 +28,13 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.Data
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -42,8 +42,8 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,17 +55,17 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+@SuppressWarnings("deprecation")
 public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDataBroker implements DataProviderService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ForwardedBackwardsCompatibleDataBroker.class);
 
     private final ConcurrentHashMap<InstanceIdentifier<?>, CommitHandlerRegistrationImpl> commitHandlers = new ConcurrentHashMap<>();
-    private final ListenerRegistry<DataChangeListener> fakeRegistry = ListenerRegistry.create();
     private final ListeningExecutorService executorService;
 
     public ForwardedBackwardsCompatibleDataBroker(final DOMDataBroker domDataBroker,
-            final BindingIndependentMappingService mappingService, final ListeningExecutorService executor) {
-        super(domDataBroker, mappingService);
+            final BindingIndependentMappingService mappingService, final SchemaService schemaService,final ListeningExecutorService executor) {
+        super(domDataBroker, mappingService,schemaService);
         executorService = executor;
         LOG.info("ForwardedBackwardsCompatibleBroker started.");
     }
@@ -113,11 +113,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             final InstanceIdentifier<? extends DataObject> path, final DataChangeListener listener) {
 
 
-        BindingDataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
-        BindingDataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
+        org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
+        org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
 
-        ListenerRegistration<BindingDataChangeListener> cfgReg = registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
-        ListenerRegistration<BindingDataChangeListener> operReg = registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg = registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg = registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
 
         return new LegacyListenerRegistration(listener,cfgReg,operReg);
     }
@@ -127,12 +127,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             final InstanceIdentifier<? extends DataObject> path,
             final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
         throw new UnsupportedOperationException("Data reader contract is not supported.");
-    }
-
-    @Override
-    public void close() throws Exception {
-        // TODO Auto-generated method stub
-
     }
 
     public ListenableFuture<RpcResult<TransactionStatus>> commit(final ForwardedBackwardsCompatibleTransacion tx) {
@@ -168,9 +162,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             @Override
             public ListenableFuture<RpcResult<TransactionStatus>> apply(final Boolean requestCommitSuccess) throws Exception {
                 if(requestCommitSuccess) {
-                    return tx.getDelegate().commit();
+                    return AbstractDataTransaction.convertToLegacyCommitFuture(tx.getDelegate().submit());
                 }
-                return Futures.immediateFuture(Rpcs.getRpcResult(false, TransactionStatus.FAILED, Collections.<RpcError>emptySet()));
+                return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>failed().withResult(TransactionStatus.FAILED).build());
             }
         });
 
@@ -193,7 +187,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     private class ForwardedBackwardsCompatibleTransacion extends
-            AbstractForwardedTransaction<DOMDataReadWriteTransaction> implements DataModificationTransaction {
+            AbstractReadWriteTransaction implements DataModificationTransaction {
 
         private final ListenerRegistry<DataTransactionListener> listeners = ListenerRegistry.create();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> updated = new HashMap<>();
@@ -220,10 +214,13 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
             boolean previouslyRemoved = posponedRemovedOperational.remove(path);
+
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+                put(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             } else {
-                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+                merge(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             }
         }
 
@@ -238,10 +235,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 created.put(path, data);
             }
             updated.put(path, data);
+            @SuppressWarnings({"rawtypes","unchecked"})
+            final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+                put(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             } else {
-                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+                merge(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             }
         }
 
@@ -315,11 +314,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             }
         }
 
-        @Override
-        public Object getIdentifier() {
-            return getDelegate().getIdentifier();
-        }
-
         private void changeStatus(final TransactionStatus status) {
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
@@ -337,11 +331,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         public ListenableFuture<RpcResult<TransactionStatus>> commit() {
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
-                doDelete(getDelegate(), LogicalDatastoreType.CONFIGURATION, path);
+                doDelete(LogicalDatastoreType.CONFIGURATION, path);
             }
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
-                doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
+                doDelete(LogicalDatastoreType.OPERATIONAL, path);
             }
 
             changeStatus(TransactionStatus.SUBMITED);
@@ -393,12 +387,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     private static final class LegacyListenerRegistration implements ListenerRegistration<DataChangeListener> {
 
         private final DataChangeListener instance;
-        private final ListenerRegistration<BindingDataChangeListener> cfgReg;
-        private final ListenerRegistration<BindingDataChangeListener> operReg;
+        private final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg;
+        private final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg;
 
         public LegacyListenerRegistration(final DataChangeListener listener,
-                final ListenerRegistration<BindingDataChangeListener> cfgReg,
-                final ListenerRegistration<BindingDataChangeListener> operReg) {
+                final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg,
+                final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg) {
             this.instance = listener;
             this.cfgReg = cfgReg;
             this.operReg = operReg;
@@ -417,7 +411,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
     }
 
-    private static class BackwardsCompatibleOperationalDataChangeInvoker implements BindingDataChangeListener, Delegator<DataChangeListener> {
+    private static class BackwardsCompatibleOperationalDataChangeInvoker implements org.opendaylight.controller.md.sal.binding.api.DataChangeListener, Delegator<DataChangeListener> {
 
         private final org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<?,?> delegate;
 
@@ -442,7 +436,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
     }
 
-    private static class BackwardsCompatibleConfigurationDataChangeInvoker implements BindingDataChangeListener, Delegator<DataChangeListener> {
+    private static class BackwardsCompatibleConfigurationDataChangeInvoker implements org.opendaylight.controller.md.sal.binding.api.DataChangeListener, Delegator<DataChangeListener> {
         private final org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<?,?> delegate;
 
         public BackwardsCompatibleConfigurationDataChangeInvoker(final DataChangeListener listener) {

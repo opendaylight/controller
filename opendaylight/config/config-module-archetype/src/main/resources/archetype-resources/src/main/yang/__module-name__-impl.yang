@@ -1,4 +1,3 @@
-// vi: set smarttab et sw=4 tabstop=4:
 module ${module-name}-${module-implementation-name} {
 
     yang-version 1;

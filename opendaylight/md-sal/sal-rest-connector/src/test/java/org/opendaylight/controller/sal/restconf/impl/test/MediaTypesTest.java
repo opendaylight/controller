@@ -19,11 +19,10 @@ import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUt
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-
+import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -54,10 +53,10 @@ public class MediaTypesTest extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//        enable(TestProperties.LOG_TRAFFIC);
-//        enable(TestProperties.DUMP_ENTITY);
-//        enable(TestProperties.RECORD_LOG_LEVEL);
-//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfService, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
@@ -65,52 +64,52 @@ public class MediaTypesTest extends JerseyTest {
         return resourceConfig;
     }
 
-  @Test
-  public void testPostOperationsWithInputDataMediaTypes() throws UnsupportedEncodingException {
-      String uriPrefix = "/operations/";
-      String uriPath = "ietf-interfaces:interfaces";
-      String uri = uriPrefix + uriPath;
-      when(restconfService.invokeRpc(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
-      post(uri, Draft02.MediaTypes.OPERATION+JSON, Draft02.MediaTypes.OPERATION+JSON, jsonData);
-      verify(restconfService, times(1)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, Draft02.MediaTypes.OPERATION+XML, Draft02.MediaTypes.OPERATION+XML, xmlData);
-      verify(restconfService, times(2)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, jsonData);
-      verify(restconfService, times(3)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML, xmlData);
-      verify(restconfService, times(4)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, MediaType.TEXT_XML, MediaType.TEXT_XML, xmlData);
-      verify(restconfService, times(5)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, null, MediaType.TEXT_XML, xmlData);
-      verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class));
+    @Test
+    public void testPostOperationsWithInputDataMediaTypes() throws UnsupportedEncodingException {
+        String uriPrefix = "/operations/";
+        String uriPath = "ietf-interfaces:interfaces";
+        String uri = uriPrefix + uriPath;
+        when(restconfService.invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class))).thenReturn(null);
+        post(uri, Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + JSON, jsonData);
+        verify(restconfService, times(1)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, Draft02.MediaTypes.OPERATION + XML, Draft02.MediaTypes.OPERATION + XML, xmlData);
+        verify(restconfService, times(2)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, jsonData);
+        verify(restconfService, times(3)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML, xmlData);
+        verify(restconfService, times(4)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, MediaType.TEXT_XML, MediaType.TEXT_XML, xmlData);
+        verify(restconfService, times(5)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, null, MediaType.TEXT_XML, xmlData);
+        verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
 
-      // negative tests
-      post(uri, MediaType.TEXT_PLAIN, MediaType.TEXT_XML, xmlData);
-      verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-      post(uri, MediaType.TEXT_XML, MediaType.TEXT_PLAIN, xmlData);
-      verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class));
-  }
+        // negative tests
+        post(uri, MediaType.TEXT_PLAIN, MediaType.TEXT_XML, xmlData);
+        verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+        post(uri, MediaType.TEXT_XML, MediaType.TEXT_PLAIN, xmlData);
+        verify(restconfService, times(6)).invokeRpc(eq(uriPath), any(CompositeNode.class), any(UriInfo.class));
+    }
 
     @Test
     public void testGetConfigMediaTypes() throws UnsupportedEncodingException {
         String uriPrefix = "/config/";
         String uriPath = "ietf-interfaces:interfaces";
         String uri = uriPrefix + uriPath;
-        when(restconfService.readConfigurationData(uriPath)).thenReturn(null);
-        get(uri, Draft02.MediaTypes.DATA+JSON);
-        verify(restconfService, times(1)).readConfigurationData(uriPath);
-        get(uri, Draft02.MediaTypes.DATA+XML);
-        verify(restconfService, times(2)).readConfigurationData(uriPath);
+        when(restconfService.readConfigurationData(eq(uriPath), any(UriInfo.class))).thenReturn(null);
+        get(uri, Draft02.MediaTypes.DATA + JSON);
+        verify(restconfService, times(1)).readConfigurationData(eq(uriPath), any(UriInfo.class));
+        get(uri, Draft02.MediaTypes.DATA + XML);
+        verify(restconfService, times(2)).readConfigurationData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.APPLICATION_JSON);
-        verify(restconfService, times(3)).readConfigurationData(uriPath);
+        verify(restconfService, times(3)).readConfigurationData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.APPLICATION_XML);
-        verify(restconfService, times(4)).readConfigurationData(uriPath);
+        verify(restconfService, times(4)).readConfigurationData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.TEXT_XML);
-        verify(restconfService, times(5)).readConfigurationData(uriPath);
+        verify(restconfService, times(5)).readConfigurationData(eq(uriPath), any(UriInfo.class));
 
         // negative tests
         get(uri, MediaType.TEXT_PLAIN);
-        verify(restconfService, times(5)).readConfigurationData(uriPath);
+        verify(restconfService, times(5)).readConfigurationData(eq(uriPath), any(UriInfo.class));
     }
 
     @Test
@@ -118,21 +117,21 @@ public class MediaTypesTest extends JerseyTest {
         String uriPrefix = "/operational/";
         String uriPath = "ietf-interfaces:interfaces";
         String uri = uriPrefix + uriPath;
-        when(restconfService.readOperationalData(uriPath)).thenReturn(null);
-        get(uri, Draft02.MediaTypes.DATA+JSON);
-        verify(restconfService, times(1)).readOperationalData(uriPath);
-        get(uri, Draft02.MediaTypes.DATA+XML);
-        verify(restconfService, times(2)).readOperationalData(uriPath);
+        when(restconfService.readOperationalData(eq(uriPath), any(UriInfo.class))).thenReturn(null);
+        get(uri, Draft02.MediaTypes.DATA + JSON);
+        verify(restconfService, times(1)).readOperationalData(eq(uriPath), any(UriInfo.class));
+        get(uri, Draft02.MediaTypes.DATA + XML);
+        verify(restconfService, times(2)).readOperationalData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.APPLICATION_JSON);
-        verify(restconfService, times(3)).readOperationalData(uriPath);
+        verify(restconfService, times(3)).readOperationalData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.APPLICATION_XML);
-        verify(restconfService, times(4)).readOperationalData(uriPath);
+        verify(restconfService, times(4)).readOperationalData(eq(uriPath), any(UriInfo.class));
         get(uri, MediaType.TEXT_XML);
-        verify(restconfService, times(5)).readOperationalData(uriPath);
+        verify(restconfService, times(5)).readOperationalData(eq(uriPath), any(UriInfo.class));
 
         // negative tests
         get(uri, MediaType.TEXT_PLAIN);
-        verify(restconfService, times(5)).readOperationalData(uriPath);
+        verify(restconfService, times(5)).readOperationalData(eq(uriPath), any(UriInfo.class));
     }
 
     @Test
@@ -141,9 +140,9 @@ public class MediaTypesTest extends JerseyTest {
         String uriPath = "ietf-interfaces:interfaces";
         String uri = uriPrefix + uriPath;
         when(restconfService.updateConfigurationData(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
-        put(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
+        put(uri, null, Draft02.MediaTypes.DATA + JSON, jsonData);
         verify(restconfService, times(1)).updateConfigurationData(eq(uriPath), any(CompositeNode.class));
-        put(uri, null, Draft02.MediaTypes.DATA+XML, xmlData);
+        put(uri, null, Draft02.MediaTypes.DATA + XML, xmlData);
         verify(restconfService, times(2)).updateConfigurationData(eq(uriPath), any(CompositeNode.class));
         put(uri, null, MediaType.APPLICATION_JSON, jsonData);
         verify(restconfService, times(3)).updateConfigurationData(eq(uriPath), any(CompositeNode.class));
@@ -161,9 +160,9 @@ public class MediaTypesTest extends JerseyTest {
         String uriPath = "ietf-interfaces:interfaces";
         String uri = uriPrefix + uriPath;
         when(restconfService.createConfigurationData(eq(uriPath), any(CompositeNode.class))).thenReturn(null);
-        post(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
+        post(uri, null, Draft02.MediaTypes.DATA + JSON, jsonData);
         verify(restconfService, times(1)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
-        post(uri, null, Draft02.MediaTypes.DATA+XML, xmlData);
+        post(uri, null, Draft02.MediaTypes.DATA + XML, xmlData);
         verify(restconfService, times(2)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
         post(uri, null, MediaType.APPLICATION_JSON, jsonData);
         verify(restconfService, times(3)).createConfigurationData(eq(uriPath), any(CompositeNode.class));
@@ -180,9 +179,9 @@ public class MediaTypesTest extends JerseyTest {
         String uriPrefix = "/config/";
         String uri = uriPrefix;
         when(restconfService.createConfigurationData(any(CompositeNode.class))).thenReturn(null);
-        post(uri, null, Draft02.MediaTypes.DATA+JSON, jsonData);
+        post(uri, null, Draft02.MediaTypes.DATA + JSON, jsonData);
         verify(restconfService, times(1)).createConfigurationData(any(CompositeNode.class));
-        post(uri, null, Draft02.MediaTypes.DATA+XML, xmlData);
+        post(uri, null, Draft02.MediaTypes.DATA + XML, xmlData);
         verify(restconfService, times(2)).createConfigurationData(any(CompositeNode.class));
         post(uri, null, MediaType.APPLICATION_JSON, jsonData);
         verify(restconfService, times(3)).createConfigurationData(any(CompositeNode.class));

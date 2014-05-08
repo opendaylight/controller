@@ -14,7 +14,7 @@ import java.io.IOException;
 
 /**
  * Class Providing username/password authentication option to
- * {@link org.opendaylight.controller.netconf.nettyutil.handler.ssh.SshHandler}
+ * {@link org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.SshHandler}
  */
 public class LoginPassword extends AuthenticationHandler {
     private final String username;

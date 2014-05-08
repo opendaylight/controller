@@ -11,6 +11,11 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+/**
+ *
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener}
+ */
+@Deprecated
 public interface DataChangeListener
         extends
         org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<InstanceIdentifier, CompositeNode> {

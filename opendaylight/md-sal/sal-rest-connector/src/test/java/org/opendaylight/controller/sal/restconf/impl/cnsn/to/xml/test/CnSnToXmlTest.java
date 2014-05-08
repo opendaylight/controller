@@ -12,12 +12,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
-
 import javax.ws.rs.WebApplicationException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -50,14 +50,10 @@ import org.opendaylight.yangtools.yang.model.util.Uint64;
 import org.opendaylight.yangtools.yang.model.util.Uint8;
 import org.opendaylight.yangtools.yang.model.util.UnionType;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
 /**
  *
- * CnSn = Composite node and Simple node data structure Class contains test of
- * serializing simple nodes data values according data types from YANG schema to
- * XML file
+ * CnSn = Composite node and Simple node data structure Class contains test of serializing simple nodes data values
+ * according data types from YANG schema to XML file
  *
  */
 public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
@@ -87,76 +83,77 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         serializeToXml(prepareLeafrefData(), "<lfBoolean>true</lfBoolean>", "<lfLfref>true</lfLfref>");
     }
 
-
     @Test
     public void snAsYangStringToXmlTest() {
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(StringType.getInstance()).deserialize("lfStr value"),
-                        "lfStr"), "<lfStr>lfStr value</lfStr>");
+                prepareCnStructForYangData(
+                        TypeDefinitionAwareCodec.from(StringType.getInstance()).deserialize("lfStr value"), "lfStr"),
+                "<lfStr>lfStr value</lfStr>");
     }
 
     @Test
     public void snAsYangInt8ToXmlTest() {
         String elName = "lfInt8";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int8.getInstance()).deserialize("14"), elName), "<"
-                        + elName + ">14</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int8.getInstance()).deserialize("14"), elName),
+                "<" + elName + ">14</" + elName + ">");
     }
 
     @Test
     public void snAsYangInt16ToXmlTest() {
         String elName = "lfInt16";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int16.getInstance()).deserialize("3000"), elName),
-                "<" + elName + ">3000</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int16.getInstance()).deserialize("3000"),
+                        elName), "<" + elName + ">3000</" + elName + ">");
     }
 
     @Test
     public void snAsYangInt32ToXmlTest() {
         String elName = "lfInt32";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int32.getInstance()).deserialize("201234"), elName),
-                "<" + elName + ">201234</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int32.getInstance()).deserialize("201234"),
+                        elName), "<" + elName + ">201234</" + elName + ">");
     }
 
     @Test
     public void snAsYangInt64ToXmlTest() {
         String elName = "lfInt64";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Int64.getInstance()).deserialize("5123456789"),
-                        elName), "<" + elName + ">5123456789</" + elName + ">");
+                prepareCnStructForYangData(
+                        TypeDefinitionAwareCodec.from(Int64.getInstance()).deserialize("5123456789"), elName), "<"
+                        + elName + ">5123456789</" + elName + ">");
     }
 
     @Test
     public void snAsYangUint8ToXmlTest() {
         String elName = "lfUint8";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint8.getInstance()).deserialize("200"), elName),
-                "<" + elName + ">200</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint8.getInstance()).deserialize("200"),
+                        elName), "<" + elName + ">200</" + elName + ">");
     }
 
     @Test
     public void snAsYangUint16ToXmlTest() {
         String elName = "lfUint16";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint16.getInstance()).deserialize("4000"), elName),
-                "<" + elName + ">4000</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint16.getInstance()).deserialize("4000"),
+                        elName), "<" + elName + ">4000</" + elName + ">");
     }
 
     @Test
     public void snAsYangUint32ToXmlTest() {
         String elName = "lfUint32";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint32.getInstance()).deserialize("4123456789"),
-                        elName), "<" + elName + ">4123456789</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint32.getInstance())
+                        .deserialize("4123456789"), elName), "<" + elName + ">4123456789</" + elName + ">");
     }
 
     @Test
     public void snAsYangUint64ToXmlTest() {
         String elName = "lfUint64";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint64.getInstance()).deserialize("5123456789"),
-                        elName), "<" + elName + ">5123456789</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(Uint64.getInstance())
+                        .deserialize("5123456789"), elName), "<" + elName + ">5123456789</" + elName + ">");
     }
 
     @Test
@@ -164,92 +161,87 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         String elName = "lfBinary";
         serializeToXml(
                 prepareCnStructForYangData(
-                        TypeDefinitionAwareCodec.from(BinaryType.getInstance())
-                        .deserialize("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"),
-                        elName), "<" + elName + ">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567</"
-                                + elName + ">");
+                        TypeDefinitionAwareCodec.from(BinaryType.getInstance()).deserialize(
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"), elName), "<" + elName
+                        + ">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567</" + elName + ">");
     }
 
     @Test
     public void snAsYangBitsToXmlTest() {
-        BitsTypeDefinition.Bit mockBit1 = mock( BitsTypeDefinition.Bit.class );
-        when( mockBit1.getName() ).thenReturn( "one" );
-        BitsTypeDefinition.Bit mockBit2 = mock( BitsTypeDefinition.Bit.class );
-        when( mockBit2.getName() ).thenReturn( "two" );
-        List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList( mockBit1, mockBit2 );
+        BitsTypeDefinition.Bit mockBit1 = mock(BitsTypeDefinition.Bit.class);
+        when(mockBit1.getName()).thenReturn("one");
+        BitsTypeDefinition.Bit mockBit2 = mock(BitsTypeDefinition.Bit.class);
+        when(mockBit2.getName()).thenReturn("two");
+        List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList(mockBit1, mockBit2);
 
         String elName = "lfBits";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(
-                        BitsType.create( mock( SchemaPath.class ), bitList ) )
-                        .deserialize("one two"), elName),
-                        "<" + elName + ">one two</" + elName + ">", "<" + elName + ">two one</" + elName + ">");
+                prepareCnStructForYangData(
+                        TypeDefinitionAwareCodec.from(BitsType.create(mock(SchemaPath.class), bitList)).deserialize(
+                                "one two"), elName), "<" + elName + ">one two</" + elName + ">", "<" + elName
+                        + ">two one</" + elName + ">");
     }
 
     @Test
     public void snAsYangEnumerationToXmlTest() {
-        EnumTypeDefinition.EnumPair mockEnum = mock( EnumTypeDefinition.EnumPair.class );
-        when( mockEnum.getName() ).thenReturn( "enum2" );
-        List<EnumPair> enumList = Lists.newArrayList( mockEnum );
+        EnumTypeDefinition.EnumPair mockEnum = mock(EnumTypeDefinition.EnumPair.class);
+        when(mockEnum.getName()).thenReturn("enum2");
+        List<EnumPair> enumList = Lists.newArrayList(mockEnum);
 
         String elName = "lfEnumeration";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(
-                        EnumerationType.create( mock( SchemaPath.class ), enumList,
-                                Optional.<EnumTypeDefinition.EnumPair>absent() ) )
-                                .deserialize("enum2"),
-                                elName), "<" + elName + ">enum2</" + elName + ">");
+                prepareCnStructForYangData(
+                        TypeDefinitionAwareCodec.from(
+                                EnumerationType.create(mock(SchemaPath.class), enumList,
+                                        Optional.<EnumTypeDefinition.EnumPair> absent())).deserialize("enum2"), elName),
+                "<" + elName + ">enum2</" + elName + ">");
     }
 
     @Test
     public void snAsYangEmptyToXmlTest() {
         String elName = "lfEmpty";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(EmptyType.getInstance()).deserialize(null), elName), "<"
-                        + elName + "/>");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(EmptyType.getInstance()).deserialize(null),
+                        elName), "<" + elName + "/>");
     }
 
     @Test
     public void snAsYangBooleanToXmlTest() {
         String elName = "lfBoolean";
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(BooleanType.getInstance()).deserialize("str"), elName),
-                "<" + elName + ">false</" + elName + ">");
+                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(BooleanType.getInstance()).deserialize("str"),
+                        elName), "<" + elName + ">false</" + elName + ">");
         serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(BooleanType.getInstance()).deserialize("true"), elName),
-                "<" + elName + ">true</" + elName + ">");
+                prepareCnStructForYangData(
+                        TypeDefinitionAwareCodec.from(BooleanType.getInstance()).deserialize("true"), elName), "<"
+                        + elName + ">true</" + elName + ">");
     }
 
     @Test
     public void snAsYangUnionToXmlTest() {
 
-        BitsTypeDefinition.Bit mockBit1 = mock( BitsTypeDefinition.Bit.class );
-        when( mockBit1.getName() ).thenReturn( "first" );
-        BitsTypeDefinition.Bit mockBit2 = mock( BitsTypeDefinition.Bit.class );
-        when( mockBit1.getName() ).thenReturn( "second" );
-        List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList( mockBit1, mockBit2 );
+        BitsTypeDefinition.Bit mockBit1 = mock(BitsTypeDefinition.Bit.class);
+        when(mockBit1.getName()).thenReturn("first");
+        BitsTypeDefinition.Bit mockBit2 = mock(BitsTypeDefinition.Bit.class);
+        when(mockBit2.getName()).thenReturn("second");
+        List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList(mockBit1, mockBit2);
 
-        List<TypeDefinition<?>> types = Lists.<TypeDefinition<?>>newArrayList(
-                Int8.getInstance(),
-                BitsType.create( mock( SchemaPath.class ) , bitList ),
-                BooleanType.getInstance() );
-        UnionType unionType = UnionType.create( types );
+        List<TypeDefinition<?>> types = Lists.<TypeDefinition<?>> newArrayList(Int8.getInstance(),
+                BitsType.create(mock(SchemaPath.class), bitList), BooleanType.getInstance());
+        UnionType unionType = UnionType.create(types);
 
         String elName = "lfUnion";
         String int8 = "15";
-        serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(int8), elName), "<"
-                        + elName + ">15</" + elName + ">");
+        serializeToXml(prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(int8), elName),
+                "<" + elName + ">15</" + elName + ">");
 
         String bits = "first second";
-        serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(bits), elName), "<"
-                        + elName + ">first second</" + elName + ">");
+        serializeToXml(prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(bits), elName),
+                "<" + elName + ">first second</" + elName + ">");
 
         String bool = "str";
-        serializeToXml(
-                prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(bool), elName), "<"
-                        + elName + ">str</" + elName + ">");
+        serializeToXml(prepareCnStructForYangData(TypeDefinitionAwareCodec.from(unionType).deserialize(bool), elName),
+                "<" + elName + ">str</" + elName + ">");
     }
 
     private void serializeToXml(final CompositeNode compositeNode, final String... xmlRepresentation)

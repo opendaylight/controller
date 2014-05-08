@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,6 +20,8 @@ import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.slf4j.Logger;
@@ -576,5 +578,13 @@ public class IPv4 extends Packet {
         if (computedChecksum != actualChecksum) {
             corrupted = true;
         }
+    }
+
+    @Override
+    public void populateMatch(Match match) {
+        match.setField(MatchType.NW_SRC, NetUtils.getInetAddress(this.getSourceAddress()));
+        match.setField(MatchType.NW_DST, NetUtils.getInetAddress(this.getDestinationAddress()));
+        match.setField(MatchType.NW_PROTO, this.getProtocol());
+        match.setField(MatchType.NW_TOS, this.getDiffServ());
     }
 }

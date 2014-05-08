@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 /**
@@ -34,7 +33,6 @@ public class Notificator {
         return listenersByStreamName.keySet();
     }
 
-
     /**
      * Gets {@link ListenerAdapter} specified by stream name.
      *
@@ -47,8 +45,7 @@ public class Notificator {
     }
 
     /**
-     * Gets {@link ListenerAdapter} listener specified by
-     * {@link InstanceIdentifier} path.
+     * Gets {@link ListenerAdapter} listener specified by {@link InstanceIdentifier} path.
      *
      * @param path
      *            Path to data in data repository.
@@ -59,8 +56,7 @@ public class Notificator {
     }
 
     /**
-     * Checks if the listener specified by {@link InstanceIdentifier} path
-     * exist.
+     * Checks if the listener specified by {@link InstanceIdentifier} path exist.
      *
      * @param path
      *            Path to data in data repository.
@@ -71,18 +67,15 @@ public class Notificator {
     }
 
     /**
-     * Creates new {@link ListenerAdapter} listener from
-     * {@link InstanceIdentifier} path and stream name.
+     * Creates new {@link ListenerAdapter} listener from {@link InstanceIdentifier} path and stream name.
      *
      * @param path
      *            Path to data in data repository.
      * @param streamName
      *            The name of the stream.
-     * @return New {@link ListenerAdapter} listener from
-     *         {@link InstanceIdentifier} path and stream name.
+     * @return New {@link ListenerAdapter} listener from {@link InstanceIdentifier} path and stream name.
      */
-    public static ListenerAdapter createListener(InstanceIdentifier path,
-            String streamName) {
+    public static ListenerAdapter createListener(InstanceIdentifier path, String streamName) {
         ListenerAdapter listener = new ListenerAdapter(path, streamName);
         try {
             lock.lock();
@@ -95,8 +88,7 @@ public class Notificator {
     }
 
     /**
-     * Looks for listener determined by {@link InstanceIdentifier} path and
-     * removes it.
+     * Looks for listener determined by {@link InstanceIdentifier} path and removes it.
      *
      * @param path
      *            InstanceIdentifier
@@ -107,8 +99,7 @@ public class Notificator {
     }
 
     /**
-     * Creates String representation of stream name from URI. Removes slash from
-     * URI in start and end position.
+     * Creates String representation of stream name from URI. Removes slash from URI in start and end position.
      *
      * @param uri
      *            URI for creation stream name.
@@ -148,14 +139,12 @@ public class Notificator {
     }
 
     /**
-     * Checks if listener has at least one subscriber. In case it doesn't have any, delete
-     * listener.
+     * Checks if listener has at least one subscriber. In case it doesn't have any, delete listener.
      *
      * @param listener
      *            ListenerAdapter
      */
-    public static void removeListenerIfNoSubscriberExists(
-            ListenerAdapter listener) {
+    public static void removeListenerIfNoSubscriberExists(ListenerAdapter listener) {
         if (!listener.hasSubscribers()) {
             deleteListener(listener);
         }

@@ -8,13 +8,19 @@
 package org.opendaylight.controller.sal.core.api.data;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.DataReader;;
 
+/**
+ *
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.dom.api.DOMDataBroker}
+ *
+ */
+@Deprecated
 public interface DataProviderService extends
     DataBrokerService, //
     DataProvisionService<InstanceIdentifier, CompositeNode>

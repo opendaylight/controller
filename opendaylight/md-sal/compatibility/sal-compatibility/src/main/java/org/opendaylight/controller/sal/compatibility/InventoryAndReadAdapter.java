@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +29,7 @@ import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeTable;
+import org.opendaylight.controller.sal.core.NodeTable.NodeTableIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -489,7 +493,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
                 }
 
                 try {
-                    final Node adNode = new Node(NodeMapping.MD_SAL_TYPE, NodeMapping.toADNodeId(node.getId()));
+                    final Node adNode = NodeMapping.toADNode(node.getId());
                     props.put(adNode, perNodePropMap);
                 } catch (ConstructionException e) {
                     LOG.warn("Failed to construct node for {}, skipping it", node, e);
@@ -572,7 +576,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
         it.setLookupCount(tableStats.getPacketsLookedUp().getValue().longValue());
         it.setMatchedCount(tableStats.getPacketsMatched().getValue().longValue());
         it.setName(tableId.toString());
-        it.setNodeTable(new NodeTable(NodeMapping.MD_SAL_TYPE, tableId, node));
+        it.setNodeTable(new NodeTable(NodeTableIDType.OPENFLOW, tableId.byteValue(), node));
         return it;
     }
 
@@ -732,26 +736,45 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     }
 
     private boolean isKnownNodeConnector(final InstanceIdentifier<? extends Object> nodeConnectorIdentifier) {
-        final List<PathArgument> path = nodeConnectorIdentifier.getPath();
-        if (path.size() >= 3) {
-            final PathArgument nodePath = path.get(1);
-            final PathArgument nodeConnectorPath = path.get(2);
-            final List<PathArgument> nodeConnectors = nodeToNodeConnectorsMap.get(nodePath);
-            if (nodeConnectors != null) {
-                return nodeConnectors.contains(nodeConnectorPath);
-            }
+        final Iterator<PathArgument> it = nodeConnectorIdentifier.getPathArguments().iterator();
+
+        if (!it.hasNext()) {
+            return false;
         }
-        return false;
+        it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodePath = it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodeConnectorPath = it.next();
+
+        final List<PathArgument> nodeConnectors = nodeToNodeConnectorsMap.get(nodePath);
+        return nodeConnectors == null ? false :
+            nodeConnectors.contains(nodeConnectorPath);
     }
 
     private boolean recordNodeConnector(final InstanceIdentifier<? extends Object> nodeConnectorIdentifier) {
-        final List<PathArgument> path = nodeConnectorIdentifier.getPath();
-        if (path.size() < 3) {
+        final Iterator<PathArgument> it = nodeConnectorIdentifier.getPathArguments().iterator();
+
+        if (!it.hasNext()) {
             return false;
         }
+        it.next();
 
-        final PathArgument nodePath = path.get(1);
-        final PathArgument nodeConnectorPath = path.get(2);
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodePath = it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodeConnectorPath = it.next();
 
         synchronized (this) {
             List<PathArgument> nodeConnectors = this.nodeToNodeConnectorsMap.get(nodePath);
@@ -765,6 +788,6 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     }
 
     private List<PathArgument> removeNodeConnectors(final InstanceIdentifier<? extends Object> nodeIdentifier) {
-        return this.nodeToNodeConnectorsMap.remove(nodeIdentifier.getPath().get(1));
+        return this.nodeToNodeConnectorsMap.remove(Iterables.get(nodeIdentifier.getPathArguments(), 1));
     }
 }

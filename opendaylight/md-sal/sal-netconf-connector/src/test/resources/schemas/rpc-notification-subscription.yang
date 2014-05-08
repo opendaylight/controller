@@ -1,0 +1,38 @@
+module rpc-notification-subscription {
+
+  namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:rpc-test";
+  prefix "rpc";
+
+  organization
+    "Cisco Systems, Inc.";
+
+  contact
+    "lsedlak@cisco.com";
+
+  description
+    "Test model for testing of rpc INPUT parameter during subscription call.";
+
+  revision 2014-07-14 {
+    description
+      "Initial revision.";
+  }
+
+  rpc subscribe {
+    description
+      "Test rpc to init subscription";
+
+    input {
+      leaf stream-name {
+        type string;
+        default "NETCONF";
+        description
+          "Optional stream name param.";
+      }
+
+      anyxml data {
+        description
+          "Optional additional data.";
+      }
+    }
+  }
+}

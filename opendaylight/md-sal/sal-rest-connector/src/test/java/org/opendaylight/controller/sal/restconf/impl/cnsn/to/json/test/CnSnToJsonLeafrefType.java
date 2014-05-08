@@ -13,9 +13,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -50,8 +48,8 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Tests case when reference to not existing element is present. In this
-     * case value from single node is printed as string.
+     * Tests case when reference to not existing element is present. In this case value from single node is printed as
+     * string.
      */
     @Test
     public void leafrefToNonExistingLeafTest() {
@@ -60,8 +58,7 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Tests case when non leaf element is referenced. In this case value from
-     * single node is printed as string.
+     * Tests case when non leaf element is referenced. In this case value from single node is printed as string.
      */
     @Test
     public void leafrefToNotLeafTest() {

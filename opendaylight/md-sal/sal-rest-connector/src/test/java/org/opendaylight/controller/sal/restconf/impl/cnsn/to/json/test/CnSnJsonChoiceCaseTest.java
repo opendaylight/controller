@@ -10,9 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -29,9 +27,8 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test when some data are in one case node and other in another. This isn't
-     * correct. Next Json validator should return error because nodes has to be
-     * from one case below concrete choice.
+     * Test when some data are in one case node and other in another. This isn't correct. Next Json validator should
+     * return error because nodes has to be from one case below concrete choice.
      *
      */
     @Test
@@ -40,10 +37,9 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test when some data are in one case node and other in another.
-     * Additionally data are loadef from various choices. This isn't correct.
-     * Next Json validator should return error because nodes has to be from one
-     * case below concrete choice.
+     * Test when some data are in one case node and other in another. Additionally data are loadef from various choices.
+     * This isn't correct. Next Json validator should return error because nodes has to be from one case below concrete
+     * choice.
      *
      */
     @Test
@@ -53,8 +49,8 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test when second level data are red first, then first and at the end
-     * third level. Level represents pass through couple choice-case
+     * Test when second level data are red first, then first and at the end third level. Level represents pass through
+     * couple choice-case
      */
 
     @Test
@@ -103,8 +99,8 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test whether is possible to find data schema for node which is specified
-     * as dirrect subnode of choice (case without CASE key word)
+     * Test whether is possible to find data schema for node which is specified as dirrect subnode of choice (case
+     * without CASE key word)
      */
     @Test
     public void nodeSchemasInCaseNotDefinedWithCaseKeyword() {

@@ -11,9 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Collections;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -41,8 +39,8 @@ public class CnSnToXmlNotExistingLeafTypeTest {
 
         boolean nullPointerExceptionRaised = false;
         try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                    Collections.<Module>emptySet(), prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
+            TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(), Collections.<Module> emptySet(),
+                    prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             LOG.error("WebApplicationException or IOException was raised");
         } catch (NullPointerException e) {

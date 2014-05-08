@@ -7,37 +7,39 @@
  */
 package org.opendaylight.controller.sal.rest.doc.jaxrs;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class JaxbContextResolver implements ContextResolver<ObjectMapper> {
 
-  private ObjectMapper ctx;
+    private final ObjectMapper ctx;
 
-  public JaxbContextResolver(){
-    ctx = new ObjectMapper();
-    ctx.registerModule(new JsonOrgModule());
-    ctx.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.ALWAYS);
-  }
-
-  @Override
-  public ObjectMapper getContext(Class<?> aClass) {
-
-    if (ApiDeclaration.class.isAssignableFrom(aClass)){
-      return ctx;
+    public JaxbContextResolver() {
+        ctx = new ObjectMapper();
+        ctx.registerModule(new JsonOrgModule());
+        ctx.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.ALWAYS);
     }
 
-    return null;//must return null so that jax-rs can continue context search
-  }
+    @Override
+    public ObjectMapper getContext(Class<?> aClass) {
+
+        if (ApiDeclaration.class.isAssignableFrom(aClass)) {
+            return ctx;
+        }
+
+        return null;// must return null so that jax-rs can continue context
+                    // search
+    }
 }

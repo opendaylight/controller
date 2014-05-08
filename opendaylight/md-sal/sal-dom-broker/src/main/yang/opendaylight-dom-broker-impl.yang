@@ -6,9 +6,14 @@ module opendaylight-sal-dom-broker-impl {
 	import config { prefix config; revision-date 2013-04-05; }
  	import opendaylight-md-sal-dom {prefix sal;}
  	import opendaylight-md-sal-common {prefix common;}
+ 	import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+ 	import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
 
     description
-        "Service definition for Binding Aware MD-SAL.";
+        "Service definition for Binding Aware MD-SAL.
+        Note: The dom-inmemory-data-broker utilizes configurable config-dom-datastore
+        and operation-dom-datastore. If configuration is not done for this stores
+        then it defaults to InMemoryDOMDataStore";
  
     revision "2013-10-28" {
         description
@@ -50,7 +55,7 @@ module opendaylight-sal-dom-broker-impl {
                     }
                 }
             }
-            
+
             container async-data-broker {
                 uses config:service-ref {
                     refine type {
@@ -58,7 +63,15 @@ module opendaylight-sal-dom-broker-impl {
                         config:required-identity sal:dom-async-data-broker;
                     }
                 }
-            
+            }
+
+            container root-schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
+                }
             }
         }
     }
@@ -66,7 +79,8 @@ module opendaylight-sal-dom-broker-impl {
     augment "/config:modules/config:module/config:configuration" {
         case dom-inmemory-data-broker {
             when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
-            
+
+
             container schema-service {
                 uses config:service-ref {
                     refine type {
@@ -74,7 +88,25 @@ module opendaylight-sal-dom-broker-impl {
                         config:required-identity sal:schema-service;
                     }
                 }
-            
+
+            }
+
+            container config-data-store{
+                 uses config:service-ref {
+                     refine type {
+                         mandatory false;
+                         config:required-identity  config-dom-store-spi:config-dom-datastore;
+                     }
+                 }
+            }
+
+            container operational-data-store{
+                  uses config:service-ref {
+                       refine type {
+                           mandatory false;
+                           config:required-identity operational-dom-store-spi:operational-dom-datastore;
+                       }
+                   }
             }
         }
     }

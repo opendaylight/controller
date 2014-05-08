@@ -9,6 +9,12 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ *
+ *
+ * @deprecated Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
+ */
+@Deprecated
 public interface DataProvider<P extends Path<P>, D> extends DataReader<P, D> {
 
 }

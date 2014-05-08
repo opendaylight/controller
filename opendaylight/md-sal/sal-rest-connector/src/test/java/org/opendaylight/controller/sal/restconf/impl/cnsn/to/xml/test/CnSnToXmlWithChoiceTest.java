@@ -10,9 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.xml.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -26,9 +24,8 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 /**
  *
- * CnSn = Composite node and Simple node data structure Class contains test of
- * serializing simple nodes data values according data types from YANG schema to
- * XML file
+ * CnSn = Composite node and Simple node data structure Class contains test of serializing simple nodes data values
+ * according data types from YANG schema to XML file
  *
  */
 public class CnSnToXmlWithChoiceTest extends YangAndXmlAndDataSchemaLoader {

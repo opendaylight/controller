@@ -49,12 +49,12 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.packet.ARP;
 import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IEEE8021Q;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IPv4;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
-import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
@@ -96,7 +96,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     private ISwitchManager switchManager;
     private ITopologyManager topologyManager;
     private IDataPacketService dataPacketService;
-    private IRouting routing;
     private IClusterContainerServices clusterContainerService;
     private IConnectionManager connectionManager;
     private Set<IfHostListener> hostListeners = new CopyOnWriteArraySet<IfHostListener>();
@@ -182,7 +181,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    protected void sendARPReply(NodeConnector p, byte[] sMAC, InetAddress sIP, byte[] tMAC, InetAddress tIP) {
+    protected void sendARPReply(NodeConnector p, byte[] sMAC, InetAddress sIP, byte[] tMAC, InetAddress tIP, short vlan) {
         byte[] senderIP = sIP.getAddress();
         byte[] targetIP = tIP.getAddress();
         ARP arp = createARP(ARP.REPLY, sMAC, senderIP, tMAC, targetIP);
@@ -193,7 +192,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                     sIP, HexEncode.bytesToHexString(tMAC), tIP, p);
         }
 
-        Ethernet ethernet = createEthernet(sMAC, tMAC, arp);
+        Ethernet ethernet = createEthernet(sMAC, tMAC, arp, vlan);
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
         destPkt.setOutgoingNodeConnector(p);
@@ -201,26 +200,24 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         this.dataPacketService.transmitDataPacket(destPkt);
     }
 
-    private void logArpPacket(ARP pkt, NodeConnector p) {
+    private void logArpPacket(ARP pkt, NodeConnector p, short vlan) {
         try {
-            if (pkt.getOpCode() == ARP.REQUEST) {
-                log.trace("Received Arp Request with srcMac {} - srcIp {} - dstMac {} - dstIp {} - inport {}", HexEncode.bytesToHexString(pkt.getSenderHardwareAddress()),
-                        InetAddress.getByAddress(pkt.getSenderProtocolAddress()), HexEncode.bytesToHexString(pkt.getTargetHardwareAddress()),
-                        InetAddress.getByAddress(pkt.getTargetProtocolAddress()), p);
-            } else if(pkt.getOpCode() == ARP.REPLY) {
-                log.trace("Received Arp Reply with srcMac {} - srcIp {} - dstMac {} - dstIp {} - inport {}", HexEncode.bytesToHexString(pkt.getSenderHardwareAddress()),
-                        InetAddress.getByAddress(pkt.getSenderProtocolAddress()), HexEncode.bytesToHexString(pkt.getTargetHardwareAddress()),
-                        InetAddress.getByAddress(pkt.getTargetProtocolAddress()), p);
-            }
-        } catch(UnknownHostException e) {
+            log.trace("Received Arp {} with srcMac {} - srcIp {} - dstMac {} - dstIp {} - inport {} {}",
+                    ((pkt.getOpCode() == ARP.REQUEST) ? "Request" : "Reply"),
+                    HexEncode.bytesToHexString(pkt.getSenderHardwareAddress()),
+                    InetAddress.getByAddress(pkt.getSenderProtocolAddress()),
+                    HexEncode.bytesToHexString(pkt.getTargetHardwareAddress()),
+                    InetAddress.getByAddress(pkt.getTargetProtocolAddress()), p, (vlan != 0 ? "on vlan " + vlan : ""));
+
+        } catch (UnknownHostException e) {
             log.warn("Illegal Ip Address in the ARP packet", e);
         }
     }
 
-    protected void handleARPPacket(Ethernet eHeader, ARP pkt, NodeConnector p) {
+    protected void handleARPPacket(Ethernet eHeader, ARP pkt, NodeConnector p, short vlan) {
 
         if(log.isTraceEnabled()) {
-            logArpPacket(pkt, p);
+            logArpPacket(pkt, p, vlan);
         }
 
         byte[] sourceMAC = eHeader.getSourceMACAddress();
@@ -264,7 +261,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         HostNodeConnector requestor = null;
         if (NetUtils.isUnicastMACAddr(sourceMAC) && p.getNode() != null) {
             try {
-                requestor = new HostNodeConnector(sourceMAC, sourceIP, p, subnet.getVlan());
+                requestor = new HostNodeConnector(sourceMAC, sourceIP, p, vlan);
             } catch (ConstructionException e) {
                 log.debug("Received ARP packet with invalid MAC: {}", HexEncode.bytesToHexString(sourceMAC));
                 return;
@@ -294,7 +291,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             // the true value indicates we should generate replies to requestors
             // across the cluster
             log.trace("Received ARP reply packet from {}, reply to all requestors.", sourceIP);
-            arpRequestReplyEvent.put(new ARPReply(sourceIP, sourceMAC), true);
+            arpRequestReplyEvent.put(new ARPReply(sourceIP, sourceMAC, vlan), true);
             return;
         }
 
@@ -315,11 +312,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                     log.trace("Received local ARP req. for default gateway. Replying with controller MAC: {}",
                             HexEncode.bytesToHexString(getControllerMAC()));
                 }
-                sendARPReply(p, getControllerMAC(), targetIP, pkt.getSenderHardwareAddress(), sourceIP);
+                sendARPReply(p, getControllerMAC(), targetIP, pkt.getSenderHardwareAddress(), sourceIP, vlan);
             } else {
                 log.trace("Received non-local ARP req. for default gateway. Raising reply event");
                 arpRequestReplyEvent.put(
-                        new ARPReply(p, targetIP, getControllerMAC(), sourceIP, pkt.getSenderHardwareAddress()), false);
+                        new ARPReply(p, targetIP, getControllerMAC(), sourceIP, pkt.getSenderHardwareAddress(), vlan), false);
             }
             return;
         }
@@ -353,10 +350,10 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                 log.trace("Received ARP req. for known host {}, sending reply...", targetIP);
                 if (connectionManager.getLocalityStatus(p.getNode()) == ConnectionLocality.LOCAL) {
                     sendARPReply(p, host.getDataLayerAddressBytes(), host.getNetworkAddress(),
-                            pkt.getSenderHardwareAddress(), sourceIP);
+                            pkt.getSenderHardwareAddress(), sourceIP, vlan);
                 } else {
                     arpRequestReplyEvent.put(new ARPReply(p, host.getNetworkAddress(), host.getDataLayerAddressBytes(),
-                            sourceIP, pkt.getSenderHardwareAddress()), false);
+                            sourceIP, pkt.getSenderHardwareAddress(), vlan), false);
                 }
             } else {
                 /*
@@ -404,7 +401,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             }
 
             byte[] destMACAddress = NetUtils.getBroadcastMACAddr();
-            Ethernet ethernet = createEthernet(getControllerMAC(), destMACAddress, arp);
+            Ethernet ethernet = createEthernet(getControllerMAC(), destMACAddress, arp, (short)0);
 
             // TODO For now send port-by-port, see how to optimize to
             // send to multiple ports at once
@@ -416,9 +413,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
     }
 
     /**
-     * Send a unicast ARP Request to the known host on a specific switch/port as
-     * defined in the host. The sender IP is the networkAddress of the subnet
-     * The sender MAC is the controller's MAC
+     * Send a unicast ARP Request to the known host on specific (switch/port,
+     * vlan) as defined in the host. The sender IP is the networkAddress of the
+     * subnet The sender MAC is the controller's MAC
      */
     protected void sendUcastARPRequest(HostNodeConnector host, Subnet subnet) {
         log.trace("sendUcastARPRequest host:{} subnet:{}", host, subnet);
@@ -440,7 +437,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                     outPort);
         }
 
-        Ethernet ethernet = createEthernet(getControllerMAC(), targetMAC, arp);
+        Ethernet ethernet = createEthernet(getControllerMAC(), targetMAC, arp, host.getVlan());
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
         destPkt.setOutgoingNodeConnector(outPort);
@@ -498,7 +495,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
      * @param pkt
      * @param p
      */
-    protected void handlePuntedIPPacket(IPv4 pkt, NodeConnector p) {
+    protected void handlePuntedIPPacket(IPv4 pkt, NodeConnector p, short vlan) {
 
         InetAddress dIP = NetUtils.getInetAddress(pkt.getDestinationAddress());
         if (dIP == null) {
@@ -653,13 +650,19 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         log.trace("Received a frame of size: {}", inPkt.getPacketData().length);
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         if (formattedPak instanceof Ethernet) {
-            Object nextPak = formattedPak.getPayload();
+            Packet nextPak = formattedPak.getPayload();
+            short vlan = 0;
+            if (nextPak instanceof IEEE8021Q) {
+                vlan = ((IEEE8021Q) nextPak).getVid();
+                log.trace("Moved after the dot1Q header");
+                nextPak = ((IEEE8021Q) nextPak).getPayload();
+            }
             if (nextPak instanceof IPv4) {
                 log.trace("Handle IP packet: {}", formattedPak);
-                handlePuntedIPPacket((IPv4) nextPak, inPkt.getIncomingNodeConnector());
+                handlePuntedIPPacket((IPv4) nextPak, inPkt.getIncomingNodeConnector(), vlan);
             } else if (nextPak instanceof ARP) {
                 log.trace("Handle ARP packet: {}", formattedPak);
-                handleARPPacket((Ethernet) formattedPak, (ARP) nextPak, inPkt.getIncomingNodeConnector());
+                handleARPPacket((Ethernet) formattedPak, (ARP) nextPak, inPkt.getIncomingNodeConnector(), vlan);
             }
         }
         return PacketResult.IGNORED;
@@ -680,12 +683,23 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         return arp;
     }
 
-    private Ethernet createEthernet(byte[] sourceMAC, byte[] targetMAC, ARP arp) {
+    private Ethernet createEthernet(byte[] sourceMAC, byte[] targetMAC, ARP arp, short vlan) {
         Ethernet ethernet = new Ethernet();
         ethernet.setSourceMACAddress(sourceMAC);
         ethernet.setDestinationMACAddress(targetMAC);
-        ethernet.setEtherType(EtherTypes.ARP.shortValue());
-        ethernet.setPayload(arp);
+        if (vlan == 0) {
+            ethernet.setEtherType(EtherTypes.ARP.shortValue());
+            ethernet.setPayload(arp);
+        } else {
+            IEEE8021Q dot1q = new IEEE8021Q();
+            dot1q.setVid(vlan);
+            dot1q.setEtherType(EtherTypes.ARP.shortValue());
+            dot1q.setPayload(arp);
+            dot1q.setCfi((byte)0);
+            dot1q.setPcp((byte)0);
+            ethernet.setEtherType(EtherTypes.VLANTAGGED.shortValue());
+            ethernet.setPayload(dot1q);
+        }
         return ethernet;
     }
 
@@ -731,7 +745,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         }
     }
 
-    private void generateAndSendReply(InetAddress sourceIP, byte[] sourceMAC) {
+    private void generateAndSendReply(InetAddress sourceIP, byte[] sourceMAC, short vlan) {
         if (log.isTraceEnabled()) {
             log.trace("generateAndSendReply called with params sourceIP:{} sourceMAC:{}", sourceIP,
                     HexEncode.bytesToHexString(sourceMAC));
@@ -745,13 +759,14 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         for (HostNodeConnector host : hosts) {
             if (log.isTraceEnabled()) {
                 log.trace(
-                        "Sending ARP Reply with src {}/{}, target {}/{}",
+                        "Sending ARP Reply with src {}/{}, target {}/{} {}",
                         new Object[] { HexEncode.bytesToHexString(sourceMAC), sourceIP,
-                                HexEncode.bytesToHexString(host.getDataLayerAddressBytes()), host.getNetworkAddress() });
+                                HexEncode.bytesToHexString(host.getDataLayerAddressBytes()), host.getNetworkAddress(),
+                                (vlan != 0 ? "on vlan " + vlan : "") });
             }
             if (connectionManager.getLocalityStatus(host.getnodeconnectorNode()) == ConnectionLocality.LOCAL) {
                 sendARPReply(host.getnodeConnector(), sourceMAC, sourceIP, host.getDataLayerAddressBytes(),
-                        host.getNetworkAddress());
+                        host.getNetworkAddress(), vlan);
             } else {
                 /*
                  * In the remote event a requestor moved to another controller
@@ -760,7 +775,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                  */
                 arpRequestReplyEvent.put(
                         new ARPReply(host.getnodeConnector(), sourceIP, sourceMAC, host.getNetworkAddress(), host
-                                .getDataLayerAddressBytes()), false);
+                                .getDataLayerAddressBytes(), vlan), false);
             }
         }
     }
@@ -822,12 +837,12 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                         // requestors across the cluster
                         if (ev.isNewReply()) {
                             log.trace("Trigger a generateAndSendReply in response to {}", rep);
-                            generateAndSendReply(rep.getTargetIP(), rep.getTargetMac());
+                            generateAndSendReply(rep.getTargetIP(), rep.getTargetMac(), rep.getVlan());
                             // Otherwise, a specific reply. If local, send out.
                         } else if (connectionManager.getLocalityStatus(rep.getPort().getNode()) == ConnectionLocality.LOCAL) {
                             log.trace("ARPCacheEventHandler - sendUcatARPReply locally in response to {}", rep);
                             sendARPReply(rep.getPort(), rep.getSourceMac(), rep.getSourceIP(), rep.getTargetMac(),
-                                    rep.getTargetIP());
+                                    rep.getTargetIP(), rep.getVlan());
                         }
                     }
                 } catch (InterruptedException e) {

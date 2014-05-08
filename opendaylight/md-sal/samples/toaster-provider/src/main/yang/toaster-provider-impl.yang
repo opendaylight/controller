@@ -53,7 +53,7 @@ module toaster-provider-impl {
                 uses config:service-ref {
                     refine type {
                         mandatory false;
-                        config:required-identity mdsal:binding-data-broker;
+                        config:required-identity mdsal:binding-async-data-broker;
                     }
                 }
             }

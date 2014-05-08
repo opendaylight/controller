@@ -1,0 +1,49 @@
+module opendaylight-sal-test-store {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:store";
+    prefix "binding-impl";
+
+    description
+        "Regression Test model for data store";
+
+    revision "2014-04-22" {
+        description
+            "Initial revision";
+    }
+
+    grouping name-value {
+        leaf name {
+            type string;
+        }
+        leaf value {
+            type string;
+        }
+    }
+
+    container lists {
+        config false;
+        container unordered-container {
+            list unordered-list {
+                key "name";
+                uses name-value;
+            }
+        }
+        container ordered-container {
+            list ordered-list {
+                ordered-by user;
+                key "name";
+                uses name-value;
+            }
+        }
+        container unkeyed-container {
+            /*
+                Following list nodes not specify key, which
+                makes impossible to uniquely identify list items
+                over time.
+            */
+            list unkeyed-list {
+                uses name-value;
+            }
+        }
+    }
+}

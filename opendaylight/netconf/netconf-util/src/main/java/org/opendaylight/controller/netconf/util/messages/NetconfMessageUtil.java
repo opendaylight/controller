@@ -10,15 +10,17 @@ package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.annotation.Nullable;
+
 import java.util.Collection;
 import java.util.List;
 

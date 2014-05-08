@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
@@ -50,12 +50,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * FIXME: THis test should be moved to sal-binding-broker and rewriten
+ * to use new DataBroker API
  */
+@SuppressWarnings("deprecation")
 public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier DOM_UNORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
@@ -139,7 +137,7 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
     private NormalizedNode<?, ?> resolveDataAsserted(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath) {
 
-        try (DOMDataReadTransaction readTx = testContext.getDomAsyncDataBroker().newReadOnlyTransaction()){
+        try (DOMDataReadOnlyTransaction readTx = testContext.getDomAsyncDataBroker().newReadOnlyTransaction()){
             ListenableFuture<Optional<NormalizedNode<?, ?>>> data = readTx.read(LogicalDatastoreType.OPERATIONAL, domPath);
             Optional<NormalizedNode<?, ?>> potential = data.get();
             assertTrue(potential.isPresent());
@@ -171,7 +169,6 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
         assertEquals(TransactionStatus.COMMITED,result.getResult());
     }
 
-    @SuppressWarnings("deprecation")
     private void assertXmlRepresentation(final InstanceIdentifier<?> containerPath, final String... childNameValues) {
 
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = testContext.getBindingToDomMappingService().toDataDom(containerPath);

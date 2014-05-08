@@ -1,0 +1,68 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module distributed-datastore-provider {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider";
+    prefix "distributed-datastore-provider";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-md-sal-dom {prefix sal;}
+
+    description
+        "This module contains the base YANG definitions for
+        the distributed datastore provider implementation";
+
+    revision "2014-06-12" {
+        description
+            "Initial revision.";
+    }
+
+    // This is the definition of the service implementation as a module identity.
+    identity distributed-config-datastore-provider {
+            base config:module-type;
+            config:provided-service config-dom-store-spi:config-dom-datastore;
+            // Specifies the prefix for generated java classes.
+            config:java-name-prefix DistributedConfigDataStoreProvider;
+    }
+
+     // This is the definition of the service implementation as a module identity.
+     identity distributed-operational-datastore-provider {
+                base config:module-type;
+                config:provided-service operational-dom-store-spi:operational-dom-datastore;
+                // Specifies the prefix for generated java classes.
+                config:java-name-prefix DistributedOperationalDataStoreProvider;
+     }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-config-datastore-provider {
+            when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
+            container schema-service {
+                          uses config:service-ref {
+                               refine type {
+                                      mandatory false;
+                                      config:required-identity sal:schema-service;
+                                }
+                          }
+                        }
+        }
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+        augment "/config:modules/config:module/config:configuration" {
+            case distributed-operational-datastore-provider {
+                when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
+                container schema-service {
+                              uses config:service-ref {
+                                   refine type {
+                                          mandatory false;
+                                          config:required-identity sal:schema-service;
+                                    }
+                              }
+                            }
+            }
+        }
+}

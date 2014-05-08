@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalAddress;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -66,6 +68,11 @@ public final class NetconfSSHServer extends Thread implements AutoCloseable {
         serverSocket.close();
         bossGroup.shutdownGracefully();
         logger.trace("SSH server socket closed.");
+    }
+
+    @VisibleForTesting
+    public InetSocketAddress getLocalSocketAddress() {
+        return (InetSocketAddress) serverSocket.getLocalSocketAddress();
     }
 
     @Override

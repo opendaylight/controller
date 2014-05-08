@@ -54,6 +54,7 @@ public class TestHelper {
                 mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "config-util").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-jmx-generator").versionAsInProject(), //
@@ -119,7 +120,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
 
-
+                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), // /
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 

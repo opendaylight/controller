@@ -56,7 +56,7 @@ public class TestingNetconfClient implements Closeable {
         this.label = clientLabel;
         sessionListener = config.getSessionListener();
         Future<NetconfClientSession> clientFuture = netconfClientDispatcher.createClient(config);
-        clientSession = get(clientFuture);
+        clientSession = get(clientFuture);//TODO: make static
         this.sessionId = clientSession.getSessionId();
     }
 

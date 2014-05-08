@@ -10,6 +10,9 @@ package org.opendaylight.controller.sal.dom.broker.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -34,9 +37,6 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-
 public final class YangSchemaUtils {
 
     private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = new Function<PathArgument, QName>(){
@@ -57,7 +57,7 @@ public final class YangSchemaUtils {
     public static DataSchemaNode getSchemaNode(final SchemaContext schema,final InstanceIdentifier path) {
         checkArgument(schema != null,"YANG Schema must not be null.");
         checkArgument(path != null,"Path must not be null.");
-        return getSchemaNode(schema, FluentIterable.from(path.getPath()).transform(QNAME_FROM_PATH_ARGUMENT));
+        return getSchemaNode(schema, FluentIterable.from(path.getPathArguments()).transform(QNAME_FROM_PATH_ARGUMENT));
     }
 
     public static DataSchemaNode getSchemaNode(final SchemaContext schema,final Iterable<QName> path) {

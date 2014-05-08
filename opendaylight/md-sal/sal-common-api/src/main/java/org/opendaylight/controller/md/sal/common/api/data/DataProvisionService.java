@@ -12,7 +12,12 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.concepts.Registration;
 
-
+/**
+ *
+ *
+ * @deprecated replaced by {@link AsyncDataBroker} and {@link AsyncConfigurationCommitCoordinator}
+ */
+@Deprecated
 public interface DataProvisionService<P extends Path<P> , D> {
 
     public Registration<DataCommitHandler<P, D>> registerCommitHandler(P path, DataCommitHandler<P, D> commitHandler);

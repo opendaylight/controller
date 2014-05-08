@@ -21,9 +21,11 @@ import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
@@ -42,7 +44,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransaction> implements
-        DataModificationTransaction, Delegator<T> {
+DataModificationTransaction, Delegator<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BackwardsCompatibleTransaction.class);
 
@@ -55,10 +57,10 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
         this.normalizer = normalizer;
     }
 
-    public static BackwardsCompatibleTransaction<?> readOnlyTransaction(final DOMDataReadTransaction readTx,
+    public static BackwardsCompatibleTransaction<?> readOnlyTransaction(final DOMDataReadOnlyTransaction readTx,
             final DataNormalizer normalizer) {
 
-        return new BackwardsCompatibleTransaction<DOMDataReadTransaction>(readTx, normalizer) {
+        return new BackwardsCompatibleTransaction<DOMDataReadOnlyTransaction>(readTx, normalizer) {
 
             @Override
             public TransactionStatus getStatus() {
@@ -203,7 +205,7 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
         public Future<RpcResult<TransactionStatus>> commit() {
             Preconditions.checkState(status == TransactionStatus.NEW);
             status = TransactionStatus.SUBMITED;
-            return getDelegate().commit();
+            return AbstractDataTransaction.convertToLegacyCommitFuture(getDelegate().submit());
         }
 
         @Override
@@ -227,23 +229,23 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
 
             LOG.trace("write {}:{} ",store,normalizedPath);
             try {
-            List<PathArgument> currentArguments = new ArrayList<>();
-            DataNormalizationOperation<?> currentOp = getNormalizer().getRootOperation();
-            Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
-            while(iterator.hasNext()) {
-                PathArgument currentArg = iterator.next();
-                try {
-                    currentOp = currentOp.getChild(currentArg);
-                } catch (DataNormalizationException e) {
-                    throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", normalizedPath), e);
+                List<PathArgument> currentArguments = new ArrayList<>();
+                DataNormalizationOperation<?> currentOp = getNormalizer().getRootOperation();
+                Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
+                while(iterator.hasNext()) {
+                    PathArgument currentArg = iterator.next();
+                    try {
+                        currentOp = currentOp.getChild(currentArg);
+                    } catch (DataNormalizationException e) {
+                        throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", normalizedPath), e);
+                    }
+                    currentArguments.add(currentArg);
+                    InstanceIdentifier currentPath = InstanceIdentifier.create(currentArguments);
+                    boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
+                    if(isPresent == false && iterator.hasNext()) {
+                        getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
+                    }
                 }
-                currentArguments.add(currentArg);
-                InstanceIdentifier currentPath = new InstanceIdentifier(currentArguments);
-                boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
-                if(isPresent == false && iterator.hasNext()) {
-                    getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
-                }
-            }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Exception durring read.",e);
             }

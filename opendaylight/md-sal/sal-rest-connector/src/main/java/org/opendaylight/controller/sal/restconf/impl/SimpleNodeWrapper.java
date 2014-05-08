@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-
-import com.google.common.base.Preconditions;
 
 public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
 
@@ -27,18 +25,18 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     private URI namespace;
     private QName name;
 
-    public SimpleNodeWrapper(String localName, Object value) {
+    public SimpleNodeWrapper(final String localName, final Object value) {
         this.localName = Preconditions.checkNotNull(localName);
         this.value = value;
     }
 
-    public SimpleNodeWrapper(URI namespace, String localName, Object value) {
+    public SimpleNodeWrapper(final URI namespace, final String localName, final Object value) {
         this(localName, value);
         this.namespace = namespace;
     }
 
     @Override
-    public void setQname(QName name) {
+    public void setQname(final QName name) {
         Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
@@ -65,7 +63,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public void setNamespace(URI namespace) {
+    public void setNamespace(final URI namespace) {
         Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
         this.namespace = namespace;
     }
@@ -89,7 +87,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
             localName = null;
             name = null;
         }
-        return (SimpleNode<Object>) simpleNode;
+        return simpleNode;
     }
 
     @Override
@@ -98,6 +96,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
+    @Deprecated
     public CompositeNode getParent() {
         return unwrap().getParent();
     }
@@ -108,6 +107,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
+    @Deprecated
     public ModifyAction getModificationAction() {
         return unwrap().getModificationAction();
     }
@@ -123,10 +123,8 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     }
 
     @Override
-    public Object setValue(Object value) {
+    public Object setValue(final Object value) {
         return unwrap().setValue(value);
     }
-
-
 
 }

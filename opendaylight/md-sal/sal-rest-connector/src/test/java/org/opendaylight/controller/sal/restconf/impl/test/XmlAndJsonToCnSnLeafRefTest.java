@@ -11,9 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;

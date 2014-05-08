@@ -16,7 +16,7 @@ public final class IdentityValuesDTO {
     private final List<IdentityValue> elementData = new ArrayList<>();
     private final String originValue;
 
-    public IdentityValuesDTO(String namespace, String value, String prefix,String originValue) {
+    public IdentityValuesDTO(String namespace, String value, String prefix, String originValue) {
         elementData.add(new IdentityValue(namespace, value, prefix));
         this.originValue = originValue;
     }
@@ -36,7 +36,6 @@ public final class IdentityValuesDTO {
     public void add(IdentityValue identityValue) {
         elementData.add(identityValue);
     }
-
 
     public List<IdentityValue> getValuesWithNamespaces() {
         return Collections.unmodifiableList(elementData);

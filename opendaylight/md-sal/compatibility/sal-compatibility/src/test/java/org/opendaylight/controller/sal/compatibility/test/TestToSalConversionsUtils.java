@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,6 +21,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.Flood;
@@ -47,6 +49,8 @@ import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
@@ -115,6 +119,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -148,7 +153,7 @@ public class TestToSalConversionsUtils {
     // prefix:
     // od|Od = Open Daylight
     private enum MtchType {
-        other, ipv4, ipv6, arp, sctp, tcp, udp
+        other, untagged, ipv4, ipv6, arp, sctp, tcp, udp
     }
 
     @Test
@@ -160,6 +165,9 @@ public class TestToSalConversionsUtils {
 
         Flow salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.other), node);
         checkSalMatch(salFlow.getMatch(), MtchType.other);
+
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.untagged), node);
+        checkSalMatch(salFlow.getMatch(), MtchType.untagged);
 
         salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv4), node);
         checkSalMatch(salFlow.getMatch(), MtchType.ipv4);
@@ -182,7 +190,18 @@ public class TestToSalConversionsUtils {
         checkSalFlow(salFlow);
     }
 
-    private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) {
+    /**
+     * test of {@link ToSalConversionsUtils#fromNodeConnectorRef(Uri, Node)}
+     * @throws ConstructionException
+     */
+    @Test
+    public void testFromNodeConnectorRef() throws ConstructionException {
+        Node node = new Node(NodeIDType.OPENFLOW, 42L);
+        NodeConnector nodeConnector = ToSalConversionsUtils.fromNodeConnectorRef(new Uri("1"), node);
+        Assert.assertEquals("OF|1@OF|00:00:00:00:00:00:00:2a", nodeConnector.toString());
+    }
+
+    private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) throws ConstructionException {
         switch (mt) {
         case other:
             /*assertNotNull("DL_DST isn't equal.", "3C:A9:F4:00:E0:C8",
@@ -190,11 +209,20 @@ public class TestToSalConversionsUtils {
             assertEquals("DL_SRC isn't equal.", "24:77:03:7C:C5:F1",
                     new String((byte[]) match.getField(MatchType.DL_SRC).getValue()));
             */
+            Node node = new Node(NodeIDType.OPENFLOW, 12L);
+            NodeConnector port = new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf((short)345), node);
+            assertEquals("IN_PORT isn't equal.", port, match.getField(MatchType.IN_PORT).getValue());
             assertEquals("DL_TYPE isn't equal.", (short) 0xffff, (short) match.getField(MatchType.DL_TYPE).getValue());
             assertEquals("NW_TOS isn't equal.", (byte) 0x33, (byte) match.getField(MatchType.NW_TOS).getValue());
             assertEquals("NW_PROTO isn't equal.", (byte) 0x3f, (byte) match.getField(MatchType.NW_PROTO).getValue());
             assertEquals("DL_VLAN isn't equal.", (short) 0xfff, (short) match.getField(MatchType.DL_VLAN).getValue());
             assertEquals("DL_VLAN_PR isn't equal.", (byte) 0x7, (byte) match.getField(MatchType.DL_VLAN_PR).getValue());
+            break;
+        case untagged:
+            assertEquals("DL_TYPE isn't equal.", (short) 0xffff, (short) match.getField(MatchType.DL_TYPE).getValue());
+            assertEquals("NW_TOS isn't equal.", (byte) 0x33, (byte) match.getField(MatchType.NW_TOS).getValue());
+            assertEquals("NW_PROTO isn't equal.", (byte) 0x3f, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            assertEquals("DL_VLAN isn't equal.", MatchType.DL_VLAN_NONE, (short) match.getField(MatchType.DL_VLAN).getValue());
             break;
         case arp:
             /*
@@ -564,9 +592,15 @@ public class TestToSalConversionsUtils {
         MatchBuilder odMatchBuilder = new MatchBuilder();
         switch (mt) {
         case other:
+            odMatchBuilder.setInPort(new NodeConnectorId("openflow:12:345"));
             odMatchBuilder.setEthernetMatch(prepEthernetMatch());
             odMatchBuilder.setIpMatch(prepIpMatch());
             odMatchBuilder.setVlanMatch(prepVlanMatch());
+            break;
+        case untagged:
+            odMatchBuilder.setEthernetMatch(prepEthernetMatch());
+            odMatchBuilder.setIpMatch(prepIpMatch());
+            odMatchBuilder.setVlanMatch(prepVlanNoneMatch());
             break;
         case ipv4:
             odMatchBuilder.setLayer3Match(prepLayer3MatchIpv4());
@@ -650,11 +684,20 @@ public class TestToSalConversionsUtils {
         VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
 
         VlanIdBuilder vlanIdBuilder = new VlanIdBuilder().setVlanId(new VlanId(0xfff));
-        vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
+        vlanMatchBuilder.setVlanId(vlanIdBuilder.setVlanIdPresent(true).build());
         vlanMatchBuilder.setVlanPcp(new VlanPcp((short) 0x7));
 
         return vlanMatchBuilder.build();
+    }
 
+    private VlanMatch prepVlanNoneMatch() {
+        VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
+
+        VlanIdBuilder vlanIdBuilder = new VlanIdBuilder().
+            setVlanIdPresent(false);
+        vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
+
+        return vlanMatchBuilder.build();
     }
 
     private IpMatch prepIpMatch() {

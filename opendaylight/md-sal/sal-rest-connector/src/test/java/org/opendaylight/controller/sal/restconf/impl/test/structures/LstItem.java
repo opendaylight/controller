@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test.structures;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +58,12 @@ public class LstItem {
     }
 
     public void addLfLst(LfLst lfLst) {
+        assertFalse("Found multiple leaf list elements for " + lfLst.getName(), lfLsts.containsKey(lfLst.getName()));
         lfLsts.put(lfLst.getName(), lfLst);
     }
 
     public void addLst(Lst lst) {
+        assertFalse("Found multiple list elements for " + lst.getName(), lsts.containsKey(lst.getName()));
         lsts.put(lst.getName(), lst);
     }
 

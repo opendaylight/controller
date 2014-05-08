@@ -16,6 +16,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -39,11 +41,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
@@ -81,23 +86,27 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
 
     private NetconfMessage getConfig, getConfigCandidate, editConfig, closeSession;
-    private DefaultCommitNotificationProducer commitNot;
+    private DefaultCommitNotificationProducer commitNotificationProducer;
     private NetconfServerDispatcher dispatch;
 
     private NetconfClientDispatcherImpl clientDispatcher;
 
+    static ModuleFactory[] FACTORIES = {new TestImplModuleFactory(), new DepTestImplModuleFactory(),
+            new NetconfTestImplModuleFactory(), new IdentityTestModuleFactory(),
+            new MultipleDependenciesModuleFactory()};
+
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,getModuleFactories().toArray(
-                new ModuleFactory[0])));
+        initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
+                FACTORIES
+        ));
 
         loadMessages();
 
         NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
 
-
-        commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
+        commitNotificationProducer = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
         dispatch = createDispatcher(factoriesListener);
         ChannelFuture s = dispatch.createServer(tcpAddress);
@@ -107,7 +116,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     }
 
     private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        return super.createDispatcher(factoriesListener, getNetconfMonitoringListenerService(), commitNot);
+        return super.createDispatcher(factoriesListener, getNetconfMonitoringListenerService(), commitNotificationProducer);
     }
 
     static NetconfMonitoringServiceImpl getNetconfMonitoringListenerService() {
@@ -120,7 +129,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     @After
     public void tearDown() throws Exception {
-        commitNot.close();
+        commitNotificationProducer.close();
         clientDispatcher.close();
     }
 
@@ -155,14 +164,6 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         return yangDependencies;
     }
 
-    protected List<ModuleFactory> getModuleFactories() {
-        return getModuleFactoriesS();
-    }
-
-    static List<ModuleFactory> getModuleFactoriesS() {
-        return Lists.newArrayList(new TestImplModuleFactory(), new DepTestImplModuleFactory(),
-                new NetconfTestImplModuleFactory(), new IdentityTestModuleFactory());
-    }
 
     @Test
     public void testNetconfClientDemonstration() throws Exception {
@@ -391,5 +392,67 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         final CodecRegistry ret = super.getCodecRegistry();
         doReturn(codec).when(ret).getIdentityCodec();
         return ret;
+    }
+
+
+    @Test
+    public void testMultipleDependencies() throws Exception {
+        // push first xml, should add parent and d1,d2 dependencies
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
+            Document rpcReply = netconfClient.sendMessage(
+                    XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/editConfig_merge_multiple-deps1.xml"))
+                    .getDocument();
+            assertIsOK(rpcReply);
+            commit(netconfClient);
+        }
+        // verify that parent.getTestingDeps == d1,d2
+        MultipleDependenciesModuleMXBean parentProxy = configRegistryClient.newMXBeanProxy(
+                configRegistryClient.lookupConfigBean(MultipleDependenciesModuleFactory.NAME, "parent"),
+                MultipleDependenciesModuleMXBean.class);
+        {
+            List<ObjectName> testingDeps = parentProxy.getTestingDeps();
+            assertEquals(2, testingDeps.size());
+            Set<String> actualRefs = getServiceReferences(testingDeps);
+            assertEquals(Sets.newHashSet("ref_d1", "ref_d2"), actualRefs);
+        }
+
+        // push second xml, should add d3 to parent's dependencies
+        mergeD3(parentProxy);
+        // push second xml again, to test that d3 is not added again
+        mergeD3(parentProxy);
+    }
+
+    public void mergeD3(MultipleDependenciesModuleMXBean parentProxy) throws Exception {
+        try (TestingNetconfClient netconfClient = new TestingNetconfClient(
+                "test " + tcpAddress.toString(), clientDispatcher, getClientConfiguration(tcpAddress, 5000))) {
+
+            Document rpcReply = netconfClient.sendMessage(
+                    XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/editConfig_merge_multiple-deps2.xml"))
+                    .getDocument();
+            assertIsOK(rpcReply);
+            commit(netconfClient);
+        }
+        {
+            List<ObjectName> testingDeps = parentProxy.getTestingDeps();
+            assertEquals(3, testingDeps.size());
+            Set<String> actualRefs = getServiceReferences(testingDeps);
+            assertEquals(Sets.newHashSet("ref_d1", "ref_d2", "ref_d3"), actualRefs);
+        }
+    }
+
+    public Set<String> getServiceReferences(List<ObjectName> testingDeps) {
+        return new HashSet<>(Lists.transform(testingDeps, new Function<ObjectName, String>() {
+            @Override
+            public String apply(ObjectName input) {
+                return ObjectNameUtil.getReferenceName(input);
+            }
+        }));
+    }
+
+    public void commit(TestingNetconfClient netconfClient) throws Exception {
+        Document rpcReply;
+        rpcReply = netconfClient.sendMessage(XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/commit.xml"))
+                .getDocument();
+        assertIsOK(rpcReply);
     }
 }
