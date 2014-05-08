@@ -18,7 +18,8 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.rest.impl.RestconfProvider;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -53,9 +54,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
 
     private void checkPreconditions() {
         if( context == null || dataService == null ) {
-            ResponseException _responseException = new ResponseException( Status.SERVICE_UNAVAILABLE,
-                    RestconfProvider.NOT_INITALIZED_MSG );
-            throw _responseException;
+            throw new RestconfDocumentedException( Status.SERVICE_UNAVAILABLE );
         }
     }
 
@@ -95,17 +94,10 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         return mountPoint.readOperationalData( path );
     }
 
-    public RpcResult<CompositeNode> invokeRpc( final QName type, final CompositeNode payload ) {
+    public Future<RpcResult<CompositeNode>> invokeRpc( final QName type, final CompositeNode payload ) {
         this.checkPreconditions();
 
-        final Future<RpcResult<CompositeNode>> future = context.rpc( type, payload );
-
-        try {
-            return future.get();
-        }
-        catch( Exception e ) {
-            throw new ResponseException( e, "Error invoking RPC " + type );
-        }
+        return context.rpc( type, payload );
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataPut( final InstanceIdentifier path,
@@ -138,9 +130,9 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         if (availableNode != null) {
             String errMsg = "Post Configuration via Restconf was not executed because data already exists";
             BrokerFacade.LOG.warn((new StringBuilder(errMsg)).append(" : ").append(path).toString());
-            // FIXME: return correct ietf-restconf:errors -> follow specification
-            // (http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48)
-            throw new ResponseException(Status.CONFLICT, errMsg);
+
+            throw new RestconfDocumentedException(
+                    "Data already exists for path: " + path, ErrorType.PROTOCOL, ErrorTag.DATA_EXISTS );
         }
         BrokerFacade.LOG.trace( "Post Configuration via Restconf: {}", path );
         transaction.putConfigurationData( path, payload );
@@ -157,9 +149,9 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         if (availableNode != null) {
             String errMsg = "Post Configuration via Restconf was not executed because data already exists";
             BrokerFacade.LOG.warn((new StringBuilder(errMsg)).append(" : ").append(path).toString());
-            // FIXME: return correct ietf-restconf:errors -> follow specification
-            // (http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48)
-            throw new ResponseException(Status.CONFLICT, errMsg);
+
+            throw new RestconfDocumentedException(
+                    "Data already exists for path: " + path, ErrorType.PROTOCOL, ErrorTag.DATA_EXISTS );
         }
         BrokerFacade.LOG.trace( "Post Configuration via Restconf: {}", path );
         transaction.putConfigurationData( path, payload );

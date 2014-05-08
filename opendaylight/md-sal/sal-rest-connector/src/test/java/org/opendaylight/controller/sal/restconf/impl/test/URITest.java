@@ -26,7 +26,7 @@ import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -67,15 +67,13 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierListWithNullKey() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes:user/null/boo");
     }
 
     @Test
     public void testToInstanceIdentifierListWithMissingKey() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes:user/foo");
     }
 
@@ -96,29 +94,25 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierChoiceException() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes:food/snack");
     }
 
     @Test
     public void testToInstanceIdentifierCaseException() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes:food/sports-arena");
     }
 
     @Test
     public void testToInstanceIdentifierChoiceCaseException() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes:food/snack/sports-arena");
     }
-    
+
     @Test
     public void testToInstanceIdentifierWithoutNode() {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request");
+        exception.expect(RestconfDocumentedException.class);
         controllerContext.toInstanceIdentifier("simple-nodes");
     }
 
@@ -142,24 +136,22 @@ public class URITest {
 
     @Test
     public void testMountPointWithoutMountService() throws FileNotFoundException {
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 503 Service Unavailable"); 
-        
+        exception.expect(RestconfDocumentedException.class);
+
         controllerContext.setMountService(null);
         InstanceIdWithSchemaNode instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
     }
-    
+
     @Test
     public void testMountPointWithoutMountPointSchema() {
         initMountService(false);
-        exception.expect(ResponseException.class);
-        exception.expectMessage("HTTP 400 Bad Request"); 
-        
+        exception.expect(RestconfDocumentedException.class);
+
         InstanceIdWithSchemaNode instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
     }
-    
+
     public void initMountService(boolean withSchema) {
         MountService mountService = mock(MountService.class);
         controllerContext.setMountService(mountService);

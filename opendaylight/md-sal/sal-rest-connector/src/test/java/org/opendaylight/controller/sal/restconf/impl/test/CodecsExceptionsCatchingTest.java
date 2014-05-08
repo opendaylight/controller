@@ -14,6 +14,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -46,6 +47,7 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restConf, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
