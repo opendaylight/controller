@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
+import static java.util.Arrays.asList;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.management.Attribute;
@@ -30,7 +34,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
+                               String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
         throw new NetconfConfigHandlingException(
                 String.format("Unable to handle missing instance, no missing instances should appear at this point, missing: %s : %s ",
                         module,
@@ -39,6 +43,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 NetconfDocumentedException.ErrorTag.operation_failed,
                 NetconfDocumentedException.ErrorSeverity.error);
     }
+
     @Override
     void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
 
@@ -51,10 +56,16 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                     continue;
                 }
 
-                Object value = ace.getResolvedValue().get();
-                ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
-                logger.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), value, on);
+                Object toBeMergedIn = ace.getResolvedValue().get();
+                // Get the existing values so we can merge the new values with them.
+                Attribute currentAttribute = ta.getAttribute(on, ace.getJmxName());
+                Object oldValue = (currentAttribute != null ? currentAttribute.getValue() : null);
+                // Merge value with currentValue
+                toBeMergedIn = merge(oldValue, toBeMergedIn);
+                ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), toBeMergedIn));
+                logger.debug("Attribute {} set to {} for {}", configAttributeEntry.getKey(), toBeMergedIn, on);
             } catch (Exception e) {
+                logger.error("Error while merging objectnames of {}", on, e);
                 throw new NetconfConfigHandlingException(String.format("Unable to set attributes for %s, Error with attribute %s : %s ",
                         on,
                         configAttributeEntry.getKey(),
@@ -64,5 +75,45 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                         NetconfDocumentedException.ErrorSeverity.error);
             }
         }
+    }
+
+    /**
+     * Merge value into current value
+     * Currently, this is only implemented for arrays of ObjectNames, but that is the
+     * most common case for which it is needed.
+     */
+    protected Object merge(Object oldValue, Object toBeMergedIn) {
+        if (oldValue instanceof ObjectName[] && toBeMergedIn instanceof ObjectName[]) {
+            toBeMergedIn = mergeObjectNameArrays((ObjectName[]) oldValue, (ObjectName[]) toBeMergedIn);
+        }
+        return toBeMergedIn;
+    }
+
+    /**
+     * Merge value into current values
+     * This implements for arrays of ObjectNames, but that is the
+     * most common case for which it is needed.
+     *
+     * @param oldValue - the new values to be merged into existing values
+     * @param toBeMergedIn - the existing values
+     *
+     * @return an ObjectName[] consisting the elements of currentValue with an elements from values not already present in currentValue added
+     *
+     */
+    protected ObjectName[] mergeObjectNameArrays(ObjectName[] oldValue, ObjectName[] toBeMergedIn) {
+        List<ObjectName> newValueList = new ArrayList<>();
+        newValueList.addAll(asList(oldValue));
+        /*
+         It is guaranteed that old values do not contain transaction name.
+         Since toBeMergedIn is filled using service references translated by ServiceRegistryWrapper, it
+         is also guaranteed that this list will not contain transaction names.
+         Run through the list of values to be merged.  If we don't have them already, add them to the list.
+         */
+        for (ObjectName objName : toBeMergedIn) {
+            if (!newValueList.contains(objName)) {
+                newValueList.add(objName);
+            }
+        }
+        return newValueList.toArray(new ObjectName[newValueList.size()]);
     }
 }

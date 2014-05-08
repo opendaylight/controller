@@ -28,7 +28,7 @@ public final class SSLUtil {
     }
 
     public static SSLContext initializeSecureContext(final String pass, final InputStream ksKeysFile, final InputStream ksTrustFile,
-            final String algorithm) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+                                                     final String algorithm) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
             UnrecoverableKeyException, KeyManagementException {
 
         Preconditions.checkNotNull(ksTrustFile, "ksTrustFile cannot be null");

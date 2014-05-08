@@ -19,10 +19,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -37,6 +39,7 @@ import org.opendaylight.controller.northbound.commons.exception.NotAcceptableExc
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -61,6 +64,14 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 public class FlowProgrammerNorthbound {
 
     private String username;
+
+    private QueryContext queryContext;
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -194,15 +205,21 @@ public class FlowProgrammerNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
         @ResponseCode(code = 404, condition = "The containerName is not found"),
-        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public FlowConfigs getStaticFlows(@PathParam("containerName") String containerName) {
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable"),
+        @ResponseCode(code = 400, condition = "Incorrect query syntex")})
+    public FlowConfigs getStaticFlows(@PathParam("containerName") String containerName,
+                   @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
 
-        List<FlowConfig> flowConfigs = getStaticFlowsInternal(containerName, null);
-        return new FlowConfigs(flowConfigs);
+        FlowConfigs result = new FlowConfigs(getStaticFlowsInternal(containerName, null));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, FlowConfigs.class)
+                .filter(result, FlowConfig.class);
+        }
+        return result;
     }
 
     /**
@@ -272,7 +289,8 @@ public class FlowProgrammerNorthbound {
         @ResponseCode(code = 404, condition = "The containerName or nodeId is not found"),
         @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfigs getStaticFlows(@PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId) {
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+            @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
@@ -281,8 +299,12 @@ public class FlowProgrammerNorthbound {
         if (node == null) {
             throw new ResourceNotFoundException(nodeId + " : " + RestMessages.NONODE.toString());
         }
-        List<FlowConfig> flows = getStaticFlowsInternal(containerName, node);
-        return new FlowConfigs(flows);
+        FlowConfigs flows = new FlowConfigs(getStaticFlowsInternal(containerName, node));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, FlowConfigs.class)
+                .filter(flows, FlowConfig.class);
+        }
+        return flows;
     }
 
     /**

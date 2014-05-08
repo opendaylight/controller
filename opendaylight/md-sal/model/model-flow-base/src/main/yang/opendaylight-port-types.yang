@@ -62,7 +62,10 @@ module opendaylight-port-types {
     grouping common-port {
 
         leaf port-number {
-            type uint32;
+            type union {
+                type uint32;
+                type string;
+            }
         }
         
         leaf hardware-address {

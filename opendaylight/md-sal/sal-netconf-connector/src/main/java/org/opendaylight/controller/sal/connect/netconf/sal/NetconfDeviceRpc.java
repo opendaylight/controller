@@ -9,17 +9,19 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
+
 import java.util.Collections;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -66,7 +68,8 @@ public final class NetconfDeviceRpc implements RpcImplementation {
         if (netconfMessageRpcResult.isSuccessful()) {
             return transformer.toRpcResult(netconfMessageRpcResult.getResult(), rpc);
         } else {
-            return Rpcs.getRpcResult(false, netconfMessageRpcResult.getErrors());
+            return RpcResultBuilder.<CompositeNode> failed()
+                                      .withRpcErrors(netconfMessageRpcResult.getErrors()).build();
         }
     }
 

@@ -25,29 +25,36 @@ import org.slf4j.LoggerFactory;
  * traffic between the echo client and server by sending the first message to
  * the server.
  */
-public class EchoClient implements Runnable {
+public class EchoClient extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(EchoClient.class);
 
-    private final ChannelHandler clientHandler;
+
+    private final ChannelInitializer<LocalChannel> channelInitializer;
 
 
-    public EchoClient(ChannelHandler clientHandler) {
-        this.clientHandler = clientHandler;
+    public EchoClient(final ChannelHandler clientHandler) {
+        channelInitializer = new ChannelInitializer<LocalChannel>() {
+            @Override
+            public void initChannel(LocalChannel ch) throws Exception {
+                ch.pipeline().addLast(clientHandler);
+            }
+        };
     }
 
+    public EchoClient(ChannelInitializer<LocalChannel> channelInitializer) {
+        this.channelInitializer = channelInitializer;
+    }
+
+    @Override
     public void run() {
         // Configure the client.
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
+
             b.group(group)
                     .channel(LocalChannel.class)
-                    .handler(new ChannelInitializer<LocalChannel>() {
-                        @Override
-                        public void initChannel(LocalChannel ch) throws Exception {
-                            ch.pipeline().addLast(clientHandler);
-                        }
-                    });
+                    .handler(channelInitializer);
 
             // Start the client.
             LocalAddress localAddress = new LocalAddress("foo");

@@ -9,11 +9,10 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.sal.restconf.impl.test.TestUtils.containsStringData;
 
 import java.io.IOException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -30,8 +29,7 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test of json output when as input are specified composite node with empty
-     * data + YANG file
+     * Test of json output when as input are specified composite node with empty data + YANG file
      */
     @Test
     public void augmentedElementsToJson() {
@@ -47,12 +45,12 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
         }
         assertNotNull(jsonOutput);
 
-        assertTrue(jsonOutput.contains("\"augment-leaf:lf2\": \"lf2\""));
-        assertTrue(jsonOutput.contains("\"augment-container:cont1\": {"));
-        assertTrue(jsonOutput.contains("\"augment-container:lf11\": \"lf11\""));
-        assertTrue(jsonOutput.contains("\"augment-list:lst1\": ["));
-        assertTrue(jsonOutput.contains("\"augment-list:lf11\": \"lf1_1\""));
-        assertTrue(jsonOutput.contains("\"augment-list:lf11\": \"lf1_2\""));
-        assertTrue(jsonOutput.contains("\"augment-leaflist:lflst1\": ["));
+        assertTrue(containsStringData(jsonOutput, "\"augment-leaf:lf2\"", ":", "\"lf2\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-container:cont1\"", ":", "\\{"));
+        assertTrue(containsStringData(jsonOutput, "\"augment-container:lf11\"", ":", "\"lf11\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lst1\"", ":", "\\["));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lf11\"", ":", "\"lf1_1\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lf11\"", ":", "\"lf1_2\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-leaflist:lflst1\"", ":", "\\["));
     }
 }

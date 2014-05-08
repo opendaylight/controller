@@ -3,12 +3,10 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -47,7 +45,7 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restConf, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
-        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
 

@@ -15,12 +15,10 @@ import static org.mockito.Mockito.mock;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -55,10 +53,10 @@ public class RestStream extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//         enable(TestProperties.LOG_TRAFFIC);
-//         enable(TestProperties.DUMP_ENTITY);
-//         enable(TestProperties.RECORD_LOG_LEVEL);
-//         set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
@@ -72,13 +70,15 @@ public class RestStream extends JerseyTest {
         Response responseWithStreamName = post(uri, MediaType.APPLICATION_XML, getRpcInput());
         String xmlResponse = responseWithStreamName.readEntity(String.class);
         assertNotNull(xmlResponse);
-        assertTrue(xmlResponse.contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
+        assertTrue(xmlResponse
+                .contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
 
         uri = "/streams/stream/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0";
         Response responseWithRedirectionUri = get(uri, MediaType.APPLICATION_XML);
         final URI websocketServerUri = responseWithRedirectionUri.getLocation();
         assertNotNull(websocketServerUri);
-        assertEquals(websocketServerUri.toString(), "http://localhost:8181/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0");
+        assertEquals(websocketServerUri.toString(),
+                "http://localhost:8181/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0");
     }
 
     private Response post(String uri, String mediaType, String data) {

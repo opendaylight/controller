@@ -25,12 +25,19 @@ import com.google.common.base.Preconditions;
  *
  * To get instance of synchronized wrapper use {@link #from(DataModificationTransaction)}
  *
+ * @deprecated Replaced by more specific transaction types. Please use
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
+ *          or
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
+ *
  */
+@Deprecated
 public final class SynchronizedTransaction implements DataModificationTransaction,Delegator<DataModificationTransaction> {
 
     private final DataModificationTransaction delegate;
 
-    private SynchronizedTransaction(DataModificationTransaction delegate) {
+    private SynchronizedTransaction(final DataModificationTransaction delegate) {
         this.delegate = delegate;
     }
 
@@ -40,7 +47,7 @@ public final class SynchronizedTransaction implements DataModificationTransactio
      * @param transaction Transaction for which synchronized wrapper should be created.
      * @return Synchronized wrapper over transaction.
      */
-    public static final SynchronizedTransaction from(DataModificationTransaction transaction) {
+    public static final SynchronizedTransaction from(final DataModificationTransaction transaction) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         if (transaction instanceof SynchronizedTransaction) {
             return (SynchronizedTransaction) transaction;
@@ -59,7 +66,7 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public synchronized DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path) {
+    public synchronized DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
         return delegate.readOperationalData(path);
     }
 
@@ -79,7 +86,7 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public synchronized DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path) {
+    public synchronized DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
         return delegate.readConfigurationData(path);
     }
 
@@ -89,12 +96,12 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public synchronized void putOperationalData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
+    public synchronized void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
         delegate.putOperationalData(path, data);
     }
 
     @Override
-    public synchronized void putConfigurationData(InstanceIdentifier<? extends DataObject> path, DataObject data) {
+    public synchronized void putConfigurationData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
         delegate.putConfigurationData(path, data);
     }
 
@@ -104,12 +111,12 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public synchronized void removeOperationalData(InstanceIdentifier<? extends DataObject> path) {
+    public synchronized void removeOperationalData(final InstanceIdentifier<? extends DataObject> path) {
         delegate.removeOperationalData(path);
     }
 
     @Override
-    public synchronized void removeConfigurationData(InstanceIdentifier<? extends DataObject> path) {
+    public synchronized void removeConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
         delegate.removeConfigurationData(path);
     }
 
@@ -129,7 +136,7 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public synchronized ListenerRegistration<DataTransactionListener> registerListener(DataTransactionListener listener) {
+    public synchronized ListenerRegistration<DataTransactionListener> registerListener(final DataTransactionListener listener) {
         return delegate.registerListener(listener);
     }
 
@@ -152,7 +159,7 @@ public final class SynchronizedTransaction implements DataModificationTransactio
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.nettyutil;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -60,6 +61,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     private State state = State.IDLE;
+    private final Promise<S> promise;
     private final Timer timer;
     private final long connectionTimeoutMillis;
 
@@ -68,6 +70,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
             L sessionListener, long connectionTimeoutMillis) {
         super(promise, channel);
         this.sessionPreferences = sessionPreferences;
+        this.promise = promise;
         this.timer = timer;
         this.sessionListener = sessionListener;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
@@ -102,32 +105,52 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     private void start() {
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
-        logger.debug("Session negotiation started with hello message {}", XmlUtil.toString(helloMessage.getDocument()));
+        logger.debug("Session negotiation started with hello message {} on channel {}", XmlUtil.toString(helloMessage.getDocument()), channel);
 
         channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
-
-        timeout = this.timer.newTimeout(new TimerTask() {
-            @Override
-            public void run(final Timeout timeout) {
-                synchronized (this) {
-                    if (state != State.ESTABLISHED) {
-                        logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
-                        final IllegalStateException cause = new IllegalStateException(
-                                "Session was not established after " + timeout);
-                        negotiationFailed(cause);
-                        changeState(State.FAILED);
-                    } else if(channel.isOpen()) {
-                        channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
-                    }
-                }
-            }
-        }, connectionTimeoutMillis, TimeUnit.MILLISECONDS);
 
         // FIXME, make sessionPreferences return HelloMessage, move NetconfHelloMessage to API
         sendMessage((NetconfHelloMessage)helloMessage);
 
         replaceHelloMessageOutboundHandler();
         changeState(State.OPEN_WAIT);
+
+        timeout = this.timer.newTimeout(new TimerTask() {
+            @Override
+            public void run(final Timeout timeout) {
+                synchronized (this) {
+                    if (state != State.ESTABLISHED) {
+
+                        logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
+
+                        // Do not fail negotiation if promise is done or canceled
+                        // It would result in setting result of the promise second time and that throws exception
+                        if (isPromiseFinished() == false) {
+                            negotiationFailed(new IllegalStateException("Session was not established after " + timeout));
+                            changeState(State.FAILED);
+
+                            channel.closeFuture().addListener(new GenericFutureListener<ChannelFuture>() {
+                                @Override
+                                public void operationComplete(ChannelFuture future) throws Exception {
+                                    if(future.isSuccess()) {
+                                        logger.debug("Channel {} closed: success", future.channel());
+                                    } else {
+                                        logger.warn("Channel {} closed: fail", future.channel());
+                                    }
+                                }
+                            });
+                        }
+                    } else if(channel.isOpen()) {
+                        channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
+                    }
+                }
+            }
+
+            private boolean isPromiseFinished() {
+                return promise.isDone() || promise.isCancelled();
+            }
+
+        }, connectionTimeoutMillis, TimeUnit.MILLISECONDS);
     }
 
     private void cancelTimeout() {
@@ -200,9 +223,9 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException;
 
     private synchronized void changeState(final State newState) {
-        logger.debug("Changing state from : {} to : {}", state, newState);
-        Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s", state,
-                newState);
+        logger.debug("Changing state from : {} to : {} for channel: {}", state, newState, channel);
+        Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s for chanel %s", state,
+                newState, channel);
         this.state = newState;
     }
 
@@ -236,7 +259,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
+            logger.warn("An exception occurred during negotiation with {}", channel.remoteAddress(), cause);
             cancelTimeout();
             negotiationFailed(cause);
             changeState(State.FAILED);

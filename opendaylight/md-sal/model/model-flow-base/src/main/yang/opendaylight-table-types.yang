@@ -192,6 +192,14 @@ module opendaylight-table-types {
         base match-field;
         description "TCP Flag Match";
     }
+    identity tunnel_ipv4_dst {
+        base match-field;
+        description "IPv4 destination tunnel endpoint address.";
+    }
+    identity tunnel_ipv4_src {
+        base match-field;
+        description "IPv4 source tunnel endpoint address.";
+    }
         
     grouping set-field-match {
         list set-field-match {

@@ -14,9 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -31,7 +29,7 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
 
     @BeforeClass
     public static void initialize() {
-        dataLoad("/xml-to-cnsn/data-of-several-modules/yang",2,"module1","cont_m1");
+        dataLoad("/xml-to-cnsn/data-of-several-modules/yang", 2, "module1", "cont_m1");
     }
 
     @Test
@@ -40,19 +38,19 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCnSn(), modules, schemaContext,
                 StructuredDataToXmlProvider.INSTANCE);
 
-//         String output =
-//         String.format("<data>" +
-//                  "\n<cont_m1>" +
-//                         "\n\t<lf1_m1>" +
-//                             "\n\t\tlf1 m1 value" +
-//                             "\n\t</lf1_m1>" +
-//                         "\n</cont_m1>" +
-//                         "\n<cont_m2>" +
-//                             "\n\t<lf1_m2>" +
-//                                 "\n\t\tlf1 m2 value" +
-//                             "\n\t</lf1_m2>" +
-//                         "\n</cont_m2>" +
-//                     "\n</data>");
+        // String output =
+        // String.format("<data>" +
+        // "\n<cont_m1>" +
+        // "\n\t<lf1_m1>" +
+        // "\n\t\tlf1 m1 value" +
+        // "\n\t</lf1_m1>" +
+        // "\n</cont_m1>" +
+        // "\n<cont_m2>" +
+        // "\n\t<lf1_m2>" +
+        // "\n\t\tlf1 m2 value" +
+        // "\n\t</lf1_m2>" +
+        // "\n</cont_m2>" +
+        // "\n</data>");
 
         StringBuilder regex = new StringBuilder();
         regex.append("^");
@@ -60,7 +58,6 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
         regex.append(".*<data.*");
         regex.append(".*xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"");
         regex.append(".*>");
-
 
         regex.append(".*<contB_m1.*\\/>");
         regex.append(".*xmlns=\"module:one\"");

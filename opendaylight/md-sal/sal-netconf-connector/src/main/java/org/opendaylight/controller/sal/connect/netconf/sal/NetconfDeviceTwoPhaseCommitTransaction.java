@@ -10,12 +10,19 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CONFIG_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DEFAULT_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_EDIT_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_ERROR_OPTION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_TARGET_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.ROLLBACK_ON_ERROR_OPTION;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,28 +33,25 @@ import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
-import org.opendaylight.controller.sal.connect.util.FailedRpcResult;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 /**
  *  Remote transaction that delegates data change to remote device using netconf messages.
@@ -87,17 +91,16 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
     }
 
     private void sendMerge(final InstanceIdentifier key, final CompositeNode value) throws InterruptedException, ExecutionException {
-        sendEditRpc(createEditConfigStructure(key, Optional.<String>absent(), Optional.of(value)));
+        sendEditRpc(createEditConfigStructure(key, Optional.<ModifyAction>absent(), Optional.of(value)), Optional.<ModifyAction>absent());
     }
 
     private void sendDelete(final InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
-        sendEditRpc(createEditConfigStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode>absent()));
+        sendEditRpc(createEditConfigStructure(toDelete, Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
     }
 
-    private void sendEditRpc(final CompositeNode editStructure) throws InterruptedException, ExecutionException {
-        final ImmutableCompositeNode editConfigRequest = createEditConfigRequest(editStructure);
+    private void sendEditRpc(final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation) throws InterruptedException, ExecutionException {
+        final ImmutableCompositeNode editConfigRequest = createEditConfigRequest(editStructure, defaultOperation);
         final RpcResult<CompositeNode> rpcResult = rpc.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, editConfigRequest).get();
-        // TODO 874 add default operation when sending delete
 
         // Check result
         if(rpcResult.isSuccessful() == false) {
@@ -106,23 +109,33 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         }
     }
 
-    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure) {
+    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation) {
         final CompositeNodeBuilder<ImmutableCompositeNode> ret = ImmutableCompositeNode.builder();
 
+        // Target
         final Node<?> targetWrapperNode = ImmutableCompositeNode.create(NETCONF_TARGET_QNAME, ImmutableList.<Node<?>>of(targetNode));
         ret.add(targetWrapperNode);
 
+        // Default operation
+        if(defaultOperation.isPresent()) {
+            final SimpleNode<String> defOp = NodeFactory.createImmutableSimpleNode(NETCONF_DEFAULT_OPERATION_QNAME, null, modifyOperationToXmlString(defaultOperation.get()));
+            ret.add(defOp);
+        }
+
+        // Error option
         if(rollbackSupported) {
             ret.addLeaf(NETCONF_ERROR_OPTION_QNAME, ROLLBACK_ON_ERROR_OPTION);
         }
+
         ret.setQName(NETCONF_EDIT_CONFIG_QNAME);
+        // Edit content
         ret.add(editStructure);
         return ret.toInstance();
     }
 
-    private CompositeNode createEditConfigStructure(final InstanceIdentifier dataPath, final Optional<String> operation,
-                                                    final Optional<CompositeNode> lastChildOverride) {
-        Preconditions.checkArgument(dataPath.getPath().isEmpty() == false, "Instance identifier with empty path %s", dataPath);
+    private CompositeNode createEditConfigStructure(final InstanceIdentifier dataPath, final Optional<ModifyAction> operation,
+            final Optional<CompositeNode> lastChildOverride) {
+        Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
 
         List<PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
 
@@ -160,7 +173,7 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         return predicates;
     }
 
-    private CompositeNode getDeepestEditElement(final PathArgument arg, final Optional<String> operation, final Optional<CompositeNode> lastChildOverride) {
+    private CompositeNode getDeepestEditElement(final PathArgument arg, final Optional<ModifyAction> operation, final Optional<CompositeNode> lastChildOverride) {
         final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
         builder.setQName(arg.getNodeType());
 
@@ -168,7 +181,7 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         addPredicatesToCompositeNodeBuilder(predicates, builder);
 
         if (operation.isPresent()) {
-            builder.setAttribute(NETCONF_OPERATION_QNAME, operation.get());
+            builder.setAttribute(NETCONF_OPERATION_QNAME, modifyOperationToXmlString(operation.get()));
         }
         if (lastChildOverride.isPresent()) {
             final List<Node<?>> children = lastChildOverride.get().getValue();
@@ -180,6 +193,10 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         }
 
         return builder.toInstance();
+    }
+
+    private String modifyOperationToXmlString(final ModifyAction operation) {
+        return operation.name().toLowerCase();
     }
 
     /**
@@ -196,8 +213,8 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
             throw new RuntimeException(id + ": Interrupted while waiting for response", e);
         } catch (final ExecutionException e) {
             LOG.warn("{}: Failed to finish commit operation", id, e);
-            return new FailedRpcResult<>(RpcErrors.getRpcError(null, null, null, RpcError.ErrorSeverity.ERROR,
-                    id + ": Unexpected operation error during commit operation", RpcError.ErrorType.APPLICATION, e));
+            return RpcResultBuilder.<Void>failed().withError( RpcError.ErrorType.APPLICATION,
+                            id + ": Unexpected operation error during commit operation", e ).build();
         }
     }
 

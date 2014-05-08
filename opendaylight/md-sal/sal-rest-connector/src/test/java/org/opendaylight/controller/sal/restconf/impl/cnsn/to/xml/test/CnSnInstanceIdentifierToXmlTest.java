@@ -12,9 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -26,9 +24,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
  *
- * CnSn = Composite node and Simple node data structure Class contains test of
- * serializing simple nodes data values according data types from YANG schema to
- * XML file
+ * CnSn = Composite node and Simple node data structure Class contains test of serializing simple nodes data values
+ * according data types from YANG schema to XML file
  *
  */
 public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoader {
@@ -40,7 +37,7 @@ public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoad
 
     @Test
     public void snAsYangInstanceIdentifier() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSnData = prepareCnStructForYangData( );
+        CompositeNode cnSnData = prepareCnStructForYangData();
         String xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSnData, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         assertNotNull(xmlOutput);

@@ -19,7 +19,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NeutronPortRequest {
+public class NeutronPortRequest implements INeutronRequest {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -29,7 +29,16 @@ public class NeutronPortRequest {
     @XmlElement(name="ports")
     List<NeutronPort> bulkRequest;
 
+    @XmlElement(name="ports_links")
+    List<NeutronPageLink> links;
+
     NeutronPortRequest() {
+    }
+
+    public NeutronPortRequest(List<NeutronPort> bulkRequest, List<NeutronPageLink> links) {
+        this.bulkRequest = bulkRequest;
+        this.links = links;
+        this.singletonPort = null;
     }
 
     NeutronPortRequest(List<NeutronPort> bulk) {

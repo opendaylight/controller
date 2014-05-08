@@ -8,7 +8,7 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>config-util</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
 
   <dependencies>
@@ -40,6 +40,15 @@
           <reuseForks>false</reuseForks>
           <perCoreThreadCount>false</perCoreThreadCount>
           <threadCount>1</threadCount>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Export-Package>org.opendaylight.controller.config.util</Export-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

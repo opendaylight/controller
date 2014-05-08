@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,22 +14,29 @@ import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
+import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
+import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
+import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private final static Logger log = LoggerFactory.getLogger(BrokerImpl.class);
@@ -43,11 +47,17 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private final Set<ProviderContextImpl> providerSessions = Collections
             .synchronizedSet(new HashSet<ProviderContextImpl>());
 
-    private BundleContext bundleContext = null;
-
     private AutoCloseable deactivator = null;
 
     private RpcRouter router = null;
+
+    private final ClassToInstanceMap<BrokerService> services;
+
+    public  BrokerImpl(final RpcRouter router,final ClassToInstanceMap<BrokerService> services) {
+        this.router = Preconditions.checkNotNull(router, "RPC Router must not be null");
+        this.services = ImmutableClassToInstanceMap.copyOf(services);
+    }
+
 
     @Override
     public ConsumerSession registerConsumer(final Consumer consumer,
@@ -79,8 +89,9 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private void checkPredicates(final Provider prov) {
         Preconditions.checkNotNull(prov, "Provider should not be null.");
         for (ProviderContextImpl session : providerSessions) {
-            if (prov.equals(session.getProvider()))
+            if (prov.equals(session.getProvider())) {
                 throw new IllegalStateException("Provider already registered");
+            }
         }
 
     }
@@ -88,23 +99,22 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private void checkPredicates(final Consumer cons) {
         Preconditions.checkNotNull(cons, "Consumer should not be null.");
         for (ConsumerContextImpl session : sessions) {
-            if (cons.equals(session.getConsumer()))
+            if (cons.equals(session.getConsumer())) {
                 throw new IllegalStateException("Consumer already registered");
+            }
         }
     }
 
     // Private Factory methods
     private ConsumerContextImpl newSessionFor(final Consumer provider,
             final BundleContext ctx) {
-        ConsumerContextImpl ret = new ConsumerContextImpl(provider, ctx);
-        ret.setBroker(this);
+        ConsumerContextImpl ret = new ConsumerContextImpl(provider, this);
         return ret;
     }
 
     private ProviderContextImpl newSessionFor(final Provider provider,
             final BundleContext ctx) {
-        ProviderContextImpl ret = new ProviderContextImpl(provider, ctx);
-        ret.setBroker(this);
+        ProviderContextImpl ret = new ProviderContextImpl(provider, this);
         return ret;
     }
 
@@ -165,21 +175,6 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     }
 
     /**
-     * @return the bundleContext
-     */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext
-     *            the bundleContext to set
-     */
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
-    /**
      * @return the deactivator
      */
     public AutoCloseable getDeactivator() {
@@ -208,4 +203,9 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     public void setRouter(final RpcRouter router) {
         this.router = router;
     }
+
+    protected <T extends BrokerService> Optional<T> getGlobalService(final Class<T> service) {
+        return Optional.fromNullable(services.getInstance(service));
+    }
+
 }

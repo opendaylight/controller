@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.frm.compatibility;
 
-import java.util.Collections;
-
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener;
@@ -17,7 +15,6 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider;
 import org.opendaylight.controller.sal.common.util.Arguments;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.Flows;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.config.rev130819.flows.FlowKey;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -26,8 +23,8 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -89,7 +86,7 @@ public class FRMRuntimeDataProvider implements RuntimeDataProvider, DataCommitHa
             this.manager.removeStaticFlow(flow.getName(), flow.getNode());
             this.manager.addStaticFlow(flow);
         }
-        return Rpcs.<Void> getRpcResult(true, null, Collections.<RpcError> emptySet());
+        return RpcResultBuilder.<Void> success().build();
     }
 
     public RpcResult<Void> rollback(final FlowCommitTransaction transaction) {

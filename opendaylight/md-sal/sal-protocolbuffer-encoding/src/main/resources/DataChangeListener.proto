@@ -1,0 +1,14 @@
+package org.opendaylight.controller.mdsal;
+
+import "SimpleNormalizedNode.proto";
+
+option java_package = "org.opendaylight.controller.protobuff.messages.datachange.notification";
+option java_outer_classname = "DataChangeListenerMessages";
+
+message DataChanged{
+  repeated string instanceIdentifierPathArguments =1 ;
+  required NormalizedNodeXml normalizedNodeXml = 2;
+}
+message DataChangedReply{
+
+}

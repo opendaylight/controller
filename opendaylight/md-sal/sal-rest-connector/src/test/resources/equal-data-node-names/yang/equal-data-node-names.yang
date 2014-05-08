@@ -1,0 +1,18 @@
+/* bug 1204 */
+module equal-data-node-names {
+  namespace "ns:equal:data:node:names";
+
+  prefix "eqdanona";
+  revision 2014-06-26 {
+  }
+
+  container cont {
+    container cont1 {
+        list lst11 {
+            leaf lf111 {
+                type string;
+            }
+        }
+    }
+  }
+}

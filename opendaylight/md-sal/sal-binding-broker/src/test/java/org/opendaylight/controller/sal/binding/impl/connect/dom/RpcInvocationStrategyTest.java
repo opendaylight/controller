@@ -25,13 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 
@@ -96,9 +96,11 @@ public class RpcInvocationStrategyTest {
 
     private void setupForForwardToDom(boolean hasOutput, boolean hasInput, int expectedErrorSize) {
 
-        if (expectedErrorSize > 0)
+        if (expectedErrorSize > 0) {
             errors.add(rpcError);
-        RpcResult<CompositeNode> result = Rpcs.getRpcResult(true, invokeRpcResult, errors);
+        }
+        RpcResult<CompositeNode> result = RpcResultBuilder.<CompositeNode>success(invokeRpcResult)
+                                                            .withRpcErrors( errors ).build();
         futureCompNode = Futures.immediateFuture(result);
         if( hasInput )
         {
@@ -191,22 +193,28 @@ public class RpcInvocationStrategyTest {
      * invokeOn Tests
      */
     private void setupRpcResultsWithOutput(int expectedErrorSize) {
-        if (expectedErrorSize > 0)
+        if (expectedErrorSize > 0) {
             errors.add(rpcError);
-        RpcResult<CompositeNode> resultCompNode = Rpcs.getRpcResult(true, inputInvokeOn, errors);
+        }
+        RpcResult<CompositeNode> resultCompNode = RpcResultBuilder.<CompositeNode>success(inputInvokeOn)
+                                                                        .withRpcErrors(errors).build();
         futureCompNode = Futures.immediateFuture(resultCompNode);
-        RpcResult<DataObject> resultDataObj = Rpcs.getRpcResult(true, toDataDomInput, errors);
+        RpcResult<DataObject> resultDataObj = RpcResultBuilder.<DataObject>success(toDataDomInput)
+                                                                           .withRpcErrors(errors).build();
         futureDataObj = Futures.immediateFuture(resultDataObj);
 
         when(mockMappingService.toDataDom(toDataDomInput)).thenReturn(outputInvokeOn);
     }
 
     private void setupRpcResultsNoOutput(int expectedErrorSize) {
-        if (expectedErrorSize > 0)
+        if (expectedErrorSize > 0) {
             errors.add(rpcError);
-        RpcResult<CompositeNode> resultCompNode = Rpcs.getRpcResult(true, inputInvokeOn, errors);
+        }
+        RpcResult<CompositeNode> resultCompNode = RpcResultBuilder.<CompositeNode>success(inputInvokeOn)
+                                                                          .withRpcErrors(errors).build();
         futureCompNode = Futures.immediateFuture(resultCompNode);
-        RpcResult<DataObject> resultDataObj = Rpcs.getRpcResult(true, null, errors);
+        RpcResult<DataObject> resultDataObj = RpcResultBuilder.<DataObject>success()
+                                                                          .withRpcErrors(errors).build();
         futureDataObj = Futures.immediateFuture(resultDataObj);
     }
 

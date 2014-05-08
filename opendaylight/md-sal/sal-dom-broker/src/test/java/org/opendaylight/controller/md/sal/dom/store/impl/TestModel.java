@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
 
 public class TestModel {
 

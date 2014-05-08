@@ -10,18 +10,16 @@ package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.channel.Channel;
-import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
-import org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket.VirtualSocket;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket.VirtualSocket;
 
 /**
  * Wrapper class around GANYMED SSH java library.
  */
-public class SshClient {
+class SshClient {
     private final VirtualSocket socket;
     private final Map<Integer, SshSession> openSessions = new HashMap<>();
     private final AuthenticationHandler authenticationHandler;
@@ -51,15 +49,10 @@ public class SshClient {
         authenticationHandler.authenticate(connection);
     }
 
-    public void closeSession(SshSession session) {
-        if (session.getState() == Channel.STATE_OPEN || session.getState() == Channel.STATE_OPENING) {
-            session.close();
-        }
-    }
 
     public void close() {
         for (SshSession session : openSessions.values()){
-            closeSession(session);
+            session.close();
         }
 
         openSessions.clear();
@@ -67,5 +60,12 @@ public class SshClient {
         if (connection != null) {
             connection.close();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SshClient{" +
+                "socket=" + socket +
+                '}';
     }
 }

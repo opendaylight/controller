@@ -73,12 +73,14 @@
       <bundle start="true" start-level="35">mvn:org.javassist/javassist/${javassist.version}</bundle>
       <bundle start="true" start-level="35">mvn:commons-io/commons-io/${commons.io.version}</bundle>
       <bundle start="true" start-level="35">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
-      <bundle start="true" start-level="35">mvn:org.apache.commons/commons-lang3/${commons.lang.version}</bundle>
+      <bundle start="true" start-level="35">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
       <bundle start="true" start-level="35">mvn:commons-net/commons-net/${commons.net.version}</bundle>
    </feature>
    <feature name="base-eclipselink-persistence" description="EclipseLink Persistence API" version="2.0.4.v201112161009">
       <bundle start="true" start-level="35">mvn:eclipselink/javax.persistence/2.0.4.v201112161009</bundle>
       <bundle start="true" start-level="35">mvn:eclipselink/javax.resource/1.5.0.v200906010428</bundle>
+      <bundle start="true" start-level="35">mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/2.5.0</bundle>
+      <bundle start="true" start-level="35">mvn:org.eclipse.persistence/org.eclipse.persistence.core/2.5.0</bundle>
    </feature>
    <feature name="base-gemini-web" description="Gemini Web" version="${geminiweb.version}">
       <feature>http</feature>

@@ -11,16 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-
 import java.util.concurrent.Future;
-
 
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -31,6 +27,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+// FIXME: Migrate to use new Data Broker APIs
+@SuppressWarnings("deprecation")
 public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
     @Test
@@ -105,14 +103,14 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         assertNull(readedData2);
     }
 
-    private static NodeRef createNodeRef(String string) {
+    private static NodeRef createNodeRef(final String string) {
         NodeKey key = new NodeKey(new NodeId(string));
         InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class).child(Node.class, key)
                 .toInstance();
         return new NodeRef(path);
     }
 
-    private static Node createNode(String string) {
+    private static Node createNode(final String string) {
         NodeBuilder ret = new NodeBuilder();
         ret.setId(new NodeId(string));
         ret.setKey(new NodeKey(ret.getId()));

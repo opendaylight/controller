@@ -12,14 +12,17 @@ import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

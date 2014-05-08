@@ -1,7 +1,15 @@
 package org.opendaylight.controller.sal.connect.netconf.listener;
 
-import java.util.Arrays;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
@@ -10,24 +18,50 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-
 public final class NetconfSessionCapabilities {
+    private static final class ParameterMatcher {
+        private final Predicate<String> predicate;
+        private final int skipLength;
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfSessionCapabilities.class);
+        ParameterMatcher(final String name) {
+            predicate = new Predicate<String>() {
+                @Override
+                public boolean apply(final String input) {
+                    return input.startsWith(name);
+                }
+            };
 
-    private final Set<String> capabilities;
+            this.skipLength = name.length();
+        }
+
+        private String from(final Iterable<String> params) {
+            final Optional<String> o = Iterables.tryFind(params, predicate);
+            if (!o.isPresent()) {
+                return null;
+            }
+
+            return o.get().substring(skipLength);
+        }
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfSessionCapabilities.class);
+    private static final ParameterMatcher MODULE_PARAM = new ParameterMatcher("module=");
+    private static final ParameterMatcher REVISION_PARAM = new ParameterMatcher("revision=");
+    private static final ParameterMatcher BROKEN_REVISON_PARAM = new ParameterMatcher("amp;revision=");
+    private static final Splitter AMP_SPLITTER = Splitter.on('&');
+    private static final Predicate<String> CONTAINS_REVISION = new Predicate<String>() {
+        @Override
+        public boolean apply(final String input) {
+            return input.contains("revision=");
+        }
+    };
 
     private final Set<QName> moduleBasedCaps;
+    private final Set<String> capabilities;
 
     private NetconfSessionCapabilities(final Set<String> capabilities, final Set<QName> moduleBasedCaps) {
-        this.capabilities = capabilities;
-        this.moduleBasedCaps = moduleBasedCaps;
+        this.capabilities = Preconditions.checkNotNull(capabilities);
+        this.moduleBasedCaps = Preconditions.checkNotNull(moduleBasedCaps);
     }
 
     public Set<QName> getModuleBasedCaps() {
@@ -65,47 +99,45 @@ public final class NetconfSessionCapabilities {
     }
 
     public static NetconfSessionCapabilities fromStrings(final Collection<String> capabilities) {
-        final Set<QName> moduleBasedCaps = Sets.newHashSet();
+        final Set<QName> moduleBasedCaps = new HashSet<>();
 
         for (final String capability : capabilities) {
-            if(isModuleBasedCapability(capability)) {
-                final String[] parts = capability.split("\\?");
-                final String namespace = parts[0];
-                final FluentIterable<String> queryParams = FluentIterable.from(Arrays.asList(parts[1].split("&")));
-
-                String revision = getStringAndTransform(queryParams, "revision=", "revision=");
-
-                final String moduleName = getStringAndTransform(queryParams, "module=", "module=");
-
-                if (revision == null) {
-                    logger.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
-                    revision = getStringAndTransform(queryParams, "amp;revision=", "amp;revision=");
-
-                    if (revision == null) {
-                        logger.warn("Netconf device returned revision incorrectly escaped for {}", capability);
-                    }
-                }
-                moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+            final int qmark = capability.indexOf('?');
+            if (qmark == -1) {
+                continue;
             }
+
+            final String namespace = capability.substring(0, qmark);
+            final Iterable<String> queryParams = AMP_SPLITTER.split(capability.substring(qmark + 1));
+            final String moduleName = MODULE_PARAM.from(queryParams);
+            if (moduleName == null) {
+                continue;
+            }
+
+            String revision = REVISION_PARAM.from(queryParams);
+            if (revision != null) {
+                moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+                continue;
+            }
+
+            /*
+             * We have seen devices which mis-escape revision, but the revision may not
+             * even be there. First check if there is a substring that matches revision.
+             */
+            if (!Iterables.any(queryParams, CONTAINS_REVISION)) {
+                continue;
+            }
+
+            LOG.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
+            revision = BROKEN_REVISON_PARAM.from(queryParams);
+            if (revision == null) {
+                LOG.warn("Netconf device returned revision incorrectly escaped for {}, ignoring it", capability);
+            }
+
+            // FIXME: do we really want to continue here?
+            moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
         }
 
-        return new NetconfSessionCapabilities(Sets.newHashSet(capabilities), moduleBasedCaps);
+        return new NetconfSessionCapabilities(ImmutableSet.copyOf(capabilities), ImmutableSet.copyOf(moduleBasedCaps));
     }
-
-    private static boolean isModuleBasedCapability(final String capability) {
-        return capability.contains("?") && capability.contains("module=") && capability.contains("revision=");
-    }
-
-    private static String getStringAndTransform(final Iterable<String> queryParams, final String match,
-                                                final String substringToRemove) {
-        final Optional<String> found = Iterables.tryFind(queryParams, new Predicate<String>() {
-            @Override
-            public boolean apply(final String input) {
-                return input.startsWith(match);
-            }
-        });
-
-        return found.isPresent() ? found.get().replaceAll(substringToRemove, "") : null;
-    }
-
 }

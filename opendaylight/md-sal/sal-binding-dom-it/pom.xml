@@ -44,13 +44,21 @@
       <artifactId>pax-exam-container-native</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-parser-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-test-model</artifactId>
+          <version>1.1-SNAPSHOT</version>
+      </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -75,26 +83,6 @@
               <goal>report</goal>
             </goals>
             <phase>test</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate-sources</goal>
-            </goals>
-            <configuration>
-              <codeGenerators>
-                <generator>
-                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
-                  <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                </generator>
-              </codeGenerators>
-              <inspectDependencies>true</inspectDependencies>
-            </configuration>
           </execution>
         </executions>
       </plugin>

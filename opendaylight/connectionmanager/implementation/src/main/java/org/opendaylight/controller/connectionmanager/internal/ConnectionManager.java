@@ -261,7 +261,7 @@ public class ConnectionManager implements IConnectionManager,
             Map<ConnectionConstants, String> params) {
         if (connectionService == null)
             return null;
-        Node node = connectionService.connect(connectionIdentifier, params);
+        Node node = connectionService.connect(type, connectionIdentifier, params);
         AbstractScheme scheme = schemes.get(activeScheme);
         if (scheme != null && node != null)
             scheme.addNode(node);

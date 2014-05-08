@@ -21,11 +21,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -41,6 +43,7 @@ import org.opendaylight.controller.northbound.commons.exception.ResourceConflict
 import org.opendaylight.controller.northbound.commons.exception.ResourceForbiddenException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
@@ -68,6 +71,14 @@ import org.opendaylight.controller.usermanager.IUserManager;
 @Path("/")
 public class ContainerManagerNorthbound {
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -172,13 +183,18 @@ public class ContainerManagerNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 401, condition = "User is not authorized to perform this operation"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public ContainerConfigs viewAllContainers() {
+    public ContainerConfigs viewAllContainers(@QueryParam("_q") String queryString) {
 
         handleNetworkAuthorization(getUserName());
 
         IContainerManager containerManager = getContainerManager();
-
-        return new ContainerConfigs(containerManager.getContainerConfigList());
+        ContainerConfigs result = new ContainerConfigs(
+                containerManager.getContainerConfigList());
+        if (queryString != null) {
+            queryContext.createQuery(queryString, ContainerConfigs.class)
+                .filter(result, ContainerConfig.class);
+        }
+        return result;
     }
 
     /**
@@ -481,7 +497,8 @@ public class ContainerManagerNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The container is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public FlowSpecConfigs viewContainerFlowSpecs(@PathParam(value = "container") String container) {
+    public FlowSpecConfigs viewContainerFlowSpecs(@PathParam(value = "container") String container,
+        @QueryParam("_q") String queryString) {
 
         handleContainerAuthorization(container, getUserName());
         handleForbiddenOnDefault(container);
@@ -489,8 +506,13 @@ public class ContainerManagerNorthbound {
         handleContainerNotExists(container);
 
         IContainerManager containerManager = getContainerManager();
-
-        return new FlowSpecConfigs(containerManager.getContainerFlows(container));
+        FlowSpecConfigs result = new FlowSpecConfigs(
+                containerManager.getContainerFlows(container));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, FlowSpecConfigs.class)
+                .filter(result, ContainerFlowConfig.class);
+        }
+        return result;
     }
 
     /**

@@ -17,11 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -59,10 +57,10 @@ public class RestDeleteOperationTest extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//        enable(TestProperties.LOG_TRAFFIC);
-//        enable(TestProperties.DUMP_ENTITY);
-//        enable(TestProperties.RECORD_LOG_LEVEL);
-//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 XmlToCompositeNodeProvider.INSTANCE);
@@ -84,8 +82,9 @@ public class RestDeleteOperationTest extends JerseyTest {
     }
 
     private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName).build();
-        return DummyFuture.builder().rpcResult(rpcResult).build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
+                .build();
+        return new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
     }
 
 }

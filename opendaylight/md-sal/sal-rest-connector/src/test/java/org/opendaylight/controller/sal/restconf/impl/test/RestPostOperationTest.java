@@ -15,19 +15,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
 
+import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -47,13 +50,14 @@ import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.util.concurrent.Futures;
 
 public class RestPostOperationTest extends JerseyTest {
 
@@ -102,12 +106,12 @@ public class RestPostOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
-        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
 
     @Test
-    public void postOperationsStatusCodes() throws UnsupportedEncodingException {
+    public void postOperationsStatusCodes() throws IOException {
         controllerContext.setSchemas(schemaContextTestModule);
         mockInvokeRpc(cnSnDataOutput, true);
         String uri = "/operations/test-module:rpc-test";
@@ -117,6 +121,14 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         mockInvokeRpc(null, false);
+        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+
+        List<RpcError> rpcErrors = new ArrayList<>();
+        rpcErrors.add( RpcResultBuilder.newError( ErrorType.RPC, "tag1", "message1",
+                                                  "applicationTag1", "info1", null ) );
+        rpcErrors.add( RpcResultBuilder.newWarning( ErrorType.PROTOCOL, "tag2", "message2",
+                                                    "applicationTag2", "info2", null ) );
+        mockInvokeRpc(null, false, rpcErrors);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         uri = "/operations/test-module:rpc-wrongtest";
@@ -150,7 +162,7 @@ public class RestPostOperationTest extends JerseyTest {
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
 
-        assertEquals( 400, post(uri, MediaType.APPLICATION_JSON, "" ));
+        assertEquals(400, post(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test
@@ -158,7 +170,8 @@ public class RestPostOperationTest extends JerseyTest {
         controllerContext.setSchemas(schemaContextYangsIetf);
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
+                rpcResult).build();
         when(
                 brokerFacade.commitConfigurationDataPostBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
@@ -175,14 +188,23 @@ public class RestPostOperationTest extends JerseyTest {
         uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData3));
 
-        assertEquals( 400, post(uri, MediaType.APPLICATION_JSON, "" ));
+        assertEquals(400, post(uri, MediaType.APPLICATION_JSON, ""));
+    }
+
+    private void mockInvokeRpc(CompositeNode result, boolean sucessful, Collection<RpcError> errors) {
+
+        DummyRpcResult.Builder<CompositeNode> builder = new DummyRpcResult.Builder<CompositeNode>().result(result)
+                .isSuccessful(sucessful);
+        if (!errors.isEmpty()) {
+            builder.errors(errors);
+        }
+        RpcResult<CompositeNode> rpcResult = builder.build();
+        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
+                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
-        RpcResult<CompositeNode> rpcResult = new DummyRpcResult.Builder<CompositeNode>().result(result)
-                .isSuccessful(sucessful).build();
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class)))
-            .thenReturn(Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ));
+        mockInvokeRpc(result, sucessful, Collections.<RpcError> emptyList());
     }
 
     private void mockCommitConfigurationDataPostMethod(TransactionStatus statusName) {
@@ -190,9 +212,9 @@ public class RestPostOperationTest extends JerseyTest {
                 .build();
         Future<RpcResult<TransactionStatus>> dummyFuture = null;
         if (statusName != null) {
-            dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+            dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
         } else {
-            dummyFuture = DummyFuture.builder().build();
+            dummyFuture = new DummyFuture.Builder<TransactionStatus>().build();
         }
 
         when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
@@ -204,7 +226,8 @@ public class RestPostOperationTest extends JerseyTest {
         initMocking();
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
+                rpcResult).build();
 
         when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
