@@ -32,7 +32,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
@@ -81,21 +80,7 @@ public class InvokeRpcMethodTest {
         when(mockedBrokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenAnswer(new AnswerImpl());
 
         StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", preparePayload());
-
-        CompositeNode rpcCompNode = structData.getData();
-        CompositeNode cont = null;
-        assertEquals("invoke:rpc:module", rpcCompNode.getNodeType().getNamespace().toString());
-        assertEquals("rpc-test", rpcCompNode.getNodeType().getLocalName());
-
-        for (Node<?> node : rpcCompNode.getChildren()) {
-            if (node.getNodeType().getLocalName().equals("cont")
-                    && node.getNodeType().getNamespace().toString().equals("nmspc")) {
-                if (node instanceof CompositeNode) {
-                    cont = (CompositeNode) node;
-                }
-            }
-        }
-        assertNotNull(cont);
+        assertTrue(structData == null);
 
     }
 
