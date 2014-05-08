@@ -88,6 +88,11 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-util</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

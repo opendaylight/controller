@@ -15,7 +15,7 @@ import java.net.URISyntaxException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
@@ -26,48 +26,28 @@ public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
         dataLoad("/normalize-node/yang/");
     }
 
-    @Test
+    @Test(expected=RestconfDocumentedException.class)
     public void namespaceNotNullAndInvalidNamespaceAndNoModuleNameTest() {
-        boolean exceptionReised = false;
-        try {
-            TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), modules, schemaNodePath);
-        } catch (ResponseException e) {
-            exceptionReised = true;
-        }
-        assertTrue(exceptionReised);
+
+        TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), modules, schemaNodePath);
     }
 
     @Test
     public void namespaceNullTest() {
-        String exceptionMessage = null;
-        try {
-            TestUtils.normalizeCompositeNode(prepareCnSn(null), modules, schemaNodePath);
-        } catch (ResponseException e) {
-            exceptionMessage = String.valueOf(e.getResponse().getEntity());
-        }
-        assertNull(exceptionMessage);
+
+        TestUtils.normalizeCompositeNode(prepareCnSn(null), modules, schemaNodePath);
     }
 
     @Test
     public void namespaceValidNamespaceTest() {
-        String exceptionMessage = null;
-        try {
-            TestUtils.normalizeCompositeNode(prepareCnSn("normalize:node:module"), modules, schemaNodePath);
-        } catch (ResponseException e) {
-            exceptionMessage = String.valueOf(e.getResponse().getEntity());
-        }
-        assertNull(exceptionMessage);
+
+        TestUtils.normalizeCompositeNode(prepareCnSn("normalize:node:module"), modules, schemaNodePath);
     }
 
     @Test
     public void namespaceValidModuleNameTest() {
-        String exceptionMessage = null;
-        try {
-            TestUtils.normalizeCompositeNode(prepareCnSn("normalize-node-module"), modules, schemaNodePath);
-        } catch (ResponseException e) {
-            exceptionMessage = String.valueOf(e.getResponse().getEntity());
-        }
-        assertNull(exceptionMessage);
+
+        TestUtils.normalizeCompositeNode(prepareCnSn("normalize-node-module"), modules, schemaNodePath);
     }
 
     private CompositeNode prepareCnSn(String namespace) {
