@@ -22,28 +22,30 @@ import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import javax.ws.rs.core.Response.Status;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.sal.common.util.RpcErrors;
+import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
@@ -54,6 +56,8 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class InvokeRpcMethodTest {
@@ -61,13 +65,6 @@ public class InvokeRpcMethodTest {
     private RestconfImpl restconfImpl = null;
     private static ControllerContext controllerContext = null;
 
-    private class AnswerImpl implements Answer<RpcResult<CompositeNode>> {
-        @Override
-        public RpcResult<CompositeNode> answer(final InvocationOnMock invocation) throws Throwable {
-            CompositeNode compNode = (CompositeNode) invocation.getArguments()[1];
-            return new DummyRpcResult.Builder<CompositeNode>().result(compNode).isSuccessful(true).build();
-        }
-    }
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
@@ -111,9 +108,13 @@ public class InvokeRpcMethodTest {
         restconf.setBroker(mockedBrokerFacade);
         restconf.setControllerContext(contContext);
 
-        when(mockedBrokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenAnswer(new AnswerImpl());
+        CompositeNode payload = preparePayload();
 
-        StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", preparePayload());
+        when(mockedBrokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class)))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture(
+                                               Rpcs.<CompositeNode>getRpcResult( true ) ) );
+
+        StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", payload);
         assertTrue(structData == null);
 
     }
@@ -131,74 +132,90 @@ public class InvokeRpcMethodTest {
 
     @Test
     public void testInvokeRpcWithNoPayloadRpc_FailNoErrors() {
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(false);
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( false );
 
-        ArgumentCaptor<CompositeNode> payload = ArgumentCaptor
-                .forClass(CompositeNode.class);
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(
-                brokerFacade.invokeRpc(
-                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
-                        payload.capture())).thenReturn(rpcResult);
+        when( brokerFacade.invokeRpc(
+                 eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
+                 any(CompositeNode.class)))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ) );
 
         restconfImpl.setBroker(brokerFacade);
 
         try {
             restconfImpl.invokeRpc("toaster:cancel-toast", "");
             fail("Expected an exception to be thrown.");
-        } catch (ResponseException e) {
-            assertEquals(e.getMessage(),
-                    Status.INTERNAL_SERVER_ERROR.getStatusCode(), e
-                    .getResponse().getStatus());
+        }
+        catch (RestconfDocumentedException e) {
+            verifyRestconfDocumentedException( e, 0, ErrorType.RPC, ErrorTag.OPERATION_FAILED,
+                                               Optional.<String>absent(), Optional.<String>absent() );
+        }
+    }
+
+    void verifyRestconfDocumentedException( final RestconfDocumentedException e, final int index,
+                                            final ErrorType expErrorType, final ErrorTag expErrorTag,
+                                            final Optional<String> expErrorMsg,
+                                            final Optional<String> expAppTag ) {
+        RestconfError actual = null;
+        try {
+            actual = e.getErrors().get( index );
+        }
+        catch( ArrayIndexOutOfBoundsException ex ) {
+            fail( "RestconfError not found at index " + index );
+        }
+
+        assertEquals( "getErrorType", expErrorType, actual.getErrorType() );
+        assertEquals( "getErrorTag", expErrorTag, actual.getErrorTag() );
+        assertNotNull( "getErrorMessage is null", actual.getErrorMessage() );
+
+        if( expErrorMsg.isPresent() ) {
+            assertEquals( "getErrorMessage", expErrorMsg.get(), actual.getErrorMessage() );
+        }
+
+        if( expAppTag.isPresent() ) {
+            assertEquals( "getErrorAppTag", expAppTag.get(), actual.getErrorAppTag() );
         }
     }
 
     @Test
     public void testInvokeRpcWithNoPayloadRpc_FailWithRpcError() {
-        List<RpcError> rpcErrors = new LinkedList<RpcError>();
+        List<RpcError> rpcErrors = Arrays.asList(
+            RpcErrors.getRpcError( null, "bogusTag", null, ErrorSeverity.ERROR, "foo",
+                                   RpcError.ErrorType.TRANSPORT, null ),
+            RpcErrors.getRpcError( "app-tag", "in-use", null, ErrorSeverity.WARNING, "bar",
+                                   RpcError.ErrorType.RPC, null ));
 
-        RpcError unknownError = mock(RpcError.class);
-        when( unknownError.getTag() ).thenReturn( "bogusTag" );
-        rpcErrors.add( unknownError );
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( false, rpcErrors );
 
-        RpcError knownError = mock( RpcError.class );
-        when( knownError.getTag() ).thenReturn( "in-use" );
-        rpcErrors.add( knownError );
-
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(false);
-        when(rpcResult.getErrors()).thenReturn( rpcErrors  );
-
-        ArgumentCaptor<CompositeNode> payload = ArgumentCaptor
-                .forClass(CompositeNode.class);
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(
-                brokerFacade.invokeRpc(
-                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
-                        payload.capture())).thenReturn(rpcResult);
+        when( brokerFacade.invokeRpc(
+                 eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
+                 any(CompositeNode.class)))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ) );
 
         restconfImpl.setBroker(brokerFacade);
 
         try {
             restconfImpl.invokeRpc("toaster:cancel-toast", "");
             fail("Expected an exception to be thrown.");
-        } catch (ResponseException e) {
-            //TODO: Change to a 409 in the future - waiting on additional BUG to enhance this.
-            assertEquals(e.getMessage(), 500, e.getResponse().getStatus());
+        }
+        catch (RestconfDocumentedException e) {
+            verifyRestconfDocumentedException( e, 0, ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED,
+                                               Optional.of( "foo" ), Optional.<String>absent() );
+            verifyRestconfDocumentedException( e, 1, ErrorType.RPC, ErrorTag.IN_USE,
+                                               Optional.of( "bar" ), Optional.of( "app-tag" ) );
         }
     }
 
     @Test
     public void testInvokeRpcWithNoPayload_Success() {
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(true);
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(
-                brokerFacade.invokeRpc(
-                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
-                        any( CompositeNode.class ))).thenReturn(rpcResult);
+        when( brokerFacade.invokeRpc(
+                 eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast")),
+                 any( CompositeNode.class )))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ) );
 
         restconfImpl.setBroker(brokerFacade);
 
@@ -213,10 +230,9 @@ public class InvokeRpcMethodTest {
         try {
             restconfImpl.invokeRpc("toaster:cancel-toast", " a payload ");
             fail("Expected an exception");
-        } catch (ResponseException e) {
-            assertEquals(e.getMessage(),
-                    Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), e
-                    .getResponse().getStatus());
+        } catch (RestconfDocumentedException e) {
+            verifyRestconfDocumentedException( e, 0, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
+                                               Optional.<String>absent(), Optional.<String>absent() );
         }
     }
 
@@ -225,24 +241,24 @@ public class InvokeRpcMethodTest {
         try {
             restconfImpl.invokeRpc("toaster:bad-method", "");
             fail("Expected an exception");
-        } catch (ResponseException e) {
-            assertEquals(e.getMessage(), Status.NOT_FOUND.getStatusCode(), e
-                    .getResponse().getStatus());
+        }
+        catch (RestconfDocumentedException e) {
+            verifyRestconfDocumentedException( e, 0, ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT,
+                                               Optional.<String>absent(), Optional.<String>absent() );
         }
     }
 
     @Test
     public void testInvokeRpcMethodWithInput() {
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(true);
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
 
         CompositeNode payload = mock(CompositeNode.class);
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(
-                brokerFacade.invokeRpc(
-                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)make-toast")),
-                        any(CompositeNode.class))).thenReturn(rpcResult);
+        when( brokerFacade.invokeRpc(
+                 eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)make-toast")),
+                 any(CompositeNode.class)))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ) );
 
         restconfImpl.setBroker(brokerFacade);
 
@@ -257,29 +273,28 @@ public class InvokeRpcMethodTest {
         try {
             restconfImpl.invokeRpc("toaster/slash", "");
             fail("Expected an exception.");
-        } catch (ResponseException e) {
-            assertEquals(e.getMessage(), Status.NOT_FOUND.getStatusCode(), e
-                    .getResponse().getStatus());
+        }
+        catch (RestconfDocumentedException e) {
+            verifyRestconfDocumentedException( e, 0, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
+                                               Optional.<String>absent(), Optional.<String>absent() );
         }
     }
 
     @Test
     public void testInvokeRpcWithNoPayloadWithOutput_Success() {
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(true);
-
         CompositeNode compositeNode = mock( CompositeNode.class );
-        when( rpcResult.getResult() ).thenReturn( compositeNode );
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true, compositeNode,
+                                                            Collections.<RpcError>emptyList() );
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
-                eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)testOutput")),
-                any( CompositeNode.class ))).thenReturn(rpcResult);
+                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)testOutput")),
+                        any( CompositeNode.class )))
+            .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ) );
 
         restconfImpl.setBroker(brokerFacade);
 
-        StructuredData output = restconfImpl.invokeRpc("toaster:testOutput",
-                "");
+        StructuredData output = restconfImpl.invokeRpc("toaster:testOutput", "");
         assertNotNull( output );
         assertSame( compositeNode, output.getData() );
         assertNotNull( output.getSchema() );
@@ -288,8 +303,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testMountedRpcCallNoPayload_Success() throws Exception
     {
-        RpcResult<CompositeNode> rpcResult = mock(RpcResult.class);
-        when(rpcResult.isSuccessful()).thenReturn(true);
+        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
 
         ListenableFuture<RpcResult<CompositeNode>> mockListener = mock( ListenableFuture.class );
         when( mockListener.get() ).thenReturn( rpcResult );
@@ -321,6 +335,4 @@ public class InvokeRpcMethodTest {
 
         //additional validation in the fact that the restconfImpl does not throw an exception.
     }
-
-
 }

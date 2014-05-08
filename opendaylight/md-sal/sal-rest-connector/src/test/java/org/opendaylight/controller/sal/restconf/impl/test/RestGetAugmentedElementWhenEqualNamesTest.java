@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 
@@ -18,16 +19,16 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestGetAugmentedElementWhenEqualNamesTest {
-    
+
     private static ControllerContext controllerContext = ControllerContext.getInstance();
-    
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    
+
     @BeforeClass
     public static void init() throws FileNotFoundException {
         SchemaContext schemaContextTestModule = TestUtils.loadSchemaContext("/common/augment/yang");
@@ -41,17 +42,15 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
         iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-b:cont1");
         assertEquals("ns:augment:main:b", iiWithData.getSchemaNode().getQName().getNamespace().toString());
     }
-    
+
     @Test
     public void nodeWithoutNamespaceHasMoreAugments() {
-        boolean exceptionCaught = false;
         try {
             controllerContext.toInstanceIdentifier("main:cont/cont1");
-        } catch (ResponseException e) {
-            assertTrue(((String) e.getResponse().getEntity()).contains("is added as augment from more than one module"));
-            exceptionCaught = true;
+            fail( "Expected exception" );
+        } catch (RestconfDocumentedException e) {
+            assertTrue(e.getErrors().get( 0 ).getErrorMessage().contains(
+                                    "is added as augment from more than one module"));
         }
-        assertTrue(exceptionCaught);
     }
-
 }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -16,13 +15,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -31,8 +28,6 @@ import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonSyntaxException;
 
 public class JsonToCnSnTest {
 
@@ -116,44 +111,39 @@ public class JsonToCnSnTest {
 
     @Test
     public void incorrectTopLevelElementsTest() {
-        Throwable cause1 = null;
+        RestconfDocumentedException cause1 = null;
         try {
-            TestUtils
-            .readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
-        } catch (WebApplicationException e) {
+            TestUtils.readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
+        } catch (RestconfDocumentedException e) {
             cause1 = e;
         }
 
         assertNotNull(cause1);
-        assertTrue(cause1
-                .getCause()
-                .getMessage()
-                .contains(
-                        "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
+        assertTrue(cause1.getErrors().get( 0 ).getErrorMessage().contains(
+            "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
 
-        Throwable cause2 = null;
+        RestconfDocumentedException cause2 = null;
         try {
             TestUtils
-            .readInputToCnSn("/json-to-cnsn/wrong-top-level2.json", true, JsonToCompositeNodeProvider.INSTANCE);
-        } catch (WebApplicationException e) {
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level2.json", true, JsonToCompositeNodeProvider.INSTANCE);
+        } catch (RestconfDocumentedException e) {
             cause2 = e;
         }
         assertNotNull(cause2);
-        assertTrue(cause2.getCause().getMessage().contains("Json Object should contain one element"));
+        assertTrue(cause2.getErrors().get( 0 ).getErrorMessage().contains(
+                                                     "Json Object should contain one element"));
 
-        Throwable cause3 = null;
+        RestconfDocumentedException cause3 = null;
         try {
             TestUtils
-            .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
-        } catch (WebApplicationException e) {
+
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
+        } catch (RestconfDocumentedException e) {
             cause3 = e;
         }
         assertNotNull(cause3);
-        assertTrue(cause3
-                .getCause()
-                .getMessage()
-                .contains(
-                        "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
+        assertTrue(cause3.getErrors().get( 0 ).getErrorMessage().contains(
+            "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
 
     }
 
@@ -178,8 +168,8 @@ public class JsonToCnSnTest {
         String reason = null;
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/empty-data1.json", true, JsonToCompositeNodeProvider.INSTANCE);
-        } catch (JsonSyntaxException e) {
-            reason = e.getMessage();
+        } catch (RestconfDocumentedException e) {
+            reason = e.getErrors().get( 0 ).getErrorMessage();
         }
 
         assertTrue(reason.contains("Expected value at line"));
@@ -278,15 +268,9 @@ public class JsonToCnSnTest {
     @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
-        boolean exceptionCaught = false;
-        try {
-            loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");
-            loadAndNormalizeData("/common/augment/json/datab.json", "/common/augment/yang", "cont", "main");
-        } catch (ResponseException e) {
-            exceptionCaught = true;
-        }
+        loadAndNormalizeData("/common/augment/json/dataa.json", "/common/augment/yang", "cont", "main");
+        loadAndNormalizeData("/common/augment/json/datab.json", "/common/augment/yang", "cont", "main");
 
-        assertFalse(exceptionCaught);
     }
 
     private void simpleTest(final String jsonPath, final String yangPath, final String topLevelElementName, final String namespace,
@@ -399,8 +383,8 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/unsupported-json-format.json", true,
                     JsonToCompositeNodeProvider.INSTANCE);
-        } catch (WebApplicationException e) {
-            exceptionMessage = e.getCause().getMessage();
+        } catch (RestconfDocumentedException e) {
+            exceptionMessage = e.getErrors().get( 0 ).getErrorMessage();
         }
         assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }
