@@ -16,14 +16,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import javax.xml.stream.XMLStreamException;
 
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 @Provider
@@ -45,7 +46,8 @@ public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNod
         try {
             return xmlReader.read(entityStream);
         } catch (XMLStreamException | UnsupportedFormatException e) {
-            throw new ResponseException(Response.Status.BAD_REQUEST, e.getMessage());
+            throw new RestconfDocumentedException( e.getMessage(), ErrorType.TRANSPORT,
+                                                   ErrorTag.OPERATION_FAILED );
         }
     }
 
