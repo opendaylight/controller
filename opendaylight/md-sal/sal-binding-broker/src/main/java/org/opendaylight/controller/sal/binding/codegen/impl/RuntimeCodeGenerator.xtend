@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils
 
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
+import org.opendaylight.yangtools.yang.binding.RpcService
 
 class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
 
@@ -28,7 +29,7 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
             val proxyName = iface.directProxyName;
             val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(proxyName)
             if(potentialClass != null) {
-                return potentialClass.newInstance;
+                return potentialClass.newInstance as RpcService;
             }
             val supertype = iface.asCtClass
             val createdCls = createClass(iface.directProxyName, supertype) [
@@ -53,7 +54,7 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
                     '''
                 ]
             ]
-            return createdCls.toClass(iface.classLoader).newInstance
+            return createdCls.toClass(iface.classLoader).newInstance as RpcService
         ]
     }
 
@@ -63,7 +64,7 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
             val routerName = iface.routerName;
             val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(routerName)
             if(potentialClass != null) {
-                return potentialClass.newInstance;
+                return potentialClass.newInstance as RpcService;
             }
 
             val targetCls = createClass(iface.routerName, supertype) [
@@ -81,6 +82,12 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
                         val rpcMeta = metadata.getRpcMethod(name);
                         val bodyTmp = '''
                         {
+                            if($1 == null) {
+                                throw new IllegalArgumentException("RPC input must not be null and must contain a value for field «rpcMeta.inputRouteGetter.name»");
+                            }
+                            if($1.«rpcMeta.inputRouteGetter.name»() == null) {
+                                throw new IllegalArgumentException("Field «rpcMeta.inputRouteGetter.name» must not be null");
+                            }
                             final «InstanceIdentifier.name» identifier = $1.«rpcMeta.inputRouteGetter.name»()«IF rpcMeta.
                             routeEncapsulated».getValue()«ENDIF»;
                             «supertype.name» instance = («supertype.name») «rpcMeta.context.routingTableField».get(identifier);
@@ -106,7 +113,7 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
                     '''
                 ]
             ]
-            return targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance
+            return  targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as RpcService
         ];
     }
 

@@ -12,6 +12,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
@@ -26,8 +27,7 @@ import java.util.concurrent.Executors;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
@@ -38,8 +38,8 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -65,8 +65,8 @@ public class NetconfDeviceTest {
         }
     }
 
-    private static final  RpcResult<NetconfMessage> rpcResult = Rpcs.getRpcResult(true, netconfMessage, Collections.<RpcError>emptySet());
-    private static final  RpcResult<CompositeNode> rpcResultC = Rpcs.getRpcResult(true, compositeNode, Collections.<RpcError>emptySet());
+    private static final  RpcResult<NetconfMessage> rpcResult = RpcResultBuilder.success(netconfMessage).build();
+    private static final  RpcResult<CompositeNode> rpcResultC = RpcResultBuilder.success(compositeNode).build();
 
     public static final String TEST_NAMESPACE = "test:namespace";
     public static final String TEST_MODULE = "test-module";
@@ -81,6 +81,32 @@ public class NetconfDeviceTest {
         device.onRemoteSessionUp(getSessionCaps(false, Collections.<String>emptyList()), listener);
 
         Mockito.verify(facade, Mockito.timeout(5000)).onDeviceDisconnected();
+    }
+
+    @Test
+    public void testNotificationBeforeSchema() throws Exception {
+        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+
+        final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaContextProviderFactory(), getSourceProviderFactory());
+
+        device.onNotification(netconfMessage);
+        device.onNotification(netconfMessage);
+
+        verify(facade, times(0)).onNotification(any(CompositeNode.class));
+
+        final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
+                Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
+
+        device.onRemoteSessionUp(sessionCaps, listener);
+
+        verify(messageTransformer, timeout(10000).times(2)).toNotification(netconfMessage);
+        verify(facade, timeout(10000).times(2)).onNotification(compositeNode);
+
+        device.onNotification(netconfMessage);
+        verify(messageTransformer, timeout(10000).times(3)).toNotification(netconfMessage);
+        verify(facade, timeout(10000).times(3)).onNotification(compositeNode);
     }
 
     @Test
@@ -137,6 +163,7 @@ public class NetconfDeviceTest {
         final RemoteDeviceHandler<NetconfSessionCapabilities> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
         doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContextProvider.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
         doNothing().when(remoteDeviceHandler).onDeviceDisconnected();
+        doNothing().when(remoteDeviceHandler).onNotification(any(CompositeNode.class));
         return remoteDeviceHandler;
     }
 
@@ -174,6 +201,7 @@ public class NetconfDeviceTest {
         final MessageTransformer<NetconfMessage> messageTransformer = mockClass(MessageTransformer.class);
         doReturn(netconfMessage).when(messageTransformer).toRpcRequest(any(QName.class), any(CompositeNode.class));
         doReturn(rpcResultC).when(messageTransformer).toRpcResult(any(NetconfMessage.class), any(QName.class));
+        doReturn(compositeNode).when(messageTransformer).toNotification(any(NetconfMessage.class));
         doNothing().when(messageTransformer).onGlobalContextUpdated(any(SchemaContext.class));
         return messageTransformer;
     }

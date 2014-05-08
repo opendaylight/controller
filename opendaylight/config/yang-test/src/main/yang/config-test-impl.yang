@@ -41,6 +41,12 @@ module config-test-impl {
         config:java-name-prefix IdentityTest;
     }
 
+    identity multiple-dependencies {
+        base config:module-type;
+        config:provided-service test:testing;
+        config:java-name-prefix MultipleDependencies;
+    }
+
     augment "/config:modules/config:module/config:configuration" {
             case impl-identity-test {
                 when "/config:modules/config:module/config:type = 'impl-identity-test'";
@@ -443,6 +449,24 @@ module config-test-impl {
             }
         }
     }
+
+
+    augment "/config:modules/config:module/config:configuration" {
+        case multiple-dependencies {
+            when "/config:modules/config:module/config:type = 'multiple-dependencies'";
+            container multiple-dependencies {
+                list testing-deps {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity test:testing;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     identity test-rpc;
     identity inner-test-rpc;

@@ -19,11 +19,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -37,6 +39,7 @@ import org.opendaylight.controller.northbound.commons.exception.NotAcceptableExc
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -74,6 +77,14 @@ import org.opendaylight.controller.sal.utils.Status;
 public class StaticRoutingNorthbound {
 
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -148,7 +159,8 @@ public class StaticRoutingNorthbound {
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName passed was not found") })
     public StaticRoutes getStaticRoutes(
-            @PathParam("containerName") String containerName) {
+            @PathParam("containerName") String containerName,
+            @QueryParam("_q") String queryString) {
 
         if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
                 Privilege.WRITE, this)){
@@ -156,7 +168,12 @@ public class StaticRoutingNorthbound {
                 UnauthorizedException("User is not authorized to perform this operation on container "
                             + containerName);
         }
-        return new StaticRoutes(getStaticRoutesInternal(containerName));
+        StaticRoutes result = new StaticRoutes(getStaticRoutesInternal(containerName));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, StaticRoutes.class)
+                .filter(result, StaticRoute.class);
+        }
+        return result;
     }
 
     /**

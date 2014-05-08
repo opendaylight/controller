@@ -156,11 +156,26 @@ public interface BindingAwareBroker {
         void unregisterFunctionality(ProviderFunctionality functionality);
     }
 
+    /**
+     * Represents an RPC implementation registration. Users should call the
+     * {@link ObjectRegistration#close close} method when the registration is no longer needed.
+     *
+     * @param <T> the implemented RPC service interface
+     */
     public interface RpcRegistration<T extends RpcService> extends ObjectRegistration<T> {
 
+        /**
+         * Returns the implemented RPC service interface.
+         */
         Class<T> getServiceType();
     }
 
+    /**
+     * Represents a routed RPC implementation registration. Users should call the
+     * {@link RoutedRegistration#close close} method when the registration is no longer needed.
+     *
+     * @param <T> the implemented RPC service interface
+     */
     public interface RoutedRpcRegistration<T extends RpcService> extends RpcRegistration<T>,
             RoutedRegistration<Class<? extends BaseIdentity>, InstanceIdentifier<?>, T> {
 

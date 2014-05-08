@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -23,6 +25,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBroker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -33,14 +36,16 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 
 public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker,
-        SchemaContextListener {
+        SchemaContextListener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractForwardedDataBroker.class);
     // The Broker to whom we do all forwarding
@@ -53,12 +58,14 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private final BindingToNormalizedNodeCodec codec;
     private BindingIndependentConnector connector;
     private ProviderSession context;
+    private final ListenerRegistration<SchemaServiceListener> schemaListenerRegistration;
 
     protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker,
-            final BindingIndependentMappingService mappingService) {
+            final BindingIndependentMappingService mappingService,final SchemaService schemaService) {
         this.domDataBroker = domDataBroker;
         this.mappingService = mappingService;
         this.codec = new BindingToNormalizedNodeCodec(mappingService);
+        this.schemaListenerRegistration = schemaService.registerSchemaServiceListener(this);
     }
 
     protected BindingToNormalizedNodeCodec getCodec() {
@@ -79,8 +86,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         codec.onGlobalContextUpdated(ctx);
     }
 
-    public ListenerRegistration<BindingDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path, final BindingDataChangeListener listener,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path, final DataChangeListener listener,
             final DataChangeScope triggeringScope) {
         DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
@@ -93,8 +100,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     protected Map<InstanceIdentifier<?>, DataObject> toBinding(
             final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
-        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized
-                .entrySet()) {
+
+        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : sortedEntries(normalized)) {
             try {
                 Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(
                         entry);
@@ -107,6 +114,21 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
             }
         }
         return newMap;
+    }
+
+    private static <T> Iterable<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier,T>> sortedEntries(final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> map) {
+        ArrayList<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T>> entries = new ArrayList<>(map.entrySet());
+        Collections.sort(entries, new Comparator<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T>>() {
+
+            @Override
+            public int compare(final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> left,
+                    final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> right) {
+                int leftSize = Iterables.size(left.getKey().getPathArguments());
+                int rightSize = Iterables.size(right.getKey().getPathArguments());
+                return Integer.compare(leftSize, rightSize);
+            }
+        });
+        return entries;
     }
 
     protected Set<InstanceIdentifier<?>> toBinding(
@@ -139,13 +161,13 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
-        private final BindingDataChangeListener bindingDataChangeListener;
+        private final DataChangeListener bindingDataChangeListener;
         private final LogicalDatastoreType store;
         private final InstanceIdentifier<?> path;
         private final DataChangeScope triggeringScope;
 
         public TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-                final BindingDataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
+                final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
             this.store = store;
             this.path = path;
             this.bindingDataChangeListener = bindingDataChangeListener;
@@ -165,7 +187,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         private Map<InstanceIdentifier<?>, DataObject> createdCache;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;
-        private Map<InstanceIdentifier<?>, ? extends DataObject> originalCache;
+        private Map<InstanceIdentifier<?>, DataObject> originalCache;
         private Set<InstanceIdentifier<?>> removedCache;
         private Optional<DataObject> originalDataCache;
         private Optional<DataObject> updatedDataCache;
@@ -203,7 +225,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
 
         @Override
-        public Map<InstanceIdentifier<?>, ? extends DataObject> getOriginalData() {
+        public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
             if (originalCache == null) {
                 originalCache = Collections.unmodifiableMap(toBinding(domEvent.getOriginalData()));
             }
@@ -246,10 +268,10 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
     }
 
-    private static class ListenerRegistrationImpl extends AbstractListenerRegistration<BindingDataChangeListener> {
+    private static class ListenerRegistrationImpl extends AbstractListenerRegistration<DataChangeListener> {
         private final ListenerRegistration<DOMDataChangeListener> registration;
 
-        public ListenerRegistrationImpl(final BindingDataChangeListener listener,
+        public ListenerRegistrationImpl(final DataChangeListener listener,
                 final ListenerRegistration<DOMDataChangeListener> registration) {
             super(listener);
             this.registration = registration;
@@ -284,6 +306,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     @Override
     public void startForwarding() {
         // NOOP
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.schemaListenerRegistration.close();
     }
 
 }

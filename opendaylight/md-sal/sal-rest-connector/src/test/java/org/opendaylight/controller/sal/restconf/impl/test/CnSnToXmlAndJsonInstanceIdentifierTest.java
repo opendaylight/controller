@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.sal.restconf.impl.test.TestUtils.containsStringData;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,16 +20,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.WebApplicationException;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -39,9 +37,10 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifie
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 
 public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -55,21 +54,16 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifier());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
-        //uncomment for debug
-        // System.out.println(output);
         validateXmlOutput(output);
 
     }
 
-    @Ignore
     @Test
     public void saveCnSnWithLeafListInstIdentifierToXmlTest() throws WebApplicationException, IOException,
-    URISyntaxException, XMLStreamException {
+            URISyntaxException, XMLStreamException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
-        //uncomment for debug
-        // System.out.println(output);
         validateXmlOutputWithLeafList(output);
     }
 
@@ -79,33 +73,40 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
         boolean strInOutput = false;
-        strInOutput = output
-                .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11[augment-module:keyvalue111=\\\"value1\\\"][augment-module:keyvalue112=\\\"value2\\\"]/augment-augment-module:lf112\"");
+        strInOutput = containsStringData(
+                output,
+                "\"augment-augment-module:lf111\"",
+                ":",
+                "\"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11\\[augment-module:keyvalue111=\\\\\"value1\\\\\"\\]\\[augment-module:keyvalue112=\\\\\"value2\\\\\"\\]/augment-augment-module:lf112\"");
 
         if (!strInOutput) {
-            strInOutput = output
-                    .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11[augment-module:keyvalue111='value1'][augment-module:keyvalue112='value2']/augment-augment-module:lf112\"");
+            strInOutput = containsStringData(
+                    output,
+                    "\"augment-augment-module:lf111\"",
+                    ":",
+                    "\"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module:lst11\\[augment-module:keyvalue111='value1'\\]\\[augment-module:keyvalue112='value2'\\]/augment-augment-module:lf112\"");
         }
-        //uncomment for debug
-        // System.out.println(output);
         assertTrue(strInOutput);
     }
 
-
     @Test
     public void saveCnSnWithLeafListInstIdentifierToJsonTest() throws WebApplicationException, IOException,
-    URISyntaxException {
+            URISyntaxException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
-        //uncomment for debug
-        // System.out.println(output);
         boolean strInOutput = false;
-        strInOutput = output
-                .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lflst11[.='lflst11_1']\"");
+        strInOutput = containsStringData(
+                output,
+                "\"augment-augment-module:lf111\"",
+                ":",
+                "\"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lflst11\\[.='lflst11_1'\\]\"");
         if (!strInOutput) {
-            strInOutput = output
-                    .contains("\"augment-augment-module:lf111\": \"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lflst11[.=\\\"lflst11_1\\\"]\"");
+            strInOutput = containsStringData(
+                    output,
+                    "\"augment-augment-module:lf111\"",
+                    ":",
+                    "\"/instance-identifier-module:cont/instance-identifier-module:cont1/augment-module-leaf-list:lflst11\\[.=\\\\\"lflst11_1\\\\\"\\]\"");
         }
 
         assertTrue(strInOutput);
@@ -189,27 +190,21 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     }
 
     private CompositeNode prepareCnSn(final InstanceIdentifier instanceIdentifier) throws URISyntaxException {
-        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
-                TestUtils.buildQName("cont", "instance:identifier:module", "2014-01-17"), null, null,null,null);
-        MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
-                TestUtils.buildQName("cont1", "instance:identifier:module", "2014-01-17"), cont, null,null,null);
-        MutableCompositeNode lst11 = NodeFactory.createMutableCompositeNode(
-                TestUtils.buildQName("lst11", "augment:module", "2014-01-17"), cont1, null,null,null);
+        CompositeNodeBuilder<ImmutableCompositeNode> cont = ImmutableCompositeNode.builder();
+        cont.setQName(QName.create("instance:identifier:module", "2014-01-17", "cont"));
 
-        MutableSimpleNode<?> lf111 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111", "augment:augment:module", "2014-01-17"),
-                lst11, instanceIdentifier,null,null);
+        CompositeNodeBuilder<ImmutableCompositeNode> cont1 = ImmutableCompositeNode.builder();
+        cont1.setQName(QName.create("instance:identifier:module", "2014-01-17", "cont1"));
 
+        CompositeNodeBuilder<ImmutableCompositeNode> lst11 = ImmutableCompositeNode.builder();
+        lst11.setQName(QName.create("augment:module", "2014-01-17", "lst11"));
 
-        lst11.getValue().add(lf111);
-        lst11.init();
-
-        cont1.getValue().add(lst11);
-        cont1.init();
-
-        cont.getValue().add(cont1);
-        cont.init();
-
-        return cont;
+        SimpleNode<?> lf111 = NodeFactory.createImmutableSimpleNode(
+                QName.create("augment:augment:module", "2014-01-17", "lf111"), null, instanceIdentifier);
+        lst11.add(lf111);
+        cont1.add(lst11.toInstance());
+        cont.add(cont1.toInstance());
+        return cont.toInstance();
     }
 
     private InstanceIdentifier createInstanceIdentifier() throws URISyntaxException {
@@ -226,7 +221,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         pathArguments.add(new NodeIdentifier(new QName(new URI("augment:augment:module"), "lf112")));
 
-        return new InstanceIdentifier(pathArguments);
+        return InstanceIdentifier.create(pathArguments);
     }
 
     private InstanceIdentifier createInstanceIdentifierWithLeafList() throws URISyntaxException {
@@ -235,7 +230,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont1")));
         pathArguments.add(new NodeWithValue(new QName(new URI("augment:module:leaf:list"), "lflst11"), "lflst11_1"));
 
-        return new InstanceIdentifier(pathArguments);
+        return InstanceIdentifier.create(pathArguments);
     }
 
 }

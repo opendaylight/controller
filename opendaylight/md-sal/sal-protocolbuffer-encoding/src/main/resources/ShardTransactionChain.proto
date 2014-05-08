@@ -1,0 +1,23 @@
+package org.opendaylight.controller.mdsal;
+
+option java_package = "org.opendaylight.controller.protobuff.messages.transaction";
+option java_outer_classname = "ShardTransactionChainMessages";
+
+message CloseTransactionChain {
+
+}
+
+message CloseTransactionChainReply{
+
+
+}
+
+message CreateTransactionChain {
+
+}
+
+message CreateTransactionChainReply{
+required string transactionChainPath = 1;
+
+}
+

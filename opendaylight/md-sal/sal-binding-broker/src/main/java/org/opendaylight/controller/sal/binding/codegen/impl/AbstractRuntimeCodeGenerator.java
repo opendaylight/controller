@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
+import com.google.common.base.Supplier;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -19,15 +21,15 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
+import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
-
-import com.google.common.base.Supplier;
 
 abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
     @GuardedBy("this")
@@ -56,11 +58,11 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
     protected abstract <T extends RpcService> Supplier<T> directProxySupplier(final Class<T> serviceType);
     protected abstract <T extends RpcService> Supplier<T> routerSupplier(final Class<T> serviceType, RpcServiceMetadata metadata);
 
-    private RpcServiceMetadata getRpcMetadata(final CtClass iface) throws ClassNotFoundException, NotFoundException {
+    private RpcServiceMetadata getRpcMetadata(final CtClass iface) throws ClassNotFoundException, NotFoundException, RpcIsNotRoutedException {
         final RpcServiceMetadata metadata = new RpcServiceMetadata();
 
         for (CtMethod method : iface.getMethods()) {
-            if (iface.equals(method.getDeclaringClass()) && method.getParameterTypes().length == 1) {
+            if (isRpcMethodWithInput(iface, method)) {
                 final RpcMetadata routingPair = getRpcMetadata(method);
                 if (routingPair != null) {
                     metadata.addContext(routingPair.getContext());
@@ -81,11 +83,25 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
                      *        remains to be investigated.
                      */
                     Thread.currentThread().getContextClassLoader().loadClass(routingPair.getInputType().getName());
+                } else {
+                    throw new RpcIsNotRoutedException("RPC " + method.getName() + " from "+ iface.getName() +" is not routed");
                 }
             }
         }
 
         return metadata;
+    }
+
+
+    private boolean isRpcMethodWithInput(final CtClass iface, final CtMethod method) throws NotFoundException {
+        if(iface.equals(method.getDeclaringClass())
+                && method.getParameterTypes().length == 1) {
+            final CtClass onlyArg = method.getParameterTypes()[0];
+            if(onlyArg.isInterface() && onlyArg.getName().endsWith(BindingMapping.RPC_INPUT_SUFFIX)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private RpcMetadata getRpcMetadata(final CtMethod method) throws NotFoundException {
@@ -122,12 +138,14 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
 
         utils.getLock().lock();
         try {
-            invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
-                @Override
-                public RuntimeGeneratedInvokerPrototype get() {
-                    return generateListenerInvoker(cls);
-                }
-            });
+            synchronized (utils) {
+                invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
+                    @Override
+                    public RuntimeGeneratedInvokerPrototype get() {
+                        return generateListenerInvoker(cls);
+                    }
+                });
+            }
 
             invokerClasses.put(cls, invoker);
             return invoker;
@@ -145,14 +163,16 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
     public final <T extends RpcService> T getDirectProxyFor(final Class<T> serviceType) {
         utils.getLock().lock();
         try {
-            return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
+            synchronized (utils) {
+                return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
+            }
         } finally {
             utils.getLock().unlock();
         }
     }
 
     @Override
-    public final <T extends RpcService> RpcRouter<T> getRouterFor(final Class<T> serviceType, final String name) {
+    public final <T extends RpcService> RpcRouter<T> getRouterFor(final Class<T> serviceType, final String name) throws RpcIsNotRoutedException {
         final RpcServiceMetadata metadata = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), new Supplier<RpcServiceMetadata>() {
             @Override
             public RpcServiceMetadata get() {
@@ -166,8 +186,10 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
 
         utils.getLock().lock();
         try {
-            final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
-            return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
+            synchronized (utils) {
+                final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
+                return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
+            }
         } finally {
             utils.getLock().unlock();
         }

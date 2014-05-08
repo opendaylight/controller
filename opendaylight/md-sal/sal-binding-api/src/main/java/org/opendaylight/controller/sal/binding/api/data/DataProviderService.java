@@ -16,7 +16,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * DataProviderService is common access point for {@link org.opendaylight.controller.sal.binding.api.BindingAwareProvider} providers
  * to access data trees described by the YANG model.
+ *
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.common.api.data.AsyncConfigurationCommitCoordinator} service.
  */
+@Deprecated
 public interface DataProviderService extends DataBrokerService, DataProvisionService<InstanceIdentifier<? extends DataObject>, DataObject> {
     /**
      * Registers a data reader for particular subtree of overal YANG data tree.
@@ -27,6 +30,8 @@ public interface DataProviderService extends DataBrokerService, DataProvisionSer
      * @param path Subpath which is handled by registered data reader
      * @param reader Instance of reader which
      * @return Registration object for reader. Invoking {@link Registration#close()} will unregister reader.
+     * @deprecated Data Reader contract is removed from capabilities of MD-SAL and is replaced by  replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
      */
+    @Deprecated
     Registration<DataReader<InstanceIdentifier<? extends DataObject>,DataObject>> registerDataReader(InstanceIdentifier<? extends DataObject> path,DataReader<InstanceIdentifier<? extends DataObject>,DataObject> reader);
 }

@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 import java.util.List;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.openexi.proc.common.EXIOptions;
 import org.w3c.dom.Document;
@@ -48,7 +48,7 @@ public final class NetconfStartExiMessage extends NetconfMessage {
         Element startExiElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_EXI_1_0,
                 START_EXI);
 
-        addAlignemnt(exiOptions, doc, startExiElement);
+        addAlignment(exiOptions, doc, startExiElement);
         addFidelity(exiOptions, doc, startExiElement);
 
         rpcElement.appendChild(startExiElement);
@@ -75,7 +75,7 @@ public final class NetconfStartExiMessage extends NetconfMessage {
         }
     }
 
-    private static void addAlignemnt(EXIOptions exiOptions, Document doc, Element startExiElement) {
+    private static void addAlignment(EXIOptions exiOptions, Document doc, Element startExiElement) {
         Element alignmentElement = doc.createElementNS(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_EXI_1_0,
                 ALIGNMENT_KEY);
         alignmentElement.setTextContent(exiOptions.getAlignmentType().toString());

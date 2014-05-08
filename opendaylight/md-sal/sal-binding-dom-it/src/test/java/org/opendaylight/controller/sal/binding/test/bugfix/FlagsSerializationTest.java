@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -39,7 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -54,11 +52,9 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.common.collect.ImmutableSet;
 
+@SuppressWarnings("deprecation")
 public class FlagsSerializationTest extends AbstractDataServiceTest {
 
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
-    private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
     private static final String FLOW_ID = "1234";
     private static final short TABLE_ID = (short)0;
     private static final String NODE_ID = "node:1";
@@ -67,27 +63,9 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId(FLOW_ID));
     private static final TableKey TABLE_KEY = new TableKey(TABLE_ID);
 
-    private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
-            NODE_ID);
-
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .child(Node.class, NODE_KEY).toInstance();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
-    private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
-
-
-
-//    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier FLOW_INSTANCE_ID_BI = //
-//    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-//
-//            .node(Flows.QNAME) //
-//            .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
-//            .toInstance();
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
             NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class)
@@ -113,15 +91,13 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
         ImmutableSet<String> domAllTrueFlags = ImmutableSet.<String>of("CHECK_OVERLAP","NO_BYT_COUNTS", "NO_PKT_COUNTS", "RESET_COUNTS", "SEND_FLOW_REM");
         testFlags(allTrueFlags,domAllTrueFlags);
 
-        FlowModFlags nullFlags = null;
-        ImmutableSet<String> domNullFlags = null;
         testFlags(null,null);
 
 
 
     }
 
-    private void testFlags(FlowModFlags flagsToTest, ImmutableSet<String> domFlags) throws Exception {
+    private void testFlags(final FlowModFlags flagsToTest, final ImmutableSet<String> domFlags) throws Exception {
         Flow flow = createFlow(flagsToTest);
         assertNotNull(flow);
 
@@ -145,7 +121,7 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
 
     }
 
-    private Flow createFlow(FlowModFlags flagsToTest) throws Exception {
+    private Flow createFlow(final FlowModFlags flagsToTest) throws Exception {
 
         DataModificationTransaction modification = baDataService.beginTransaction();
 

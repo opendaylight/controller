@@ -18,17 +18,18 @@ import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertCo
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
 import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
@@ -63,10 +63,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
-
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
@@ -76,8 +72,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,NetconfITTest.getModuleFactoriesS().toArray(
-                new ModuleFactory[0])));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,NetconfITTest.FACTORIES));
 
         NetconfMonitoringServiceImpl monitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
 
@@ -143,8 +138,8 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
         }
 
         notificationVerifier.assertNotificationCount(2);
-        notificationVerifier.assertNotificationContent(0, 0, 0, 9);
-        notificationVerifier.assertNotificationContent(1, 4, 3, 9);
+        notificationVerifier.assertNotificationContent(0, 0, 0, 8);
+        notificationVerifier.assertNotificationContent(1, 4, 3, 8);
 
         mockedAggregator.assertSnapshotCount(2);
         // Capabilities are stripped for persister

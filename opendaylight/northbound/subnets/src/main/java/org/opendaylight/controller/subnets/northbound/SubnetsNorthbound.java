@@ -19,11 +19,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -35,6 +37,7 @@ import org.opendaylight.controller.northbound.commons.exception.ResourceConflict
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -63,6 +66,14 @@ public class SubnetsNorthbound {
     protected static final Logger logger = LoggerFactory.getLogger(SubnetsNorthbound.class);
 
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -160,9 +171,11 @@ public class SubnetsNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({ @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
         @ResponseCode(code = 404, condition = "The containerName passed was not found"),
-        @ResponseCode(code = 503, condition = "Service unavailable") })
+        @ResponseCode(code = 503, condition = "Service unavailable"),
+        @ResponseCode(code = 400, condition = "Incorrect query syntex") })
     @TypeHint(SubnetConfigs.class)
-    public SubnetConfigs listSubnets(@PathParam("containerName") String containerName) {
+    public SubnetConfigs listSubnets(@PathParam("containerName") String containerName,
+        @QueryParam("_q") String queryString) {
 
         handleContainerDoesNotExist(containerName);
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
@@ -174,7 +187,13 @@ public class SubnetsNorthbound {
         if (switchManager == null) {
             throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        return new SubnetConfigs(switchManager.getSubnetsConfigList());
+        List<SubnetConfig> subnets = switchManager.getSubnetsConfigList();
+        if (queryString != null) {
+            subnets = queryContext.createQuery(queryString, SubnetConfig.class)
+                    .find(subnets);
+
+        }
+        return new SubnetConfigs(subnets);
     }
 
     /**

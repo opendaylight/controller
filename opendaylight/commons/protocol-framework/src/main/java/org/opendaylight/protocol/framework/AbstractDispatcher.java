@@ -8,9 +8,11 @@
 package org.opendaylight.protocol.framework;
 
 import com.google.common.base.Preconditions;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -25,9 +27,11 @@ import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
+
 import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +98,8 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      *
      * @return ChannelFuture representing the binding process
      */
-    protected <CH extends Channel> ChannelFuture createServer(SocketAddress address, Class<? extends ServerChannel> channelClass,
-                                                              final ChannelPipelineInitializer<CH, S> initializer) {
+    protected <CH extends Channel> ChannelFuture createServer(final SocketAddress address, final Class<? extends ServerChannel> channelClass,
+            final ChannelPipelineInitializer<CH, S> initializer) {
         final ServerBootstrap b = new ServerBootstrap();
         b.childHandler(new ChannelInitializer<CH>() {
 
@@ -110,6 +114,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
             // makes no sense for LocalServer and produces warning
             b.childOption(ChannelOption.SO_KEEPALIVE, true);
         }
+        b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         customizeBootstrap(b);
 
         if (b.group() == null) {
@@ -151,9 +156,8 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
     protected Future<S> createClient(final InetSocketAddress address, final ReconnectStrategy strategy, final PipelineInitializer<S> initializer) {
         final Bootstrap b = new Bootstrap();
         final ProtocolSessionPromise<S> p = new ProtocolSessionPromise<S>(executor, address, strategy, b);
-        b.group(this.workerGroup).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true).handler(
+        b.option(ChannelOption.SO_KEEPALIVE, true).handler(
                 new ChannelInitializer<SocketChannel>() {
-
                     @Override
                     protected void initChannel(final SocketChannel ch) {
                         initializer.initializeChannel(ch, p);
@@ -161,6 +165,18 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
                 });
 
         customizeBootstrap(b);
+
+        if (b.group() == null) {
+            b.group(workerGroup);
+        }
+
+        // There is no way to detect if this was already set by
+        // customizeBootstrap()
+        try {
+            b.channel(NioSocketChannel.class);
+        } catch (IllegalStateException e) {
+            LOG.trace("Not overriding channelFactory on bootstrap {}", b, e);
+        }
 
         p.connect();
         LOG.debug("Client created.");

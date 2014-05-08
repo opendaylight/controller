@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.common.impl.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,10 +20,9 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yangtools.concepts.Path;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +66,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
 
             log.trace("Transaction: {} Finished successfully (no effects).", transactionId);
 
-            return Rpcs.<TransactionStatus> getRpcResult(true, TransactionStatus.COMMITED,
-                    Collections.<RpcError> emptySet());
+            return RpcResultBuilder.<TransactionStatus> success( TransactionStatus.COMMITED ).build();
         }
 
         final ImmutableList.Builder<ListenerStateCapture<P, D, DCL>> listenersBuilder = ImmutableList.builder();
@@ -127,8 +124,7 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
         log.trace("Transaction: {} Notifying listeners.", transactionId);
 
         publishDataChangeEvent(listeners);
-        return Rpcs.<TransactionStatus> getRpcResult(true, TransactionStatus.COMMITED,
-                Collections.<RpcError> emptySet());
+        return RpcResultBuilder.<TransactionStatus> success(TransactionStatus.COMMITED).build();
     }
 
     private void captureInitialState(ImmutableList<ListenerStateCapture<P, D, DCL>> listeners) {
@@ -240,7 +236,6 @@ public class TwoPhaseCommit<P extends Path<P>, D extends Object, DCL extends Dat
         for (final DataCommitTransaction<P, D> transaction : transactions) {
             transaction.rollback();
         }
-        Set<RpcError> _emptySet = Collections.<RpcError> emptySet();
-        return Rpcs.<TransactionStatus> getRpcResult(false, TransactionStatus.FAILED, _emptySet);
+        return RpcResultBuilder.<TransactionStatus> failed().withResult(TransactionStatus.FAILED).build();
     }
 }

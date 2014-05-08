@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.compatibility.FromSalConversionsUtils;
 import org.opendaylight.controller.sal.compatibility.InventoryMapping;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
@@ -60,6 +59,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.n
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMapBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,8 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             LOG.error(e.getMessage());
         }
 
-        return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
+        return Futures.immediateFuture(RpcResultBuilder.<GetAllFlowStatisticsFromFlowTableOutput>
+                                                status(rpcResultBool).withResult(rpcResultType).build());
     }
 
     /**
@@ -133,7 +134,8 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             LOG.error(e.getMessage());
         }
 
-        return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
+        return Futures.immediateFuture(RpcResultBuilder.<GetAllFlowsStatisticsFromAllFlowTablesOutput>
+                                               status(rpcResultBool).withResult(rpcResultType).build());
     }
 
     @Override
@@ -154,7 +156,8 @@ public class FlowStatisticsAdapter implements OpendaylightFlowStatisticsService,
             LOG.error(e.getMessage());
         }
 
-        return Futures.immediateFuture(Rpcs.getRpcResult(rpcResultBool, rpcResultType, null));
+        return Futures.immediateFuture(RpcResultBuilder.<GetFlowStatisticsFromFlowTableOutput>
+                                              status(rpcResultBool).withResult(rpcResultType).build());
     }
 
     @Override

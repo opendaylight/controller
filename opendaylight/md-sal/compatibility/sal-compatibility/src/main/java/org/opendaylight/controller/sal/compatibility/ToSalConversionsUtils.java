@@ -55,6 +55,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
@@ -94,8 +95,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.GenericFlowAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MacAddressFilter;
@@ -114,10 +118,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.net.InetAddresses;
 
 public class ToSalConversionsUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ToSalConversionsUtils.class);
 
     private ToSalConversionsUtils() {
 
@@ -125,7 +133,38 @@ public class ToSalConversionsUtils {
 
     public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source, Node node) {
         final Flow target = new Flow();
+        genericFlowToAdFlow(source, target);
 
+        target.setMatch(toMatch(source.getMatch()));
+
+        List<Action> actions = getAction(source);
+        if (actions != null) {
+            target.setActions(actionFrom(actions, node));
+        }
+
+        return target;
+    }
+
+    /**
+     * @param source notification, missing instructions
+     * @param node corresponding node where the flow change occured
+     * @return ad-sal node, build from given data
+     */
+    public static Flow toFlow(SwitchFlowRemoved source, Node node) {
+        final Flow target = new Flow();
+        genericFlowToAdFlow(source, target);
+
+        target.setMatch(toMatch(source.getMatch()));
+
+        return target;
+    }
+
+    /**
+     * @param source
+     * @param target
+     */
+    private static void genericFlowToAdFlow(GenericFlowAttributes source,
+            final Flow target) {
         Integer hardTimeout = source.getHardTimeout();
         if (hardTimeout != null) {
             target.setHardTimeout(hardTimeout.shortValue());
@@ -140,16 +179,7 @@ public class ToSalConversionsUtils {
         if (priority != null) {
             target.setPriority(priority.shortValue());
         }
-
-        target.setMatch(toMatch(source.getMatch()));
-
-        List<Action> actions = getAction(source);
-        if (actions != null) {
-            target.setActions(actionFrom(actions, node));
-        }
-
         target.setId(source.getCookie().getValue().longValue());
-        return target;
     }
 
     public static List<Action> getAction(
@@ -178,7 +208,8 @@ public class ToSalConversionsUtils {
                 Uri nodeConnector = ((OutputActionCase) sourceAction).getOutputAction().getOutputNodeConnector();
                 if (nodeConnector != null) {
                     //for (Uri uri : nodeConnectors) {
-                        targetAction.add(new Output(fromNodeConnectorRef(nodeConnector, node)));
+                    Uri fullNodeConnector = new Uri(node.getType()+":"+node.getID()+":"+nodeConnector.getValue());
+                        targetAction.add(new Output(fromNodeConnectorRef(fullNodeConnector, node)));
                     //}
                 }
             } else if (sourceAction instanceof PopMplsActionCase) {
@@ -346,17 +377,24 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    private static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
+    /**
+     * @param openflow nodeConnector uri
+     * @param node
+     * @return assembled nodeConnector
+     */
+    public static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
         NodeConnector nodeConnector = null;
         try {
-            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_TYPE,node.getNodeIDString()+":"+uri.getValue(),node);
+            NodeConnectorId nodeConnectorId = new NodeConnectorId(uri.getValue());
+            nodeConnector = NodeMapping.toADNodeConnector(nodeConnectorId, node);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            LOG.warn("nodeConnector creation failed at node: {} with nodeConnectorUri: {}",
+                    node, uri.getValue());
         }
         return nodeConnector;
     }
 
-    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match source) {
+    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match source) {
         Match target = new Match();
         if (source != null) {
             fillFrom(target, source.getVlanMatch());
@@ -364,22 +402,45 @@ public class ToSalConversionsUtils {
             fillFrom(target, source.getLayer3Match());
             fillFrom(target, source.getLayer4Match());
             fillFrom(target, source.getIpMatch());
+            fillFrom(target, source.getInPort());
         }
 
         return target;
+    }
+
+    /**
+     * @param target
+     * @param inPort
+     */
+    private static void fillFrom(Match target, NodeConnectorId inPort) {
+        if (inPort != null) {
+            String inPortValue = inPort.getValue();
+            if (inPortValue != null) {
+                try {
+                    target.setField(MatchType.IN_PORT, NodeMapping.toADNodeConnector(inPort,
+                            NodeMapping.toAdNodeId(inPort)));
+                } catch (ConstructionException e) {
+                    LOG.warn("nodeConnector construction failed", e);
+                }
+            }
+        }
     }
 
     private static void fillFrom(Match target, VlanMatch vlanMatch) {
         if (vlanMatch != null) {
             VlanId vlanId = vlanMatch.getVlanId();
             if (vlanId != null) {
-                org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanIdInner = vlanId
-                        .getVlanId();
-                if (vlanIdInner != null) {
-                    Integer vlanValue = vlanIdInner.getValue();
-                    if (vlanValue != null) {
-                        target.setField(DL_VLAN, vlanValue.shortValue());
+                if (Boolean.TRUE.equals(vlanId.isVlanIdPresent())) {
+                    org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanIdInner = vlanId
+                            .getVlanId();
+                    if (vlanIdInner != null) {
+                        Integer vlanValue = vlanIdInner.getValue();
+                        if (vlanValue != null) {
+                            target.setField(DL_VLAN, vlanValue.shortValue());
+                        }
                     }
+                } else {
+                    target.setField(DL_VLAN, MatchType.DL_VLAN_NONE);
                 }
             }
             VlanPcp vlanPcp = vlanMatch.getVlanPcp();

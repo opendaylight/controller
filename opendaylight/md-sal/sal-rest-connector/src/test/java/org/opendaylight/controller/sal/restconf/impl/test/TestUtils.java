@@ -13,6 +13,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Preconditions;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,7 +28,8 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -40,7 +42,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -60,8 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Preconditions;
 
 public final class TestUtils {
 
@@ -148,10 +147,9 @@ public final class TestUtils {
 
     /**
      *
-     * Fill missing data (namespaces) and build correct data type in
-     * {@code compositeNode} according to {@code dataSchemaNode}. The method
-     * {@link RestconfImpl#createConfigurationData createConfigurationData} is
-     * used because it contains calling of method {code normalizeNode}
+     * Fill missing data (namespaces) and build correct data type in {@code compositeNode} according to
+     * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
+     * because it contains calling of method {code normalizeNode}
      */
     public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules, String schemaNodePath) {
         RestconfImpl restconf = RestconfImpl.getInstance();
@@ -162,9 +160,8 @@ public final class TestUtils {
     }
 
     /**
-     * Searches module with name {@code searchedModuleName} in {@code modules}.
-     * If module name isn't specified and module set has only one element then
-     * this element is returned.
+     * Searches module with name {@code searchedModuleName} in {@code modules}. If module name isn't specified and
+     * module set has only one element then this element is returned.
      *
      */
     public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
@@ -280,8 +277,8 @@ public final class TestUtils {
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null, null,
-                byteArrayOS);
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null,
+                null, byteArrayOS);
 
         return byteArrayOS.toString();
     }
@@ -297,6 +294,22 @@ public final class TestUtils {
         }
         bufReader.close();
         return result.toString();
+    }
 
+    private static Pattern patternForStringsSeparatedByWhiteChars(String... substrings) {
+        StringBuilder pattern = new StringBuilder();
+        pattern.append(".*");
+        for (String substring : substrings) {
+            pattern.append(substring);
+            pattern.append("\\s*");
+        }
+        pattern.append(".*");
+        return Pattern.compile(pattern.toString(), Pattern.DOTALL);
+    }
+
+    public static boolean containsStringData(String jsonOutput, String... substrings) {
+        Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
+        Matcher matcher = pattern.matcher(jsonOutput);
+        return matcher.matches();
     }
 }

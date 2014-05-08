@@ -10,9 +10,6 @@
 
   <artifactId>netconf-it</artifactId>
   <name>${project.artifactId}</name>
-  <properties>
-    <tinybundles.version>2.0.0</tinybundles.version>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -177,7 +174,6 @@
       <plugin>
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>maven-paxexam-plugin</artifactId>
-        <version>1.2.4</version>
         <executions>
           <execution>
             <id>generate-config</id>

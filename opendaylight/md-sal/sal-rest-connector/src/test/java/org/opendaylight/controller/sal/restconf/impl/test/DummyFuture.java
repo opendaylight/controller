@@ -11,16 +11,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
+public class DummyFuture<T> implements Future<RpcResult<T>> {
 
     private final boolean cancel;
     private final boolean isCancelled;
     private final boolean isDone;
-    private final RpcResult<TransactionStatus> result;
+    private final RpcResult<T> result;
 
     public DummyFuture() {
         cancel = false;
@@ -29,15 +27,11 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
         result = null;
     }
 
-    private DummyFuture(final Builder builder) {
+    private DummyFuture(final Builder<T> builder) {
         cancel = builder.cancel;
         isCancelled = builder.isCancelled;
         isDone = builder.isDone;
         result = builder.result;
-    }
-
-    public static Builder builder() {
-        return new DummyFuture.Builder();
     }
 
     @Override
@@ -56,45 +50,45 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
     }
 
     @Override
-    public RpcResult<TransactionStatus> get() throws InterruptedException, ExecutionException {
+    public RpcResult<T> get() throws InterruptedException, ExecutionException {
         return result;
     }
 
     @Override
-    public RpcResult<TransactionStatus> get(final long timeout, final TimeUnit unit) throws InterruptedException,
-    ExecutionException, TimeoutException {
+    public RpcResult<T> get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
+            TimeoutException {
         return result;
     }
 
-    public static class Builder {
+    public static class Builder<T> {
 
         private boolean cancel;
         private boolean isCancelled;
         private boolean isDone;
-        private RpcResult<TransactionStatus> result;
+        private RpcResult<T> result;
 
-        public Builder cancel(final boolean cancel) {
+        public Builder<T> cancel(final boolean cancel) {
             this.cancel = cancel;
             return this;
         }
 
-        public Builder isCancelled(final boolean isCancelled) {
+        public Builder<T> isCancelled(final boolean isCancelled) {
             this.isCancelled = isCancelled;
             return this;
         }
 
-        public Builder isDone(final boolean isDone) {
+        public Builder<T> isDone(final boolean isDone) {
             this.isDone = isDone;
             return this;
         }
 
-        public Builder rpcResult(final RpcResult<TransactionStatus> result) {
+        public Builder<T> rpcResult(final RpcResult<T> result) {
             this.result = result;
             return this;
         }
 
-        public Future<RpcResult<TransactionStatus>> build() {
-            return new DummyFuture(this);
+        public Future<RpcResult<T>> build() {
+            return new DummyFuture<T>(this);
         }
     }
 }

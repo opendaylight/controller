@@ -25,6 +25,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+/*
+ * FIXME: THis test should be moved to sal-binding-broker and rewriten
+ * to use new DataBroker API
+ */
+@SuppressWarnings("deprecation")
 public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
 
     private static final NodeKey NODE_FOO_KEY = new NodeKey(new NodeId("foo"));

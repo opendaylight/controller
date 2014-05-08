@@ -48,9 +48,13 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
     private final TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            long now = System.nanoTime();
-            if(now > lastRequestTime+TimeUnit.MILLISECONDS.toNanos(REQUEST_MONITOR_INTERVAL)){
-                requestStatistics();
+            try{
+                long now = System.nanoTime();
+                if(now > lastRequestTime+TimeUnit.MILLISECONDS.toNanos(REQUEST_MONITOR_INTERVAL)){
+                    requestStatistics();
+                }
+            }catch (IllegalArgumentException | IllegalStateException | NullPointerException e){
+                srsLogger.warn("Exception occured while sending statistics request : {}",e);
             }
         }
     };

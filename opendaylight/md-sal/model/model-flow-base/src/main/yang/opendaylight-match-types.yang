@@ -275,6 +275,17 @@ module opendaylight-match-types {
         }
     }
 
+    grouping "tunnel-ipv4-match-fields" {
+        leaf tunnel-ipv4-source {
+            description "IPv4 source tunnel endpoint address.";
+            type inet:ipv4-prefix;
+        }
+        leaf tunnel-ipv4-destination {
+            description "IPv4 destination tunnel endpoint address.";
+            type inet:ipv4-prefix;
+        }
+    }
+
     grouping match {
         leaf in-port {
             type inv:node-connector-id;
@@ -320,6 +331,9 @@ module opendaylight-match-types {
             }
             case "arp-match" {
                 uses "arp-match-fields";
+            }
+            case "tunnel-ipv4-match" {
+                uses "tunnel-ipv4-match-fields";
             }
         }
 

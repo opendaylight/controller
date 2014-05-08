@@ -93,6 +93,7 @@ public class ChannelInputStream extends InputStream implements ChannelInboundHan
         synchronized(lock) {
             this.bb.discardReadBytes();
             this.bb.writeBytes((ByteBuf) o);
+            ((ByteBuf) o).release();
             lock.notifyAll();
         }
     }

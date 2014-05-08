@@ -8,7 +8,7 @@
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>base-features</artifactId>
-  <packaging>kar</packaging>
+  <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <description>Base Features POM</description>
   <properties>

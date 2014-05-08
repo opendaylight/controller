@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,49 +48,29 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+@SuppressWarnings("deprecation")
 public class DOMCodecBug01Test extends AbstractDataServiceTest {
 
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
-    private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
     private static final long FLOW_ID = 1234;
     private static final String NODE_ID = "node:1";
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
 
-    private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
-            NODE_ID);
-
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .child(Node.class, NODE_KEY).toInstance();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
     private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
 
     private static final FlowKey FLOW_KEY = new FlowKey(FLOW_ID, NODE_REF);
 
-    private static final Map<QName, Object> FLOW_KEY_BI = //
-    ImmutableMap.<QName, Object> of(FLOW_ID_QNAME, FLOW_ID, FLOW_NODE_QNAME, NODE_INSTANCE_ID_BI);
-
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier FLOW_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Flows.QNAME) //
-            .nodeWithKey(Flow.QNAME, FLOW_KEY_BI) //
-            .toInstance();
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
     InstanceIdentifier.builder(Flows.class) //
             .child(Flow.class, FLOW_KEY) //

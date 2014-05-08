@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.dom.broker.impl;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -70,8 +68,7 @@ public final class HashMapDataStore implements DataStore, AutoCloseable {
     }
 
     public RpcResult<Void> rollback(HashMapDataStoreTransaction transaction) {
-        return Rpcs.<Void> getRpcResult(true, null,
-                Collections.<RpcError> emptySet());
+        return RpcResultBuilder.<Void> success().build();
     }
 
     public RpcResult<Void> finish(HashMapDataStoreTransaction transaction) {
@@ -100,8 +97,7 @@ public final class HashMapDataStore implements DataStore, AutoCloseable {
         configuration.putAll(modification.getUpdatedConfigurationData());
         operational.putAll(modification.getUpdatedOperationalData());
 
-        return Rpcs.<Void> getRpcResult(true, null,
-                Collections.<RpcError> emptySet());
+        return RpcResultBuilder.<Void> success().build();
     }
 
     public void remove(final Map<InstanceIdentifier, CompositeNode> map,

@@ -17,7 +17,17 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface DataModificationTransaction extends DataModification<InstanceIdentifier, CompositeNode>{
+/**
+ *
+ * @deprecated Replaced by more specific
+ *             {@link org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction}
+ *             ,
+ *             {@link org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction}
+ *             or {@link org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction}
+ *
+ */
+@Deprecated
+public interface DataModificationTransaction extends DataModification<InstanceIdentifier, CompositeNode> {
 
     /**
      * Returns transaction identifier
@@ -34,8 +44,8 @@ public interface DataModificationTransaction extends DataModification<InstanceId
      * Commits transaction to be stored in global data repository.
      *
      *
-     * @return  Future object which returns RpcResult with TransactionStatus
-     *          when transaction is processed by store.
+     * @return Future object which returns RpcResult with TransactionStatus when
+     *         transaction is processed by store.
      */
     @Override
     Future<RpcResult<TransactionStatus>> commit();
@@ -43,6 +53,6 @@ public interface DataModificationTransaction extends DataModification<InstanceId
     ListenerRegistration<DataTransactionListener> registerListener(DataTransactionListener listener);
 
     public interface DataTransactionListener extends EventListener {
-        void onStatusUpdated(DataModificationTransaction transaction,TransactionStatus status);
+        void onStatusUpdated(DataModificationTransaction transaction, TransactionStatus status);
     }
 }

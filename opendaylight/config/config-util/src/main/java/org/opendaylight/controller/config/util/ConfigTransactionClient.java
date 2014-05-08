@@ -41,4 +41,14 @@ public interface ConfigTransactionClient extends
     void destroyModule(String moduleName, String instanceName) throws InstanceNotFoundException;
 
     void setAttribute(ObjectName on, String jmxName, Attribute attribute);
+
+    /*
+     * Get the attribute named jmxName from the Object with ObjectName on
+     *
+     * @param on - ObjectName of the Object from which the attribute should be read
+     * @param jmxName - name of the attribute to be read
+     *
+     * @return Attribute of Object on with attribute name jmxName
+     */
+    Attribute getAttribute(ObjectName on, String jmxName);
 }

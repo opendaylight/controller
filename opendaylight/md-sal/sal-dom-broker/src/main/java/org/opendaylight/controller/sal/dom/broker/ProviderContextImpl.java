@@ -18,21 +18,20 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.osgi.framework.BundleContext;
 
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
     private final Set<RpcRegistrationWrapper> registrations = new HashSet<>();
     private final Provider provider;
 
-    public ProviderContextImpl(final Provider provider, final BundleContext ctx) {
-        super(null, ctx);
+    public ProviderContextImpl(final Provider provider, final BrokerImpl broker) {
+        super(null, broker);
         this.provider = provider;
     }
 
     @Override
     public RpcRegistrationWrapper addRpcImplementation(final QName rpcType,
             final RpcImplementation implementation) throws IllegalArgumentException {
-        final RpcRegistration origReg = getBroker().getRouter()
+        final RpcRegistration origReg = getBrokerChecked().getRouter()
                 .addRpcImplementation(rpcType, implementation);
         final RpcRegistrationWrapper newReg = new RpcRegistrationWrapper(
                 origReg);
@@ -56,24 +55,24 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
             final QName rpcType, final RpcImplementation implementation) {
         throw new UnsupportedOperationException(
                 "TODO: auto-generated method stub");
+
     }
 
     @Override
     public RoutedRpcRegistration addRoutedRpcImplementation(
             final QName rpcType, final RpcImplementation implementation) {
-        throw new UnsupportedOperationException(
-                "TODO: auto-generated method stub");
+        return getBrokerChecked().getRouter().addRoutedRpcImplementation(rpcType, implementation);
     }
 
     @Override
     public Set<QName> getSupportedRpcs() {
-        return getBroker().getRouter().getSupportedRpcs();
+        return getBrokerChecked().getRouter().getSupportedRpcs();
     }
 
     @Override
     public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(
             final RpcRegistrationListener listener) {
-        return getBroker().getRouter().addRpcRegistrationListener(listener);
+        return getBrokerChecked().getRouter().addRpcRegistrationListener(listener);
     }
 
     /**

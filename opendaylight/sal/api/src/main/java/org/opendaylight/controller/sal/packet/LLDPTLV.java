@@ -151,18 +151,23 @@ public class LLDPTLV extends Packet {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         LLDPTLV other = (LLDPTLV) obj;
         if (fieldValues == null) {
-            if (other.fieldValues != null)
+            if (other.fieldValues != null) {
                 return false;
-        } else if (!fieldValues.equals(other.fieldValues))
+            }
+        } else if (!fieldValues.equals(other.fieldValues)) {
             return false;
+        }
         return true;
     }
 

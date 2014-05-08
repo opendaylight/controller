@@ -17,6 +17,10 @@ import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ER
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TYPE_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.NAMESPACE;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.stream.JsonWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,7 +28,6 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map.Entry;
-
 import javax.activation.UnsupportedDataTypeException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -41,7 +44,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
@@ -57,29 +59,24 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.gson.stream.JsonWriter;
-
 /**
- * This class defines an ExceptionMapper that handles RestconfDocumentedExceptions thrown by
- * resource implementations and translates appropriately to restconf error response as defined in
- * the RESTCONF RFC draft.
+ * This class defines an ExceptionMapper that handles RestconfDocumentedExceptions thrown by resource implementations
+ * and translates appropriately to restconf error response as defined in the RESTCONF RFC draft.
  *
  * @author Thomas Pantelis
  */
 @Provider
 public class RestconfDocumentedExceptionMapper implements ExceptionMapper<RestconfDocumentedException> {
 
-    private final static Logger LOG = LoggerFactory.getLogger( RestconfDocumentedExceptionMapper.class );
+    private final static Logger LOG = LoggerFactory.getLogger(RestconfDocumentedExceptionMapper.class);
 
     @Context
     private HttpHeaders headers;
 
     @Override
-    public Response toResponse( final RestconfDocumentedException exception ) {
+    public Response toResponse(final RestconfDocumentedException exception) {
 
-        LOG.debug( "In toResponse: {}", exception.getMessage() );
+        LOG.debug("In toResponse: {}", exception.getMessage());
 
         // Default to the content type if there's no Accept header
 
@@ -87,172 +84,158 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         List<MediaType> accepts = headers.getAcceptableMediaTypes();
 
-        LOG.debug( "Accept headers: {}", accepts );
+        LOG.debug("Accept headers: {}", accepts);
 
-        if( accepts != null && accepts.size() > 0 ) {
-            mediaType = accepts.get( 0 ); // just pick the first one
+        if (accepts != null && accepts.size() > 0) {
+            mediaType = accepts.get(0); // just pick the first one
         }
 
-        LOG.debug( "Using MediaType: {}",  mediaType );
+        LOG.debug("Using MediaType: {}", mediaType);
 
         List<RestconfError> errors = exception.getErrors();
-        if( errors.isEmpty() ) {
+        if (errors.isEmpty()) {
             // We don't actually want to send any content but, if we don't set any content here,
             // the tomcat front-end will send back an html error report. To prevent that, set a
             // single space char in the entity.
 
-            return Response.status( exception.getStatus() )
-                    .type( MediaType.TEXT_PLAIN_TYPE )
-                    .entity( " " ).build();
+            return Response.status(exception.getStatus()).type(MediaType.TEXT_PLAIN_TYPE).entity(" ").build();
         }
 
         int status = errors.iterator().next().getErrorTag().getStatusCode();
 
         ControllerContext context = ControllerContext.getInstance();
-        DataNodeContainer errorsSchemaNode = (DataNodeContainer)context.getRestconfModuleErrorsSchemaNode();
+        DataNodeContainer errorsSchemaNode = (DataNodeContainer) context.getRestconfModuleErrorsSchemaNode();
 
-        if( errorsSchemaNode == null ) {
-            return Response.status( status )
-                    .type( MediaType.TEXT_PLAIN_TYPE )
-                    .entity( exception.getMessage() ).build();
+        if (errorsSchemaNode == null) {
+            return Response.status(status).type(MediaType.TEXT_PLAIN_TYPE).entity(exception.getMessage()).build();
         }
 
         ImmutableList.Builder<Node<?>> errorNodes = ImmutableList.<Node<?>> builder();
-        for( RestconfError error: errors ) {
-            errorNodes.add( toDomNode( error ) );
+        for (RestconfError error : errors) {
+            errorNodes.add(toDomNode(error));
         }
 
-        ImmutableCompositeNode errorsNode =
-                ImmutableCompositeNode.create( ERRORS_CONTAINER_QNAME, errorNodes.build() );
+        ImmutableCompositeNode errorsNode = ImmutableCompositeNode.create(ERRORS_CONTAINER_QNAME, errorNodes.build());
 
         Object responseBody;
-        if( mediaType.getSubtype().endsWith( "json" ) ) {
-            responseBody = toJsonResponseBody( errorsNode, errorsSchemaNode );
-        }
-        else {
-            responseBody = toXMLResponseBody( errorsNode, errorsSchemaNode );
+        if (mediaType.getSubtype().endsWith("json")) {
+            responseBody = toJsonResponseBody(errorsNode, errorsSchemaNode);
+        } else {
+            responseBody = toXMLResponseBody(errorsNode, errorsSchemaNode);
         }
 
-        return Response.status( status ).type( mediaType ).entity( responseBody ).build();
+        return Response.status(status).type(mediaType).entity(responseBody).build();
     }
 
-    private Object toJsonResponseBody( final ImmutableCompositeNode errorsNode,
-            final DataNodeContainer errorsSchemaNode ) {
+    private Object toJsonResponseBody(final ImmutableCompositeNode errorsNode, final DataNodeContainer errorsSchemaNode) {
 
-        JsonMapper jsonMapper = new JsonMapper();
+        JsonMapper jsonMapper = new JsonMapper(null);
 
         Object responseBody = null;
         try {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            JsonWriter writer = new JsonWriter( new OutputStreamWriter( outStream, "UTF-8" ) );
-            writer.setIndent( "    " );
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(outStream, Charsets.UTF_8));
+            writer.setIndent("    ");
 
-            jsonMapper.write( writer, errorsNode, errorsSchemaNode, null );
+            jsonMapper.write(writer, errorsNode, errorsSchemaNode);
             writer.flush();
 
-            responseBody = outStream.toString( "UTF-8" );
-        }
-        catch( IOException e ) {
-            LOG.error( "Error writing error response body", e );
+            responseBody = outStream.toString("UTF-8");
+        } catch (IOException e) {
+            LOG.error("Error writing error response body", e);
         }
 
         return responseBody;
     }
 
-    private Object toXMLResponseBody( final ImmutableCompositeNode errorsNode,
-            final DataNodeContainer errorsSchemaNode ) {
+    private Object toXMLResponseBody(final ImmutableCompositeNode errorsNode, final DataNodeContainer errorsSchemaNode) {
 
         XmlMapper xmlMapper = new XmlMapper();
 
         Object responseBody = null;
         try {
-            Document xmlDoc = xmlMapper.write( errorsNode, errorsSchemaNode );
+            Document xmlDoc = xmlMapper.write(errorsNode, errorsSchemaNode);
 
-            responseBody = documentToString( xmlDoc );
-        }
-        catch( TransformerException | UnsupportedDataTypeException | UnsupportedEncodingException e ) {
-            LOG.error( "Error writing error response body", e );
+            responseBody = documentToString(xmlDoc);
+        } catch (TransformerException | UnsupportedDataTypeException | UnsupportedEncodingException e) {
+            LOG.error("Error writing error response body", e);
         }
 
         return responseBody;
     }
 
-    private String documentToString( final Document doc ) throws TransformerException, UnsupportedEncodingException {
+    private String documentToString(final Document doc) throws TransformerException, UnsupportedEncodingException {
         Transformer transformer = createTransformer();
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-        transformer.transform( new DOMSource( doc ), new StreamResult( outStream ) );
+        transformer.transform(new DOMSource(doc), new StreamResult(outStream));
 
-        return outStream.toString( "UTF-8" );
+        return outStream.toString("UTF-8");
     }
 
     private Transformer createTransformer() throws TransformerFactoryConfigurationError,
-    TransformerConfigurationException {
+            TransformerConfigurationException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "no" );
-        transformer.setOutputProperty( OutputKeys.METHOD, "xml" );
-        transformer.setOutputProperty( OutputKeys.INDENT, "yes" );
-        transformer.setOutputProperty( OutputKeys.ENCODING, "UTF-8" );
-        transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "4" );
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         return transformer;
     }
 
-    private Node<?> toDomNode( final RestconfError error ) {
+    private Node<?> toDomNode(final RestconfError error) {
 
         CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
-        builder.setQName( ERROR_LIST_QNAME );
+        builder.setQName(ERROR_LIST_QNAME);
 
-        addLeaf( builder, ERROR_TYPE_QNAME, error.getErrorType().getErrorTypeTag() );
-        addLeaf( builder, ERROR_TAG_QNAME, error.getErrorTag().getTagValue() );
-        addLeaf( builder, ERROR_MESSAGE_QNAME, error.getErrorMessage() );
-        addLeaf( builder, ERROR_APP_TAG_QNAME, error.getErrorAppTag() );
+        addLeaf(builder, ERROR_TYPE_QNAME, error.getErrorType().getErrorTypeTag());
+        addLeaf(builder, ERROR_TAG_QNAME, error.getErrorTag().getTagValue());
+        addLeaf(builder, ERROR_MESSAGE_QNAME, error.getErrorMessage());
+        addLeaf(builder, ERROR_APP_TAG_QNAME, error.getErrorAppTag());
 
-        Node<?> errorInfoNode = parseErrorInfo( error.getErrorInfo() );
-        if( errorInfoNode != null ) {
-            builder.add( errorInfoNode );
+        Node<?> errorInfoNode = parseErrorInfo(error.getErrorInfo());
+        if (errorInfoNode != null) {
+            builder.add(errorInfoNode);
         }
 
         return builder.toInstance();
     }
 
-    private Node<?> parseErrorInfo( final String errorInfo ) {
-        if( Strings.isNullOrEmpty( errorInfo ) ) {
+    private Node<?> parseErrorInfo(final String errorInfo) {
+        if (Strings.isNullOrEmpty(errorInfo)) {
             return null;
         }
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware( true );
-        factory.setCoalescing( true );
-        factory.setIgnoringElementContentWhitespace( true );
-        factory.setIgnoringComments( true );
+        factory.setNamespaceAware(true);
+        factory.setCoalescing(true);
+        factory.setIgnoringElementContentWhitespace(true);
+        factory.setIgnoringComments(true);
 
         // Wrap the error info content in a root <error-info> element so it can be parsed
         // as XML. The error info content may or may not be XML. If not then it will be
         // parsed as text content of the <error-info> element.
 
-        String errorInfoWithRoot =
-                new StringBuilder( "<error-info xmlns=\"" ).append( NAMESPACE ).append( "\">" )
-                .append( errorInfo ).append( "</error-info>" ).toString();
+        String errorInfoWithRoot = new StringBuilder("<error-info xmlns=\"").append(NAMESPACE).append("\">")
+                .append(errorInfo).append("</error-info>").toString();
 
         Document doc = null;
         try {
-            doc = factory.newDocumentBuilder().parse(
-                    new InputSource( new StringReader( errorInfoWithRoot ) ) );
-        }
-        catch( Exception e ) {
-            // TODO: what if the content is text that happens to contain invalid markup? Could
-            // wrap in CDATA and try again.
+            doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(errorInfoWithRoot)));
+        } catch (Exception e) {
+            // TODO: what if the content is text that happens to contain invalid markup?
+            // Could wrap in CDATA and try again.
 
-            LOG.warn( "Error parsing restconf error-info, \"" + errorInfo + "\", as XML: " +
-                    e.toString() );
+            LOG.warn("Error parsing restconf error-info, \"{}\", as XML", errorInfo, e);
             return null;
         }
 
-        Node<?> errorInfoNode = XmlDocumentUtils.toDomNode( doc );
+        Node<?> errorInfoNode = XmlDocumentUtils.toDomNode(doc);
 
-        if( errorInfoNode instanceof CompositeNode ) {
-            CompositeNode compositeNode = (CompositeNode)XmlDocumentUtils.toDomNode( doc );
+        if (errorInfoNode instanceof CompositeNode) {
+            CompositeNode compositeNode = (CompositeNode) XmlDocumentUtils.toDomNode(doc);
 
             // At this point the QName for the "error-info" CompositeNode doesn't contain the revision
             // as it isn't present in the XML. So we'll copy all the child nodes and create a new
@@ -260,20 +243,20 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
             // locate the schema.
 
             ImmutableList.Builder<Node<?>> childNodes = ImmutableList.builder();
-            for( Entry<QName, List<Node<?>>> entry: compositeNode.entrySet() ) {
-                childNodes.addAll( entry.getValue() );
+            for (Entry<QName, List<Node<?>>> entry : compositeNode.entrySet()) {
+                childNodes.addAll(entry.getValue());
             }
 
-            errorInfoNode = ImmutableCompositeNode.create( ERROR_INFO_QNAME, childNodes.build() );
+            errorInfoNode = ImmutableCompositeNode.create(ERROR_INFO_QNAME, childNodes.build());
         }
 
         return errorInfoNode;
     }
 
-    private void addLeaf( final CompositeNodeBuilder<ImmutableCompositeNode> builder, final QName qname,
-            final String value ) {
-        if( !Strings.isNullOrEmpty( value ) ) {
-            builder.addLeaf( qname, value );
+    private void addLeaf(final CompositeNodeBuilder<ImmutableCompositeNode> builder, final QName qname,
+            final String value) {
+        if (!Strings.isNullOrEmpty(value)) {
+            builder.addLeaf(qname, value);
         }
     }
 }

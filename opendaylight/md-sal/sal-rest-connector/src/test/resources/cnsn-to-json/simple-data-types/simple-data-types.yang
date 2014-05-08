@@ -269,6 +269,10 @@ module simple-data-types {
         }
     }
 	  
-	  
+	anyxml complex-any;
+	
+	anyxml simple-any;
+	
+	anyxml empty-any;
   }
 }
