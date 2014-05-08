@@ -125,6 +125,7 @@
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
+    <module>features/controller</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
   </modules>
