@@ -21,8 +21,6 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.rest.impl.RestconfProvider;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -57,9 +55,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
 
     private void checkPreconditions() {
         if( context == null || dataService == null ) {
-            ResponseException _responseException = new ResponseException( Status.SERVICE_UNAVAILABLE,
-                    RestconfProvider.NOT_INITALIZED_MSG );
-            throw _responseException;
+            throw new RestconfDocumentedException( Status.SERVICE_UNAVAILABLE );
         }
     }
 
@@ -108,7 +104,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
             return future.get();
         }
         catch( Exception e ) {
-            throw new ResponseException( e, "Error invoking RPC " + type );
+            throw new RestconfDocumentedException( "Error invoking RPC " + type, e );
         }
     }
 

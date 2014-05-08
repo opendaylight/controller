@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,17 +85,21 @@ class JsonMapper {
     private void writeChildrenOfParent(JsonWriter writer, CompositeNode parent, DataNodeContainer parentSchema)
             throws IOException {
         checkNotNull(parent);
-        checkNotNull(parentSchema);
+
+        Set<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ?
+                                   Collections.<DataSchemaNode>emptySet() : parentSchema.getChildNodes();
 
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
+            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchemaChildNodes);
 
             if (childSchema == null) {
-                throw new UnsupportedDataTypeException("Probably the data node \"" + child.getNodeType().getLocalName()
-                        + "\" is not conform to schema");
-            }
+                // Node may not conform to schema or allows "anyxml" - we'll process it.
 
-            if (childSchema instanceof ContainerSchemaNode) {
+                logger.debug( "No schema found for data node \"" + child.getNodeType() );
+
+                handleNoSchemaFound( writer, child, parent );
+            }
+            else if (childSchema instanceof ContainerSchemaNode) {
                 Preconditions.checkState(child instanceof CompositeNode,
                         "Data representation of Container should be CompositeNode - " + child.getNodeType());
                 writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
@@ -123,12 +128,28 @@ class JsonMapper {
         }
 
         for (Node<?> child : parent.getChildren()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
+            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchemaChildNodes);
             if (childSchema instanceof LeafListSchemaNode) {
-                foundLeafLists.remove((LeafListSchemaNode) childSchema);
+                foundLeafLists.remove(childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
-                foundLists.remove((ListSchemaNode) childSchema);
+                foundLists.remove(childSchema);
             }
+        }
+    }
+
+    private void handleNoSchemaFound( JsonWriter writer, Node<?> node,
+                                      CompositeNode parent ) throws IOException {
+        if( node instanceof SimpleNode<?> ) {
+            writeName( node, null, writer );
+            Object value = node.getValue();
+            if( value != null ) {
+                writer.value( String.valueOf( value ) );
+            }
+        } else { // CompositeNode
+            Preconditions.checkState( node instanceof CompositeNode,
+                    "Data representation of Container should be CompositeNode - " + node.getNodeType() );
+
+            writeContainer( writer, (CompositeNode) node, null );
         }
     }
 
@@ -301,7 +322,7 @@ class JsonMapper {
 
     private void writeName(Node<?> node, DataSchemaNode schema, JsonWriter writer) throws IOException {
         String nameForOutput = node.getNodeType().getLocalName();
-        if (schema.isAugmenting()) {
+        if ( schema != null && schema.isAugmenting()) {
             ControllerContext contContext = ControllerContext.getInstance();
             CharSequence moduleName = null;
             if (mountPoint == null) {
