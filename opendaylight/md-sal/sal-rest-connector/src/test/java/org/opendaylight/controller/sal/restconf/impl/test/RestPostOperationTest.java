@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -51,6 +52,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
+import com.google.common.util.concurrent.Futures;
 
 public class RestPostOperationTest extends JerseyTest {
 
@@ -99,6 +102,7 @@ public class RestPostOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
@@ -116,7 +120,7 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         uri = "/operations/test-module:rpc-wrongtest";
-        assertEquals(404, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+        assertEquals(400, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
     }
 
     @Test
@@ -173,7 +177,8 @@ public class RestPostOperationTest extends JerseyTest {
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
         RpcResult<CompositeNode> rpcResult = new DummyRpcResult.Builder<CompositeNode>().result(result)
                 .isSuccessful(sucessful).build();
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(rpcResult);
+        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class)))
+            .thenReturn(Futures.<RpcResult<CompositeNode>>immediateFuture( rpcResult ));
     }
 
     private void mockCommitConfigurationDataPostMethod(TransactionStatus statusName) {

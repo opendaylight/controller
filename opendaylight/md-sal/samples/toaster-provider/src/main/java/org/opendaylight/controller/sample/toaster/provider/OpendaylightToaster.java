@@ -37,7 +37,9 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,14 +159,15 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                 LOG.info( "Toaster is already making toast" );
 
                 RpcResult<Void> result = Rpcs.<Void> getRpcResult(false, null, Arrays.asList(
-                        RpcErrors.getRpcError( null, null, null, null,
-                                               "Toaster is busy", null, null ) ) );
+                        RpcErrors.getRpcError( "", "in-use", null, ErrorSeverity.WARNING,
+                                               "Toaster is busy", ErrorType.APPLICATION, null ) ) );
                 return Futures.immediateFuture(result);
             }
             else if( outOfBread() ) {
                 RpcResult<Void> result = Rpcs.<Void> getRpcResult(false, null, Arrays.asList(
-                        RpcErrors.getRpcError( null, null, null, null,
-                                               "Toaster is out of bread", null, null ) ) );
+                        RpcErrors.getRpcError( "out-of-stock", "resource-denied", null, null,
+                                               "Toaster is out of bread",
+                                               ErrorType.APPLICATION, null ) ) );
                 return Futures.immediateFuture(result);
             }
             else {

@@ -34,11 +34,11 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -92,6 +92,7 @@ public class RestGetOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
@@ -145,15 +146,15 @@ public class RestGetOperationTest extends JerseyTest {
 
     /**
      * MountPoint test. URI represents mount point.
-     * 
+     *
      * Slashes in URI behind mount point. lst1 element with key
      * GigabitEthernet0%2F0%2F0%2F0 (GigabitEthernet0/0/0/0) is requested via
      * GET HTTP operation. It is tested whether %2F character is replaced with
      * simple / in InstanceIdentifier parameter in method
      * {@link BrokerFacade#readConfigurationDataBehindMountPoint(MountInstance, InstanceIdentifier)}
      * which is called in method {@link RestconfImpl#readConfigurationData}
-     * 
-     * 
+     *
+     *
      * @throws ParseException
      */
     @Test

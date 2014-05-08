@@ -23,7 +23,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -38,7 +38,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return true;
+        return type.equals( StructuredData.class );
     }
 
     @Override
@@ -52,7 +52,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
             throws IOException, WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
-            throw new ResponseException(Response.Status.NOT_FOUND, "No data exists.");
+            throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, "UTF-8"));
