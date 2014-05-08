@@ -1774,14 +1774,14 @@
           </configuration>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
               <groupId>org.codehaus.enunciate</groupId>
               <artifactId>enunciate-swagger</artifactId>
               <version>${enunciate.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>commons.logback_settings</artifactId>
+              <version>0.0.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
