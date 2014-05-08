@@ -7,13 +7,24 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
-  <artifactId>base-features</artifactId>
+  <artifactId>features-adsal</artifactId>
+  <version>${sal.version}</version>
   <packaging>pom</packaging>
-  <name>${project.artifactId}</name>
-  <description>Base Features POM</description>
+  <name>Features :: AD-SAL Features</name>
+  <description>AD-SAL Features POM</description>
   <properties>
     <features.file>features.xml</features.file>
   </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>base-features</artifactId>
+      <version>${project.parent.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
   <build>
     <resources>
       <resource>
@@ -22,24 +33,6 @@
       </resource>
     </resources>
     <plugins>
-      <plugin>
-        <groupId>org.apache.karaf.tooling</groupId>
-        <artifactId>karaf-maven-plugin</artifactId>
-        <version>${karaf.version}</version>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>features-create-kar</id>
-            <goals>
-              <goal>features-create-kar</goal>
-            </goals>
-            <configuration>
-              <featuresFile>${project.build.directory}/classes/${features.file}</featuresFile>
-            </configuration>
-          </execution>
-        </executions>
-        <!-- There is no useful configuration for the kar mojo. The features-generate-descriptor mojo configuration may be useful -->
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
