@@ -161,7 +161,6 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
-        <version>${yangtools.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
