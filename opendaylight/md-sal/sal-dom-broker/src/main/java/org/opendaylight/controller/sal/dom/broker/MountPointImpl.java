@@ -135,7 +135,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
 
     @Override
     public ListenableFuture<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
-        return null;
+        return rpcs.invokeRpc( type, input );
     }
 
     @Override
