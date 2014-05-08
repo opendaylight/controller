@@ -16,7 +16,14 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 
+import com.google.common.collect.ImmutableSet;
+
 public class RestconfApplication extends Application {
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return ImmutableSet.<Class<?>>of( RestconfDocumentedExceptionMapper.class );
+    }
 
     @Override
     public Set<Object> getSingletons() {
@@ -35,5 +42,6 @@ public class RestconfApplication extends Application {
         singletons.add(StructuredDataToJsonProvider.INSTANCE);
         return singletons;
     }
+
 
 }

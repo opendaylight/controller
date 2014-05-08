@@ -7,6 +7,15 @@
 */
 package org.opendaylight.controller.sal.restconf.rpc.impl;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 public abstract class AbstractRpcExecutor implements RpcExecutor {
@@ -19,5 +28,28 @@ public abstract class AbstractRpcExecutor implements RpcExecutor {
     @Override
     public RpcDefinition getRpcDefinition() {
         return rpcDef;
+    }
+
+    protected RpcResult<CompositeNode> getRpcResult(
+                                            Future<RpcResult<CompositeNode>> fromFuture ) {
+        try {
+            return fromFuture.get();
+        }
+        catch( InterruptedException e ) {
+            throw new RestconfDocumentedException(
+                        "The operation was interrupted while executing and did not complete.",
+                        ErrorType.RPC, ErrorTag.PARTIAL_OPERATION );
+        }
+        catch( ExecutionException e ) {
+            if( e.getCause() instanceof CancellationException ) {
+                throw new RestconfDocumentedException(
+                        "The operation was cancelled while executing.",
+                        ErrorType.RPC, ErrorTag.PARTIAL_OPERATION );
+            }
+            else {
+                throw new RestconfDocumentedException(
+                       "The operation encountered an unexpected error while executing.", e );
+            }
+        }
     }
 }
