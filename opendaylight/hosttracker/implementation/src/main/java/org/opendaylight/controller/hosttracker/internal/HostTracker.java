@@ -39,6 +39,7 @@ import org.opendaylight.controller.clustering.services.IClusterContainerServices
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.hosttracker.HostIdFactory;
 import org.opendaylight.controller.hosttracker.IHostId;
+import org.opendaylight.controller.hosttracker.IHosttrackerShell;
 import org.opendaylight.controller.hosttracker.IPHostId;
 import org.opendaylight.controller.hosttracker.IPMacHostId;
 import org.opendaylight.controller.hosttracker.IfHostListener;
@@ -101,7 +102,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAware, IInventoryListener,
-        ITopologyManagerAware, ICacheUpdateAware<IHostId, HostNodeConnector>, CommandProvider {
+        ITopologyManagerAware, ICacheUpdateAware<IHostId, HostNodeConnector>, CommandProvider, IHosttrackerShell {
     static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
     static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
@@ -1617,5 +1618,25 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public List<List<String>> getHostNetworkHierarchy(InetAddress addr) {
         IHostId id = HostIdFactory.create(addr, null);
         return getHostNetworkHierarchy(id);
+    }
+
+    @Override
+    public void dumpPendingARPReqList(CommandInterpreter ci) {
+        // TODO Auto-generated method stub
+        ARPPending arphost;
+        for (Entry<IHostId, ARPPending> entry : ARPPendingList.entrySet()) {
+            arphost = entry.getValue();
+            ci.println(arphost.getHostId().toString());
+        }
+    }
+
+    @Override
+    public void dumpFailedARPReqList(CommandInterpreter ci) {
+        // TODO Auto-generated method stub
+        ARPPending arphost;
+        for (Entry<IHostId, ARPPending> entry : failedARPReqList.entrySet()) {
+            arphost = entry.getValue();
+            ci.println(arphost.getHostId().toString());
+        }
     }
 }
