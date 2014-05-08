@@ -21,7 +21,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
-public class TreeNodeUtils {
+public final class TreeNodeUtils {
+    private TreeNodeUtils() {
+        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
 
     /**
      * Finds a node in tree
@@ -39,7 +42,6 @@ public class TreeNodeUtils {
         }
         return current;
     }
-
 
     public static <T extends StoreTreeNode<T>> T findNodeChecked(final T tree, final InstanceIdentifier path) {
         T current = tree;
