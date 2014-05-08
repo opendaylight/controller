@@ -1,0 +1,20 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+        <command name="hosttracker/dumpFailedARPReqList">
+            <action class="org.opendaylight.controller.hosttracker.shell.DumpPendingARPReqList">
+               <property name="dumpFailedARPReqList" ref="hosttracker.shell"/>
+            </action>
+        </command>
+
+        <command name="hosttracker/dumpPendingARPReqList">
+            <action class="org.opendaylight.controller.hosttracker.shell.DumpFailedARPReqList">
+               <property name="dumpPendingARPReqList" ref="hosttracker.shell"/>
+            </action>
+        </command>
+    </command-bundle>
+
+    <reference id="hosttracker.shell" interface="org.opendaylight.controller.hosttracker.IHostTrackerShell"/>
+
+</blueprint>
