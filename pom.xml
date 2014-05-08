@@ -28,6 +28,7 @@
     <module>opendaylight/forwardingrulesmanager/implementation</module>
     <module>opendaylight/hosttracker/api</module>
     <module>opendaylight/hosttracker/implementation</module>
+    <module>opendaylight/hosttracker/shell</module>
     <module>opendaylight/hosttracker_new/api</module>
     <module>opendaylight/hosttracker_new/implementation</module>
     <module>opendaylight/containermanager/api</module>
@@ -126,6 +127,7 @@
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
+    <module>features/controller</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>

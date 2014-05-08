@@ -39,18 +39,12 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <!-- scope is compile so all features (there is only one) are installed
+            into startup.properties and the feature repo itself is not installed -->
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>base-features</artifactId>
       <version>${project.version}</version>
       <type>kar</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-features</artifactId>
-      <version>${config.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
       <scope>runtime</scope>
     </dependency>
     <!--<dependency>
@@ -208,27 +202,24 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
         <executions>
           <execution>
-            <id>copy</id>
+            <id>copy-resources</id>
             <goals>
-              <goal>copy</goal>
+              <goal>copy-resources</goal>
             </goals>
             <!-- here the phase you need -->
-            <phase>generate-resources</phase>
+            <phase>process-resources</phase>
             <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.opendaylight.controller</groupId>
-                  <artifactId>karaf.branding</artifactId>
-                  <version>${karaf.branding.version}</version>
-                  <outputDirectory>target/assembly/lib</outputDirectory>
-                  <destFileName>karaf.branding-${branding.version}.jar</destFileName>
-                </artifactItem>
-              </artifactItems>
+              <outputDirectory>${basedir}/target/assembly</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/resources</directory>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
