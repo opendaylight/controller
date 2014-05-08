@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-config-persister-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.controller/config-persister-features/${config.version}/xml/features</repository>
+  <feature name='odl-config-netty' version='${project.version}'>
+    <feature version='${project.version}'>odl-config-netty-config-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netty-event-executor-config/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/netty-threadgroup-config/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/netty-timer-config/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/threadpool-config-api/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/threadpool-config-impl/${project.version}</bundle>
+    <feature version='${project.version}'>odl-config-startup</feature>
+  </feature>
+</features>
