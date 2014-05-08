@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_32d0ee4f",
+        "filename": "features/controller/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-08T14:49:07Z",
+      "side": 1,
+      "message": "Can be removed.. now in MD-SAL+config patch",
+      "revId": "8f3a8b8b5eaefd3b92dbd5c373847d6ab07aab09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d2c42294",
+        "filename": "features/controller/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-08T14:49:07Z",
+      "side": 1,
+      "message": "In netconf patch",
+      "revId": "8f3a8b8b5eaefd3b92dbd5c373847d6ab07aab09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2c12681",
+        "filename": "features/controller/src/main/resources/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-08T14:49:07Z",
+      "side": 1,
+      "message": "In config patch",
+      "revId": "8f3a8b8b5eaefd3b92dbd5c373847d6ab07aab09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
