@@ -9,6 +9,9 @@ package org.opendaylight.controller.sal.dom.broker.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,9 +31,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 
 public class YangDataOperations {
 
@@ -84,10 +84,10 @@ public class YangDataOperations {
         }
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<Map<QName, Object>, CompositeNode> originalMap = YangDataUtils
-                .toIndexMap((List) original, node.getKeyDefinition());
+        .toIndexMap((List) original, node.getKeyDefinition());
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<Map<QName, Object>, CompositeNode> modifiedMap = YangDataUtils
-                .toIndexMap((List) modified, node.getKeyDefinition());
+        .toIndexMap((List) modified, node.getKeyDefinition());
 
         final List<Node<?>> mergedNodes = new ArrayList<Node<?>>(
                 original.size() + modified.size());
@@ -140,7 +140,7 @@ public class YangDataOperations {
                 modified.getNodeType()));
 
         final List<Node<?>> mergedChildNodes = new ArrayList<Node<?>>(stored
-                .getChildren().size() + modified.getChildren().size());
+                .getValue().size() + modified.getValue().size());
         final Set<QName> toProcess = new HashSet<QName>(stored.keySet());
         toProcess.addAll(modified.keySet());
 

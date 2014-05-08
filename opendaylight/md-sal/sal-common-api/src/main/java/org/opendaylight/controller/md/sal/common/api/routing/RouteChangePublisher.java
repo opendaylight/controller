@@ -9,6 +9,12 @@ package org.opendaylight.controller.md.sal.common.api.routing;
 
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
+/**
+ * Publishes changes in local RPC routing table to registered listener.
+ *
+ * @param <C> Type, which is used to represent Routing context.
+ * @param <P> Type of data tree path, which is used to identify route.
+ */
 public interface RouteChangePublisher<C,P> {
 
     <L extends RouteChangeListener<C,P>> ListenerRegistration<L> registerRouteChangeListener(L listener);

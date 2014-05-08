@@ -12,6 +12,7 @@ import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public interface MountProvisionInstance extends //
         MountInstance,//
         NotificationPublishService, //

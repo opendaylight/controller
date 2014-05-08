@@ -84,8 +84,9 @@ public interface RuntimeCodeGenerator {
      *            - Subclass of RpcService for which Router is to be generated.
      * @return Instance of RpcService of provided serviceType which implements
      *         also {@link RpcRouter}<T> and {@link org.opendaylight.controller.sal.binding.spi.DelegateProxy}
+     * @throws RpcIsNotRoutedException
      */
-    <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType,String name) throws IllegalArgumentException;
+    <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType,String name) throws IllegalArgumentException, RpcIsNotRoutedException;
 
     NotificationInvokerFactory getInvokerFactory();
 }

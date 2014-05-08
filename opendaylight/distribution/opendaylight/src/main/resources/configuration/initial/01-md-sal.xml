@@ -15,6 +15,7 @@
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:schema-service-singleton</type>
                     <name>yang-schema-service</name>
                 </module>
+
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:runtime-generated-mapping</type>
                     <name>runtime-mapping-singleton</name>
@@ -34,8 +35,52 @@
                         <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
                         <name>binding-data-broker</name>
                     </data-broker>
+                    <root-data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
+                        <name>binding-data-broker</name>
+                    </root-data-broker>
                 </module>
 
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-config-datastore-provider</type>
+                    <name>config-store-service</name>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                </module>
+
+                <!-- DISTRIBUTED_DATA_STORE -->
+                <!-- Enable the following modules if you want to use the Distributed Data Store instead of the InMemoryDataStore -->
+                <!--
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider">prefix:distributed-operational-datastore-provider</type>
+                    <name>distributed-operational-store-module</name>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                </module>
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider">prefix:distributed-config-datastore-provider</type>
+                    <name>distributed-config-store-module</name>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                </module>
+                -->
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-operational-datastore-provider</type>
+                    <name>operational-store-service</name>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                </module>
                 <!--
                      Tree-based in-memory data store. This is the data store which is currently
                      recommended for single-node deployments.
@@ -43,10 +88,30 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-inmemory-data-broker</type>
                     <name>inmemory-data-broker</name>
+
                     <schema-service>
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
                         <name>yang-schema-service</name>
                     </schema-service>
+
+                   <config-data-store>
+                        <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                        <name>config-store-service</name>
+                        <!-- DISTRIBUTED_DATA_STORE -->
+                        <!--
+                        <name>distributed-config-store-service</name>
+                        -->
+                    </config-data-store>
+
+                    <operational-data-store>
+                        <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                        <name>operational-store-service</name>
+                        <!-- DISTRIBUTED_DATA_STORE -->
+                        <!--
+                        <name>distributed-operational-store-service</name>
+                        -->
+
+                    </operational-data-store>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</type>
@@ -68,6 +133,20 @@
                         <name>runtime-mapping-singleton</name>
                     </binding-mapping-service>
                 </module>
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-forwarded-data-broker</type>
+                    <name>binding-async-data-broker</name>
+                    <binding-forwarded-data-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                        <dom-async-broker>
+                            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                            <name>dom-broker</name>
+                        </dom-async-broker>
+                        <binding-mapping-service>
+                            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding:binding-dom-mapping-service</type>
+                            <name>runtime-mapping-singleton</name>
+                        </binding-mapping-service>
+                    </binding-forwarded-data-broker>
+                </module>
             </modules>
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                     <service>
@@ -77,6 +156,43 @@
                             <provider>/modules/module[type='schema-service-singleton'][name='yang-schema-service']</provider>
                         </instance>
                     </service>
+
+                <!-- DISTRIBUTED_DATA_STORE -->
+                <!-- Enable the following if you want to use the Distributed Data Store instead of the InMemory Data Store -->
+                <!-- Note that you MUST delete the InMemoryDataStore related services which provide config-dom-datastore and operational-dom-datastore -->
+                <!--
+                <service>
+                    <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                    <instance>
+                        <name>distributed-config-store-service</name>
+                        <provider>/modules/module[type='distributed-config-datastore-provider'][name='distributed-config-store-module']</provider>
+                    </instance>
+                </service>
+                <service>
+                    <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                    <instance>
+                        <name>distributed-operational-store-service</name>
+                        <provider>/modules/module[type='distributed-operational-datastore-provider'][name='distributed-operational-store-module']</provider>
+                    </instance>
+                </service>
+                -->
+
+                <!-- DISTRIBUTED_DATA_STORE -->
+                <!-- Delete the following two services (config-store-service and operational-store-service) if you want to use the distributed data store instead -->
+                <service>
+                    <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                    <instance>
+                        <name>config-store-service</name>
+                        <provider>/modules/module[type='inmemory-config-datastore-provider'][name='config-store-service']</provider>
+                    </instance>
+                </service>
+                <service>
+                    <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                    <instance>
+                        <name>operational-store-service</name>
+                        <provider>/modules/module[type='inmemory-operational-datastore-provider'][name='operational-store-service']</provider>
+                    </instance>
+                </service>
                     <service>
                         <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-dom-mapping-service</type>
                         <instance>
@@ -123,6 +239,14 @@
                     </service>
 
                     <service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
+                        <instance>
+                            <name>binding-data-broker</name>
+                            <provider>/modules/module[type='binding-forwarded-data-broker'][name='binding-async-data-broker']</provider>
+                        </instance>
+                    </service>
+
+                    <service>
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
                         <instance>
                             <name>inmemory-data-broker</name>
@@ -140,5 +264,9 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store?module=opendaylight-config-dom-datastore&amp;revision=2014-06-17</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store?module=opendaylight-operational-dom-datastore&amp;revision=2014-06-17</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider?module=opendaylight-inmemory-datastore-provider&amp;revision=2014-06-17</capability>
+
     </required-capabilities>
 </snapshot>

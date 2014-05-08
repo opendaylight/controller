@@ -20,6 +20,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-api</artifactId>
+            <version>${config.version}</version>
         </dependency>
     </dependencies>
 

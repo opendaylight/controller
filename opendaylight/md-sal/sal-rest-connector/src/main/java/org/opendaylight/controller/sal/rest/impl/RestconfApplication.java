@@ -7,22 +7,19 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.core.Application;
-
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-
-import com.google.common.collect.ImmutableSet;
 
 public class RestconfApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return ImmutableSet.<Class<?>>of( RestconfDocumentedExceptionMapper.class );
+        return ImmutableSet.<Class<?>> of(RestconfDocumentedExceptionMapper.class);
     }
 
     @Override
@@ -42,6 +39,5 @@ public class RestconfApplication extends Application {
         singletons.add(StructuredDataToJsonProvider.INSTANCE);
         return singletons;
     }
-
 
 }

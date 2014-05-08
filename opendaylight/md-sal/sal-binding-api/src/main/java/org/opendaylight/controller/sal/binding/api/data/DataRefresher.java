@@ -13,8 +13,9 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
  * Trigger for refreshing of the data exposed by the {@link Provider}
  *
  *
- *
+ * @deprecated Unused, not supported. Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore.
  */
+@Deprecated
 public interface DataRefresher extends BindingAwareProvider.ProviderFunctionality {
 
     /**

@@ -107,7 +107,7 @@ public class DOMBrokerTest {
                 TestModel.TEST_PATH);
         assertTrue(writeTxContainer.get().isPresent());
 
-        writeTx.commit().get();
+        writeTx.submit().get();
 
         Optional<NormalizedNode<?, ?>> afterCommitRead = domBroker.newReadOnlyTransaction()
                 .read(OPERATIONAL, TestModel.TEST_PATH).get();

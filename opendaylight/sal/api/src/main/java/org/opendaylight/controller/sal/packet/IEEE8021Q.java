@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,8 +11,11 @@ package org.opendaylight.controller.sal.packet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 
 /**
  * Class that represents the IEEE 802.1Q objects
@@ -146,6 +149,22 @@ public class IEEE8021Q extends Packet {
         byte[] ethType = BitBufferHelper.toByteArray(etherType);
         fieldValues.put(ETHT, ethType);
         return this;
+    }
+
+    @Override
+    public void populateMatch(Match match) {
+        match.setField(MatchType.DL_VLAN, this.getVid());
+        match.setField(MatchType.DL_VLAN_PR, this.getPcp());
+        match.setField(MatchType.DL_TYPE, this.getEtherType());
+    }
+
+    /**
+     * Gets the header size in bits
+     * @return The .1Q header size in bits
+     */
+    @Override
+    public int getHeaderSize() {
+        return 32;
     }
 
 }

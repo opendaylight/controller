@@ -20,7 +20,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronSubnetRequest {
+public class NeutronSubnetRequest implements INeutronRequest {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -30,16 +30,28 @@ public class NeutronSubnetRequest {
     @XmlElement(name="subnets")
     List<NeutronSubnet> bulkRequest;
 
+    @XmlElement(name="subnets_links")
+    List<NeutronPageLink> links;
+
     NeutronSubnetRequest() {
+    }
+
+    public NeutronSubnetRequest(List<NeutronSubnet> bulkRequest, List<NeutronPageLink> links) {
+        this.bulkRequest = bulkRequest;
+        this.links = links;
+        this.singletonSubnet = null;
     }
 
     NeutronSubnetRequest(List<NeutronSubnet> bulk) {
         bulkRequest = bulk;
         singletonSubnet = null;
+        links = null;
     }
 
     NeutronSubnetRequest(NeutronSubnet subnet) {
         singletonSubnet = subnet;
+        bulkRequest = null;
+        links = null;
     }
 
     public NeutronSubnet getSingleton() {

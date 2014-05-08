@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
@@ -42,12 +41,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -136,7 +134,7 @@ public class CrossBrokerRpcTest {
             @Override
             public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
                 CompositeNode result = testContext.getBindingToDomMappingService().toDataDom(output);
-                return Futures.immediateFuture(Rpcs.getRpcResult(true, result, ImmutableList.<RpcError>of()));
+                return Futures.immediateFuture(RpcResultBuilder.<CompositeNode>success(result).build());
             }
         });
         registration.registerPath(NodeContext.QNAME, BI_NODE_C_ID);
@@ -168,7 +166,7 @@ public class CrossBrokerRpcTest {
     private Future<RpcResult<AddFlowOutput>> addFlowResult(boolean success, long xid) {
         AddFlowOutput output = new AddFlowOutputBuilder() //
                 .setTransactionId(new TransactionId(BigInteger.valueOf(xid))).build();
-        RpcResult<AddFlowOutput> result = Rpcs.getRpcResult(success, output, ImmutableList.<RpcError> of());
+        RpcResult<AddFlowOutput> result = RpcResultBuilder.<AddFlowOutput>status(success).withResult(output).build();
         return Futures.immediateFuture(result);
     }
 

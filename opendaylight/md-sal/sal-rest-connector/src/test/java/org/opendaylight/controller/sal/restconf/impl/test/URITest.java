@@ -14,9 +14,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Iterables;
 import java.io.FileNotFoundException;
 import java.util.Set;
-
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -131,7 +131,7 @@ public class URITest {
         initMountService(true);
         InstanceIdWithSchemaNode instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/");
-        assertEquals(true, instanceIdentifier.getInstanceIdentifier().getPath().isEmpty());
+        assertTrue(Iterables.isEmpty(instanceIdentifier.getInstanceIdentifier().getPathArguments()));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class URITest {
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
     }
 
-    public void initMountService(boolean withSchema) {
+    public void initMountService(final boolean withSchema) {
         MountService mountService = mock(MountService.class);
         controllerContext.setMountService(mountService);
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
@@ -163,10 +163,11 @@ public class URITest {
         Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
         SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
         MountInstance mountInstance = mock(MountInstance.class);
-        if (withSchema)
+        if (withSchema) {
             when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
-        else
+        } else {
             when(mountInstance.getSchemaContext()).thenReturn(null);
+        }
         when(mountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
     }
 }

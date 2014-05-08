@@ -163,6 +163,7 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
     @Override
     public void onFlowRemoved(final FlowRemoved notification) {
+        // notified upon remove flow rpc successfully invoked
         if (notification == null) {
             return;
         }
@@ -190,7 +191,25 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
     @Override
     public void onSwitchFlowRemoved(final SwitchFlowRemoved notification) {
-        // FIXME: unfinished?
+        // notified upon remove flow message from device arrives
+        if (notification == null) {
+            return;
+        }
+
+        final NodeRef node = notification.getNode();
+        if (node == null) {
+            LOG.debug("Notification {} has not node, ignoring it", notification);
+            return;
+        }
+
+        Node adNode;
+        try {
+            adNode = NodeMapping.toADNode(notification.getNode());
+        } catch (ConstructionException e) {
+            LOG.warn("Failed to construct AD node for {}, ignoring notification", node, e);
+            return;
+        }
+        flowProgrammerPublisher.flowRemoved(adNode, ToSalConversionsUtils.toFlow(notification, adNode));
     }
 
     @Override
@@ -228,7 +247,8 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
         flowId = UUID.randomUUID();
         cache.put(flow, flowId);
-        return this.writeFlowAsync(MDFlowMapping.toMDFlow(flow, flowId.toString()), new NodeKey(new NodeId(node.getNodeIDString())));
+        return this.writeFlowAsync(MDFlowMapping.toMDFlow(flow, flowId.toString()), new NodeKey(
+                new NodeId(NodeMapping.OPENFLOW_ID_PREFIX + node.getID())));
     }
 
     private Future<RpcResult<TransactionStatus>> internalModifyFlowAsync(final Node node, final Flow oldFlow, final Flow newFlow, final long rid) {
@@ -242,7 +262,8 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
         }
 
         cache.put(newFlow, flowId);
-        return this.writeFlowAsync(MDFlowMapping.toMDFlow(newFlow, flowId.toString()), new NodeKey(new NodeId(node.getNodeIDString())));
+        return this.writeFlowAsync(MDFlowMapping.toMDFlow(newFlow, flowId.toString()), new NodeKey(
+                new NodeId(NodeMapping.OPENFLOW_ID_PREFIX + node.getID())));
     }
 
     private Future<RpcResult<TransactionStatus>> internalRemoveFlowAsync(final Node node, final Flow adflow, final long rid) {
@@ -256,7 +277,8 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
         final org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow flow = MDFlowMapping.toMDFlow(adflow, flowId.toString());
         final DataModificationTransaction modification = this.dataBrokerService.beginTransaction();
-        modification.removeConfigurationData(flowPath(flow, new NodeKey(new NodeId(node.getNodeIDString()))));
+        modification.removeConfigurationData(flowPath(flow, new NodeKey(
+                new NodeId(NodeMapping.OPENFLOW_ID_PREFIX + node.getID()))));
         return modification.commit();
     }
 

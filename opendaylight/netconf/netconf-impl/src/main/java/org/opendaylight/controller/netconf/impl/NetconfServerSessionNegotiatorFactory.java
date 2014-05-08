@@ -12,16 +12,17 @@ import static org.opendaylight.controller.netconf.mapping.api.NetconfOperationPr
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+
 import java.util.Set;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceSnapshot;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
@@ -31,6 +32,7 @@ import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

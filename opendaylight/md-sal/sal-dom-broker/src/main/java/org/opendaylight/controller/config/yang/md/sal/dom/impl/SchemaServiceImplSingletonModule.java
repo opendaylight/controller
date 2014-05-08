@@ -15,7 +15,6 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,43 +56,21 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ServiceReference<SchemaService> ref = getBundleContext().getServiceReference(SchemaService.class);
-        if (ref != null) {
-            return new GlobalSchemaServiceProxy(getBundleContext(), ref);
-        }
-
-        GlobalBundleScanningSchemaServiceImpl newInstance = new GlobalBundleScanningSchemaServiceImpl(getBundleContext());
-        newInstance.start();
-        return newInstance;
+        return GlobalBundleScanningSchemaServiceImpl.getInstance();
     }
 
     public class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, Delegator<SchemaService> {
 
-        private BundleContext bundleContext;
-        private ServiceReference<SchemaService> reference;
         private SchemaService delegate;
 
-        public GlobalSchemaServiceProxy(final BundleContext bundleContext, final ServiceReference<SchemaService> ref) {
-            this.bundleContext = bundleContext;
-            this.reference = ref;
-            this.delegate = bundleContext.getService(reference);
+        public GlobalSchemaServiceProxy() {
+            this.delegate = GlobalBundleScanningSchemaServiceImpl.getInstance();
         }
 
         @Override
         public void close() throws Exception {
             if (delegate != null) {
                 delegate = null;
-
-                try {
-                    bundleContext.ungetService(reference);
-                } catch (IllegalStateException e) {
-                    // Indicates the service was already unregistered which can happen normally
-                    // on shutdown.
-                    LOG.debug( "Error unregistering service", e );
-                }
-
-                reference = null;
-                bundleContext = null;
             }
         }
 

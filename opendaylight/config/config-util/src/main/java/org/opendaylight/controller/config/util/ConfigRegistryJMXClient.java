@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
 
 public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final ConfigRegistryMXBean configRegistryMXBeanProxy;
@@ -65,9 +66,26 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
                 configMBeanServer);
     }
 
+    /**
+     * Usage of this method indicates error as config JMX uses solely MXBeans.
+     * Use {@link #newMXBeanProxy(javax.management.ObjectName, Class)}
+     * or {@link JMX#newMBeanProxy(javax.management.MBeanServerConnection, javax.management.ObjectName, Class)}
+     * This method will be removed soon.
+     */
+    @Deprecated
     public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
+        on = translateServiceRefIfPossible(on, clazz, configMBeanServer);
         return JMX.newMBeanProxy(configMBeanServer, on, clazz);
     }
+
+    static  ObjectName translateServiceRefIfPossible(ObjectName on, Class<?> clazz, MBeanServer configMBeanServer) {
+        if (ObjectNameUtil.isServiceReference(on) && clazz.equals(ServiceReferenceMXBean.class) == false) {
+            ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, on, ServiceReferenceMXBean.class);
+            on = proxy.getCurrentImplementation();
+        }
+        return on;
+    }
+
 
     public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
         return JMX.newMXBeanProxy(configMBeanServer, on, clazz);
@@ -211,5 +229,4 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
         configRegistryMXBeanProxy.checkServiceReferenceExists(objectName);
     }
-
 }

@@ -21,8 +21,10 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
  *
  *
  * @see DataProviderService
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.dom.api.DOMDataBroker}
  *
  */
+@Deprecated
 public interface DataBrokerService extends
     BrokerService, //
     DataReader<InstanceIdentifier, CompositeNode>, //
@@ -36,5 +38,6 @@ public interface DataBrokerService extends
     @Override
     public CompositeNode readOperationalData(InstanceIdentifier path);
 
+    @Override
     DataModificationTransaction beginTransaction();
 }

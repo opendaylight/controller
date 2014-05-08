@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
+import ch.ethz.ssh2.channel.Channel;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,31 +20,16 @@ import java.io.OutputStream;
 /**
  * Wrapper class for proprietary SSH sessions implementations
  */
-public class SshSession implements Closeable {
+class SshSession implements Closeable {
     private final Session session;
 
     public SshSession(Session session) {
         this.session = session;
     }
 
-    public void execCommand(String cmd) throws IOException {
-        session.execCommand(cmd);
-    }
-
-    public void execCommand(String cmd, String charsetName) throws IOException {
-        session.execCommand(cmd, charsetName);
-    }
-
-    public void startShell() throws IOException {
-        session.startShell();
-    }
 
     public void startSubSystem(String name) throws IOException {
         session.startSubSystem(name);
-    }
-
-    public int getState() {
-        return session.getState();
     }
 
     public InputStream getStdout() {
@@ -58,24 +44,10 @@ public class SshSession implements Closeable {
         return session.getStdin();
     }
 
-    public int waitUntilDataAvailable(long timeout) throws IOException {
-        return session.waitUntilDataAvailable(timeout);
-    }
-
-    public int waitForCondition(int conditionSet, long timeout) {
-        return session.waitForCondition(conditionSet, timeout);
-    }
-
-    public Integer getExitStatus() {
-        return session.getExitStatus();
-    }
-
-    public String getExitSignal() {
-        return session.getExitSignal();
-    }
-
     @Override
     public void close() {
-        session.close();
+        if (session.getState() == Channel.STATE_OPEN || session.getState() == Channel.STATE_OPENING) {
+            session.close();
+        }
     }
 }

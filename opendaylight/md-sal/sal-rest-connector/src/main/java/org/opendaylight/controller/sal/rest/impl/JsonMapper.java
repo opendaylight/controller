@@ -9,15 +9,15 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -48,22 +49,19 @@ import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinit
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.gson.stream.JsonWriter;
-
 class JsonMapper {
+    private static final Logger LOG = LoggerFactory.getLogger(JsonMapper.class);
+    private final MountInstance mountPoint;
 
-    private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
-    private final Set<ListSchemaNode> foundLists = new HashSet<>();
-    private MountInstance mountPoint;
-    private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
+    public JsonMapper(final MountInstance mountPoint) {
+        this.mountPoint = mountPoint;
+    }
 
-    public void write(final JsonWriter writer, final CompositeNode data, final DataNodeContainer schema, final MountInstance mountPoint)
+    public void write(final JsonWriter writer, final CompositeNode data, final DataNodeContainer schema)
             throws IOException {
         Preconditions.checkNotNull(writer);
         Preconditions.checkNotNull(data);
         Preconditions.checkNotNull(schema);
-        this.mountPoint = mountPoint;
 
         writer.beginObject();
 
@@ -77,18 +75,16 @@ class JsonMapper {
         }
 
         writer.endObject();
-
-        foundLeafLists.clear();
-        foundLists.clear();
     }
 
-    private void writeChildrenOfParent(final JsonWriter writer, final CompositeNode parent, final DataNodeContainer parentSchema)
-            throws IOException {
+    private void writeChildrenOfParent(final JsonWriter writer, final CompositeNode parent,
+            final DataNodeContainer parentSchema) throws IOException {
         checkNotNull(parent);
 
-        Set<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ?
-                                   Collections.<DataSchemaNode>emptySet() : parentSchema.getChildNodes();
+        final Set<QName> foundLists = new HashSet<>();
 
+        Set<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ? Collections.<DataSchemaNode> emptySet()
+                : parentSchema.getChildNodes();
 
         for (Node<?> child : parent.getValue()) {
             DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchemaChildNodes);
@@ -96,69 +92,90 @@ class JsonMapper {
             if (childSchema == null) {
                 // Node may not conform to schema or allows "anyxml" - we'll process it.
 
-                logger.debug( "No schema found for data node \"" + child.getNodeType() );
+                LOG.debug("No schema found for data node \"{}\"", child.getNodeType());
 
-                handleNoSchemaFound( writer, child, parent );
-            }
-            else if (childSchema instanceof ContainerSchemaNode) {
+                if (!foundLists.contains(child.getNodeType())) {
+                    handleNoSchemaFound(writer, child, parent);
+
+                    // Since we don't have a schema, we don't know which nodes are supposed to be
+                    // lists so treat every one as a potential list to avoid outputting duplicates.
+
+                    foundLists.add(child.getNodeType());
+                }
+            } else if (childSchema instanceof ContainerSchemaNode) {
                 Preconditions.checkState(child instanceof CompositeNode,
-                        "Data representation of Container should be CompositeNode - " + child.getNodeType());
+                        "Data representation of Container should be CompositeNode - %s", child.getNodeType());
                 writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
-                if (!foundLists.contains(childSchema)) {
+                if (!foundLists.contains(child.getNodeType())) {
                     Preconditions.checkState(child instanceof CompositeNode,
-                            "Data representation of List should be CompositeNode - " + child.getNodeType());
-                    foundLists.add((ListSchemaNode) childSchema);
+                            "Data representation of List should be CompositeNode - %s", child.getNodeType());
+                    foundLists.add(child.getNodeType());
                     writeList(writer, parent, (CompositeNode) child, (ListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafListSchemaNode) {
-                if (!foundLeafLists.contains(childSchema)) {
+                if (!foundLists.contains(child.getNodeType())) {
                     Preconditions.checkState(child instanceof SimpleNode<?>,
-                            "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
-                    foundLeafLists.add((LeafListSchemaNode) childSchema);
+                            "Data representation of LeafList should be SimpleNode - %s", child.getNodeType());
+                    foundLists.add(child.getNodeType());
                     writeLeafList(writer, parent, (SimpleNode<?>) child, (LeafListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafSchemaNode) {
                 Preconditions.checkState(child instanceof SimpleNode<?>,
-                        "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
+                        "Data representation of LeafList should be SimpleNode - %s", child.getNodeType());
                 writeLeaf(writer, (SimpleNode<?>) child, (LeafSchemaNode) childSchema);
+            } else if (childSchema instanceof AnyXmlSchemaNode) {
+                if (child instanceof CompositeNode) {
+                    writeContainer(writer, (CompositeNode) child, null);
+                } else {
+                    handleNoSchemaFound(writer, child, parent);
+                }
             } else {
                 throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode, ListSchemaNode, "
                         + "LeafListSchemaNode, or LeafSchemaNode. Other types are not supported yet.");
             }
         }
-
-        for (Node<?> child : parent.getValue()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchemaChildNodes);
-            if (childSchema instanceof LeafListSchemaNode) {
-                foundLeafLists.remove(childSchema);
-            } else if (childSchema instanceof ListSchemaNode) {
-                foundLists.remove(childSchema);
-            }
-        }
     }
 
-    private void handleNoSchemaFound( final JsonWriter writer, final Node<?> node,
-                                      final CompositeNode parent ) throws IOException {
-        if( node instanceof SimpleNode<?> ) {
-            writeName( node, null, writer );
-            Object value = node.getValue();
-            if( value != null ) {
-                writer.value( String.valueOf( value ) );
+    private static void writeValue(final JsonWriter writer, final Object value) throws IOException {
+        writer.value(value == null ? "" : String.valueOf(value));
+    }
+
+    private void handleNoSchemaFound(final JsonWriter writer, final Node<?> node, final CompositeNode parent)
+            throws IOException {
+        if (node instanceof SimpleNode<?>) {
+            List<SimpleNode<?>> nodeLeafList = parent.getSimpleNodesByName(node.getNodeType());
+            if (nodeLeafList.size() == 1) {
+                writeName(node, null, writer);
+                writeValue(writer, node.getValue());
+            } else { // more than 1, write as a json array
+                writeName(node, null, writer);
+                writer.beginArray();
+                for (SimpleNode<?> leafNode : nodeLeafList) {
+                    writeValue(writer, leafNode.getValue());
+                }
+
+                writer.endArray();
             }
         } else { // CompositeNode
-            Preconditions.checkState( node instanceof CompositeNode,
-                    "Data representation of Container should be CompositeNode - " + node.getNodeType() );
+            Preconditions.checkState(node instanceof CompositeNode,
+                    "Data representation of Container should be CompositeNode - %s", node.getNodeType());
 
-            writeContainer( writer, (CompositeNode) node, null );
+            List<CompositeNode> nodeList = parent.getCompositesByName(node.getNodeType());
+            if (nodeList.size() == 1) {
+                writeContainer(writer, (CompositeNode) node, null);
+            } else { // more than 1, write as a json array
+                writeList(writer, parent, (CompositeNode) node, null);
+            }
         }
     }
 
-    private DataSchemaNode findFirstSchemaForNode(final Node<?> node, final Set<DataSchemaNode> dataSchemaNode) {
+    private static DataSchemaNode findFirstSchemaForNode(final Node<?> node, final Set<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
             if (node.getNodeType().equals(dsn.getQName())) {
                 return dsn;
-            } else if (dsn instanceof ChoiceNode) {
+            }
+            if (dsn instanceof ChoiceNode) {
                 for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
                     DataSchemaNode foundDsn = findFirstSchemaForNode(node, choiceCase.getChildNodes());
                     if (foundDsn != null) {
@@ -170,15 +187,16 @@ class JsonMapper {
         return null;
     }
 
-    private void writeContainer(final JsonWriter writer, final CompositeNode node, final ContainerSchemaNode schema) throws IOException {
+    private void writeContainer(final JsonWriter writer, final CompositeNode node, final ContainerSchemaNode schema)
+            throws IOException {
         writeName(node, schema, writer);
         writer.beginObject();
         writeChildrenOfParent(writer, node, schema);
         writer.endObject();
     }
 
-    private void writeList(final JsonWriter writer, final CompositeNode nodeParent, final CompositeNode node, final ListSchemaNode schema)
-            throws IOException {
+    private void writeList(final JsonWriter writer, final CompositeNode nodeParent, final CompositeNode node,
+            final ListSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
         writer.beginArray();
 
@@ -210,19 +228,20 @@ class JsonMapper {
         writer.endArray();
     }
 
-    private void writeLeaf(final JsonWriter writer, final SimpleNode<?> node, final LeafSchemaNode schema) throws IOException {
+    private void writeLeaf(final JsonWriter writer, final SimpleNode<?> node, final LeafSchemaNode schema)
+            throws IOException {
         writeName(node, schema, writer);
         writeValueOfNodeByType(writer, node, schema.getType(), schema);
     }
 
-    private void writeValueOfNodeByType(final JsonWriter writer, final SimpleNode<?> node, final TypeDefinition<?> type,
-            final DataSchemaNode schema) throws IOException {
+    private void writeValueOfNodeByType(final JsonWriter writer, final SimpleNode<?> node,
+            final TypeDefinition<?> type, final DataSchemaNode schema) throws IOException {
 
         TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(type);
 
         if (node.getValue() == null && !(baseType instanceof EmptyTypeDefinition)) {
-            logger.debug("While generationg JSON output null value was found for type "
-                    + baseType.getClass().getSimpleName() + ".");
+            LOG.debug("While generationg JSON output null value was found for type {}.", baseType.getClass()
+                    .getSimpleName());
         }
 
         if (baseType instanceof IdentityrefTypeDefinition) {
@@ -267,25 +286,25 @@ class JsonMapper {
         }
     }
 
-    private void writeIdentityValuesDTOToJson(final JsonWriter writer, final IdentityValuesDTO valueDTO) throws IOException {
+    private static void writeIdentityValuesDTOToJson(final JsonWriter writer, final IdentityValuesDTO valueDTO)
+            throws IOException {
         StringBuilder result = new StringBuilder();
         for (IdentityValue identityValue : valueDTO.getValuesWithNamespaces()) {
-            result.append("/");
+            result.append('/');
 
             writeModuleNameAndIdentifier(result, identityValue);
             if (identityValue.getPredicates() != null && !identityValue.getPredicates().isEmpty()) {
                 for (Predicate predicate : identityValue.getPredicates()) {
                     IdentityValue identityValuePredicate = predicate.getName();
-                    result.append("[");
+                    result.append('[');
                     if (identityValuePredicate == null) {
-                        result.append(".");
+                        result.append('.');
                     } else {
                         writeModuleNameAndIdentifier(result, identityValuePredicate);
                     }
                     result.append("='");
                     result.append(predicate.getValue());
-                    result.append("'");
-                    result.append("]");
+                    result.append("']");
                 }
             }
         }
@@ -293,21 +312,21 @@ class JsonMapper {
         writer.value(result.toString());
     }
 
-    private void writeModuleNameAndIdentifier(final StringBuilder result, final IdentityValue identityValue) {
+    private static void writeModuleNameAndIdentifier(final StringBuilder result, final IdentityValue identityValue) {
         String moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
                 URI.create(identityValue.getNamespace()));
         if (moduleName != null && !moduleName.isEmpty()) {
             result.append(moduleName);
-            result.append(":");
+            result.append(':');
         }
         result.append(identityValue.getValue());
     }
 
-    private void writeStringRepresentation(final JsonWriter writer, final SimpleNode<?> node, final TypeDefinition<?> baseType,
-            final Class<?> requiredType) throws IOException {
+    private static void writeStringRepresentation(final JsonWriter writer, final SimpleNode<?> node,
+            final TypeDefinition<?> baseType, final Class<?> requiredType) throws IOException {
         Object value = node.getValue();
-        logger.debug("Value of " + baseType.getQName().getNamespace() + ":" + baseType.getQName().getLocalName()
-                + " is not instance of " + requiredType.getClass() + " but is " + node.getValue().getClass());
+        LOG.debug("Value of {}:{} is not instance of {} but is {}", baseType.getQName().getNamespace(), baseType
+                .getQName().getLocalName(), requiredType.getClass(), node.getValue().getClass());
         if (value == null) {
             writer.value("");
         } else {
@@ -323,7 +342,7 @@ class JsonMapper {
 
     private void writeName(final Node<?> node, final DataSchemaNode schema, final JsonWriter writer) throws IOException {
         String nameForOutput = node.getNodeType().getLocalName();
-        if ( schema != null && schema.isAugmenting()) {
+        if (schema != null && schema.isAugmenting()) {
             ControllerContext contContext = ControllerContext.getInstance();
             CharSequence moduleName = null;
             if (mountPoint == null) {
@@ -334,7 +353,7 @@ class JsonMapper {
             if (moduleName != null) {
                 nameForOutput = moduleName.toString();
             } else {
-                logger.info("Module '{}' was not found in schema from mount point", schema.getQName());
+                LOG.info("Module '{}' was not found in schema from mount point", schema.getQName());
             }
         }
         writer.name(nameForOutput);

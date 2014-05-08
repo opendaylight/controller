@@ -27,7 +27,7 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable, A
      * @throws TransactionChainClosedException if the chain has been closed.
      */
     @Override
-    public AsyncReadTransaction<P, D> newReadOnlyTransaction();
+    public AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
 
     /**

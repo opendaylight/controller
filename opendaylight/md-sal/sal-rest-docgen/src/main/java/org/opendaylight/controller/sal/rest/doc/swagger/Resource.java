@@ -8,27 +8,28 @@
 package org.opendaylight.controller.sal.rest.doc.swagger;
 
 /**
- * Implementation of swagger spec
- * (see <a href="https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#512-resource-object">
- *   https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#512-resource-object</a>)
+ * Implementation of swagger spec (see <a href=
+ * "https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#512-resource-object"
+ * > https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#512-
+ * resource-object</a>)
  */
 public class Resource {
-  private String path;
-  private String description;
+    private String path;
+    private String description;
 
-  public String getPath() {
-    return path;
-  }
+    public String getPath() {
+        return path;
+    }
 
-  public void setPath(String path) {
-    this.path = path;
-  }
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

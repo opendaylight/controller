@@ -8,7 +8,11 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.opendaylight.yangtools.concepts.Path;
-
+/**
+ *
+ * @deprecated Replaced by {@link AsyncDataTransactionFactory}
+ */
+@Deprecated
 public interface DataModificationTransactionFactory<P extends Path<P> ,D> {
 
     DataModification<P, D> beginTransaction();

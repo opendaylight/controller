@@ -12,7 +12,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
-
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,10 +46,9 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
     public void nodeWithoutNamespaceHasMoreAugments() {
         try {
             controllerContext.toInstanceIdentifier("main:cont/cont1");
-            fail( "Expected exception" );
+            fail("Expected exception");
         } catch (RestconfDocumentedException e) {
-            assertTrue(e.getErrors().get( 0 ).getErrorMessage().contains(
-                                    "is added as augment from more than one module"));
+            assertTrue(e.getErrors().get(0).getErrorMessage().contains("is added as augment from more than one module"));
         }
     }
 }

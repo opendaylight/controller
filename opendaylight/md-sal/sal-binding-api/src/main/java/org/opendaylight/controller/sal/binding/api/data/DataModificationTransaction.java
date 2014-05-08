@@ -17,6 +17,18 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+/**
+ *
+ *
+ * @deprecated Replaced by more specific transaction types. Please use
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
+ *          or
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
+ *
+ *
+ */
+@Deprecated
 public interface DataModificationTransaction extends DataModification<InstanceIdentifier<? extends DataObject>, DataObject> {
     /**
      * Returns an unique identifier for transaction

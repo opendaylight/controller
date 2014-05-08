@@ -12,9 +12,9 @@ import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 
 /**
- * @author mirehak
- *
+ * @deprecated Use {@link org.opendaylight.yangtools.yang.common.RpcResultBuilder}
  */
+@Deprecated
 public class RpcErrors {
 
     /**

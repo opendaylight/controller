@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Collections;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-
-import com.google.common.base.Preconditions;
 
 public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> {
 
@@ -31,17 +29,17 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
         return composite;
     }
 
-    public void setComposite(boolean composite) {
+    public void setComposite(final boolean composite) {
         this.composite = composite;
     }
 
-    public EmptyNodeWrapper(URI namespace, String localName) {
+    public EmptyNodeWrapper(final URI namespace, final String localName) {
         this.localName = Preconditions.checkNotNull(localName);
         this.namespace = namespace;
     }
 
     @Override
-    public void setQname(QName name) {
+    public void setQname(final QName name) {
         Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
@@ -68,7 +66,7 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     }
 
     @Override
-    public void setNamespace(URI namespace) {
+    public void setNamespace(final URI namespace) {
         Preconditions.checkState(unwrapped == null, "Cannot change the object, due to data inconsistencies.");
         this.namespace = namespace;
     }
@@ -85,8 +83,9 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            if(composite) {
-                unwrapped = NodeFactory.createImmutableCompositeNode(name, null, Collections.<Node<?>>emptyList(),null);
+            if (composite) {
+                unwrapped = NodeFactory.createImmutableCompositeNode(name, null, Collections.<Node<?>> emptyList(),
+                        null);
             } else {
                 unwrapped = NodeFactory.createImmutableSimpleNode(name, null, null);
             }
@@ -103,6 +102,7 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     }
 
     @Override
+    @Deprecated
     public CompositeNode getParent() {
         return unwrap().getParent();
     }
@@ -118,7 +118,7 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
     }
 
     @Override
-    public Void setValue(Void value) {
+    public Void setValue(final Void value) {
         return null;
     }
 

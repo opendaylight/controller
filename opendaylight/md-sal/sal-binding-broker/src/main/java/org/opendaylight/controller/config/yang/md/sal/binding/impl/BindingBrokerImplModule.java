@@ -21,7 +21,6 @@ import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardingUtils;
-import org.osgi.framework.BundleContext;
 
 /**
 *
@@ -29,16 +28,14 @@ import org.osgi.framework.BundleContext;
 public final class BindingBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule {
 
-    private BundleContext bundleContext;
-
-    public BindingBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public BindingBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            BindingBrokerImplModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final BindingBrokerImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -63,33 +60,26 @@ public final class BindingBrokerImplModule extends
     private RootBindingAwareBroker createStandaloneBroker() {
         RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
 
-        broker.setDataBroker(getDataBrokerDependency());
+        broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
+        broker.setDataBroker(getRootDataBrokerDependency());
         return broker;
     }
 
     private RootBindingAwareBroker createForwardedBroker() {
         DomForwardedBindingBrokerImpl broker = new DomForwardedBindingBrokerImpl(getIdentifier().getInstanceName());
 
-        broker.setDataBroker(getDataBrokerDependency());
+        broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
 
         broker.getMountManager().setDataCommitExecutor(SingletonHolder.getDefaultCommitExecutor());
         broker.getMountManager().setNotificationExecutor(SingletonHolder.getDefaultNotificationExecutor());
 
-
+        broker.setDataBroker(getRootDataBrokerDependency());
         DomForwardingUtils.reuseForwardingFrom(broker, broker.getDataBroker());
         broker.startForwarding();
         return broker;
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 }

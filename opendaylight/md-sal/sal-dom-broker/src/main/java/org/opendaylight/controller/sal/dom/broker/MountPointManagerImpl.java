@@ -14,11 +14,13 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+@Deprecated
 public class MountPointManagerImpl implements MountProvisionService {
 
     private final ListenerRegistry<MountProvisionListener> listeners =
