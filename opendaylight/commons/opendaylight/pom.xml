@@ -42,6 +42,7 @@
     <config.version>0.2.5-SNAPSHOT</config.version>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
+    <connectionmanager.shell.version>1.0-SNAPSHOT</connectionmanager.shell.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
     <containermanager.northbound.version>0.4.2-SNAPSHOT</containermanager.northbound.version>
@@ -76,6 +77,7 @@
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker.shell.version>1.0.0-SNAPSHOT</hosttracker.shell.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
@@ -94,6 +96,7 @@
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
@@ -176,7 +179,6 @@
 
   <dependencyManagement>
     <dependencies>
-
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ietf-netconf-monitoring</artifactId>
@@ -1774,14 +1776,14 @@
           </configuration>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
               <groupId>org.codehaus.enunciate</groupId>
               <artifactId>enunciate-swagger</artifactId>
               <version>${enunciate.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>commons.logback_settings</artifactId>
+              <version>0.0.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
