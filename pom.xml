@@ -42,6 +42,7 @@
     <module>opendaylight/usermanager/implementation</module>
     <module>opendaylight/connectionmanager/api</module>
     <module>opendaylight/connectionmanager/implementation</module>
+    <module>opendaylight/connectionmanager/shell</module>
     <module>opendaylight/security</module>
 
     <!-- third-parties uncomment them if you need snapshot version of it -->
@@ -126,6 +127,7 @@
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
+    <module>features/controller</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
