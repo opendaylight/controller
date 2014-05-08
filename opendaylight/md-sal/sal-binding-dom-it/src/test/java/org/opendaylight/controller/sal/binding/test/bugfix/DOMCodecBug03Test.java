@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.common.util.concurrent.SettableFuture;
 
+@SuppressWarnings("deprecation")
 public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");

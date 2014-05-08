@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -258,18 +258,23 @@ public class ARP extends Packet {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ARP other = (ARP) obj;
         if (fieldValues == null) {
-            if (other.fieldValues != null)
+            if (other.fieldValues != null) {
                 return false;
-        } else if (!fieldValues.equals(other.fieldValues))
+            }
+        } else if (!fieldValues.equals(other.fieldValues)) {
             return false;
+        }
         return true;
     }
 }

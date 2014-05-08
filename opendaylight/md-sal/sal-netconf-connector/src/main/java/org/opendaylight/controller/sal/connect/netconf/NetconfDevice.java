@@ -7,15 +7,19 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
@@ -36,9 +40,6 @@ import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-
 /**
  *  This is a mediator between NetconfDeviceCommunicator and NetconfDeviceSalFacade
  */
@@ -53,6 +54,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     private final MessageTransformer<NetconfMessage> messageTransformer;
     private final SchemaContextProviderFactory schemaContextProviderFactory;
     private final SchemaSourceProviderFactory<InputStream> sourceProviderFactory;
+    private final NotificationHandler notificationHandler;
 
     public static NetconfDevice createNetconfDevice(final RemoteDeviceId id,
             final AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider,
@@ -79,6 +81,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         this.sourceProviderFactory = sourceProviderFactory;
         this.processingExecutor = MoreExecutors.listeningDecorator(processingExecutor);
         this.schemaContextProviderFactory = schemaContextProviderFactory;
+        this.notificationHandler = new NotificationHandler(salFacade, messageTransformer, id);
     }
 
     @Override
@@ -99,6 +102,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
                 final SchemaContextProvider schemaContextProvider = setUpSchemaContext(delegate, remoteSessionCapabilities);
                 updateMessageTransformer(schemaContextProvider);
                 salFacade.onDeviceConnected(schemaContextProvider, remoteSessionCapabilities, deviceRpc);
+                notificationHandler.onRemoteSchemaUp();
             }
         });
 
@@ -142,7 +146,63 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
 
     @Override
     public void onNotification(final NetconfMessage notification) {
-        final CompositeNode parsedNotification = messageTransformer.toNotification(notification);
-        salFacade.onNotification(parsedNotification);
+        notificationHandler.handleNotification(notification);
+    }
+
+    /**
+     * Handles incoming notifications. Either caches them(until onRemoteSchemaUp is called) or passes to sal Facade.
+     */
+    private final static class NotificationHandler {
+
+        private final RemoteDeviceHandler<?> salFacade;
+        private final List<NetconfMessage> cache = new LinkedList<>();
+        private final MessageTransformer<NetconfMessage> messageTransformer;
+        private boolean passNotifications = false;
+        private final RemoteDeviceId id;
+
+        NotificationHandler(final RemoteDeviceHandler<?> salFacade, final MessageTransformer<NetconfMessage> messageTransformer, final RemoteDeviceId id) {
+            this.salFacade = salFacade;
+            this.messageTransformer = messageTransformer;
+            this.id = id;
+        }
+
+        synchronized void handleNotification(final NetconfMessage notification) {
+            if(passNotifications) {
+                passNotification(messageTransformer.toNotification(notification));
+            } else {
+                cacheNotification(notification);
+            }
+        }
+
+        /**
+         * Forward all cached notifications and pass all notifications from this point directly to sal facade.
+         */
+        synchronized void onRemoteSchemaUp() {
+            passNotifications = true;
+
+            for (final NetconfMessage cachedNotification : cache) {
+                passNotification(messageTransformer.toNotification(cachedNotification));
+            }
+
+            cache.clear();
+        }
+
+        private void cacheNotification(final NetconfMessage notification) {
+            Preconditions.checkState(passNotifications == false);
+
+            logger.debug("{}: Caching notification {}, remote schema not yet fully built", id, notification);
+            if(logger.isTraceEnabled()) {
+                logger.trace("{}: Caching notification {}", id, XmlUtil.toString(notification.getDocument()));
+            }
+
+            cache.add(notification);
+        }
+
+        private void passNotification(final CompositeNode parsedNotification) {
+            logger.debug("{}: Forwarding notification {}", id, parsedNotification);
+            Preconditions.checkNotNull(parsedNotification);
+            salFacade.onNotification(parsedNotification);
+        }
+
     }
 }

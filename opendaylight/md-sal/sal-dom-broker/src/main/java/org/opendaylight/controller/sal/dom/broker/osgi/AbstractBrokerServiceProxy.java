@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.osgi.framework.ServiceReference;
@@ -23,9 +25,9 @@ public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implem
     private T delegate;
     private final ServiceReference<T> reference;
 
-    public AbstractBrokerServiceProxy(final ServiceReference<T> ref, final T delegate) {
+    public AbstractBrokerServiceProxy(final @Nullable ServiceReference<T> ref, final T delegate) {
         this.delegate = checkNotNull(delegate, "Delegate should not be null.");
-        this.reference = checkNotNull(ref, "Reference should not be null.");
+        this.reference = ref;
     }
 
     protected final T getDelegate() {

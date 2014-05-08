@@ -69,9 +69,10 @@ public class Context {
         initialized = true;
     }
 
-    public List<Filter> findMatchingFilters(String pathInfo) {
+    public List<Filter> findMatchingFilters(String path) {
+        logger.trace("findMatchingFilters({})", path);
         checkState(initialized, "Not initialized");
-        return urlMatcher.findMatchingFilters(pathInfo);
+        return urlMatcher.findMatchingFilters(path);
     }
 
     @XmlAttribute(name = "path")

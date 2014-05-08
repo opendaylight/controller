@@ -7,18 +7,19 @@
  */
 package org.opendaylight.controller.sal.rest.doc.jaxrs;
 
-import org.opendaylight.controller.sal.rest.doc.impl.ApiDocServiceImpl;
-
-import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.ws.rs.core.Application;
+
+import org.opendaylight.controller.sal.rest.doc.impl.ApiDocServiceImpl;
+
 public class ApiDocApplication extends Application {
-  @Override
-  public Set<Object> getSingletons() {
-    Set<Object> singletons = new HashSet<>();
-    singletons.add(ApiDocServiceImpl.getInstance());
-    singletons.add(new JaxbContextResolver());
-    return singletons;
-  }
+    @Override
+    public Set<Object> getSingletons() {
+        Set<Object> singletons = new HashSet<>();
+        singletons.add(ApiDocServiceImpl.getInstance());
+        singletons.add(new JaxbContextResolver());
+        return singletons;
+    }
 }

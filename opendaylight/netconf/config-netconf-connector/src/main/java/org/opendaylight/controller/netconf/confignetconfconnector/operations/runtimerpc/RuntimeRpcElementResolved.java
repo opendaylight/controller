@@ -11,11 +11,13 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ru
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 
 import javax.management.ObjectName;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

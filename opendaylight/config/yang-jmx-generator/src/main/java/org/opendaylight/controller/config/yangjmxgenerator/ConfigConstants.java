@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.opendaylight.yangtools.yang.common.QName;
 
 public class ConfigConstants {
@@ -33,33 +28,14 @@ public class ConfigConstants {
     public static final QName RPC_CONTEXT_REF_GROUPING_LEAF = createRpcXQName("context-instance");
     public static final QName RPC_CONTEXT_INSTANCE_EXTENSION_QNAME = createRpcXQName("rpc-context-instance");
 
-    public static QName createConfigQName(String localName) {
-        return createQName(CONFIG_NAMESPACE, "2013-04-05", localName);
+    public static QName createConfigQName(final String localName) {
+        // FIXME: pre-construct QNameModule
+        return QName.create(CONFIG_NAMESPACE, "2013-04-05", localName);
     }
 
-    public static QName createRpcXQName(String localName) {
-        return createQName("urn:ietf:params:xml:ns:yang:rpc-context",
+    public static QName createRpcXQName(final String localName) {
+        // FIXME: pre-construct QNameModule
+        return QName.create("urn:ietf:params:xml:ns:yang:rpc-context",
                 "2013-06-17", localName);
     }
-
-    /**
-     *
-     * @param uri
-     * @param revisionDate
-     *            in format yyyy-MM-dd
-     * @param localName
-     * @return
-     */
-    private static QName createQName(String uri, String revisionDate,
-            String localName) {
-        SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date revision;
-        try {
-            revision = revisionFormat.parse(revisionDate);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-        return new QName(URI.create(uri), revision, localName);
-    }
-
 }

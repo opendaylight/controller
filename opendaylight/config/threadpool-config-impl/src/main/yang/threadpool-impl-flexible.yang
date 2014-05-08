@@ -46,6 +46,12 @@ module threadpool-impl-flexible {
                 type uint32;
             }
 
+            leaf queueCapacity {
+                type uint16;
+                mandatory false;
+                description "Capacity of queue that holds waiting tasks";
+            }
+
             container threadFactory {
                 uses config:service-ref {
                     refine type {

@@ -844,6 +844,10 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-util</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-netconf-connector</artifactId>
         </dependency>
         <dependency>
@@ -935,12 +939,6 @@
           <artifactId>protocol-framework</artifactId>
         </dependency>
 
-        <!-- clustering -->
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>remoterpc-routingtable.implementation</artifactId>
-          <version>${mdsal.version}</version>
-        </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-api</artifactId>
@@ -996,15 +994,16 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-inmemory-datastore</artifactId>
+          <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-netconf-connector</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-remote</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-remoterpc-connector</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
@@ -1064,10 +1063,6 @@
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-flow-base</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller.model</groupId>
-          <artifactId>model-flow-management</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
@@ -1319,6 +1314,19 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>docs</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>swagger-ui</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>

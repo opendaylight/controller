@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationI
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -49,7 +50,7 @@ public class DataNormalizer {
         ImmutableList.Builder<PathArgument> normalizedArgs = ImmutableList.builder();
 
         DataNormalizationOperation<?> currentOp = operation;
-        Iterator<PathArgument> arguments = legacy.getPath().iterator();
+        Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
 
         try {
             while (arguments.hasNext()) {
@@ -68,7 +69,17 @@ public class DataNormalizer {
             throw new IllegalArgumentException(String.format("Failed to normalize path %s", legacy), e);
         }
 
-        return new InstanceIdentifier(normalizedArgs.build());
+        return InstanceIdentifier.create(normalizedArgs.build());
+    }
+
+    public DataNormalizationOperation<?> getOperation(final InstanceIdentifier legacy) throws DataNormalizationException {
+        DataNormalizationOperation<?> currentOp = operation;
+        Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
+
+        while (arguments.hasNext()) {
+            currentOp = currentOp.getChild(arguments.next());
+        }
+        return currentOp;
     }
 
     public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
@@ -82,7 +93,7 @@ public class DataNormalizer {
         InstanceIdentifier normalizedPath = toNormalized(legacyPath);
 
         DataNormalizationOperation<?> currentOp = operation;
-        for (PathArgument arg : normalizedPath.getPath()) {
+        for (PathArgument arg : normalizedPath.getPathArguments()) {
             try {
                 currentOp = currentOp.getChild(arg);
             } catch (DataNormalizationException e) {
@@ -104,9 +115,7 @@ public class DataNormalizer {
 
             if (potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
                 currentOp = potentialOp;
-                ArrayList<PathArgument> reworkedArgs = new ArrayList<>(normalizedPath.getPath());
-                reworkedArgs.add(potentialOp.getIdentifier());
-                normalizedPath = new InstanceIdentifier(reworkedArgs);
+                normalizedPath = normalizedPath.node(potentialOp.getIdentifier());
             }
         }
 
@@ -118,15 +127,14 @@ public class DataNormalizer {
 
     public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) throws DataNormalizationException {
         ImmutableList.Builder<PathArgument> legacyArgs = ImmutableList.builder();
-        PathArgument previous = null;
         DataNormalizationOperation<?> currentOp = operation;
-        for (PathArgument normalizedArg : normalized.getPath()) {
+        for (PathArgument normalizedArg : normalized.getPathArguments()) {
             currentOp = currentOp.getChild(normalizedArg);
-            if(!currentOp.isMixin()) {
+            if (!currentOp.isMixin()) {
                 legacyArgs.add(normalizedArg);
             }
         }
-        return new InstanceIdentifier(legacyArgs.build());
+        return InstanceIdentifier.create(legacyArgs.build());
     }
 
     public CompositeNode toLegacy(final InstanceIdentifier normalizedPath, final NormalizedNode<?, ?> normalizedData) {
@@ -134,6 +142,9 @@ public class DataNormalizer {
         // DataContainerNode<?>,"Node object %s, %s should be of type DataContainerNode",normalizedPath,normalizedData);
         if (normalizedData instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) normalizedData);
+        } else if (normalizedData instanceof AnyXmlNode) {
+            Node<?> value = ((AnyXmlNode) normalizedData).getValue();
+            return value instanceof CompositeNode ? (CompositeNode) value : null;
         }
         return null;
     }
@@ -150,6 +161,8 @@ public class DataNormalizer {
 
         if (node instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) node);
+        } else if (node instanceof AnyXmlNode) {
+            return ((AnyXmlNode) node).getValue();
         }
         return toLegacySimple(node);
 
@@ -166,7 +179,7 @@ public class DataNormalizer {
         for (NormalizedNode<?, ?> child : node.getValue()) {
             if (child instanceof MixinNode && child instanceof NormalizedNodeContainer<?, ?, ?>) {
                 builder.addAll(toLegacyNodesFromMixin((NormalizedNodeContainer) child));
-            } else if( child instanceof UnkeyedListNode) {
+            } else if (child instanceof UnkeyedListNode) {
                 builder.addAll(toLegacyNodesFromUnkeyedList((UnkeyedListNode) child));
             } else {
                 addToBuilder(builder, toLegacy(child));

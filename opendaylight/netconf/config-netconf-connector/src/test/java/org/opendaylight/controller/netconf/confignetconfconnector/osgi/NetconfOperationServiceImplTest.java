@@ -8,14 +8,12 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
-import org.opendaylight.controller.config.api.LookupRegistry;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.yangtools.yang.common.QName;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -24,9 +22,12 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
+import org.opendaylight.controller.config.api.LookupRegistry;
+import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.yangtools.yang.common.QName;
 
 public class NetconfOperationServiceImplTest {
 
@@ -72,15 +73,15 @@ public class NetconfOperationServiceImplTest {
             Assert.assertThat(
                     message,
                     JUnitMatchers
-                            .containsString("missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
+                    .containsString("missing from config subsystem but present in yangstore: [(namespace?revision=1970-01-01)qname2]"));
             Assert.assertThat(
                     message,
                     JUnitMatchers
-                            .containsString("All modules present in config: [(namespace?revision=1970-01-01)qname1]"));
+                    .containsString("All modules present in config: [(namespace?revision=1970-01-01)qname1]"));
         }
     }
 
-    private YangStoreSnapshot mockYangStoreSnapshot(String... qnames) {
+    private YangStoreSnapshot mockYangStoreSnapshot(final String... qnames) {
         YangStoreSnapshot mock = mock(YangStoreSnapshot.class);
 
         Map<String, Map<String, ModuleMXBeanEntry>> map = Maps.newHashMap();
@@ -99,18 +100,18 @@ public class NetconfOperationServiceImplTest {
         return mock;
     }
 
-    private ModuleMXBeanEntry mockMBeanEntry(String qname) {
+    private ModuleMXBeanEntry mockMBeanEntry(final String qname) {
         ModuleMXBeanEntry mock = mock(ModuleMXBeanEntry.class);
         QName q = getQName(qname);
         doReturn(q).when(mock).getYangModuleQName();
         return mock;
     }
 
-    private QName getQName(String qname) {
-        return new QName(URI.create("namespace"), date1970_01_01, qname);
+    private QName getQName(final String qname) {
+        return QName.create(URI.create("namespace"), date1970_01_01, qname);
     }
 
-    private LookupRegistry mockJmxClient(String... visibleQNames) {
+    private LookupRegistry mockJmxClient(final String... visibleQNames) {
         LookupRegistry mock = mock(LookupRegistry.class);
         Set<String> qnames = Sets.newHashSet();
         for (String visibleQName : visibleQNames) {

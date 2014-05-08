@@ -8,54 +8,55 @@
 package org.opendaylight.controller.sal.rest.doc.swagger;
 
 /**
- * Implementation of swagger spec
- * (see <a href="https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#524-parameter-object">
- *   https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#524-parameter-object</a>)
+ * Implementation of swagger spec (see <a href=
+ * "https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#524-parameter-object"
+ * > https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#524-
+ * parameter-object</a>)
  */
 public class Parameter {
-  private String name;
-  private String description;
-  private boolean required;
-  private String type;
-  private String paramType;
+    private String name;
+    private String description;
+    private boolean required;
+    private String type;
+    private String paramType;
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public boolean isRequired() {
-    return required;
-  }
+    public boolean isRequired() {
+        return required;
+    }
 
-  public void setRequired(boolean required) {
-    this.required = required;
-  }
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
 
-  public String getType() {
-    return type;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-  public String getParamType() {
-    return paramType;
-  }
+    public String getParamType() {
+        return paramType;
+    }
 
-  public void setParamType(String paramType) {
-    this.paramType = paramType;
-  }
+    public void setParamType(String paramType) {
+        this.paramType = paramType;
+    }
 }

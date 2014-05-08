@@ -32,11 +32,15 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
+import org.opendaylight.controller.sal.packet.PacketException;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFPacketOut;
@@ -169,12 +173,10 @@ public class DataPacketMuxDemux implements IContainerListener,
 
     @Override
     public void receive(ISwitch sw, OFMessage msg) {
-        if (sw == null || msg == null
-                || this.pluginOutDataPacketServices == null) {
+        if (sw == null || msg == null || this.pluginOutDataPacketServices == null) {
             // Something fishy, we cannot do anything
-            logger.debug(
-                    "sw: {} and/or msg: {} and/or pluginOutDataPacketServices: {} is null!",
-                    new Object[] { sw, msg, this.pluginOutDataPacketServices });
+            logger.debug("sw: {} and/or msg: {} and/or pluginOutDataPacketServices: {} is null!", new Object[] { sw,
+                    msg, this.pluginOutDataPacketServices });
             return;
         }
 
@@ -185,8 +187,7 @@ public class DataPacketMuxDemux implements IContainerListener,
                 logger.debug("Connection service refused DataPacketMuxDemux receive {} {}", sw, msg);
                 return;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return;
         }
 
@@ -204,63 +205,72 @@ public class DataPacketMuxDemux implements IContainerListener,
                 // pass the parsed packet simply because once the
                 // packet infra is settled all the packets will passed
                 // around as parsed and read-only
-                for (int i = 0; i < this.iDataPacketListen.size(); i++) {
-                    IDataPacketListen s = this.iDataPacketListen.get(i);
-                    if (s.receiveDataPacket(dataPacket).equals(
-                            PacketResult.CONSUME)) {
+                for (IDataPacketListen s : this.iDataPacketListen) {
+                      if (s.receiveDataPacket(dataPacket).equals(PacketResult.CONSUME)) {
                         logger.trace("Consumed locally data packet");
                         return;
                     }
                 }
 
-                // Now dispatch the packet toward SAL at least for
-                // default container, we need to revisit this in a general
-                // slicing architecture refresh
-                IPluginOutDataPacketService defaultOutService = this.pluginOutDataPacketServices
-                        .get(GlobalConstants.DEFAULT.toString());
-                if (defaultOutService != null) {
-                    defaultOutService.receiveDataPacket(dataPacket);
-                    if (logger.isTraceEnabled()) {
-                      logger.trace(
-                              "Dispatched to apps a frame of size: {} on " +
-                              "container: {}: {}", new Object[] {
-                                    ofPacket.getPacketData().length,
-                                    GlobalConstants.DEFAULT.toString(),
-                                    HexEncode.bytesToHexString(dataPacket
-                                            .getPacketData()) });
-                    }
-                }
+                boolean dispatched_to_container = false;
+
                 // Now check the mapping between nodeConnector and
                 // Container and later on optimally filter based on
                 // flowSpec
                 List<String> containersRX = this.nc2Container.get(p);
                 if (containersRX != null) {
-                    for (int i = 0; i < containersRX.size(); i++) {
-                        String container = containersRX.get(i);
-                        IPluginOutDataPacketService s = this.pluginOutDataPacketServices
-                                .get(container);
-                        if (s != null) {
-                            // TODO add filtering on a per-flowSpec base
-                            s.receiveDataPacket(dataPacket);
-                            if (logger.isTraceEnabled()) {
-                              logger.trace(
-                                      "Dispatched to apps a frame of size: {}" +
-                                      " on container: {}: {}", new Object[] {
-                                            ofPacket.getPacketData().length,
-                                            container,
-                                            HexEncode.bytesToHexString(dataPacket
-                                                    .getPacketData()) });
+                    Ethernet frame = new Ethernet();
+                    byte data[] = dataPacket.getPacketData();
+                    frame.deserialize(data, 0, data.length * NetUtils.NumBitsInAByte);
+                    Match packetMatch = frame.getMatch();
+                    for (String container : containersRX) {
+                        boolean notify = true;
+                        List<ContainerFlow> containerFlows = this.container2FlowSpecs.get(container);
+                        if (containerFlows != null) {
+                            notify = false;
+                            for (ContainerFlow cFlow : containerFlows) {
+                                if (cFlow.allowsMatch(packetMatch)) {
+                                    notify = true;
+                                    break;
+                                }
+                            }
+                            if (notify) {
+                                IPluginOutDataPacketService s = this.pluginOutDataPacketServices.get(container);
+                                if (s != null) {
+                                    s.receiveDataPacket(dataPacket);
+                                    if (logger.isTraceEnabled()) {
+                                        logger.trace(
+                                                "Dispatched to apps a frame of size: {}" + " on container: {}: {}",
+                                                new Object[] { ofPacket.getPacketData().length, container,
+                                                        HexEncode.bytesToHexString(dataPacket.getPacketData()) });
+                                    }
+                                }
+                                dispatched_to_container = true;
                             }
                         }
                     }
                 }
-
+                if (!dispatched_to_container) {
+                    // Now dispatch the packet toward SAL for default container
+                    IPluginOutDataPacketService defaultOutService = this.pluginOutDataPacketServices
+                        .get(GlobalConstants.DEFAULT.toString());
+                    if (defaultOutService != null) {
+                        defaultOutService.receiveDataPacket(dataPacket);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Dispatched to apps a frame of size: {} on " + "container: {}: {}",
+                                         new Object[] { ofPacket.getPacketData().length,
+                                                        GlobalConstants.DEFAULT.toString(),
+                                                        HexEncode.bytesToHexString(dataPacket.getPacketData()) });
+                        }
+                    }
+                }
                 // This is supposed to be the catch all for all the
                 // DataPacket hence we will assume it has been handled
                 return;
             } catch (ConstructionException cex) {
+            } catch (PacketException e) {
+                logger.debug("Failed to deserialize raw packet: ", e.getMessage());
             }
-
             // If we reach this point something went wrong.
             return;
         } else {

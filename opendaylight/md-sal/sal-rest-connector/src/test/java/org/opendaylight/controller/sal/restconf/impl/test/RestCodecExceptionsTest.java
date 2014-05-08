@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.concepts.Codec;
@@ -28,7 +27,7 @@ public class RestCodecExceptionsTest {
 
     @Test
     public void serializeExceptionTest() {
-        Codec<Object, Object> codec = RestCodec.from(BitsType.create(PATH, Collections.<Bit>emptyList()), null);
+        Codec<Object, Object> codec = RestCodec.from(BitsType.create(PATH, Collections.<Bit> emptyList()), null);
         String serializedValue = (String) codec.serialize("incorrect value"); // set
                                                                               // expected
         assertEquals("incorrect value", serializedValue);

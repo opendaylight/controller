@@ -12,6 +12,12 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+/**
+ *
+ * @deprecated Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore.
+ *
+ */
+@Deprecated
 public interface DataStore extends //
     DataReader<InstanceIdentifier, CompositeNode>,
     DataCommitHandler<InstanceIdentifier, CompositeNode> {

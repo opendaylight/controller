@@ -47,25 +47,23 @@ public class Draft02 {
 
         String ERROR_LIST_SCHEMA_NODE = "error";
 
-        QName IETF_RESTCONF_QNAME = QName.create( Draft02.RestConfModule.NAMESPACE,
-                                                  Draft02.RestConfModule.REVISION,
-                                                  Draft02.RestConfModule.NAME );
+        QName IETF_RESTCONF_QNAME = QName.create(Draft02.RestConfModule.NAMESPACE, Draft02.RestConfModule.REVISION,
+                Draft02.RestConfModule.NAME);
 
-        QName ERRORS_CONTAINER_QNAME = QName.create( IETF_RESTCONF_QNAME, ERRORS_CONTAINER_SCHEMA_NODE );
+        QName ERRORS_CONTAINER_QNAME = QName.create(IETF_RESTCONF_QNAME, ERRORS_CONTAINER_SCHEMA_NODE);
 
-        QName ERROR_LIST_QNAME = QName.create( IETF_RESTCONF_QNAME, ERROR_LIST_SCHEMA_NODE );
+        QName ERROR_LIST_QNAME = QName.create(IETF_RESTCONF_QNAME, ERROR_LIST_SCHEMA_NODE);
 
-        QName ERROR_TYPE_QNAME = QName.create( IETF_RESTCONF_QNAME, "error-type" );
+        QName ERROR_TYPE_QNAME = QName.create(IETF_RESTCONF_QNAME, "error-type");
 
-        QName ERROR_TAG_QNAME = QName.create( IETF_RESTCONF_QNAME, "error-tag" );
+        QName ERROR_TAG_QNAME = QName.create(IETF_RESTCONF_QNAME, "error-tag");
 
-        QName ERROR_APP_TAG_QNAME = QName.create( IETF_RESTCONF_QNAME, "error-app-tag" );
+        QName ERROR_APP_TAG_QNAME = QName.create(IETF_RESTCONF_QNAME, "error-app-tag");
 
-        QName ERROR_MESSAGE_QNAME = QName.create( IETF_RESTCONF_QNAME, "error-message" );
+        QName ERROR_MESSAGE_QNAME = QName.create(IETF_RESTCONF_QNAME, "error-message");
 
-        QName ERROR_INFO_QNAME = QName.create( IETF_RESTCONF_QNAME, "error-info" );
+        QName ERROR_INFO_QNAME = QName.create(IETF_RESTCONF_QNAME, "error-info");
     }
-
 
     public static interface Paths {
 

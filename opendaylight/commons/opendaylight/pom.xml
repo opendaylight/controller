@@ -2,11 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent</artifactId>
+    <version>1.4.2-SNAPSHOT</version>
+    <relativePath></relativePath>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
   <version>1.4.2-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -15,42 +17,63 @@
   </prerequisites>
 
   <properties>
+
+    <akka.version>2.3.4</akka.version>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
+    <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
     <aries.util.version>1.1.0</aries.util.version>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.4.0</bundle.plugin.version>
+    <bundlescanner.api.version>0.4.2-SNAPSHOT</bundlescanner.api.version>
+    <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
-    <checkstyle.version>2.10</checkstyle.version>
+    <checkstyle.version>2.12</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
     <clustering.test.version>0.4.2-SNAPSHOT</clustering.test.version>
     <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
     <!-- Third Party Versions -->
-    <commons.codec.version>1.7</commons.codec.version>
+    <commons.catalina>7.0.32.v201211201336</commons.catalina>
+    <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
+    <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
+    <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
+    <commons.coyote>7.0.32.v201211201952</commons.coyote>
+    <commons.el>7.0.32.v201211081135</commons.el>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
-    <commons.lang.version>3.1</commons.lang.version>
+    <commons.jasper>7.0.32.v201211201952</commons.jasper>
+    <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
+    <commons.lang3.version>3.1</commons.lang3.version>
+    <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
+    <commons.opendaylight.commons.httpclient>0.1.2-SNAPSHOT</commons.opendaylight.commons.httpclient>
+    <commons.opendaylight.concepts.version>0.5.2-SNAPSHOT</commons.opendaylight.concepts.version>
+    <commons.opendaylight.version>1.4.2-SNAPSHOT</commons.opendaylight.version>
+    <commons.parent.version>1.0.2-SNAPSHOT</commons.parent.version>
+    <commons.tomcat.api>7.0.32.v201211081135</commons.tomcat.api>
+    <commons.tomcat.util>7.0.32.v201211201952</commons.tomcat.util>
     <compiler.version>2.3.2</compiler.version>
+    <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
+    <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
     <containermanager.northbound.version>0.4.2-SNAPSHOT</containermanager.northbound.version>
+    <containermanager.shell.version>0.5.2-SNAPSHOT</containermanager.shell.version>
     <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
     <controllermanager.northbound.version>0.0.2-SNAPSHOT</controllermanager.northbound.version>
-    <corsfilter.version>7.0.42</corsfilter.version>
-    <ctrie.version>0.2.0</ctrie.version>
     <devices.web.version>0.4.2-SNAPSHOT</devices.web.version>
+    <dummy-console.version>1.1.0-SNAPSHOT</dummy-console.version>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
@@ -58,81 +81,65 @@
     <exam.version>3.0.0</exam.version>
 
     <!-- OpenEXI third party lib for netconf-->
+
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
-    <failsafe.version>2.15</failsafe.version>
-    <feature.transaction.version>1.0.1</feature.transaction.version>
-    <felix.dependencymanager.shell.version>3.0.1</felix.dependencymanager.shell.version>
-    <felix.dependencymanager.version>3.1.0</felix.dependencymanager.version>
-    <felix.fileinstall.version>3.1.6</felix.fileinstall.version>
-    <felix.webconsole.version>4.2.0</felix.webconsole.version>
     <filtervalve.version>1.4.2-SNAPSHOT</filtervalve.version>
+    <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
     <flows.web.version>0.4.2-SNAPSHOT</flows.web.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
     <forwarding.staticrouting.northbound.version>0.4.2-SNAPSHOT</forwarding.staticrouting.northbound.version>
     <forwardingrulesmanager.implementation.version>0.4.2-SNAPSHOT</forwardingrulesmanager.implementation.version>
     <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
-    <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
-    <gson.version>2.2.4</gson.version>
-    <guava.version>14.0.1</guava.version>
+    <ganymed.version>1.1-SNAPSHOT</ganymed.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker_new.implementation.version>0.4.2-SNAPSHOT</hosttracker_new.implementation.version>
+    <httpservice-bridge.northbound.version>0.0.2-SNAPSHOT</httpservice-bridge.northbound.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-restconf.version>2013.10.19.1-SNAPSHOT</ietf-restconf.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
-    <jackson.version>2.3.2</jackson.version>
-    <jacoco.version>0.6.2.201302030002</jacoco.version>
-    <jar.plugin.version>2.4</jar.plugin.version>
-    <java.version.source>1.7</java.version.source>
-    <java.version.target>1.7</java.version.target>
-    <javassist.version>3.17.1-GA</javassist.version>
-    <javax.annotation.version>1.2</javax.annotation.version>
-    <!-- Third party version -->
-    <jersey-servlet.version>1.17</jersey-servlet.version>
-    <jersey.version>1.17</jersey.version>
-    <jersey2.publisher.version>4.0</jersey2.publisher.version>
-    <jersey2.version>2.8</jersey2.version>
-    <jettison.version>1.3.3</jettison.version>
+    <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
+    <jolokia-bridge.version>0.0.2-SNAPSHOT</jolokia-bridge.version>
     <jolokia.version>1.1.4</jolokia.version>
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <jsr311.v2.api.version>2.0</jsr311.v2.api.version>
     <junit.version>4.8.1</junit.version>
     <karaf.branding.version>1.0.0-SNAPSHOT</karaf.branding.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
+    <leveldb.version>0.7</leveldb.version>
+    <leveldbjni.version>1.8</leveldbjni.version>
+    <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
-    <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
-    <!-- Java Versions -->
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
+    <mimepull.version>1.9.4</mimepull.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
-    <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
-    <netty.version>4.0.19.Final</netty.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <networkconfig.neutron.implementation.version>0.4.2-SNAPSHOT</networkconfig.neutron.implementation.version>
     <networkconfig.neutron.northbound.version>0.4.2-SNAPSHOT</networkconfig.neutron.northbound.version>
     <networkconfig.neutron.version>0.4.2-SNAPSHOT</networkconfig.neutron.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <northbound.commons.version>0.4.2-SNAPSHOT</northbound.commons.version>
+    <northbound.hosttracker.version>1.4.2-SNAPSHOT</northbound.hosttracker.version>
+    <northbound.jolokia.version>1.4.2-SNAPSHOT</northbound.jolokia.version>
     <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
-    <org.json.version>20080701</org.json.version>
     <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
-    <osgi.compendium.version>5.0.0</osgi.compendium.version>
-    <osgi.core.version>5.0.0</osgi.core.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <projectinfo>2.6</projectinfo>
+    <parboiled.version>1.1.6</parboiled.version>
+    <parboiled.scala.version>1.1.6</parboiled.scala.version>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
+    <protobuf.version>2.5.0</protobuf.version>
     <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
     <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
     <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
-    <releaseplugin.version>2.3.2</releaseplugin.version>
     <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.implementation.version>0.4.2-SNAPSHOT</sal.implementation.version>
@@ -143,21 +150,23 @@
     <samples.loadbalancer.northbound.version>0.4.2-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.4.2-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
+    <scala.version>2.10</scala.version>
+    <scala.micro.version>4</scala.micro.version>
     <security.version>0.4.2-SNAPSHOT</security.version>
+    <shapeless.version>1.2.4</shapeless.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
-    <siteplugin>3.2</siteplugin>
-    <slf4j.version>1.7.2</slf4j.version>
     <sonar.branch>${user.name}-private-view</sonar.branch>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
-    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
+    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
     <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
     <spring-security-karaf.version>3.1.4.RELEASE</spring-security-karaf.version>
     <spring-security.version>3.1.3.RELEASE</spring-security.version>
     <spring.version>3.1.3.RELEASE</spring.version>
+    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
     <statistics.northbound.version>0.4.2-SNAPSHOT</statistics.northbound.version>
     <statisticsmanager.implementation.version>0.4.2-SNAPSHOT</statisticsmanager.implementation.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
@@ -171,21 +180,21 @@
     <topology.web.version>0.4.2-SNAPSHOT</topology.web.version>
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
     <troubleshoot.web.version>0.4.2-SNAPSHOT</troubleshoot.web.version>
-    <url.version>1.5.0</url.version>
+    <typesafe.config.version>1.2.0</typesafe.config.version>
+    <uncommons.maths.version>1.2.2</uncommons.maths.version>
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
-    <virgo.version>3.6.0.RELEASE</virgo.version>
     <web.version>0.4.2-SNAPSHOT</web.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
-    <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
+    <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-
+       <!-- project specific dependencies -->
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ietf-netconf-monitoring</artifactId>
@@ -267,6 +276,12 @@
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
+      <!-- 3rd party dependencies needed by config-->
+      <dependency>
+        <groupId>com.jcabi</groupId>
+        <artifactId>jcabi-maven-slf4j</artifactId>
+        <version>0.8</version>
+      </dependency>
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
@@ -279,10 +294,40 @@
         <artifactId>jersey-core</artifactId>
         <version>${jersey.version}</version>
       </dependency>
+
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>${jersey.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-actor_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-cluster_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-remote_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-testkit_${scala.version}</artifactId>
+        <version>${akka.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -298,6 +343,11 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${commons.io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${commons.lang.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-net</groupId>
@@ -462,6 +512,11 @@
         <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
+        <groupId>net.sourceforge.pmd</groupId>
+        <artifactId>pmd</artifactId>
+        <version>5.1.0</version>
+      </dependency>
+      <dependency>
         <groupId>orbit</groupId>
         <artifactId>javax.activation</artifactId>
         <version>1.1.0.v201211130549</version>
@@ -504,47 +559,47 @@
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.catalina</artifactId>
-        <version>7.0.32.v201211201336</version>
+        <version>${commons.catalina}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.catalina.ha</artifactId>
-        <version>7.0.32.v201211201952</version>
+        <version>${commons.catalina.ha}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.catalina.tribes</artifactId>
-        <version>7.0.32.v201211201952</version>
+        <version>${commons.catalina.tribes}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.coyote</artifactId>
-        <version>7.0.32.v201211201952</version>
+        <version>${commons.coyote}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.el</artifactId>
-        <version>7.0.32.v201211081135</version>
+        <version>${commons.el}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.jasper</artifactId>
-        <version>7.0.32.v201211201952</version>
+        <version>${commons.jasper}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.juli.extras</artifactId>
-        <version>7.0.32.v201211081135</version>
+        <version>${commons.juli.version}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.tomcat.api</artifactId>
-        <version>7.0.32.v201211081135</version>
+        <version>${commons.tomcat.api}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
         <artifactId>org.apache.tomcat.util</artifactId>
-        <version>7.0.32.v201211201952</version>
+        <version>${commons.tomcat.util}</version>
       </dependency>
       <dependency>
         <groupId>org.aopalliance</groupId>
@@ -554,7 +609,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>${commons.lang.version}</version>
+        <version>${commons.lang3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -595,9 +650,24 @@
         <version>${enunciate.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.codehaus.gmaven.runtime</groupId>
+        <artifactId>gmaven-runtime-2.0</artifactId>
+        <version>1.5</version>
+      </dependency>
+      <dependency>
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
         <version>${jettison.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse</groupId>
+        <artifactId>jdt</artifactId>
+        <version>3.3.0-v20070607-1300</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.equinox</groupId>
+        <artifactId>app</artifactId>
+        <version>1.0.0-v20070606</version>
       </dependency>
 
       <!-- equinox http service bridge -->
@@ -605,6 +675,11 @@
         <groupId>org.eclipse.equinox.http</groupId>
         <artifactId>servlet</artifactId>
         <version>1.0.0-v20070606</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jdt</groupId>
+        <artifactId>core</artifactId>
+        <version>3.3.0-v_771</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
@@ -629,9 +704,19 @@
         <version>${xtend.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+        <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+        <version>2.4</version>
+      </dependency>
+      <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>${javassist.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>jaxrs-api</artifactId>
+        <version>3.0.4.Final</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.spec.javax.transaction</groupId>
@@ -815,6 +900,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>containermanager.shell</artifactId>
+        <version>${containermanager.shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>controllermanager.northbound</artifactId>
         <version>${controllermanager.northbound.version}</version>
       </dependency>
@@ -827,6 +917,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>filter-valve</artifactId>
         <version>${filtervalve.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>flow-management-compatibility</artifactId>
+        <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -917,6 +1012,12 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-client</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-client</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
       </dependency>
 
       <!--Netconf config-->
@@ -1131,11 +1232,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-remoterpc-connector</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-rest-connector</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1147,6 +1243,11 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-restconf-broker</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-test-model</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
 
@@ -1370,6 +1471,27 @@
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-topology</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster-consumer</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster-provider</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>
         <version>${jersey-servlet.version}</version>
@@ -1377,7 +1499,7 @@
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>ganymed</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>${ganymed.version}</version>
       </dependency>
       <!-- Third parties from opendaylight released -->
       <dependency>
@@ -1539,6 +1661,16 @@
         <version>${yang-ext.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+        <artifactId>antlr4-runtime-osgi-nohead</artifactId>
+        <version>4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+        <artifactId>xtend-lib-osgi</artifactId>
+        <version>${xtend.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.openexi</groupId>
         <artifactId>nagasena</artifactId>
         <version>${exi.nagasena.version}</version>
@@ -1558,17 +1690,15 @@
         <artifactId>org.osgi.core</artifactId>
         <version>${osgi.core.version}</version>
       </dependency>
-
       <dependency>
-        <groupId>org.ow2.asm</groupId>
-        <artifactId>asm-all</artifactId>
-        <version>4.1</version>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.9.9-RC1</version>
       </dependency>
-      <!-- Visual VM hook -->
       <dependency>
-        <groupId>org.ow2.chameleon.management</groupId>
-        <artifactId>chameleon-mbeans</artifactId>
-        <version>1.0.0</version>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}.1</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -1587,92 +1717,14 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.aop</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.asm</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.beans</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.context</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.context.support</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.core</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.expression</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.transaction</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.web</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>org.springframework.web.servlet</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <!-- Spring security -->
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-config</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-core</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-taglibs</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>virgomirror</groupId>
-        <artifactId>org.eclipse.jdt.core.compiler.batch</artifactId>
-        <version>3.8.0.I20120518-2145</version>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -1698,44 +1750,6 @@
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>mockito-configuration</artifactId>
         <version>${yangtools.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <!-- Add Pax Exam -->
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-container-native</artifactId>
-        <version>${exam.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-junit4</artifactId>
-        <version>${exam.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-link-mvn</artifactId>
-        <version>${exam.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.url</groupId>
-        <artifactId>pax-url-aether</artifactId>
-        <version>${url.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.osgi</groupId>
-        <artifactId>spring-osgi-mock</artifactId>
-        <version>${spring-osgi.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>xmlunit</groupId>
-        <artifactId>xmlunit</artifactId>
-        <version>1.5</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -1884,7 +1898,7 @@
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
+          <version>${lifecycle.mapping.version}</version>
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
@@ -1996,6 +2010,21 @@
                     <ignore></ignore>
                   </action>
                 </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>javacc-maven-plugin</artifactId>
+                    <versionRange>[0.0,)</versionRange>
+                    <goals>
+                      <goal>javacc</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>false</runOnIncremental>
+                    </execute>
+                  </action>
+                </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -2052,7 +2081,7 @@
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
           <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
-          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/</excludes>
+          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/,**\/xtend-gen\/</excludes>
         </configuration>
         <dependencies>
           <dependency>
@@ -2228,7 +2257,7 @@
       </snapshots>
       <id>opendaylight-mirror</id>
       <name>opendaylight-mirror</name>
-      <url>${nexusproxy}/groups/public/</url>
+      <url>http://nexus.opendaylight.org/content/groups/public/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <repository>
@@ -2240,7 +2269,7 @@
       </snapshots>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </repository>
   </repositories>
 
@@ -2256,7 +2285,7 @@
       </snapshots>
       <id>opendaylight-mirror</id>
       <name>opendaylight-mirror</name>
-      <url>${nexusproxy}/groups/public/</url>
+      <url>http://nexus.opendaylight.org/content/groups/public/</url>
     </pluginRepository>
     <!-- OpenDayLight Snapshot artifact -->
     <pluginRepository>
@@ -2268,19 +2297,19 @@
       </snapshots>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </pluginRepository>
   </pluginRepositories>
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/${nexus.repository.release}/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>

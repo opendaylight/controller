@@ -7,20 +7,25 @@
  */
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import org.junit.matchers.JUnitMatchers;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import org.junit.matchers.JUnitMatchers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 final class TestingExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConfigPersisterTest.class);
 
     private Throwable t;
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        logger.debug("Uncaught exception in thread {}", t, e);
         this.t = e;
     }
 

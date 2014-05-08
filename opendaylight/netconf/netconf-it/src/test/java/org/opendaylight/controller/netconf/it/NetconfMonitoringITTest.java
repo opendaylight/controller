@@ -13,6 +13,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,14 +26,11 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
@@ -53,11 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
-
 public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     private static final Logger logger =  LoggerFactory.getLogger(NetconfITTest.class);
@@ -74,8 +70,7 @@ public class NetconfMonitoringITTest extends AbstractNetconfConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, NetconfITTest.getModuleFactoriesS().toArray(
-                new ModuleFactory[0])));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, NetconfITTest.FACTORIES));
 
         monitoringService = new NetconfMonitoringServiceImpl(getNetconfOperationProvider());
 

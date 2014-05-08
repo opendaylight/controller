@@ -95,8 +95,10 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
+
+        // TODO rollback on error not supported EditConfigXmlParser:100
         // [RFC6241] 8.5.  Rollback-on-Error Capability
-        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
+        // capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
 
         Set<Module> modules = yangStoreSnapshot.getModules();
         for (Module module : modules) {

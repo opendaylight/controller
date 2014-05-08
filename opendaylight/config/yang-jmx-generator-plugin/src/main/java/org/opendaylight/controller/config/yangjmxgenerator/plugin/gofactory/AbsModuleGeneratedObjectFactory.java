@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.gofactory;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 import com.google.common.base.Joiner;
@@ -212,7 +213,7 @@ public class AbsModuleGeneratedObjectFactory {
                         "}\n", moduleField.getName(), osgi);
                 } else {
                     str = format(
-                        "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);",
+                        "%1$sDependency = dependencyResolver.resolveInstance(%2$s.class, %1$s, %1$sJmxAttribute);\n",
                         moduleField.getName(), osgi);
                 }
                 resolveDependenciesMap.put(moduleField, str);
@@ -222,7 +223,8 @@ public class AbsModuleGeneratedObjectFactory {
         // wrap each field resolvation statement with if !=null when dependency is not mandatory
         for (Map.Entry<ModuleField, String> entry : resolveDependenciesMap.entrySet()) {
             if (entry.getKey().getDependency().isMandatory() == false) {
-                result += format("if (%s!=null) {\n%s;\n}", entry.getKey().getName(), entry.getValue());
+                checkState(entry.getValue().endsWith(";\n"));
+                result += format("if (%s!=null) {\n%s}\n", entry.getKey().getName(), entry.getValue());
             } else {
                 result += entry.getValue();
             }
@@ -284,7 +286,7 @@ public class AbsModuleGeneratedObjectFactory {
             format("private final %s oldModule;\n", abstractFQN.getTypeName())+
             format("private final %s oldInstance;\n", AutoCloseable.class.getCanonicalName())+
             format("private %s instance;\n", AutoCloseable.class.getCanonicalName())+
-            format("private final %s dependencyResolver;\n", DependencyResolver.class.getCanonicalName())+
+            format("protected final %s dependencyResolver;\n", DependencyResolver.class.getCanonicalName())+
             format("private final %s identifier;\n", ModuleIdentifier.class.getCanonicalName())+
             "@Override\n"+
             format("public %s getIdentifier() {\n", ModuleIdentifier.class.getCanonicalName())+
@@ -401,7 +403,7 @@ public class AbsModuleGeneratedObjectFactory {
         parameters.put(ModuleIdentifier.class.getCanonicalName(), "identifier");
         parameters.put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
 
-        String setToNulls = "this.oldInstance=null;\n;" +
+        String setToNulls = "this.oldInstance=null;\n" +
                 "this.oldModule=null;\n";
         return getConstructorStart(abstractFQN, parameters, setToNulls);
     }

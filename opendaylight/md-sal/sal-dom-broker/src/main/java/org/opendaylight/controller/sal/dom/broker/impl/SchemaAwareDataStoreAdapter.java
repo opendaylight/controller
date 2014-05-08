@@ -9,6 +9,11 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,10 +44,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 
 public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
 DataStore, //
@@ -235,7 +236,7 @@ AutoCloseable {
         public CompositeNode readConfigurationData(final InstanceIdentifier path) {
             getDelegateReadLock().lock();
             try {
-                if (path.getPath().isEmpty()) {
+                if (Iterables.isEmpty(path.getPathArguments())) {
                     return null;
                 }
                 QName qname = null;
@@ -278,7 +279,7 @@ AutoCloseable {
         public CompositeNode readOperationalData(final InstanceIdentifier path) {
             getDelegateReadLock().lock();
             try {
-                if (path.getPath().isEmpty()) {
+                if (Iterables.isEmpty(path.getPathArguments())) {
                     return null;
                 }
                 QName qname = null;

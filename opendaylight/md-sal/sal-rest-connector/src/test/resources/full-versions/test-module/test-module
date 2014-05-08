@@ -4,7 +4,7 @@ module test-module {
 
   revision 2014-01-09 {
   }
-  
+
   container interfaces {
     container class {
         leaf name {
@@ -18,7 +18,7 @@ module test-module {
         }
     }
   }
-  
+
   container cont {
     container cont1 {
         leaf lf11 {
@@ -34,9 +34,18 @@ module test-module {
             type string;
         }
     }
-  }   
+  }
   
-  
+  list lst-with-composite-key {
+    key "key1 key2";
+    leaf key1 {
+        type string;
+    }
+    leaf key2 {
+        type uint8;
+    }
+  }
+
   rpc rpc-test {
     input {
       container cont {
@@ -48,16 +57,11 @@ module test-module {
                 type string;
             }
         }
-      }    
+      }
     }
     output {
         container cont-output {
         }
-    } 
-  
+    }
   }
-  
-  
- 
-
 }

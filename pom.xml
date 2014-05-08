@@ -32,6 +32,7 @@
     <module>opendaylight/hosttracker_new/implementation</module>
     <module>opendaylight/containermanager/api</module>
     <module>opendaylight/containermanager/implementation</module>
+    <module>opendaylight/containermanager/shell</module>
     <module>opendaylight/appauth</module>
     <module>opendaylight/switchmanager/api</module>
     <module>opendaylight/switchmanager/implementation</module>
@@ -126,9 +127,13 @@
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
+    <module>features/controller</module>
+    <module>features/adsal</module>
+    <module>features/extras</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
+    <module>features</module>
   </modules>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
@@ -165,6 +170,7 @@
       </activation>
       <modules>
         <module>opendaylight/northbound/java-client</module>
+        <module>opendaylight/northbound/swagger-ui</module>
       </modules>
     </profile>
   </profiles>

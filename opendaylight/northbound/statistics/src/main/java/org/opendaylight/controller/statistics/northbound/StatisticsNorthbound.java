@@ -15,9 +15,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -29,6 +31,7 @@ import org.opendaylight.controller.northbound.commons.exception.ResourceConflict
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -57,7 +60,14 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 public class StatisticsNorthbound {
 
     private String username;
+    private QueryContext queryContext;
 
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
     @Context
     public void setSecurityContext(SecurityContext context) {
         if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
@@ -234,7 +244,8 @@ public class StatisticsNorthbound {
         @ResponseCode(code = 404, condition = "The containerName is not found"),
         @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllFlowStatistics getFlowStatistics(
-            @PathParam("containerName") String containerName) {
+            @PathParam("containerName") String containerName,
+            @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException(
@@ -265,7 +276,12 @@ public class StatisticsNorthbound {
             FlowStatistics stat = new FlowStatistics(node, flowStats);
             statistics.add(stat);
         }
-        return new AllFlowStatistics(statistics);
+        AllFlowStatistics result = new AllFlowStatistics(statistics);
+        if (queryString != null) {
+            queryContext.createQuery(queryString, AllFlowStatistics.class)
+                .filter(result, FlowStatistics.class);
+        }
+        return result;
     }
 
     /**
@@ -610,7 +626,8 @@ public class StatisticsNorthbound {
         @ResponseCode(code = 404, condition = "The containerName is not found"),
         @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllPortStatistics getPortStatistics(
-            @PathParam("containerName") String containerName) {
+            @PathParam("containerName") String containerName,
+            @QueryParam("_q") String queryString) {
 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.READ, this)) {
@@ -638,7 +655,13 @@ public class StatisticsNorthbound {
             PortStatistics portStat = new PortStatistics(node, stat);
             statistics.add(portStat);
         }
-        return new AllPortStatistics(statistics);
+
+        AllPortStatistics result = new AllPortStatistics(statistics);
+        if (queryString != null) {
+            queryContext.createQuery(queryString, AllPortStatistics.class)
+                .filter(result, PortStatistics.class);
+        }
+        return result;
     }
 
     /**
@@ -924,7 +947,8 @@ public class StatisticsNorthbound {
         @ResponseCode(code = 404, condition = "The containerName is not found"),
         @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllTableStatistics getTableStatistics(
-            @PathParam("containerName") String containerName) {
+            @PathParam("containerName") String containerName,
+            @QueryParam("_q") String queryString) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
@@ -952,7 +976,12 @@ public class StatisticsNorthbound {
             TableStatistics tableStat = new TableStatistics(node, stat);
             statistics.add(tableStat);
         }
-        return new AllTableStatistics(statistics);
+        AllTableStatistics allstats = new AllTableStatistics(statistics);
+        if (queryString != null) {
+            queryContext.createQuery(queryString, AllTableStatistics.class)
+                .filter(allstats, TableStatistics.class);
+        }
+        return allstats;
     }
 
     /**
