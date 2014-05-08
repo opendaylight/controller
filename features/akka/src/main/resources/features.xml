@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="akka-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+   <!--> Scala Features -->
+   <feature name="scala" description="scala dependencies"
+      version="${project.version}">
+      <bundle>mvn:org.parboiled/parboiled-core/1.1.6</bundle>
+      <bundle>mvn:org.parboiled/parboiled-scala_2.10/1.1.6</bundle>
+      <bundle>mvn:org.scala-lang/scala-library/2.10.3</bundle>
+      <bundle>mvn:org.scala-lang/scala-reflect/2.10.3</bundle>
+   </feature>
+   <!--> Akka Features -->
+   <feature name="akka" description="akka dependencies"
+      version="${project.version}">
+      <feature>scala</feature>
+      <feature>third-party</feature>
+      <bundle>mvn:com.typesafe/config/1.2.0</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-actor_2.10/2.3.2</bundle>
+      <bundle>mvn:com.google.protobuf/protobuf-java/2.5.0</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-remote_2.10/2.3.2</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-cluster_2.10/2.3.2</bundle>
+      <bundle>wrap:mvn:com.typesafe.akka/akka-contrib_2.10/2.3.2</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-osgi_2.10/2.3.2</bundle>
+   </feature>
+   <!--> Spray Features -->
+   <feature name="spray" description="spray dependencies"
+      version="${project.version}">
+      <feature>akka</feature>
+      <bundle>mvn:io.spray/spray-can/1.3.1</bundle>
+      <bundle>mvn:io.spray/spray-http/1.3.1</bundle>
+      <bundle>mvn:io.spray/spray-io/1.3.1</bundle>
+      <bundle>mvn:io.spray/spray-json_2.10/1.2.6</bundle>
+      <bundle>wrap:mvn:io.spray/spray-routing/1.1-M7</bundle>
+      <bundle>mvn:io.spray/spray-util/1.3.1</bundle>
+   </feature>
+   <!--> ThirdParty Features -->
+   <feature name="third-party" description="Third partiy dependencies"
+      version="${project.version}">
+     <!-- <bundle>wrap:mvn:org.opendaylight.controller.thirdparty.jfree/jcommon/1.0.16</bundle> -->
+     <!-- <bundle>wrap:mvn:org.opendaylight.controller.thirdparty.jfree/jfreechart/1.0.13</bundle> -->
+      <!--  <bundle>mvn:org.opendaylight.controller.thirdparty.uncommons/1.2.2</bundle>-->
+      <bundle>wrap:mvn:org.uncommons.maths/uncommons-maths/1.2.2</bundle>
+      <!--  <bundle>mvn:org.jboss.netty/bootstrap/3.9.0.Final</bundle>-->
+      <bundle>mvn:org.iq80/leveldb</bundle>
+      <bundle>mvn:org.fusesource.leveldbjni/leveldbjni/1.8</bundle>
+      <bundle>mvn:io.netty/netty/3.9.0.Final</bundle>
+   </feature>
+   <!--> Messaging features -->
+   <feature name="messaging" description="Messaging dependencies"
+      version="${project.version}">
+      <bundle>wrap:mvn:org.opendaylight.controller/messaging.datastore</bundle>
+   </feature>
+</features>
