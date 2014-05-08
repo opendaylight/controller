@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -33,6 +32,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -62,7 +62,6 @@ import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.FeatureDefinition;
-import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -83,26 +82,6 @@ public class RestconfImpl implements RestconfService {
     private final static String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
 
     private final static SimpleDateFormat REVISION_FORMAT =  new SimpleDateFormat("yyyy-MM-dd");
-
-    private final static String RESTCONF_MODULE_DRAFT02_REVISION = "2013-10-19";
-
-    private final static String RESTCONF_MODULE_DRAFT02_NAME = "ietf-restconf";
-
-    private final static String RESTCONF_MODULE_DRAFT02_NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-restconf";
-
-    private final static String RESTCONF_MODULE_DRAFT02_RESTCONF_GROUPING_SCHEMA_NODE = "restconf";
-
-    private final static String RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE = "restconf";
-
-    private final static String RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE = "modules";
-
-    private final static String RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE = "module";
-
-    private final static String RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE = "streams";
-
-    private final static String RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE = "stream";
-
-    private final static String RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE = "operations";
 
     private final static String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
@@ -132,8 +111,8 @@ public class RestconfImpl implements RestconfService {
         final Module restconfModule = this.getRestconfModule();
 
         final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
-        final DataSchemaNode moduleSchemaNode =
-                this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE);
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                        restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
 
         Set<Module> allModules = this.controllerContext.getAllModules();
         for (final Module module : allModules) {
@@ -141,8 +120,8 @@ public class RestconfImpl implements RestconfService {
             modulesAsData.add(moduleCompositeNode);
         }
 
-        final DataSchemaNode modulesSchemaNode =
-                this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                   restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
         QName qName = modulesSchemaNode.getQName();
         final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
         return new StructuredData(modulesNode, modulesSchemaNode, null);
@@ -154,14 +133,14 @@ public class RestconfImpl implements RestconfService {
 
         final List<Node<?>> streamsAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
-        final DataSchemaNode streamSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE);
+        final DataSchemaNode streamSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                             restconfModule, Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
         for (final String streamName : availableStreams) {
             streamsAsData.add(this.toStreamCompositeNode(streamName, streamSchemaNode));
         }
 
-        final DataSchemaNode streamsSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode streamsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                     restconfModule, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
         QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
         return new StructuredData(streamsNode, streamsSchemaNode, null);
@@ -185,15 +164,15 @@ public class RestconfImpl implements RestconfService {
 
         final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
-        final DataSchemaNode moduleSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE);
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                         restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
 
         for (final Module module : modules) {
             modulesAsData.add(this.toModuleCompositeNode(module, moduleSchemaNode));
         }
 
-        final DataSchemaNode modulesSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode modulesSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                  restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
         QName qName = modulesSchemaNode.getQName();
         final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
         return new StructuredData(modulesNode, modulesSchemaNode, mountPoint);
@@ -221,8 +200,8 @@ public class RestconfImpl implements RestconfService {
         }
 
         Module restconfModule = this.getRestconfModule();
-        final DataSchemaNode moduleSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE);
+        final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                                          restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
         final CompositeNode moduleNode = this.toModuleCompositeNode(module, moduleSchemaNode);
         return new StructuredData(moduleNode, moduleSchemaNode, mountPoint);
     }
@@ -256,12 +235,12 @@ public class RestconfImpl implements RestconfService {
                                                                  final MountInstance mountPoint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
-        final DataSchemaNode operationsSchemaNode =
-            this.getSchemaNode(restconfModule, RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                              restconfModule, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
         QName qName = operationsSchemaNode.getQName();
         SchemaPath path = operationsSchemaNode.getPath();
         ContainerSchemaNodeBuilder containerSchemaNodeBuilder =
-                             new ContainerSchemaNodeBuilder(RESTCONF_MODULE_DRAFT02_NAME, 0, qName, path);
+                             new ContainerSchemaNodeBuilder(Draft02.RestConfModule.NAME, 0, qName, path);
         final ContainerSchemaNodeBuilder fakeOperationsSchemaNode = containerSchemaNodeBuilder;
         for (final Module module : modules) {
             Set<RpcDefinition> rpcs = module.getRpcs();
@@ -289,9 +268,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Module getRestconfModule() {
-        QName qName = QName.create(RESTCONF_MODULE_DRAFT02_NAMESPACE, RESTCONF_MODULE_DRAFT02_REVISION,
-                                   RESTCONF_MODULE_DRAFT02_NAME);
-        final Module restconfModule = this.controllerContext.findModuleByNameAndRevision(qName);
+        Module restconfModule = controllerContext.getRestconfModule();
         if (restconfModule == null) {
             throw new ResponseException(Status.INTERNAL_SERVER_ERROR, "Restconf module was not found.");
         }
@@ -394,66 +371,6 @@ public class RestconfImpl implements RestconfService {
         }
 
         return NodeFactory.createImmutableCompositeNode(moduleSchemaNode.getQName(), null, moduleNodeValues);
-    }
-
-    private DataSchemaNode getSchemaNode(final Module restconfModule, final String schemaNodeName) {
-        Set<GroupingDefinition> groupings = restconfModule.getGroupings();
-
-        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
-            @Override
-            public boolean apply(final GroupingDefinition g) {
-                return Objects.equal(g.getQName().getLocalName(),
-                                     RESTCONF_MODULE_DRAFT02_RESTCONF_GROUPING_SCHEMA_NODE);
-            }
-        };
-
-        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
-
-        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
-
-        List<DataSchemaNode> instanceDataChildrenByName =
-                this.controllerContext.findInstanceDataChildrenByName(restconfGrouping,
-                                                            RESTCONF_MODULE_DRAFT02_RESTCONF_CONTAINER_SCHEMA_NODE);
-        final DataSchemaNode restconfContainer = Iterables.getFirst(instanceDataChildrenByName, null);
-
-        if (Objects.equal(schemaNodeName, RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE)) {
-            List<DataSchemaNode> instances =
-                    this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
-                                                    RESTCONF_MODULE_DRAFT02_OPERATIONS_CONTAINER_SCHEMA_NODE);
-            return Iterables.getFirst(instances, null);
-        }
-        else if(Objects.equal(schemaNodeName, RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE)) {
-            List<DataSchemaNode> instances =
-                    this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
-                                                   RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE);
-            return Iterables.getFirst(instances, null);
-        }
-        else if(Objects.equal(schemaNodeName, RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE)) {
-            List<DataSchemaNode> instances =
-                    this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
-                                                   RESTCONF_MODULE_DRAFT02_STREAMS_CONTAINER_SCHEMA_NODE);
-            final DataSchemaNode modules = Iterables.getFirst(instances, null);
-            instances = this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) modules),
-                                                               RESTCONF_MODULE_DRAFT02_STREAM_LIST_SCHEMA_NODE);
-            return Iterables.getFirst(instances, null);
-        }
-        else if(Objects.equal(schemaNodeName, RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE)) {
-            List<DataSchemaNode> instances =
-                    this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
-                                                         RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE);
-            return Iterables.getFirst(instances, null);
-        }
-        else if(Objects.equal(schemaNodeName, RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE)) {
-            List<DataSchemaNode> instances =
-                    this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
-                                                         RESTCONF_MODULE_DRAFT02_MODULES_CONTAINER_SCHEMA_NODE);
-            final DataSchemaNode modules = Iterables.getFirst(instances, null);
-            instances = this.controllerContext.findInstanceDataChildrenByName(((DataNodeContainer) modules),
-                                                                 RESTCONF_MODULE_DRAFT02_MODULE_LIST_SCHEMA_NODE);
-            return Iterables.getFirst(instances, null);
-        }
-
-        return null;
     }
 
     @Override

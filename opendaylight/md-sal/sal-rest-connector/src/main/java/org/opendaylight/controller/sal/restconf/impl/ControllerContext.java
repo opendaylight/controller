@@ -38,6 +38,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
@@ -55,6 +56,7 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -384,6 +386,112 @@ public class ControllerContext implements SchemaContextListener {
         builder.append( ":" );
         builder.append( qname.getLocalName() );
         return builder.toString();
+    }
+
+    public Module getRestconfModule() {
+        return findModuleByNameAndRevision( Draft02.RestConfModule.IETF_RESTCONF_QNAME );
+    }
+
+    public DataSchemaNode getRestconfModuleErrorsSchemaNode() {
+        Module restconfModule = getRestconfModule();
+        if( restconfModule == null ) {
+            return null;
+        }
+
+        Set<GroupingDefinition> groupings = restconfModule.getGroupings();
+
+        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
+            @Override
+            public boolean apply(final GroupingDefinition g) {
+                return Objects.equal(g.getQName().getLocalName(),
+                                     Draft02.RestConfModule.ERRORS_GROUPING_SCHEMA_NODE);
+            }
+        };
+
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
+
+        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
+
+        List<DataSchemaNode> instanceDataChildrenByName =
+                this.findInstanceDataChildrenByName(restconfGrouping,
+                                                    Draft02.RestConfModule.ERRORS_CONTAINER_SCHEMA_NODE);
+        return Iterables.getFirst(instanceDataChildrenByName, null);
+    }
+
+    public DataSchemaNode getRestconfModuleRestConfSchemaNode( Module inRestconfModule,
+                                                               String schemaNodeName ) {
+        Module restconfModule = inRestconfModule;
+        if( restconfModule == null ) {
+            restconfModule = getRestconfModule();
+        }
+
+        if( restconfModule == null ) {
+            return null;
+        }
+
+        Set<GroupingDefinition> groupings = restconfModule.getGroupings();
+
+        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
+            @Override
+            public boolean apply(final GroupingDefinition g) {
+                return Objects.equal(g.getQName().getLocalName(),
+                                     Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE);
+            }
+        };
+
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
+
+        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
+
+        List<DataSchemaNode> instanceDataChildrenByName =
+                this.findInstanceDataChildrenByName(restconfGrouping,
+                                                            Draft02.RestConfModule.RESTCONF_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode restconfContainer = Iterables.getFirst(instanceDataChildrenByName, null);
+
+        if (Objects.equal(schemaNodeName, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                    Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            final DataSchemaNode modules = Iterables.getFirst(instances, null);
+            instances = this.findInstanceDataChildrenByName(((DataNodeContainer) modules),
+                                                               Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                         Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                         Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+            final DataSchemaNode modules = Iterables.getFirst(instances, null);
+            instances = this.findInstanceDataChildrenByName(((DataNodeContainer) modules),
+                                                                 Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+
+        return null;
     }
 
     private static DataSchemaNode childByQName( final ChoiceNode container, final QName name ) {
