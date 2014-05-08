@@ -9,6 +9,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -18,8 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.concurrent.Future;
-
-import javax.ws.rs.core.Response.Status;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,8 @@ import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -120,7 +120,7 @@ public class BrokerFacadeTest {
         assertSame( "readOperationalDataBehindMountPoint", dataNode, actualNode );
     }
 
-    @Test(expected=ResponseException.class)
+    @Test(expected=RestconfDocumentedException.class)
     public void testReadOperationalDataWithNoDataBroker() {
         brokerFacade.setDataService( null );
 
@@ -129,26 +129,19 @@ public class BrokerFacadeTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testInvokeRpc() {
+    public void testInvokeRpc() throws Exception {
         RpcResult<CompositeNode> expResult = mock( RpcResult.class );
         Future<RpcResult<CompositeNode>> future = Futures.immediateFuture( expResult );
         when( mockConsumerSession.rpc( qname, dataNode ) ).thenReturn( future );
 
-        RpcResult<CompositeNode> actualResult = brokerFacade.invokeRpc( qname, dataNode );
+        Future<RpcResult<CompositeNode>> actualFuture = brokerFacade.invokeRpc( qname, dataNode );
+        assertNotNull( "Future is null", actualFuture );
+        RpcResult<CompositeNode> actualResult = actualFuture.get();
 
         assertSame( "invokeRpc", expResult, actualResult );
     }
 
-    @Test(expected=ResponseException.class)
-    public void testInvokeRpcWithException() {
-        Exception mockEx = new Exception( "mock" );
-        Future<RpcResult<CompositeNode>> future = Futures.immediateFailedFuture( mockEx );
-        when( mockConsumerSession.rpc( qname, dataNode ) ).thenReturn( future );
-
-        brokerFacade.invokeRpc( qname, dataNode );
-    }
-
-    @Test(expected=ResponseException.class)
+    @Test(expected=RestconfDocumentedException.class)
     public void testInvokeRpcWithNoConsumerSession() {
         brokerFacade.setContext( null );
 
@@ -218,7 +211,7 @@ public class BrokerFacadeTest {
         inOrder.verify( mockTransaction ).commit();
     }
 
-    @Test(expected=ResponseException.class)
+    @Test(expected=RestconfDocumentedException.class)
     public void testCommitConfigurationDataPostAlreadyExists() {
         when( dataBroker.beginTransaction() ).thenReturn( mockTransaction );
         mockTransaction.putConfigurationData( instanceID, dataNode );
@@ -226,10 +219,10 @@ public class BrokerFacadeTest {
             .thenReturn( dataNode );
         try {
             brokerFacade.commitConfigurationDataPost( instanceID, dataNode );
-        } catch (ResponseException e) {
-            assertEquals("Unexpect Exception Status -> "
-                    + "http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48",
-                    (e.getResponse().getStatus()), Status.CONFLICT.getStatusCode());
+        }
+        catch (RestconfDocumentedException e) {
+            assertEquals("getErrorTag",
+                    RestconfError.ErrorTag.DATA_EXISTS, e.getErrors().get( 0 ).getErrorTag());
             throw e;
         }
     }
@@ -259,7 +252,7 @@ public class BrokerFacadeTest {
         inOrder.verify( mockTransaction ).commit();
     }
 
-    @Test(expected=ResponseException.class)
+    @Test(expected=RestconfDocumentedException.class)
     public void testCommitConfigurationDataPostBehindMountPointAlreadyExists() {
 
         when( mockMountInstance.beginTransaction() ).thenReturn( mockTransaction );
@@ -269,10 +262,10 @@ public class BrokerFacadeTest {
         try {
             brokerFacade.commitConfigurationDataPostBehindMountPoint( mockMountInstance,
                     instanceID, dataNode );
-        } catch (ResponseException e) {
-            assertEquals("Unexpect Exception Status -> "
-                    + "http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48",
-                    e.getResponse().getStatus(), Status.CONFLICT.getStatusCode());
+        }
+        catch (RestconfDocumentedException e) {
+            assertEquals("getErrorTag",
+                    RestconfError.ErrorTag.DATA_EXISTS, e.getErrors().get( 0 ).getErrorTag());
             throw e;
         }
     }

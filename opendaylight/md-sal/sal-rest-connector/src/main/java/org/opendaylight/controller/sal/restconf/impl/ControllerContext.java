@@ -38,11 +38,12 @@ import javax.ws.rs.core.Response.Status;
 
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
-import org.opendaylight.controller.sal.rest.impl.RestconfProvider;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -55,6 +56,7 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -108,7 +110,7 @@ public class ControllerContext implements SchemaContextListener {
 
     private void checkPreconditions() {
         if( globalSchema == null ) {
-            throw new ResponseException( Status.SERVICE_UNAVAILABLE, RestconfProvider.NOT_INITALIZED_MSG );
+            throw new RestconfDocumentedException( Status.SERVICE_UNAVAILABLE );
         }
     }
 
@@ -139,8 +141,9 @@ public class ControllerContext implements SchemaContextListener {
         String first = pathArgs.iterator().next();
         final String startModule = ControllerContext.toModuleName( first );
         if( startModule == null ) {
-            throw new ResponseException( Status.BAD_REQUEST,
-                    "First node in URI has to be in format \"moduleName:nodeName\"" );
+            throw new RestconfDocumentedException(
+                    "First node in URI has to be in format \"moduleName:nodeName\"",
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
 
         InstanceIdentifierBuilder builder = InstanceIdentifier.builder();
@@ -149,7 +152,8 @@ public class ControllerContext implements SchemaContextListener {
                                                            latestModule, null, toMountPointIdentifier );
 
         if( iiWithSchemaNode == null ) {
-            throw new ResponseException( Status.BAD_REQUEST, "URI has bad format" );
+            throw new RestconfDocumentedException(
+                    "URI has bad format", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
 
         return iiWithSchemaNode;
@@ -386,6 +390,112 @@ public class ControllerContext implements SchemaContextListener {
         return builder.toString();
     }
 
+    public Module getRestconfModule() {
+        return findModuleByNameAndRevision( Draft02.RestConfModule.IETF_RESTCONF_QNAME );
+    }
+
+    public DataSchemaNode getRestconfModuleErrorsSchemaNode() {
+        Module restconfModule = getRestconfModule();
+        if( restconfModule == null ) {
+            return null;
+        }
+
+        Set<GroupingDefinition> groupings = restconfModule.getGroupings();
+
+        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
+            @Override
+            public boolean apply(final GroupingDefinition g) {
+                return Objects.equal(g.getQName().getLocalName(),
+                                     Draft02.RestConfModule.ERRORS_GROUPING_SCHEMA_NODE);
+            }
+        };
+
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
+
+        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
+
+        List<DataSchemaNode> instanceDataChildrenByName =
+                this.findInstanceDataChildrenByName(restconfGrouping,
+                                                    Draft02.RestConfModule.ERRORS_CONTAINER_SCHEMA_NODE);
+        return Iterables.getFirst(instanceDataChildrenByName, null);
+    }
+
+    public DataSchemaNode getRestconfModuleRestConfSchemaNode( Module inRestconfModule,
+                                                               String schemaNodeName ) {
+        Module restconfModule = inRestconfModule;
+        if( restconfModule == null ) {
+            restconfModule = getRestconfModule();
+        }
+
+        if( restconfModule == null ) {
+            return null;
+        }
+
+        Set<GroupingDefinition> groupings = restconfModule.getGroupings();
+
+        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
+            @Override
+            public boolean apply(final GroupingDefinition g) {
+                return Objects.equal(g.getQName().getLocalName(),
+                                     Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE);
+            }
+        };
+
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
+
+        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
+
+        List<DataSchemaNode> instanceDataChildrenByName =
+                this.findInstanceDataChildrenByName(restconfGrouping,
+                                                            Draft02.RestConfModule.RESTCONF_CONTAINER_SCHEMA_NODE);
+        final DataSchemaNode restconfContainer = Iterables.getFirst(instanceDataChildrenByName, null);
+
+        if (Objects.equal(schemaNodeName, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                    Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            final DataSchemaNode modules = Iterables.getFirst(instances, null);
+            instances = this.findInstanceDataChildrenByName(((DataNodeContainer) modules),
+                                                               Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                         Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                         Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+            final DataSchemaNode modules = Iterables.getFirst(instances, null);
+            instances = this.findInstanceDataChildrenByName(((DataNodeContainer) modules),
+                                                                 Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+        else if(Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            List<DataSchemaNode> instances =
+                    this.findInstanceDataChildrenByName(((DataNodeContainer) restconfContainer),
+                                                   Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            return Iterables.getFirst(instances, null);
+        }
+
+        return null;
+    }
+
     private static DataSchemaNode childByQName( final ChoiceNode container, final QName name ) {
         for( final ChoiceCaseNode caze : container.getCases() ) {
             final DataSchemaNode ret = ControllerContext.childByQName( caze, name );
@@ -461,27 +571,30 @@ public class ControllerContext implements SchemaContextListener {
             if( Objects.equal( moduleName, ControllerContext.MOUNT_MODULE ) &&
                 Objects.equal( nodeName, ControllerContext.MOUNT_NODE ) ) {
                 if( mountPoint != null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                                         "Restconf supports just one mount point in URI." );
+                    throw new RestconfDocumentedException(
+                            "Restconf supports just one mount point in URI.",
+                            ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED );
                 }
 
                 if( mountService == null ) {
-                    throw new ResponseException( Status.SERVICE_UNAVAILABLE,
-                                "MountService was not found. Finding behind mount points does not work." );
+                    throw new RestconfDocumentedException(
+                            "MountService was not found. Finding behind mount points does not work.",
+                            ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED );
                 }
 
                 final InstanceIdentifier partialPath = builder.toInstance();
                 final MountInstance mount = mountService.getMountPoint( partialPath );
                 if( mount == null ) {
                     LOG.debug( "Instance identifier to missing mount point: {}", partialPath );
-                    throw new ResponseException( Status.BAD_REQUEST,
-                                                 "Mount point does not exist." );
+                    throw new RestconfDocumentedException(
+                         "Mount point does not exist.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT );
                 }
 
                 final SchemaContext mountPointSchema = mount.getSchemaContext();
                 if( mountPointSchema == null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                                       "Mount point does not contain any schema with modules." );
+                    throw new RestconfDocumentedException(
+                            "Mount point does not contain any schema with modules.",
+                            ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT );
                 }
 
                 if( returnJustMountPoint ) {
@@ -496,16 +609,17 @@ public class ControllerContext implements SchemaContextListener {
 
                 final String moduleNameBehindMountPoint = toModuleName(  strings.get( 1 ) );
                 if( moduleNameBehindMountPoint == null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                            "First node after mount point in URI has to be in format \"moduleName:nodeName\"" );
+                    throw new RestconfDocumentedException(
+                        "First node after mount point in URI has to be in format \"moduleName:nodeName\"",
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
                 }
 
                 final Module moduleBehindMountPoint = this.getLatestModule( mountPointSchema,
                                                                             moduleNameBehindMountPoint );
                 if( moduleBehindMountPoint == null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                                                 "URI has bad format. \"" + moduleName +
-                                                 "\" module does not exist in mount point." );
+                    throw new RestconfDocumentedException(
+                            "\"" +moduleName + "\" module does not exist in mount point.",
+                            ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT );
                 }
 
                 List<String> subList = strings.subList( 1, strings.size() );
@@ -517,8 +631,9 @@ public class ControllerContext implements SchemaContextListener {
             if( mountPoint == null ) {
                 module = this.getLatestModule( globalSchema, moduleName );
                 if( module == null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                            "URI has bad format. \"" + moduleName + "\" module does not exist." );
+                    throw new RestconfDocumentedException(
+                            "\"" + moduleName + "\" module does not exist.",
+                            ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT );
                 }
             }
             else {
@@ -526,20 +641,20 @@ public class ControllerContext implements SchemaContextListener {
                 module = schemaContext == null ? null :
                                           this.getLatestModule( schemaContext, moduleName );
                 if( module == null ) {
-                    throw new ResponseException( Status.BAD_REQUEST,
-                                        "URI has bad format. \"" + moduleName +
-                                        "\" module does not exist in mount point." );
+                    throw new RestconfDocumentedException(
+                            "\"" + moduleName + "\" module does not exist in mount point.",
+                            ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT );
                 }
             }
 
             targetNode = this.findInstanceDataChildByNameAndNamespace(
                                           parentNode, nodeName, module.getNamespace() );;
             if( targetNode == null ) {
-                throw new ResponseException( Status.BAD_REQUEST,
-                            "URI has bad format. Possible reasons:\n" +
-                            "1. \"" + head + "\" was not found in parent data node.\n" +
-                            "2. \"" + head + "\" is behind mount point. Then it should be in format \"/" +
-                            MOUNT + "/" + head + "\"." );
+                throw new RestconfDocumentedException(
+                        "URI has bad format. Possible reasons:\n" +
+                        " 1. \"" + head + "\" was not found in parent data node.\n" +
+                        " 2. \"" + head + "\" is behind mount point. Then it should be in format \"/" +
+                        MOUNT + "/" + head + "\".", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
             }
         } else {
             final List<DataSchemaNode> potentialSchemaNodes =
@@ -552,26 +667,27 @@ public class ControllerContext implements SchemaContextListener {
                               .append( "\n" );
                 }
 
-                throw new ResponseException( Status.BAD_REQUEST,
+                throw new RestconfDocumentedException(
                         "URI has bad format. Node \"" + nodeName +
                         "\" is added as augment from more than one module. " +
                         "Therefore the node must have module name and it has to be in format \"moduleName:nodeName\"." +
                         "\nThe node is added as augment from modules with namespaces:\n" +
-                        strBuilder.toString() );
+                        strBuilder.toString(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
             }
 
             if( potentialSchemaNodes.isEmpty() ) {
-                throw new ResponseException( Status.BAD_REQUEST, "URI has bad format. \"" + nodeName +
-                                             "\" was not found in parent data node.\n" );
+                throw new RestconfDocumentedException(
+                        "\"" + nodeName + "\" in URI was not found in parent data node",
+                        ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT );
             }
 
             targetNode = potentialSchemaNodes.iterator().next();
         }
 
         if( !this.isListOrContainer( targetNode ) ) {
-            throw new ResponseException( Status.BAD_REQUEST,
-                                         "URI has bad format. Node \"" + head +
-                                         "\" must be Container or List yang type." );
+            throw new RestconfDocumentedException(
+                    "URI has bad format. Node \"" + head + "\" must be Container or List yang type.",
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
 
         int consumed = 1;
@@ -579,8 +695,9 @@ public class ControllerContext implements SchemaContextListener {
             final ListSchemaNode listNode = ((ListSchemaNode) targetNode);
             final int keysSize = listNode.getKeyDefinition().size();
             if( (strings.size() - consumed) < keysSize ) {
-                throw new ResponseException( Status.BAD_REQUEST, "Missing key for list \"" +
-                                             listNode.getQName().getLocalName() + "\"." );
+                throw new RestconfDocumentedException(
+                        "Missing key for list \"" + listNode.getQName().getLocalName() + "\".",
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
             }
 
             final List<String> uriKeyValues = strings.subList( consumed, consumed + keysSize );
@@ -590,9 +707,10 @@ public class ControllerContext implements SchemaContextListener {
                 {
                     final String uriKeyValue = uriKeyValues.get( i );
                     if( uriKeyValue.equals( NULL_VALUE ) ) {
-                        throw new ResponseException( Status.BAD_REQUEST,
-                                    "URI has bad format. List \"" + listNode.getQName().getLocalName() +
-                                    "\" cannot contain \"null\" value as a key." );
+                        throw new RestconfDocumentedException(
+                                "URI has bad format. List \"" + listNode.getQName().getLocalName() +
+                                "\" cannot contain \"null\" value as a key.",
+                                ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
                     }
 
                     this.addKeyValue( keyValues, listNode.getDataChildByName( key ),
@@ -711,8 +829,9 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         if( decoded == null ) {
-            throw new ResponseException( Status.BAD_REQUEST, uriValue + " from URI can\'t be resolved. " +
-                                         additionalInfo );
+            throw new RestconfDocumentedException(
+                            uriValue + " from URI can't be resolved. " + additionalInfo,
+                            ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
 
         map.put( node.getQName(), decoded );
@@ -807,8 +926,9 @@ public class ControllerContext implements SchemaContextListener {
             return decodedPathArgs;
         }
         catch( UnsupportedEncodingException e ) {
-            throw new ResponseException( Status.BAD_REQUEST,
-                    "Invalid URL path '" + strings + "': " + e.getMessage() );
+            throw new RestconfDocumentedException(
+                    "Invalid URL path '" + strings + "': " + e.getMessage(),
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
     }
 
@@ -818,8 +938,9 @@ public class ControllerContext implements SchemaContextListener {
                 return URLDecoder.decode( pathArg, URI_ENCODING_CHAR_SET );
             }
             catch( UnsupportedEncodingException e ) {
-                throw new ResponseException( Status.BAD_REQUEST,
-                        "Invalid URL path arg '" + pathArg + "': " + e.getMessage() );
+                throw new RestconfDocumentedException(
+                        "Invalid URL path arg '" + pathArg + "': " + e.getMessage(),
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
             }
         }
 
