@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014 Brocade Communication Systems, Inc.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -12,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +25,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.rpc.impl.BrokerRpcExecutor;
+import org.opendaylight.controller.sal.restconf.rpc.impl.MountPointRpcExecutor;
+import org.opendaylight.controller.sal.restconf.rpc.impl.RpcExecutor;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
@@ -68,6 +74,8 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("all")
 public class RestconfImpl implements RestconfService {
     private final static RestconfImpl INSTANCE = new RestconfImpl();
+
+    private static final int CHAR_NOT_FOUND = -1;
 
     private final static String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
 
@@ -452,109 +460,145 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData invokeRpc(final String identifier, final CompositeNode payload) {
-        final RpcDefinition rpc = this.resolveIdentifierInInvokeRpc(identifier);
-        if (Objects.equal(rpc.getQName().getNamespace().toString(), SAL_REMOTE_NAMESPACE) &&
-            Objects.equal(rpc.getQName().getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
+        final RpcExecutor rpc = this.resolveIdentifierInInvokeRpc(identifier);
+        QName rpcName = rpc.getRpcDefinition().getQName();
+        URI rpcNamespace = rpcName.getNamespace();
+        if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE) &&
+            Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
 
-            final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
-            final SimpleNode<? extends Object> pathNode = value == null ? null :
-                                   value.getFirstSimpleByName( QName.create(rpc.getQName(), "path") );
-            final Object pathValue = pathNode == null ? null : pathNode.getValue();
-
-            if (!(pathValue instanceof InstanceIdentifier)) {
-                throw new ResponseException(Status.INTERNAL_SERVER_ERROR,
-                                             "Instance identifier was not normalized correctly.");
-            }
-
-            final InstanceIdentifier pathIdentifier = ((InstanceIdentifier) pathValue);
-            String streamName = null;
-            if (!Iterables.isEmpty(pathIdentifier.getPath())) {
-                String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
-                streamName = Notificator.createStreamNameFromUri(fullRestconfIdentifier);
-            }
-
-            if (Strings.isNullOrEmpty(streamName)) {
-                throw new ResponseException(Status.BAD_REQUEST,
-                         "Path is empty or contains data node which is not Container or List build-in type.");
-            }
-
-            final SimpleNode<String> streamNameNode = NodeFactory.<String>createImmutableSimpleNode(
-                                 QName.create(rpc.getOutput().getQName(), "stream-name"), null, streamName);
-            final List<Node<?>> output = new ArrayList<Node<?>>();
-            output.add(streamNameNode);
-
-            final MutableCompositeNode responseData = NodeFactory.createMutableCompositeNode(
-                                                  rpc.getOutput().getQName(), null, output, null, null);
-
-            if (!Notificator.existListenerFor(pathIdentifier)) {
-                Notificator.createListener(pathIdentifier, streamName);
-            }
-
-            return new StructuredData(responseData, rpc.getOutput(), null);
+            return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition());
         }
 
-        RpcDefinition rpcDefinition = this.controllerContext.getRpcDefinition(identifier);
-        return this.callRpc(rpcDefinition, payload);
+        return callRpc(rpc, payload);
+    }
+
+    private StructuredData invokeSalRemoteRpcSubscribeRPC(final CompositeNode payload,
+                                                          final RpcDefinition rpc) {
+        final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
+        final SimpleNode<? extends Object> pathNode = value == null ? null :
+                               value.getFirstSimpleByName( QName.create(rpc.getQName(), "path") );
+        final Object pathValue = pathNode == null ? null : pathNode.getValue();
+
+        if (!(pathValue instanceof InstanceIdentifier)) {
+            throw new ResponseException(Status.INTERNAL_SERVER_ERROR,
+                                         "Instance identifier was not normalized correctly.");
+        }
+
+        final InstanceIdentifier pathIdentifier = ((InstanceIdentifier) pathValue);
+        String streamName = null;
+        if (!Iterables.isEmpty(pathIdentifier.getPath())) {
+            String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
+            streamName = Notificator.createStreamNameFromUri(fullRestconfIdentifier);
+        }
+
+        if (Strings.isNullOrEmpty(streamName)) {
+            throw new ResponseException(Status.BAD_REQUEST,
+                     "Path is empty or contains data node which is not Container or List build-in type.");
+        }
+
+        final SimpleNode<String> streamNameNode = NodeFactory.<String>createImmutableSimpleNode(
+                             QName.create(rpc.getOutput().getQName(), "stream-name"), null, streamName);
+        final List<Node<?>> output = new ArrayList<Node<?>>();
+        output.add(streamNameNode);
+
+        final MutableCompositeNode responseData = NodeFactory.createMutableCompositeNode(
+                                              rpc.getOutput().getQName(), null, output, null, null);
+
+        if (!Notificator.existListenerFor(pathIdentifier)) {
+            Notificator.createListener(pathIdentifier, streamName);
+        }
+
+        return new StructuredData(responseData, rpc.getOutput(), null);
     }
 
     @Override
     public StructuredData invokeRpc(final String identifier, final String noPayload) {
-        if (!Strings.isNullOrEmpty(noPayload)) {
-            throw new ResponseException(Status.UNSUPPORTED_MEDIA_TYPE,
-                                                       "Content-Type contains unsupported Media Type.");
+        if (StringUtils.isNotBlank(noPayload)) {
+            throw new ResponseException(
+                    Status.UNSUPPORTED_MEDIA_TYPE, "Content-Type contains unsupported Media Type.");
         }
-
-        final RpcDefinition rpc = this.resolveIdentifierInInvokeRpc(identifier);
-        return this.callRpc(rpc, null);
+        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
+        return callRpc(rpc, null);
     }
 
-    private RpcDefinition resolveIdentifierInInvokeRpc(final String identifier) {
-        if (identifier.indexOf("/") < 0) {
-            final String identifierDecoded = this.controllerContext.urlPathArgDecode(identifier);
-            final RpcDefinition rpc = this.controllerContext.getRpcDefinition(identifierDecoded);
-            if (rpc != null) {
-                return rpc;
-            }
+    private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
+        String identifierEncoded = null;
+        MountInstance mountPoint = null;
+        if (identifier.contains(ControllerContext.MOUNT)) {
+            // mounted RPC call - look up mount instance.
+            InstanceIdWithSchemaNode mountPointId = controllerContext
+                    .toMountPointIdentifier(identifier);
+            mountPoint = mountPointId.getMountPoint();
 
-            throw new ResponseException(Status.NOT_FOUND, "RPC does not exist.");
+            int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
+                    + ControllerContext.MOUNT.length() + 1;
+            String remoteRpcName = identifier.substring(startOfRemoteRpcName);
+            identifierEncoded = remoteRpcName;
+
+        } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
+            final String slashErrorMsg = String
+                    .format("Identifier %n%s%ncan\'t contain slash "
+                            + "character (/).%nIf slash is part of identifier name then use %%2F placeholder.",
+                            identifier);
+            throw new ResponseException(Status.NOT_FOUND, slashErrorMsg);
+        } else {
+            identifierEncoded = identifier;
         }
 
-        final String slashErrorMsg = String.format(
-                "Identifier %n%s%ncan\'t contain slash character (/).%nIf slash is part of identifier name then use %%2F placeholder.",
-                identifier);
+        final String identifierDecoded = controllerContext.urlPathArgDecode(identifierEncoded);
+        RpcDefinition rpc = controllerContext.getRpcDefinition(identifierDecoded);
 
-        throw new ResponseException(Status.NOT_FOUND, slashErrorMsg);
-    }
-
-    private StructuredData callRpc(final RpcDefinition rpc, final CompositeNode payload) {
         if (rpc == null) {
             throw new ResponseException(Status.NOT_FOUND, "RPC does not exist.");
         }
 
+        if (mountPoint == null) {
+            return new BrokerRpcExecutor(rpc, broker);
+        } else {
+            return new MountPointRpcExecutor(rpc, mountPoint);
+        }
+
+    }
+
+    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload) {
+        if (rpcExecutor == null) {
+            throw new ResponseException(Status.NOT_FOUND, "RPC does not exist.");
+        }
+
         CompositeNode rpcRequest = null;
+        RpcDefinition rpc = rpcExecutor.getRpcDefinition();
+        QName rpcName = rpc.getQName();
+
         if (payload == null) {
-            rpcRequest = NodeFactory.createMutableCompositeNode(rpc.getQName(), null, null, null, null);
-        }
-        else {
+            rpcRequest = NodeFactory.createMutableCompositeNode(rpcName, null, null, null, null);
+        } else {
             final CompositeNode value = this.normalizeNode(payload, rpc.getInput(), null);
-            final List<Node<?>> input = new ArrayList<Node<?>>();
-            input.add(value);
-
-            rpcRequest = NodeFactory.createMutableCompositeNode(rpc.getQName(), null, input, null, null);
+            List<Node<?>> input = Collections.<Node<?>> singletonList(value);
+            rpcRequest = NodeFactory.createMutableCompositeNode(rpcName, null, input, null, null);
         }
 
-        final RpcResult<CompositeNode> rpcResult = broker.invokeRpc(rpc.getQName(), rpcRequest);
+        RpcResult<CompositeNode> rpcResult = rpcExecutor.invokeRpc(rpcRequest);
 
-        if (!rpcResult.isSuccessful()) {
-            throw new ResponseException(Status.INTERNAL_SERVER_ERROR, "Operation failed");
-        }
+        checkRpcSuccessAndThrowException(rpcResult);
 
-        CompositeNode result = rpcResult.getResult();
-        if (result == null) {
+        if (rpcResult.getResult() == null) {
             return null;
         }
 
-        return new StructuredData(result, rpc.getOutput(), null);
+        if( rpc.getOutput() == null )
+        {
+            return null; //no output, nothing to send back.
+        }
+
+        return new StructuredData(rpcResult.getResult(), rpc.getOutput(), null);
+    }
+
+    private void checkRpcSuccessAndThrowException(RpcResult<CompositeNode> rpcResult) {
+        if (rpcResult.isSuccessful() == false) {
+            //TODO: Get smart about what error code we are return (Future Bug coming)
+            throw new ResponseException(Status.INTERNAL_SERVER_ERROR,
+                        "The operation was not successful and there were no RPC errors returned");
+        }
     }
 
     @Override
@@ -670,7 +714,7 @@ public class RestconfImpl implements RestconfService {
                 status = future == null ? null : future.get();
             }
         }
-        catch( ResponseException e) { throw e; }
+        catch( ResponseException e ){ throw e; }
         catch( Exception e ) {
             throw new ResponseException( e, "Error creating data" );
         }
@@ -720,7 +764,7 @@ public class RestconfImpl implements RestconfService {
                 status = future == null ? null : future.get();
             }
         }
-        catch( ResponseException e) { throw e; }
+	catch( ResponseException e ){ throw e; }
         catch( Exception e ) {
             throw new ResponseException( e, "Error creating data" );
         }
