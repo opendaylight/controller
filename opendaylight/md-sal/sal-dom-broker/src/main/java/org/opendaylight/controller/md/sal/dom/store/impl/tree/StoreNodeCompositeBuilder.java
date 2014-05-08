@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 
 /**
@@ -28,7 +28,12 @@ public class StoreNodeCompositeBuilder {
 
     private StoreNodeCompositeBuilder(final NormalizedNodeContainerBuilder nodeBuilder) {
         this.metadata = StoreMetadataNode.builder();
-        this.data = nodeBuilder;
+        this.data = Preconditions.checkNotNull(nodeBuilder);
+    }
+
+    public StoreNodeCompositeBuilder(NormalizedNodeContainerBuilder nodeBuilder, StoreMetadataNode currentMeta) {
+        this.metadata = StoreMetadataNode.builder(currentMeta);
+        this.data = Preconditions.checkNotNull(nodeBuilder);
     }
 
     @SuppressWarnings("unchecked")
@@ -39,12 +44,9 @@ public class StoreNodeCompositeBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public StoreNodeCompositeBuilder addIfPresent(final Optional<StoreMetadataNode> potential) {
-        if (potential.isPresent()) {
-            StoreMetadataNode node = potential.get();
-            metadata.add(node);
-            data.addChild(node.getData());
-        }
+    public StoreNodeCompositeBuilder remove(PathArgument id) {
+        metadata.remove(id);
+        data.removeChild(id);
         return this;
     }
 
@@ -54,6 +56,10 @@ public class StoreNodeCompositeBuilder {
 
     public static StoreNodeCompositeBuilder from(final NormalizedNodeContainerBuilder nodeBuilder) {
         return new StoreNodeCompositeBuilder(nodeBuilder);
+    }
+
+    public static StoreNodeCompositeBuilder from(final NormalizedNodeContainerBuilder nodeBuilder, StoreMetadataNode currentMeta) {
+        return new StoreNodeCompositeBuilder(nodeBuilder, currentMeta);
     }
 
     @SuppressWarnings("unchecked")
@@ -71,5 +77,4 @@ public class StoreNodeCompositeBuilder {
         metadata.setSubtreeVersion(updatedSubtreeVersion);
         return this;
     }
-
 }

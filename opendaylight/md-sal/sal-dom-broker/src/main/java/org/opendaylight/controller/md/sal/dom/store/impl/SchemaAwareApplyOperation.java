@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -27,11 +34,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
+import org.opendaylight.yangtools.yang.data.api.schema.OrderedLeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableAugmentationNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableChoiceNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
@@ -59,8 +67,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.primitives.UnsignedLong;
 
 public abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
@@ -321,30 +327,28 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         @Override
         protected StoreMetadataNode applyWrite(final NodeModification modification,
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
-            //
+
             NormalizedNode<?, ?> newValue = modification.getWritenValue();
 
-            UnsignedLong nodeVersion = subtreeVersion;
+            final UnsignedLong nodeVersion;
             if (currentMeta.isPresent()) {
                 nodeVersion = StoreUtils.increase(currentMeta.get().getNodeVersion());
+            } else {
+                nodeVersion = subtreeVersion;
             }
-            StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion, nodeVersion);
 
+            final StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion, nodeVersion);
             if (!modification.hasAdditionalModifications()) {
                 return newValueMeta;
             }
+
             @SuppressWarnings("rawtypes")
-            NormalizedNodeContainerBuilder dataBuilder = createBuilder(modification.getIdentifier());
+            NormalizedNodeContainerBuilder dataBuilder = createBuilder(newValue);
             StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder) //
                     .setNodeVersion(nodeVersion) //
                     .setSubtreeVersion(subtreeVersion);
 
-            Set<PathArgument> processedPreexisting = applyPreexistingChildren(modification, newValueMeta.getChildren(),
-                    builder, nodeVersion);
-            applyNewChildren(modification, processedPreexisting, builder, nodeVersion);
-
-            return builder.build();
-
+            return mutateChildren(modification.getModifications(), newValueMeta, builder, nodeVersion);
         }
 
         @Override
@@ -357,55 +361,34 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         @Override
         public StoreMetadataNode applySubtreeChange(final NodeModification modification,
                 final StoreMetadataNode currentMeta, final UnsignedLong subtreeVersion) {
+            // Bump subtree version to its new target
+            final UnsignedLong updatedSubtreeVersion = StoreUtils.increase(currentMeta.getSubtreeVersion());
 
-            UnsignedLong updatedSubtreeVersion = StoreUtils.increase(currentMeta.getSubtreeVersion());
             @SuppressWarnings("rawtypes")
-            NormalizedNodeContainerBuilder dataBuilder = createBuilder(modification.getIdentifier());
-            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder)
+            NormalizedNodeContainerBuilder dataBuilder = createBuilder(currentMeta.getData());
+            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder, currentMeta)
                     .setIdentifier(modification.getIdentifier()).setNodeVersion(currentMeta.getNodeVersion())
                     .setSubtreeVersion(updatedSubtreeVersion);
-            // We process preexisting nodes
-            Set<PathArgument> processedPreexisting = applyPreexistingChildren(modification, currentMeta.getChildren(),
-                    builder, updatedSubtreeVersion);
-            applyNewChildren(modification, processedPreexisting, builder, updatedSubtreeVersion);
-            return builder.build();
+
+            return mutateChildren(modification.getModifications(), currentMeta, builder, updatedSubtreeVersion);
         }
 
-        private void applyNewChildren(final NodeModification modification, final Set<PathArgument> ignore,
-                final StoreNodeCompositeBuilder builder, final UnsignedLong subtreeVersion) {
-            for (NodeModification childModification : modification.getModifications()) {
-                PathArgument childIdentifier = childModification.getIdentifier();
-                // We skip allready processed modifications
-                if (ignore.contains(childIdentifier)) {
-                    continue;
-                }
+        private StoreMetadataNode mutateChildren(final Iterable<NodeModification> modifications, final StoreMetadataNode meta,
+                final StoreNodeCompositeBuilder builder, final UnsignedLong nodeVersion) {
 
-                builder.addIfPresent(resolveChildOperation(childIdentifier) //
-                        .apply(childModification, Optional.<StoreMetadataNode> absent(), subtreeVersion));
-            }
-        }
+            for (NodeModification mod : modifications) {
+                final PathArgument id = mod.getIdentifier();
+                final Optional<StoreMetadataNode> cm = meta.getChild(id);
 
-        private Set<PathArgument> applyPreexistingChildren(final NodeModification modification,
-                final Iterable<StoreMetadataNode> children, final StoreNodeCompositeBuilder nodeBuilder,
-                final UnsignedLong subtreeVersion) {
-            Builder<PathArgument> processedModifications = ImmutableSet.<PathArgument> builder();
-            for (StoreMetadataNode childMeta : children) {
-                PathArgument childIdentifier = childMeta.getIdentifier();
-                // We retrieve Child modification metadata
-                Optional<NodeModification> childModification = modification.getChild(childIdentifier);
-                // Node is modified
-                if (childModification.isPresent()) {
-                    processedModifications.add(childIdentifier);
-                    Optional<StoreMetadataNode> result = resolveChildOperation(childIdentifier) //
-                            .apply(childModification.get(), Optional.of(childMeta), subtreeVersion);
-                    nodeBuilder.addIfPresent(result);
+                Optional<StoreMetadataNode> result = resolveChildOperation(id).apply(mod, cm, nodeVersion);
+                if (result.isPresent()) {
+                    builder.add(result.get());
                 } else {
-                    // Child is unmodified - reuse existing metadata and data
-                    // snapshot
-                    nodeBuilder.add(childMeta);
+                    builder.remove(id);
                 }
             }
-            return processedModifications.build();
+
+            return builder.build();
         }
 
         @Override
@@ -425,7 +408,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
 
         @SuppressWarnings("rawtypes")
-        protected abstract NormalizedNodeContainerBuilder createBuilder(PathArgument identifier);
+        protected abstract NormalizedNodeContainerBuilder createBuilder(NormalizedNode<?, ?> original);
     }
 
     public static abstract class DataNodeContainerModificationStrategy<T extends DataNodeContainer> extends
@@ -470,7 +453,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         @SuppressWarnings("rawtypes")
-        protected abstract DataContainerNodeBuilder createBuilder(PathArgument identifier);
+        protected abstract DataContainerNodeBuilder createBuilder(NormalizedNode<?, ?> original);
 
         @Override
         public String toString() {
@@ -488,12 +471,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         @SuppressWarnings("rawtypes")
-        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
-            // TODO Auto-generated method stub
-            checkArgument(identifier instanceof NodeIdentifier);
-            return ImmutableContainerNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected DataContainerNodeBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof ContainerNode);
+            return ImmutableContainerNodeBuilder.create((ContainerNode) original);
         }
-
     }
 
     public static class UnkeyedListItemModificationStrategy extends
@@ -505,11 +486,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         @SuppressWarnings("rawtypes")
-        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
-            checkArgument(identifier instanceof NodeIdentifier);
-            return ImmutableUnkeyedListEntryNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected DataContainerNodeBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof UnkeyedListEntryNode);
+            return ImmutableUnkeyedListEntryNodeBuilder.create((UnkeyedListEntryNode) original);
         }
-
     }
 
     public static class AugmentationModificationStrategy extends
@@ -522,10 +502,11 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
 
         @Override
-        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
-            return Builders.augmentationBuilder().withNodeIdentifier((AugmentationIdentifier) identifier);
+        @SuppressWarnings("rawtypes")
+        protected DataContainerNodeBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof AugmentationNode);
+            return ImmutableAugmentationNodeBuilder.create((AugmentationNode) original);
         }
-
     }
 
     public static class ChoiceModificationStrategy extends NormalizedNodeContainerModificationStrategy {
@@ -554,11 +535,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         @SuppressWarnings("rawtypes")
-        protected DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
-            checkArgument(identifier instanceof NodeIdentifier);
-            return ImmutableChoiceNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected DataContainerNodeBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode);
+            return ImmutableChoiceNodeBuilder.create((org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode) original);
         }
-
     }
 
     public static class ListEntryModificationStrategy extends DataNodeContainerModificationStrategy<ListSchemaNode> {
@@ -569,10 +549,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @Override
         @SuppressWarnings("rawtypes")
-        protected final DataContainerNodeBuilder createBuilder(final PathArgument identifier) {
-            return ImmutableMapEntryNodeBuilder.create().withNodeIdentifier((NodeIdentifierWithPredicates) identifier);
+        protected final DataContainerNodeBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof MapEntryNode);
+            return ImmutableMapEntryNodeBuilder.create((MapEntryNode) original);
         }
-
     }
 
     public static class UnorderedLeafSetModificationStrategy extends NormalizedNodeContainerModificationStrategy {
@@ -587,8 +567,9 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @SuppressWarnings("rawtypes")
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
-            return ImmutableLeafSetNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected NormalizedNodeContainerBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof LeafSetNode<?>);
+            return ImmutableLeafSetNodeBuilder.create((LeafSetNode<?>) original);
         }
 
         @Override
@@ -598,7 +579,6 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             }
             return Optional.absent();
         }
-
     }
 
     public static class OrderedLeafSetModificationStrategy extends NormalizedNodeContainerModificationStrategy {
@@ -613,8 +593,9 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @SuppressWarnings("rawtypes")
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
-            return ImmutableOrderedLeafSetNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected NormalizedNodeContainerBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof OrderedLeafSetNode<?>);
+            return ImmutableOrderedLeafSetNodeBuilder.create((OrderedLeafSetNode<?>) original);
         }
 
         @Override
@@ -624,7 +605,6 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
             }
             return Optional.absent();
         }
-
     }
 
     public static class UnkeyedListModificationStrategy extends SchemaAwareApplyOperation {
@@ -685,8 +665,9 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @SuppressWarnings("rawtypes")
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
-            return ImmutableMapNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected NormalizedNodeContainerBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof MapNode);
+            return ImmutableMapNodeBuilder.create((MapNode) original);
         }
 
         @Override
@@ -714,8 +695,9 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @SuppressWarnings("rawtypes")
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final PathArgument identifier) {
-            return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier((NodeIdentifier) identifier);
+        protected NormalizedNodeContainerBuilder createBuilder(final NormalizedNode<?, ?> original) {
+            checkArgument(original instanceof OrderedMapNode);
+            return ImmutableOrderedMapNodeBuilder.create((OrderedMapNode) original);
         }
 
         @Override
