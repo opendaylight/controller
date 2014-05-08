@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -174,7 +174,7 @@ public class RemoteRpcProvider implements
     Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable =
         routingTableProvider.getRoutingTable();
 
-    checkNotNull(routingTable.isPresent(), "Routing table is null");
+    checkState(routingTable.isPresent(), "Routing table is null");
 
     return routingTable.get();
   }
