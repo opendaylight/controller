@@ -23,6 +23,6 @@ public class BrokerRpcExecutor extends AbstractRpcExecutor {
 
     @Override
     public RpcResult<CompositeNode> invokeRpc(CompositeNode rpcRequest) {
-        return broker.invokeRpc( getRpcDefinition().getQName(), rpcRequest );
+        return getRpcResult( broker.invokeRpc( getRpcDefinition().getQName(), rpcRequest ) );
     }
 }
