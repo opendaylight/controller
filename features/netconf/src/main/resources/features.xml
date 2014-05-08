@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-netconf-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.controller/features-odl-protocol-framework/${protocol-framework.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/config-features/${config.version}/xml/features</repository>
+
+  <feature name='odl-netconf-api' version='${project.version}'>
+    <bundle>mvn:org.opendaylight.controller/netconf-api/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/ietf-netconf-monitoring/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/ietf-netconf-monitoring-extension/${project.version}</bundle>
+    <feature version='${protocol-framework.version}'>odl-protocol-framework</feature>
+    <bundle>mvn:org.opendaylight.yangtools.model/ietf-inet-types/${ietf-inet-types.version}</bundle>
+    <bundle>mvn:org.opendaylight.yangtools.model/ietf-yang-types/${ietf-yang-types.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-mapping-api' version='${project.version}'>
+    <feature version='${project.version}'>odl-netconf-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-mapping-api/${project.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-util' version='${project.version}'>
+    <feature version='${project.version}'>odl-netconf-mapping-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netconf-util/${project.version}</bundle>
+  </feature>
+  <feature name='odl-config-netconf-connector' version='${project.version}'>
+    <feature version='${config.version}'>odl-config-manager</feature>
+    <bundle>mvn:org.opendaylight.controller/config-netconf-connector/${project.version}</bundle>
+    <feature version='${project.version}'>odl-netconf-api</feature>
+    <feature version='${project.version}'>odl-netconf-mapping-api</feature>
+    <feature version='${project.version}'>odl-netconf-util</feature>
+  </feature>
+
+  <feature name='odl-netconf-impl' version='${project.version}'>
+    <bundle>mvn:org.opendaylight.controller/netconf-impl/${project.version}</bundle>
+    <feature version='${project.version}'>odl-netconf-api</feature>
+    <feature version='${project.version}'>odl-netconf-mapping-api</feature>
+    <feature version='${project.version}'>odl-netconf-util</feature>
+    <feature version='${project.version}'>odl-netconf-netty-util</feature>
+  </feature>
+  <feature name='odl-netconf-netty-util' version='${project.version}'>
+    <bundle>mvn:org.opendaylight.controller/netconf-netty-util/${project.version}</bundle>
+    <feature version='${project.version}'>odl-netconf-api</feature>
+    <feature version='${project.version}'>odl-netconf-mapping-api</feature>
+    <feature version='${project.version}'>odl-netconf-util</feature>
+    <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/${ganymed.version}</bundle>
+    <bundle>mvn:org.openexi/nagasena/${exi.nagasena.version}</bundle>
+    <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+  </feature>
+  <feature name='odl-netconf-misc' version='${project.version}'>
+    <bundle>mvn:org.opendaylight.controller/netconf-client/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/netconf-monitoring/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.controller/netconf-tcp/${project.version}</bundle>
+  </feature>
+
+</features>
