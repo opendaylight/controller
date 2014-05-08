@@ -426,6 +426,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>containermanager.shell</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>controllermanager.northbound</artifactId>
     </dependency>
     <dependency>
