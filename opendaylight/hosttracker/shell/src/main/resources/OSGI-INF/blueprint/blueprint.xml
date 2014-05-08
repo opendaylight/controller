@@ -1,0 +1,65 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+<!-- TRY 1
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
+            <action class="org.opendaylight.controller.hosttracker.shell.DumpFailedARPReqList">
+            <property name="hosttracker" ref="hosttracker"/>
+            </action>
+        </command>
+
+        <command>
+            <action class="org.opendaylight.controller.hosttracker.shell.DumpPendingARPReqList">
+            <property name="hosttracker" ref="hosttracker"/>
+            </action>
+        </command>
+    </command-bundle>
+
+    <reference id="hosttracker" interface="org.opendaylight.controller.hosttracker.IHostTrackerShell"/>
+-->
+<!-- TRY 2
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="dumpFailedARPReqList" class="org.opendaylight.controller.hosttracker.implementation.HostTracker">
+    </bean>
+
+    <bean id="dumpPendingARPReqList" class="org.opendaylight.controller.hosttracker.implementation.HostTracker">
+    </bean>
+
+    <service ref="dumpFailedARPReqList" interface="org.opendaylight.controller.hosttracker.IHostTrackerShell"/>
+    <service ref="dumpPendingARPReqList" interface="org.opendaylight.controller.hosttracker.IHostTrackerShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+        <command>
+        <action class="org.opendaylight.controller.hosttracker.shell.DumpFailedARPReqList">
+            <property name="dumpFailedARPReqList" ref="dumpFailedARPReqList"/>
+            </action>
+        </command>
+
+        <command>
+            <action class="org.opendaylight.controller.hosttracker.shell.DumpPendingARPReqList">
+            <property name="dumpPendingARPReqList" ref="dumpPendingARPReqList"/>
+            </action>
+        </command>
+
+    </command-bundle>
+-->
+<!-- TRY 3-->
+    <bean id="HostTracker" class="org.opendaylight.controller.hosttracker.HostTracker"/>
+    <reference id="HostTrackerRef" interface="org.opendaylight.controller.hosttracker.IHostTrackerShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.DumpFailedARPReqList">
+          <property name="HostTracker" ref="HostTrackerRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.DumpPendingARPReqList">
+          <property name="HostTracker" ref="HostTrackerRef"/>
+       </action>
+    </command>
+    </command-bundle>
+</blueprint>
