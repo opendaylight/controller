@@ -40,6 +40,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.controller.sal.core.api.Provider;
@@ -49,6 +50,8 @@ import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.inventory.rev140108.NetconfNode;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -117,13 +120,14 @@ public class NetconfDevice implements Provider, //
 
     SchemaSourceProvider<InputStream> remoteSourceProvider;
 
-    DataBrokerService dataBroker;
+    private volatile DataBrokerService dataBroker;
 
     NetconfDeviceListener listener;
 
     private boolean rollbackSupported;
 
     private NetconfClientConfiguration clientConfig;
+    private volatile DataProviderService dataProviderService;
 
     public NetconfDevice(String name) {
         this.name = name;
@@ -217,6 +221,8 @@ public class NetconfDevice implements Provider, //
     }
 
     private void updateDeviceState(boolean up, Set<QName> capabilities) {
+        checkDataStoreState();
+
         DataModificationTransaction transaction = dataBroker.beginTransaction();
 
         CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
@@ -305,6 +311,22 @@ public class NetconfDevice implements Provider, //
     public void onSessionInitiated(ProviderSession session) {
         dataBroker = session.getService(DataBrokerService.class);
 
+        processingExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                updateInitialState();
+            }
+        });
+
+        mountService = session.getService(MountProvisionService.class);
+        if (mountService != null) {
+            mountInstance = mountService.createOrGetMountPoint(path);
+        }
+    }
+
+    private void updateInitialState() {
+        checkDataStoreState();
+
         DataModificationTransaction transaction = dataBroker.beginTransaction();
         if (operationalNodeNotExisting(transaction)) {
             transaction.putOperationalData(path, getNodeWithId());
@@ -320,12 +342,12 @@ public class NetconfDevice implements Provider, //
         } catch (ExecutionException e) {
             throw new RuntimeException("Read configuration data " + path + " failed", e);
         }
-
-        mountService = session.getService(MountProvisionService.class);
-        if (mountService != null) {
-            mountInstance = mountService.createOrGetMountPoint(path);
-        }
     }
+
+    private void checkDataStoreState() {
+        // read data from Nodes/Node in order to wait with write until schema for Nodes/Node is present in datastore
+        dataProviderService.readOperationalData(org.opendaylight.yangtools.yang.binding.InstanceIdentifier.builder(
+                Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class).augmentation(NetconfNode.class).build());    }
 
     CompositeNode getNodeWithId() {
         SimpleNodeTOImpl id = new SimpleNodeTOImpl(INVENTORY_ID, null, name);
@@ -473,6 +495,9 @@ public class NetconfDevice implements Provider, //
         this.clientConfig = clientConfig;
     }
 
+    public void setDataProviderService(final DataProviderService dataProviderService) {
+        this.dataProviderService = dataProviderService;
+    }
 }
 
 class NetconfDeviceSchemaContextProvider {
