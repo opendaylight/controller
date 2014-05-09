@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_60c0dc50",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 1781,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T19:14:38Z",
+      "side": 1,
+      "message": "Why this change?",
+      "revId": "eb187dbb73737ca227edbaddfc095b50ab635f35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
