@@ -96,9 +96,6 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         DataProviderService dataProviderService =
                 bundleContext.getService(serviceReference);
 
-        dataProviderService.readOperationalData(InstanceIdentifier.builder(
-                Nodes.class).child(Node.class).augmentation(NetconfNode.class).build());
-
         getDomRegistryDependency();
         NetconfDevice device = new NetconfDevice(getIdentifier().getInstanceName());
 
@@ -109,7 +106,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         device.setEventExecutor(getEventExecutorDependency());
         device.setDispatcher(getClientDispatcher() == null ? createDispatcher() : getClientDispatcherDependency());
         device.setSchemaSourceProvider(getGlobalNetconfSchemaProvider(bundleContext));
-
+        device.setDataProviderService(dataProviderService);
         getDomRegistryDependency().registerProvider(device, bundleContext);
         device.start();
         return device;
