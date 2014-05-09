@@ -20,8 +20,6 @@ import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +28,6 @@ import java.util.concurrent.TimeoutException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
@@ -52,14 +49,16 @@ import org.ops4j.pax.exam.util.Filter;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Constants;
 import org.xml.sax.SAXException;
+import javax.inject.Inject;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-@Ignore
 @RunWith(PaxExam.class)
 public class IdentityRefNetconfTest {
 
@@ -67,10 +66,7 @@ public class IdentityRefNetconfTest {
 
     // Wait for controller to start
 
-    // FIXME move this (pax) test to different module
-    // pax jars contain guava classes that clash with real guava dependencies in non-pax tests
-    //
-    //@Inject
+    @Inject
     @Filter(timeout = 60 * 1000)
     BindingAwareBroker broker;
 
