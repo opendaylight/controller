@@ -15,4 +15,6 @@ public interface RoutedRegistration<C, P extends Path<P>, S> extends Registratio
     void registerPath(C context, P path);
     void unregisterPath(C context, P path);
 
+    @Override
+    void close();
 }
