@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_60bc5cbc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-09T20:47:50Z",
+      "side": 1,
+      "message": "Please remove this suppress warnings",
+      "revId": "04b50a8cd9a5e5541a6a414b4300040df6c3b038",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_60e3fcd9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-09T20:47:50Z",
+      "side": 1,
+      "message": "Use StringBuilder here. For other concepts, please do look in Guava to find equivalents. In the end, there should be no mention of xtend nor xtext in imports.",
+      "revId": "04b50a8cd9a5e5541a6a414b4300040df6c3b038",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_00b1d0e0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-09T20:47:50Z",
+      "side": 1,
+      "message": "Same here, suppresswarnings is quite evil",
+      "revId": "04b50a8cd9a5e5541a6a414b4300040df6c3b038",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_80c40041",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-09T20:47:50Z",
+      "side": 1,
+      "message": "Please do not use sneakyThrow. Declare exceptions as throws as close to public entrypoints as possible, then decide to either make them public or encapsulate them either in a sublass of RuntimeException, or an API exception (RestConfException?).",
+      "revId": "04b50a8cd9a5e5541a6a414b4300040df6c3b038",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
