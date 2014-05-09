@@ -547,6 +547,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messaging.clustering</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>messaging.datastore</artifactId>
     </dependency>
     <dependency>

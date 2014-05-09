@@ -43,7 +43,8 @@
     <module>opendaylight/connectionmanager/api</module>
     <module>opendaylight/connectionmanager/implementation</module>
     <module>opendaylight/security</module>
-
+    <module>opendaylight/messaging/datastore</module>
+    <module>opendaylight/messaging/clustering</module>
     <!-- third-parties uncomment them if you need snapshot version of it -->
     <!-- <module>third-party/openflowj</module> -->
     <!-- <module>third-party/net.sf.jung2</module> -->
