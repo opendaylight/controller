@@ -61,13 +61,18 @@ public class StringUtil {
 
 
     public static Optional<String> loadCopyright() {
-        try (InputStream in = StringUtil.class.getResourceAsStream("/copyright.txt")) {
-            if (in != null) {
-                return Optional.of(IOUtils.toString(in));
+        /*
+         * FIXME: BUG-980: this is a nice feature, but the copyright needs to come
+         *        from the project being processed, not this one.
+            try (InputStream in = StringUtil.class.getResourceAsStream("/copyright.txt")) {
+                if (in != null) {
+                    return Optional.of(IOUtils.toString(in));
+                }
+            } catch (IOException e) {
+                logger.warn("Cannot load copyright.txt", e);
             }
-        } catch (IOException e) {
-            logger.warn("Cannot load copyright.txt", e);
-        }
+ 
+        */
         return Optional.absent();
     }
 
