@@ -16,18 +16,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>sal-binding-it</artifactId>
-      <exclusions>
-        <!-- FIXME see IdentityRefNetconfTest  -->
-        <!-- Pax-url-aether contains guava classes e.g. ImmutableSet that clashes with guava and causes tests to fail-->
-        <exclusion>
-          <groupId>org.ops4j.pax.url</groupId>
-          <artifactId>pax-url-aether</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.logback_settings</artifactId>
     </dependency>
@@ -144,12 +132,6 @@
       <artifactId>yang-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.tinybundles</groupId>
-      <artifactId>tinybundles</artifactId>
-      <version>${tinybundles.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -161,10 +143,6 @@
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
           <perCoreThreadCount>false</perCoreThreadCount>
-          <classpathDependencyExcludes>
-            <classpathDependencyExcludes>com.google.collections:google-collections</classpathDependencyExcludes>
-            <classpathDependencyExcludes>org.ops4j.pax.url:pax-url-aether</classpathDependencyExcludes>
-          </classpathDependencyExcludes>
         </configuration>
         <executions>
           <execution>
