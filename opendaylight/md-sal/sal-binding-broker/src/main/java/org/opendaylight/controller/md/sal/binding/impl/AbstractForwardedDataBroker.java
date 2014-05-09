@@ -99,7 +99,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
                 Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = getCodec().toBinding(entry);
                 newMap.put(binding.getKey(), binding.getValue());
             } catch (DeserializationException e) {
-                LOG.debug("Omitting {}", entry, e);
+                LOG.warn("Failed to transform {}, omitting it", entry, e);
             }
         }
         return newMap;
@@ -113,7 +113,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
                 InstanceIdentifier<? extends DataObject> binding = getCodec().toBinding(normalizedPath);
                 hashSet.add(binding);
             } catch (DeserializationException e) {
-                LOG.debug("Omitting {}", normalizedPath, e);
+                LOG.warn("Failed to transform {}, omitting it", normalizedPath, e);
             }
         }
         return hashSet;
