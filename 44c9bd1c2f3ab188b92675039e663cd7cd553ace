@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c0968894",
+        "filename": "opendaylight/commons/filter-valve/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-05-09T16:04:06Z",
+      "side": 1,
+      "message": "Cosmetic, i think we don\u0027t need this here.",
+      "revId": "44c9bd1c2f3ab188b92675039e663cd7cd553ace",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
