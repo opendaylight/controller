@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8055e0c7",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/IHosttrackerShell.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "Create console agnostic interface",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a05264db",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1622,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "Create Proper Public Access to the lists print it in the shell command not here..",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_405fd8e5",
+        "filename": "opendaylight/hosttracker/shell/.gitignore",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "Remove me from here..",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_60645cb9",
+        "filename": "opendaylight/hosttracker/shell/delme",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "filename is telling you want to do",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0059d0fd",
+        "filename": "opendaylight/hosttracker/shell/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "don\u0027t hardcode version",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_205e54e7",
+        "filename": "opendaylight/hosttracker/shell/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "Ibid on version hardcoding",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e06f0c91",
+        "filename": "opendaylight/hosttracker/shell/src/main/resources/OSGI-INF/blueprint/blueprint.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "your command is twice the same here..",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c072087c",
+        "filename": "opendaylight/hosttracker/shell/src/main/resources/OSGI-INF/blueprint/blueprint.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-05-09T17:49:20Z",
+      "side": 1,
+      "message": "only need reference once",
+      "revId": "18807c1f289b00577bdf2de334e04888fc035809",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
