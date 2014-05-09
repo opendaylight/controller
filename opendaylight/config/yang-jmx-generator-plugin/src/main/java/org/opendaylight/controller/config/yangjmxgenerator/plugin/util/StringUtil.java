@@ -4,14 +4,11 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.FullyQualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -61,13 +58,18 @@ public class StringUtil {
 
 
     public static Optional<String> loadCopyright() {
-        try (InputStream in = StringUtil.class.getResourceAsStream("/copyright.txt")) {
-            if (in != null) {
-                return Optional.of(IOUtils.toString(in));
+        /*
+         * FIXME: BUG-980: this is a nice feature, but the copyright needs to come
+         *        from the project being processed, not this one.
+            try (InputStream in = StringUtil.class.getResourceAsStream("/copyright.txt")) {
+                if (in != null) {
+                    return Optional.of(IOUtils.toString(in));
+                }
+            } catch (IOException e) {
+                logger.warn("Cannot load copyright.txt", e);
             }
-        } catch (IOException e) {
-            logger.warn("Cannot load copyright.txt", e);
-        }
+
+        */
         return Optional.absent();
     }
 
