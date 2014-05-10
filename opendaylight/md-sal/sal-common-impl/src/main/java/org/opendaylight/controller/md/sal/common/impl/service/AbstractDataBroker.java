@@ -14,14 +14,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -46,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -120,9 +119,9 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
     }
 
     protected ImmutableList<DataCommitHandler<P, D>> affectedCommitHandlers(final Set<P> paths) {
-        final Callable<ImmutableList<DataCommitHandler<P, D>>> _function = new Callable<ImmutableList<DataCommitHandler<P, D>>>() {
+        final Supplier<ImmutableList<DataCommitHandler<P, D>>> _function = new Supplier<ImmutableList<DataCommitHandler<P, D>>>() {
             @Override
-            public ImmutableList<DataCommitHandler<P, D>> call() throws Exception {
+            public ImmutableList<DataCommitHandler<P, D>> get() {
                 Map<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>> _asMap = commitHandlers.asMap();
                 Set<Entry<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>>> _entrySet = _asMap.entrySet();
                 FluentIterable<Entry<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>>> _from = FluentIterable
@@ -163,9 +162,9 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
     }
 
     protected ImmutableList<DataCommitHandler<P, D>> probablyAffectedCommitHandlers(final HashSet<P> paths) {
-        final Callable<ImmutableList<DataCommitHandler<P, D>>> _function = new Callable<ImmutableList<DataCommitHandler<P, D>>>() {
+        final Supplier<ImmutableList<DataCommitHandler<P, D>>> _function = new Supplier<ImmutableList<DataCommitHandler<P, D>>>() {
             @Override
-            public ImmutableList<DataCommitHandler<P, D>> call() throws Exception {
+            public ImmutableList<DataCommitHandler<P, D>> get() {
                 Map<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>> _asMap = commitHandlers.asMap();
                 Set<Entry<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>>> _entrySet = _asMap.entrySet();
                 FluentIterable<Entry<P, Collection<DataCommitHandlerRegistrationImpl<P, D>>>> _from = FluentIterable
@@ -221,12 +220,10 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
         return _dataReadRouter.readOperationalData(path);
     }
 
-    private static <T extends Object> T withLock(final Lock lock, final Callable<T> method) {
+    private static <T extends Object> T withLock(final Lock lock, final Supplier<T> method) {
         lock.lock();
         try {
-            return method.call();
-        } catch (Exception e) {
-            throw Exceptions.sneakyThrow(e);
+            return method.get();
         } finally {
             lock.unlock();
         }
