@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -79,17 +78,21 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
             @Nullable
             @Override
             public Optional<DataObject> apply(@Nullable final Optional<NormalizedNode<?, ?>> normalizedNode) {
-                try {
-                    final DataObject dataObject = normalizedNode.isPresent() ? codec.toBinding(path,
-                            normalizedNode.get()) : null;
+                if (normalizedNode.isPresent()) {
+                    final DataObject dataObject;
+                    try {
+                        dataObject = codec.toBinding(path, normalizedNode.get());
+                    } catch (DeserializationException e) {
+                        LOG.warn("Failed to create dataobject from node {}", normalizedNode.get(), e);
+                        throw new IllegalStateException("Failed to create dataobject", e);
+                    }
+
                     if (dataObject != null) {
                         updateCache(store, path, dataObject);
+                        return Optional.of(dataObject);
                     }
-                    return Optional.fromNullable(dataObject);
-                } catch (DeserializationException e) {
-                    Exceptions.sneakyThrow(e);
                 }
-                return null;
+                return Optional.absent();
             }
         });
     }
@@ -108,10 +111,10 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
         final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = codec
                 .toNormalizedNode(path, data);
 
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
-        ensureParentsByMerge(writeTransaction, store, normalized.getKey(), path);
-        LOG.debug("Tx: {} : Putting data {}",getDelegate().getIdentifier(),normalized.getKey());
-        writeTransaction.put(store, normalized.getKey(), normalized.getValue());
+        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
+        ensureParentsByMerge(writeTransaction, store, normalizedPath, path);
+        LOG.debug("Tx: {} : Putting data {}", getDelegate().getIdentifier(), normalizedPath);
+        writeTransaction.put(store, normalizedPath, normalized.getValue());
     }
 
     protected void doMergeWithEnsureParents(final DOMDataReadWriteTransaction writeTransaction,
@@ -120,10 +123,10 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
         final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = codec
                 .toNormalizedNode(path, data);
 
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
-        ensureParentsByMerge(writeTransaction, store, normalized.getKey(), path);
-        LOG.debug("Tx: {} : Merge data {}",getDelegate().getIdentifier(),normalized.getKey());
-        writeTransaction.merge(store, normalized.getKey(), normalized.getValue());
+        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
+        ensureParentsByMerge(writeTransaction, store, normalizedPath, path);
+        LOG.debug("Tx: {} : Merge data {}",getDelegate().getIdentifier(),normalizedPath);
+        writeTransaction.merge(store, normalizedPath, normalized.getValue());
     }
 
     private void ensureParentsByMerge(final DOMDataReadWriteTransaction writeTransaction,
