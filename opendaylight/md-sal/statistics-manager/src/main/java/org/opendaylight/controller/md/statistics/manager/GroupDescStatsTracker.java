@@ -96,7 +96,7 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
             if (Group.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Group> group = (InstanceIdentifier<Group>)key;
-                InstanceIdentifier<?> del = InstanceIdentifier.builder(group).augmentation(NodeGroupDescStats.class).toInstance();
+                InstanceIdentifier<?> del = group.augmentation(NodeGroupDescStats.class);
                 logger.debug("Key {} triggered remove of augmentation {}", key, del);
 
                 trans.removeOperationalData(del);

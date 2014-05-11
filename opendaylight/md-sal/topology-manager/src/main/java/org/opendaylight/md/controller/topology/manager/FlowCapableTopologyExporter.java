@@ -193,8 +193,7 @@ class FlowCapableTopologyExporter implements //
         }
         for (Link link : topologyData.getLink()) {
             if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
-                InstanceIdentifier<Link> path = InstanceIdentifier.builder(topologyPath)
-                        .child(Link.class, link.getKey()).build();
+                InstanceIdentifier<Link> path = topologyPath.child(Link.class, link.getKey());
                 transaction.removeOperationalData(path);
             }
         }
@@ -208,8 +207,7 @@ class FlowCapableTopologyExporter implements //
         }
         for (Link link : topologyData.getLink()) {
             if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
-                InstanceIdentifier<Link> path = InstanceIdentifier.builder(topologyPath)
-                        .child(Link.class, link.getKey()).build();
+                InstanceIdentifier<Link> path = topologyPath.child(Link.class, link.getKey());
                 transaction.removeOperationalData(path);
             }
         }
@@ -233,20 +231,20 @@ class FlowCapableTopologyExporter implements //
                 .child(Topology.class, topology).child(Link.class, link.getKey()).build();
         return linkInstanceId;
     }
-    
+
     /**
      * @param txId transaction identificator
      * @param future transaction result
      */
     private static void listenOnTransactionState(final Object txId, Future<RpcResult<TransactionStatus>> future) {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),new FutureCallback<RpcResult<TransactionStatus>>() {
-            
+
             @Override
             public void onFailure(Throwable t) {
                 LOG.error("Topology export failed for Tx:{}", txId, t);
-                
+
             }
-            
+
             @Override
             public void onSuccess(RpcResult<TransactionStatus> result) {
                 if(!result.isSuccessful()) {

@@ -61,8 +61,8 @@ public class CrossBrokerMountPointTest {
             .child(Node.class, NODE_KEY).toInstance();
     private static GroupKey GROUP_KEY = new GroupKey(new GroupId(0L));
 
-    private static final InstanceIdentifier<GroupStatistics> GROUP_STATISTICS_ID_BA = InstanceIdentifier
-            .builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class) //
+    private static final InstanceIdentifier<GroupStatistics> GROUP_STATISTICS_ID_BA = NODE_INSTANCE_ID_BA
+            .builder().augmentation(FlowCapableNode.class) //
             .child(Group.class, GROUP_KEY) //
             .augmentation(NodeGroupStatistics.class) //
             .child(GroupStatistics.class) //
