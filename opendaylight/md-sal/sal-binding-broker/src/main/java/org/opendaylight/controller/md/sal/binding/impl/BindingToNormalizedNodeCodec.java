@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.yangtools.concepts.util.ClassLoaderUtils;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
@@ -150,7 +151,11 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
             throws DeserializationException {
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier legacyPath;
+
         try {
+            if(isChoiceOrCasePath(normalized)) {
+                throw new DeserializationException("Choice target is not supported in Binding path.");
+            }
             legacyPath = legacyToNormalized.toLegacy(normalized);
         } catch (DataNormalizationException e) {
             throw new IllegalStateException("Could not denormalize path.", e);
@@ -158,6 +163,19 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         LOG.trace("InstanceIdentifier Path Deserialization: Legacy representation {}, Normalized representation: {}",
                 legacyPath, normalized);
         return bindingToLegacy.fromDataDom(legacyPath);
+    }
+
+    private boolean isChoiceOrCasePath(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized) throws DataNormalizationException {
+        DataNormalizationOperation<?> op = findNormalizationOperation(normalized);
+        return op.isMixin() && op.getIdentifier() instanceof NodeIdentifier;
+    }
+
+    private DataNormalizationOperation<?> findNormalizationOperation(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized) throws DataNormalizationException {
+        DataNormalizationOperation<?> current = legacyToNormalized.getRootOperation();
+        for(PathArgument arg : normalized.getPath()) {
+        current = current.getChild(arg);
+        }
+        return current;
     }
 
     private static final Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> toEntry(
@@ -193,6 +211,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             throws DeserializationException {
         InstanceIdentifier<? extends DataObject> bindingPath = toBinding(normalized.getKey());
         DataObject bindingData = toBinding(bindingPath, normalized.getValue());
+        if(bindingData == null) {
+            LOG.warn("Failed to deserialize {} to Binding format. Binding path is: {}",normalized,bindingPath);
+        }
         return toEntry(bindingPath, bindingData);
     }
 
