@@ -178,7 +178,7 @@ public final class NodeMapping {
         nodeConnectorId = new NodeConnectorId(Arguments.<String>checkInstanceOf(nodeConnector.getID(), String.class));
     }
     final NodeConnectorKey connectorKey = new NodeConnectorKey(nodeConnectorId);
-    final InstanceIdentifier<NodeConnector> path = InstanceIdentifier.builder(nodePath).child(NODECONNECTOR_CLASS, connectorKey).toInstance();
+    final InstanceIdentifier<NodeConnector> path = nodePath.child(NODECONNECTOR_CLASS, connectorKey);
     return new NodeConnectorRef(path);
   }
 

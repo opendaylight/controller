@@ -110,16 +110,14 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     private static final TableKey TABLE_KEY_BA = new TableKey((short) 0);
 
     private static final InstanceIdentifier<Flow> FLOWS_PATH_BA = //
-    InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
+            NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class) //
             .child(Table.class, TABLE_KEY_BA) //
             .child(Flow.class) //
             .toInstance();
 
     private static final InstanceIdentifier<Flow> FLOW_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder(FLOWS_PATH_BA.firstIdentifierOf(Table.class)) //
-            .child(Flow.class, FLOW_KEY) //
-            .toInstance();
+    FLOWS_PATH_BA.firstIdentifierOf(Table.class).child(Flow.class, FLOW_KEY);
 
     @Test
     public void simpleModifyOperation() throws Exception {
