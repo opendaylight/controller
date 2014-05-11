@@ -12,6 +12,7 @@ package org.opendaylight.controller.clustering.test.internal;
 import java.io.Serializable;
 
 public class StringContainer implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String mystring;
 
     public StringContainer() {

@@ -7,7 +7,14 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+
 import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +23,6 @@ import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
-
-import java.io.IOException;
-import java.util.concurrent.*;
 
 /**
  *
@@ -69,7 +73,7 @@ public class ClientRequestHandlerTest {
       serverThread.execute(MessagingUtil.startReplyServer(context, serverAddress, 1));
       threadPool.execute(createEmptyMessageTaskAndHandle(handler, serverAddress));
     }
-    Thread.currentThread().sleep(5000);//wait for all messages to get processed
+    Thread.sleep(5000);//wait for all messages to get processed
     //should be connected to 5 remote server
     Assert.assertEquals(5, handler.getWorkerCount());
   }

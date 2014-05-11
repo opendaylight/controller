@@ -1,7 +1,7 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.gofactory;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
+import java.util.LinkedHashMap;
+
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -11,7 +11,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.Generated
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.JavaFileInputBuilder;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
 
-import java.util.LinkedHashMap;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 
 public class ConcreteModuleGeneratedObjectFactory {
 
@@ -46,12 +47,10 @@ public class ConcreteModuleGeneratedObjectFactory {
     }
 
     private static String getNewCtor(FullyQualifiedName fqn) {
-        LinkedHashMap<String, String> parameters = new LinkedHashMap<String, String>(){
-            {
-                put(ModuleIdentifier.class.getCanonicalName(), "identifier");
-                put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
-            }
-        };
+        LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
+        parameters.put(ModuleIdentifier.class.getCanonicalName(), "identifier");
+        parameters.put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
+
         StringBuilder stringBuilder = getCtor(fqn, parameters);
         return stringBuilder.toString();
     }
@@ -72,14 +71,11 @@ public class ConcreteModuleGeneratedObjectFactory {
     }
 
     private static String getCopyCtor(final FullyQualifiedName fqn) {
-        LinkedHashMap<String, String> parameters = new LinkedHashMap<String, String>(){
-            {
-                put(ModuleIdentifier.class.getCanonicalName(), "identifier");
-                put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
-                put(fqn.toString(), "oldModule");
-                put(AutoCloseable.class.getCanonicalName(), "oldInstance");
-            }
-        };
+        LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
+        parameters.put(ModuleIdentifier.class.getCanonicalName(), "identifier");
+        parameters.put(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
+        parameters.put(fqn.toString(), "oldModule");
+        parameters.put(AutoCloseable.class.getCanonicalName(), "oldInstance");
         StringBuilder stringBuilder = getCtor(fqn, parameters);
         return stringBuilder.toString();
     }

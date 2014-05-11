@@ -12,6 +12,7 @@ package org.opendaylight.controller.clustering.test.internal;
 import java.io.Serializable;
 
 public class ComplexClass implements IComplex, Serializable {
+    private static final long serialVersionUID = 1L;
     private String identity;
 
     public ComplexClass(String i) {

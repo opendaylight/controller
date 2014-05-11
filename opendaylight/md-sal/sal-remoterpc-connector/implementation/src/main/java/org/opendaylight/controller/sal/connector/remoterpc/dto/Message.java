@@ -8,11 +8,17 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc.dto;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
-import java.io.*;
-
 public class Message implements Serializable {
+    private static final long serialVersionUID = 1L;
 
  public static enum MessageType {
     PING((byte) 0),
@@ -118,12 +124,13 @@ public class Message implements Serializable {
   }
 
   public static class Response extends Message implements RpcRouter.RpcReply {
+    private static final long serialVersionUID = 1L;
     private ResponseCode code; // response code
 
     public static enum ResponseCode {
       SUCCESS(200), BADREQUEST(400), TIMEOUT(408), GONE(410), SERVERERROR(500), SERVICEUNAVAILABLE(503);
 
-      private int code;
+      private final int code;
 
       ResponseCode(int code) {
         this.code = code;
@@ -144,7 +151,7 @@ public class Message implements Serializable {
    */
   public static class MessageBuilder{
 
-    private Message message;
+    private final Message message;
 
     public MessageBuilder(){
       message = new Message();

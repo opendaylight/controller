@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,12 +15,18 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import javassist.ClassPool;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class SingletonHolder {
     private static final Logger logger = LoggerFactory.getLogger(SingletonHolder.class);
@@ -69,6 +72,8 @@ public class SingletonHolder {
             // occurs in RejectedExecutionHandler.
             // This impl saturates threadpool first, then queue. When both are full caller will get blocked.
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(queueSize) {
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 public boolean offer(Runnable r) {
                     // ThreadPoolExecutor will spawn a new thread after core size is reached only if the queue.offer returns false.
