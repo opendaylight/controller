@@ -19,7 +19,6 @@ import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.UnsupportedProtocolException;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,7 @@ class SalRemoteClientImpl implements SalRemoteClient {
     public SalRemoteClientImpl(final URL url) {
         Preconditions.checkNotNull(url);
 
-        this.mappingService = new RuntimeGeneratedMappingServiceImpl();
-        this.mappingService.setPool(ClassPool.getDefault());
-        this.mappingService.init();
+        this.mappingService = new RuntimeGeneratedMappingServiceImpl(ClassPool.getDefault());
 
         final ModuleInfoBackedContext moduleInfo = ModuleInfoBackedContext.create();
         moduleInfo.addModuleInfos(BindingReflections.loadModuleInfos());

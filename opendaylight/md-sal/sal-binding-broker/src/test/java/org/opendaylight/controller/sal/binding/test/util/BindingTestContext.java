@@ -267,9 +267,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
 
     public void startBindingToDomMappingService() {
         checkState(classPool != null, "ClassPool needs to be present");
-        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl();
-        mappingServiceImpl.setPool(classPool);
-        mappingServiceImpl.init();
+        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
     }
 
     public void updateYangSchema(final String[] files) {
