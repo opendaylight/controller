@@ -96,8 +96,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized
                 .entrySet()) {
             try {
-                Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = getCodec().toBinding(entry);
-                newMap.put(binding.getKey(), binding.getValue());
+                Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(
+                        entry);
+                if (potential.isPresent()) {
+                    Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
+                    newMap.put(binding.getKey(), binding.getValue());
+                }
             } catch (DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", entry, e);
             }
@@ -110,8 +114,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
         for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath : normalized) {
             try {
-                InstanceIdentifier<? extends DataObject> binding = getCodec().toBinding(normalizedPath);
-                hashSet.add(binding);
+                Optional<InstanceIdentifier<? extends DataObject>> potential = getCodec().toBinding(normalizedPath);
+                if (potential.isPresent()) {
+                    InstanceIdentifier<? extends DataObject> binding = potential.get();
+                    hashSet.add(binding);
+                }
             } catch (DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", normalizedPath, e);
             }
@@ -120,7 +127,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     protected Optional<DataObject> toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
-        if(path.isWildcarded()) {
+        if (path.isWildcarded()) {
             return Optional.absent();
         }
 
@@ -231,11 +238,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public String toString() {
             return Objects.toStringHelper(TranslatedDataChangeEvent.class) //
-                .add("created", getCreatedData()) //
-                .add("updated", getUpdatedData()) //
-                .add("removed", getRemovedPaths()) //
-                .add("dom", domEvent) //
-                .toString();
+                    .add("created", getCreatedData()) //
+                    .add("updated", getUpdatedData()) //
+                    .add("removed", getRemovedPaths()) //
+                    .add("dom", domEvent) //
+                    .toString();
         }
     }
 
