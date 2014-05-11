@@ -32,9 +32,9 @@ import com.google.common.util.concurrent.JdkFutureAdapters;
 
 abstract class AbstractStatsTracker<I, K> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractStatsTracker.class);
-    
+
     private static final int WAIT_FOR_REQUEST_CYCLE = 2;
-    
+
     private final FutureCallback<RpcResult<? extends TransactionAware>> callback =
             new FutureCallback<RpcResult<? extends TransactionAware>>() {
         @Override
@@ -73,7 +73,7 @@ abstract class AbstractStatsTracker<I, K> {
     }
 
     protected final InstanceIdentifierBuilder<Node> getNodeIdentifierBuilder() {
-        return InstanceIdentifier.builder(getNodeIdentifier());
+        return getNodeIdentifier().builder();
     }
 
     protected final NodeRef getNodeRef() {

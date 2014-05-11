@@ -60,13 +60,11 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .toInstance();
 
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
-            .builder(NODES_INSTANCE_ID_BA) //
-            .child(Node.class, NODE_KEY).toInstance();
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
 
 
-    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = InstanceIdentifier//
-            .builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = //
+            NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class, NODE_KEY) //
             .augmentation(FlowCapableNode.class) //
             .child(SupportedActions.class)
@@ -163,7 +161,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
 
         NodeConnectorId ncId = new NodeConnectorId("openflow:1:bar");
         NodeConnectorKey nodeKey = new NodeConnectorKey(ncId );
-        InstanceIdentifier<NodeConnector> ncInstanceId = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA).child(NodeConnector.class, nodeKey).toInstance();
+        InstanceIdentifier<NodeConnector> ncInstanceId = NODE_INSTANCE_ID_BA.child(NodeConnector.class, nodeKey);
         NodeConnectorBuilder ncBuilder = new NodeConnectorBuilder();
         ncBuilder.setId(ncId);
         ncBuilder.setKey(nodeKey);
