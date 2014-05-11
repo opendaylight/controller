@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a6bb5c0d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-11T17:12:52Z",
+      "side": 1,
+      "message": "Can any of these two be made mandatory in the constructor? This class is hardly useable without them",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_86be58fe",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-11T17:12:52Z",
+      "side": 1,
+      "message": "Is this getter needed?",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e6c16481",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-11T17:12:52Z",
+      "side": 1,
+      "message": "Please do not use sneakyThrow -- declare the exceptions or use IllegalStateException.",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
