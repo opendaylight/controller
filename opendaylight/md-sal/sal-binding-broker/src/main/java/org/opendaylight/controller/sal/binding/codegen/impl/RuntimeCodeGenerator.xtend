@@ -43,13 +43,11 @@ import javassist.LoaderClassPath
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
     val CtClass BROKER_NOTIFICATION_LISTENER;
-    val ClassPool classPool;
     val extension JavassistUtils utils;
     val Map<Class<? extends NotificationListener>, RuntimeGeneratedInvokerPrototype> invokerClasses;
 
 
     new(ClassPool pool) {
-        classPool = pool;
         utils = new JavassistUtils(pool);
         invokerClasses = new WeakHashMap();
         BROKER_NOTIFICATION_LISTENER = org.opendaylight.controller.sal.binding.api.NotificationListener.asCtClass;
