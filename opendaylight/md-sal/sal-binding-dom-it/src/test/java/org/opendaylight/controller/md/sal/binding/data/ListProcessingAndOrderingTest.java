@@ -75,13 +75,13 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
     private static final UnorderedListKey UNORDERED_FOO_KEY = new UnorderedListKey("foo");
     private static final UnorderedListKey UNORDERED_BAR_KEY = new UnorderedListKey("bar");
 
-    private static final InstanceIdentifier<UnorderedList> UNORDERED_FOO_PATH = InstanceIdentifier.builder(UNORDERED_CONTAINER_PATH).child(UnorderedList.class,UNORDERED_FOO_KEY).build();
-    private static final InstanceIdentifier<UnorderedList> UNORDERED_BAR_PATH = InstanceIdentifier.builder(UNORDERED_CONTAINER_PATH).child(UnorderedList.class,UNORDERED_BAR_KEY).build();
+    private static final InstanceIdentifier<UnorderedList> UNORDERED_FOO_PATH = UNORDERED_CONTAINER_PATH.child(UnorderedList.class,UNORDERED_FOO_KEY);
+    private static final InstanceIdentifier<UnorderedList> UNORDERED_BAR_PATH = UNORDERED_CONTAINER_PATH.child(UnorderedList.class,UNORDERED_BAR_KEY);
 
     private static final OrderedListKey ORDERED_FOO_KEY = new OrderedListKey("foo");
     private static final OrderedListKey ORDERED_BAR_KEY = new OrderedListKey("bar");
-    private static final InstanceIdentifier<OrderedList> ORDERED_FOO_PATH = InstanceIdentifier.builder(ORDERED_CONTAINER_PATH).child(OrderedList.class,ORDERED_FOO_KEY).build();
-    private static final InstanceIdentifier<OrderedList> ORDERED_BAR_PATH = InstanceIdentifier.builder(ORDERED_CONTAINER_PATH).child(OrderedList.class,ORDERED_BAR_KEY).build();
+    private static final InstanceIdentifier<OrderedList> ORDERED_FOO_PATH = ORDERED_CONTAINER_PATH.child(OrderedList.class,ORDERED_FOO_KEY);
+    private static final InstanceIdentifier<OrderedList> ORDERED_BAR_PATH = ORDERED_CONTAINER_PATH.child(OrderedList.class,ORDERED_BAR_KEY);
 
 
     @Test

@@ -58,18 +58,18 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .toInstance();
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier//
-            .builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = //
+            NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class, NODE_KEY).toInstance();
 
-    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = InstanceIdentifier//
-            .builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = //
+            NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class, NODE_KEY) //
             .augmentation(FlowCapableNode.class) //
             .child(SupportedActions.class).toInstance();
 
-    private static final InstanceIdentifier<FlowCapableNode> ALL_FLOW_CAPABLE_NODES = InstanceIdentifier //
-            .builder(NODES_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<FlowCapableNode> ALL_FLOW_CAPABLE_NODES = //
+            NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class) //
             .augmentation(FlowCapableNode.class) //
             .build();
@@ -88,8 +88,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .node(SUPPORTED_ACTIONS_QNAME) //
             .toInstance();
-    private static final InstanceIdentifier<FlowCapableNode> FLOW_AUGMENTATION_PATH = InstanceIdentifier //
-            .builder(NODE_INSTANCE_ID_BA) //
+    private static final InstanceIdentifier<FlowCapableNode> FLOW_AUGMENTATION_PATH =
+            NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class) //
             .build();
 
@@ -126,8 +126,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         fnub.setDescription("Description Foo");
         fnub.setSoftware("JUnit emulated");
         FlowCapableNode fnu = fnub.build();
-        InstanceIdentifier<FlowCapableNode> augmentIdentifier = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
-                .augmentation(FlowCapableNode.class).toInstance();
+        InstanceIdentifier<FlowCapableNode> augmentIdentifier = NODE_INSTANCE_ID_BA
+                .augmentation(FlowCapableNode.class);
         DataModificationTransaction augmentedTransaction = baDataService.beginTransaction();
         augmentedTransaction.putOperationalData(augmentIdentifier, fnu);
 
@@ -183,8 +183,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         lastReceivedChangeEvent = SettableFuture.create();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        FlowCapableNode readedAugmentation = (FlowCapableNode) baDataService.readOperationalData(InstanceIdentifier
-                .builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class).toInstance());
+        FlowCapableNode readedAugmentation = (FlowCapableNode) baDataService.readOperationalData(
+                NODE_INSTANCE_ID_BA.augmentation(FlowCapableNode.class));
         assertNotNull(readedAugmentation);
 
         assertEquals(fnu.getHardware(), readedAugmentation.getHardware());
@@ -198,10 +198,10 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
 
     private void testPutNodeConnectorWithAugmentation() throws Exception {
         NodeConnectorKey ncKey = new NodeConnectorKey(new NodeConnectorId("test:0:0"));
-        InstanceIdentifier<NodeConnector> ncPath = InstanceIdentifier.builder(NODE_INSTANCE_ID_BA)
-                .child(NodeConnector.class, ncKey).toInstance();
-        InstanceIdentifier<FlowCapableNodeConnector> ncAugmentPath = InstanceIdentifier.builder(ncPath)
-                .augmentation(FlowCapableNodeConnector.class).toInstance();
+        InstanceIdentifier<NodeConnector> ncPath = NODE_INSTANCE_ID_BA
+                .child(NodeConnector.class, ncKey);
+        InstanceIdentifier<FlowCapableNodeConnector> ncAugmentPath = ncPath
+                .augmentation(FlowCapableNodeConnector.class);
 
         NodeConnectorBuilder nc = new NodeConnectorBuilder();
         nc.setKey(ncKey);

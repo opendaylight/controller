@@ -54,13 +54,11 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
             .child(Node.class, NODE_KEY).toInstance();
 
     private static final InstanceIdentifier<Table> TABLE_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder(NODE_INSTANCE_ID_BA) //
+            NODE_INSTANCE_ID_BA.builder() //
             .augmentation(FlowCapableNode.class).child(Table.class, TABLE_KEY).build();
 
     private static final InstanceIdentifier<? extends DataObject> FLOW_INSTANCE_ID_BA = //
-    InstanceIdentifier.builder(TABLE_INSTANCE_ID_BA) //
-            .child(Flow.class, FLOW_KEY) //
-            .toInstance();
+            TABLE_INSTANCE_ID_BA.child(Flow.class, FLOW_KEY);
     /**
      *
      * The scenario tests writing parent node, which also contains child items
@@ -103,7 +101,7 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
         DataObject readedTable = baDataService.readConfigurationData(TABLE_INSTANCE_ID_BA);
         assertNotNull("Readed table should not be nul.", readedTable);
         assertTrue(readedTable instanceof Table);
-        
+
         DataObject readedFlow = baDataService.readConfigurationData(FLOW_INSTANCE_ID_BA);
         assertNotNull("Readed flow should not be null.",readedFlow);
         assertTrue(readedFlow instanceof Flow);

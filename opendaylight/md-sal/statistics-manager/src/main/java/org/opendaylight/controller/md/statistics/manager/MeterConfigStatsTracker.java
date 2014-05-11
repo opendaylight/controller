@@ -82,7 +82,7 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
                 InstanceIdentifier<Meter> meter = (InstanceIdentifier<Meter>)key;
 
                 InstanceIdentifier<?> nodeMeterStatisticsAugmentation =
-                        InstanceIdentifier.builder(meter).augmentation(NodeMeterConfigStats.class).toInstance();
+                        meter.augmentation(NodeMeterConfigStats.class);
                 trans.removeOperationalData(nodeMeterStatisticsAugmentation);
             }
         }
