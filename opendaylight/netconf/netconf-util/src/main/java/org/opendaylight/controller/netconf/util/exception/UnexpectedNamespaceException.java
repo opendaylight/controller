@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.netconf.util.exception;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-
 import java.util.Collections;
 import java.util.Map;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+
 public class UnexpectedNamespaceException extends NetconfDocumentedException {
+    private static final long serialVersionUID = 1L;
 
     public UnexpectedNamespaceException(final String message, final ErrorType errorType, final ErrorTag errorTag,
                                           final ErrorSeverity errorSeverity) {

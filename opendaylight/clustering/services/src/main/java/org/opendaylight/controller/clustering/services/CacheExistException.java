@@ -23,6 +23,7 @@ package org.opendaylight.controller.clustering.services;
  * allocated already exists
  */
 public class CacheExistException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Instantiates a new cache exist exception.

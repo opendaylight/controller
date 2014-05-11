@@ -20,7 +20,9 @@ package org.opendaylight.controller.clustering.services;
  * @deprecated for internal use
  * The Class ListenRoleChangeAddException.
  */
+@Deprecated
 public class ListenRoleChangeAddException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Instantiates a new listen role change add exception.

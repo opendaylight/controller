@@ -24,6 +24,7 @@ package org.opendaylight.controller.clustering.services;
  * passed and so on.
  */
 public class CacheConfigException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Instantiates a new cache config exception.
