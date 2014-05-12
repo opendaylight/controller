@@ -1103,17 +1103,14 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-impl</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-spi</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-util</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
@@ -1123,7 +1120,6 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-type-provider</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
@@ -1169,12 +1165,10 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-parser-api</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-parser-impl</artifactId>
-          <version>${yangtools.version}</version>
         </dependency>
         <!-- yang model dependencies -->
         <dependency>
