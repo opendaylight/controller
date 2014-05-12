@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -46,8 +47,22 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         this.children = Preconditions.checkNotNull(children);
     }
 
+    public static StoreMetadataNode createEmpty(final NormalizedNode<?, ?> data) {
+        return new StoreMetadataNode(data, UnsignedLong.ZERO, UnsignedLong.ZERO,
+                Collections.<PathArgument, StoreMetadataNode>emptyMap());
+    }
+
+    public StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
+            final UnsignedLong subtreeVersion) {
+        this(data, nodeVersion, subtreeVersion, Collections.<PathArgument, StoreMetadataNode>emptyMap());
+    }
+
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static Builder builder(StoreMetadataNode node) {
+        return new Builder(node);
     }
 
     public UnsignedLong getNodeVersion() {
@@ -118,11 +133,16 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         private UnsignedLong nodeVersion;
         private UnsignedLong subtreeVersion;
         private NormalizedNode<?, ?> data;
-        private Map<PathArgument, StoreMetadataNode> children = new LinkedHashMap<>();
+        private Map<PathArgument, StoreMetadataNode> children;
         private boolean dirty = false;
 
-        private Builder() {}
+        private Builder() {
+            children = new LinkedHashMap<>();
+        }
 
+        public Builder(StoreMetadataNode node) {
+            children = new LinkedHashMap<>(node.children);
+        }
 
         public UnsignedLong getVersion() {
             return nodeVersion;
@@ -153,6 +173,15 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
             return this;
         }
 
+        public Builder remove(final PathArgument id) {
+            if (dirty) {
+                children = new LinkedHashMap<>(children);
+                dirty = false;
+            }
+            children.remove(id);
+            return this;
+        }
+
         public StoreMetadataNode build() {
             checkState(data != null, "Data node should not be null.");
             checkState(subtreeVersion.compareTo(nodeVersion) >= 0,
@@ -165,5 +194,4 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
     public static StoreMetadataNode createRecursively(final NormalizedNode<?, ?> node, final UnsignedLong version) {
         return createRecursively(node, version, version);
     }
-
 }
