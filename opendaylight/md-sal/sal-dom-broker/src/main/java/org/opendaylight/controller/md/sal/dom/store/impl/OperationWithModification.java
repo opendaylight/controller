@@ -45,10 +45,6 @@ public class OperationWithModification {
         return applyOperation;
     }
 
-    public boolean isApplicable(final Optional<StoreMetadataNode> data) {
-        return applyOperation.isApplicable(modification, data);
-    }
-
     public Optional<StoreMetadataNode> apply(final Optional<StoreMetadataNode> data, final UnsignedLong subtreeVersion) {
         return applyOperation.apply(modification, data, subtreeVersion);
     }

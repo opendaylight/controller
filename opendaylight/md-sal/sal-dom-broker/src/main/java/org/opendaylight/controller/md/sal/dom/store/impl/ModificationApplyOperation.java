@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
@@ -61,17 +62,6 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
 
     /**
      *
-     * Checks if provided node modification could be applied to current metadata node.
-     *
-     * @param modification Modification
-     * @param current Metadata Node to which modification should be applied
-     * @return true if modification is applicable
-     *         false if modification is no applicable
-     */
-    boolean isApplicable(NodeModification modification, Optional<StoreMetadataNode> current);
-
-    /**
-     *
      * Performs structural verification of NodeModification, such as writen values / types
      * uses right structural elements.
      *
@@ -88,4 +78,16 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
      */
     @Override
     Optional<ModificationApplyOperation> getChild(PathArgument child);
+
+    /**
+    *
+    * Checks if provided node modification could be applied to current metadata node.
+    *
+    * @param modification Modification
+    * @param current Metadata Node to which modification should be applied
+    * @return true if modification is applicable
+    *         false if modification is no applicable
+     * @throws DataPreconditionFailedException
+    */
+    void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<StoreMetadataNode> current) throws DataPreconditionFailedException;
 }
