@@ -61,9 +61,8 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
     private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .toInstance();
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier
-            .builder(NODES_INSTANCE_ID_BA) //
-            .child(Node.class, NODE_KEY).toInstance();
+    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA =
+            NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
 
     private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
@@ -74,7 +73,7 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
 
     /**
      * Test for Bug 148
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -111,12 +110,12 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
 //        Node meterStatsNodeWithDuration = createTestNode(NodeMeterStatistics.class, nodeMeterStatistics(5, true));
 //        commitNodeAndVerifyTransaction(meterStatsNodeWithDuration);
 //
-//        
+//
 //        Node nodeWithUpdatedList = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
 //        AugmentationVerifier.from(nodeWithUpdatedList) //
 //                .assertHasAugmentation(FlowCapableNode.class) //
 //                .assertHasAugmentation(NodeMeterStatistics.class);
-//        
+//
 //        List<MeterStats> meterStats = nodeWithUpdatedList.getAugmentation(NodeMeterStatistics.class).getMeterStatistics().getMeterStats();
 //        assertNotNull(meterStats);
 //        assertFalse(meterStats.isEmpty());

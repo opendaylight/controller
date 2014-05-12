@@ -122,8 +122,8 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
             if (Queue.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 final InstanceIdentifier<Queue> queue = (InstanceIdentifier<Queue>)key;
-                final InstanceIdentifier<?> del = InstanceIdentifier.builder(queue)
-                        .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).build();
+                final InstanceIdentifier<?> del = queue
+                        .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
                 logger.debug("Key {} triggered remove of augmentation {}", key, del);
 
                 trans.removeOperationalData(del);

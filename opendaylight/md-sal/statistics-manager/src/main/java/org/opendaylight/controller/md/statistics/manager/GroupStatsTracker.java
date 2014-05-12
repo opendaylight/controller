@@ -87,7 +87,7 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
             if (Group.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Group> group = (InstanceIdentifier<Group>)key;
-                InstanceIdentifier<?> del = InstanceIdentifier.builder(group).augmentation(NodeGroupStatistics.class).toInstance();
+                InstanceIdentifier<?> del = group.augmentation(NodeGroupStatistics.class);
                 logger.debug("Key {} triggered remove of augmentation {}", key, del);
 
                 trans.removeOperationalData(del);

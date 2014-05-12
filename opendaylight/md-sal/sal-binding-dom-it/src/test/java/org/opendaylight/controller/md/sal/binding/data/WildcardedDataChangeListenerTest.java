@@ -78,14 +78,12 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId("test"));
 
-    private static final InstanceIdentifier<Flow> NODE_0_FLOW_PATH = InstanceIdentifier.builder(NODE_0_TABLE_PATH)
-            .child(Flow.class, FLOW_KEY).build();
+    private static final InstanceIdentifier<Flow> NODE_0_FLOW_PATH = NODE_0_TABLE_PATH.child(Flow.class, FLOW_KEY);
 
-    private static final InstanceIdentifier<Flow> NODE_1_FLOW_PATH = InstanceIdentifier.builder(NODE_1_TABLE_PATH)
-            .child(Flow.class, FLOW_KEY).build();
+    private static final InstanceIdentifier<Flow> NODE_1_FLOW_PATH = NODE_1_TABLE_PATH.child(Flow.class, FLOW_KEY);
 
-    private static final InstanceIdentifier<TableFeatures> NODE_0_TABLE_FEATURES_PATH = InstanceIdentifier
-            .builder(NODE_0_TABLE_PATH).child(TableFeatures.class, TABLE_FEATURES_KEY).build();
+    private static final InstanceIdentifier<TableFeatures> NODE_0_TABLE_FEATURES_PATH =
+            NODE_0_TABLE_PATH.child(TableFeatures.class, TABLE_FEATURES_KEY);
 
     private static final TableFeatures TABLE_FEATURES = new TableFeaturesBuilder()//
             .setKey(TABLE_FEATURES_KEY) //

@@ -30,10 +30,8 @@ public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
     private static final NodeKey NODE_FOO_KEY = new NodeKey(new NodeId("foo"));
     private static final NodeKey NODE_BAR_KEY = new NodeKey(new NodeId("foo"));
     private static InstanceIdentifier<Nodes> NODES_PATH = InstanceIdentifier.builder(Nodes.class).build();
-    private static InstanceIdentifier<Node> NODE_FOO_PATH = InstanceIdentifier.builder(NODES_PATH)
-            .child(Node.class, NODE_FOO_KEY).build();
-    private static InstanceIdentifier<Node> NODE_BAR_PATH = InstanceIdentifier.builder(NODES_PATH)
-            .child(Node.class, NODE_FOO_KEY).build();
+    private static InstanceIdentifier<Node> NODE_FOO_PATH = NODES_PATH.child(Node.class, NODE_FOO_KEY);
+    private static InstanceIdentifier<Node> NODE_BAR_PATH = NODES_PATH.child(Node.class, NODE_FOO_KEY);
 
     @Test
     public void testConcurrentCreate() throws InterruptedException, ExecutionException {
