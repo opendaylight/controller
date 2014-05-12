@@ -207,7 +207,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public DataObject getOriginalSubtree() {
             if (originalDataCache == null) {
-                originalDataCache = toBindingData(path, domEvent.getOriginalSubtree());
+                if(domEvent.getOriginalSubtree() != null) {
+                    originalDataCache = toBindingData(path, domEvent.getOriginalSubtree());
+                } else {
+                    originalDataCache = Optional.absent();
+                }
             }
             return originalDataCache.orNull();
         }
@@ -215,9 +219,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public DataObject getUpdatedSubtree() {
             if (updatedDataCache == null) {
-                updatedDataCache = toBindingData(path, domEvent.getUpdatedSubtree());
+                if(domEvent.getUpdatedSubtree() != null) {
+                    updatedDataCache = toBindingData(path, domEvent.getUpdatedSubtree());
+                } else {
+                    updatedDataCache = Optional.absent();
+                }
             }
-
             return updatedDataCache.orNull();
         }
 
