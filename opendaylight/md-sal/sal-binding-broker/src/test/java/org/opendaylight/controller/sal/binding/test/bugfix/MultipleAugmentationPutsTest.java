@@ -48,7 +48,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-public class MultipleAugmentationPuts extends AbstractDataServiceTest implements DataChangeListener {
+public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final String NODE_ID = "openflow:1";
@@ -76,7 +76,7 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
      *
      * @throws Exception
      */
-    @Test
+    @Test( timeout = 15000)
     public void testAugmentSerialization() throws Exception {
 
         baDataService.registerDataChangeListener(NODES_INSTANCE_ID_BA, this);
