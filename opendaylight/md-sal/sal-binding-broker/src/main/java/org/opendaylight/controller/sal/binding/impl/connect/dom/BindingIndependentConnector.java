@@ -77,8 +77,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
@@ -87,7 +85,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.util.concurrent.Futures;
@@ -736,221 +733,10 @@ public class BindingIndependentConnector implements //
                         }
                     }
                     checkState(targetMethod != null, "Rpc method not found");
-                    Optional<Class<?>> outputClass = BindingReflections.resolveRpcOutputClass(targetMethod);
-                    Optional<Class<? extends DataContainer>> inputClass = BindingReflections
-                            .resolveRpcInputClass(targetMethod);
-
-                    RpcInvocationStrategy strategy = null;
-                    if (outputClass.isPresent()) {
-                        if (inputClass.isPresent()) {
-                            strategy = new DefaultInvocationStrategy(rpc, targetMethod, outputClass.get(), inputClass
-                                    .get());
-                        } else {
-                            strategy = new NoInputInvocationStrategy(rpc, targetMethod, outputClass.get());
-                        }
-                    } else if (inputClass.isPresent()) {
-                        strategy = new NoOutputInvocationStrategy(rpc, targetMethod, inputClass.get());
-                    } else {
-                        strategy = new NoInputNoOutputInvocationStrategy(rpc, targetMethod);
-                    }
-                    return strategy;
+                    return  new RpcInvocationStrategy(rpc,targetMethod, mappingService, biRpcRegistry);
                 }
 
             });
-        }
-    }
-
-    private abstract class RpcInvocationStrategy {
-
-        protected final Method targetMethod;
-        protected final QName rpc;
-
-        public RpcInvocationStrategy(final QName rpc, final Method targetMethod) {
-            this.targetMethod = targetMethod;
-            this.rpc = rpc;
-        }
-
-        public abstract Future<RpcResult<?>> forwardToDomBroker(DataObject input);
-
-        public abstract RpcResult<CompositeNode> uncheckedInvoke(RpcService rpcService, CompositeNode domInput)
-                throws Exception;
-
-        public RpcResult<CompositeNode> invokeOn(final RpcService rpcService, final CompositeNode domInput)
-                throws Exception {
-            return uncheckedInvoke(rpcService, domInput);
-        }
-    }
-
-    private class DefaultInvocationStrategy extends RpcInvocationStrategy {
-
-        @SuppressWarnings("rawtypes")
-        private final WeakReference<Class> inputClass;
-
-        @SuppressWarnings("rawtypes")
-        private final WeakReference<Class> outputClass;
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        public DefaultInvocationStrategy(final QName rpc, final Method targetMethod, final Class<?> outputClass,
-                final Class<? extends DataContainer> inputClass) {
-            super(rpc, targetMethod);
-            this.outputClass = new WeakReference(outputClass);
-            this.inputClass = new WeakReference(inputClass);
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput)
-                throws Exception {
-            DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
-            Future<RpcResult<?>> futureResult = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
-            if (futureResult == null) {
-                return Rpcs.getRpcResult(false);
-            }
-            RpcResult<?> bindingResult = futureResult.get();
-            final Object resultObj = bindingResult.getResult();
-            if (resultObj instanceof DataObject) {
-                final CompositeNode output = mappingService.toDataDom((DataObject) resultObj);
-                return Rpcs.getRpcResult(true, output, Collections.<RpcError> emptySet());
-            }
-            return Rpcs.getRpcResult(true);
-        }
-
-        @Override
-        public ListenableFuture<RpcResult<?>> forwardToDomBroker(final DataObject input) {
-            if (biRpcRegistry == null) {
-                return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
-            }
-
-            CompositeNode xml = mappingService.toDataDom(input);
-            CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
-
-            return Futures.transform(biRpcRegistry.invokeRpc(rpc, wrappedXml),
-                    new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
-                        @Override
-                        public RpcResult<?> apply(final RpcResult<CompositeNode> input) {
-                            Object baResultValue = null;
-                            if (input.getResult() != null) {
-                                baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(),
-                                        input.getResult());
-                            }
-                            return Rpcs.getRpcResult(input.isSuccessful(), baResultValue, input.getErrors());
-                        }
-                    });
-        }
-    }
-
-    private class NoInputInvocationStrategy extends RpcInvocationStrategy {
-
-        @SuppressWarnings("rawtypes")
-        private final WeakReference<Class> outputClass;
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        public NoInputInvocationStrategy(final QName rpc, final Method targetMethod, final Class<?> outputClass) {
-            super(rpc, targetMethod);
-            this.outputClass = new WeakReference(outputClass);
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput)
-                throws Exception {
-            Future<RpcResult<?>> futureResult = (Future<RpcResult<?>>) targetMethod.invoke(rpcService);
-            if (futureResult == null) {
-                return Rpcs.getRpcResult(false);
-            }
-            RpcResult<?> bindingResult = futureResult.get();
-            final Object resultObj = bindingResult.getResult();
-            if (resultObj instanceof DataObject) {
-                final CompositeNode output = mappingService.toDataDom((DataObject) resultObj);
-                return Rpcs.getRpcResult(true, output, Collections.<RpcError> emptySet());
-            }
-            return Rpcs.getRpcResult(true);
-        }
-
-        @Override
-        public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
-            if (biRpcRegistry != null) {
-                CompositeNode xml = mappingService.toDataDom(input);
-                CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
-                return Futures.transform(biRpcRegistry.invokeRpc(rpc, wrappedXml),
-                        new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
-                            @Override
-                            public RpcResult<?> apply(final RpcResult<CompositeNode> input) {
-                                Object baResultValue = null;
-                                if (input.getResult() != null) {
-                                    baResultValue = mappingService.dataObjectFromDataDom(outputClass.get(),
-                                            input.getResult());
-                                }
-                                return Rpcs.getRpcResult(input.isSuccessful(), baResultValue, input.getErrors());
-                            }
-                        });
-            } else {
-                return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
-            }
-        }
-    }
-
-    private class NoInputNoOutputInvocationStrategy extends RpcInvocationStrategy {
-
-        public NoInputNoOutputInvocationStrategy(final QName rpc, final Method targetMethod) {
-            super(rpc, targetMethod);
-        }
-
-        @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput)
-                throws Exception {
-            @SuppressWarnings("unchecked")
-            Future<RpcResult<Void>> result = (Future<RpcResult<Void>>) targetMethod.invoke(rpcService);
-            RpcResult<Void> bindingResult = result.get();
-            return Rpcs.getRpcResult(bindingResult.isSuccessful(), bindingResult.getErrors());
-        }
-
-        @Override
-        public Future<RpcResult<?>> forwardToDomBroker(final DataObject input) {
-            return Futures.immediateFuture(null);
-        }
-    }
-
-    private class NoOutputInvocationStrategy extends RpcInvocationStrategy {
-
-        @SuppressWarnings("rawtypes")
-        private final WeakReference<Class> inputClass;
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        public NoOutputInvocationStrategy(final QName rpc, final Method targetMethod,
-                final Class<? extends DataContainer> inputClass) {
-            super(rpc, targetMethod);
-            this.inputClass = new WeakReference(inputClass);
-        }
-
-        @Override
-        public RpcResult<CompositeNode> uncheckedInvoke(final RpcService rpcService, final CompositeNode domInput)
-                throws Exception {
-            DataContainer bindingInput = mappingService.dataObjectFromDataDom(inputClass.get(), domInput);
-            Future<RpcResult<?>> result = (Future<RpcResult<?>>) targetMethod.invoke(rpcService, bindingInput);
-            if (result == null) {
-                return Rpcs.getRpcResult(false);
-            }
-            RpcResult<?> bindingResult = result.get();
-            return Rpcs.getRpcResult(true);
-        }
-
-        @Override
-        public ListenableFuture<RpcResult<?>> forwardToDomBroker(final DataObject input) {
-            if (biRpcRegistry == null) {
-                return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
-            }
-
-            CompositeNode xml = mappingService.toDataDom(input);
-            CompositeNode wrappedXml = ImmutableCompositeNode.create(rpc, ImmutableList.<Node<?>> of(xml));
-
-            return Futures.transform(biRpcRegistry.invokeRpc(rpc, wrappedXml),
-                    new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
-                        @Override
-                        public RpcResult<?> apply(final RpcResult<CompositeNode> input) {
-                            return Rpcs.<Void> getRpcResult(input.isSuccessful(), null, input.getErrors());
-                        }
-                    });
         }
     }
 
