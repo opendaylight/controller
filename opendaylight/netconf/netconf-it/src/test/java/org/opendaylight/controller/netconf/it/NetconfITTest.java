@@ -11,7 +11,8 @@ package org.opendaylight.controller.netconf.it;
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -32,21 +33,19 @@ import java.util.concurrent.TimeoutException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.Assert;
-
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
-import org.opendaylight.controller.netconf.StubUserManager;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
@@ -60,11 +59,13 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceSnapshotImpl;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
-import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
-import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
+import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -73,9 +74,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
-
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
@@ -177,7 +176,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
     static List<ModuleFactory> getModuleFactoriesS() {
         return Lists.newArrayList(new TestImplModuleFactory(), new DepTestImplModuleFactory(),
-                new NetconfTestImplModuleFactory());
+                new NetconfTestImplModuleFactory(), new IdentityTestModuleFactory());
     }
 
     @Test
@@ -376,54 +375,35 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         return netconfClient;
     }
 
-    private void startSSHServer() throws Exception {
-        logger.info("Creating SSH server");
-        StubUserManager um = new StubUserManager(USERNAME, PASSWORD);
-        String pem;
-        try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
-            pem = IOUtils.toString(is);
-        }
-        AuthProvider ap = new AuthProvider(um, pem);
-        Thread sshServerThread = new Thread(NetconfSSHServer.start(10830, tcpAddress, ap));
-        sshServerThread.setDaemon(true);
-        sshServerThread.start();
-        logger.info("SSH server on");
-    }
-
     @Test
-    public void sshTest() throws Exception {
-        startSSHServer();
-        logger.info("creating connection");
-        Connection conn = new Connection(sshAddress.getHostName(), sshAddress.getPort());
-        Assert.assertNotNull(conn);
-        logger.info("connection created");
-        conn.connect();
-        boolean isAuthenticated = conn.authenticateWithPassword(USERNAME, PASSWORD);
-        assertTrue(isAuthenticated);
-        logger.info("user authenticated");
-        final Session sess = conn.openSession();
-        sess.startSubSystem("netconf");
-        logger.info("user authenticated");
-        sess.getStdin().write(XmlUtil.toString(this.getConfig.getDocument()).getBytes());
+    public void testIdRef() throws Exception {
+        NetconfMessage editId = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/editConfig_identities.xml");
+        NetconfMessage commit = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/commit.xml");
 
-        new Thread() {
-            @Override
-            public void run() {
-                while (true) {
-                    byte[] bytes = new byte[1024];
-                    int c = 0;
-                    try {
-                        c = sess.getStdout().read(bytes);
-                    } catch (IOException e) {
-                        throw new IllegalStateException("IO exception while reading data on ssh bridge.");
-                    }
-                    logger.info("got data:" + bytes);
-                    if (c == 0) {
-                        break;
-                    }
-                }
-            }
-        }.join();
+        try (TestingNetconfClient netconfClient = createSession(tcpAddress, "1")) {
+            assertIsOK(netconfClient.sendMessage(editId).getDocument());
+            assertIsOK(netconfClient.sendMessage(commit).getDocument());
+
+            NetconfMessage response = netconfClient.sendMessage(getConfig);
+
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</prefix:afi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</prefix:afi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</prefix:safi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</prefix:safi>"));
+
+        } catch (Exception e) {
+            fail(Throwables.getStackTraceAsString(e));
+        }
     }
 
+    @Override
+    protected CodecRegistry getCodecRegistry() {
+        final IdentityCodec<?> codec = mock(IdentityCodec.class);
+        doReturn(TestIdentity1.class).when(codec).deserialize(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(codec).deserialize(TestIdentity2.QNAME);
+
+        final CodecRegistry ret = super.getCodecRegistry();
+        doReturn(codec).when(ret).getIdentityCodec();
+        return ret;
+    }
 }
