@@ -54,7 +54,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
     private static final InstanceIdentifier PUBLIC_ROOT_PATH = InstanceIdentifier.builder().build();
 
-
     private final ListeningExecutorService executor;
     private final String name;
     private final AtomicLong txCounter = new AtomicLong(0);
@@ -104,15 +103,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             final InstanceIdentifier path, final L listener, final DataChangeScope scope) {
 
         /*
-         * Make sure commit is not occurring right now. Listener has to be registered and its
-         * state capture enqueued at a consistent point.
+         * Make sure commit is not occurring right now. Listener has to be
+         * registered and its state capture enqueued at a consistent point.
          *
-         * FIXME: improve this to read-write lock, such that multiple listener registrations
-         *        can occur simultaneously
+         * FIXME: improve this to read-write lock, such that multiple listener
+         * registrations can occur simultaneously
          */
         final DataChangeListenerRegistration<L> reg;
         synchronized (this) {
-            LOG.debug("{}: Registering data change listener {} for {}",name,listener,path);
+            LOG.debug("{}: Registering data change listener {} for {}", name, listener, path);
 
             reg = listenerTree.registerDataChangeListener(path, listener, scope);
 
@@ -138,9 +137,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         };
     }
 
-    private synchronized DOMStoreThreePhaseCommitCohort submit(
-            final SnapshotBackedWriteTransaction writeTx) {
-        LOG.debug("Tx: {} is submitted. Modifications: {}",writeTx.getIdentifier(),writeTx.getMutatedView());
+    private synchronized DOMStoreThreePhaseCommitCohort submit(final SnapshotBackedWriteTransaction writeTx) {
+        LOG.debug("Tx: {} is submitted. Modifications: {}", writeTx.getIdentifier(), writeTx.getMutatedView());
         return new ThreePhaseCommitImpl(writeTx);
     }
 
@@ -148,12 +146,13 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         return name + "-" + txCounter.getAndIncrement();
     }
 
-    private void commit(final DataAndMetadataSnapshot currentSnapshot,
-            final StoreMetadataNode newDataTree, final ResolveDataChangeEventsTask listenerResolver) {
-        LOG.debug("Updating Store snaphot version: {} with version:{}",currentSnapshot.getMetadataTree().getSubtreeVersion(),newDataTree.getSubtreeVersion());
+    private void commit(final DataAndMetadataSnapshot currentSnapshot, final StoreMetadataNode newDataTree,
+            final ResolveDataChangeEventsTask listenerResolver) {
+        LOG.debug("Updating Store snaphot version: {} with version:{}", currentSnapshot.getMetadataTree()
+                .getSubtreeVersion(), newDataTree.getSubtreeVersion());
 
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Data Tree is {}",StoreUtils.toStringTree(newDataTree));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Data Tree is {}", StoreUtils.toStringTree(newDataTree));
         }
 
         final DataAndMetadataSnapshot newSnapshot = DataAndMetadataSnapshot.builder() //
@@ -162,14 +161,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 .build();
 
         /*
-         * The commit has to occur atomically with regard to listener registrations.
+         * The commit has to occur atomically with regard to listener
+         * registrations.
          */
         synchronized (this) {
             final boolean success = snapshot.compareAndSet(currentSnapshot, newSnapshot);
             checkState(success, "Store snapshot and transaction snapshot differ. This should never happen.");
 
             for (ChangeListenerNotifyTask task : listenerResolver.call()) {
-                LOG.trace("Scheduling invocation of listeners: {}",task);
+                LOG.trace("Scheduling invocation of listeners: {}", task);
                 executor.submit(task);
             }
         }
@@ -195,7 +195,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         /**
          * Add class-specific toString attributes.
          *
-         * @param toStringHelper ToStringHelper instance
+         * @param toStringHelper
+         *            ToStringHelper instance
          * @return ToStringHelper instance which was passed in
          */
         protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
@@ -203,13 +204,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
     }
 
-    private static class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements DOMStoreReadTransaction {
+    private static class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements
+            DOMStoreReadTransaction {
         private DataAndMetadataSnapshot stableSnapshot;
 
         public SnapshotBackedReadTransaction(final Object identifier, final DataAndMetadataSnapshot snapshot) {
             super(identifier);
             this.stableSnapshot = Preconditions.checkNotNull(snapshot);
-            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot.getMetadataTree().getSubtreeVersion());
+            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot.getMetadataTree()
+                    .getSubtreeVersion());
         }
 
         @Override
@@ -226,7 +229,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
     }
 
-    private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
+    private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements
+            DOMStoreWriteTransaction {
         private MutableDataTree mutableTree;
         private InMemoryDOMDataStore store;
         private boolean ready = false;
@@ -236,7 +240,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             super(identifier);
             mutableTree = MutableDataTree.from(snapshot, applyOper);
             this.store = store;
-            LOG.debug("Write Tx: {} allocated with snapshot {}",identifier,snapshot.getMetadataTree().getSubtreeVersion());
+            LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot.getMetadataTree()
+                    .getSubtreeVersion());
         }
 
         @Override
@@ -250,11 +255,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
             checkNotReady();
             try {
-                LOG.trace("Tx: {} Write: {}:{}",getIdentifier(),path,data);
+                LOG.trace("Tx: {} Write: {}:{}", getIdentifier(), path, data);
                 mutableTree.write(path, data);
-              // FIXME: Add checked exception
+                // FIXME: Add checked exception
             } catch (Exception e) {
-                LOG.error("Tx: {}, failed to write {}:{} in {}",getIdentifier(),path,data,mutableTree,e);
+                LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             }
         }
 
@@ -262,11 +267,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
             checkNotReady();
             try {
-                LOG.trace("Tx: {} Merge: {}:{}",getIdentifier(),path,data);
+                LOG.trace("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
                 mutableTree.merge(path, data);
-              // FIXME: Add checked exception
+                // FIXME: Add checked exception
             } catch (Exception e) {
-                LOG.error("Tx: {}, failed to write {}:{} in {}",getIdentifier(),path,data,mutableTree,e);
+                LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
             }
         }
 
@@ -274,11 +279,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public void delete(final InstanceIdentifier path) {
             checkNotReady();
             try {
-                LOG.trace("Tx: {} Delete: {}",getIdentifier(),path);
+                LOG.trace("Tx: {} Delete: {}", getIdentifier(), path);
                 mutableTree.delete(path);
-             // FIXME: Add checked exception
+                // FIXME: Add checked exception
             } catch (Exception e) {
-                LOG.error("Tx: {}, failed to delete {} in {}",getIdentifier(),path,mutableTree,e);
+                LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, mutableTree, e);
             }
         }
 
@@ -320,11 +325,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
-            LOG.trace("Tx: {} Read: {}",getIdentifier(),path);
+            LOG.trace("Tx: {} Read: {}", getIdentifier(), path);
             try {
                 return Futures.immediateFuture(getMutatedView().read(path));
             } catch (Exception e) {
-                LOG.error("Tx: {} Failed Read of {}",getIdentifier(),path,e);
+                LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
                 throw e;
             }
         }
@@ -353,9 +358,16 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
                 @Override
                 public Boolean call() throws Exception {
-                    boolean applicable = snapshotOperation.isApplicable(modification,
+                    Boolean applicable = false;
+                    try {
+                        snapshotOperation.checkApplicable(PUBLIC_ROOT_PATH, modification,
                             Optional.of(snapshotCapture.getMetadataTree()));
-                    LOG.debug("Store Transcation: {} : canCommit : {}", transaction.getIdentifier(), applicable);
+                        applicable = true;
+                    } catch (DataPreconditionFailedException e) {
+                        LOG.warn("Store Tx: {} Data Precondition failed for {}.",transaction.getIdentifier(),e.getPath(),e);
+                        applicable = false;
+                    }
+                    LOG.debug("Store Transaction: {} : canCommit : {}", transaction.getIdentifier(), applicable);
                     return applicable;
                 }
             });
@@ -364,12 +376,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         @Override
         public ListenableFuture<Void> preCommit() {
             storeSnapshot = snapshot.get();
-            if(modification.getModificationType() == ModificationType.UNMODIFIED) {
+            if (modification.getModificationType() == ModificationType.UNMODIFIED) {
                 return Futures.immediateFuture(null);
             }
             return executor.submit(new Callable<Void>() {
-
-
 
                 @Override
                 public Void call() throws Exception {
@@ -399,14 +409,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Void> commit() {
-            if(modification.getModificationType() == ModificationType.UNMODIFIED) {
+            if (modification.getModificationType() == ModificationType.UNMODIFIED) {
                 return Futures.immediateFuture(null);
             }
 
-            checkState(proposedSubtree != null,"Proposed subtree must be computed");
-            checkState(storeSnapshot != null,"Proposed subtree must be computed");
+            checkState(proposedSubtree != null, "Proposed subtree must be computed");
+            checkState(storeSnapshot != null, "Proposed subtree must be computed");
             // return ImmediateFuture<>;
-            InMemoryDOMDataStore.this.commit(storeSnapshot, proposedSubtree.get(),listenerResolver);
+            InMemoryDOMDataStore.this.commit(storeSnapshot, proposedSubtree.get(), listenerResolver);
             return Futures.<Void> immediateFuture(null);
         }
 
@@ -421,7 +431,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         }
 
         @Override
-        public boolean isApplicable(final NodeModification modification, final Optional<StoreMetadataNode> storeMetadata) {
+        public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> storeMetadata) {
             throw new IllegalStateException("Schema Context is not available.");
         }
 
