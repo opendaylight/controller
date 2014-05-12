@@ -22,7 +22,6 @@
           <instructions>
             <Import-Package>*</Import-Package>
             <Export-Package>org.eclipse.osgi.framework.console</Export-Package>
-            <Bundle-Activator></Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

@@ -35,7 +35,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -48,7 +47,6 @@
                             org.apache.felix.dm,</Import-Package>
             <Export-Package>org.opendaylight.controller.appauth,
                             org.opendaylight.controller.appauth.authorization</Export-Package>
-            <Bundle-Activator></Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

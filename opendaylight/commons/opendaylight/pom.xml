@@ -22,7 +22,7 @@
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
-    <bundle.plugin.version>2.3.7</bundle.plugin.version>
+    <bundle.plugin.version>2.4.0</bundle.plugin.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.10</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
@@ -1774,14 +1774,14 @@
           </configuration>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
               <groupId>org.codehaus.enunciate</groupId>
               <artifactId>enunciate-swagger</artifactId>
               <version>${enunciate.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>commons.logback_settings</artifactId>
+              <version>0.0.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
