@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Giovanni Meo <gmeo@cisco.com>
+Code-Review+1: Robert Varga <rovarga@cisco.com>
+Submitted-by: Giovanni Meo <gmeo@cisco.com>
+Submitted-at: Mon, 12 May 2014 13:53:28 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/6883
+Project: controller
+Branch: refs/heads/master
