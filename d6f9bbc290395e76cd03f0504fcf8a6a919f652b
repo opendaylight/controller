@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_41891a25",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-12T16:00:43Z",
+      "side": 1,
+      "message": "The problem is that BrokerFacade INSTANCE is accessed in RestConfApplication which is somehow hooked into JAXRS and it doesn\u0027t have access to the dependencies. The RestConfProvider bundle activator is where the dependencies are wired up. \n\nI\u0027m new to this code so not (yet) familiar with the rationale behind it\u0027s overall design. I basically just took the java-generated file and cleaned up the obfuscated code to make it more readable. I think changing the overall design and wiring is out of scope of this bug. I\u0027d personally prefer it to use blueprint....",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_86be58fe",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 2
@@ -36,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_618e9e30",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-12T16:00:43Z",
+      "side": 1,
+      "message": "The getters are used internally in checkPreconditions. They don\u0027t need to be - they\u0027re remnants of the xtend code generation. I can remove the setters if you want.",
+      "parentUuid": "fa82b9bf_86be58fe",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e6c16481",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 2
@@ -47,6 +82,24 @@
       "writtenOn": "2014-05-11T17:12:52Z",
       "side": 1,
       "message": "Please do not use sneakyThrow -- declare the exceptions or use IllegalStateException.",
+      "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_41903a43",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-12T16:00:43Z",
+      "side": 1,
+      "message": "You\u0027re right - missed this one. I\u0027ll change it to throw unchecked  ResponseException. Not sure if that\u0027s ideal but  ResponseException is already thrown in other places (also in ControllerContext).",
+      "parentUuid": "fa82b9bf_e6c16481",
       "revId": "d6f9bbc290395e76cd03f0504fcf8a6a919f652b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
