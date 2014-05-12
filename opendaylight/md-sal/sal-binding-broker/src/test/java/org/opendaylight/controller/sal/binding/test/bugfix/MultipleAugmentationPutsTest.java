@@ -48,7 +48,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-public class MultipleAugmentationPuts extends AbstractDataServiceTest implements DataChangeListener {
+public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final String NODE_ID = "openflow:1";
@@ -74,10 +74,10 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
 
     /**
      * Test for Bug 148
-     * 
+     *
      * @throws Exception
      */
-    @Test
+    @Test( timeout = 15000)
     public void testAugmentSerialization() throws Exception {
 
         baDataService.registerDataChangeListener(NODES_INSTANCE_ID_BA, this);
@@ -111,12 +111,12 @@ public class MultipleAugmentationPuts extends AbstractDataServiceTest implements
 //        Node meterStatsNodeWithDuration = createTestNode(NodeMeterStatistics.class, nodeMeterStatistics(5, true));
 //        commitNodeAndVerifyTransaction(meterStatsNodeWithDuration);
 //
-//        
+//
 //        Node nodeWithUpdatedList = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
 //        AugmentationVerifier.from(nodeWithUpdatedList) //
 //                .assertHasAugmentation(FlowCapableNode.class) //
 //                .assertHasAugmentation(NodeMeterStatistics.class);
-//        
+//
 //        List<MeterStats> meterStats = nodeWithUpdatedList.getAugmentation(NodeMeterStatistics.class).getMeterStatistics().getMeterStats();
 //        assertNotNull(meterStats);
 //        assertFalse(meterStats.isEmpty());
