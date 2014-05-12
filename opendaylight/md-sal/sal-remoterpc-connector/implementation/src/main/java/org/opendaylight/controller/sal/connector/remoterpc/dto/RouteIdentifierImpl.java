@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc.dto;
 
+import java.io.Serializable;
+
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-import java.io.Serializable;
-
 public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, InstanceIdentifier>,Serializable {
+  private static final long serialVersionUID = 1L;
 
   private QName context;
   private QName type;

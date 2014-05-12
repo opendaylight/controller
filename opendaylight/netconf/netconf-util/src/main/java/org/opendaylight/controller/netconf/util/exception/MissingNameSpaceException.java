@@ -7,20 +7,21 @@
  */
 package org.opendaylight.controller.netconf.util.exception;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-
 import java.util.Collections;
 import java.util.Map;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+
 public class MissingNameSpaceException extends NetconfDocumentedException {
+    private static final long serialVersionUID = 1L;
 
     public MissingNameSpaceException(final String message, final ErrorType errorType, final ErrorTag errorTag,
-                                      final ErrorSeverity errorSeverity) {
+                                     final ErrorSeverity errorSeverity) {
         this(message, errorType, errorTag, errorSeverity, Collections.<String, String> emptyMap());
     }
 
     public MissingNameSpaceException(final String message, final ErrorType errorType, final ErrorTag errorTag,
-                                      final ErrorSeverity errorSeverity, final Map<String, String> errorInfo){
+                                     final ErrorSeverity errorSeverity, final Map<String, String> errorInfo){
         super(message,errorType,errorTag,errorSeverity,errorInfo);
     }
 }

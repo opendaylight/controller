@@ -49,12 +49,8 @@ public class DataNormalizerTest {
 
         InstanceIdentifier normalizedPath = normalizer.toNormalized(LEAF_TWO_PATH_LEGACY);
 
-        Node<?> outerListLegacy = normalizer.toLegacy(OUTER_LIST_WITH_CHOICE);
+        Node<?> outerListLegacy = DataNormalizer.toLegacy(OUTER_LIST_WITH_CHOICE);
         assertNotNull(outerListLegacy);
-
-
-
-
     }
 
 }

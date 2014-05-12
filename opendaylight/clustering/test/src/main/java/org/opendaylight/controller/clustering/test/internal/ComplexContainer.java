@@ -12,9 +12,10 @@ package org.opendaylight.controller.clustering.test.internal;
 import java.io.Serializable;
 
 public class ComplexContainer implements Serializable {
-    private IComplex f;
-    private IComplex f1;
-    private Integer state;
+    private static final long serialVersionUID = 1L;
+    private final IComplex f;
+    private final IComplex f1;
+    private final Integer state;
 
     public ComplexContainer(String i, Integer s) {
         this.state = s;

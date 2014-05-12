@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.netconf.confignetconfconnector.exception;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-
 import java.util.Collections;
 import java.util.Map;
 
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+
 public class NoTransactionFoundException extends NetconfDocumentedException {
+    private static final long serialVersionUID = 1L;
 
     public NoTransactionFoundException(final String message, final ErrorType errorType, final ErrorTag errorTag,
                                           final ErrorSeverity errorSeverity) {

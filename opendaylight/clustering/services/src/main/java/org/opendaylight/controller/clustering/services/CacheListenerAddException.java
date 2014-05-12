@@ -21,6 +21,7 @@ package org.opendaylight.controller.clustering.services;
  * Listener being added fails for any reason
  */
 public class CacheListenerAddException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Instantiates a new cache listener add exception.
