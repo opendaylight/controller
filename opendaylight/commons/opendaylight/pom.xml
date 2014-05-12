@@ -22,6 +22,7 @@
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
+    <branding.version>1.0.0-SNAPSHOT</branding.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.10</checkstyle.version>
