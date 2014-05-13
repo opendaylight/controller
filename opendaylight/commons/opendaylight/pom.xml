@@ -43,7 +43,7 @@
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
-    <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
+    <forwardingrulesmanager.version>0.5.1-SNAPSHOT</forwardingrulesmanager.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
     <guava.version>14.0.1</guava.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
