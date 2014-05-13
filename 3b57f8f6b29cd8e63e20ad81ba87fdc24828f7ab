@@ -16,6 +16,24 @@
       "revId": "3b57f8f6b29cd8e63e20ad81ba87fdc24828f7ab",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93d8d91e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-13T13:18:20Z",
+      "side": 1,
+      "message": "Can you clarify? URLEncoder/URLDecoder don\u0027t have equivalent methods that take a CharSet. I don\u0027t see equivalent classes in guava.",
+      "parentUuid": "fa82b9bf_132cc946",
+      "revId": "3b57f8f6b29cd8e63e20ad81ba87fdc24828f7ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
