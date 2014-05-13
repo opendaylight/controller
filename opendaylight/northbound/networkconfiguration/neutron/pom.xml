@@ -10,6 +10,9 @@
   <artifactId>networkconfig.neutron.northbound</artifactId>
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <properties>
+    <enunciate.version>1.26.2</enunciate.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -80,6 +83,16 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
+        <configuration>
+          <configFile>enunciate.xml</configFile>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>docs</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

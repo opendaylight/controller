@@ -11,17 +11,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.sal.core.Property;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.opendaylight.controller.sal.core.Property;
 
 /**
  * The class describes set of properties attached to a controller
@@ -31,12 +29,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ControllerProperties {
 
+    @XmlElementRef
+    @XmlElementWrapper
+    @JsonIgnore
     /**
      * Set to store the controller properties
      */
-    @XmlElement(name="property")
-    @XmlElementWrapper
-    @JsonIgnore
     private Set<Property> properties;
 
     // JAXB required constructor

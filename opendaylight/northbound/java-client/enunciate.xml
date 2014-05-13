@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.28.xsd">
+    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
 
   <services> </services>
 
   <modules>
     <!-- Disable doc generation -->
     <docs disabled="true"/>
-    <swagger disabled="true"/>
+
     <!-- Disable all the client generation tools -->
     <basic-app disabled="true" />
     <c disabled="true" />
