@@ -61,10 +61,6 @@
 	 -->
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
-
-    <!--  Karaf feature -->
-    <module>feature</module>
-
   </modules>
 
   <build>
