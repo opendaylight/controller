@@ -71,7 +71,7 @@ public class ControllerCustomRealm  extends RealmBase {
                     || result.equals(AuthResultEnum.AUTH_ACCEPT)) {
                 return this.getPrincipal(username);
             } else {
-                logger.debug("Authentication failed for user " + username);
+                logger.error("Authentication failed for user " + username);
                 return null;
             }
         } else {
