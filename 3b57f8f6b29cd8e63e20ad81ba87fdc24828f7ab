@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_132cc946",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-13T09:34:38Z",
+      "side": 1,
+      "message": "Can we use com.google.common.base.Charsets.ISO_8859_1? That should eliminate a few exceptions in the code below...",
+      "revId": "3b57f8f6b29cd8e63e20ad81ba87fdc24828f7ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
