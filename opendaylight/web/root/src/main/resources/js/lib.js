@@ -27,15 +27,15 @@ one.lib.dashlet = {
         return $h4;
     },
     label : function(name, type) {
-        var $span = $(document.createElement('span'));
-        $span.addClass('label');
-        if (type !== undefined) {
-            $span.addClass(type);
-        } else if (type !== null) {
-            $span.addClass('label-info');
-        }
-        $span.append(name);
-        return $span;
+    	var $span = $(document.createElement('span'));
+    	$span.addClass('label');
+    	if (type !== undefined) {
+    		$span.addClass(type);
+    	} else if (type !== null) {
+    		$span.addClass('label-info');
+    	}
+    	$span.append(name);
+    	return $span;
     },
     list : function(list) {
         var $ul = $(document.createElement('ul'));
@@ -381,7 +381,6 @@ one.lib.helper = {
             parseFloat(value) : ''
     }
 }
-
 
 /** ALERT */
 one.lib.alert = function(alert) {
