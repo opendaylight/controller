@@ -1,4 +1,4 @@
-<infinispan>
+<infinispan xsi:schemaLocation="urn:infinispan:config:5.3 http://www.infinispan.org/schemas/infinispan-config-5.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:infinispan:config:5.3">
   <global>
     <transport>
       <properties>
@@ -11,14 +11,18 @@
         jmxDomain="org.infinispan"
         cacheManagerName="SampleCacheManager"/>
   </global>
-
- <default>
+  <default>
+    <!-- Configure a synchronous replication cache -->
+    <clustering mode="replication">
+      <sync/>
+    </clustering>
+    <!--
+        Used to register JMX statistics in any available MBean server
+    -->
     <jmxStatistics enabled="true"/>
-        <clustering mode="replication">
-        <sync/>
-        </clustering>
-        </default>
- <namedCache name="transactional-type">
+  </default>
+  <!-- transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup" -->
+  <namedCache name="transactional-type">
     <transaction
         transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup"
         syncRollbackPhase="true"
@@ -27,13 +31,8 @@
         use1PcForAutoCommitTransactions="true"
         autoCommit="true"
         lockingMode="OPTIMISTIC"
-        useEagerLocking="true"
         useSynchronization="true"
         transactionMode="TRANSACTIONAL"
         />
-        <clustering mode="replication">
-        <sync/>
-        </clustering>
   </namedCache>
-
 </infinispan>

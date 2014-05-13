@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>clustering.services-implementation</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
+  <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <properties>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.infinispan</groupId>
       <artifactId>infinispan-core</artifactId>
-      <version>6.0.2.Final</version>
+      <version>5.3.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.jbossts.jta</groupId>
@@ -87,7 +87,7 @@
             <!-- why those dependencies ends in the DynamicImport-Package -->
             <!-- rather in the Import-Package -->
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Embed-Dependency>infinispan-core,infinispan-commons,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
@@ -110,7 +110,7 @@
                     <exclude>org.infinispan:infinispan-core:*</exclude>
                   </excludes>
                   <includes>
-                    <include>org.infinispan:infinispan-core:[6.0.2.Final]</include>
+                    <include>org.infinispan:infinispan-core:[5.3.0.Final]</include>
                   </includes>
                 </bannedDependencies>
               </rules>
