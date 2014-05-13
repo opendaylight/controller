@@ -397,6 +397,85 @@ public class SwitchNorthbound {
     }
 
     /**
+     * Get a property of a node
+     *
+     * @param containerName
+     *            Name of the Container (Eg. 'SliceRed')
+     * @param nodeType
+     *            Type of the node being programmed (Eg. 'OF')
+     * @param nodeId
+     *            Node Identifier as specified by
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:03:01:02')
+     * @param propertyName
+     *            Name of the Property. Properties that can be deleted are
+     *            description, forwarding(only in default container) and tier.
+     * @return Property value of the property
+     *
+     *         <pre>
+     *
+     * Example:
+     *
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/node/OF/00:00:00:00:00:00:00:01/property/description
+     *
+     * Response body in XML
+     * &lt;description&gt;
+     *     &#x20;&#x20;&lt;value&gt;switch1&lt;/value&gt;
+     * &lt;/description&gt;
+     *
+     * Response body in JSON
+     * {
+     *     &#x20;&#x20;"value": "switch1"
+     * }
+     * </pre>
+     */
+
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/property/{propertyName}")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @TypeHint(String.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Property getNodeProperty(@PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+            @PathParam("propertyName") String propertyName) {
+
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
+        }
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        handleNodeAvailability(containerName, nodeType, nodeId);
+        Node node = Node.fromString(nodeType, nodeId);
+        if (node == null) {
+            throw new ResourceNotFoundException(nodeId + " : " + RestMessages.NONODE.toString());
+        }
+        SwitchConfig switchConfig = switchManager.getSwitchConfig(node.toString());
+        if (switchConfig == null) {
+            throw new ResourceNotFoundException(nodeId + " : " + "Config Not Found" );
+        } else {
+            Map<String, Property> nodeProperties = new HashMap<String, Property>(switchConfig.getNodeProperties());
+            if (!nodeProperties.containsKey(propertyName.toLowerCase())) {
+                String msg = "Property " + propertyName + " does not exist or not "
+                        + "configured for switch " + nodeId;
+                throw new ResourceNotFoundException(msg);
+            } else {
+                return nodeProperties.get(propertyName.toLowerCase());
+            }
+        }
+    }
+
+    /**
      *
      * Retrieve a list of all the nodeconnectors and their properties in a given
      * node
