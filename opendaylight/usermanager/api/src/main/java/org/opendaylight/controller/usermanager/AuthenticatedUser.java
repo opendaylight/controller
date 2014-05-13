@@ -10,7 +10,6 @@ package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class AuthenticatedUser implements Serializable {
     }
 
     public List<String> getUserRoles() {
-        return userRoles == null ? Collections.<String> emptyList() : new ArrayList<String>(userRoles);
+        return userRoles;
     }
 
     public void addUserRole(String string) {
