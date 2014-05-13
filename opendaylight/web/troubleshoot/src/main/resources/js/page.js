@@ -374,11 +374,6 @@ one.f.troubleshooting.existingNodes = {
                             sortable: true
                         },
                         {
-                            property: 'nwTOS',
-                            label: 'ToS Bits',
-                            sortable: true
-                        },
-                        {
                             property: 'nwProto',
                             label: 'NW Proto',
                             sortable: true
@@ -442,7 +437,6 @@ one.f.troubleshooting.existingNodes = {
                     entry.push(value["dlVlan"]);
                     entry.push(value["nwSrc"]);
                     entry.push(value["nwDst"]);
-                    entry.push(value["nwTOS"]);
                     entry.push(value["nwProto"]);
                     entry.push(value["tpSrc"]);
                     entry.push(value["tpDst"]);
