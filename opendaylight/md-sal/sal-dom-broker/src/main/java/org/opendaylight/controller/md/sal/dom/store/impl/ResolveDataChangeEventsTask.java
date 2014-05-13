@@ -327,12 +327,12 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
             final Collection<Node> listeners, final NormalizedNode<?, ?> beforeData,
             final NormalizedNode<?, ?> afterData) {
 
-        if (beforeData instanceof NormalizedNodeContainer<?, ?, ?> && !listeners.isEmpty()) {
+        if (beforeData instanceof NormalizedNodeContainer<?, ?, ?>) {
             // Node is container (contains child) and we have interested
             // listeners registered for it, that means we need to do
             // resolution of changes on children level and can not
             // shortcut resolution.
-
+            LOG.trace("Resolving subtree replace event for {} before {}, after {}",path,beforeData,afterData);
             @SuppressWarnings("unchecked")
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) beforeData;
             @SuppressWarnings("unchecked")
@@ -342,7 +342,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
             // Node is either of Leaf type (does not contain child nodes)
             // or we do not have listeners, so normal equals method is
             // sufficient for determining change.
-
+            LOG.trace("Resolving leaf replace event for {} , before {}, after {}",path,beforeData,afterData);
             DOMImmutableDataChangeEvent event = builder(DataChangeScope.BASE).setBefore(beforeData).setAfter(afterData)
                     .addUpdated(path, beforeData, afterData).build();
             addPartialTask(listeners, event);
@@ -447,12 +447,13 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
     private DOMImmutableDataChangeEvent resolveSameEventRecursivelly(final InstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<PathArgument, ?> node,
             final SimpleEventFactory eventFactory) {
-
         final DOMImmutableDataChangeEvent event = eventFactory.create(path, node);
         DOMImmutableDataChangeEvent propagateEvent = event;
-            // We have listeners for this node or it's children, so we will try
+        // We have listeners for this node or it's children, so we will try
             // to do additional processing
         if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
+            LOG.trace("Resolving subtree recursive event for {}, type {}", path, eventFactory);
+
             Builder eventBuilder = builder(DataChangeScope.BASE);
             eventBuilder.merge(event);
             eventBuilder.setBefore(event.getOriginalSubtree());
@@ -464,6 +465,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
             for (NormalizedNode<PathArgument, ?> child : container.getValue()) {
                 PathArgument childId = child.getIdentifier();
+                LOG.trace("Resolving event for child {}", childId);
                 Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
                 eventBuilder.merge(resolveSameEventRecursivelly(append(path, childId), childListeners, child, eventFactory));
             }
@@ -473,7 +475,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
             propagateEvent = builder(DataChangeScope.BASE).build();
         }
         if (!listeners.isEmpty()) {
-            addPartialTask(listeners, event);
+            addPartialTask(listeners, propagateEvent);
         }
         return propagateEvent;
     }
@@ -521,9 +523,9 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
 
     private DOMImmutableDataChangeEvent addPartialTask(final Collection<ListenerTree.Node> listeners,
             final DOMImmutableDataChangeEvent event) {
-
         for (ListenerTree.Node listenerNode : listeners) {
             if (!listenerNode.getListeners().isEmpty()) {
+                LOG.trace("Adding event {} for listeners {}",event,listenerNode);
                 events.put(listenerNode, event);
             }
         }
