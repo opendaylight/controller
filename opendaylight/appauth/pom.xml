@@ -14,10 +14,6 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>configuration</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
     </dependency>
     <dependency>
@@ -39,8 +35,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.opendaylight.controller.configuration,
-                            org.opendaylight.controller.containermanager,
+            <Import-Package>org.opendaylight.controller.containermanager,
                             org.opendaylight.controller.sal.authorization,
                             org.opendaylight.controller.sal.utils,
                             org.opendaylight.controller.usermanager,
@@ -54,10 +49,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-  </scm>
 </project>

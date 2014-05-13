@@ -123,8 +123,8 @@ public class SwitchConfig extends ConfigurationObject implements Cloneable, Seri
     }
 
     private Status validateNodeId() {
-        if (nodeId == null || nodeId.trim().isEmpty()) {
-            return new Status(StatusCode.BADREQUEST, "Invalid node id");
+        if (nodeId == null || nodeId.isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "NodeId cannot be empty");
         }
         return new Status(StatusCode.SUCCESS);
     }
