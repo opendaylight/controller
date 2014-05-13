@@ -18,6 +18,10 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-netty-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>netconf-util</artifactId>
     </dependency>
     <dependency>
@@ -54,8 +58,8 @@
                             javax.xml.parsers,
                             javax.xml.xpath,
                             org.opendaylight.controller.netconf.api,
-                            org.opendaylight.controller.netconf.util,
                             org.opendaylight.controller.netconf.util.*,
+                            org.opendaylight.controller.netconf.nettyutil.*,
                             org.opendaylight.protocol.framework,
                             org.openexi.*,
                             org.slf4j,

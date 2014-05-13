@@ -14,21 +14,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
-
 import java.util.Queue;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.handler.ChunkedFramingMechanismEncoder;
-import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
-import org.opendaylight.controller.netconf.util.handler.NetconfChunkAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfEOMAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.ChunkedFramingMechanismEncoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.FramingMechanismHandlerFactory;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfChunkAggregator;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEOMAggregator;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;

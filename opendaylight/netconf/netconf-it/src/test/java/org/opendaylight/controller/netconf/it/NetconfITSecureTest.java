@@ -14,6 +14,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import ch.ethz.ssh2.Connection;
+import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,9 +25,7 @@ import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
-
 import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,20 +45,16 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
-import org.opendaylight.controller.netconf.util.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-
-import ch.ethz.ssh2.Connection;
-import io.netty.channel.ChannelFuture;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 

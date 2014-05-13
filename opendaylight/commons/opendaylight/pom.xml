@@ -188,6 +188,11 @@
         <version>${netconf.version}</version>
       </dependency>
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>netconf-netty-util</artifactId>
+        <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
@@ -1774,14 +1779,14 @@
           </configuration>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.controller</groupId>
-              <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
               <groupId>org.codehaus.enunciate</groupId>
               <artifactId>enunciate-swagger</artifactId>
               <version>${enunciate.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>commons.logback_settings</artifactId>
+              <version>0.0.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
