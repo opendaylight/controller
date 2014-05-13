@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
-import org.ops4j.pax.exam.util.PathUtils;
-
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.util.PathUtils;
 
 public class TestHelper {
 
@@ -68,6 +68,7 @@ public class TestHelper {
 
                 mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "netconf-netty-util").versionAsInProject(), //
                 mavenBundle("org.openexi", "nagasena").versionAsInProject(), //
                 mavenBundle("org.openexi", "nagasena-rta").versionAsInProject(), //
                 mavenBundle(CONTROLLER + ".thirdparty", "ganymed").versionAsInProject(), //

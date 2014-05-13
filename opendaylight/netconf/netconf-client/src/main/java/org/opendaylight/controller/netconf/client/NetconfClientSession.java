@@ -8,18 +8,16 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import io.netty.channel.Channel;
 import java.util.Collection;
-
-import org.opendaylight.controller.netconf.util.AbstractNetconfSession;
-import org.opendaylight.controller.netconf.util.handler.NetconfEXICodec;
-import org.opendaylight.controller.netconf.util.handler.NetconfEXIToMessageDecoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageToEXIEncoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageToXMLEncoder;
-import org.opendaylight.controller.netconf.util.handler.NetconfXMLToMessageDecoder;
+import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSession;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToEXIEncoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToXMLEncoder;
+import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.netty.channel.Channel;
 
 public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 

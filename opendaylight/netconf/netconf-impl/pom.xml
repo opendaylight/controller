@@ -32,6 +32,10 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-netty-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>netconf-util</artifactId>
     </dependency>
     <dependency>
@@ -125,19 +129,13 @@
                             org.opendaylight.controller.netconf.api,
                             org.opendaylight.controller.netconf.api.jmx,
                             org.opendaylight.controller.netconf.mapping.api,
-                            org.opendaylight.controller.netconf.util,
-                            org.opendaylight.controller.netconf.util.mapping,
-                            org.opendaylight.controller.netconf.util.osgi,
-                            org.opendaylight.controller.netconf.util.xml,
-                            org.opendaylight.controller.netconf.util.exception,
-                            org.opendaylight.controller.netconf.util.handler,
+                            org.opendaylight.controller.netconf.util.*,
                             org.opendaylight.protocol.framework,
                             org.osgi.framework,
                             org.osgi.util.tracker,
                             org.slf4j,
                             org.w3c.dom,
                             org.xml.sax,
-                            org.opendaylight.controller.netconf.util.messages,
                             io.netty.util.internal,
                             org.opendaylight.controller.netconf.api.monitoring,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
@@ -148,7 +146,8 @@
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.extension.rev131210,
                             org.opendaylight.yangtools.yang.binding,
-                            org.openexi.*,</Import-Package>
+                            org.openexi.*,
+                            org.opendaylight.controller.netconf.nettyutil.*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

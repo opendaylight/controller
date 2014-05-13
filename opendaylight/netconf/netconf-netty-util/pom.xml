@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>netconf-subsystem</artifactId>
+    <version>0.2.5-SNAPSHOT</version>
+  </parent>
+  <artifactId>netconf-netty-util</artifactId>
+  <packaging>bundle</packaging>
+  <name>${project.artifactId}</name>
+
+  <dependencies>
+    <!-- compile dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-mapping-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>protocol-framework</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>ganymed</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openexi</groupId>
+      <artifactId>nagasena-rta</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xmlunit</groupId>
+      <artifactId>xmlunit</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Import-Package>ch.ethz.ssh2, com.google.common.base, com.google.common.collect, io.netty.buffer,
+              io.netty.channel, io.netty.channel.socket, io.netty.handler.codec, io.netty.handler.ssl, io.netty.util,
+              io.netty.util.concurrent, javax.xml.transform, javax.xml.transform.dom, javax.xml.transform.sax,
+              javax.xml.transform.stream, org.opendaylight.controller.netconf.api,
+              org.opendaylight.controller.netconf.util.messages, org.opendaylight.controller.netconf.util.xml,
+              org.opendaylight.protocol.framework, org.openexi.proc, org.openexi.proc.common, org.openexi.proc.grammars,
+              org.openexi.sax, org.openexi.schema, org.slf4j, org.w3c.dom, org.xml.sax</Import-Package>
+            <Export-Package>org.opendaylight.controller.netconf.nettyutil,
+              org.opendaylight.controller.netconf.nettyutil.handler,
+              org.opendaylight.controller.netconf.nettyutil.handler.exi,
+              org.opendaylight.controller.netconf.nettyutil.handler.ssh,
+              org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication,
+              org.opendaylight.controller.netconf.nettyutil.handler.ssh.client</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
