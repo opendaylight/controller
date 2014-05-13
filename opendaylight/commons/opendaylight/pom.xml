@@ -77,7 +77,7 @@
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
-    <jackson.version>2.3.2</jackson.version>
+    <jackson.version>2.3.0</jackson.version>
     <jacoco.version>0.6.2.201302030002</jacoco.version>
     <jar.plugin.version>2.4</jar.plugin.version>
     <java.version.source>1.7</java.version.source>
@@ -109,7 +109,6 @@
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
-    <org.json.version>20080701</org.json.version>
     <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
     <osgi.compendium.version>5.0.0</osgi.compendium.version>
     <osgi.core.version>5.0.0</osgi.core.version>
@@ -208,12 +207,6 @@
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-json-org</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-base</artifactId>
         <version>${jackson.version}</version>
@@ -253,6 +246,11 @@
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-core</artifactId>
         <version>${jersey.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
         <groupId>com.sun.jersey</groupId>
@@ -430,11 +428,6 @@
         <groupId>io.netty</groupId>
         <artifactId>netty-transport</artifactId>
         <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
-        <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
         <groupId>orbit</groupId>
@@ -617,11 +610,6 @@
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-osgi</artifactId>
         <version>${jolokia.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>${org.json.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1096,11 +1084,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-rest-docgen</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-restconf-broker</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1425,11 +1408,6 @@
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-model-util</artifactId>
-        <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-parser-api</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
       <dependency>
