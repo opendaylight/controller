@@ -89,7 +89,7 @@
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
-    <sal.version>0.8.1-SNAPSHOT</sal.version>
+    <sal.version>0.7.1-SNAPSHOT</sal.version>
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
     <samples.loadbalancer>0.5.2-SNAPSHOT</samples.loadbalancer>
     <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
