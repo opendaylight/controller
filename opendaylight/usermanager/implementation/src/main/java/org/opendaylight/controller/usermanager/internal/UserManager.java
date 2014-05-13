@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -53,7 +52,6 @@ import org.opendaylight.controller.usermanager.UserConfig;
 import org.opendaylight.controller.usermanager.security.SessionManager;
 import org.opendaylight.controller.usermanager.security.UserSecurityContextRepository;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +79,6 @@ public class UserManager implements IUserManager, IObjectReader,
     private static final String SERVERS_FILE_NAME = "servers.conf";
     private static final String AUTH_FILE_NAME = "authorization.conf";
     private static final String RECOVERY_FILE = "NETWORK_ADMIN_PASSWORD_RECOVERY";
-    private static final boolean DISALLOW_DEFAULT_ADMIN_PASSWORD =
-        Boolean.getBoolean("usermanager.disable-default-admin-password");
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
     // local authorization info for remotely authenticated users
@@ -99,8 +95,8 @@ public class UserManager implements IUserManager, IObjectReader,
         ADD("add", "added"),
         MODIFY("modify", "modified"),
         REMOVE("remove", "removed");
-        private final String action;
-        private final String postAction;
+        private String action;
+        private String postAction;
         private Command(String action, String postAction) {
             this.action = action;
             this.postAction = postAction;
@@ -216,94 +212,46 @@ public class UserManager implements IUserManager, IObjectReader,
 
     }
 
-    private void checkDefaultNetworkAdmin(String newPass) {
-        boolean usingFactoryPassword = false;
-        // network admin already configured.
-        if (localUserConfigList.containsKey(DEFAULT_ADMIN)) {
-            UserConfig uc =  localUserConfigList.get(DEFAULT_ADMIN);
-            if (!uc.isPasswordMatch(DEFAULT_ADMIN_PASSWORD)) {
-                return;
-            } else {
-                usingFactoryPassword = true;
-            }
-        }
-
-        List<String> defaultRoles = new ArrayList<String>(1);
-        defaultRoles.add(DEFAULT_ADMIN_ROLE);
-        if (newPass == null) {
-            if (!localUserConfigList.containsKey(DEFAULT_ADMIN)) {
-              // Need to skip the strong password check for the default admin
-                UserConfig defaultAdmin = UserConfig.getUncheckedUserConfig(
-                    UserManager.DEFAULT_ADMIN, UserManager.DEFAULT_ADMIN_PASSWORD,
-                    defaultRoles);
-                localUserConfigList.put(UserManager.DEFAULT_ADMIN, defaultAdmin);
-                usingFactoryPassword = true;
-            }
-        } else {
-            // use new password for admin
-            Status status = UserConfig.validateClearTextPassword(newPass);
-            if (status.isSuccess()) {
-                localUserConfigList.put(UserManager.DEFAULT_ADMIN,
-                    new UserConfig(UserManager.DEFAULT_ADMIN, newPass, defaultRoles));
-                logger.trace("Network Adminstrator password is reset.");
-                if (newPass.equals(DEFAULT_ADMIN_PASSWORD)) {
-                    usingFactoryPassword = true;
-                }
-            } else {
-                logger.warn("Password is invalid - {}. Network Adminstrator password " +
-                    "cannot be set.", status.getDescription());
-            }
-        }
-
-        if (usingFactoryPassword) {
-            if (DISALLOW_DEFAULT_ADMIN_PASSWORD) {
-                logger.warn("Network Administrator factory default password " +
-                    "is disallowed. Please set the password prior to starting " +
-                    "the controller. Shutting down now.");
-                // shutdown osgi
-                try {
-                    BundleContext bundleContext = FrameworkUtil.getBundle(
-                        getClass()).getBundleContext();
-                    bundleContext.getBundle(0).stop();
-                } catch (BundleException e) {
-                    logger.warn("Cannot stop framework ", e);
-                }
-            } else {
-                logger.warn("Network Administrator password is set to factory default. " +
-                    "Please change the password as soon as possible.");
-            }
+    private void checkDefaultNetworkAdmin() {
+        /*
+         * If startup config is not there, it's old or it was deleted or if a
+         * password recovery was run, need to add Default Network Admin User
+         */
+        if (!localUserConfigList.containsKey(DEFAULT_ADMIN)) {
+            List<String> roles = new ArrayList<String>(1);
+            roles.add(DEFAULT_ADMIN_ROLE);
+            // Need to skip the strong password check for the default admin
+            UserConfig defaultAdmin = UserConfig.getUncheckedUserConfig(UserManager.DEFAULT_ADMIN,
+                    UserManager.DEFAULT_ADMIN_PASSWORD, roles);
+            localUserConfigList.put(UserManager.DEFAULT_ADMIN, defaultAdmin);
         }
     }
 
-    private String checkPasswordRecovery() {
+    private void checkPasswordRecovery() {
         final String fileDescription = "Default Network Administrator password recovery file";
-        File recoveryFile = new File(UserManager.RECOVERY_FILE);
-        if (!recoveryFile.exists()) return null;
-        // read the recovery file
-        String pwd = null;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(recoveryFile));
-            // read password from recovery file if it has one
-            pwd = reader.readLine();
-            if (pwd != null && pwd.trim().length() == 0) {
-                pwd = null;
-            }
-            reader.close();
+            FileInputStream fis = new FileInputStream(UserManager.RECOVERY_FILE);
             /*
              * Recovery file detected, remove current default network
              * administrator entry from local users configuration list.
              * Warn user and delete recovery file.
              */
             this.localUserConfigList.remove(UserManager.DEFAULT_ADMIN);
-            if (!recoveryFile.delete()) {
+            logger.info("Default Network Administrator password has been reset to factory default.");
+            logger.info("Please change the default Network Administrator password as soon as possible");
+            File filePointer = new File(UserManager.RECOVERY_FILE);
+            boolean status = filePointer.delete();
+            if (!status) {
                 logger.warn("Failed to delete {}", fileDescription);
             } else {
                 logger.trace("{} deleted", fileDescription);
             }
+            fis.close();
+        } catch (FileNotFoundException fnf) {
+            logger.trace("{} not present", fileDescription);
         } catch (IOException e) {
-            logger.warn("Failed to process file {}", fileDescription);
+            logger.warn("Failed to close file stream for {}", fileDescription);
         }
-        return pwd;
     }
 
     @Override
@@ -347,20 +295,20 @@ public class UserManager implements IUserManager, IObjectReader,
         if (!remotelyAuthenticated) {
             UserConfig localUser = this.localUserConfigList.get(userName);
             if (localUser == null) {
-                logger.trace(
+                logger.info(
                         "Local Authentication Failed for User:\"{}\", Reason: "
                                 + "user not found in Local Database", userName);
                 return (AuthResultEnum.AUTH_INVALID_LOC_USER);
             }
             rcResponse = localUser.authenticate(password);
             if (rcResponse.getStatus() != AuthResultEnum.AUTH_ACCEPT_LOC) {
-                logger.trace(
+                logger.info(
                         "Local Authentication Failed for User: \"{}\", Reason: {}",
                         userName, rcResponse.getStatus().toString());
 
                 return (rcResponse.getStatus());
             }
-            logger.trace("Local Authentication Succeeded for User: \"{}\"",
+            logger.info("Local Authentication Succeeded for User: \"{}\"",
                     userName);
         }
 
@@ -388,16 +336,16 @@ public class UserManager implements IUserManager, IObjectReader,
          * data to the rcResponse
          */
         if (remotelyAuthenticated && !authorizationInfoIsPresent) {
-            logger.trace(
+            logger.info(
                     "No Remote Authorization Info provided by Server for User: \"{}\"",
                     userName);
-            logger.trace(
+            logger.info(
                     "Looking for Local Authorization Info for User: \"{}\"",
                     userName);
 
             AuthorizationConfig resource = authorizationConfList.get(userName);
             if (resource != null) {
-                logger.trace("Found Local Authorization Info for User: \"{}\"",
+                logger.info("Found Local Authorization Info for User: \"{}\"",
                         userName);
                 attributes = resource.getRolesString();
 
@@ -414,7 +362,7 @@ public class UserManager implements IUserManager, IObjectReader,
             result.setRoleList(attributes.split(" "));
             authorized = true;
         } else {
-            logger.trace("Not able to find Authorization Info for User: \"{}\"",
+            logger.info("Not able to find Authorization Info for User: \"{}\"",
                     userName);
         }
 
@@ -423,10 +371,10 @@ public class UserManager implements IUserManager, IObjectReader,
          */
         putUserInActiveList(userName, result);
         if (authorized) {
-            logger.trace("User \"{}\" authorized for the following role(s): {}",
+            logger.info("User \"{}\" authorized for the following role(s): {}",
                     userName, result.getUserRoles());
         } else {
-            logger.trace("User \"{}\" Not Authorized for any role ", userName);
+            logger.info("User \"{}\" Not Authorized for any role ", userName);
         }
 
         return rcResponse.getStatus();
@@ -895,10 +843,10 @@ public class UserManager implements IUserManager, IObjectReader,
         loadConfigurations();
 
         // Check if a password recovery was triggered for default network admin user
-        String pwd = checkPasswordRecovery();
+        checkPasswordRecovery();
 
         // Make sure default Network Admin account is there
-        checkDefaultNetworkAdmin(pwd);
+        checkDefaultNetworkAdmin();
 
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this, null);
