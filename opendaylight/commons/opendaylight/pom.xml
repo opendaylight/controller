@@ -19,7 +19,6 @@
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
-    <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
@@ -58,7 +57,6 @@
     <!-- OpenEXI third party lib for netconf-->
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
-    <feature.transaction.version>1.0.1</feature.transaction.version>
     <felix.dependencymanager.shell.version>3.0.1</felix.dependencymanager.shell.version>
     <felix.dependencymanager.version>3.1.0</felix.dependencymanager.version>
     <felix.fileinstall.version>3.1.6</felix.fileinstall.version>
@@ -94,7 +92,6 @@
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
-    <karaf.version>3.0.1</karaf.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
@@ -144,9 +141,7 @@
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
-    <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
-    <spring-security-karaf.version>3.1.4.RELEASE</spring-security-karaf.version>
     <spring-security.version>3.1.3.RELEASE</spring-security.version>
     <spring.version>3.1.3.RELEASE</spring.version>
     <statistics.northbound.version>0.4.2-SNAPSHOT</statistics.northbound.version>
