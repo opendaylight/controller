@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3361cd39",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "scope test",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5366d152",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "organize imports using https://wiki.opendaylight.org/view/OpenDaylight_Controller:Developing_With_Intellij",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_734e75c3",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_934bf9af",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "yes",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53cd7130",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/api/RemoteDeviceSalFacade.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "Please add comments what C is, or use longer generic parameter name",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3ff4133",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceCommitHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "final",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73fc353f",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceDataReader.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "do not left interrupted flag cleared - call thread.interrupt()",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d38661b9",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceTwoPhaseCommitTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "add javadoc",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7393d5fa",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-05-13T14:35:51Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "321d418d4f523e7d45d8962b8d760f56e897aff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
