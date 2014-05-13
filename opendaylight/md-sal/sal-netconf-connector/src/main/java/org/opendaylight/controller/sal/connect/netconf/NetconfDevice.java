@@ -40,6 +40,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -126,7 +127,7 @@ public class NetconfDevice implements Provider, //
 
     private boolean rollbackSupported;
 
-    private NetconfClientConfiguration clientConfig;
+    private NetconfReconnectingClientConfiguration clientConfig;
     private volatile DataProviderService dataProviderService;
 
     public NetconfDevice(String name) {
@@ -146,7 +147,7 @@ public class NetconfDevice implements Provider, //
 
         logger.info("Starting NETCONF Client {} for address {}", name, socketAddress);
 
-        dispatcher.createClient(clientConfig);
+        dispatcher.createReconnectingClient(clientConfig);
     }
 
     Optional<SchemaContext> getSchemaContext() {
@@ -491,7 +492,7 @@ public class NetconfDevice implements Provider, //
         this.dispatcher = dispatcher;
     }
 
-    public void setClientConfig(final NetconfClientConfiguration clientConfig) {
+    public void setClientConfig(final NetconfReconnectingClientConfiguration clientConfig) {
         this.clientConfig = clientConfig;
     }
 
