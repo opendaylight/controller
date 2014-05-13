@@ -373,11 +373,11 @@ one.lib.nav = {
 
 one.lib.helper = {
     parseInt : function(value) {
-        return (value != null && value.trim() !== '') ?
+        return (value !== null && value !== '') ?
             parseInt(value) : ''
     },
     parseFloat : function(value) {
-        return (value != null && value.trim() !== '') ?
+        return (value !== null && value !== '') ?
             parseFloat(value) : ''
     }
 }
