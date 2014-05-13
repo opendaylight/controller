@@ -115,9 +115,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
      * only subnet returned. As soon as a user-configured subnet is created this one will
      * vanish.
      */
-    private static final String DISABLE_DEFAULT_SUBNET_PROP = "switchmanager.disableDefaultSubnetGateway";
-    private static final String DISABLE_DEFAULT_SUBNET_PROP_VAL = System.getProperty(DISABLE_DEFAULT_SUBNET_PROP);
-    private static final boolean USE_DEFAULT_SUBNET_GW = !Boolean.valueOf(DISABLE_DEFAULT_SUBNET_PROP_VAL);
     protected static final SubnetConfig DEFAULT_SUBNETCONFIG;
     protected static final Subnet DEFAULT_SUBNET;
     protected static final String DEFAULT_SUBNET_NAME = "default (cannot be modifed)";
@@ -291,9 +288,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     @Override
     public List<SubnetConfig> getSubnetsConfigList() {
         // if there are no subnets, return the default subnet
-        if (USE_DEFAULT_SUBNET_GW && subnetsConfigList.isEmpty()) {
+        if(subnetsConfigList.size() == 0){
             return Collections.singletonList(DEFAULT_SUBNETCONFIG);
-        } else {
+        }else{
             return new ArrayList<SubnetConfig>(subnetsConfigList.values());
         }
     }
@@ -301,9 +298,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     @Override
     public SubnetConfig getSubnetConfig(String subnet) {
         // if there are no subnets, return the default subnet
-        if (USE_DEFAULT_SUBNET_GW && subnetsConfigList.isEmpty() && subnet.equalsIgnoreCase(DEFAULT_SUBNET_NAME)) {
+        if(subnetsConfigList.isEmpty() && subnet.equalsIgnoreCase(DEFAULT_SUBNET_NAME)){
             return DEFAULT_SUBNETCONFIG;
-        } else {
+        }else{
             return subnetsConfigList.get(subnet);
         }
     }
