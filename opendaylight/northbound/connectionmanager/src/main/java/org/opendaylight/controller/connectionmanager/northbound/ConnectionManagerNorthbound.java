@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.northbound.commons.exception.NotAcceptableExc
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
@@ -50,7 +52,14 @@ import org.opendaylight.controller.sal.utils.Status;
 @Path("/")
 public class ConnectionManagerNorthbound {
     private String username;
+    private QueryContext queryContext;
 
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
     @Context
     public void setSecurityContext(SecurityContext context) {
         if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
@@ -115,7 +124,8 @@ public class ConnectionManagerNorthbound {
         @ResponseCode(code = 406, condition = "Invalid Controller IP Address passed."),
         @ResponseCode(code = 503, condition = "Connection Manager Service not available")})
 
-    public Nodes getNodes(@DefaultValue("") @QueryParam("controller") String controllerAddress) {
+    public Nodes getNodes(@DefaultValue("") @QueryParam("controller") String controllerAddress,
+        @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container");
         }
@@ -140,7 +150,12 @@ public class ConnectionManagerNorthbound {
         } else {
             nodeSet = connectionManager.getLocalNodes();
         }
-        return new Nodes(nodeSet);
+        Nodes nodes = new Nodes(nodeSet);
+        if (queryString != null) {
+            queryContext.createQuery(queryString, Nodes.class)
+                .filter(nodes, Node.class);
+        }
+        return nodes;
     }
 
     /**

@@ -21,11 +21,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -39,6 +41,7 @@ import org.opendaylight.controller.northbound.commons.exception.ResourceConflict
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -69,6 +72,14 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 public class HostTrackerNorthbound {
 
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -107,7 +118,7 @@ public class HostTrackerNorthbound {
         return hostTracker;
     }
 
-    private Hosts convertHosts(Set<HostNodeConnector> hostNodeConnectors) {
+    private Set<HostConfig> convertHosts(Set<HostNodeConnector> hostNodeConnectors) {
         if(hostNodeConnectors == null) {
             return null;
         }
@@ -115,7 +126,7 @@ public class HostTrackerNorthbound {
         for(HostNodeConnector hnc : hostNodeConnectors) {
             hosts.add(HostConfig.convert(hnc));
         }
-        return new Hosts(hosts);
+        return hosts;
     }
 
     /**
@@ -194,14 +205,20 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public Hosts getActiveHosts(@PathParam("containerName") String containerName) {
+    public Hosts getActiveHosts(@PathParam("containerName") String containerName,
+        @QueryParam("_q") String queryString) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        return convertHosts(hostTracker.getAllHosts());
+        Hosts hosts = new Hosts(convertHosts(hostTracker.getAllHosts()));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, Hosts.class)
+                .filter(hosts, HostConfig.class);
+        }
+        return hosts;
     }
 
     /**
@@ -281,13 +298,19 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getInactiveHosts(
-            @PathParam("containerName") String containerName) {
+            @PathParam("containerName") String containerName,
+            @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        return convertHosts(hostTracker.getInactiveStaticHosts());
+        Hosts hosts = new Hosts(convertHosts(hostTracker.getInactiveStaticHosts()));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, Hosts.class)
+                .filter(hosts, HostConfig.class);
+        }
+        return hosts;
     }
 
     /**

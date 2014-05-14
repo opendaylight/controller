@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.northbound.commons.exception.BadRequestExcept
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Property;
@@ -55,6 +57,14 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 public class ControllerManagerNorthbound {
 
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -122,7 +132,8 @@ public class ControllerManagerNorthbound {
             @ResponseCode(code = 404, condition = "The containerName or property is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public ControllerProperties getControllerProperties(@PathParam("containerName") String containerName,
-            @QueryParam("propertyName") String propertyName) {
+            @QueryParam("propertyName") String propertyName,
+            @QueryParam("_q") String queryString) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
@@ -147,8 +158,12 @@ public class ControllerManagerNorthbound {
             throw new ResourceNotFoundException("Unable to find property with name: " + propertyName);
         }
         properties.add(property);
-
-        return new ControllerProperties(properties);
+        ControllerProperties result = new ControllerProperties(properties);
+        if (queryString != null) {
+            queryContext.createQuery(queryString, ControllerProperties.class)
+                .filter(result, Property.class);
+        }
+        return result;
 
     }
 
