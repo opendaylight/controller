@@ -17,9 +17,18 @@
        <module name="RedundantImport"/>
        <module name="UnusedImports"/>
        <module name="AvoidStarImport"/>
+        <module name="ImportOrder">
+            <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
+            <property name="option" value="above"/>
+        </module>
        <module name="UpperEll"/>
        <module name="EmptyStatement"/>
        <module name="EqualsHashCode"/>
     </module>
-
+    <module name="RegexpHeader">
+        <property name="headerFile" value="${checkstyle.header.file}"/>
+        <property name="fileExtensions" value="java"/>
+        <property name="multiLines" value="1,8,11,12"/>
+    </module>
 </module>
