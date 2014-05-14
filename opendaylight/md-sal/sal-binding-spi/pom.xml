@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>sal-binding-spi</artifactId>
     <scm>
@@ -17,17 +17,14 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-core-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>concepts-lang</artifactId>
-            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

@@ -4,34 +4,34 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.1-1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>commons.opendaylight</artifactId>
-  <version>1.4.2-SNAPSHOT</version>
+  <version>1.4.1-1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
 
   <properties>
-    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <arphandler.version>0.5.1-1-SNAPSHOT</arphandler.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
-    <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
+    <bundlescanner.version>0.4.1-1-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.10</checkstyle.version>
-    <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
-    <clustering.services_implementation.version>0.4.2-SNAPSHOT</clustering.services_implementation.version>
-    <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
-    <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
+    <clustering.services.version>0.5.0-1-SNAPSHOT</clustering.services.version>
+    <clustering.services_implementation.version>0.4.1-1-SNAPSHOT</clustering.services_implementation.version>
+    <clustering.stub.version>0.4.1-1-SNAPSHOT</clustering.stub.version>
+    <commons.httpclient.version>0.1.1-1-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang.version>3.1</commons.lang.version>
     <compiler.version>2.3.2</compiler.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
-    <config.version>0.2.5-SNAPSHOT</config.version>
-    <configuration.version>0.4.3-SNAPSHOT</configuration.version>
-    <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
-    <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
-    <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
+    <config.version>0.2.3-1-SNAPSHOT</config.version>
+    <configuration.version>0.4.1-1-SNAPSHOT</configuration.version>
+    <connectionmanager.version>0.1.1-1-SNAPSHOT</connectionmanager.version>
+    <containermanager.it.version>0.5.1-1-SNAPSHOT</containermanager.it.version>
+    <containermanager.version>0.5.1-1-SNAPSHOT</containermanager.version>
     <!--versions for bits of the controller -->
     <corsfilter.version>7.0.42</corsfilter.version>
     <!-- enforcer version -->
@@ -42,13 +42,13 @@
     <!-- OpenEXI third party lib for netconf-->
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
-    <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
-    <forwardingrulesmanager.version>0.5.1-SNAPSHOT</forwardingrulesmanager.version>
+    <forwarding.staticrouting>0.5.1-1-SNAPSHOT</forwarding.staticrouting>
+    <forwardingrulesmanager.version>0.5.0-1-SNAPSHOT</forwardingrulesmanager.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
     <guava.version>14.0.1</guava.version>
-    <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
-    <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
-    <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker.api.version>0.5.1-1-SNAPSHOT</hosttracker.api.version>
+    <hosttracker.implementation.version>0.5.1-1-SNAPSHOT</hosttracker.implementation.version>
+    <hosttracker_new.api.version>0.4.1-1-SNAPSHOT</hosttracker_new.api.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
@@ -65,14 +65,14 @@
     <jolokia.version>1.1.4</jolokia.version>
     <junit.version>4.8.1</junit.version>
     <logback.version>1.0.9</logback.version>
-    <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
+    <logging.bridge.version>0.4.1-1-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
     <!-- Java Versions -->
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
-    <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <mdsal.version>1.0-1-SNAPSHOT</mdsal.version>
     <mockito.version>1.9.5</mockito.version>
-    <netconf.version>0.2.5-SNAPSHOT</netconf.version>
+    <netconf.version>0.2.3-1-SNAPSHOT</netconf.version>
     <netty.version>4.0.17.Final</netty.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <!-- ODL repository / plugin repository -->
@@ -84,7 +84,7 @@
     <projectinfo>2.6</projectinfo>
 
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
-    <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
+    <protocol-framework.version>0.4.0-1-SNAPSHOT</protocol-framework.version>
     <protocol_plugin.stub.version>0.4.2-SNAPSHOT</protocol_plugin.stub.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
@@ -92,7 +92,7 @@
     <sal.version>0.7.1-SNAPSHOT</sal.version>
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
     <samples.loadbalancer>0.5.2-SNAPSHOT</samples.loadbalancer>
-    <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
+    <sanitytest.version>0.4.1-1-SNAPSHOT</sanitytest.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
     <slf4j.version>1.7.2</slf4j.version>
@@ -904,17 +904,17 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>0.4.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron.implementation</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>0.4.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>networkconfig.neutron.northbound</artifactId>
-        <version>0.4.2-SNAPSHOT</version>
+        <version>0.4.1-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
