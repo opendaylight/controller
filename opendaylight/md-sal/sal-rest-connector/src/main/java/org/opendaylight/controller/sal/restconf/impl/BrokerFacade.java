@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import com.google.common.base.Objects;
-
-import java.util.Map;
+import java.text.MessageFormat;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.core.Response.Status;
@@ -22,7 +20,6 @@ import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.impl.RestconfProvider;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -137,19 +134,16 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         this.checkPreconditions();
 
         final DataModificationTransaction transaction = dataService.beginTransaction();
-        transaction.putConfigurationData( path, payload );
-        Map<InstanceIdentifier, CompositeNode> createdConfigurationData =
-                                                           transaction.getCreatedConfigurationData();
-        CompositeNode createdNode = createdConfigurationData.get( path );
-
-        if( Objects.equal( payload, createdNode ) ) {
-            LOG.trace( "Post Configuration via Restconf: {}", path );
-            return transaction.commit();
+        /* check for available Node in Configuration DataStore by path */
+        CompositeNode availableNode = transaction.readConfigurationData( path );
+        if (availableNode != null) {
+            String errMsg = MessageFormat.format( "Post Configuration via Restconf was not executed because data already exists: {0}", path );
+            BrokerFacade.LOG.warn(errMsg);
+            throw new ResponseException(Status.BAD_REQUEST, errMsg);
         }
-
-        LOG.trace( "Post Configuration via Restconf was not executed because data already exists: {}",
-                   path );
-        return null;
+        BrokerFacade.LOG.trace( "Post Configuration via Restconf: {}", path );
+        transaction.putConfigurationData( path, payload );
+        return transaction.commit();
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataPostBehindMountPoint(
@@ -157,19 +151,16 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         this.checkPreconditions();
 
         final DataModificationTransaction transaction = mountPoint.beginTransaction();
-        transaction.putConfigurationData( path, payload );
-        Map<InstanceIdentifier, CompositeNode> createdConfigurationData =
-                                                               transaction.getCreatedConfigurationData();
-        CompositeNode createdNode = createdConfigurationData.get( path );
-
-        if( Objects.equal( payload, createdNode ) ) {
-            LOG.trace( "Post Configuration via Restconf: {}", path );
-            return transaction.commit();
+        /* check for available Node in Configuration DataStore by path */
+        CompositeNode availableNode = transaction.readConfigurationData( path );
+        if (availableNode != null) {
+            String errMsg = MessageFormat.format( "Post Configuration via Restconf was not executed because data already exists: {0}", path );
+            BrokerFacade.LOG.warn(errMsg);
+            throw new ResponseException(Status.BAD_REQUEST, errMsg);
         }
-
-        LOG.trace( "Post Configuration via Restconf was not executed because data already exists: {}",
-                    path );
-        return null;
+        BrokerFacade.LOG.trace( "Post Configuration via Restconf: {}", path );
+        transaction.putConfigurationData( path, payload );
+        return transaction.commit();
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataDelete( final InstanceIdentifier path ) {

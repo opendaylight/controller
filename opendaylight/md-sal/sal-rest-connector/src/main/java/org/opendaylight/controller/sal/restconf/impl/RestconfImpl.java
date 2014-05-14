@@ -7,14 +7,6 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,17 +26,6 @@ import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ResponseException;
-import org.opendaylight.controller.sal.restconf.impl.RestCodec;
-import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
@@ -75,6 +56,14 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
+
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 @SuppressWarnings("all")
 public class RestconfImpl implements RestconfService {
@@ -681,6 +670,7 @@ public class RestconfImpl implements RestconfService {
                 status = future == null ? null : future.get();
             }
         }
+        catch( ResponseException e) { throw e; }
         catch( Exception e ) {
             throw new ResponseException( e, "Error creating data" );
         }
@@ -730,6 +720,7 @@ public class RestconfImpl implements RestconfService {
                 status = future == null ? null : future.get();
             }
         }
+        catch( ResponseException e) { throw e; }
         catch( Exception e ) {
             throw new ResponseException( e, "Error creating data" );
         }
