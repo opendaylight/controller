@@ -11,7 +11,10 @@ package org.opendaylight.controller.containermanager.northbound;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.ws.rs.core.Application;
+
+import org.opendaylight.controller.northbound.commons.query.QueryContextProvider;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
@@ -28,6 +31,7 @@ public class ContainerManagerNorthboundRSApplication extends Application {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(ContainerManagerNorthbound.class);
         classes.add(JacksonJaxbJsonProvider.class);
+        classes.add(QueryContextProvider.class);
         return classes;
     }
 }

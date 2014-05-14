@@ -21,10 +21,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -33,6 +35,7 @@ import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Edge;
@@ -59,7 +62,14 @@ import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 public class TopologyNorthboundJAXRS {
 
     private String username;
+    private QueryContext queryContext;
 
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
     @Context
     public void setSecurityContext(SecurityContext context) {
         if (context != null && context.getUserPrincipal() != null) {
@@ -240,7 +250,8 @@ public class TopologyNorthboundJAXRS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Topology.class)
     @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name was not found") })
-    public Topology getTopology(@PathParam("containerName") String containerName) {
+    public Topology getTopology(@PathParam("containerName") String containerName,
+        @QueryParam("_q") String queryString) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
@@ -253,16 +264,21 @@ public class TopologyNorthboundJAXRS {
         }
 
         Map<Edge, Set<Property>> topo = topologyManager.getEdges();
-        if (topo != null) {
-            List<EdgeProperties> res = new ArrayList<EdgeProperties>();
-            for (Map.Entry<Edge, Set<Property>> entry : topo.entrySet()) {
-                EdgeProperties el = new EdgeProperties(entry.getKey(), entry.getValue());
-                res.add(el);
-            }
-            return new Topology(res);
+        if (topo == null) {
+            return null;
         }
+        List<EdgeProperties> res = new ArrayList<EdgeProperties>();
+        for (Map.Entry<Edge, Set<Property>> entry : topo.entrySet()) {
+            EdgeProperties el = new EdgeProperties(entry.getKey(), entry.getValue());
+            res.add(el);
+        }
+        Topology result = new Topology(res);
 
-        return null;
+        if (queryString != null) {
+            queryContext.createQuery(queryString, Topology.class)
+                .filter(result, EdgeProperties.class);
+        }
+        return result;
     }
 
     /**
@@ -311,7 +327,8 @@ public class TopologyNorthboundJAXRS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(TopologyUserLinks.class)
     @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name was not found") })
-    public TopologyUserLinks getUserLinks(@PathParam("containerName") String containerName) {
+    public TopologyUserLinks getUserLinks(@PathParam("containerName") String containerName,
+        @QueryParam("_q") String queryString) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
@@ -324,12 +341,16 @@ public class TopologyNorthboundJAXRS {
         }
 
         ConcurrentMap<String, TopologyUserLinkConfig> userLinks = topologyManager.getUserLinks();
-        if ((userLinks != null) && (userLinks.values() != null)) {
-            List<TopologyUserLinkConfig> res = new ArrayList<TopologyUserLinkConfig>(userLinks.values());
-            return new TopologyUserLinks(res);
+        if ((userLinks == null) || (userLinks.values() == null)) {
+            return null;
         }
-
-        return null;
+        TopologyUserLinks result = new TopologyUserLinks(
+                new ArrayList<TopologyUserLinkConfig>(userLinks.values()));
+        if (queryString != null) {
+            queryContext.createQuery(queryString, TopologyUserLinks.class)
+                .filter(result, TopologyUserLinkConfig.class);
+        }
+        return result;
     }
 
     /**
