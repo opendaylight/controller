@@ -1382,6 +1382,16 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>object-cache-api</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>object-cache-guava</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>restconf-client-api</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
