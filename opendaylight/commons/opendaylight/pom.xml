@@ -24,6 +24,7 @@
     <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.4.0</bundle.plugin.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
+    <checkstyle.header.file>controller/java.header</checkstyle.header.file>
     <checkstyle.version>2.10</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
