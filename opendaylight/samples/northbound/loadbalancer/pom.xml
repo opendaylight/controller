@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.1-1-SNAPSHOT</version>
     <relativePath>../../../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>samples.loadbalancer.northbound</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <version>0.4.1-1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -82,7 +82,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.7.1-SNAPSHOT</version>
+            <version>0.7.0-1-SNAPSHOT</version>
           </dependency>
         </dependencies>
       </plugin>
