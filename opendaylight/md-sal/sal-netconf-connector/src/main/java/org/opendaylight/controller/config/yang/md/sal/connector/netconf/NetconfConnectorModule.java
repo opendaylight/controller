@@ -23,11 +23,14 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
+import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.util.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDeviceListener;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -141,12 +144,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         this.bundleContext = bundleContext;
     }
 
-    public NetconfClientConfiguration getClientConfig(final NetconfDevice device) {
+    public NetconfReconnectingClientConfiguration getClientConfig(final NetconfDevice device) {
         InetSocketAddress socketAddress = getSocketAddress();
         ReconnectStrategy strategy = getReconnectStrategy();
         long clientConnectionTimeoutMillis = getConnectionTimeoutMillis();
 
-        return NetconfClientConfigurationBuilder.create()
+        return NetconfReconnectingClientConfigurationBuilder.create()
         .withAddress(socketAddress)
         .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
         .withReconnectStrategy(strategy)
@@ -155,6 +158,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
                 NetconfClientConfiguration.NetconfClientProtocol.SSH)
+        .withConnectStrategyFactory(new ReconnectStrategyFactory() {
+            @Override
+            public ReconnectStrategy createReconnectStrategy() {
+                return getReconnectStrategy();
+            }
+        })
         .build();
     }
 
@@ -166,7 +175,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             logger.trace("Setting {} on {} to infinity", maxConnectionAttemptsJmxAttribute, this);
             connectionAttempts = null;
         }
-        double sleepFactor = 1.0;
+        double sleepFactor = 1.5;
         int minSleep = 1000;
         Long maxSleep = null;
         Long deadline = null;
