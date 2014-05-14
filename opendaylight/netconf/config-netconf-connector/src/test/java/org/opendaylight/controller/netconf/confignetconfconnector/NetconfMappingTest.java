@@ -8,11 +8,42 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
+import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
+import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+import javax.xml.parsers.ParserConfigurationException;
 import org.custommonkey.xmlunit.AbstractNodeTester;
 import org.custommonkey.xmlunit.NodeTest;
 import org.custommonkey.xmlunit.NodeTestException;
@@ -82,38 +113,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.xml.sax.SAXException;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElement;
-import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithText;
-import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElement;
 
 
 public class NetconfMappingTest extends AbstractConfigTest {
@@ -573,7 +572,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         String enumContent = "TWO";
 
         for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
-            String name = moduleElement.getOnlyChildElement("prefix:name").getTextContent();
+            String name = moduleElement.getOnlyChildElement("name").getTextContent();
             if(name.equals(INSTANCE_NAME)) {
                 XmlElement enumAttr = moduleElement.getOnlyChildElement(enumName);
                 assertEquals(enumContent, enumAttr.getTextContent());
@@ -599,7 +598,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
             for (XmlElement type : moduleElement.getChildElements("type")) {
-                if (type.getNamespace() != null) {
+                if (type.getNamespaceOptionally().isPresent()) {
                     configAttributeType.add(type.getTextContent());
                 }
             }

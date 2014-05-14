@@ -45,6 +45,7 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
         QName qName = QName.create(value);
         String identity = qName.getLocalName();
         String identityNamespace = qName.getNamespace().toString();
+        //FIXME not sure here: should it be <prefix:key ..>prefix:val</> or <key ..>prefix:val</> ?
         Element element = XmlUtil.createPrefixedTextElement(doc, XmlUtil.createPrefixedValue(PREFIX, key), PREFIX, identity, Optional.<String>of(identityNamespace));
         return element;
     }

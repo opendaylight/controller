@@ -42,7 +42,7 @@ import java.io.StringWriter;
 public final class XmlUtil {
 
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
-    private static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
+    public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -118,8 +118,18 @@ public final class XmlUtil {
         return typeElement;
     }
 
+    @Deprecated
     public static Element createPrefixedTextElement(Document document, String qName, String prefix, String content, Optional<String> namespace) {
         return createTextElement(document, qName, createPrefixedValue(prefix, content), namespace);
+    }
+
+    public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
+                                                                 String namespace, String contentWithoutPrefix) {
+        String content = createPrefixedValue(XmlNetconfConstants.PREFIX, contentWithoutPrefix);
+        Element element = createTextElement(document, qName, content, Optional.<String>absent());
+        String prefixedNamespaceAttr = createPrefixedValue(XMLNS_ATTRIBUTE_KEY, prefix);
+        element.setAttributeNS(XMLNS_URI, prefixedNamespaceAttr, namespace);
+        return element;
     }
 
     public static String createPrefixedValue(String prefix, String value) {
