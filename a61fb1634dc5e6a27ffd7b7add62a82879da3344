@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_56d9df55",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-14T01:39:26Z",
+      "side": 1,
+      "message": "Seems like you pasted back xtend-generated code. No need for the intermediate variable _responseException.",
+      "revId": "a61fb1634dc5e6a27ffd7b7add62a82879da3344",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16e35708",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-14T01:39:26Z",
+      "side": 1,
+      "message": "Remove underscore in var name",
+      "revId": "a61fb1634dc5e6a27ffd7b7add62a82879da3344",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b6e70b12",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-14T01:39:26Z",
+      "side": 1,
+      "message": "Please remove intermediate exception variable",
+      "revId": "a61fb1634dc5e6a27ffd7b7add62a82879da3344",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d6e40f0f",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-14T01:39:26Z",
+      "side": 1,
+      "message": "Please remove intermediate exception variable",
+      "revId": "a61fb1634dc5e6a27ffd7b7add62a82879da3344",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76f183cc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/rpc/impl/MountPointRpcExecutor.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-14T01:39:26Z",
+      "side": 1,
+      "message": "Use guava\u0027s Preconditions.checkNull",
+      "revId": "a61fb1634dc5e6a27ffd7b7add62a82879da3344",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
