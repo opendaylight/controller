@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -109,6 +110,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private String containerName = null;
     private boolean isDefaultContainer = true;
     private static final int REPLACE_RETRY = 1;
+    private ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, GlobalConstants.DEFAULT.toString(), this);
 
     /* Information about the default subnet. If there have been no configured subnets, i.e.,
      * subnets.size() == 0 or subnetsConfigList.size() == 0, then this subnet will be the
@@ -1016,6 +1018,15 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 if (nodeProperties.get(ForwardingMode.name) != null) {
                     ForwardingMode mode = (ForwardingMode) nodeProperties.get(ForwardingMode.name);
                     forwardingModeChanged = mode.isProactive();
+                }
+            } else if ((conf == null) && (containerName != null) && !(containerName.equals(GlobalConstants.DEFAULT.toString()))) {
+                Property defaultContainerSwitchDesc = (Description) defaultSwitchManager.getNodeProp(node, Description.propertyName);
+                if (defaultContainerSwitchDesc != null) {
+                    Map<String, Property> descPropMap = new HashMap<String, Property>();
+                    descPropMap.put(Description.propertyName, defaultContainerSwitchDesc);
+                    conf = new SwitchConfig(nodeId, descPropMap);
+                    updateNodeConfig(conf);
+                    propMap.put(Description.propertyName, defaultContainerSwitchDesc);
                 }
             }
         }
