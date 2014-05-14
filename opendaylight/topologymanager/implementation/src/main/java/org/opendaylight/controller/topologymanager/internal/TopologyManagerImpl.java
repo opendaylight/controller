@@ -193,18 +193,8 @@ public class TopologyManagerImpl implements
     void init(Component c) {
         allocateCaches();
         retrieveCaches();
-        String containerName = null;
-        Dictionary<?, ?> props = c.getServiceProperties();
-        if (props != null) {
-            containerName = (String) props.get("containerName");
-        } else {
-            // In the Global instance case the containerName is empty
-            containerName = "UNKNOWN";
-        }
-
         registerWithOSGIConsole();
         loadConfiguration();
-
         // Restore the shuttingDown status on init of the component
         shuttingDown = false;
         notifyThread = new Thread(new TopologyNotify(notifyQ));
