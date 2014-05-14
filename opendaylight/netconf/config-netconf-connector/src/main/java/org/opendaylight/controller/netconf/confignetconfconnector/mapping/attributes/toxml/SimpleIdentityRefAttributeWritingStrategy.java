@@ -43,9 +43,8 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
     @Override
     protected Element createElement(Document doc, String key, String value, Optional<String> namespace) {
         QName qName = QName.create(value);
-        String identity = qName.getLocalName();
+        String identityValue = qName.getLocalName();
         String identityNamespace = qName.getNamespace().toString();
-        Element element = XmlUtil.createPrefixedTextElement(doc, XmlUtil.createPrefixedValue(PREFIX, key), PREFIX, identity, Optional.<String>of(identityNamespace));
-        return element;
+        return XmlUtil.createTextElementWithNamespacedContent(doc, key, PREFIX, identityNamespace, identityValue);
     }
 }
