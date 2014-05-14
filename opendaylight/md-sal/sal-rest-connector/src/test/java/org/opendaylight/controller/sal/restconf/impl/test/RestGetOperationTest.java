@@ -234,7 +234,7 @@ public class RestGetOperationTest extends JerseyTest {
         response = target(uri).request("application/yang.api+xml").get();
         responseBody = response.readEntity(String.class);
         assertNotNull(responseBody);
-        assertTrue(responseBody.contains("<streams xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\"/>"));
+        assertTrue(responseBody.contains("<streams xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\""));
     }
 
     // /modules/module
