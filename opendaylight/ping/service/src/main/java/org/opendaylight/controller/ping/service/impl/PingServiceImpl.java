@@ -1,6 +1,7 @@
 package org.opendaylight.controller.ping.service.impl;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.opendaylight.controller.ping.service.api.PingServiceAPI;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareConsumer;
@@ -20,6 +21,9 @@ public class PingServiceImpl extends AbstractBindingAwareConsumer implements
     private PingService ping;
     private ConsumerContext session;
 
+    private Ipv4Address currDestination;
+    private Future<RpcResult<SendEchoOutput>> currResult;
+
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.session = session;
@@ -31,36 +35,59 @@ public class PingServiceImpl extends AbstractBindingAwareConsumer implements
     }
 
     @Override
-    public boolean pingDestination(String address) {
+    public PingResult pingDestinationSync(String address) {
+        return pingDestinationCommon(address, true);
+    }
+
+    @Override
+    public PingResult pingDestinationAsync(String address) {
+        return pingDestinationCommon(address, false);
+    }
+
+    private PingResult pingDestinationCommon(String address, boolean isSync) {
 
         if (ping == null) {
             ping = this.session.getRpcService(PingService.class);
             if (ping == null) {
 
                 /* No ping service found. */
-                return false;
+                return PingResult.Error;
             }
         }
 
-        Ipv4Address destination = new Ipv4Address(address);
+        Ipv4Address newDestination = new Ipv4Address(address);
+        if (isSync || currDestination == null || !currDestination.equals(newDestination)) {
+            SendEchoInputBuilder ib = new SendEchoInputBuilder();
+            ib.setDestination(newDestination);
+            currDestination = newDestination;
+            currResult = ping.sendEcho(ib.build());
+        }
 
-        SendEchoInputBuilder ib = new SendEchoInputBuilder();
-        ib.setDestination(destination);
         try {
-            RpcResult<SendEchoOutput> result = ping.sendEcho(ib.build()).get();
-            switch (result.getResult().getEchoResult()) {
+            if (!isSync && !currResult.isDone()) {
+                return PingResult.InProgress;
+            }
+
+            /** If we made it here, we know that the result is completed. Being so, we will
+             * clear currDestination to trigger a new build() cycle next time this call is made.
+             */
+            currDestination = Ipv4Address.getDefaultInstance("0.0.0.0");
+
+            // Translate echoResult to pingResult
+            switch (currResult.get().getResult().getEchoResult()) {
             case Reachable:
-                return true;
+                return PingResult.GotResponse;
             case Unreachable:
+                return PingResult.NoResponse;
             case Error:
             default:
-                return false;
+                return PingResult.Error;
             }
         } catch (InterruptedException ie) {
         } catch (ExecutionException ee) {
         }
 
-        return false;
+        return PingResult.Error;
     }
 
 }
