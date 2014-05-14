@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
+import org.opendaylight.controller.hosttracker.IHostTrackerShell;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
@@ -79,7 +80,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                             IfIptoHost.class.getName(),
                             IfHostListener.class.getName(),
                             ITopologyManagerAware.class.getName(),
-                            ICacheUpdateAware.class.getName() }, props);
+                            ICacheUpdateAware.class.getName(),
+                            IHostTrackerShell.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName)
                     .setService(ISwitchManager.class)

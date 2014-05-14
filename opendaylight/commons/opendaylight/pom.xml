@@ -18,8 +18,8 @@
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -63,11 +63,11 @@
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
-    <enunciate.version>1.26.2</enunciate.version>
+    <enunciate.version>1.28</enunciate.version>
     <exam.version>3.0.0</exam.version>
 
     <!-- OpenEXI third party lib for netconf-->
-    <exi.nagasena.version>0000.0002.0038.0-SNAPSHOT</exi.nagasena.version>
+    <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
     <failsafe.version>2.15</failsafe.version>
     <feature.transaction.version>1.0.1</feature.transaction.version>
     <felix.dependencymanager.shell.version>3.0.1</felix.dependencymanager.shell.version>
@@ -86,6 +86,7 @@
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
+    <hosttracker.shell.version>1.0.0-SNAPSHOT</hosttracker.shell.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
     <hosttracker_new.implementation.version>0.4.2-SNAPSHOT</hosttracker_new.implementation.version>
     <httpservice-bridge.northbound.version>0.0.2-SNAPSHOT</httpservice-bridge.northbound.version>
@@ -108,6 +109,7 @@
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
@@ -188,13 +190,12 @@
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
-    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
+    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ietf-netconf-monitoring</artifactId>
@@ -1357,16 +1358,6 @@
         <artifactId>ganymed</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>nagasena</artifactId>
-        <version>${exi.nagasena.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>nagasena-rta</artifactId>
-        <version>${exi.nagasena.version}</version>
-      </dependency>
       <!-- Third parties from opendaylight released -->
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -1500,6 +1491,16 @@
         <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>yang-ext</artifactId>
         <version>${yang-ext.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openexi</groupId>
+        <artifactId>nagasena</artifactId>
+        <version>${exi.nagasena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openexi</groupId>
+        <artifactId>nagasena-rta</artifactId>
+        <version>${exi.nagasena.version}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
@@ -1791,6 +1792,11 @@
             <configFile>enunciate.xml</configFile>
           </configuration>
           <dependencies>
+            <dependency>
+              <groupId>org.codehaus.enunciate</groupId>
+              <artifactId>enunciate-swagger</artifactId>
+              <version>${enunciate.version}</version>
+            </dependency>
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
