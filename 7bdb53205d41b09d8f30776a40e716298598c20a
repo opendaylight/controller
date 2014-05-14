@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0c74a697",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/osgi/NetconfImplActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-14T19:21:02Z",
+      "side": 1,
+      "message": "raw exceptions should be avoided... where is it thrown from?",
+      "revId": "7bdb53205d41b09d8f30776a40e716298598c20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ec6e22c9",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/osgi/NetconfImplActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-14T19:21:02Z",
+      "side": 1,
+      "message": "seems to be unused",
+      "revId": "7bdb53205d41b09d8f30776a40e716298598c20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cc655ee2",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/osgi/NetconfSSHActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-14T19:21:02Z",
+      "side": 1,
+      "message": "Don\u0027t remember. Please test out on Windows.",
+      "revId": "7bdb53205d41b09d8f30776a40e716298598c20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
