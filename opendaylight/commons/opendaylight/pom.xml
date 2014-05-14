@@ -18,8 +18,8 @@
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -86,6 +86,7 @@
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
+    <hosttracker.shell.version>1.0.0-SNAPSHOT</hosttracker.shell.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
     <hosttracker_new.implementation.version>0.4.2-SNAPSHOT</hosttracker_new.implementation.version>
     <httpservice-bridge.northbound.version>0.0.2-SNAPSHOT</httpservice-bridge.northbound.version>
@@ -188,8 +189,8 @@
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
-    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
+    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>
