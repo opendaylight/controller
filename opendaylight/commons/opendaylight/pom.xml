@@ -117,6 +117,9 @@
     <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
     <osgi.compendium.version>5.0.0</osgi.compendium.version>
     <osgi.core.version>5.0.0</osgi.core.version>
+    <ping.northbound.version>1.0-SNAPSHOT</ping.northbound.version>
+    <ping.plugin.version>0.4.0-SNAPSHOT</ping.plugin.version>
+    <ping.service.version>1.1-SNAPSHOT</ping.service.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <projectinfo>2.6</projectinfo>
@@ -997,6 +1000,23 @@
         <version>${osgi-brandfragment.web.version}</version>
       </dependency>
 
+      <!-- Ping -->
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>ping.northbound</artifactId>
+        <version>${ping.northbound.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>ping.plugin</artifactId>
+        <version>${ping.plugin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>ping.service</artifactId>
+        <version>${ping.service.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol-framework</artifactId>
@@ -1339,6 +1359,11 @@
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
         <artifactId>model-inventory</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-ping</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>

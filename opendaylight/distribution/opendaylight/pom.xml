@@ -505,6 +505,20 @@
       <artifactId>osgi-brandfragment.web</artifactId>
     </dependency>
 
+    <!-- Ping -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>ping.northbound</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>ping.plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>ping.service</artifactId>
+    </dependency>
+
     <!-- Southbound bundles -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -1072,6 +1086,10 @@
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
           <artifactId>model-inventory</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.model</groupId>
+          <artifactId>model-ping</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller.model</groupId>
