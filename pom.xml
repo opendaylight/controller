@@ -114,6 +114,11 @@
     <module>opendaylight/samples/loadbalancer</module>
     <module>opendaylight/samples/northbound/loadbalancer</module>
 
+    <!-- Ping -->
+    <module>opendaylight/ping/service</module>
+    <module>opendaylight/ping/plugin</module>
+    <module>opendaylight/ping/northbound</module>
+
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/protocol-framework</module>
