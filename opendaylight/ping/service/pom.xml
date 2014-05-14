@@ -53,6 +53,7 @@
               org.opendaylight.yangtools.yang.common,
               org.opendaylight.yangtools.yang.binding,
               org.opendaylight.controller.sal.binding.api,
+              org.slf4j,
               org.osgi.framework</Import-Package>
             <Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>
             <Bundle-Activator>org.opendaylight.controller.ping.service.impl.PingServiceImpl</Bundle-Activator>
