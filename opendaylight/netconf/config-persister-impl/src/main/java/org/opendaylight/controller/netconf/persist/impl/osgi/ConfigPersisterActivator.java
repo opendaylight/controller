@@ -159,6 +159,16 @@ public class ConfigPersisterActivator implements BundleActivator {
                         throw new IllegalStateException(e);
                     }
                     logger.info("Configuration Persister initialization completed.");
+
+                    /*
+                     * We have completed initial configuration. At this point
+                     * it is good idea to perform garbage collection to prune
+                     * any garbage we have accumulated during startup.
+                     */
+                    logger.debug("Running post-initialization garbage collection...");
+                    System.gc();
+                    logger.debug("Post-initialization garbage collection completed.");
+
                     ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
                     synchronized (ConfigPersisterActivator.this) {
                         autoCloseables.add(jmxNotificationHandler);
@@ -168,7 +178,7 @@ public class ConfigPersisterActivator implements BundleActivator {
             synchronized (ConfigPersisterActivator.this) {
                 autoCloseables.add(new AutoCloseable() {
                     @Override
-                    public void close() throws Exception {
+                    public void close() {
                         pushingThread.interrupt();
                     }
                 });
