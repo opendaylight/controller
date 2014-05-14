@@ -178,7 +178,7 @@ public class ServerImplTest {
     Thread[] threads = new Thread[Thread.activeCount()];
     Thread.enumerate(threads);
 
-    List<Thread> foundThreads = new ArrayList();
+    List<Thread> foundThreads = new ArrayList<Thread>();
     for (Thread t : threads) {
       if (t.getName().startsWith(name))
         foundThreads.add(t);
