@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -1016,6 +1017,18 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 if (nodeProperties.get(ForwardingMode.name) != null) {
                     ForwardingMode mode = (ForwardingMode) nodeProperties.get(ForwardingMode.name);
                     forwardingModeChanged = mode.isProactive();
+                }
+            } else if ((conf == null) &&  !(GlobalConstants.DEFAULT.toString().equals(containerName))) {
+                ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, GlobalConstants.DEFAULT.toString(), this);
+                if (defaultSwitchManager != null) {
+                    Property defaultContainerSwitchDesc = (Description) defaultSwitchManager.getNodeProp(node, Description.propertyName);
+                    if (defaultContainerSwitchDesc != null) {
+                        Map<String, Property> descPropMap = new HashMap<String, Property>();
+                        descPropMap.put(Description.propertyName, defaultContainerSwitchDesc);
+                        conf = new SwitchConfig(nodeId, descPropMap);
+                        updateNodeConfig(conf);
+                        propMap.put(Description.propertyName, defaultContainerSwitchDesc);
+                    }
                 }
             }
         }
