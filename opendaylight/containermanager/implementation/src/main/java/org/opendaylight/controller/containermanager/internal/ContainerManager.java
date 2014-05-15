@@ -44,6 +44,7 @@ import org.opendaylight.controller.containermanager.ContainerFlowChangeEvent;
 import org.opendaylight.controller.containermanager.ContainerFlowConfig;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.containermanager.IContainerManagerShell;
 import org.opendaylight.controller.containermanager.NodeConnectorsChangeEvent;
 import org.opendaylight.controller.sal.authorization.AppRoleLevel;
 import org.opendaylight.controller.sal.authorization.Privilege;
@@ -71,7 +72,7 @@ import org.slf4j.LoggerFactory;
 
 public class ContainerManager extends Authorization<String> implements IContainerManager, IObjectReader,
         CommandProvider, ICacheUpdateAware<String, Object>, IContainerInternal, IContainerAuthorization,
-        IConfigurationAware {
+        IConfigurationAware, IContainerManagerShell {
     private static final Logger logger = LoggerFactory.getLogger(ContainerManager.class);
     private static String CONTAINERS_FILE_NAME = "containers.conf";
     private static final String allContainersGroup = "allContainers";
@@ -1618,5 +1619,287 @@ public class ContainerManager extends Authorization<String> implements IContaine
     @Override
     public boolean inContainerMode() {
         return this.containerConfigs.size() > 0;
+    }
+
+    public List<String> psc() {
+        List<String> result = new ArrayList<String>();
+        for (Map.Entry<String, ContainerConfig> entry : containerConfigs.entrySet()) {
+            ContainerConfig sc = entry.getValue();
+            result.add(String.format("%s: %s", sc.getContainerName(), sc.toString()));
+        }
+        result.add("Total number of containers: " + containerConfigs.entrySet().size());
+        return result;
+    }
+
+    public List<String> pfc() {
+        List<String> result = new ArrayList<String>();
+        for (Map.Entry<String, ContainerConfig> entry : containerConfigs.entrySet()) {
+            ContainerConfig sc = entry.getValue();
+            result.add(String.format("%s: %s", sc.getContainerName(), sc.getContainerFlowConfigs()));
+        }
+        return result;
+    }
+
+    public List<String> psd() {
+        List<String> result = new ArrayList<String>();
+        for (String containerName : containerData.keySet()) {
+            ContainerData sd = containerData.get(containerName);
+            for (Node sid : sd.getSwPorts().keySet()) {
+                Set<NodeConnector> s = sd.getSwPorts().get(sid);
+                result.add("\t" + sid + " : " + s);
+            }
+
+            for (ContainerFlow s : sd.getContainerFlowSpecs()) {
+                result.add("\t" + s.toString());
+            }
+        }
+        return result;
+    }
+
+    public List<String> psp() {
+        List<String> result = new ArrayList<String>();
+        for (NodeConnector sp : nodeConnectorToContainers.keySet()) {
+            result.add(nodeConnectorToContainers.get(sp).toString());
+        }
+        return result;
+    }
+
+    public List<String> psm() {
+        List<String> result = new ArrayList<String>();
+        for (Node sp : nodeToContainers.keySet()) {
+            result.add(nodeToContainers.get(sp).toString());
+        }
+        return result;
+    }
+
+    public List<String> addContainer(String arg1, String arg2) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String staticVlan = arg2;
+        ContainerConfig containerConfig = new ContainerConfig(containerName, staticVlan, null, null);
+        result.add((this.addRemoveContainer(containerConfig, false)).toString());
+        return result;
+    }
+
+    public List<String> createContainer(String arg1, String arg2) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String staticVlan = arg2;
+        if (staticVlan == null) {
+            result.add("Static Vlan not specified");
+            return result;
+        }
+        List<String> ports = new ArrayList<String>();
+        for (long l = 1L; l < 10L; l++) {
+            ports.add(NodeConnectorCreator.createOFNodeConnector((short) 1, NodeCreator.createOFNode(l)).toString());
+        }
+        List<ContainerFlowConfig> cFlowList = new ArrayList<ContainerFlowConfig>();
+        cFlowList.add(this.createSampleContainerFlowConfig("tcp", true));
+        ContainerConfig containerConfig = new ContainerConfig(containerName, staticVlan, ports, cFlowList);
+        result.add((this.addRemoveContainer(containerConfig, false)).toString());
+        return result;
+    }
+
+    public List<String> removeContainerShell(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        ContainerConfig containerConfig = new ContainerConfig(containerName, "", null, null);
+        result.add((this.addRemoveContainer(containerConfig, true)).toString());
+        return result;
+    }
+
+    public List<String> addContainerEntry(String arg1, String arg2, String arg3) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String nodeId = arg2;
+        if (nodeId == null) {
+            result.add("Node Id not specified");
+            return result;
+        }
+        String portId = arg3;
+        if (portId == null) {
+            result.add("Port not specified");
+            return result;
+        }
+        Node node = NodeCreator.createOFNode(Long.valueOf(nodeId));
+        Short port = Short.valueOf(portId);
+        NodeConnector nc = NodeConnectorCreator.createOFNodeConnector(port, node);
+        List<String> portList = new ArrayList<String>(1);
+        portList.add(nc.toString());
+        result.add((this.addRemoveContainerEntries(containerName, portList, false)).toString());
+        return result;
+    }
+
+    public List<String> removeContainerEntry(String arg1, String arg2, String arg3) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String nodeId = arg2;
+        if (nodeId == null) {
+            result.add("Node Id not specified");
+            return result;
+        }
+        String portId = arg3;
+        if (portId == null) {
+            result.add("Port not specified");
+            return result;
+        }
+        Node node = NodeCreator.createOFNode(Long.valueOf(nodeId));
+        Short port = Short.valueOf(portId);
+        NodeConnector nc = NodeConnectorCreator.createOFNodeConnector(port, node);
+        List<String> portList = new ArrayList<String>(1);
+        portList.add(nc.toString());
+        result.add((this.addRemoveContainerEntries(containerName, portList, true)).toString());
+        return result;
+    }
+    public List<String> addContainerFlow(String arg1, String arg2, String arg3) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String cflowName = arg2;
+        if (cflowName == null) {
+            result.add("cflowName not specified");
+            return result;
+        }
+        String unidirectional = arg3;
+        boolean boolUnidirectional = Boolean.parseBoolean(unidirectional);
+        List<ContainerFlowConfig> list = new ArrayList<ContainerFlowConfig>();
+        list.add(createSampleContainerFlowConfig(cflowName, boolUnidirectional));
+        result.add((this.addRemoveContainerFlow(containerName, list, false)).toString());
+        return result;
+    }
+
+    public List<String> removeContainerFlow(String arg1, String arg2) {
+        List<String> result = new ArrayList<String>();
+        String containerName = arg1;
+        if (containerName == null) {
+            result.add("Container Name not specified");
+            return result;
+        }
+        String cflowName = arg2;
+        if (cflowName == null) {
+            result.add("cflowName not specified");
+            return result;
+        }
+        Set<String> set = new HashSet<String>(1);
+        set.add(cflowName);
+        result.add((this.removeContainerFlows(containerName, set)).toString());
+        return result;
+    }
+
+    public List<String> containermgrGetRoles() {
+        List<String> result = new ArrayList<String>();
+        result.add("Configured roles for Container Mgr:");
+        List<String> list = this.getRoles();
+        for (String role : list) {
+            result.add(role + "\t" + roles.get(role));
+        }
+        return result;
+    }
+
+    public List<String> containermgrGetAuthorizedGroups(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String roleName = arg1;
+        if (roleName == null || roleName.trim().isEmpty()) {
+            result.add("Invalid argument");
+            result.add("mmGetAuthorizedGroups <role_name>");
+            return result;
+        }
+        result.add("Resource Groups associated to role " + roleName + ":");
+        List<ResourceGroup> list = this.getAuthorizedGroups(roleName);
+        for (ResourceGroup group : list) {
+            result.add(group.toString());
+        }
+        return result;
+    }
+    public List<String> containermgrGetAuthorizedResources(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String roleName = arg1;
+        if (roleName == null || roleName.trim().isEmpty()) {
+            result.add("Invalid argument");
+            result.add("mmGetAuthorizedResources <role_name>");
+            return result;
+        }
+        result.add("Resource associated to role " + roleName + ":");
+        List<Resource> list = this.getAuthorizedResources(roleName);
+        for (Resource resource : list) {
+            result.add(resource.toString());
+        }
+        return result;
+    }
+    public List<String> containermgrGetResourcesForGroup(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String groupName = arg1;
+        if (groupName == null || groupName.trim().isEmpty()) {
+            result.add("Invalid argument");
+            result.add("containermgrResourcesForGroup <group_name>");
+            return result;
+        }
+        result.add("Group " + groupName + " contains the following resources:");
+        List<Object> resources = this.getResources(groupName);
+        for (Object resource : resources) {
+            result.add(resource.toString());
+        }
+        return result;
+    }
+    public List<String> containermgrGetUserLevel(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String userName = arg1;
+        if (userName == null || userName.trim().isEmpty()) {
+            result.add("Invalid argument");
+            result.add("containermgrGetUserLevel <user_name>");
+            return result;
+        }
+        result.add("User " + userName + " has level: " + this.getUserLevel(userName));
+        return result;
+    }
+    public List<String> containermgrGetUserResources(String arg1) {
+        List<String> result = new ArrayList<String>();
+        String userName = arg1;
+        if (userName == null || userName.trim().isEmpty()) {
+            result.add("Invalid argument");
+            result.add("containermgrGetUserResources <user_name>");
+            return result;
+        }
+        result.add("User " + userName + " owns the following resources: ");
+        Set<Resource> resources = this.getAllResourcesforUser(userName);
+        for (Resource resource : resources) {
+            result.add(resource.toString());
+        }
+        return result;
+    }
+    public List<String> saveConfig() {
+        List<String> result = new ArrayList<String>();
+        Status status = new Status(StatusCode.NOSERVICE, "Configuration service not reachable");
+
+        IConfigurationService configService = (IConfigurationService) ServiceHelper.getGlobalInstance(
+                IConfigurationService.class, this);
+        if (configService != null) {
+            status = configService.saveConfigurations();
+        }
+        result.add(status.toString());
+        return result;
     }
 }

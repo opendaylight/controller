@@ -5,7 +5,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../opendaylight/commons/opendaylight</relativePath>
+    <relativePath>../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>controller-features</artifactId>
   <packaging>pom</packaging>

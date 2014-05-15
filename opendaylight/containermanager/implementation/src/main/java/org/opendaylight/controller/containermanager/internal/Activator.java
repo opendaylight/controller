@@ -10,11 +10,14 @@
 package org.opendaylight.controller.containermanager.internal;
 
 import org.eclipse.osgi.framework.console.CommandProvider;
+
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Hashtable;
+
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.containermanager.IContainerManagerShell;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
@@ -124,7 +127,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                             CommandProvider.class.getName(),
                             IContainerInternal.class.getName(),
                             IContainerAuthorization.class.getName(),
-                            ICacheUpdateAware.class.getName()}, props);
+                            ICacheUpdateAware.class.getName(),
+                            IContainerManagerShell.class.getName()}, props);
 
             c.add(createServiceDependency()
                     .setService(IClusterGlobalServices.class)
