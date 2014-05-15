@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a05fb6e4",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/IConnectionManagerShell.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "Please use proper accessor method conventions : setScheme",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c062faac",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/IConnectionManagerShell.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "I would prefer not even have this method. But have IConnectionManagerShell extend from IConnectionManager. which already has methods for getLocalNodes() and getNodes().",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0068e285",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "Method name change as commented on the interface.",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e06cde9e",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "Please remove all the commented out lines.",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a006d6cc",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "Method name change. Or even consider move this method completely into the Shell implementation class (PrintNodes.java) which will use the getLocalNodes() and getNodes().",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6010ce01",
+        "filename": "opendaylight/connectionmanager/shell/src/main/java/org/opendaylight/controller/connectionmanager/shell/PrintNodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": "Please change this appropriately based on the previous comments on the other files",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c0099ade",
+        "filename": "opendaylight/connectionmanager/shell/src/main/java/org/opendaylight/controller/connectionmanager/shell/PrintNodes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": ":) Is it a copy/paste mistake ? pls change the method name to be more appropriate.\nHow is the DI work here ? Is it part of the Felix gogo support ?",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8013920c",
+        "filename": "opendaylight/connectionmanager/shell/src/main/java/org/opendaylight/controller/connectionmanager/shell/Scheme.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-15T19:34:18Z",
+      "side": 1,
+      "message": ":) Is it a copy/paste mistake ? pls change the method name to be more appropriate.",
+      "revId": "d49ac549a1297046fce12501c15517d05e5d2ee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
