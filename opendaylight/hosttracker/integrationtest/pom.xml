@@ -105,6 +105,28 @@
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
     </dependency>
+    <!-- Pax Exam version you would like to use. At least 2.2.x is required. -->
+    <!--  <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit4</artifactId>
+      <version>3.4.0</version>
+      <scope>test</scope>
+    </dependency>-->
+    <!-- in order to run the tests on karaf -->
+    <dependency>
+      <groupId>org.apache.karaf</groupId>
+      <artifactId>apache-karaf</artifactId>
+      <version>2.3.5</version>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
+    <!-- Karaf Test Framework Version -->
+    <dependency>
+      <groupId>org.apache.karaf.tooling.exam</groupId>
+      <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
+      <version>2.3.5</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Add Pax Exam -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
@@ -119,6 +141,12 @@
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-link-mvn</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-spi</artifactId>
+      <version>3.4.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
