@@ -137,11 +137,9 @@ public class ModificationMetadataTreeTest {
 
     @Test
     public void basicReadWrites() {
-        MutableDataTree modificationTree = MutableDataTree.from(
-                DataAndMetadataSnapshot.builder() //
-                        .setMetadataTree(StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))) //
-                        .setSchemaContext(schemaContext) //
-                        .build(), new SchemaAwareApplyOperationRoot(schemaContext));
+        MutableDataTree modificationTree = MutableDataTree.from(new DataTree.Snapshot(schemaContext,
+                StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))),
+                new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.read(OUTER_LIST_2_PATH);
         assertTrue(originalBarNode.isPresent());
         assertSame(BAR_NODE, originalBarNode.get());
@@ -166,7 +164,7 @@ public class ModificationMetadataTreeTest {
         /**
          * Creates empty Snapshot with associated schema context.
          */
-        DataAndMetadataSnapshot emptySnapshot = DataAndMetadataSnapshot.createEmpty(schemaContext);
+        DataTree t = DataTree.create(schemaContext);
 
         /**
          *
@@ -174,7 +172,7 @@ public class ModificationMetadataTreeTest {
          * context.
          *
          */
-        MutableDataTree modificationTree = MutableDataTree.from(emptySnapshot, new SchemaAwareApplyOperationRoot(
+        MutableDataTree modificationTree = MutableDataTree.from(t.takeSnapshot(), new SchemaAwareApplyOperationRoot(
                 schemaContext));
         return modificationTree;
     }
