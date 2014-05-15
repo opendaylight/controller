@@ -166,7 +166,16 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     protected void checkMergeApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
         Optional<StoreMetadataNode> original = modification.getOriginal();
         if (original.isPresent() && current.isPresent()) {
-            checkNotConflicting(path,original.get(), current.get());
+            /*
+             * We need to do conflict detection only and only if the value of leaf changed
+             * before two transactions. If value of leaf is unchanged between two transactions
+             * it should not cause transaction to fail, since result of this merge
+             * leads to same data.
+             */
+            if(!original.get().getData().equals(current.get().getData())) {
+
+                checkNotConflicting(path,original.get(), current.get());
+            }
         }
     }
 
