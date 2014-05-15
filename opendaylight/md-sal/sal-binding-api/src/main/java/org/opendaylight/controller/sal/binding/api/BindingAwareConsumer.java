@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
  * component of the controller or application supplies a concrete implementation
  * of this interface.
  * 
- * A user-implemented component (application) which faciliates the SAL and SAL
+ * A user-implemented component (application) which facilitates the SAL and SAL
  * services to access infrastructure services or providers' functionality.
  * 
  * 

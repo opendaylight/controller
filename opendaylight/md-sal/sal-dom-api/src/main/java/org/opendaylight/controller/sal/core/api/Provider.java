@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
  * of this interface.
  * 
  * <p>
- * A user-implemented component (application) which faciliates the SAL and SAL
+ * A user-implemented component (application) which facilitates the SAL and SAL
  * services to access infrastructure services and to provide functionality to
  * {@link Consumer}s and other providers.
  * 
