@@ -42,6 +42,7 @@
     <module>opendaylight/usermanager/implementation</module>
     <module>opendaylight/connectionmanager/api</module>
     <module>opendaylight/connectionmanager/implementation</module>
+    <module>opendaylight/connectionmanager/shell</module>
     <module>opendaylight/security</module>
 
     <!-- third-parties uncomment them if you need snapshot version of it -->
