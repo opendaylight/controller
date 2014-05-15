@@ -16,6 +16,23 @@
       "revId": "450d83efff34a26e3844444d519757455f6c89fc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fa2a518f",
+        "filename": "opendaylight/commons/checkstyle/src/main/resources/controller/copyright.header",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 590
+      },
+      "writtenOn": "2014-05-15T14:14:10Z",
+      "side": 1,
+      "message": "regXboi: I think that the above line needs to be\n^ \\* Copyright .* \\d\\d\\d\\d(-\\d\\d\\d\\d)? .*?\\bAll rights reserved\\b.*?$",
+      "revId": "450d83efff34a26e3844444d519757455f6c89fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
