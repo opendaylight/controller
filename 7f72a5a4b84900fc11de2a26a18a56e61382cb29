@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b8a05491",
+        "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-15T00:32:21Z",
+      "side": 1,
+      "message": "This design only allows for a single ping to be running at a time. Not sure of the best way to solve this problem but probably worth giving that some thought to make sure we illustraite a best practice. \n\nIf you want to get out the status in an async request, perhaps maintain an internal map of values, and return an ID from the async ping start method. And then implement another method to retrieve the result by ID?",
+      "revId": "7f72a5a4b84900fc11de2a26a18a56e61382cb29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f85d7cea",
+        "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-15T00:32:21Z",
+      "side": 1,
+      "message": "currDestination is not thread safe.",
+      "revId": "7f72a5a4b84900fc11de2a26a18a56e61382cb29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d858b8fc",
+        "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-15T00:32:21Z",
+      "side": 1,
+      "message": "currResult is not thread safe here. If this method gets called twice you will have concurrency issues.",
+      "revId": "7f72a5a4b84900fc11de2a26a18a56e61382cb29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
