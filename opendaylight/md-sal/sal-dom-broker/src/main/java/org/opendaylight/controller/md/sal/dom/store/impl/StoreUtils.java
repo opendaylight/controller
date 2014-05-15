@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 
 public final class StoreUtils {
+    private static final int STRINGTREE_INDENT = 4;
 
     private final static Function<Identifiable<Object>, Object> EXTRACT_IDENTIFIER = new Function<Identifiable<Object>, Object>() {
         @Override
@@ -36,6 +37,10 @@ public final class StoreUtils {
             return input.getIdentifier();
         }
     };
+
+    private StoreUtils() {
+        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
 
     public static final UnsignedLong increase(final UnsignedLong original) {
         return original.plus(UnsignedLong.ONE);
@@ -107,24 +112,27 @@ public final class StoreUtils {
         return FluentIterable.from(children).transform(StoreUtils.<V> identifierExtractor()).toSet();
     }
 
-    public static String toStringTree(final StoreMetadataNode metaNode) {
+    public static String toStringTree(final NormalizedNode<?, ?> node) {
         StringBuilder builder = new StringBuilder();
-        toStringTree(builder, metaNode, 0);
+        toStringTree(builder, node, 0);
         return builder.toString();
     }
 
-    private static void toStringTree(final StringBuilder builder, final StoreMetadataNode metaNode, final int offset) {
-        String prefix = Strings.repeat(" ", offset);
-        builder.append(prefix).append(toStringTree(metaNode.getIdentifier()));
-        NormalizedNode<?, ?> dataNode = metaNode.getData();
-        if (dataNode instanceof NormalizedNodeContainer<?, ?, ?>) {
+    private static void toStringTree(final StringBuilder builder, final NormalizedNode<?, ?> node, final int offset) {
+        final String prefix = Strings.repeat(" ", offset);
+
+        builder.append(prefix).append(toStringTree(node.getIdentifier()));
+        if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
+            final NormalizedNodeContainer<?, ?, ?> container = (NormalizedNodeContainer<?, ?, ?>) node;
+
             builder.append(" {\n");
-            for (StoreMetadataNode child : metaNode.getChildren()) {
-                toStringTree(builder, child, offset + 4);
+            for (NormalizedNode<?, ?> child : container.getValue()) {
+                toStringTree(builder, child, offset + STRINGTREE_INDENT);
             }
+
             builder.append(prefix).append('}');
         } else {
-            builder.append(' ').append(dataNode.getValue());
+            builder.append(' ').append(node.getValue());
         }
         builder.append('\n');
     }
