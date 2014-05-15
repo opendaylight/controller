@@ -1,5 +1,3 @@
-
-
 package org.opendaylight.controller.config.yang.test.impl;
 public class IdentityTestModule extends org.opendaylight.controller.config.yang.test.impl.AbstractIdentityTestModule {
     public IdentityTestModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {

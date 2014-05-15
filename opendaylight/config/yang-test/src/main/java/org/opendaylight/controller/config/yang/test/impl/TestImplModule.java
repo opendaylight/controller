@@ -1,5 +1,3 @@
-
-
 package org.opendaylight.controller.config.yang.test.impl;
 public class TestImplModule extends org.opendaylight.controller.config.yang.test.impl.AbstractTestImplModule {
     public TestImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
