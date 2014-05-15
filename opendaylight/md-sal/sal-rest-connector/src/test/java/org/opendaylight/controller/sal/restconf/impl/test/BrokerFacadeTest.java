@@ -8,12 +8,18 @@
 
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Future;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -212,18 +218,20 @@ public class BrokerFacadeTest {
         inOrder.verify( mockTransaction ).commit();
     }
 
-    @Test
+    @Test(expected=ResponseException.class)
     public void testCommitConfigurationDataPostAlreadyExists() {
         when( dataBroker.beginTransaction() ).thenReturn( mockTransaction );
         mockTransaction.putConfigurationData( instanceID, dataNode );
-        when( mockTransaction.getCreatedConfigurationData() )
-            .thenReturn( Collections.<InstanceIdentifier,CompositeNode>emptyMap() );
-
-        Future<RpcResult<TransactionStatus>> actualFuture =
-                             brokerFacade.commitConfigurationDataPost( instanceID, dataNode );
-
-        assertNull( "Retruned non-null Future", actualFuture );
-        verify( mockTransaction, never() ).commit();
+        when ( mockTransaction.readConfigurationData( instanceID ) )
+            .thenReturn( dataNode );
+        try {
+            brokerFacade.commitConfigurationDataPost( instanceID, dataNode );
+        } catch (ResponseException e) {
+            assertEquals("Unexpect Exception Status -> "
+                    + "http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48",
+                    (e.getResponse().getStatus()), Status.CONFLICT.getStatusCode());
+            throw e;
+        }
     }
 
     @Test
@@ -251,20 +259,22 @@ public class BrokerFacadeTest {
         inOrder.verify( mockTransaction ).commit();
     }
 
-    @Test
+    @Test(expected=ResponseException.class)
     public void testCommitConfigurationDataPostBehindMountPointAlreadyExists() {
 
         when( mockMountInstance.beginTransaction() ).thenReturn( mockTransaction );
         mockTransaction.putConfigurationData( instanceID, dataNode );
-        when( mockTransaction.getCreatedConfigurationData() )
-            .thenReturn( Collections.<InstanceIdentifier,CompositeNode>emptyMap() );
-
-        Future<RpcResult<TransactionStatus>> actualFuture =
-                brokerFacade.commitConfigurationDataPostBehindMountPoint( mockMountInstance,
-                                                                          instanceID, dataNode );
-
-        assertNull( "Retruned non-null Future", actualFuture );
-        verify( mockTransaction, never() ).commit();
+        when ( mockTransaction.readConfigurationData( instanceID ) )
+            .thenReturn( dataNode );
+        try {
+            brokerFacade.commitConfigurationDataPostBehindMountPoint( mockMountInstance,
+                    instanceID, dataNode );
+        } catch (ResponseException e) {
+            assertEquals("Unexpect Exception Status -> "
+                    + "http://tools.ietf.org/html/draft-bierman-netconf-restconf-03#page-48",
+                    e.getResponse().getStatus(), Status.CONFLICT.getStatusCode());
+            throw e;
+        }
     }
 
     @Test
