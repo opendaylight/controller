@@ -39,7 +39,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>base-features</artifactId>
       <version>${project.version}</version>
-      <type>kar</type>
+      <type>pom</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
