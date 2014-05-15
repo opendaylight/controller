@@ -66,13 +66,8 @@ class DataAndMetadataSnapshot {
     }
 
     public static class Builder {
-        private NormalizedNode<?, ?> dataTree;
         private StoreMetadataNode metadataTree;
         private SchemaContext schemaContext;
-
-        public NormalizedNode<?, ?> getDataTree() {
-            return dataTree;
-        }
 
         public Builder setMetadataTree(final StoreMetadataNode metadataTree) {
             this.metadataTree = metadataTree;
