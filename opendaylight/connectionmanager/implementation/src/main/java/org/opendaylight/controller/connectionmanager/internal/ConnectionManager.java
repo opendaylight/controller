@@ -37,6 +37,7 @@ import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.connectionmanager.IConnectionManagerShell;
 import org.opendaylight.controller.connectionmanager.scheme.AbstractScheme;
 import org.opendaylight.controller.connectionmanager.scheme.SchemeFactory;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConnectionManager implements IConnectionManager,
         IConnectionListener, ICoordinatorChangeAware, IListenInventoryUpdates,
-        ICacheUpdateAware<Node, Set<InetAddress>>, CommandProvider {
+        ICacheUpdateAware<Node, Set<InetAddress>>, CommandProvider, IConnectionManagerShell {
     private static final Logger logger = LoggerFactory
             .getLogger(ConnectionManager.class);
     private ConnectionMgmtScheme activeScheme = ConnectionMgmtScheme.ANY_CONTROLLER_ONE_MASTER;
@@ -447,5 +448,18 @@ public class ConnectionManager implements IConnectionManager,
         if (scheme == null)
             return Collections.emptySet();
         return scheme.getControllers(node);
+    }
+
+    @Override
+    public String setScheme(String schemeStr) {
+        if (schemeStr == null) {
+            return activeScheme.name();
+        }
+        ConnectionMgmtScheme scheme = ConnectionMgmtScheme.valueOf(schemeStr);
+        if (scheme == null) {
+            return null;
+        }
+        activeScheme = scheme;
+        return activeScheme.name();
     }
 }
