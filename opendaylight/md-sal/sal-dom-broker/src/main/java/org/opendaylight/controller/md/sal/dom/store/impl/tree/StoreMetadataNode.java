@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -21,7 +21,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.primitives.UnsignedLong;
 
 public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreTreeNode<StoreMetadataNode> {
@@ -82,10 +81,6 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         return this.data;
     }
 
-    public Iterable<StoreMetadataNode> getChildren() {
-        return Iterables.unmodifiableIterable(children.values());
-    }
-
     @Override
     public Optional<StoreMetadataNode> getChild(final PathArgument key) {
         return Optional.fromNullable(children.get(key));
@@ -137,11 +132,11 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
         private boolean dirty = false;
 
         private Builder() {
-            children = new LinkedHashMap<>();
+            children = new HashMap<>();
         }
 
         public Builder(StoreMetadataNode node) {
-            children = new LinkedHashMap<>(node.children);
+            children = new HashMap<>(node.children);
         }
 
         public UnsignedLong getVersion() {
@@ -166,7 +161,7 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
 
         public Builder add(final StoreMetadataNode node) {
             if (dirty) {
-                children = new LinkedHashMap<>(children);
+                children = new HashMap<>(children);
                 dirty = false;
             }
             children.put(node.getIdentifier(), node);
@@ -175,7 +170,7 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
 
         public Builder remove(final PathArgument id) {
             if (dirty) {
-                children = new LinkedHashMap<>(children);
+                children = new HashMap<>(children);
                 dirty = false;
             }
             children.remove(id);
