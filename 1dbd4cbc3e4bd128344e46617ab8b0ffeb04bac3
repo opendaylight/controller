@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_40226a02",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-05-15T21:03:52Z",
+      "side": 1,
+      "message": "Please move this into the if block, you only need it there when you are sure this instance is not the default one. Having it here is confusing.",
+      "revId": "1dbd4cbc3e4bd128344e46617ab8b0ffeb04bac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_600d2e90",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-05-15T21:03:52Z",
+      "side": 1,
+      "message": "Please change the two conditions into one:\n!GlobalConstants.DEFAULT.toString().equals(containerName)",
+      "revId": "1dbd4cbc3e4bd128344e46617ab8b0ffeb04bac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
