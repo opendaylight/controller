@@ -21,6 +21,7 @@ package org.opendaylight.controller.connectionmanager.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.connectionmanager.IConnectionManagerShell;
 import org.opendaylight.controller.connectionmanager.scheme.AbstractScheme;
 import org.opendaylight.controller.connectionmanager.scheme.SchemeFactory;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
@@ -58,7 +60,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConnectionManager implements IConnectionManager,
         IConnectionListener, ICoordinatorChangeAware, IListenInventoryUpdates,
-        ICacheUpdateAware<Node, Set<InetAddress>>, CommandProvider {
+        ICacheUpdateAware<Node, Set<InetAddress>>, CommandProvider, IConnectionManagerShell {
     private static final Logger logger = LoggerFactory
             .getLogger(ConnectionManager.class);
     private ConnectionMgmtScheme activeScheme = ConnectionMgmtScheme.ANY_CONTROLLER_ONE_MASTER;
@@ -447,5 +449,57 @@ public class ConnectionManager implements IConnectionManager,
         if (scheme == null)
             return Collections.emptySet();
         return scheme.getControllers(node);
+    }
+
+    @Override
+    public String scheme(String schemeStr) {
+        //String schemeStr = ci.nextArgument();
+        //String schemeStr = arg;
+        if (schemeStr == null) {
+            //ci.println("Please enter valid Scheme name");
+            //ci.println("Current Scheme : " + activeScheme.name());
+            return activeScheme.name();
+        }
+        ConnectionMgmtScheme scheme = ConnectionMgmtScheme.valueOf(schemeStr);
+        if (scheme == null) {
+            //ci.println("Please enter a valid Scheme name");
+            return null;
+        }
+        activeScheme = scheme;
+        return activeScheme.name();
+    }
+
+    @Override
+    public ArrayList<String> printNodes(String controller) {
+        //String controller = arg;
+        ArrayList<String> nodes = new ArrayList<String>();
+        if (controller == null) {
+            //ci.println("Nodes connected to this controller : ");
+            if (this.getLocalNodes() == null) {
+                //ci.println("None");
+                return nodes;
+            } else {
+                nodes.add(this.getLocalNodes().toString());
+                return nodes;
+                //ci.println(this.getLocalNodes().toString());
+            }
+            //return;
+        }
+        try {
+            InetAddress address = InetAddress.getByName(controller);
+            //ci.println("Nodes connected to controller " + controller);
+            if (this.getNodes(address) == null) {
+                //ci.println("None");
+                return nodes;
+            } else {
+                nodes.add(this.getNodes(address).toString());
+                //ci.println(this.getNodes(address).toString());
+                return nodes;
+            }
+        } catch (UnknownHostException e) {
+            logger.error("An error occured", e);
+        }
+
+        return nodes;
     }
 }
