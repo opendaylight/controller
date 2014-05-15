@@ -152,7 +152,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 .getSubtreeVersion(), newDataTree.getSubtreeVersion());
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Data Tree is {}", StoreUtils.toStringTree(newDataTree));
+            LOG.trace("Data Tree is {}", StoreUtils.toStringTree(newDataTree.getData()));
         }
 
         final DataAndMetadataSnapshot newSnapshot = DataAndMetadataSnapshot.builder() //
