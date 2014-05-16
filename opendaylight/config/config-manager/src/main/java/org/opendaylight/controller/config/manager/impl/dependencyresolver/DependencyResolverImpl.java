@@ -7,6 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
+import static java.lang.String.format;
+
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -25,14 +38,6 @@ import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.ObjectName;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static java.lang.String.format;
-
 /**
  * Protect {@link org.opendaylight.controller.config.spi.Module#getInstance()}
  * by creating proxy that would throw exception if those methods are called
@@ -49,15 +54,20 @@ final class DependencyResolverImpl implements DependencyResolver,
     private final Set<ModuleIdentifier> dependencies = new HashSet<>();
     private final ServiceReferenceReadableRegistry readableRegistry;
     private final CodecRegistry codecRegistry;
+    private final String transactionName;
+    private final MBeanServer mBeanServer;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
                            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
-                           ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry) {
+                           ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry,
+                           String transactionName, MBeanServer mBeanServer) {
         this.codecRegistry = codecRegistry;
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
         this.readableRegistry = readableRegistry;
+        this.transactionName = transactionName;
+        this.mBeanServer = mBeanServer;
     }
 
     /**
@@ -80,7 +90,8 @@ final class DependencyResolverImpl implements DependencyResolver,
 
         JmxAttributeValidationException.checkNotNull(dependentReadOnlyON,
                 "is null, expected dependency implementing "
-                        + expectedServiceInterface, jmxAttribute);
+                        + expectedServiceInterface, jmxAttribute
+        );
 
 
         // check that objectName belongs to this transaction - this should be
@@ -91,8 +102,10 @@ final class DependencyResolverImpl implements DependencyResolver,
         JmxAttributeValidationException.checkCondition(
                 hasTransaction == false,
                 format("ObjectName should not contain "
-                        + "transaction name. %s set to %s. ", jmxAttribute,
-                        dependentReadOnlyON), jmxAttribute);
+                                + "transaction name. %s set to %s. ", jmxAttribute,
+                        dependentReadOnlyON
+                ), jmxAttribute
+        );
 
         dependentReadOnlyON = translateServiceRefIfPossible(dependentReadOnlyON);
 
@@ -110,7 +123,8 @@ final class DependencyResolverImpl implements DependencyResolver,
                             + "attribute %s",
                     foundFactory.getImplementationName(), foundFactory,
                     expectedServiceInterface, dependentReadOnlyON,
-                    jmxAttribute);
+                    jmxAttribute
+            );
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
         synchronized (this) {
@@ -157,7 +171,8 @@ final class DependencyResolverImpl implements DependencyResolver,
             String message = format(
                     "Error while %s resolving instance %s. getInstance() returned null. "
                             + "Expected type %s , attribute %s", name,
-                    dependentModuleIdentifier, expectedType, jmxAttribute);
+                    dependentModuleIdentifier, expectedType, jmxAttribute
+            );
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
         try {
@@ -166,7 +181,8 @@ final class DependencyResolverImpl implements DependencyResolver,
             String message = format(
                     "Instance cannot be cast to expected type. Instance class is %s , "
                             + "expected type %s , attribute %s",
-                    instance.getClass(), expectedType, jmxAttribute);
+                    instance.getClass(), expectedType, jmxAttribute
+            );
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
     }
@@ -258,4 +274,20 @@ final class DependencyResolverImpl implements DependencyResolver,
         return name;
     }
 
+    @Override
+    public Object getAttribute(ObjectName name, String attribute)
+            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+        name = translateServiceRefIfPossible(name);
+        // add transaction name
+        name = ObjectNameUtil.withTransactionName(name, transactionName);
+        return mBeanServer.getAttribute(name, attribute);
+    }
+
+    @Override
+    public <T> T newMXBeanProxy(ObjectName name, Class<T> interfaceClass) {
+        name = translateServiceRefIfPossible(name);
+        // add transaction name
+        name = ObjectNameUtil.withTransactionName(name, transactionName);
+        return JMX.newMXBeanProxy(mBeanServer, name, interfaceClass);
+    }
 }

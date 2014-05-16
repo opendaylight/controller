@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -43,8 +44,6 @@ import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * This is a JMX bean representing current transaction. It contains
  * transaction identifier, unique version and parent version for
@@ -96,7 +95,7 @@ class ConfigTransactionControllerImpl implements
         this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
         this.dependencyResolverManager = new DependencyResolverManager(txLookupRegistry.getTransactionIdentifier(),
-                transactionStatus, writableSRRegistry, codecRegistry);
+                transactionStatus, writableSRRegistry, codecRegistry, transactionsMBeanServer);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
         this.blankTransaction = blankTransaction;

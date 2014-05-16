@@ -21,6 +21,9 @@ public class JmxAttribute {
         this.attributeName = attributeName;
     }
 
+    /**
+     * Name of attribute in JMX.
+     */
     public String getAttributeName() {
         return attributeName;
     }
