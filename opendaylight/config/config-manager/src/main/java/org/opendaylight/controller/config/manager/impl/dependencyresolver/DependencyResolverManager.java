@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
@@ -45,19 +46,25 @@ import org.osgi.framework.BundleContext;
 public class DependencyResolverManager implements DependencyResolverFactory, AutoCloseable {
     @GuardedBy("this")
     private final Map<ModuleIdentifier, DependencyResolverImpl> moduleIdentifiersToDependencyResolverMap = new HashMap<>();
+    private final TransactionIdentifier transactionIdentifier;
     private final ModulesHolder modulesHolder;
     private final TransactionStatus transactionStatus;
     private final ServiceReferenceReadableRegistry readableRegistry;
     private final CodecRegistry codecRegistry;
     private final DeadlockMonitor deadlockMonitor;
+    private final MBeanServer mBeanServer;
 
     public DependencyResolverManager(TransactionIdentifier transactionIdentifier,
-                                     TransactionStatus transactionStatus, ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry) {
+                                     TransactionStatus transactionStatus,
+                                     ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry,
+                                     MBeanServer mBeanServer) {
+        this.transactionIdentifier = transactionIdentifier;
         this.modulesHolder = new ModulesHolder(transactionIdentifier);
         this.transactionStatus = transactionStatus;
         this.readableRegistry = readableRegistry;
         this.codecRegistry = codecRegistry;
         this.deadlockMonitor = new DeadlockMonitor(transactionIdentifier);
+        this.mBeanServer = mBeanServer;
     }
 
     @Override
@@ -69,7 +76,8 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         DependencyResolverImpl dependencyResolver = moduleIdentifiersToDependencyResolverMap.get(name);
         if (dependencyResolver == null) {
             transactionStatus.checkNotCommitted();
-            dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry, codecRegistry);
+            dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry,
+                    codecRegistry, transactionIdentifier.getName(), mBeanServer);
             moduleIdentifiersToDependencyResolverMap.put(name, dependencyResolver);
         }
         return dependencyResolver;

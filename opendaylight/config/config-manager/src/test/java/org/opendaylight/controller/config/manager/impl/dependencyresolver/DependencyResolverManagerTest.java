@@ -21,6 +21,7 @@ import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
 import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
@@ -29,7 +30,7 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-public class DependencyResolverManagerTest {
+public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanServerTest {
 
     final ModuleIdentifier apspName = new ModuleIdentifier("apsp", "apsp"); // depends
                                                                             // on:
@@ -45,7 +46,8 @@ public class DependencyResolverManagerTest {
     public void setUp() {
         transactionStatus = mock(TransactionStatus.class);
         ServiceReferenceReadableRegistry mockedRegistry = mock(ServiceReferenceReadableRegistry.class);
-        tested = new DependencyResolverManager(new TransactionIdentifier("txName"), transactionStatus, mockedRegistry, null);
+        tested = new DependencyResolverManager(new TransactionIdentifier("txName"), transactionStatus, mockedRegistry,
+                null, platformMBeanServer);
         doNothing().when(transactionStatus).checkCommitStarted();
         doNothing().when(transactionStatus).checkNotCommitted();
     }

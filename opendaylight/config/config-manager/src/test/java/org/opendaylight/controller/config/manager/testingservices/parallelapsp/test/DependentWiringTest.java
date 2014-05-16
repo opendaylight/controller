@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.internal.matchers.StringContains.containsString;
+
+import java.util.Map;
+import javax.management.ObjectName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,19 +25,11 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPImpl;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-
-import javax.management.ObjectName;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.internal.matchers.StringContains.containsString;
 
 public class DependentWiringTest extends AbstractParallelAPSPTest {
     private final String fixed1 = "fixed1";
@@ -130,6 +130,19 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
         // new reference should be copied to apsp-parallel
         assertEquals((Integer) newNumberOfThreads,
                 parallelAPSPRuntimeProxy.getMaxNumberOfThreads());
+
+    }
+
+    @Test
+    public void testUsingServiceReferences() throws Exception {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName threadPoolON = createFixed1(transaction, 10);
+                transaction.lookupConfigBean(getThreadPoolImplementationName(), fixed1);
+        String refName = "ref";
+        ObjectName serviceReferenceON = transaction.saveServiceReference(TestingThreadPoolServiceInterface.QNAME, refName,
+                threadPoolON);
+        createParallelAPSP(transaction, serviceReferenceON);
+        transaction.commit();
 
     }
 }
