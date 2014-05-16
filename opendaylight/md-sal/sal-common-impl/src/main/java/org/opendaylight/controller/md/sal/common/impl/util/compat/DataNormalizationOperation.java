@@ -83,6 +83,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     public abstract NormalizedNode<?, ?> normalize(Node<?> legacyData);
 
+    public abstract boolean isLeaf();
+
     private static abstract class SimpleTypeNormalization<T extends PathArgument> extends DataNormalizationOperation<T> {
 
         protected SimpleTypeNormalization(final T identifier) {
@@ -111,6 +113,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return null;
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return true;
         }
 
     }
@@ -197,6 +204,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
                 }
             }
             return builder.build();
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
         }
 
         @SuppressWarnings("rawtypes")
