@@ -19,6 +19,11 @@
       <bundle>mvn:org.opendaylight.controller/sal.connection/${sal.connection.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal.connection.implementation/${sal.connection.version}</bundle>
    </feature>
+   <feature name="odl-sal-shell" description="SAL shell commands" version="${sal.shell.version}">
+       <feature>odl-sal</feature>
+       <bundle>mvn:org.opendaylight.controller/sal/${sal.version}</bundle>
+       <bundle>mvn:org.opendaylight.controller/sal.shell/${sal.shell.version}</bundle>
+   </feature>
    <feature name="odl-controller-web" description="Controller Web Interface" version="${project.version}">
       <feature>odl-managers</feature>
       <feature>base-tomcat</feature>

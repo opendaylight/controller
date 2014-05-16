@@ -15,6 +15,7 @@ import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
+import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerServiceShell;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IInventoryService;
@@ -29,6 +30,7 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.reader.IReadServiceListener;
+import org.opendaylight.controller.sal.reader.IReadServiceShell;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
@@ -72,7 +74,9 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(
                     new String[] { IPluginOutInventoryService.class.getName(),
-                            IInventoryService.class.getName() }, props);
+                            IInventoryService.class.getName(),
+                            IFlowProgrammerServiceShell.class.getName(),
+                            IReadServiceShell.class.getName()}, props);
 
             // Now lets add a service dependency to make sure the
             // provider of service exists

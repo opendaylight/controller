@@ -1,0 +1,64 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="salFlowProgrammerServiceShellRef" interface="org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerServiceShell"/>
+    <reference id="salReadServiceShellRef" interface="org.opendaylight.controller.sal.reader.IReadServiceShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+    <!-- sal.FlowProgrammerService shell -->
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.AddFlow">
+          <property name="salFlow" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.AddFlowV6">
+          <property name="salFlow" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ModifyFlow">
+          <property name="salFlow" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.RemoveFlow">
+          <property name="salFlow" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.RemoveFlowV6">
+          <property name="salFlow" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <!-- sal.ReadService shell -->
+        <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadFlows">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadPorts">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadPort">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadTable">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadDescr">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.sal.shell.ReadFlow">
+          <property name="salReader" ref="salReadServiceShellRef"/>
+       </action>
+    </command>
+    </command-bundle>
+</blueprint>
