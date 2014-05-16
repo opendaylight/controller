@@ -39,6 +39,7 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.reader.IReadServiceListener;
+import org.opendaylight.controller.sal.reader.IReadServiceShell;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * The SAL Read Service. Dispatches read requests to the proper SDN protocol
  * plugin, and notifies any listeners on updates from any plugin readers
  */
-public class ReadService implements IReadService, CommandProvider, IPluginOutReadService {
+public class ReadService implements IReadService, CommandProvider, IPluginOutReadService, IReadServiceShell {
 
     protected static final Logger logger = LoggerFactory.getLogger(ReadService.class);
     private ConcurrentHashMap<String, IPluginInReadService> pluginReader =
@@ -605,5 +606,10 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
         actions.add(new Flood());
         actions.add(new Controller());
         return new Flow(match, actions);
+    }
+
+    @Override
+    public Flow getFlow(Node node) throws UnknownHostException {
+        return this.getSampleFlow(node);
     }
 }
