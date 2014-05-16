@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ea3c34e",
+        "filename": "opendaylight/karaf-branding/src/main/resources/org/apache/karaf/branding/branding.properties",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-16T16:17:12Z",
+      "side": 1,
+      "message": "Why is this Apache License header here?",
+      "revId": "46e0fea9bd73881c4011482aa6cae87db19a6bfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
