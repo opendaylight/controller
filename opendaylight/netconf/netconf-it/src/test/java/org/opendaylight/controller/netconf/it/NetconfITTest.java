@@ -269,11 +269,11 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
             final String expectedNamespace = "urn:opendaylight:params:xml:ns:yang:controller:test:impl";
 
             final String rpc = "<rpc message-id=\"5\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">"
-                    + "<no-arg xmlns=\""
+                    + "<no-output xmlns=\""
                     + expectedNamespace
                     + "\">    "
                     + "<context-instance>/modules/module[type='impl-netconf'][name='instance']</context-instance>"
-                    + "<arg1>argument1</arg1>" + "</no-arg>" + "</rpc>";
+                    + "<arg1>argument1</arg1>" + "</no-output>" + "</rpc>";
             final Document doc = XmlUtil.readXmlToDocument(rpc);
             final NetconfMessage message = netconfClient.sendMessage(new NetconfMessage(doc));
 

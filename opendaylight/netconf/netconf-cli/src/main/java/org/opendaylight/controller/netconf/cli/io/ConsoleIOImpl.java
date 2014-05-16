@@ -1,0 +1,92 @@
+package org.opendaylight.controller.netconf.cli.io;
+
+import static org.opendaylight.controller.netconf.cli.io.IOUtil.PATH_SEPARATOR;
+import static org.opendaylight.controller.netconf.cli.io.IOUtil.PROMPT_PREFIX;
+import static org.opendaylight.controller.netconf.cli.io.IOUtil.PROMPT_SUFIX;
+
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
+
+import jline.console.ConsoleReader;
+import jline.console.completer.Completer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ConsoleIOImpl implements ConsoleIO {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConsoleIOImpl.class);
+
+    private final ConsoleReader console;
+    protected Deque<ConsoleContext> contexts = new ArrayDeque<>();
+
+    public ConsoleIOImpl() throws IOException {
+        console = new ConsoleReader();
+        console.setHandleUserInterrupt(true);
+        console.setPaginationEnabled(true);
+        console.setHistoryEnabled(true);
+    }
+
+    @Override
+    public String read() throws IOException {
+        return console.readLine().trim();
+    }
+
+    @Override
+    public void write(final CharSequence data) throws IOException {
+        console.print(data);
+        console.flush();
+    }
+
+    @Override
+    public void writeLn(final CharSequence data) throws IOException {
+        console.println(data);
+        console.flush();
+    }
+
+    @Override
+    public ConsoleContext getContext() {
+        return contexts.peek();
+    }
+
+    @Override
+    public void enterContext(final ConsoleContext consoleContext) {
+        contexts.push(consoleContext);
+        setCompleter(consoleContext.getCompleter());
+        console.setPrompt(buildPrompt());
+    }
+
+    @Override
+    public void leaveContext() {
+        contexts.pop();
+    }
+
+    protected String buildPrompt() {
+        final StringBuilder newPrompt = new StringBuilder();
+        newPrompt.append(PROMPT_PREFIX);
+        newPrompt.append(contexts.isEmpty() ? "" : "(");
+
+        for (final ConsoleContext consoleContext : contexts) {
+            final String promptPart = consoleContext.getPrompt();
+            if (promptPart != null) {
+                newPrompt.append(PATH_SEPARATOR);
+                newPrompt.append(promptPart);
+            }
+        }
+        newPrompt.append(contexts.isEmpty() ? "" : ")");
+        newPrompt.append(PROMPT_SUFIX);
+
+        return newPrompt.toString();
+    }
+
+    private void setCompleter(final Completer newCompleter) {
+        final Collection<Completer> completers = console.getCompleters();
+        for (final Completer concreteCompleter : completers) {
+            console.removeCompleter(concreteCompleter);
+        }
+        console.addCompleter(newCompleter);
+    }
+
+}
