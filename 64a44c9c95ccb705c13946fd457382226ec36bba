@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a3c82023",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/util/NetconfMessageTransformUtil.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-05-16T09:00:28Z",
+      "side": 1,
+      "message": "Enforce noninstantiability with a private constructor",
+      "revId": "64a44c9c95ccb705c13946fd457382226ec36bba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a3efc086",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/util/RemoteDeviceId.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-05-16T09:00:28Z",
+      "side": 1,
+      "message": "There is BindingIndependentMappingService  in yangtools for this.You can check org.opendaylight.yangtools.restconf.client.ConfigurationDataStoreImpl for usage example.",
+      "revId": "64a44c9c95ccb705c13946fd457382226ec36bba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
