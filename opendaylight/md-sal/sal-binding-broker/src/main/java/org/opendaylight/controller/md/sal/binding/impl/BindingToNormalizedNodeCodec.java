@@ -142,6 +142,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             return potential;
         }
 
+        int normalizedCount = getAugmentationCount(normalized);
         AugmentationIdentifier lastArgument = (AugmentationIdentifier) Iterables.getLast(normalized.getPath());
 
         // Here we employ small trick - Binding-aware Codec injects an pointer
@@ -153,16 +154,19 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
                     ImmutableList.<PathArgument> builder().addAll(normalized.getPath()).add(new NodeIdentifier(child))
                             .build());
             try {
-                if (!isChoiceOrCasePath(childPath)) {
+                if (!isNotRepresentable(childPath)) {
                     InstanceIdentifier<? extends DataObject> potentialPath = shortenToLastAugment(toBindingImpl(
                             childPath).get());
-                    return Optional.<InstanceIdentifier<? extends DataObject>> of(potentialPath);
+                    int potentialAugmentCount = getAugmentationCount(potentialPath);
+                    if(potentialAugmentCount == normalizedCount) {
+                        return Optional.<InstanceIdentifier<? extends DataObject>> of(potentialPath);
+                    }
                 }
             } catch (Exception e) {
                 LOG.trace("Unable to deserialize aug. child path for {}", childPath, e);
             }
         }
-        return toBindingImpl(normalized);
+        return Optional.absent();
     }
 
     private Optional<InstanceIdentifier<? extends DataObject>> toBindingImpl(
@@ -171,7 +175,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier legacyPath;
 
         try {
-            if (isChoiceOrCasePath(normalized)) {
+            if (isNotRepresentable(normalized)) {
                 return Optional.absent();
             }
             legacyPath = legacyToNormalized.toLegacy(normalized);
@@ -183,10 +187,16 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return Optional.<InstanceIdentifier<? extends DataObject>> of(bindingToLegacy.fromDataDom(legacyPath));
     }
 
-    private boolean isChoiceOrCasePath(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+    private boolean isNotRepresentable(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
             throws DataNormalizationException {
         DataNormalizationOperation<?> op = findNormalizationOperation(normalized);
-        return op.isMixin() && op.getIdentifier() instanceof NodeIdentifier;
+        if( op.isMixin() && op.getIdentifier() instanceof NodeIdentifier) {
+            return true;
+        }
+        if(op.isLeaf()) {
+            return true;
+        }
+        return false;
     }
 
     private DataNormalizationOperation<?> findNormalizationOperation(
@@ -256,7 +266,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         if (isAugmentationIdentifier(processed)) {
             return processed;
         }
-        // Here we employ small trick - DataNormalizer injecst augmentation
+        // Here we employ small trick - DataNormalizer injects augmentation
         // identifier if child is
         // also part of the path (since using a child we can safely identify
         // augmentation)
@@ -382,5 +392,26 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
 
     private boolean isAugmentationIdentifier(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier processed) {
         return Iterables.getLast(processed.getPath()) instanceof AugmentationIdentifier;
+    }
+
+    private static int getAugmentationCount(final InstanceIdentifier<?> potential) {
+        int count = 0;
+        for(org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument arg : potential.getPathArguments()) {
+            if(isAugmentation(arg.getType())) {
+                count++;
+            }
+
+        }
+        return count;
+    }
+
+    private static int getAugmentationCount(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier potential) {
+        int count = 0;
+        for(PathArgument arg : potential.getPath()) {
+            if(arg instanceof AugmentationIdentifier) {
+                count++;
+            }
+        }
+        return count;
     }
 }
