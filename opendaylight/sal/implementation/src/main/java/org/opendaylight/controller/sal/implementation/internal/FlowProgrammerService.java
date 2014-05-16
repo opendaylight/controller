@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
+import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerServiceShell;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * received from the network node related to flow programming.
  */
 public class FlowProgrammerService implements IFlowProgrammerService,
-        IPluginOutFlowProgrammerService, CommandProvider {
+        IPluginOutFlowProgrammerService, CommandProvider, IFlowProgrammerServiceShell {
 
     protected static final Logger logger = LoggerFactory
             .getLogger(FlowProgrammerService.class);
@@ -525,5 +526,15 @@ public class FlowProgrammerService implements IFlowProgrammerService,
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
+    public Flow getFlow(Node node) throws UnknownHostException {
+        return this.getSampleFlow(node);
+    }
+
+    @Override
+    public Flow getFlowV6(Node node) throws UnknownHostException {
+        return this.getSampleFlowV6(node);
     }
 }

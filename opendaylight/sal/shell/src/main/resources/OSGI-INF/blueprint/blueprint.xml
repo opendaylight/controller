@@ -1,0 +1,64 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="salFlowProgrammerServiceShellRef" interface="org.opendaylight.controller.sal.IFlowProgrammerServiceShell"/>
+    <reference id="salTopologyShellRef" interface="org.opendaylight.controller.sal.IFlowProgrammerServiceShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+    <!-- sal.FlowProgrammerService shell -->
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.AddFlow">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.AddFlowV6">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ModifyFlow">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.RemoveFlow">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.RemoveFlowV6">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <!-- sal.ReadService shell -->
+        <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadFlows">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadPorts">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadPort">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadTable">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadDescr">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.hosttracker.shell.ReadFlow">
+          <property name="sal" ref="salFlowProgrammerServiceShellRef"/>
+       </action>
+    </command>
+    </command-bundle>
+</blueprint>
