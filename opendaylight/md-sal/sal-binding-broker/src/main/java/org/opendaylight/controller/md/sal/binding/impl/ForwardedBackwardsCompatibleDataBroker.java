@@ -35,6 +35,7 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -60,12 +61,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     private static final Logger LOG = LoggerFactory.getLogger(ForwardedBackwardsCompatibleDataBroker.class);
 
     private final ConcurrentHashMap<InstanceIdentifier<?>, CommitHandlerRegistrationImpl> commitHandlers = new ConcurrentHashMap<>();
-    private final ListenerRegistry<DataChangeListener> fakeRegistry = ListenerRegistry.create();
     private final ListeningExecutorService executorService;
 
     public ForwardedBackwardsCompatibleDataBroker(final DOMDataBroker domDataBroker,
-            final BindingIndependentMappingService mappingService, final ListeningExecutorService executor) {
-        super(domDataBroker, mappingService);
+            final BindingIndependentMappingService mappingService, final SchemaService schemaService,final ListeningExecutorService executor) {
+        super(domDataBroker, mappingService,schemaService);
         executorService = executor;
         LOG.info("ForwardedBackwardsCompatibleBroker started.");
     }
@@ -127,12 +127,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             final InstanceIdentifier<? extends DataObject> path,
             final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
         throw new UnsupportedOperationException("Data reader contract is not supported.");
-    }
-
-    @Override
-    public void close() throws Exception {
-        // TODO Auto-generated method stub
-
     }
 
     public ListenableFuture<RpcResult<TransactionStatus>> commit(final ForwardedBackwardsCompatibleTransacion tx) {

@@ -42,6 +42,12 @@ module opendaylight-sal-binding-broker-impl {
         config:provided-service sal:binding-data-consumer-broker;
         config:java-name-prefix ForwardedCompatibleDataBrokerImpl;
     }
+    
+    identity binding-forwarded-data-broker {
+        base config:module-type;
+        config:provided-service sal:binding-async-data-broker;
+        config:java-name-prefix BindingAsyncDataBrokerImpl;
+    }
 
     identity binding-rpc-broker {
         base config:module-type;
@@ -133,6 +139,30 @@ module opendaylight-sal-binding-broker-impl {
             }
 
             container binding-mapping-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity binding-dom-mapping-service;
+                    }
+                }
+            }
+        }
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-forwarded-data-broker {
+            when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
+
+            container target-dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container binding-dom-mapping-service {
                 uses config:service-ref {
                     refine type {
                         mandatory true;
