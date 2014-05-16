@@ -18,8 +18,8 @@
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -109,6 +109,7 @@
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
     <karaf.version>3.0.1</karaf.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
@@ -174,6 +175,8 @@
     <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
     <switchmanager.implementation.version>0.4.2-SNAPSHOT</switchmanager.implementation.version>
     <switchmanager.northbound.version>0.4.2-SNAPSHOT</switchmanager.northbound.version>
+    <switchmanager.shell.version>1.0.0-SNAPSHOT</switchmanager.shell.version>
+    <switchmanager.version>0.7.1-SNAPSHOT</switchmanager.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
     <topology.northbound.version>0.4.2-SNAPSHOT</topology.northbound.version>
     <topology.web.version>0.4.2-SNAPSHOT</topology.web.version>
@@ -188,8 +191,8 @@
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
-    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
+    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>

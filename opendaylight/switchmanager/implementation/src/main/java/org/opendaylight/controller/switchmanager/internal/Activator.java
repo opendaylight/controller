@@ -22,6 +22,7 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISpanAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
+import org.opendaylight.controller.switchmanager.ISwitchManagerShell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(new String[] {
                     IListenInventoryUpdates.class.getName(),
                     ISwitchManager.class.getName(),
-                    IConfigurationContainerAware.class.getName() }, null);
+                    IConfigurationContainerAware.class.getName(),
+                    ISwitchManagerShell.class.getName()}, null);
 
             // Now lets add a service dependency to make sure the
             // provider of service exists
