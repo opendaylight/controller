@@ -150,9 +150,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
      */
     @Override
     public void notifyNodeDisconnectFromMaster(Node node) {
-        for (String pluginType : this.pluginService.keySet()) {
-            IPluginInConnectionService s = pluginService.get(pluginType);
-            s.notifyNodeDisconnectFromMaster(node);
+        IPluginInConnectionService s = pluginService.get(node.getType());
+        if (s != null) {
+             s.notifyNodeDisconnectFromMaster(node);
         }
     }
 }
