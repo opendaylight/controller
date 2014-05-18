@@ -27,7 +27,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>concepts-lang</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4-1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

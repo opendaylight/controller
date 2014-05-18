@@ -4,7 +4,7 @@
     <parent>
         <artifactId>yang-prototype</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.4-1-SNAPSHOT</version>
     </parent>
     <scm>
       <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
