@@ -857,12 +857,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>httpservice-bridge</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.2-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>jolokia-bridge</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.2-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1337,7 +1337,7 @@
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>ganymed</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.1-1-SNAPSHOT</version>
       </dependency>
       <!-- Third parties from opendaylight released -->
       <dependency>
@@ -1613,7 +1613,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.logback_settings</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.2-1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -1781,7 +1781,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
-              <version>0.0.2-SNAPSHOT</version>
+              <version>0.0.2-1-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
