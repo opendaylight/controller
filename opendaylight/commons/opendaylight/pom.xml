@@ -49,9 +49,9 @@
     <hosttracker.api.version>0.5.1-1-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.1-1-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker_new.api.version>0.4.1-1-SNAPSHOT</hosttracker_new.api.version>
-    <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
+    <ietf-inet-types.version>2010.09.24.3-1-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.1-1-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
+    <ietf-yang-types.version>2010.09.24.3-1-SNAPSHOT</ietf-yang-types.version>
     <jackson.version>2.3.0</jackson.version>
     <jacoco.version>0.6.2.201302030002</jacoco.version>
     <jar.plugin.version>2.4</jar.plugin.version>
@@ -77,7 +77,7 @@
     <networkconfig.bridgedomain.northbound.version>0.0.2-1-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
+    <opendaylight-l2-types.version>2013.08.27.3-1-SNAPSHOT</opendaylight-l2-types.version>
     <osgi.core.version>5.0.0</osgi.core.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -115,8 +115,8 @@
     <virgo.version>3.6.0.RELEASE</virgo.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
-    <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
-    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
+    <yang-ext.version>2013.09.07.3-1-SNAPSHOT</yang-ext.version>
+    <yangtools.version>0.6.1-1-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>

@@ -16,7 +16,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller.thirdparty</groupId>
   <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-  <version>7.0.43-SNAPSHOT</version>
+  <version>7.0.42-1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <build>
     <plugins>
