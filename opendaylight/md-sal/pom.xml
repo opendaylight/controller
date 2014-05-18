@@ -54,9 +54,6 @@
     <!-- Compability Packages -->
     <module>compatibility</module>
 
-    <!-- Clustering
-    <module>sal-remoterpc-connector/implementation</module>
-	 -->
   </modules>
 
   <build>
