@@ -204,10 +204,6 @@
       <modules>
         <module>sal-binding-it</module>
         <module>sal-binding-dom-it</module>
-        <!--module>clustered-data-store/integrationtest</module -->
-        <!--module>zeromq-routingtable/integrationtest</module -->
-        <!--module>sal-remoterpc-connector/integrationtest</module -->
-        <!--module>test/sal-rest-connector-it</modulei -->
       </modules>
     </profile>
   </profiles>
