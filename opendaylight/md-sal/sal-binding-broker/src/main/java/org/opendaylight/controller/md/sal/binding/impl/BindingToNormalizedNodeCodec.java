@@ -149,23 +149,38 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         // to augmentation class
         // if child is referenced - so we will reference child and then shorten
         // path.
+        LOG.trace("Looking for candidates to match {}", normalized);
         for (QName child : lastArgument.getPossibleChildNames()) {
             org.opendaylight.yangtools.yang.data.api.InstanceIdentifier childPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
                     ImmutableList.<PathArgument> builder().addAll(normalized.getPath()).add(new NodeIdentifier(child))
                             .build());
             try {
-                if (!isNotRepresentable(childPath)) {
-                    InstanceIdentifier<? extends DataObject> potentialPath = shortenToLastAugment(toBindingImpl(
-                            childPath).get());
-                    int potentialAugmentCount = getAugmentationCount(potentialPath);
-                    if(potentialAugmentCount == normalizedCount) {
-                        return Optional.<InstanceIdentifier<? extends DataObject>> of(potentialPath);
-                    }
+                if (isNotRepresentable(childPath)) {
+                    LOG.trace("Path {} is not BI-representable, skipping it", childPath);
+                    continue;
                 }
-            } catch (Exception e) {
-                LOG.trace("Unable to deserialize aug. child path for {}", childPath, e);
+            } catch (DataNormalizationException e) {
+                LOG.warn("Failed to denormalize path {}, skipping it", childPath, e);
+                continue;
             }
+
+            Optional<InstanceIdentifier<? extends DataObject>> baId = toBindingImpl(childPath);
+            if (!baId.isPresent()) {
+                LOG.debug("No binding-aware identifier found for path {}, skipping it", childPath);
+                continue;
+            }
+
+            InstanceIdentifier<? extends DataObject> potentialPath = shortenToLastAugment(baId.get());
+            int potentialAugmentCount = getAugmentationCount(potentialPath);
+            if (potentialAugmentCount == normalizedCount) {
+                LOG.trace("Found matching path {}", potentialPath);
+                return Optional.<InstanceIdentifier<? extends DataObject>> of(potentialPath);
+            }
+
+            LOG.trace("Skipping mis-matched potential path {}", potentialPath);
         }
+
+        LOG.trace("Failed to find augmentation matching {}", normalized);
         return Optional.absent();
     }
 
@@ -350,10 +365,8 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             try {
                 return ClassLoaderUtils.withClassLoader(method.getDeclaringClass().getClassLoader(),
                         new Callable<Class>() {
-
-                            @SuppressWarnings("rawtypes")
                             @Override
-                            public Class call() throws Exception {
+                            public Class call() {
                                 Type listResult = ClassLoaderUtils.getFirstGenericParameter(method
                                         .getGenericReturnType());
                                 if (listResult instanceof Class
