@@ -54,10 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -83,32 +80,20 @@ public final class NodeMapping {
       return  new org.opendaylight.controller.sal.core.Node(NodeMapping.MD_SAL_TYPE, aDNodeId);
   }
 
-  public static NodeId toNodeId(final InstanceIdentifier<? extends Object> node) {
-    Preconditions.<InstanceIdentifier<? extends Object>>checkNotNull(node);
-    List<PathArgument> path = node.getPath();
-    Preconditions.<List<PathArgument>>checkNotNull(path);
-    int size = path.size();
-    Preconditions.checkArgument(size >= 2);
-    final PathArgument arg = path.get(1);
-    final IdentifiableItem item = Arguments.<IdentifiableItem>checkInstanceOf(arg, IdentifiableItem.class);
-    Identifier<?> key = item.getKey();
-    final NodeKey nodeKey = Arguments.<NodeKey>checkInstanceOf(key, NodeKey.class);
-    return nodeKey.getId();
+  public static NodeId toNodeId(final InstanceIdentifier<?> id) {
+    final NodeKey key = id.firstKeyOf(Node.class, NodeKey.class);
+    Preconditions.checkArgument(key != null, "No node identifier found in %s", id);
+    return key.getId();
   }
 
   public static String toADNodeId(final NodeId nodeId) {
-    Preconditions.<NodeId>checkNotNull(nodeId);
     return nodeId.getValue();
   }
 
   public static org.opendaylight.controller.sal.core.NodeConnector toADNodeConnector(final NodeConnectorRef source) throws ConstructionException {
-    Preconditions.<NodeConnectorRef>checkNotNull(source);
-    final InstanceIdentifier<?> path = Preconditions.<InstanceIdentifier<? extends Object>>checkNotNull(source.getValue());
-    Preconditions.checkArgument(path.getPath().size() >= 3);
-    final PathArgument arg = path.getPath().get(2);
-    final IdentifiableItem item = Arguments.<IdentifiableItem>checkInstanceOf(arg,IdentifiableItem.class);
-    final NodeConnectorKey connectorKey = Arguments.<NodeConnectorKey>checkInstanceOf(item.getKey(), NodeConnectorKey.class);
-    return NodeMapping.toADNodeConnector(connectorKey.getId(), NodeMapping.toNodeId(path));
+    final InstanceIdentifier<?> id = Preconditions.checkNotNull(source.getValue());
+    final NodeConnectorKey key = id.firstKeyOf(NodeConnector.class, NodeConnectorKey.class);
+    return NodeMapping.toADNodeConnector(key.getId(), NodeMapping.toNodeId(id));
   }
 
   public static org.opendaylight.controller.sal.core.NodeConnector toADNodeConnector(final NodeConnectorId ncid, final NodeId nid) throws ConstructionException {
@@ -161,6 +146,7 @@ public final class NodeMapping {
   public static NodeConnectorRef toNodeConnectorRef(final org.opendaylight.controller.sal.core.NodeConnector nodeConnector) {
 
     final NodeRef node = NodeMapping.toNodeRef(nodeConnector.getNode());
+    @SuppressWarnings("unchecked")
     final InstanceIdentifier<Node> nodePath = ((InstanceIdentifier<Node>) node.getValue());
     NodeConnectorId nodeConnectorId = null;
 
