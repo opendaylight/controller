@@ -34,13 +34,13 @@ class MutableDataTree {
     private static final Logger LOG = LoggerFactory.getLogger(MutableDataTree.class);
     private final AtomicBoolean sealed = new AtomicBoolean();
     private final ModificationApplyOperation strategyTree;
-    private final DataAndMetadataSnapshot snapshot;
     private final NodeModification rootModification;
+    private final DataTree.Snapshot snapshot;
 
-    private MutableDataTree(final DataAndMetadataSnapshot snapshot, final ModificationApplyOperation strategyTree) {
-        this.snapshot = snapshot;
-        this.strategyTree = strategyTree;
-        this.rootModification = NodeModification.createUnmodified(snapshot.getMetadataTree());
+    private MutableDataTree(final DataTree.Snapshot snapshot, final ModificationApplyOperation strategyTree) {
+        this.snapshot = Preconditions.checkNotNull(snapshot);
+        this.strategyTree = Preconditions.checkNotNull(strategyTree);
+        this.rootModification = NodeModification.createUnmodified(snapshot.getRootNode());
     }
 
     public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
@@ -97,7 +97,7 @@ class MutableDataTree {
                 return potentialSnapshot.get();
             }
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
-                    StoreUtils.increase(snapshot.getMetadataTree().getSubtreeVersion()));
+                    StoreUtils.increase(snapshot.getRootNode().getSubtreeVersion()));
         } catch (Exception e) {
             LOG.error("Could not create snapshot for {}:{}", path,modification,e);
             throw e;
@@ -119,7 +119,7 @@ class MutableDataTree {
         return OperationWithModification.from(operation, modification);
     }
 
-    public static MutableDataTree from(final DataAndMetadataSnapshot snapshot, final ModificationApplyOperation resolver) {
+    public static MutableDataTree from(final DataTree.Snapshot snapshot, final ModificationApplyOperation resolver) {
         return new MutableDataTree(snapshot, resolver);
     }
 
