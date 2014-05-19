@@ -8,21 +8,18 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import com.google.common.base.Optional;
+import io.netty.channel.Channel;
+import io.netty.util.Timer;
+import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
-
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
-import org.opendaylight.controller.netconf.util.AbstractNetconfSessionNegotiator;
+import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSessionNegotiator;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-
-import io.netty.channel.Channel;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.Promise;
 
 public class NetconfServerSessionNegotiator extends
         AbstractNetconfSessionNegotiator<NetconfServerSessionPreferences, NetconfServerSession, NetconfServerSessionListener> {

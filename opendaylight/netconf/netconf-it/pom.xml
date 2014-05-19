@@ -16,6 +16,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-netty-util</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.logback_settings</artifactId>
     </dependency>
@@ -103,6 +107,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-monitoring</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-netty-util</artifactId>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>

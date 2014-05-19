@@ -12,11 +12,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
-import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
-import org.opendaylight.protocol.framework.AbstractDispatcher;
-
 import java.net.InetSocketAddress;
+import org.opendaylight.controller.netconf.impl.util.DeserializerExceptionHandler;
+import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
+import org.opendaylight.protocol.framework.AbstractDispatcher;
 
 public class NetconfServerDispatcher extends AbstractDispatcher<NetconfServerSession, NetconfServerSessionListener> {
 

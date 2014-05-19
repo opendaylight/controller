@@ -9,7 +9,7 @@ package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Promise;
-import org.opendaylight.controller.netconf.util.AbstractChannelInitializer;
+import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 class TcpClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
