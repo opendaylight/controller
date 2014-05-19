@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_178fc3cd",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-19T15:03:33Z",
+      "side": 1,
+      "message": "Hi Tony - we simply copied what was existing, but you are right - if input is null we\u0027ll get a nasty NPE. :) Ultimately there should probably be an upstream process that checks for null input when it is expected and respond with the appropriate error. That said, I think the fix here is to pass in an empty list of children?? - Would you agree?\n\nCompositeNode inputXml \u003d null;\n        if( input !\u003d null ) {\n            CompositeNode xml \u003d mappingService.toDataDom(input);\n            inputXml \u003d ImmutableCompositeNode.create(rpc, ImmutableList.\u003cNode\u003c?\u003e\u003e of(xml));\n        } else {\n            inputXml \u003d ImmutableCompositeNode.create( rpc, Collections.\u003cNode\u003c?\u003e\u003eemptyList() );\n        }\n\n...\n\nreturn Futures.transform(biRpcRegistry.invokeRpc(rpc, inputXml), transformationFunction);",
+      "parentUuid": "fa82b9bf_37cbe754",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d7e15bd1",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-19T14:09:07Z",
       "side": 1,
       "message": "This should be lazily transformed future using Futures.transform and converted to DOM format.",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d7c07be2",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-19T15:03:33Z",
+      "side": 1,
+      "message": "Not sure I follow the suggestion - again we copied existing code so it sounds like we want to change the behavior. \n\nWhen you say a \"lazy\" transform, are you talking about offloading the mappingService.toDataDom() to a different thread? If so I am not sure what that would buy us since we still need to block on our thread (given the current API).\n\nIf you can add some more detail that would be great.",
+      "parentUuid": "fa82b9bf_d7e15bd1",
       "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
