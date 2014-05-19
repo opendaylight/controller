@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9a721aac",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T16:56:08Z",
+      "side": 1,
+      "message": "You should probably move the Controller Modules Versions comment too...",
+      "revId": "054ecbb02a3a7ff0200b4d8ff8bcc86c31ce77ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
