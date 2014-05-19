@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1aedaaef",
+        "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-19T19:13:18Z",
+      "side": 1,
+      "message": "Yes, good point! I really dislike silent errors.",
+      "parentUuid": "fa82b9bf_9713d30c",
+      "revId": "e936e98189184f4d1268b89b040ca558d8e805c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_37fa07be",
         "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-19T13:58:44Z",
       "side": 1,
       "message": "There is a \"small\" edge case here where two concurrent calls one after another could result in duplicate entries (one over writing the other). You can avoid this with the \"putIfAbsent\" method on the concurrent map, or locking on an object here when you get / put values.\n\nUltimately I am not 100% that duplicate ping entries (one over writing the other) will cause a problem (still reading on).",
+      "revId": "e936e98189184f4d1268b89b040ca558d8e805c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_faf1e6cd",
+        "filename": "opendaylight/ping/service/src/main/java/org/opendaylight/controller/ping/service/impl/PingServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-19T19:13:18Z",
+      "side": 1,
+      "message": "Yes, good point. I think that the overwrite would have been okay in this case, except that a redundant rpc into the plug-in would have to happen. Still, \u0027putIfAbsent\u0027 is nicer.",
+      "parentUuid": "fa82b9bf_37fa07be",
       "revId": "e936e98189184f4d1268b89b040ca558d8e805c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
