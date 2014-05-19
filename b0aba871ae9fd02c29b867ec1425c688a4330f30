@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_044f8fbe",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-19T11:40:46Z",
+      "side": 1,
+      "message": "Good eye :)  See https://git.opendaylight.org/gerrit/#/c/7210/ (follow on patch that upgrades the yangtools dependencies :)  This patch just updates the internal versions :) ).",
+      "parentUuid": "fa82b9bf_e14e1d96",
+      "revId": "b0aba871ae9fd02c29b867ec1425c688a4330f30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8145d171",
         "filename": "opendaylight/commons/opendaylight/pom.xml",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-19T11:08:00Z",
       "side": 1,
       "message": "I believe we need to change this as well",
+      "revId": "b0aba871ae9fd02c29b867ec1425c688a4330f30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_244ad3ac",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-19T11:40:46Z",
+      "side": 1,
+      "message": "Good eye :)  See https://git.opendaylight.org/gerrit/#/c/7210/ (follow on patch that upgrades the yangtools dependencies :)  This patch just updates the internal versions :) ).",
+      "parentUuid": "fa82b9bf_8145d171",
       "revId": "b0aba871ae9fd02c29b867ec1425c688a4330f30",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
