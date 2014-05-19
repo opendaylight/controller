@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
-public class Arguments {
+public final class Arguments {
 
     private Arguments() {
         throw new UnsupportedOperationException("Utility class");
     }
-    
+
     /**
      * Checks if value is instance of provided class
-     * 
-     * 
+     *
+     *
      * @param value Value to check
      * @param type Type to check
      * @return Reference which was checked
@@ -24,7 +24,7 @@ public class Arguments {
     @SuppressWarnings("unchecked")
     public static <T> T checkInstanceOf(Object value, Class<T> type) {
         if(!type.isInstance(value))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(String.format("Value %s is not of type %s", value, type));
         return (T) value;
     }
 }
