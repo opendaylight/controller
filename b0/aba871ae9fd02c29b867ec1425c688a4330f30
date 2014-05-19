@@ -1,0 +1,7 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Giovanni Meo <gmeo@cisco.com>
+Submitted-by: Giovanni Meo <gmeo@cisco.com>
+Submitted-at: Mon, 19 May 2014 12:23:04 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/7200
+Project: controller
+Branch: refs/heads/stable/hydrogen
