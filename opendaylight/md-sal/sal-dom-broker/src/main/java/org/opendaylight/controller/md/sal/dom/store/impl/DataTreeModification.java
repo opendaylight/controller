@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
@@ -31,21 +31,25 @@ import com.google.common.base.Preconditions;
  * by a read-only snapshot and tracks modifications on top of that. The modification
  * has the ability to rebase itself on a new snapshot.
  */
-/*
- * FIXME: the thread safety of concurrent write/delete/read/seal operations
- *        needs to be evaluated.
- */
 class DataTreeModification {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeModification.class);
-    private final AtomicBoolean sealed = new AtomicBoolean();
+
+    /*
+     * FIXME: the thread safety of concurrent write/delete/read/seal operations
+     *        needs to be evaluated.
+     */
+    private static final AtomicIntegerFieldUpdater<DataTreeModification> SEALED_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(DataTreeModification.class, "sealed");
+    private volatile int sealed = 0;
+
     private final ModificationApplyOperation strategyTree;
-    private final NodeModification rootModification;
     private final DataTree.Snapshot snapshot;
+    private final NodeModification rootNode;
 
     private DataTreeModification(final DataTree.Snapshot snapshot, final ModificationApplyOperation strategyTree) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.strategyTree = Preconditions.checkNotNull(strategyTree);
-        this.rootModification = NodeModification.createUnmodified(snapshot.getRootNode());
+        this.rootNode = NodeModification.createUnmodified(snapshot.getRootNode());
     }
 
     public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
@@ -77,7 +81,7 @@ class DataTreeModification {
     }
 
     public Optional<NormalizedNode<?, ?>> read(final InstanceIdentifier path) {
-        Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootModification, path, NodeModification.IS_TERMINAL_PREDICATE);
+        Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
 
         Optional<StoreMetadataNode> result = resolveSnapshot(modification);
         if (result.isPresent()) {
@@ -115,7 +119,7 @@ class DataTreeModification {
     }
 
     private OperationWithModification resolveModificationFor(final InstanceIdentifier path) {
-        NodeModification modification = rootModification;
+        NodeModification modification = rootNode;
         // We ensure strategy is present.
         ModificationApplyOperation operation = resolveModificationStrategy(path);
         for (PathArgument pathArg : path.getPath()) {
@@ -129,21 +133,22 @@ class DataTreeModification {
     }
 
     public void seal() {
-        final boolean success = sealed.compareAndSet(false, true);
+        final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
         Preconditions.checkState(success, "Attempted to seal an already-sealed Data Tree.");
-        rootModification.seal();
+        rootNode.seal();
     }
 
     private void checkSealed() {
-        checkState(!sealed.get(), "Data Tree is sealed. No further modifications allowed.");
+        checkState(sealed == 0, "Data Tree is sealed. No further modifications allowed.");
     }
 
+    @Deprecated
     protected NodeModification getRootModification() {
-        return rootModification;
+        return rootNode;
     }
 
     @Override
     public String toString() {
-        return "MutableDataTree [modification=" + rootModification + "]";
+        return "MutableDataTree [modification=" + rootNode + "]";
     }
 }
