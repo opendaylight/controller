@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.builder;
-import static org.opendaylight.controller.md.sal.dom.store.impl.StoreUtils.append;
+import static org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils.append;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -22,11 +22,12 @@ import java.util.concurrent.Callable;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Node;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
@@ -38,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -62,61 +64,18 @@ import com.google.common.collect.Multimap;
  * </ul>
  *
  */
-public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListenerNotifyTask>> {
+final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListenerNotifyTask>> {
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
     private static final DOMImmutableDataChangeEvent NO_CHANGE = builder(DataChangeScope.BASE).build();
 
-    private InstanceIdentifier rootPath;
-    private ListenerTree listenerRoot;
-    private NodeModification modificationRoot;
-    private Optional<StoreMetadataNode> beforeRoot;
-    private Optional<StoreMetadataNode> afterRoot;
     private final Multimap<ListenerTree.Node, DOMImmutableDataChangeEvent> events = HashMultimap.create();
+    private final DataTreeCandidate candidate;
+    private final ListenerTree listenerRoot;
 
-    protected InstanceIdentifier getRootPath() {
-        return rootPath;
-    }
-
-    protected ResolveDataChangeEventsTask setRootPath(final InstanceIdentifier rootPath) {
-        this.rootPath = rootPath;
-        return this;
-    }
-
-    protected ListenerTree getListenerRoot() {
-        return listenerRoot;
-    }
-
-    protected ResolveDataChangeEventsTask setListenerRoot(final ListenerTree listenerRoot) {
-        this.listenerRoot = listenerRoot;
-        return this;
-    }
-
-    protected NodeModification getModificationRoot() {
-        return modificationRoot;
-    }
-
-    protected ResolveDataChangeEventsTask setModificationRoot(final NodeModification modificationRoot) {
-        this.modificationRoot = modificationRoot;
-        return this;
-    }
-
-    protected Optional<StoreMetadataNode> getBeforeRoot() {
-        return beforeRoot;
-    }
-
-    protected ResolveDataChangeEventsTask setBeforeRoot(final Optional<StoreMetadataNode> beforeRoot) {
-        this.beforeRoot = beforeRoot;
-        return this;
-    }
-
-    protected Optional<StoreMetadataNode> getAfterRoot() {
-        return afterRoot;
-    }
-
-    protected ResolveDataChangeEventsTask setAfterRoot(final Optional<StoreMetadataNode> afterRoot) {
-        this.afterRoot = afterRoot;
-        return this;
-    }
+    public ResolveDataChangeEventsTask(DataTreeCandidate candidate, ListenerTree listenerTree) {
+    	this.candidate = Preconditions.checkNotNull(candidate);
+    	this.listenerRoot = Preconditions.checkNotNull(listenerTree);
+	}
 
     /**
      * Resolves and creates Notification Tasks
@@ -129,11 +88,10 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
      */
     @Override
     public Iterable<ChangeListenerNotifyTask> call() {
-        LOG.trace("Resolving events for {}", modificationRoot);
-
         try (final Walker w = listenerRoot.getWalker()) {
-            resolveAnyChangeEvent(rootPath, Collections.singleton(w.getRootNode()), modificationRoot, beforeRoot,
-                    afterRoot);
+            resolveAnyChangeEvent(candidate.getRootPath(), Collections.singleton(w.getRootNode()),
+            		candidate.getModificationRoot(), Optional.fromNullable(candidate.getBeforeRoot()),
+            		Optional.fromNullable(candidate.getAfterRoot()));
             return createNotificationTasks();
         }
     }
@@ -556,7 +514,7 @@ public class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeList
         }
     }
 
-    public static ResolveDataChangeEventsTask create() {
-        return new ResolveDataChangeEventsTask();
-    }
+	public static ResolveDataChangeEventsTask create(DataTreeCandidate candidate, ListenerTree listenerTree) {
+        return new ResolveDataChangeEventsTask(candidate, listenerTree);
+	}
 }
