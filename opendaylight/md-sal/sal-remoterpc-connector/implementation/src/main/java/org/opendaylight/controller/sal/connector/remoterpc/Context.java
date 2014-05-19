@@ -7,19 +7,19 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.zeromq.ZMQ;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import org.zeromq.ZMQ;
+
 /**
  * Provides a ZeroMQ Context object
  */
 public class Context {
-  private ZMQ.Context zmqContext = ZMQ.context(1);
+  private final ZMQ.Context zmqContext = ZMQ.context(1);
   private String uri;
   private final String DEFAULT_RPC_PORT = "5554";
 
@@ -69,7 +69,7 @@ public class Context {
    */
   private String findIpAddress() {
     String hostAddress = null;
-    Enumeration e = null;
+    Enumeration<?> e = null;
     try {
       e = NetworkInterface.getNetworkInterfaces();
     } catch (SocketException e1) {
@@ -79,7 +79,7 @@ public class Context {
 
       NetworkInterface n = (NetworkInterface) e.nextElement();
 
-      Enumeration ee = n.getInetAddresses();
+      Enumeration<?> ee = n.getInetAddresses();
       while (ee.hasMoreElements()) {
         InetAddress i = (InetAddress) ee.nextElement();
         if ((i instanceof Inet4Address) && (i.isSiteLocalAddress()))

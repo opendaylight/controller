@@ -443,9 +443,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     private static class BackwardsCompatibleConfigurationDataChangeInvoker implements BindingDataChangeListener, Delegator<DataChangeListener> {
-
-
-        @SuppressWarnings("rawtypes")
         private final org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<?,?> delegate;
 
         public BackwardsCompatibleConfigurationDataChangeInvoker(final DataChangeListener listener) {

@@ -40,8 +40,8 @@ public class ClientImplTest {
 
     //mock routing table
     routingTableProvider = mock(RoutingTableProvider.class);
-    RoutingTable<RpcRouter.RouteIdentifier, String> mockRoutingTable = new MockRoutingTable<String, String>();
-    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
+    RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> mockRoutingTable = new MockRoutingTable<String, String>();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
     when(routingTableProvider.getRoutingTable()).thenReturn(optionalRoutingTable);
 
     //mock ClientRequestHandler

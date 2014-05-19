@@ -8,38 +8,39 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collection;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  *
  */
 public class ServerRequestHandler implements AutoCloseable{
 
-  private Logger _logger = LoggerFactory.getLogger(ServerRequestHandler.class);
+  private final Logger _logger = LoggerFactory.getLogger(ServerRequestHandler.class);
   private final String DEFAULT_NAME = "remote-rpc-worker";
-  private String dealerAddress;
-  private String serverAddress;
-  private int workerCount;
-  private ZMQ.Context context;
-  private Broker.ProviderSession broker;
+  private final String dealerAddress;
+  private final String serverAddress;
+  private final int workerCount;
+  private final ZMQ.Context context;
+  private final Broker.ProviderSession broker;
 
   private RequestHandlerThreadPool workerPool;
   private final AtomicInteger threadId = new AtomicInteger();
@@ -87,7 +88,7 @@ public class ServerRequestHandler implements AutoCloseable{
    * Worker to handles RPC request
    */
   private class Worker implements Runnable {
-    private String name;
+    private final String name;
 
     public Worker(int id){
       this.name = DEFAULT_NAME + "-" + id;
@@ -187,7 +188,7 @@ public class ServerRequestHandler implements AutoCloseable{
   }
 
   class MessageHandler{
-    private ZMQ.Socket socket;
+    private final ZMQ.Socket socket;
     private Message message;          //parsed message received on zmq server port
     private boolean messageForBroker = false; //if the message is valid and not a "ping" message
 
@@ -236,7 +237,7 @@ public class ServerRequestHandler implements AutoCloseable{
       CompositeNode payload = (result != null) ? result.getResult() : null;
 
       String recipient = null;
-      RpcRouter.RouteIdentifier routeId = null;
+      RpcRouter.RouteIdentifier<?, ?, ?> routeId = null;
 
       if (message != null) {
         recipient = message.getSender();
