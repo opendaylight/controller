@@ -15,10 +15,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreNodeCompositeBuilder;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ModificationType;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreNodeCompositeBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
