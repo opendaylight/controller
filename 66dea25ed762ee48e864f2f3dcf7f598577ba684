@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_645a1b52",
+        "filename": "features/controller/src/main/resources/features.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-19T12:09:01Z",
+      "side": 1,
+      "message": "Please use the config feature from: \nhttps://git.opendaylight.org/gerrit/#/c/6753/",
+      "revId": "66dea25ed762ee48e864f2f3dcf7f598577ba684",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0459cf59",
+        "filename": "opendaylight/distribution/opendaylight-karaf/src/main/resources/etc/startup.properties",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-19T12:09:01Z",
+      "side": 1,
+      "message": "Could you help me understand why we are hardcoding runlevels here?",
+      "revId": "66dea25ed762ee48e864f2f3dcf7f598577ba684",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0430efff",
+        "filename": "opendaylight/distribution/opendaylight-karaf/src/main/resources/etc/system.properties",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-19T12:09:01Z",
+      "side": 1,
+      "message": "Could you explain what these properties do?",
+      "revId": "66dea25ed762ee48e864f2f3dcf7f598577ba684",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
