@@ -26,18 +26,23 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+/**
+ * Class encapsulation of set of modifications to a base tree. This tree is backed
+ * by a read-only snapshot and tracks modifications on top of that. The modification
+ * has the ability to rebase itself on a new snapshot.
+ */
 /*
  * FIXME: the thread safety of concurrent write/delete/read/seal operations
  *        needs to be evaluated.
  */
-class MutableDataTree {
-    private static final Logger LOG = LoggerFactory.getLogger(MutableDataTree.class);
+class DataTreeModification {
+    private static final Logger LOG = LoggerFactory.getLogger(DataTreeModification.class);
     private final AtomicBoolean sealed = new AtomicBoolean();
     private final ModificationApplyOperation strategyTree;
     private final NodeModification rootModification;
     private final DataTree.Snapshot snapshot;
 
-    private MutableDataTree(final DataTree.Snapshot snapshot, final ModificationApplyOperation strategyTree) {
+    private DataTreeModification(final DataTree.Snapshot snapshot, final ModificationApplyOperation strategyTree) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.strategyTree = Preconditions.checkNotNull(strategyTree);
         this.rootModification = NodeModification.createUnmodified(snapshot.getRootNode());
@@ -119,8 +124,8 @@ class MutableDataTree {
         return OperationWithModification.from(operation, modification);
     }
 
-    public static MutableDataTree from(final DataTree.Snapshot snapshot, final ModificationApplyOperation resolver) {
-        return new MutableDataTree(snapshot, resolver);
+    public static DataTreeModification from(final DataTree.Snapshot snapshot, final ModificationApplyOperation resolver) {
+        return new DataTreeModification(snapshot, resolver);
     }
 
     public void seal() {
