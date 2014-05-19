@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import java.lang.ref.SoftReference;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -15,7 +16,7 @@ import javax.annotation.concurrent.GuardedBy;
 public class YangStoreServiceImpl implements YangStoreService {
     private final SchemaContextProvider service;
     @GuardedBy("this")
-    private YangStoreSnapshotImpl cache = null;
+    private SoftReference<YangStoreSnapshotImpl> cache = new SoftReference<>(null);
 
     public YangStoreServiceImpl(SchemaContextProvider service) {
         this.service = service;
@@ -23,16 +24,18 @@ public class YangStoreServiceImpl implements YangStoreService {
 
     @Override
     public synchronized YangStoreSnapshotImpl getYangStoreSnapshot() throws YangStoreException {
-        if (cache == null) {
-            cache = new YangStoreSnapshotImpl(service.getSchemaContext());
+        YangStoreSnapshotImpl yangStoreSnapshot = cache.get();
+        if (yangStoreSnapshot == null) {
+            yangStoreSnapshot = new YangStoreSnapshotImpl(service.getSchemaContext());
+            cache = new SoftReference<>(yangStoreSnapshot);
         }
-        return cache;
+        return yangStoreSnapshot;
     }
 
     /**
      * Called when schema context changes, invalidates cache.
      */
     public synchronized void refresh() {
-        cache = null;
+        cache.clear();
     }
 }
