@@ -41,7 +41,7 @@ public class Message implements Serializable {
   private MessageType type;
   private String sender;
   private String recipient;
-  private RpcRouter.RouteIdentifier route;
+  private RpcRouter.RouteIdentifier<?, ?, ?> route;
   private Object payload;
 
   public MessageType getType() {
@@ -60,11 +60,11 @@ public class Message implements Serializable {
     this.sender = sender;
   }
 
-  public RpcRouter.RouteIdentifier getRoute() {
+  public RpcRouter.RouteIdentifier<?, ?, ?> getRoute() {
     return route;
   }
 
-  public void setRoute(RpcRouter.RouteIdentifier route) {
+  public void setRoute(RpcRouter.RouteIdentifier<?, ?, ?> route) {
     this.route = route;
   }
 
@@ -123,7 +123,7 @@ public class Message implements Serializable {
     return o.readObject();
   }
 
-  public static class Response extends Message implements RpcRouter.RpcReply {
+  public static class Response extends Message implements RpcRouter.RpcReply<Object> {
     private static final long serialVersionUID = 1L;
     private ResponseCode code; // response code
 
@@ -173,7 +173,7 @@ public class Message implements Serializable {
       return this;
     }
 
-    public MessageBuilder route(RpcRouter.RouteIdentifier route){
+    public MessageBuilder route(RpcRouter.RouteIdentifier<?, ?, ?> route){
       message.setRoute(route);
       return this;
     }

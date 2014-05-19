@@ -7,12 +7,6 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc.utils;
 
-import junit.framework.Assert;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zeromq.ZMQ;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,6 +14,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+
+import junit.framework.Assert;
+
+import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zeromq.ZMQ;
 
 public class MessagingUtil {
 
@@ -160,7 +161,7 @@ public class MessagingUtil {
     if (context == null) return;
 
     ExecutorService exec = Executors.newSingleThreadExecutor();
-    FutureTask zmqTermination = new FutureTask(new Runnable() {
+    FutureTask<?> zmqTermination = new FutureTask<Void>(new Runnable() {
 
       @Override
       public void run() {

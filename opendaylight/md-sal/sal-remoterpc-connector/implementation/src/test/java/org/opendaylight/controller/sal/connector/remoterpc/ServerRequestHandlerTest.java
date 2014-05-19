@@ -7,7 +7,15 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
+import static org.mockito.Mockito.mock;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,22 +23,15 @@ import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.zeromq.ZMQ;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.mockito.Mockito.mock;
-
 public class ServerRequestHandlerTest {
 
   ServerRequestHandler handler;
   ZMQ.Context context;
   ExecutorService executorService = Executors.newCachedThreadPool();
-  private int workerCount = 2;
-  private String mockDealerAddress = "inproc://rpc-request-handler";
-  private String mockServerIp = "localhost";
-  private int mockServerPort = 5554;
+  private final int workerCount = 2;
+  private final String mockDealerAddress = "inproc://rpc-request-handler";
+  private final String mockServerIp = "localhost";
+  private final int mockServerPort = 5554;
 
   @Before
   public void setUp() throws Exception {
@@ -98,7 +99,7 @@ public class ServerRequestHandlerTest {
     Thread[] threads = new Thread[Thread.activeCount()];
     Thread.enumerate(threads);
 
-    List<Thread> foundThreads = new ArrayList();
+    List<Thread> foundThreads = new ArrayList<Thread>();
     for (Thread t : threads) {
       if (t.getName().startsWith(name))
         foundThreads.add(t);

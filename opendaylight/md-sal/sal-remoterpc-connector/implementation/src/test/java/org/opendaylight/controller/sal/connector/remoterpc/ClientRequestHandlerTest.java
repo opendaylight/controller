@@ -99,7 +99,7 @@ public class ClientRequestHandlerTest {
   private Message handleMessageWithTimeout(final Message request) {
     Message response = null;
 
-    FutureTask task = new FutureTask(new Callable<Message>() {
+    FutureTask<?> task = new FutureTask<Message>(new Callable<Message>() {
 
       @Override
       public Message call() {

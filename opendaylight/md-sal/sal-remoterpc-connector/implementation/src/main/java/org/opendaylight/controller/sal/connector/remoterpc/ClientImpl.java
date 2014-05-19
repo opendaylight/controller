@@ -180,10 +180,10 @@ public class ClientImpl implements RemoteRpcClient {
    * @param  routeId route identifier
    * @return         remote network address
    */
-  private String lookupRemoteAddressForGlobalRpc(RpcRouter.RouteIdentifier routeId){
+  private String lookupRemoteAddressForGlobalRpc(RpcRouter.RouteIdentifier<?, ?, ?> routeId){
     checkNotNull(routeId, "route must not be null");
 
-    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable = routingTableProvider.getRoutingTable();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String>> routingTable = routingTableProvider.getRoutingTable();
     checkNotNull(routingTable.isPresent(), "Routing table is null");
 
     String address = null;
@@ -202,10 +202,10 @@ public class ClientImpl implements RemoteRpcClient {
    * @param  routeId route identifier
    * @return         remote network address
    */
-  private String lookupRemoteAddressForRpc(RpcRouter.RouteIdentifier routeId){
+  private String lookupRemoteAddressForRpc(RpcRouter.RouteIdentifier<?, ?, ?> routeId){
     checkNotNull(routeId, "route must not be null");
 
-    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable = routingTableProvider.getRoutingTable();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String>> routingTable = routingTableProvider.getRoutingTable();
     checkNotNull(routingTable.isPresent(), "Routing table is null");
 
     String address = routingTable.get().getLastAddedRoute(routeId);
@@ -230,7 +230,7 @@ public class ClientImpl implements RemoteRpcClient {
    */
   private void closeZmqContext() {
     ExecutorService exec = Executors.newSingleThreadExecutor();
-    FutureTask zmqTermination = new FutureTask(new Runnable() {
+    FutureTask<?> zmqTermination = new FutureTask<Void>(new Runnable() {
 
       @Override
       public void run() {
