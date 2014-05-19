@@ -10,8 +10,8 @@ package org.opendaylight.controller.sal.compatibility.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
+import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
 
@@ -19,17 +19,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.action.*;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.HwPath;
+import org.opendaylight.controller.sal.action.Loopback;
+import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.action.PushVlan;
+import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetDlType;
+import org.opendaylight.controller.sal.action.SetNextHop;
+import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanCfi;
+import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
+import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.compatibility.MDFlowMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodAllActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.HwPathActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.LoopbackActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlTypeActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNextHopActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanCfiActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanPcpActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SwPathActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatch;
@@ -140,7 +176,7 @@ public class TestFromSalConversionsUtils {
             if (layer4Match instanceof SctpMatch) {
                 assertEquals("Sctp source port is incorrect.", 0xffff, (int) ((SctpMatch) layer4Match)
                         .getSctpSourcePort().getValue());
-                assertEquals("Sctp dest port is incorrect.", (int) 0xfffe, (int) ((SctpMatch) layer4Match)
+                assertEquals("Sctp dest port is incorrect.", 0xfffe, (int) ((SctpMatch) layer4Match)
                         .getSctpDestinationPort().getValue());
                 sctpFound = true;
             }
@@ -151,9 +187,9 @@ public class TestFromSalConversionsUtils {
             assertEquals("Wrong protocol", TCP, match.getIpMatch().getIpProtocol().byteValue());
             layer4Match = match.getLayer4Match();
             if (layer4Match instanceof TcpMatch) {
-                assertEquals("Tcp source port is incorrect.", (int) 0xabcd, (int) ((TcpMatch) layer4Match)
+                assertEquals("Tcp source port is incorrect.", 0xabcd, (int) ((TcpMatch) layer4Match)
                         .getTcpSourcePort().getValue());
-                assertEquals("Tcp dest port is incorrect.", (int) 0xdcba, (int) ((TcpMatch) layer4Match)
+                assertEquals("Tcp dest port is incorrect.", 0xdcba, (int) ((TcpMatch) layer4Match)
                         .getTcpDestinationPort().getValue());
                 sctpFound = true;
             }
@@ -164,9 +200,9 @@ public class TestFromSalConversionsUtils {
             assertEquals("Wrong protocol", UDP, match.getIpMatch().getIpProtocol().byteValue());
             layer4Match = match.getLayer4Match();
             if (layer4Match instanceof UdpMatch) {
-                assertEquals("Udp source port is incorrect.", (int) 0xcdef, (int) ((UdpMatch) layer4Match)
+                assertEquals("Udp source port is incorrect.", 0xcdef, (int) ((UdpMatch) layer4Match)
                         .getUdpSourcePort().getValue());
-                assertEquals("Udp dest port is incorrect.", (int) 0xfedc, (int) ((UdpMatch) layer4Match)
+                assertEquals("Udp dest port is incorrect.", 0xfedc, (int) ((UdpMatch) layer4Match)
                         .getUdpDestinationPort().getValue());
                 sctpFound = true;
             }
@@ -227,13 +263,13 @@ public class TestFromSalConversionsUtils {
                     assertEquals("Wrong value of vlad ID in PushVlanAction.", (Integer) 4095,
                             ((PushVlanActionCase) innerAction).getPushVlanAction().getVlanId().getValue());
                 } else if (innerAction instanceof SetDlDstActionCase) {
-                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa",
                             ((SetDlDstActionCase) innerAction).getSetDlDstAction().getAddress().getValue());
                 } else if (innerAction instanceof SetDlSrcActionCase) {
-                    assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                    assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa",
                             ((SetDlSrcActionCase) innerAction).getSetDlSrcAction().getAddress().getValue());
                 } else if (innerAction instanceof SetDlTypeActionCase) {
-                    assertEquals("Wrong data link type in SetDlTypeAction.", (long) 513,
+                    assertEquals("Wrong data link type in SetDlTypeAction.", 513,
                             (long) ((SetDlTypeActionCase) innerAction).getSetDlTypeAction().getDlType().getValue());
                 } else if (innerAction instanceof SetNextHopActionCase) {
                     Address address = ((SetNextHopActionCase) innerAction).getSetNextHopAction().getAddress();

@@ -11,13 +11,17 @@ import java.util.Arrays
 import java.util.Dictionary
 import java.util.Hashtable
 import org.apache.felix.dm.Component
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
 import org.opendaylight.controller.sal.binding.api.NotificationService
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
+import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter
 import org.opendaylight.controller.sal.compatibility.topology.TopologyAdapter
+import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase
 import org.opendaylight.controller.sal.core.Node
 import org.opendaylight.controller.sal.core.NodeConnector
@@ -26,6 +30,7 @@ import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerSer
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
+import org.opendaylight.controller.sal.packet.IPluginInDataPacketService
 import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService
 import org.opendaylight.controller.sal.reader.IPluginInReadService
 import org.opendaylight.controller.sal.reader.IPluginOutReadService
@@ -34,22 +39,15 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
 import org.opendaylight.controller.sal.utils.GlobalConstants
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory
 import org.opendaylight.controller.sal.utils.INodeFactory
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices
-import org.opendaylight.controller.sal.packet.IPluginInDataPacketService
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
 import org.osgi.framework.BundleContext
 
 import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
-import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
-import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
 
 class ComponentActivator extends ComponentActivatorAbstractBase {
 

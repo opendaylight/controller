@@ -10,11 +10,13 @@ package org.opendaylight.controller.sal.compatibility
 import java.util.ArrayList
 import java.util.Collections
 import java.util.List
+import java.util.Map
 import java.util.Set
-import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.controller.sal.core.Edge
@@ -76,10 +78,6 @@ import org.slf4j.LoggerFactory
 
 import static extension org.opendaylight.controller.sal.common.util.Arguments.*
 import static extension org.opendaylight.controller.sal.compatibility.NodeMapping.*
-import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader
-import java.util.concurrent.ConcurrentHashMap
-import java.util.Map
-import java.util.HashMap
 
 class InventoryAndReadAdapter implements IPluginInReadService,
                                              IPluginInInventoryService,
