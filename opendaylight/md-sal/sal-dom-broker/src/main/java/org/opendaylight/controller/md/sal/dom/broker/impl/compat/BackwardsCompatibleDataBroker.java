@@ -1,36 +1,28 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.compat;
 
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.data.DataValidator;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
-import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 public class BackwardsCompatibleDataBroker implements DataProviderService, SchemaContextListener {
 
-    DOMDataBroker backingBroker;
-    DataNormalizer normalizer;
-    private final ListenerRegistry<DataChangeListener> fakeRegistry = ListenerRegistry.create();
-
+    private final DOMDataBroker backingBroker;
+    private DataNormalizer normalizer;
 
     public BackwardsCompatibleDataBroker(final DOMDataBroker newBiDataImpl) {
         backingBroker = newBiDataImpl;
@@ -43,7 +35,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
 
     @Override
     public CompositeNode readConfigurationData(final InstanceIdentifier legacyPath) {
-        BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
+        final BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
         try {
             return tx.readConfigurationData(legacyPath);
         } finally {
@@ -53,7 +45,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
 
     @Override
     public CompositeNode readOperationalData(final InstanceIdentifier legacyPath) {
-        BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
+        final BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
         try {
             return tx.readOperationalData(legacyPath);
         } finally {
@@ -67,9 +59,19 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
     }
 
     @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier path,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier legacyPath,
             final DataChangeListener listener) {
-        return fakeRegistry .register(listener);
+        final InstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
+
+        final TranslatingListenerInvoker translatingCfgListener =
+                TranslatingListenerInvoker.createConfig(listener, normalizer);
+        translatingCfgListener.register(backingBroker, normalizedPath);
+
+        final TranslatingListenerInvoker translatingOpListener =
+                TranslatingListenerInvoker.createOperational(listener, normalizer);
+        translatingOpListener.register(backingBroker, normalizedPath);
+
+        return new DelegateListenerRegistration(translatingCfgListener, translatingOpListener, listener);
     }
 
     @Override
@@ -90,7 +92,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
         return null;
     }
 
-    // Obsolote functionality
+    // Obsolete functionality
 
     @Override
     public void addValidator(final DataStoreIdentifier store, final DataValidator validator) {
@@ -124,25 +126,26 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
         throw new UnsupportedOperationException("Data Reader contract is not supported.");
     }
 
-    private final class TranslatingListenerInvoker implements DOMDataChangeListener, Delegator<DataChangeListener> {
+    private static class DelegateListenerRegistration implements ListenerRegistration<DataChangeListener> {
+        private final TranslatingListenerInvoker translatingCfgListener;
+        private final TranslatingListenerInvoker translatingOpListener;
+        private final DataChangeListener listener;
 
-
-        private DataChangeListener delegate;
-
-        @Override
-        public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
-
-            DataChangeEvent<InstanceIdentifier, CompositeNode> legacyChange = null;
-            delegate.onDataChanged(legacyChange);
+        public DelegateListenerRegistration(final TranslatingListenerInvoker translatingCfgListener, final TranslatingListenerInvoker translatingOpListener, final DataChangeListener listener) {
+            this.translatingCfgListener = translatingCfgListener;
+            this.translatingOpListener = translatingOpListener;
+            this.listener = listener;
         }
 
         @Override
-        public DataChangeListener getDelegate() {
-
-            return delegate;
+        public void close() {
+            translatingCfgListener.close();
+            translatingOpListener.close();
         }
 
-
+        @Override
+        public DataChangeListener getInstance() {
+            return listener;
+        }
     }
-
 }
