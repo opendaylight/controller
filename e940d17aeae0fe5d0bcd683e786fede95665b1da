@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_37cbe754",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-05-19T14:09:07Z",
+      "side": 1,
+      "message": "Possible Null pointer exception since we are combining strategies together and input may be null if there is no input for RPC.",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d7e15bd1",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-05-19T14:09:07Z",
+      "side": 1,
+      "message": "This should be lazily transformed future using Futures.transform and converted to DOM format.",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
