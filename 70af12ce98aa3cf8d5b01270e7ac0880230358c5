@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_efada989",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 491
+      },
+      "writtenOn": "2014-05-19T06:51:12Z",
+      "side": 1,
+      "message": "I think there\u0027s a copy/paste error here  ;)",
+      "revId": "70af12ce98aa3cf8d5b01270e7ac0880230358c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
