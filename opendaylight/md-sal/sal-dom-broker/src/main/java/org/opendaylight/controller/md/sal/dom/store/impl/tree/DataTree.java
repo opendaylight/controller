@@ -13,20 +13,20 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * Interface representing a data tree which can be modified in an MVCC fashion.
  */
 public interface DataTree {
-	/**
-	 * Take a read-only point-in-time snapshot of the tree.
-	 *
-	 * @return Data tree snapshot.
-	 */
-	DataTreeSnapshot takeSnapshot();
+    /**
+     * Take a read-only point-in-time snapshot of the tree.
+     *
+     * @return Data tree snapshot.
+     */
+    DataTreeSnapshot takeSnapshot();
 
-	/**
-	 * Make the data tree use a new schema context. The context will be used
-	 * only by subsequent operations.
-	 *
-	 * @param newSchemaContext new SchemaContext
-	 * @throws IllegalArgumentException if the new context is incompatible
-	 */
+    /**
+     * Make the data tree use a new schema context. The context will be used
+     * only by subsequent operations.
+     *
+     * @param newSchemaContext new SchemaContext
+     * @throws IllegalArgumentException if the new context is incompatible
+     */
     void setSchemaContext(SchemaContext newSchemaContext);
 
     /**

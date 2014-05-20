@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
@@ -24,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 
-class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreTreeNode<StoreMetadataNode> {
+class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
     private final Map<PathArgument, StoreMetadataNode> children;
     private final UnsignedLong nodeVersion;
     private final UnsignedLong subtreeVersion;
@@ -37,7 +36,7 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreT
      * @param subtreeVersion
      * @param children Map of children, must not be modified externally
      */
-    protected StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
+    private StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
             final UnsignedLong subtreeVersion, final Map<PathArgument, StoreMetadataNode> children) {
         this.nodeVersion = Preconditions.checkNotNull(nodeVersion);
         this.subtreeVersion = Preconditions.checkNotNull(subtreeVersion);
@@ -48,11 +47,6 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreT
     public static StoreMetadataNode createEmpty(final NormalizedNode<?, ?> data) {
         return new StoreMetadataNode(data, UnsignedLong.ZERO, UnsignedLong.ZERO,
                 Collections.<PathArgument, StoreMetadataNode>emptyMap());
-    }
-
-    public StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
-            final UnsignedLong subtreeVersion) {
-        this(data, nodeVersion, subtreeVersion, Collections.<PathArgument, StoreMetadataNode>emptyMap());
     }
 
     public static Builder builder() {
@@ -80,8 +74,7 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreT
         return this.data;
     }
 
-    @Override
-    public Optional<StoreMetadataNode> getChild(final PathArgument key) {
+    Optional<StoreMetadataNode> getChild(final PathArgument key) {
         return Optional.fromNullable(children.get(key));
     }
 
@@ -134,7 +127,7 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreT
             children = new HashMap<>();
         }
 
-        public Builder(StoreMetadataNode node) {
+        private Builder(StoreMetadataNode node) {
             children = new HashMap<>(node.children);
         }
 
