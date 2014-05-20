@@ -19,10 +19,6 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
-      <artifactId>org.eclipse.xtend.lib</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-api</artifactId>
     </dependency>
@@ -90,10 +86,6 @@
             <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
       <!-- TODO - unite yang-maven-plugin configuration in md-sal-->
       <plugin>
