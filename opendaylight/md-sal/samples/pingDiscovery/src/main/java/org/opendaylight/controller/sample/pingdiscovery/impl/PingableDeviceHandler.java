@@ -1,0 +1,172 @@
+/*
+ * Copyright (c) 2014 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.sample.pingdiscovery.impl;
+
+import java.util.Collections;
+import java.util.Set;
+
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.common.util.Rpcs;
+import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.controller.sample.pingdiscovery.PingService;
+import org.opendaylight.controller.sample.pingdiscovery.PingUtils;
+import org.opendaylight.yang.gen.v1.http.opendaylight.org.samples.device.ip.rev140515.Node1;
+import org.opendaylight.yang.gen.v1.http.opendaylight.org.samples.icmp.data.rev140515.Icmpdata;
+import org.opendaylight.yang.gen.v1.http.opendaylight.org.samples.icmp.data.rev140515.IcmpdataBuilder;
+import org.opendaylight.yang.gen.v1.http.opendaylight.org.samples.icmp.data.rev140515.SendPingNowOutput;
+import org.opendaylight.yang.gen.v1.http.opendaylight.org.samples.icmp.data.rev140515.SendPingNowOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+/**
+ * This class is responsible for handling the RPC call, or DataRead to a SINGLE node. <br>
+ * <br>
+ * DEMONSTRATES: Shows how to our logic gets notified about an RPC call or read to the config or
+ * operational data stores on a single node.
+ *
+ * @author Devin Avery
+ * @author Greg Hall
+ *
+ */
+public class PingableDeviceHandler implements RpcImplementation,
+DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier,CompositeNode> {
+
+    private final Logger log = LoggerFactory.getLogger(PingableDeviceHandler.class);
+    private DataBrokerService dataBrokerService;
+    private final InstanceIdentifier<Node> nodePath;
+    private BindingIndependentMappingService mappingService;
+    private PingService pingService ;
+
+    public PingableDeviceHandler(String nodeId) {
+        nodePath = createPath(nodeId);
+    }
+
+    public void setDataBrokerService(DataBrokerService dataBrokerService) {
+        this.dataBrokerService = dataBrokerService;
+    }
+
+    public void setMappingService(BindingIndependentMappingService mappingService) {
+        this.mappingService = mappingService;
+    }
+
+    public void setPingService( PingService pingService) {
+        this.pingService = pingService ;
+    }
+    @Override
+    public Set<QName> getSupportedRpcs() {
+        return Collections.emptySet(); // why does this work?
+    }
+
+    @Override
+    public CompositeNode readConfigurationData(
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+
+        // This is where you put your logic which handles a readon to the configuration data store.
+        // You would interact with this read in a similar way as the readOperationalData.
+        return null;
+    }
+
+    @Override
+    public CompositeNode readOperationalData(
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+
+        // A GET was just performed to
+        // opendaylight-inventory:nodes/node/<node_id>/yang-ext:mount:/icmpdata:icmpdata
+        // we need to get out the path to validate this, and then return only the requested data/
+        PathArgument pathArgument = path.getPath().get(0);
+        QName nodeType = pathArgument.getNodeType();
+        if (nodeType.getNamespace().toString()
+                .equals("http://opendaylight.org/samples/icmp/data")
+                && nodeType.getLocalName().equals("icmpdata")) {
+            double pingTime = readIPAndPing(); // perform the ping, then next line, build response
+            Icmpdata output = new IcmpdataBuilder().setIsAvailable(
+                    (pingTime != PingService.NOT_FOUND)).build();
+            return mappingService.toDataDom(output); //convert the response from BA to a BI response
+        }
+        return null;
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc,
+            CompositeNode input) {
+        // An RPC call was sent to this mounted item. Read the IP from the data broker, and perform
+        // the RPC in a blocking thread.
+        log.info("Invoke RPC: " + rpc + " on nodePath " + nodePath);
+
+        double pingTime = readIPAndPing(); // perform ping - note this is a blocking call.
+
+        //build up response
+        SendPingNowOutputBuilder outputBuilder = new SendPingNowOutputBuilder() ;
+        SendPingNowOutput output ;
+        RpcResult<CompositeNode> result ;
+
+        if (pingTime != PingService.NOT_FOUND) {
+            outputBuilder.setRtt(Math.round(pingTime));
+        }
+        output = outputBuilder.build();
+
+        result = Rpcs.getRpcResult(true, mappingService.toDataDom(output),
+                Collections.<RpcError> emptyList());
+
+        return Futures.immediateFuture( result );
+    }
+
+    /**
+     * Reads the IP address of the device from our augmentation attribute, and then performs
+     * a "ping" to that IP address.
+     * @return
+     */
+    private double readIPAndPing() {
+        String ip = null;
+        double pingTime = PingService.NOT_FOUND;
+        try {
+            ip = readIPAddress();
+            pingTime = pingService.ping(ip);
+        } catch (Exception e) {
+            log.error("Exception while pinging ip: " + ip, e);
+        }
+        return pingTime;
+    }
+
+    /**
+     * Reads the IP address from our augmentation node via the data broker service.
+     * @return
+     */
+    private String readIPAddress() {
+        String ip;
+        Node operationalData = (Node) dataBrokerService.readOperationalData(nodePath);
+        Node1 ipData = operationalData.getAugmentation(Node1.class);
+        IpAddress ipaddress = ipData.getIpaddress();
+
+        ip = PingUtils.getIPAddressAsString(ipaddress);
+        return ip;
+    }
+
+    private InstanceIdentifier<Node> createPath(String nodeIdStr) {
+        return InstanceIdentifier.<Nodes> builder(Nodes.class)
+                .<Node, NodeKey> child(Node.class, new NodeKey(new NodeId(nodeIdStr)))
+                .toInstance();
+    }
+
+}

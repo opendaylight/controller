@@ -1,0 +1,71 @@
+module icmp-provider {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:icmp:provider:impl";
+
+    prefix "icmp-provider-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import opendaylight-md-sal-dom {prefix dom;}
+
+    description "This module is uses the config sub-system of ODL to wire in some required dependencies used by our service.";
+    
+    revision "2014-05-15" {
+        description "Initial revision.";
+    }
+
+    // This is the definition of the service implementation as a module identity.
+    identity icmp-discovery-provider-impl {
+            base config:module-type;
+            
+            // Specifies the prefix for generated java classes.
+            config:java-name-prefix IcmpDiscoveryProvider;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    //This is defining the services we want MD-SAL to inject for us.
+    augment "/config:modules/config:module/config:configuration" {
+        case icmp-discovery-provider-impl {
+            when "/config:modules/config:module/config:type = 'icmp-discovery-provider-impl'";
+
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-data-broker;
+                    }
+                }
+            }
+            
+            container dom-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+            
+            container notification-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-notification-service;
+                    }
+                }
+            }
+        }
+    }
+}
