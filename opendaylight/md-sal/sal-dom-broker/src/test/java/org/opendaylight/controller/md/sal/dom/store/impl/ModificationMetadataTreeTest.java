@@ -137,7 +137,7 @@ public class ModificationMetadataTreeTest {
 
     @Test
     public void basicReadWrites() {
-        MutableDataTree modificationTree = MutableDataTree.from(new DataTree.Snapshot(schemaContext,
+        DataTreeModification modificationTree = DataTreeModification.from(new DataTree.Snapshot(schemaContext,
                 StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))),
                 new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.read(OUTER_LIST_2_PATH);
@@ -160,7 +160,7 @@ public class ModificationMetadataTreeTest {
     }
 
 
-    public MutableDataTree createEmptyModificationTree() {
+    public DataTreeModification createEmptyModificationTree() {
         /**
          * Creates empty Snapshot with associated schema context.
          */
@@ -172,7 +172,7 @@ public class ModificationMetadataTreeTest {
          * context.
          *
          */
-        MutableDataTree modificationTree = MutableDataTree.from(t.takeSnapshot(), new SchemaAwareApplyOperationRoot(
+        DataTreeModification modificationTree = DataTreeModification.from(t.takeSnapshot(), new SchemaAwareApplyOperationRoot(
                 schemaContext));
         return modificationTree;
     }
@@ -180,7 +180,7 @@ public class ModificationMetadataTreeTest {
     @Test
     public void createFromEmptyState() {
 
-        MutableDataTree modificationTree = createEmptyModificationTree();
+        DataTreeModification modificationTree = createEmptyModificationTree();
         /**
          * Writes empty container node to /test
          *
@@ -217,7 +217,7 @@ public class ModificationMetadataTreeTest {
 
     @Test
     public void writeSubtreeReadChildren() {
-        MutableDataTree modificationTree = createEmptyModificationTree();
+        DataTreeModification modificationTree = createEmptyModificationTree();
         modificationTree.write(TEST_PATH, createTestContainer());
         Optional<NormalizedNode<?, ?>> potential = modificationTree.read(TWO_TWO_PATH);
         MapEntryNode node = assertPresentAndType(potential, MapEntryNode.class);
@@ -225,7 +225,7 @@ public class ModificationMetadataTreeTest {
 
     @Test
     public void writeSubtreeDeleteChildren() {
-        MutableDataTree modificationTree = createEmptyModificationTree();
+        DataTreeModification modificationTree = createEmptyModificationTree();
         modificationTree.write(TEST_PATH, createTestContainer());
 
         // We verify data are present

@@ -222,14 +222,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements
             DOMStoreWriteTransaction {
-        private MutableDataTree mutableTree;
+        private DataTreeModification mutableTree;
         private InMemoryDOMDataStore store;
         private boolean ready = false;
 
         public SnapshotBackedWriteTransaction(final Object identifier, final DataTree.Snapshot snapshot,
                 final InMemoryDOMDataStore store, final ModificationApplyOperation applyOper) {
             super(identifier);
-            mutableTree = MutableDataTree.from(snapshot, applyOper);
+            mutableTree = DataTreeModification.from(snapshot, applyOper);
             this.store = store;
             LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
         }
@@ -295,7 +295,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             return store.submit(this);
         }
 
-        protected MutableDataTree getMutatedView() {
+        protected DataTreeModification getMutatedView() {
             return mutableTree;
         }
 
