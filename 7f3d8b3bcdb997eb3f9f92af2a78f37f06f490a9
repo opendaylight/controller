@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b91da98",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/RuntimeMappingModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-20T19:18:44Z",
+      "side": 1,
+      "message": "Not throwing exception -- let\u0027s not declare it (sonar complains)",
+      "revId": "7f3d8b3bcdb997eb3f9f92af2a78f37f06f490a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b97e290",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/RuntimeMappingModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-20T19:18:44Z",
+      "side": 1,
+      "message": "Let\u0027s log this on debug .",
+      "revId": "7f3d8b3bcdb997eb3f9f92af2a78f37f06f490a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab80ee46",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/SchemaServiceImplSingletonModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-20T19:18:44Z",
+      "side": 1,
+      "message": "Can we log it on debug at least?",
+      "revId": "7f3d8b3bcdb997eb3f9f92af2a78f37f06f490a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2b8cde7e",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/NetconfSSHServer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-20T19:18:44Z",
+      "side": 1,
+      "message": "Please add a comment. Also, please remove the {} -- it is not supposed to be here.\n\nI would prefer a debug message about the expected exception. Having them completely silent is bad going forward.",
+      "revId": "7f3d8b3bcdb997eb3f9f92af2a78f37f06f490a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
