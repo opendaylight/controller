@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -73,6 +72,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private final Map<String, QName> providedServices;
 
     private Collection<RuntimeBeanEntry> runtimeBeans;
+    private String nullableDummyContainerName;
 
     ModuleMXBeanEntry(ModuleMXBeanEntryInitial initials, Map<String, AttributeIfc> yangToAttributes,
             Map<String, QName> providedServices2, Collection<RuntimeBeanEntry> runtimeBeans) {
@@ -182,6 +182,15 @@ public class ModuleMXBeanEntry extends AbstractEntry {
                 + initial.localName + '\'' + ", packageName='" + initial.packageName
                 + '\'' + '}';
     }
+
+    public String getNullableDummyContainerName() {
+        return nullableDummyContainerName;
+    }
+
+    public void setNullableDummyContainerName(String nullableDummyContainerName) {
+        this.nullableDummyContainerName = nullableDummyContainerName;
+    }
+
 
     static final class ModuleMXBeanEntryInitial {
 

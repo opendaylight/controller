@@ -17,8 +17,8 @@
   <properties>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
-    <!-- Controller Modules Versions -->
     <aries.util.version>1.1.0</aries.util.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -920,6 +920,12 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-monitoring</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-netty-util</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

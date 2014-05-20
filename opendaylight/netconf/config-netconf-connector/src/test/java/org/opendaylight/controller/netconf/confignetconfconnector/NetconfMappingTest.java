@@ -24,6 +24,7 @@ import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElem
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -39,6 +40,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -75,6 +77,7 @@ import org.opendaylight.controller.config.yang.test.impl.IdentityTestModuleFacto
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.Peers;
+import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
@@ -93,7 +96,6 @@ import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
@@ -124,6 +126,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     private NetconfTestImplModuleFactory factory;
     private DepTestImplModuleFactory factory2;
     private IdentityTestModuleFactory factory3;
+    private TestImplModuleFactory factory4;
 
     @Mock
     YangStoreSnapshot yangStoreSnapshot;
@@ -144,8 +147,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
         this.factory3 = new IdentityTestModuleFactory();
+        factory4 = new TestImplModuleFactory();
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, this.factory, this.factory2,
-                this.factory3));
+                this.factory3, factory4));
 
         transactionProvider = new TransactionProvider(this.configRegistryClient, NETCONF_SESSION_ID);
     }
@@ -423,42 +427,42 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(2, afterReplace);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test
     public void testSameAttrDifferentNamespaces() throws Exception {
         try {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespaces.xml");
+            fail();
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
-            assertContainsString(message, "Element simple-long-2 present multiple times with different namespaces");
+            assertContainsString(message, "Element simpleInt present multiple times with different namespaces");
             assertContainsString(message, TEST_NAMESPACE);
             assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
-            throw e;
         }
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test
     public void testDifferentNamespaceInTO() throws Exception {
         try {
             edit("netconfMessages/namespaces/editConfig_differentNamespaceTO.xml");
+            fail();
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Unrecognised elements");
             assertContainsString(message, "simple-int2");
             assertContainsString(message, "dto_d");
-            throw e;
         }
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test
     public void testSameAttrDifferentNamespacesList() throws Exception {
         try {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespacesList.xml");
+            fail();
         } catch (NetconfDocumentedException e) {
             String message = e.getMessage();
-            assertContainsString(message, "Element binaryLeaf present multiple times with different namespaces");
+            assertContainsString(message, "Element allow-user present multiple times with different namespaces");
             assertContainsString(message, TEST_NAMESPACE);
             assertContainsString(message, XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
-            throw e;
         }
     }
 
@@ -491,6 +495,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         for (int i = 0; i < TESTS_COUNT; i++) {
             String file = String.format(format, i + 1);
+            logger.info("Reading {}", file);
             try {
                 edit(file);
             } catch (NetconfDocumentedException e) {
@@ -564,23 +569,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertThat(string, JUnitMatchers.containsString(substring));
     }
 
-    private void checkEnum(final Document response) throws NetconfDocumentedException {
-        XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
-                .getOnlyChildElement("modules");
+    private void checkEnum(final Document response) throws Exception {
 
-        String enumName = "extended-enum";
-        String enumContent = "TWO";
+        String expectedEnumContent = "TWO";
 
-        for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
-            String name = moduleElement.getOnlyChildElement("name").getTextContent();
-            if(name.equals(INSTANCE_NAME)) {
-                XmlElement enumAttr = moduleElement.getOnlyChildElement(enumName);
-                assertEquals(enumContent, enumAttr.getTextContent());
-                return;
-            }
-        }
-
-        fail("Enum attribute " + enumName + ":" + enumContent + " not present in " + XmlUtil.toString(response));
+        XMLAssert.assertXpathEvaluatesTo(expectedEnumContent,
+                getXpathForNetconfImplSubnode(INSTANCE_NAME,"extended-enum"),
+                response);
     }
 
     private void checkTestingDeps(Document response) {
@@ -588,24 +583,23 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(2, testingDepsSize);
     }
 
-    private void checkTypeConfigAttribute(Document response) throws NetconfDocumentedException {
+    private String getXpathForNetconfImplSubnode(String instanceName, String subnode) {
+        return "/urn:ietf:params:xml:ns:netconf:base:1.0:rpc-reply" +
+                "/urn:ietf:params:xml:ns:netconf:base:1.0:data" +
+                "/urn:opendaylight:params:xml:ns:yang:controller:config:modules" +
+                "/module[name='"+instanceName+"']" +
+                "/urn:opendaylight:params:xml:ns:yang:controller:test:impl:impl-netconf" +
+                "/urn:opendaylight:params:xml:ns:yang:controller:test:impl:"+subnode;
+    }
 
-        XmlElement modulesElement = XmlElement.fromDomElement(response.getDocumentElement()).getOnlyChildElement("data")
-                .getOnlyChildElement("modules");
+    private void checkTypeConfigAttribute(Document response) throws Exception {
 
-        List<String> expectedValues = Lists.newArrayList("default-string", "configAttributeType");
-        Set<String> configAttributeType = Sets.newHashSet();
-
-        for (XmlElement moduleElement : modulesElement.getChildElements("module")) {
-            for (XmlElement type : moduleElement.getChildElements("type")) {
-                if (type.getNamespaceOptionally().isPresent()) {
-                    configAttributeType.add(type.getTextContent());
-                }
-            }
-        }
-
-        for (String expectedValue : expectedValues) {
-            assertTrue(configAttributeType.contains(expectedValue));
+        Map<String,String> namesToTypeValues = ImmutableMap.of("instance-from-code", "configAttributeType",
+                "test2", "default-string");
+        for (Entry<String, String> nameToExpectedValue : namesToTypeValues.entrySet()) {
+            XMLAssert.assertXpathEvaluatesTo(nameToExpectedValue.getValue(),
+                    getXpathForNetconfImplSubnode(nameToExpectedValue.getKey(),"type"),
+                    response);
         }
     }
 

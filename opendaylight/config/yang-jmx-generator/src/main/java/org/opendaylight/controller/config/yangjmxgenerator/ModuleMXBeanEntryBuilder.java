@@ -7,12 +7,27 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AbstractDependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -35,25 +50,12 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleImport;
 import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
 
 final class ModuleMXBeanEntryBuilder {
 
@@ -233,7 +235,7 @@ final class ModuleMXBeanEntryBuilder {
         return true;
     }
 
-    private void processChoiceCaseNode(Map<String, ModuleMXBeanEntry> result,
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(Map<String, ModuleMXBeanEntry> result,
             Map<String, QName> uniqueGeneratedClassesNames, String configModulePrefix,
             Map<String, IdentitySchemaNode> moduleIdentities,
             Map<String, IdentitySchemaNode> unaugmentedModuleIdentities, AugmentationSchema augmentation,
@@ -266,15 +268,17 @@ final class ModuleMXBeanEntryBuilder {
         // runtime-data
         Collection<RuntimeBeanEntry> runtimeBeans = null;
 
+        HAS_CHILDREN_AND_QNAME dataNodeContainer = getDataNodeContainer(choiceCaseNode);
+
         if (expectedConfigurationAugmentationSchemaPath.equals(augmentation.getTargetPath())) {
             logger.debug("Parsing configuration of {}", moduleLocalNameFromXPath);
-            yangToAttributes = fillConfiguration(choiceCaseNode, currentModule, typeProviderWrapper, qNamesToSIEs,
+            yangToAttributes = fillConfiguration(dataNodeContainer, currentModule, typeProviderWrapper, qNamesToSIEs,
                     schemaContext, packageName);
             checkUniqueAttributesWithGeneratedClass(uniqueGeneratedClassesNames, when.getQName(), yangToAttributes);
         } else if (expectedStateAugmentationSchemaPath.equals(augmentation.getTargetPath())) {
             logger.debug("Parsing state of {}", moduleLocalNameFromXPath);
             try {
-                runtimeBeans = fillRuntimeBeans(choiceCaseNode, currentModule, typeProviderWrapper, packageName,
+                runtimeBeans = fillRuntimeBeans(dataNodeContainer, currentModule, typeProviderWrapper, packageName,
                         moduleLocalNameFromXPath, javaNamePrefix);
             } catch (NameConflictException e) {
                 throw new NameConflictException(e.getConflictingName(), when.getQName(), when.getQName());
@@ -289,14 +293,20 @@ final class ModuleMXBeanEntryBuilder {
         } else {
             throw new IllegalArgumentException("Cannot parse augmentation " + augmentation);
         }
+        boolean hasDummyContainer = choiceCaseNode.equals(dataNodeContainer) == false;
+
+        String nullableDummyContainerName = hasDummyContainer ? dataNodeContainer.getQName().getLocalName() : null;
         if (result.containsKey(moduleLocalNameFromXPath)) {
-            // either fill runtimeBeans or yangToAttributes
+            // either fill runtimeBeans or yangToAttributes, merge
             ModuleMXBeanEntry moduleMXBeanEntry = result.get(moduleLocalNameFromXPath);
             if (yangToAttributes != null && moduleMXBeanEntry.getAttributes() == null) {
                 moduleMXBeanEntry.setYangToAttributes(yangToAttributes);
             } else if (runtimeBeans != null && moduleMXBeanEntry.getRuntimeBeans() == null) {
                 moduleMXBeanEntry.setRuntimeBeans(runtimeBeans);
             }
+            checkState(Objects.equals(nullableDummyContainerName, moduleMXBeanEntry.getNullableDummyContainerName()),
+                    "Mismatch in module " + moduleMXBeanEntry.toString() + " - dummy container must be present/missing in" +
+                            " both state and configuration");
         } else {
             ModuleMXBeanEntry.ModuleMXBeanEntryInitial initial = new ModuleMXBeanEntry.ModuleMXBeanEntryInitialBuilder()
                     .setIdSchemaNode(moduleIdentity).setPackageName(packageName).setJavaNamePrefix(javaNamePrefix)
@@ -309,6 +319,7 @@ final class ModuleMXBeanEntryBuilder {
 
             moduleMXBeanEntry.setYangModuleName(currentModule.getName());
             moduleMXBeanEntry.setYangModuleLocalname(moduleLocalNameFromXPath);
+            moduleMXBeanEntry.setNullableDummyContainerName(nullableDummyContainerName);
             result.put(moduleLocalNameFromXPath, moduleMXBeanEntry);
         }
     }
@@ -352,29 +363,52 @@ final class ModuleMXBeanEntryBuilder {
     }
 
     private void checkUniqueTOAttr(Map<String, QName> uniqueGeneratedClassNames, QName parentQName, TOAttribute attr) {
-        final String upperCaseCammelCase = attr.getUpperCaseCammelCase();
-        if (uniqueGeneratedClassNames.containsKey(upperCaseCammelCase)) {
-            QName firstDefinedQName = uniqueGeneratedClassNames.get(upperCaseCammelCase);
-            throw new NameConflictException(upperCaseCammelCase, firstDefinedQName, parentQName);
+        final String upperCaseCamelCase = attr.getUpperCaseCammelCase();
+        if (uniqueGeneratedClassNames.containsKey(upperCaseCamelCase)) {
+            QName firstDefinedQName = uniqueGeneratedClassNames.get(upperCaseCamelCase);
+            throw new NameConflictException(upperCaseCamelCase, firstDefinedQName, parentQName);
         } else {
-            uniqueGeneratedClassNames.put(upperCaseCammelCase, parentQName);
+            uniqueGeneratedClassNames.put(upperCaseCamelCase, parentQName);
         }
     }
 
-    private Collection<RuntimeBeanEntry> fillRuntimeBeans(ChoiceCaseNode choiceCaseNode, Module currentModule,
+    private Collection<RuntimeBeanEntry> fillRuntimeBeans(DataNodeContainer dataNodeContainer, Module currentModule,
             TypeProviderWrapper typeProviderWrapper, String packageName, String moduleLocalNameFromXPath,
             String javaNamePrefix) {
 
-        return RuntimeBeanEntry.extractClassNameToRuntimeBeanMap(packageName, choiceCaseNode, moduleLocalNameFromXPath,
+        return RuntimeBeanEntry.extractClassNameToRuntimeBeanMap(packageName, dataNodeContainer, moduleLocalNameFromXPath,
                 typeProviderWrapper, javaNamePrefix, currentModule).values();
 
     }
 
-    private Map<String, AttributeIfc> fillConfiguration(ChoiceCaseNode choiceCaseNode, Module currentModule,
+    /**
+     * Since each case statement within a module must provide unique child nodes, it is allowed to wrap
+     * the actual configuration with a container node with name equal to case name.
+     *
+     * @param choiceCaseNode state or configuration case statement
+     * @return either choiceCaseNode or its only child container
+     */
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(ChoiceCaseNode choiceCaseNode) {
+        Set<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
+        if (childNodes.size() == 1) {
+            DataSchemaNode onlyChild = childNodes.iterator().next();
+            if (onlyChild instanceof ContainerSchemaNode) {
+                ContainerSchemaNode onlyContainer = (ContainerSchemaNode) onlyChild;
+                if (Objects.equals(onlyContainer.getQName().getLocalName(), choiceCaseNode.getQName().getLocalName())) {
+                    // the actual configuration is inside dummy container
+                    return (HAS_CHILDREN_AND_QNAME) onlyContainer;
+                }
+            }
+        }
+        return (HAS_CHILDREN_AND_QNAME) choiceCaseNode;
+    }
+
+    private Map<String, AttributeIfc> fillConfiguration(DataNodeContainer dataNodeContainer, Module currentModule,
             TypeProviderWrapper typeProviderWrapper, Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
             SchemaContext schemaContext, String packageName) {
         Map<String, AttributeIfc> yangToAttributes = new HashMap<>();
-        for (DataSchemaNode attrNode : choiceCaseNode.getChildNodes()) {
+        Set<DataSchemaNode> childNodes = dataNodeContainer.getChildNodes();
+        for (DataSchemaNode attrNode : childNodes) {
             AttributeIfc attributeValue = getAttributeValue(attrNode, currentModule, qNamesToSIEs, typeProviderWrapper,
                     schemaContext, packageName);
             yangToAttributes.put(attributeValue.getAttributeYangName(), attributeValue);
@@ -483,7 +517,7 @@ final class ModuleMXBeanEntryBuilder {
             String prefix = m.group(1);
             ModuleImport moduleImport = findModuleImport(currentModule, prefix);
             foundModule = schemaContext.findModuleByName(moduleImport.getModuleName(), moduleImport.getRevision());
-            checkState(foundModule != null, format("Module not found in SchemaContext by %s", moduleImport));
+            checkNotNull(foundModule, format("Module not found in SchemaContext by %s", moduleImport));
             localSIName = m.group(2);
         } else {
             foundModule = currentModule; // no prefix => SIE is in currentModule

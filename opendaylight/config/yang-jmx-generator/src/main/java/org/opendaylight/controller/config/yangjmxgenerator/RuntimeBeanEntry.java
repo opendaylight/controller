@@ -7,31 +7,12 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
-import org.opendaylight.yangtools.yang.model.api.SchemaNode;
-import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.UsesNode;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,9 +25,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
 /**
  * Holds information about runtime bean to be generated. There are two kinds of
@@ -68,7 +66,7 @@ public class RuntimeBeanEntry {
 
     @VisibleForTesting
     RuntimeBeanEntry(String packageName,
-            DataSchemaNode nodeForReporting, String yangName,
+            DataNodeContainer nodeForReporting, String yangName,
             String javaNamePrefix, boolean isRoot,
             Optional<String> keyYangName, List<AttributeIfc> attributes,
             List<RuntimeBeanEntry> children, Set<Rpc> rpcs) {
@@ -112,7 +110,7 @@ public class RuntimeBeanEntry {
      *         not contain special configuration for it.
      */
     public static Map<String, RuntimeBeanEntry> extractClassNameToRuntimeBeanMap(
-            String packageName, ChoiceCaseNode container,
+            String packageName, DataNodeContainer container,
             String moduleYangName, TypeProviderWrapper typeProviderWrapper,
             String javaNamePrefix, Module currentModule) {
 
@@ -390,7 +388,7 @@ public class RuntimeBeanEntry {
     }
 
     private static RuntimeBeanEntry createRoot(String packageName,
-            DataSchemaNode nodeForReporting, String attributeYangName,
+            DataNodeContainer nodeForReporting, String attributeYangName,
             List<AttributeIfc> attributes, String javaNamePrefix,
             List<RuntimeBeanEntry> children, Set<Rpc> rpcs) {
         return new RuntimeBeanEntry(packageName, nodeForReporting,
