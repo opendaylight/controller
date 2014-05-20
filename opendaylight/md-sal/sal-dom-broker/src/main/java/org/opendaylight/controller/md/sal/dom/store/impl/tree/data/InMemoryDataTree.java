@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFa
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -127,7 +128,7 @@ final class InMemoryDataTree implements DataTree {
         rwLock.writeLock().lock();
         try {
             Preconditions.checkState(c.getBeforeRoot() == rootNode,
-                    String.format("Store snapshot %s and transaction snapshot %s differ.", rootNode, c.getBeforeRoot()));
+                    String.format("Store tree %s and candidate base %s differ.", rootNode, c.getBeforeRoot()));
             this.rootNode = c.getAfterRoot();
         } finally {
             rwLock.writeLock().unlock();

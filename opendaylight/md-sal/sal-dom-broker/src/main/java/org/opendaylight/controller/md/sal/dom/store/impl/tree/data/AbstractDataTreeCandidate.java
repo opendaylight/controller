@@ -13,21 +13,15 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import com.google.common.base.Preconditions;
 
 abstract class AbstractDataTreeCandidate implements DataTreeCandidate {
-	private final InstanceIdentifier rootPath;
-	private final NodeModification modificationRoot;
+    private final InstanceIdentifier rootPath;
 
-	protected AbstractDataTreeCandidate(final InstanceIdentifier rootPath, NodeModification modificationRoot) {
-		this.rootPath = Preconditions.checkNotNull(rootPath);
-		this.modificationRoot = Preconditions.checkNotNull(modificationRoot);
-	}
+    protected AbstractDataTreeCandidate(final InstanceIdentifier rootPath) {
+        this.rootPath = Preconditions.checkNotNull(rootPath);
+    }
 
-	@Override
-	public final InstanceIdentifier getRootPath() {
-		return rootPath;
-	}
+    @Override
+    public final InstanceIdentifier getRootPath() {
+        return rootPath;
+    }
 
-	@Override
-	public final NodeModification getModificationRoot() {
-		return modificationRoot;
-	}
 }
