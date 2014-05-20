@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b03ffdd5",
+        "filename": "opendaylight/sal/shell/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-20T17:30:10Z",
+      "side": 1,
+      "message": "Use Karaf version property",
+      "revId": "cebf17de2e288dbace7a6a7db1764ebbc8e0898f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5026b1cf",
+        "filename": "opendaylight/sal/shell/src/main/java/org/opendaylight/controller/sal/shell/ModifyFlow.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-20T17:30:10Z",
+      "side": 1,
+      "message": "why 190.190.190.190??",
+      "revId": "cebf17de2e288dbace7a6a7db1764ebbc8e0898f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_702175b3",
+        "filename": "opendaylight/sal/shell/src/main/java/org/opendaylight/controller/sal/shell/ReadFlows.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-20T17:30:10Z",
+      "side": 1,
+      "message": "Why is the scope host tracker and command name dump Failed ARPReqList?",
+      "revId": "cebf17de2e288dbace7a6a7db1764ebbc8e0898f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
