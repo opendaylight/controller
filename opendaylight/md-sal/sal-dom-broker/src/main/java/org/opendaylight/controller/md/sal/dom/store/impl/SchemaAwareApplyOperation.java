@@ -114,15 +114,17 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     public static SchemaAwareApplyOperation from(final DataNodeContainer resolvedTree,
             final AugmentationTarget augSchemas, final AugmentationIdentifier identifier) {
         AugmentationSchema augSchema = null;
-        allAugments: for (AugmentationSchema potential : augSchemas.getAvailableAugmentations()) {
-            boolean containsAll = true;
-            for (DataSchemaNode child : potential.getChildNodes()) {
-                if (identifier.getPossibleChildNames().contains(child.getQName())) {
-                    augSchema = potential;
-                    break allAugments;
+
+        allAugments:
+            for (AugmentationSchema potential : augSchemas.getAvailableAugmentations()) {
+                for (DataSchemaNode child : potential.getChildNodes()) {
+                    if (identifier.getPossibleChildNames().contains(child.getQName())) {
+                        augSchema = potential;
+                        break allAugments;
+                    }
                 }
             }
-        }
+
         if (augSchema != null) {
             return new AugmentationModificationStrategy(augSchema, resolvedTree);
         }
@@ -138,11 +140,11 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     @Override
     public void verifyStructure(final NodeModification modification) throws IllegalArgumentException {
         if (modification.getModificationType() == ModificationType.WRITE) {
-            verifyWritenStructure(modification.getWritenValue());
+            verifyWrittenStructure(modification.getWrittenValue());
         }
     }
 
-    protected abstract void verifyWritenStructure(NormalizedNode<?, ?> writenValue);
+    protected abstract void verifyWrittenStructure(NormalizedNode<?, ?> writtenValue);
 
     @Override
     public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
@@ -236,8 +238,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
     protected abstract StoreMetadataNode applySubtreeChange(NodeModification modification,
             StoreMetadataNode currentMeta, UnsignedLong subtreeVersion);
 
-    public static abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends
-            SchemaAwareApplyOperation {
+    public static abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends SchemaAwareApplyOperation {
 
         private final T schema;
         private final Class<? extends NormalizedNode<?, ?>> nodeClass;
@@ -249,8 +250,8 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
 
         @Override
-        protected void verifyWritenStructure(final NormalizedNode<?, ?> writenValue) {
-            checkArgument(nodeClass.isInstance(writenValue), "Node should must be of type %s", nodeClass);
+        protected void verifyWrittenStructure(final NormalizedNode<?, ?> writtenValue) {
+            checkArgument(nodeClass.isInstance(writtenValue), "Node should must be of type %s", nodeClass);
         }
 
         @Override
@@ -277,7 +278,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
             UnsignedLong nodeVersion = subtreeVersion;
             return StoreMetadataNode.builder().setNodeVersion(nodeVersion).setSubtreeVersion(subtreeVersion)
-                    .setData(modification.getWritenValue()).build();
+                    .setData(modification.getWrittenValue()).build();
         }
 
         @Override
@@ -332,13 +333,20 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
         @SuppressWarnings("rawtypes")
         @Override
-        protected void verifyWritenStructure(final NormalizedNode<?, ?> writenValue) {
-            checkArgument(nodeClass.isInstance(writenValue), "Node should must be of type %s", nodeClass);
-            checkArgument(writenValue instanceof NormalizedNodeContainer);
-            NormalizedNodeContainer writenCont = (NormalizedNodeContainer) writenValue;
-            for (Object child : writenCont.getValue()) {
+        protected void verifyWrittenStructure(final NormalizedNode<?, ?> writtenValue) {
+            checkArgument(nodeClass.isInstance(writtenValue), "Node should must be of type %s", nodeClass);
+            checkArgument(writtenValue instanceof NormalizedNodeContainer);
+
+            NormalizedNodeContainer container = (NormalizedNodeContainer) writtenValue;
+            for (Object child : container.getValue()) {
                 checkArgument(child instanceof NormalizedNode);
-                NormalizedNode childNode = (NormalizedNode) child;
+
+                /*
+                 * FIXME: fail-fast semantics:
+                 *
+                 * We can validate the data structure here, aborting the commit
+                 * before it ever progresses to being committed.
+                 */
             }
         }
 
@@ -346,7 +354,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         protected StoreMetadataNode applyWrite(final NodeModification modification,
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
 
-            NormalizedNode<?, ?> newValue = modification.getWritenValue();
+            NormalizedNode<?, ?> newValue = modification.getWrittenValue();
 
             final UnsignedLong nodeVersion;
             if (currentMeta.isPresent()) {
@@ -439,8 +447,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         protected abstract NormalizedNodeContainerBuilder createBuilder(NormalizedNode<?, ?> original);
     }
 
-    public static abstract class DataNodeContainerModificationStrategy<T extends DataNodeContainer> extends
-            NormalizedNodeContainerModificationStrategy {
+    public static abstract class DataNodeContainerModificationStrategy<T extends DataNodeContainer> extends NormalizedNodeContainerModificationStrategy {
 
         private final T schema;
         private final LoadingCache<PathArgument, ModificationApplyOperation> childCache = CacheBuilder.newBuilder()
@@ -490,8 +497,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     }
 
-    public static class ContainerModificationStrategy extends
-            DataNodeContainerModificationStrategy<ContainerSchemaNode> {
+    public static class ContainerModificationStrategy extends DataNodeContainerModificationStrategy<ContainerSchemaNode> {
 
         public ContainerModificationStrategy(final ContainerSchemaNode schemaNode) {
             super(schemaNode, ContainerNode.class);
@@ -505,8 +511,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
     }
 
-    public static class UnkeyedListItemModificationStrategy extends
-            DataNodeContainerModificationStrategy<ListSchemaNode> {
+    public static class UnkeyedListItemModificationStrategy extends DataNodeContainerModificationStrategy<ListSchemaNode> {
 
         public UnkeyedListItemModificationStrategy(final ListSchemaNode schemaNode) {
             super(schemaNode, UnkeyedListEntryNode.class);
@@ -520,8 +525,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
     }
 
-    public static class AugmentationModificationStrategy extends
-            DataNodeContainerModificationStrategy<AugmentationSchema> {
+    public static class AugmentationModificationStrategy extends DataNodeContainerModificationStrategy<AugmentationSchema> {
 
         protected AugmentationModificationStrategy(final AugmentationSchema schema, final DataNodeContainer resolved) {
             super(createAugmentProxy(schema,resolved), AugmentationNode.class);
@@ -537,12 +541,10 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
 
     public static class ChoiceModificationStrategy extends NormalizedNodeContainerModificationStrategy {
 
-        private final ChoiceNode schema;
         private final Map<PathArgument, ModificationApplyOperation> childNodes;
 
         public ChoiceModificationStrategy(final ChoiceNode schemaNode) {
             super(org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode.class);
-            this.schema = schemaNode;
             ImmutableMap.Builder<PathArgument, ModificationApplyOperation> child = ImmutableMap.builder();
 
             for (ChoiceCaseNode caze : schemaNode.getCases()) {
@@ -656,7 +658,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         @Override
         protected StoreMetadataNode applyWrite(final NodeModification modification,
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
-            return StoreMetadataNode.createRecursively(modification.getWritenValue(), subtreeVersion);
+            return StoreMetadataNode.createRecursively(modification.getWrittenValue(), subtreeVersion);
         }
 
         @Override
@@ -668,7 +670,7 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         }
 
         @Override
-        protected void verifyWritenStructure(final NormalizedNode<?, ?> writenValue) {
+        protected void verifyWrittenStructure(final NormalizedNode<?, ?> writtenValue) {
 
         }
 
@@ -738,10 +740,6 @@ public abstract class SchemaAwareApplyOperation implements ModificationApplyOper
         public String toString() {
             return "OrderedMapModificationStrategy [entry=" + entryStrategy + "]";
         }
-    }
-
-    public void verifyIdentifier(final PathArgument identifier) {
-
     }
 
     public static AugmentationSchema createAugmentProxy(final AugmentationSchema schema, final DataNodeContainer resolved) {
