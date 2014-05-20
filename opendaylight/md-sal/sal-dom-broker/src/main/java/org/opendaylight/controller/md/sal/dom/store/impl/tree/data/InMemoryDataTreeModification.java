@@ -12,9 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.OperationWithModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -53,18 +51,18 @@ final class InMemoryDataTreeModification implements DataTreeModification {
         return rootNode;
     }
 
-	ModificationApplyOperation getStrategy() {
-		return strategyTree;
-	}
+    ModificationApplyOperation getStrategy() {
+        return strategyTree;
+    }
 
     @Override
-	public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
+    public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
         checkSealed();
         resolveModificationFor(path).write(value);
     }
 
     @Override
-	public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkSealed();
         mergeImpl(resolveModificationFor(path),data);
     }
@@ -83,13 +81,13 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-	public void delete(final InstanceIdentifier path) {
+    public void delete(final InstanceIdentifier path) {
         checkSealed();
         resolveModificationFor(path).delete();
     }
 
     @Override
-	public Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
+    public Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
         Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
 
         Optional<StoreMetadataNode> result = resolveSnapshot(modification);
@@ -138,7 +136,7 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-	public void seal() {
+    public void seal() {
         final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
         Preconditions.checkState(success, "Attempted to seal an already-sealed Data Tree.");
         rootNode.seal();
@@ -153,9 +151,9 @@ final class InMemoryDataTreeModification implements DataTreeModification {
         return "MutableDataTree [modification=" + rootNode + "]";
     }
 
-	@Override
-	public DataTreeModification newModification(ModificationApplyOperation applyOper) {
-    	// FIXME: transaction chaining
-    	throw new UnsupportedOperationException("Implement this as part of transaction chaining");
-	}
+    @Override
+    public DataTreeModification newModification() {
+        // FIXME: transaction chaining
+        throw new UnsupportedOperationException("Implement this as part of transaction chaining");
+    }
 }

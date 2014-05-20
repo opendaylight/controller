@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -16,12 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ModificationType;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreNodeCompositeBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
@@ -73,7 +68,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 
-public abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
+abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
     public static SchemaAwareApplyOperation from(final DataSchemaNode schemaNode) {
         if (schemaNode instanceof ContainerSchemaNode) {

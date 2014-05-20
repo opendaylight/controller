@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl.tree;
+package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
@@ -37,7 +37,7 @@ import com.google.common.primitives.UnsignedLong;
  *
  *
  */
-public interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOperation> {
+interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOperation> {
 
     /**
      *
@@ -79,14 +79,14 @@ public interface ModificationApplyOperation extends StoreTreeNode<ModificationAp
     Optional<ModificationApplyOperation> getChild(PathArgument child);
 
     /**
-    *
-    * Checks if provided node modification could be applied to current metadata node.
-    *
-    * @param modification Modification
-    * @param current Metadata Node to which modification should be applied
-    * @return true if modification is applicable
-    *         false if modification is no applicable
+     *
+     * Checks if provided node modification could be applied to current metadata node.
+     *
+     * @param modification Modification
+     * @param current Metadata Node to which modification should be applied
+     * @return true if modification is applicable
+     *         false if modification is no applicable
      * @throws DataPreconditionFailedException
-    */
+     */
     void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<StoreMetadataNode> current) throws DataPreconditionFailedException;
 }

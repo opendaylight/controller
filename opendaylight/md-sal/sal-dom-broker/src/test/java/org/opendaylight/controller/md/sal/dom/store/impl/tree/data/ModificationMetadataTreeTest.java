@@ -26,7 +26,6 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.store.impl.SchemaAwareApplyOperationRoot;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
@@ -99,14 +98,16 @@ public class ModificationMetadataTreeTest {
                     .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME)) //
                     .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME)) //
                     .build()) //
-            .build();
+                    .build();
 
     private SchemaContext schemaContext;
+    private ModificationApplyOperation applyOper;
 
     @Before
     public void prepare() {
         schemaContext = TestModel.createTestContext();
         assertNotNull("Schema context must not be null.", schemaContext);
+        applyOper = SchemaAwareApplyOperation.from(schemaContext);
     }
 
     /**
@@ -141,14 +142,14 @@ public class ModificationMetadataTreeTest {
                 .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
                 .withChild(
                         mapNodeBuilder(OUTER_LIST_QNAME)
-                                .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
-                                .withChild(BAR_NODE).build()).build();
+                        .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                        .withChild(BAR_NODE).build()).build();
     }
 
     @Test
     public void basicReadWrites() {
         DataTreeModification modificationTree = new InMemoryDataTreeModification(new InMemoryDataTreeSnapshot(schemaContext,
-                StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))),
+                StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5)), applyOper),
                 new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.readNode(OUTER_LIST_2_PATH);
         assertTrue(originalBarNode.isPresent());
@@ -183,7 +184,7 @@ public class ModificationMetadataTreeTest {
          * context.
          *
          */
-        return t.takeSnapshot().newModification(new SchemaAwareApplyOperationRoot(schemaContext));
+        return t.takeSnapshot().newModification();
     }
 
     @Test

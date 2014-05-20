@@ -5,18 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
 import com.google.common.primitives.UnsignedLong;
 
-public class OperationWithModification {
+final class OperationWithModification {
 
     private final NodeModification modification;
 

@@ -20,7 +20,7 @@ import com.google.common.primitives.UnsignedLong;
  *
  */
 @SuppressWarnings("rawtypes")
-public class StoreNodeCompositeBuilder {
+class StoreNodeCompositeBuilder {
 
     private final StoreMetadataNode.Builder metadata;
 
