@@ -1,4 +1,11 @@
-package org.opendaylight.controller.md.sal.dom.store.impl;
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,7 +26,10 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.SchemaAwareApplyOperationRoot;
+import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -137,10 +147,10 @@ public class ModificationMetadataTreeTest {
 
     @Test
     public void basicReadWrites() {
-        DataTreeModification modificationTree = DataTreeModification.from(new DataTree.Snapshot(schemaContext,
+        DataTreeModification modificationTree = new InMemoryDataTreeModification(new InMemoryDataTreeSnapshot(schemaContext,
                 StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5))),
                 new SchemaAwareApplyOperationRoot(schemaContext));
-        Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.read(OUTER_LIST_2_PATH);
+        Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.readNode(OUTER_LIST_2_PATH);
         assertTrue(originalBarNode.isPresent());
         assertSame(BAR_NODE, originalBarNode.get());
 
@@ -149,13 +159,13 @@ public class ModificationMetadataTreeTest {
 
         // reads node to /outer-list/1/inner_list/two/value
         // and checks if node is already present
-        Optional<NormalizedNode<?, ?>> barTwoCModified = modificationTree.read(TWO_TWO_VALUE_PATH);
+        Optional<NormalizedNode<?, ?>> barTwoCModified = modificationTree.readNode(TWO_TWO_VALUE_PATH);
         assertTrue(barTwoCModified.isPresent());
         assertEquals(ImmutableNodes.leafNode(VALUE_QNAME, "test"), barTwoCModified.get());
 
         // delete node to /outer-list/1/inner_list/two/value
         modificationTree.delete(TWO_TWO_VALUE_PATH);
-        Optional<NormalizedNode<?, ?>> barTwoCAfterDelete = modificationTree.read(TWO_TWO_VALUE_PATH);
+        Optional<NormalizedNode<?, ?>> barTwoCAfterDelete = modificationTree.readNode(TWO_TWO_VALUE_PATH);
         assertFalse(barTwoCAfterDelete.isPresent());
     }
 
@@ -164,7 +174,8 @@ public class ModificationMetadataTreeTest {
         /**
          * Creates empty Snapshot with associated schema context.
          */
-        DataTree t = DataTree.create(schemaContext);
+        DataTree t = InMemoryDataTreeFactory.getInstance().create();
+        t.setSchemaContext(schemaContext);
 
         /**
          *
@@ -172,9 +183,7 @@ public class ModificationMetadataTreeTest {
          * context.
          *
          */
-        DataTreeModification modificationTree = DataTreeModification.from(t.takeSnapshot(), new SchemaAwareApplyOperationRoot(
-                schemaContext));
-        return modificationTree;
+        return t.takeSnapshot().newModification(new SchemaAwareApplyOperationRoot(schemaContext));
     }
 
     @Test
@@ -195,14 +204,14 @@ public class ModificationMetadataTreeTest {
         /**
          * Reads list node from /test/outer-list
          */
-        Optional<NormalizedNode<?, ?>> potentialOuterList = modificationTree.read(OUTER_LIST_PATH);
+        Optional<NormalizedNode<?, ?>> potentialOuterList = modificationTree.readNode(OUTER_LIST_PATH);
         assertTrue(potentialOuterList.isPresent());
 
         /**
          * Reads container node from /test and verifies that it contains test
          * node
          */
-        Optional<NormalizedNode<?, ?>> potentialTest = modificationTree.read(TEST_PATH);
+        Optional<NormalizedNode<?, ?>> potentialTest = modificationTree.readNode(TEST_PATH);
         ContainerNode containerTest = assertPresentAndType(potentialTest, ContainerNode.class);
 
         /**
@@ -219,8 +228,8 @@ public class ModificationMetadataTreeTest {
     public void writeSubtreeReadChildren() {
         DataTreeModification modificationTree = createEmptyModificationTree();
         modificationTree.write(TEST_PATH, createTestContainer());
-        Optional<NormalizedNode<?, ?>> potential = modificationTree.read(TWO_TWO_PATH);
-        MapEntryNode node = assertPresentAndType(potential, MapEntryNode.class);
+        Optional<NormalizedNode<?, ?>> potential = modificationTree.readNode(TWO_TWO_PATH);
+        assertPresentAndType(potential, MapEntryNode.class);
     }
 
     @Test
@@ -229,11 +238,11 @@ public class ModificationMetadataTreeTest {
         modificationTree.write(TEST_PATH, createTestContainer());
 
         // We verify data are present
-        Optional<NormalizedNode<?, ?>> potentialBeforeDelete = modificationTree.read(TWO_TWO_PATH);
-        MapEntryNode node = assertPresentAndType(potentialBeforeDelete, MapEntryNode.class);
+        Optional<NormalizedNode<?, ?>> potentialBeforeDelete = modificationTree.readNode(TWO_TWO_PATH);
+        assertPresentAndType(potentialBeforeDelete, MapEntryNode.class);
 
         modificationTree.delete(TWO_TWO_PATH);
-        Optional<NormalizedNode<?, ?>> potentialAfterDelete = modificationTree.read(TWO_TWO_PATH);
+        Optional<NormalizedNode<?, ?>> potentialAfterDelete = modificationTree.readNode(TWO_TWO_PATH);
         assertFalse(potentialAfterDelete.isPresent());
 
     }

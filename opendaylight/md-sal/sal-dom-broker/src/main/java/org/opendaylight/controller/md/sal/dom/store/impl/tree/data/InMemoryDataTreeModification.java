@@ -5,15 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.OperationWithModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
@@ -26,38 +28,43 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-/**
- * Class encapsulation of set of modifications to a base tree. This tree is backed
- * by a read-only snapshot and tracks modifications on top of that. The modification
- * has the ability to rebase itself on a new snapshot.
- */
-class DataTreeModification {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeModification.class);
+final class InMemoryDataTreeModification implements DataTreeModification {
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryDataTreeModification.class);
 
     /*
      * FIXME: the thread safety of concurrent write/delete/read/seal operations
      *        needs to be evaluated.
      */
-    private static final AtomicIntegerFieldUpdater<DataTreeModification> SEALED_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(DataTreeModification.class, "sealed");
+    private static final AtomicIntegerFieldUpdater<InMemoryDataTreeModification> SEALED_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(InMemoryDataTreeModification.class, "sealed");
     private volatile int sealed = 0;
 
     private final ModificationApplyOperation strategyTree;
-    private final DataTree.Snapshot snapshot;
+    private final InMemoryDataTreeSnapshot snapshot;
     private final NodeModification rootNode;
 
-    private DataTreeModification(final DataTree.Snapshot snapshot, final ModificationApplyOperation strategyTree) {
+    InMemoryDataTreeModification(final InMemoryDataTreeSnapshot snapshot, final ModificationApplyOperation resolver) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
-        this.strategyTree = Preconditions.checkNotNull(strategyTree);
+        this.strategyTree = Preconditions.checkNotNull(resolver);
         this.rootNode = NodeModification.createUnmodified(snapshot.getRootNode());
     }
 
-    public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
+    NodeModification getRootModification() {
+        return rootNode;
+    }
+
+	ModificationApplyOperation getStrategy() {
+		return strategyTree;
+	}
+
+    @Override
+	public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
         checkSealed();
         resolveModificationFor(path).write(value);
     }
 
-    public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    @Override
+	public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkSealed();
         mergeImpl(resolveModificationFor(path),data);
     }
@@ -75,12 +82,14 @@ class DataTreeModification {
         op.merge(data);
     }
 
-    public void delete(final InstanceIdentifier path) {
+    @Override
+	public void delete(final InstanceIdentifier path) {
         checkSealed();
         resolveModificationFor(path).delete();
     }
 
-    public Optional<NormalizedNode<?, ?>> read(final InstanceIdentifier path) {
+    @Override
+	public Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
         Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
 
         Optional<StoreMetadataNode> result = resolveSnapshot(modification);
@@ -128,11 +137,8 @@ class DataTreeModification {
         return OperationWithModification.from(operation, modification);
     }
 
-    public static DataTreeModification from(final DataTree.Snapshot snapshot, final ModificationApplyOperation resolver) {
-        return new DataTreeModification(snapshot, resolver);
-    }
-
-    public void seal() {
+    @Override
+	public void seal() {
         final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
         Preconditions.checkState(success, "Attempted to seal an already-sealed Data Tree.");
         rootNode.seal();
@@ -142,13 +148,14 @@ class DataTreeModification {
         checkState(sealed == 0, "Data Tree is sealed. No further modifications allowed.");
     }
 
-    @Deprecated
-    protected NodeModification getRootModification() {
-        return rootNode;
-    }
-
     @Override
     public String toString() {
         return "MutableDataTree [modification=" + rootNode + "]";
     }
+
+	@Override
+	public DataTreeModification newModification(ModificationApplyOperation applyOper) {
+    	// FIXME: transaction chaining
+    	throw new UnsupportedOperationException("Implement this as part of transaction chaining");
+	}
 }
