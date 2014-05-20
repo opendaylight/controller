@@ -17,6 +17,7 @@
   <properties>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
+    <aries.util.version>1.1.0</aries.util.version>
     <!-- Controller Modules Versions -->
     <aries.util.version>1.1.0</aries.util.version>
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
