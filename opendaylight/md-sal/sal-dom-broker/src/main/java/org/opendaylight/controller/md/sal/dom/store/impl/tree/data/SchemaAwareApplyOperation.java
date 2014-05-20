@@ -358,7 +358,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
                 nodeVersion = subtreeVersion;
             }
 
-            final StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion, nodeVersion);
+            final StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion);
             if (!modification.hasAdditionalModifications()) {
                 return newValueMeta;
             }

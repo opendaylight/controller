@@ -84,16 +84,16 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
     }
 
     public static final StoreMetadataNode createRecursively(final NormalizedNode<?, ?> node,
-            final UnsignedLong nodeVersion, final UnsignedLong subtreeVersion) {
-        Builder builder = builder(nodeVersion) //
-                .setSubtreeVersion(subtreeVersion) //
+            final UnsignedLong version) {
+        Builder builder = builder(version) //
+                .setSubtreeVersion(version) //
                 .setData(node);
         if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
 
             @SuppressWarnings("unchecked")
             NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> nodeContainer = (NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>>) node;
             for (NormalizedNode<?, ?> subNode : nodeContainer.getValue()) {
-                builder.add(createRecursively(subNode, nodeVersion, subtreeVersion));
+                builder.add(createRecursively(subNode, version));
             }
         }
         return builder.build();
@@ -154,7 +154,4 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
         }
     }
 
-    public static StoreMetadataNode createRecursively(final NormalizedNode<?, ?> node, final UnsignedLong version) {
-        return createRecursively(node, version, version);
-    }
 }
