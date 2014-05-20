@@ -7,15 +7,12 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
 import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
 import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Mock implementation of routing table
@@ -59,7 +56,7 @@ public class MockRoutingTable<K, V> implements RoutingTable {
   }
 
   @Override
-  public Set getRoutes(Object o) {
+  public Set<String> getRoutes(Object o) {
     Set<String> routes = new HashSet<String>();
     routes.add("localhost:5554");
     return routes;

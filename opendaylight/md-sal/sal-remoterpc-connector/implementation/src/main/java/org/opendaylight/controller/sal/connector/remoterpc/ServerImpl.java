@@ -7,48 +7,33 @@
  */
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RouteChangeListener;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTableException;
-import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
-import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zeromq.ZMQ;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zeromq.ZMQ;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 /**
  * ZeroMq based implementation of RpcRouter.
  */
 public class ServerImpl implements RemoteRpcServer {
 
-  private Logger _logger = LoggerFactory.getLogger(ServerImpl.class);
+  private final Logger _logger = LoggerFactory.getLogger(ServerImpl.class);
 
   private ExecutorService serverPool;
   protected ServerRequestHandler handler;
@@ -63,7 +48,7 @@ public class ServerImpl implements RemoteRpcServer {
   private volatile State status = State.STOPPED;
 
   private String serverAddress;
-  private int port;
+  private final int port;
 
   public static enum State {
     STARTING, STARTED, STOPPED;
@@ -167,7 +152,7 @@ public class ServerImpl implements RemoteRpcServer {
    */
   private void closeZmqContext() {
     ExecutorService exec = Executors.newSingleThreadExecutor();
-    FutureTask zmqTermination = new FutureTask(new Runnable() {
+    FutureTask<?> zmqTermination = new FutureTask<Void>(new Runnable() {
 
       @Override
       public void run() {
@@ -249,7 +234,7 @@ public class ServerImpl implements RemoteRpcServer {
    * @return
    */
   private String findIpAddress() {
-    Enumeration e = null;
+    Enumeration<?> e = null;
     try {
       e = NetworkInterface.getNetworkInterfaces();
     } catch (SocketException e1) {
@@ -260,7 +245,7 @@ public class ServerImpl implements RemoteRpcServer {
 
       NetworkInterface n = (NetworkInterface) e.nextElement();
 
-      Enumeration ee = n.getInetAddresses();
+      Enumeration<?> ee = n.getInetAddresses();
       while (ee.hasMoreElements()) {
         InetAddress i = (InetAddress) ee.nextElement();
         _logger.debug("Trying address {}", i);

@@ -8,14 +8,11 @@
 
 package org.opendaylight.controller.sal.connector.remoterpc;
 
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
-
 public interface RemoteRpcClient extends AutoCloseable{
 
     void setRoutingTableProvider(RoutingTableProvider provider);
-    
+
     void stop();
-    
+
     void start();
 }

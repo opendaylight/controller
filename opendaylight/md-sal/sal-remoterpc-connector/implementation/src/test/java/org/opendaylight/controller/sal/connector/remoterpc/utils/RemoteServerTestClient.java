@@ -1,13 +1,13 @@
 package org.opendaylight.controller.sal.connector.remoterpc.utils;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.zeromq.ZMQ;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RemoteServerTestClient {
 
@@ -39,7 +39,7 @@ public class RemoteServerTestClient {
   }
   public Message createAddFlowMessage(String serverAddress ){
 
-    RpcRouter.RouteIdentifier routeIdentifier = getAddFlowRpcIdentifier();
+    RpcRouter.RouteIdentifier<?, ?, ?> routeIdentifier = getAddFlowRpcIdentifier();
 
     Message addFlow = new Message.MessageBuilder()
         .type(Message.MessageType.REQUEST)
@@ -52,7 +52,7 @@ public class RemoteServerTestClient {
     return addFlow;
   }
 
-  private RpcRouter.RouteIdentifier getAddFlowRpcIdentifier(){
+  private RpcRouter.RouteIdentifier<?, ?, ?> getAddFlowRpcIdentifier(){
     throw new UnsupportedOperationException();
   }
 

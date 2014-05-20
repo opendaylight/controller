@@ -8,18 +8,8 @@
 package org.opendaylight.controller.sal.connector.remoterpc;
 
 
-import com.google.common.base.Optional;
-import junit.framework.Assert;
-import org.junit.*;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
-import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.zeromq.ZMQ;
-import zmq.Ctx;
-import zmq.SocketBase;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,8 +18,24 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import junit.framework.Assert;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
+import org.opendaylight.controller.sal.connector.remoterpc.api.RoutingTable;
+import org.opendaylight.controller.sal.connector.remoterpc.utils.MessagingUtil;
+import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.zeromq.ZMQ;
+
+import zmq.Ctx;
+import zmq.SocketBase;
+
+import com.google.common.base.Optional;
 
 public class ServerImplTest {
 
@@ -68,12 +74,12 @@ public class ServerImplTest {
     server = new ServerImpl(port);
     server.setBrokerSession(brokerSession);
 
-    RoutingTable<RpcRouter.RouteIdentifier, String> mockRoutingTable = new MockRoutingTable<String, String>();
-    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
+    RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> mockRoutingTable = new MockRoutingTable<String, String>();
+    Optional<RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String>> optionalRoutingTable = Optional.fromNullable(mockRoutingTable);
     when(routingTableProvider.getRoutingTable()).thenReturn(optionalRoutingTable);
 
     when(brokerSession.addRpcRegistrationListener(listener)).thenReturn(null);
-    when(brokerSession.getSupportedRpcs()).thenReturn(Collections.EMPTY_SET);
+    when(brokerSession.getSupportedRpcs()).thenReturn(Collections.<QName>emptySet());
     when(brokerSession.rpc(null, mock(CompositeNode.class))).thenReturn(null);
     server.start();
     Thread.sleep(5000);//wait for server to start
@@ -178,7 +184,7 @@ public class ServerImplTest {
     Thread[] threads = new Thread[Thread.activeCount()];
     Thread.enumerate(threads);
 
-    List<Thread> foundThreads = new ArrayList();
+    List<Thread> foundThreads = new ArrayList<Thread>();
     for (Thread t : threads) {
       if (t.getName().startsWith(name))
         foundThreads.add(t);

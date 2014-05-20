@@ -285,7 +285,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
             for (QName key : keyDefinition) {
 
@@ -325,7 +325,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             return Builders.unkeyedListEntryBuilder().withNodeIdentifier(getIdentifier());
         }
 
@@ -343,7 +343,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             return Builders.containerBuilder().withNodeIdentifier(getIdentifier());
         }
 
@@ -377,7 +377,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             return Builders.orderedLeafSetBuilder().withNodeIdentifier(getIdentifier());
         }
 
@@ -397,7 +397,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             return Builders.leafSetBuilder().withNodeIdentifier(getIdentifier());
         }
 
@@ -602,7 +602,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
+        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
             return Builders.choiceBuilder().withNodeIdentifier(getIdentifier());
         }
 

@@ -58,7 +58,7 @@ public class RemoteRpcProvider implements
   private ProviderSession brokerSession;
   private RpcProvisionRegistry rpcProvisionRegistry;
   private BundleContext context;
-  private ServiceTracker clusterTracker;
+  private ServiceTracker<?, ?> clusterTracker;
 
   public RemoteRpcProvider(ServerImpl server, ClientImpl client) {
     this.server = server;
@@ -170,8 +170,8 @@ public class RemoteRpcProvider implements
 
   }
 
-  private RoutingTable<RpcRouter.RouteIdentifier, String> getRoutingTable(){
-    Optional<RoutingTable<RpcRouter.RouteIdentifier, String>> routingTable =
+  private RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> getRoutingTable(){
+    Optional<RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String>> routingTable =
         routingTableProvider.getRoutingTable();
 
     checkState(routingTable.isPresent(), "Routing table is null");
@@ -191,7 +191,7 @@ public class RemoteRpcProvider implements
       RouteIdentifierImpl routeId = new RouteIdentifierImpl();
       routeId.setType(rpc);
 
-      RoutingTable<RpcRouter.RouteIdentifier, String> routingTable = getRoutingTable();
+      RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable = getRoutingTable();
 
       try {
         routingTable.addGlobalRoute(routeId, server.getServerAddress());
@@ -212,7 +212,7 @@ public class RemoteRpcProvider implements
       RouteIdentifierImpl routeId = new RouteIdentifierImpl();
       routeId.setType(rpc);
 
-      RoutingTable<RpcRouter.RouteIdentifier, String> routingTable = getRoutingTable();
+      RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable = getRoutingTable();
 
       try {
         routingTable.removeGlobalRoute(routeId);
@@ -245,9 +245,9 @@ public class RemoteRpcProvider implements
      *
      * @param announcements
      */
-    private void announce(Set<RpcRouter.RouteIdentifier> announcements) {
+    private void announce(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements) {
       _logger.debug("Announcing [{}]", announcements);
-      RoutingTable<RpcRouter.RouteIdentifier, String> routingTable = getRoutingTable();
+      RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable = getRoutingTable();
       try {
         routingTable.addRoutes(announcements, server.getServerAddress());
       } catch (RoutingTableException | SystemException e) {
@@ -259,9 +259,9 @@ public class RemoteRpcProvider implements
      *
      * @param removals
      */
-    private void remove(Set<RpcRouter.RouteIdentifier> removals){
+    private void remove(Set<RpcRouter.RouteIdentifier<?, ?, ?>> removals){
       _logger.debug("Removing [{}]", removals);
-      RoutingTable<RpcRouter.RouteIdentifier, String> routingTable = getRoutingTable();
+      RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable = getRoutingTable();
       try {
         routingTable.removeRoutes(removals, server.getServerAddress());
       } catch (RoutingTableException | SystemException e) {
@@ -274,9 +274,9 @@ public class RemoteRpcProvider implements
      * @param changes
      * @return
      */
-    private Set<RpcRouter.RouteIdentifier> getRouteIdentifiers(Map<RpcRoutingContext, Set<InstanceIdentifier>> changes) {
+    private Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRouteIdentifiers(Map<RpcRoutingContext, Set<InstanceIdentifier>> changes) {
       RouteIdentifierImpl routeId = null;
-      Set<RpcRouter.RouteIdentifier> routeIdSet = new HashSet<RpcRouter.RouteIdentifier>();
+      Set<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdSet = new HashSet<>();
 
       for (RpcRoutingContext context : changes.keySet()){
         routeId = new RouteIdentifierImpl();
