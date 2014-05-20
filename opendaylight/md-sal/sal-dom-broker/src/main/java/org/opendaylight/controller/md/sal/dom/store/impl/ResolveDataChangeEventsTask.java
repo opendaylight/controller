@@ -23,11 +23,11 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidateNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Node;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
@@ -73,9 +73,9 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private final ListenerTree listenerRoot;
 
     public ResolveDataChangeEventsTask(DataTreeCandidate candidate, ListenerTree listenerTree) {
-    	this.candidate = Preconditions.checkNotNull(candidate);
-    	this.listenerRoot = Preconditions.checkNotNull(listenerTree);
-	}
+        this.candidate = Preconditions.checkNotNull(candidate);
+        this.listenerRoot = Preconditions.checkNotNull(listenerTree);
+    }
 
     /**
      * Resolves and creates Notification Tasks
@@ -89,9 +89,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     @Override
     public Iterable<ChangeListenerNotifyTask> call() {
         try (final Walker w = listenerRoot.getWalker()) {
-            resolveAnyChangeEvent(candidate.getRootPath(), Collections.singleton(w.getRootNode()),
-            		candidate.getModificationRoot(), Optional.fromNullable(candidate.getBeforeRoot()),
-            		Optional.fromNullable(candidate.getAfterRoot()));
+            resolveAnyChangeEvent(candidate.getRootPath(), Collections.singleton(w.getRootNode()), candidate.getRootNode());
             return createNotificationTasks();
         }
     }
@@ -256,29 +254,38 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @return Data Change Event of this node and all it's children
      */
     private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final InstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NodeModification modification,
-            final Optional<StoreMetadataNode> before, final Optional<StoreMetadataNode> after) {
-        // No listeners are present in listener registration subtree
-        // no before and after state is present
-        if (!before.isPresent() && !after.isPresent()) {
-            return NO_CHANGE;
-        }
-        switch (modification.getModificationType()) {
-        case SUBTREE_MODIFIED:
-            return resolveSubtreeChangeEvent(path, listeners, modification, before.get(), after.get());
-        case MERGE:
-        case WRITE:
-            if (before.isPresent()) {
-                return resolveReplacedEvent(path, listeners, before.get().getData(), after.get().getData());
-            } else {
-                return resolveCreateEvent(path, listeners, after.get());
-            }
-        case DELETE:
-            return resolveDeleteEvent(path, listeners, before.get());
-        default:
+            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode node) {
+
+        if (node.getModificationType() != ModificationType.UNMODIFIED &&
+                !node.getDataAfter().isPresent() && !node.getDataBefore().isPresent()) {
+            LOG.debug("Modification at {} has type {}, but no before- and after-data. Assuming unchanged.",
+                    path, node.getModificationType());
             return NO_CHANGE;
         }
 
+        // no before and after state is present
+
+        switch (node.getModificationType()) {
+        case SUBTREE_MODIFIED:
+            return resolveSubtreeChangeEvent(path, listeners, node);
+        case MERGE:
+        case WRITE:
+            Preconditions.checkArgument(node.getDataAfter().isPresent(),
+                    "Modification at {} has type {} but no after-data", path, node.getModificationType());
+            if (node.getDataBefore().isPresent()) {
+                return resolveReplacedEvent(path, listeners, node.getDataBefore().get(), node.getDataAfter().get());
+            } else {
+                return resolveCreateEvent(path, listeners, node.getDataAfter().get());
+            }
+        case DELETE:
+            Preconditions.checkArgument(node.getDataBefore().isPresent(),
+                    "Modification at {} has type {} but no before-data", path, node.getModificationType());
+            return resolveDeleteEvent(path, listeners, node.getDataBefore().get());
+        case UNMODIFIED:
+            return NO_CHANGE;
+        }
+
+        throw new IllegalStateException(String.format("Unhandled node state %s at %s", node.getModificationType(), path));
     }
 
     private DOMImmutableDataChangeEvent resolveReplacedEvent(final InstanceIdentifier path,
@@ -313,7 +320,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private DOMImmutableDataChangeEvent resolveNodeContainerReplaced(final InstanceIdentifier path,
             final Collection<Node> listeners,
             final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont,
-            final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont) {
+                    final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont) {
         final Set<PathArgument> alreadyProcessed = new HashSet<>();
         final List<DOMImmutableDataChangeEvent> childChanges = new LinkedList<>();
 
@@ -388,17 +395,17 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @return
      */
     private DOMImmutableDataChangeEvent resolveCreateEvent(final InstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final StoreMetadataNode afterState) {
+            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> afterState) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState.getData();
+        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
     }
 
     private DOMImmutableDataChangeEvent resolveDeleteEvent(final InstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final StoreMetadataNode beforeState) {
+            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> beforeState) {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState.getData();
+        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState;
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getRemoveEventFactory());
     }
 
@@ -408,7 +415,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         final DOMImmutableDataChangeEvent event = eventFactory.create(path, node);
         DOMImmutableDataChangeEvent propagateEvent = event;
         // We have listeners for this node or it's children, so we will try
-            // to do additional processing
+        // to do additional processing
         if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
             LOG.trace("Resolving subtree recursive event for {}, type {}", path, eventFactory);
 
@@ -439,30 +446,31 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final InstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NodeModification modification,
-            final StoreMetadataNode before, final StoreMetadataNode after) {
+            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode modification) {
 
-        Builder one = builder(DataChangeScope.ONE).setBefore(before.getData()).setAfter(after.getData());
+        Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", path);
+        Preconditions.checkArgument(modification.getDataAfter().isPresent(), "Subtree change with after-data not present at path %s", path);
 
-        Builder subtree = builder(DataChangeScope.SUBTREE).setBefore(before.getData()).setAfter(after.getData());
+        Builder one = builder(DataChangeScope.ONE).
+                setBefore(modification.getDataBefore().get()).
+                setAfter(modification.getDataAfter().get());
+        Builder subtree = builder(DataChangeScope.SUBTREE).
+                setBefore(modification.getDataBefore().get()).
+                setAfter(modification.getDataAfter().get());
 
-        for (NodeModification childMod : modification.getModifications()) {
+        for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
             PathArgument childId = childMod.getIdentifier();
             InstanceIdentifier childPath = append(path, childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
-
-            Optional<StoreMetadataNode> childBefore = before.getChild(childId);
-            Optional<StoreMetadataNode> childAfter = after.getChild(childId);
 
             switch (childMod.getModificationType()) {
             case WRITE:
             case MERGE:
             case DELETE:
-                one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod, childBefore, childAfter));
+                one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod));
                 break;
             case SUBTREE_MODIFIED:
-                subtree.merge(resolveSubtreeChangeEvent(childPath, childListeners, childMod, childBefore.get(),
-                        childAfter.get()));
+                subtree.merge(resolveSubtreeChangeEvent(childPath, childListeners, childMod));
                 break;
             case UNMODIFIED:
                 // no-op
@@ -514,7 +522,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         }
     }
 
-	public static ResolveDataChangeEventsTask create(DataTreeCandidate candidate, ListenerTree listenerTree) {
+    public static ResolveDataChangeEventsTask create(DataTreeCandidate candidate, ListenerTree listenerTree) {
         return new ResolveDataChangeEventsTask(candidate, listenerTree);
-	}
+    }
 }

@@ -24,14 +24,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 
-// FIXME: this should not be public
-public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreTreeNode<StoreMetadataNode> {
-
+class StoreMetadataNode implements Immutable, Identifiable<PathArgument>, StoreTreeNode<StoreMetadataNode> {
+    private final Map<PathArgument, StoreMetadataNode> children;
     private final UnsignedLong nodeVersion;
     private final UnsignedLong subtreeVersion;
     private final NormalizedNode<?, ?> data;
-
-    private final Map<PathArgument, StoreMetadataNode> children;
 
     /**
      *
@@ -42,9 +39,9 @@ public class StoreMetadataNode implements Immutable, Identifiable<PathArgument>,
      */
     protected StoreMetadataNode(final NormalizedNode<?, ?> data, final UnsignedLong nodeVersion,
             final UnsignedLong subtreeVersion, final Map<PathArgument, StoreMetadataNode> children) {
-        this.nodeVersion = nodeVersion;
-        this.subtreeVersion = subtreeVersion;
-        this.data = data;
+        this.nodeVersion = Preconditions.checkNotNull(nodeVersion);
+        this.subtreeVersion = Preconditions.checkNotNull(subtreeVersion);
+        this.data = Preconditions.checkNotNull(data);
         this.children = Preconditions.checkNotNull(children);
     }
 

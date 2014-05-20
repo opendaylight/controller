@@ -335,12 +335,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Void> abort() {
-            if (candidate != null) {
-                candidate.close();
-                candidate = null;
-            }
-
-            return Futures.<Void> immediateFuture(null);
+            candidate = null;
+            return Futures.immediateFuture(null);
         }
 
         @Override
@@ -360,7 +356,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 }
             }
 
-            return Futures.<Void> immediateFuture(null);
+            return Futures.immediateFuture(null);
         }
     }
 }
