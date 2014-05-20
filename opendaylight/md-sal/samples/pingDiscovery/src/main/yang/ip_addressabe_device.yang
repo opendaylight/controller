@@ -1,0 +1,30 @@
+module ip-addressable-device {
+
+    yang-version 1;
+
+    namespace "http://opendaylight.org/samples/device/ip";
+    prefix "ipdevice";
+
+    import ietf-inet-types { prefix inet; }
+    import opendaylight-inventory { prefix inv; }
+
+    organization "Brocade Communication Systems";
+
+    contact "Devin Avery <devin.avery@brocade.com>";
+
+    description "Augments inventory nodes, adding information used to communicate with an IP addressable device.";
+
+    revision "2014-05-15" {
+        description "Initial revision";
+    }
+
+	//This is how we augment the generic / basic "inventory" item.
+    augment /inv:nodes/inv:node {
+
+        leaf ipaddress {
+           type inet:ip-address;
+           config false;
+        }
+    }
+
+}
