@@ -218,7 +218,7 @@ public class NeutronPortsNorthbound {
             if (portInterface.macInUse(singleton.getMacAddress())) {
                 throw new ResourceConflictException("MAC Address is in use.");
             }
-            
+
             /*
              * if fixed IPs are specified, each one has to have an existing subnet ID
              * that is in the same scoping network as the port.  In addition, if an IP
@@ -250,7 +250,7 @@ public class NeutronPortsNorthbound {
                     }
                 }
             }
-            
+
             Object[] instances = ServiceHelper.getGlobalInstances(INeutronPortAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
@@ -261,7 +261,7 @@ public class NeutronPortsNorthbound {
                     }
                 }
             }
-           
+
 
             // add the port to the cache
             portInterface.addPort(singleton);
@@ -312,7 +312,7 @@ public class NeutronPortsNorthbound {
                 if (portInterface.macInUse(test.getMacAddress())) {
                     throw new ResourceConflictException("MAC address in use");
                 }
-                
+
                 /*
                  * if fixed IPs are specified, each one has to have an existing subnet ID
                  * that is in the same scoping network as the port.  In addition, if an IP
