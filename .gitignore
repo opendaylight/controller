@@ -25,3 +25,5 @@ classes
 out/
 .externalToolBuilders
 maven-eclipse.xml
+.DS_STORE
+.metadata
