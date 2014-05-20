@@ -1,0 +1,94 @@
+module icmp-discovery {
+
+    yang-version 1;
+
+    namespace "http://opendaylight.org/samples/icmp";
+    prefix "pingdisc";
+
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types { prefix inet; }
+
+    organization "Brocade Communication Systems";
+
+    contact "Devin Avery <devin.avery@brocade.com>";
+
+    description "This defines the ICMP discovery service. This is a service which is defined in ODL
+    and allows you to set up a profile to ping a list of IPs (and optionally repeat in the original)";
+
+    revision "2014-05-15" {
+        description "ICMP discovery - initial revision";
+    }
+
+    typedef profile-id {
+        type inet:uri ;
+    }
+
+    typedef discovery-state {
+        // enums aren't storing properly at the time of this writing, using a boolean
+        //
+        // false means inactive, true means active
+        //
+        type uint8 ;
+    }
+
+    //TODO: we really want to be clear about what is operational vs configuration here...
+    grouping profile-grp {
+        leaf id {
+            type profile-id ;
+            mandatory true;
+        }
+        leaf timeout-seconds {
+            type uint16 ;
+        }
+        leaf-list ip-list {
+            type inet:ip-address ;
+        }
+        leaf status {
+            type discovery-state ;
+        }
+    }
+
+    container profiles {
+        config false;
+        list profile {
+          key "id" ;
+          uses profile-grp;
+        }
+    }
+
+    //defines an RPC which you can use
+    rpc discover {
+        description "This RPC call allows you to create a discovery profile, and start it at the same time. Optionally
+        you can provide just the ID (if you precreated the discovery profile, OR already ran the discover RPC) to
+        start the discovery profile using the existing IP list. Calling this RPC twice with IP list data will result
+        in a merge of IP addresses in the existing profile.";
+
+        input {
+            leaf id {
+                type profile-id ;
+            }
+            leaf-list ip-list {
+                type inet:ip-address ;
+            }
+            leaf timeout-seconds {
+                type uint16 ;
+            }
+        }
+        output {
+            leaf success {
+                type boolean;
+            }
+        }
+    }
+
+    //efines notifications which are sent when a discovery is started / completed.
+    notification profile-started {
+        description "A discovery profile has been started.";
+        uses profile-grp;
+    }
+
+    notification profile-finished {
+        description "A discovery profile has finished.";
+        uses profile-grp ;
+    }
+}
