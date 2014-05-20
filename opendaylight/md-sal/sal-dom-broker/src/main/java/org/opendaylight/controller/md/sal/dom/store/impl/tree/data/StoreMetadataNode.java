@@ -83,21 +83,6 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
         return "StoreMetadataNode [identifier=" + getIdentifier() + ", nodeVersion=" + nodeVersion + "]";
     }
 
-    public static Optional<UnsignedLong> getVersion(final Optional<StoreMetadataNode> currentMetadata) {
-        if (currentMetadata.isPresent()) {
-            return Optional.of(currentMetadata.get().getNodeVersion());
-        }
-        return Optional.absent();
-    }
-
-    public static Optional<StoreMetadataNode> getChild(final Optional<StoreMetadataNode> parent,
-            final PathArgument child) {
-        if (parent.isPresent()) {
-            return parent.get().getChild(child);
-        }
-        return Optional.absent();
-    }
-
     public static final StoreMetadataNode createRecursively(final NormalizedNode<?, ?> node,
             final UnsignedLong nodeVersion, final UnsignedLong subtreeVersion) {
         Builder builder = builder(nodeVersion) //
