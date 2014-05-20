@@ -1,0 +1,41 @@
+module icmpdata {
+
+	yang-version 1;
+	
+	namespace "http://opendaylight.org/samples/icmp/data";
+	prefix "icmpdata";
+	
+    import ietf-inet-types { prefix inet; }
+	
+	organization "Brocade Communication Systems";
+	
+	contact "Devin Avery <devin.avery@brocade.com>";
+	
+	description "Defines ICMP (ping) data for a given device.";
+	
+	revision "2014-05-15" {
+	    description "ICMP discovery - initial revision";
+	}
+	
+	container icmpdata {
+	    presence "Device";
+	    
+	    leaf is-available {
+	       type boolean;
+	       description "When read, forces an active read to the device.";
+	       config false;
+	    }
+	    
+	}
+
+	rpc sendPingNow {
+        description "Sends an ICMP ping to the device.";
+        
+        output {
+            leaf rtt {
+                type uint32;
+            }
+        }
+	}
+	
+}
