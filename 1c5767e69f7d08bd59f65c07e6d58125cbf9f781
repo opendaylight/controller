@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d061613a",
+        "filename": "opendaylight/connectionmanager/shell/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-20T14:56:40Z",
+      "side": 1,
+      "message": "Used a property for version.",
+      "revId": "1c5767e69f7d08bd59f65c07e6d58125cbf9f781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
