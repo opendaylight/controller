@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b02a9d2a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-20T13:31:37Z",
+      "side": 1,
+      "message": "Merging in proposed changes now.",
+      "parentUuid": "fa82b9bf_b0ce1db3",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d7e15bd1",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
         "patchSetId": 4
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "So this is suggestion for follow up patch (seperate from this one), which may use same approach as in previous method when you have transformation function and you convert future to listenableFuture (JdkFutureAdapters) and then use Futures.transform which will not block caller thread and transform result when it is available.",
       "parentUuid": "fa82b9bf_d7c07be2",
+      "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_90275964",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/connect/dom/RpcInvocationStrategy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-20T13:31:37Z",
+      "side": 1,
+      "message": "Ok, I understand. So the request is to change the invokeOn API to return a listenable future - I understand. \n\nI still don\u0027t fully understand the difference on when the invokeOn vs forwardToDomBroker methods are called, but I agree that we want the API to be async by nature if at all possible. \n\nSince you have a better handle on when these methods are called (and in what situations) can you open a new bug to track that work? Or if you want to send me an email with the specifics I can open that bug.\n\nFor now, we will consider this comment as addressed in a future change set.\n\nThank you!",
+      "parentUuid": "fa82b9bf_50c5518c",
       "revId": "e940d17aeae0fe5d0bcd683e786fede95665b1da",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
