@@ -49,11 +49,11 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
                 Collections.<PathArgument, StoreMetadataNode>emptyMap());
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(final UnsignedLong version) {
+        return new Builder(version);
     }
 
-    public static Builder builder(StoreMetadataNode node) {
+    public static Builder builder(final StoreMetadataNode node) {
         return new Builder(node);
     }
 
@@ -100,8 +100,7 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
 
     public static final StoreMetadataNode createRecursively(final NormalizedNode<?, ?> node,
             final UnsignedLong nodeVersion, final UnsignedLong subtreeVersion) {
-        Builder builder = builder() //
-                .setNodeVersion(nodeVersion) //
+        Builder builder = builder(nodeVersion) //
                 .setSubtreeVersion(subtreeVersion) //
                 .setData(node);
         if (node instanceof NormalizedNodeContainer<?, ?, ?>) {
@@ -117,28 +116,20 @@ class StoreMetadataNode implements Immutable, Identifiable<PathArgument> {
 
     public static class Builder {
 
-        private UnsignedLong nodeVersion;
+        private final UnsignedLong nodeVersion;
         private UnsignedLong subtreeVersion;
         private NormalizedNode<?, ?> data;
         private Map<PathArgument, StoreMetadataNode> children;
         private boolean dirty = false;
 
-        private Builder() {
+        private Builder(final UnsignedLong version) {
+            this.nodeVersion = Preconditions.checkNotNull(version);
             children = new HashMap<>();
         }
 
-        private Builder(StoreMetadataNode node) {
+        private Builder(final StoreMetadataNode node) {
+            this.nodeVersion = node.getNodeVersion();
             children = new HashMap<>(node.children);
-        }
-
-        public UnsignedLong getVersion() {
-            return nodeVersion;
-
-        }
-
-        public Builder setNodeVersion(final UnsignedLong version) {
-            this.nodeVersion = version;
-            return this;
         }
 
         public Builder setSubtreeVersion(final UnsignedLong version) {

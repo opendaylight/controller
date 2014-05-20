@@ -272,8 +272,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         @Override
         protected StoreMetadataNode applyWrite(final NodeModification modification,
                 final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
-            UnsignedLong nodeVersion = subtreeVersion;
-            return StoreMetadataNode.builder().setNodeVersion(nodeVersion).setSubtreeVersion(subtreeVersion)
+            return StoreMetadataNode.builder(subtreeVersion).setSubtreeVersion(subtreeVersion)
                     .setData(modification.getWrittenValue()).build();
         }
 
@@ -366,8 +365,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
             @SuppressWarnings("rawtypes")
             NormalizedNodeContainerBuilder dataBuilder = createBuilder(newValue);
-            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder) //
-                    .setNodeVersion(nodeVersion) //
+            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.create(nodeVersion, dataBuilder) //
                     .setSubtreeVersion(subtreeVersion);
 
             return mutateChildren(modification.getModifications(), newValueMeta, builder, nodeVersion);
@@ -388,8 +386,8 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
             @SuppressWarnings("rawtypes")
             NormalizedNodeContainerBuilder dataBuilder = createBuilder(currentMeta.getData());
-            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.from(dataBuilder, currentMeta)
-                    .setIdentifier(modification.getIdentifier()).setNodeVersion(currentMeta.getNodeVersion())
+            StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.create(dataBuilder, currentMeta)
+                    .setIdentifier(modification.getIdentifier())
                     .setSubtreeVersion(updatedSubtreeVersion);
 
             return mutateChildren(modification.getModifications(), currentMeta, builder, updatedSubtreeVersion);

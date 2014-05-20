@@ -26,12 +26,12 @@ class StoreNodeCompositeBuilder {
 
     private final NormalizedNodeContainerBuilder data;
 
-    private StoreNodeCompositeBuilder(final NormalizedNodeContainerBuilder nodeBuilder) {
-        this.metadata = StoreMetadataNode.builder();
+    private StoreNodeCompositeBuilder(final UnsignedLong version, final NormalizedNodeContainerBuilder nodeBuilder) {
+        this.metadata = StoreMetadataNode.builder(version);
         this.data = Preconditions.checkNotNull(nodeBuilder);
     }
 
-    public StoreNodeCompositeBuilder(NormalizedNodeContainerBuilder nodeBuilder, StoreMetadataNode currentMeta) {
+    private StoreNodeCompositeBuilder(final NormalizedNodeContainerBuilder nodeBuilder, final StoreMetadataNode currentMeta) {
         this.metadata = StoreMetadataNode.builder(currentMeta);
         this.data = Preconditions.checkNotNull(nodeBuilder);
     }
@@ -44,7 +44,7 @@ class StoreNodeCompositeBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public StoreNodeCompositeBuilder remove(PathArgument id) {
+    public StoreNodeCompositeBuilder remove(final PathArgument id) {
         metadata.remove(id);
         data.removeChild(id);
         return this;
@@ -54,22 +54,17 @@ class StoreNodeCompositeBuilder {
         return metadata.setData(data.build()).build();
     }
 
-    public static StoreNodeCompositeBuilder from(final NormalizedNodeContainerBuilder nodeBuilder) {
-        return new StoreNodeCompositeBuilder(nodeBuilder);
+    public static StoreNodeCompositeBuilder create(final UnsignedLong version, final NormalizedNodeContainerBuilder nodeBuilder) {
+        return new StoreNodeCompositeBuilder(version, nodeBuilder);
     }
 
-    public static StoreNodeCompositeBuilder from(final NormalizedNodeContainerBuilder nodeBuilder, StoreMetadataNode currentMeta) {
+    public static StoreNodeCompositeBuilder create(final NormalizedNodeContainerBuilder nodeBuilder, final StoreMetadataNode currentMeta) {
         return new StoreNodeCompositeBuilder(nodeBuilder, currentMeta);
     }
 
     @SuppressWarnings("unchecked")
     public StoreNodeCompositeBuilder setIdentifier(final PathArgument identifier) {
         data.withNodeIdentifier(identifier);
-        return this;
-    }
-
-    public StoreNodeCompositeBuilder setNodeVersion(final UnsignedLong nodeVersion) {
-        metadata.setNodeVersion(nodeVersion);
         return this;
     }
 
