@@ -22,10 +22,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeSnapshot;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationApplyOperation;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.InMemoryDataTreeFactory;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -36,7 +33,6 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -47,22 +43,17 @@ import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener {
-
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
-    private static final InstanceIdentifier PUBLIC_ROOT_PATH = InstanceIdentifier.builder().build();
-
+    private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+    private final ListenerTree listenerTree = ListenerTree.create();
+    private final AtomicLong txCounter = new AtomicLong(0);
     private final ListeningExecutorService executor;
     private final String name;
-    private final AtomicLong txCounter = new AtomicLong(0);
-    private final ListenerTree listenerTree = ListenerTree.create();
-    private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
-    private ModificationApplyOperation operationTree = new AlwaysFailOperation();
 
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService executor) {
         this.name = Preconditions.checkNotNull(name);
@@ -81,25 +72,17 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this, operationTree);
+        return new SnapshotBackedReadWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this, operationTree);
+        return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
     }
 
     @Override
     public synchronized void onGlobalContextUpdated(final SchemaContext ctx) {
-        /*
-         * Order of operations is important: dataTree may reject the context
-         * and creation of ModificationApplyOperation may fail. So pre-construct
-         * the operation, then update the data tree and then move the operation
-         * into view.
-         */
-        final ModificationApplyOperation newOperationTree = SchemaAwareApplyOperationRoot.from(ctx);
         dataTree.setSchemaContext(ctx);
-        operationTree = newOperationTree;
     }
 
     @Override
@@ -180,7 +163,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private static final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements
-            DOMStoreReadTransaction {
+    DOMStoreReadTransaction {
         private DataTreeSnapshot stableSnapshot;
 
         public SnapshotBackedReadTransaction(final Object identifier, final DataTreeSnapshot snapshot) {
@@ -204,15 +187,15 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements
-            DOMStoreWriteTransaction {
+    DOMStoreWriteTransaction {
         private DataTreeModification mutableTree;
         private InMemoryDOMDataStore store;
         private boolean ready = false;
 
         public SnapshotBackedWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-                final InMemoryDOMDataStore store, final ModificationApplyOperation applyOper) {
+                final InMemoryDOMDataStore store) {
             super(identifier);
-            mutableTree = snapshot.newModification(applyOper);
+            mutableTree = snapshot.newModification();
             this.store = store;
             LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
         }
@@ -289,11 +272,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     }
 
     private static class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction implements
-            DOMStoreReadWriteTransaction {
+    DOMStoreReadWriteTransaction {
 
         protected SnapshotBackedReadWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-                final InMemoryDOMDataStore store, final ModificationApplyOperation applyOper) {
-            super(identifier, snapshot, store, applyOper);
+                final InMemoryDOMDataStore store) {
+            super(identifier, snapshot, store);
         }
 
         @Override
@@ -327,7 +310,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 @Override
                 public Boolean call() {
                     try {
-                    	dataTree.validate(modification);
+                        dataTree.validate(modification);
                         LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
                         return true;
                     } catch (DataPreconditionFailedException e) {
@@ -343,16 +326,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             return executor.submit(new Callable<Void>() {
                 @Override
                 public Void call() {
-                	candidate = dataTree.prepare(modification);
-
+                    candidate = dataTree.prepare(modification);
                     listenerResolver = ResolveDataChangeEventsTask.create(candidate, listenerTree);
-
-//                            .setRootPath(PUBLIC_ROOT_PATH) //
-//                            .setBeforeRoot(Optional.of(metadataTree)) //
-//                            .setAfterRoot(proposedSubtree) //
-//                            .setModificationRoot(modification.getRootModification()) //
-//                            .setListenerRoot(listenerTree);
-
                     return null;
                 }
             });
@@ -360,10 +335,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
         @Override
         public ListenableFuture<Void> abort() {
-        	if (candidate != null) {
-        		candidate.close();
-        		candidate = null;
-        	}
+            if (candidate != null) {
+                candidate.close();
+                candidate = null;
+            }
 
             return Futures.<Void> immediateFuture(null);
         }
@@ -387,30 +362,5 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
             return Futures.<Void> immediateFuture(null);
         }
-    }
-
-    private static final class AlwaysFailOperation implements ModificationApplyOperation {
-
-        @Override
-        public Optional<StoreMetadataNode> apply(final NodeModification modification,
-                final Optional<StoreMetadataNode> storeMeta, final UnsignedLong subtreeVersion) {
-            throw new IllegalStateException("Schema Context is not available.");
-        }
-
-        @Override
-        public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> storeMetadata) {
-            throw new IllegalStateException("Schema Context is not available.");
-        }
-
-        @Override
-        public Optional<ModificationApplyOperation> getChild(final PathArgument child) {
-            throw new IllegalStateException("Schema Context is not available.");
-        }
-
-        @Override
-        public void verifyStructure(final NodeModification modification) throws IllegalArgumentException {
-            throw new IllegalStateException("Schema Context is not available.");
-        }
-
     }
 }

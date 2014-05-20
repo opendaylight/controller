@@ -32,6 +32,7 @@ import com.google.common.base.Predicate;
  * and {@link StoreMetadataNode} which represents original state {@link #getOriginal()}.
  *
  */
+// FIXME: hide this class
 public class NodeModification implements StoreTreeNode<NodeModification>, Identifiable<PathArgument> {
 
     public static final Predicate<NodeModification> IS_TERMINAL_PREDICATE = new Predicate<NodeModification>() {

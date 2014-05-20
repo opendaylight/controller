@@ -18,12 +18,12 @@ import com.google.common.base.Optional;
  * visible through the snapshot.
  */
 public interface DataTreeSnapshot {
-	/**
-	 * Read a particular node from the snapshot.
-	 *
-	 * @param path Path of the node
-	 * @return Optional result encapsulating the presence and value of the node
-	 */
+    /**
+     * Read a particular node from the snapshot.
+     *
+     * @param path Path of the node
+     * @return Optional result encapsulating the presence and value of the node
+     */
     Optional<NormalizedNode<?, ?>> readNode(InstanceIdentifier path);
 
     /**
@@ -33,5 +33,5 @@ public interface DataTreeSnapshot {
      * @param strategy data modification strategy
      * @return A new data tree modification
      */
-    DataTreeModification newModification(ModificationApplyOperation applyOper);
+    DataTreeModification newModification();
 }
