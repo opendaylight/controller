@@ -16,6 +16,7 @@
     <module>toaster-consumer</module>
     <module>toaster-provider</module>
     <module>l2switch</module>
+    <module>pingDiscovery</module>
   </modules>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
