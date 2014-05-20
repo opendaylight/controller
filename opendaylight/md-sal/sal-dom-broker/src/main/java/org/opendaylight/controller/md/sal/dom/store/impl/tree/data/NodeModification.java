@@ -68,7 +68,7 @@ public class NodeModification implements StoreTreeNode<NodeModification>, Identi
      *
      * @return
      */
-    public NormalizedNode<?, ?> getWritenValue() {
+    public NormalizedNode<?, ?> getWrittenValue() {
         return value;
     }
 
