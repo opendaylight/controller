@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -334,8 +335,8 @@ public final class NodeMapping {
 
   public static MacAddress toADMacAddress(final NodeId id) {
     final String nodeId = id.getValue().replaceAll("openflow:", "");
-    long lNodeId = Long.parseLong(nodeId);
-    lNodeId = Long.valueOf(lNodeId).longValue();
+    BigInteger nodeIdRaw = new BigInteger(nodeId);
+    long lNodeId = nodeIdRaw.longValue();
     byte[] bytesFromDpid = ToSalConversionsUtils.bytesFromDpid(lNodeId);
     return new MacAddress(bytesFromDpid);
   }
