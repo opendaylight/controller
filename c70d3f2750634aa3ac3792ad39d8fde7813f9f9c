@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e8e7d910",
+        "filename": "features/akka/src/main/resources/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-21T18:42:44Z",
+      "side": 1,
+      "message": "Generally, its a good practice to give a name that won\u0027t accidentally be used by other features deployed in the environment (avoid generic naming).",
+      "revId": "c70d3f2750634aa3ac3792ad39d8fde7813f9f9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68bbc9e5",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-21T18:42:44Z",
+      "side": 1,
+      "message": "Use properties",
+      "revId": "c70d3f2750634aa3ac3792ad39d8fde7813f9f9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_88be4dd3",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-21T18:42:44Z",
+      "side": 1,
+      "message": "Use properties",
+      "revId": "c70d3f2750634aa3ac3792ad39d8fde7813f9f9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_88d72d23",
+        "filename": "opendaylight/messaging/clustering/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-21T18:42:44Z",
+      "side": 1,
+      "message": "Should use property for version",
+      "revId": "c70d3f2750634aa3ac3792ad39d8fde7813f9f9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
