@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a613430c",
+        "filename": "opendaylight/distribution/opendaylight-karaf/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T12:45:14Z",
+      "side": 0,
+      "message": "This file change is unrelated. It has to do with sort pom.\nAlready taken care via https://git.opendaylight.org/gerrit/#/c/7225/",
+      "revId": "c3c49eaef5b1435b871f97eb060f8abdba5a6671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

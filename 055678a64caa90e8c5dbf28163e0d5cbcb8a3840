@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_86107f02",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T12:45:14Z",
+      "side": 1,
+      "message": "This file change is unrelated. It has to do with sort pom.\nAlready taken care via https://git.opendaylight.org/gerrit/#/c/7225/",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbd45222",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/discovery_profile.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T12:45:14Z",
+      "side": 1,
+      "message": "\u0027d\u0027efines",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2b161ef2",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/icmp_data.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T12:45:14Z",
+      "side": 1,
+      "message": "A little inconsistency on use of spaces vs tabs.",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
