@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_280dc190",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T21:06:47Z",
+      "side": 1,
+      "message": "duplicate line (see below)...",
+      "revId": "7c191a18127a93bb356414dc404b3cbcb1369860",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_481045a8",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-21T21:06:47Z",
+      "side": 1,
+      "message": "remove or tweak line above to not mention toaster",
+      "revId": "7c191a18127a93bb356414dc404b3cbcb1369860",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
