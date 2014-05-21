@@ -10,9 +10,17 @@ package org.opendaylight.controller.netconf.util.xml;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
@@ -27,14 +35,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public final class XmlElement {
 
@@ -111,7 +111,7 @@ public final class XmlElement {
     public void checkNamespaceAttribute(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
         if (!getNamespaceAttribute().equals(expectedNamespace))
         {
-            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s for element %s, should be %s",
+            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespaceAttribute(),
                     expectedNamespace),
                     NetconfDocumentedException.ErrorType.application,
@@ -123,7 +123,7 @@ public final class XmlElement {
     public void checkNamespace(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
         if (!getNamespace().equals(expectedNamespace))
        {
-            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s for element %s, should be %s",
+            throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespace(),
                     expectedNamespace),
                     NetconfDocumentedException.ErrorType.application,
@@ -320,23 +320,22 @@ public final class XmlElement {
     }
 
     public String getTextContent() throws NetconfDocumentedException {
-        Node textChild = element.getFirstChild();
-        if (null == textChild){
-            throw new NetconfDocumentedException(String.format( "Child node expected, got null for " + getName() + " : " + element),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+        NodeList childNodes = element.getChildNodes();
+        if (childNodes.getLength() == 0) {
+            return "";
         }
-        if (!(textChild instanceof Text)){
-            throw new NetconfDocumentedException(String.format(getName() + " should contain text." +
-                    Text.class.getName() + " expected, got " + textChild),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+        for(int i = 0; i < childNodes.getLength(); i++) {
+            Node textChild = childNodes.item(i);
+            if (textChild instanceof Text) {
+                String content = textChild.getTextContent();
+                return content.trim();
+            }
         }
-        String content = textChild.getTextContent();
-        // Trim needed
-        return content.trim();
+        throw new NetconfDocumentedException(getName() + " should contain text.",
+                NetconfDocumentedException.ErrorType.application,
+                NetconfDocumentedException.ErrorTag.invalid_value,
+                NetconfDocumentedException.ErrorSeverity.error
+        );
     }
 
     public String getNamespaceAttribute() throws MissingNameSpaceException {
@@ -351,15 +350,24 @@ public final class XmlElement {
         return attribute;
     }
 
-    public String getNamespace() throws MissingNameSpaceException {
+    public Optional<String> getNamespaceOptionally() {
         String namespaceURI = element.getNamespaceURI();
-        if (namespaceURI  == null || namespaceURI.equals("")){
+        if (Strings.isNullOrEmpty(namespaceURI)) {
+            return Optional.absent();
+        } else {
+            return Optional.of(namespaceURI);
+        }
+    }
+
+    public String getNamespace() throws MissingNameSpaceException {
+        Optional<String> namespaceURI = getNamespaceOptionally();
+        if (namespaceURI.isPresent() == false){
             throw new MissingNameSpaceException(String.format("No namespace defined for %s", this),
                     NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed,
                     NetconfDocumentedException.ErrorSeverity.error);
         }
-        return namespaceURI;
+        return namespaceURI.get();
     }
 
     @Override

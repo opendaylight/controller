@@ -386,10 +386,10 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
 
             NetconfMessage response = netconfClient.sendMessage(getConfig);
 
-            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</prefix:afi>"));
-            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</prefix:afi>"));
-            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</prefix:safi>"));
-            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<prefix:safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</prefix:safi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</afi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<afi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</afi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity2</safi>"));
+            assertThat(XmlUtil.toString(response.getDocument()), JUnitMatchers.containsString("<safi xmlns:prefix=\"urn:opendaylight:params:xml:ns:yang:controller:config:test:types\">prefix:test-identity1</safi>"));
 
         } catch (Exception e) {
             fail(Throwables.getStackTraceAsString(e));

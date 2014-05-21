@@ -131,11 +131,15 @@ public final class Services {
         for (String namespace : mappedServices.keySet()) {
 
             for (Entry<String, Map<String, String>> serviceEntry : mappedServices.get(namespace).entrySet()) {
+                // service belongs to config.yang namespace
                 Element serviceElement = XmlUtil.createElement(document, SERVICE_KEY, Optional.<String>absent());
                 root.appendChild(serviceElement);
 
-                Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(XmlNetconfConstants.PREFIX, TYPE_KEY), XmlNetconfConstants.PREFIX,
-                        serviceEntry.getKey(), Optional.of(namespace));
+                // type belongs to config.yang namespace
+                String serviceType = serviceEntry.getKey();
+                Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlNetconfConstants.TYPE_KEY,
+                        XmlNetconfConstants.PREFIX, namespace, serviceType);
+
                 serviceElement.appendChild(typeElement);
 
                 for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {

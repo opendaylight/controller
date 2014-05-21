@@ -12,13 +12,8 @@ import com.google.common.base.Preconditions;
 import java.util.List;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleAttributeReadingStrategy.class);
-
-
     public SimpleAttributeReadingStrategy(String nullableDefault) {
         super(nullableDefault);
     }
@@ -29,20 +24,7 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once " + xmlElement
                 + " but was " + configNodes.size());
 
-        String textContent = "";
-        try{
-            textContent = readElementContent(xmlElement);
-        }catch(IllegalStateException | NullPointerException e) {
-            // yuma sends <attribute /> for empty value instead of <attribute></attribute>
-            logger.warn("Ignoring exception caused by failure to read text element", e);
-        }
-
-        if (null == textContent){
-            throw new NetconfDocumentedException(String.format("This element should contain text %s", xmlElement),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
-        }
+        String textContent = readElementContent(xmlElement);
         return AttributeConfigElement.create(postprocessNullableDefault(getNullableDefault()),
                 postprocessParsedValue(textContent));
     }

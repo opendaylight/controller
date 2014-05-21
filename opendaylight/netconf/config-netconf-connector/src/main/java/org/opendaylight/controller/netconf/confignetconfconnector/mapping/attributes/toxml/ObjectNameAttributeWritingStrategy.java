@@ -40,8 +40,9 @@ public class ObjectNameAttributeWritingStrategy implements AttributeWritingStrat
         String refName = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getRefName();
         String namespaceForType = ((ObjectNameAttributeMappingStrategy.MappedDependency) value).getNamespace();
 
-        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(XmlNetconfConstants.PREFIX, XmlNetconfConstants.TYPE_KEY), XmlNetconfConstants.PREFIX,
-                moduleName, Optional.<String>of(namespaceForType));
+        Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document,  XmlNetconfConstants.TYPE_KEY, XmlNetconfConstants.PREFIX,
+                namespaceForType, moduleName);
+
         innerNode.appendChild(typeElement);
 
         final Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, refName, Optional.<String>absent());

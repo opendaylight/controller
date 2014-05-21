@@ -10,11 +10,12 @@ package org.opendaylight.controller.netconf.util.xml;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -32,17 +33,15 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 public final class XmlUtil {
 
     public static final String XMLNS_ATTRIBUTE_KEY = "xmlns";
-    private static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
+    public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/";
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -118,8 +117,14 @@ public final class XmlUtil {
         return typeElement;
     }
 
-    public static Element createPrefixedTextElement(Document document, String qName, String prefix, String content, Optional<String> namespace) {
-        return createTextElement(document, qName, createPrefixedValue(prefix, content), namespace);
+    public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
+                                                                 String namespace, String contentWithoutPrefix) {
+
+        String content = createPrefixedValue(XmlNetconfConstants.PREFIX, contentWithoutPrefix);
+        Element element = createTextElement(document, qName, content, Optional.<String>absent());
+        String prefixedNamespaceAttr = createPrefixedValue(XMLNS_ATTRIBUTE_KEY, prefix);
+        element.setAttributeNS(XMLNS_URI, prefixedNamespaceAttr, namespace);
+        return element;
     }
 
     public static String createPrefixedValue(String prefix, String value) {

@@ -60,28 +60,22 @@ public class ModuleConfig {
 
     public Element toXml(ObjectName instanceON, ServiceRegistryWrapper depTracker, Document document, String namespace) {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.MODULE_KEY, Optional.<String>absent());
-        // Xml.addNamespaceAttr(document, root, namespace);
 
-        final String prefix = getPrefix();
-        Element typeElement = XmlUtil.createPrefixedTextElement(document, XmlUtil.createPrefixedValue(prefix, XmlNetconfConstants.TYPE_KEY), prefix,
-                moduleName, Optional.<String>of(namespace));
-        // Xml.addNamespaceAttr(document, typeElement,
-        // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        // type belongs to config.yang namespace, but needs to be <type prefix:moduleNS>prefix:moduleName</type>
+
+        Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlNetconfConstants.TYPE_KEY,
+                XmlNetconfConstants.PREFIX, namespace, moduleName);
+
         root.appendChild(typeElement);
+        // name belongs to config.yang namespace
+        String instanceName = ObjectNameUtil.getInstanceName(instanceON);
+        Element nameElement = XmlUtil.createTextElement(document, XmlNetconfConstants.NAME_KEY, instanceName, Optional.<String>absent());
 
-        Element nameElement = XmlUtil.createTextElement(document, XmlUtil.createPrefixedValue(prefix, XmlNetconfConstants.NAME_KEY),
-                ObjectNameUtil.getInstanceName(instanceON), Optional.<String>of(namespace));
-        // Xml.addNamespaceAttr(document, nameElement,
-        // XMLUtil.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         root.appendChild(nameElement);
 
         root = instanceConfig.toXml(instanceON, depTracker, namespace, document, root);
 
         return root;
-    }
-
-    private String getPrefix() {
-        return XmlNetconfConstants.PREFIX;
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
