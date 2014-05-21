@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_6bd746c0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-05-21T02:55:54Z",
+      "side": 1,
+      "message": "I am a bit confused... unless there is deep magic I don\u0027t understand, this commit does not appear to add a REST API for adding and removing features... could you clarify?",
+      "revId": "eb1bd68326ae9783d3722887f7c08195a71c17e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
