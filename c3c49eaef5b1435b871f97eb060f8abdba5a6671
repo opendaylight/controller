@@ -16,6 +16,24 @@
       "revId": "c3c49eaef5b1435b871f97eb060f8abdba5a6671",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8893ad4e",
+        "filename": "opendaylight/distribution/opendaylight-karaf/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-21T19:32:07Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a613430c",
+      "revId": "c3c49eaef5b1435b871f97eb060f8abdba5a6671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

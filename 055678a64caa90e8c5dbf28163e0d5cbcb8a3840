@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6890a943",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-21T19:32:07Z",
+      "side": 1,
+      "message": "Great thank you. This change will get merged if / when we ever push this to master.",
+      "parentUuid": "fa82b9bf_86107f02",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cbd45222",
         "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/discovery_profile.yang",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e8a3599c",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/discovery_profile.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-21T19:32:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cbd45222",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2b161ef2",
         "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/icmp_data.yang",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-05-21T12:45:14Z",
       "side": 1,
       "message": "A little inconsistency on use of spaces vs tabs.",
+      "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_089f9d51",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/yang/icmp_data.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-05-21T19:32:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_2b161ef2",
       "revId": "055678a64caa90e8c5dbf28163e0d5cbcb8a3840",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
