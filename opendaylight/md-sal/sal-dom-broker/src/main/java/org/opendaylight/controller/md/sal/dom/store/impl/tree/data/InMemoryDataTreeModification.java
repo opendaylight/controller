@@ -88,21 +88,22 @@ final class InMemoryDataTreeModification implements DataTreeModification {
 
     @Override
     public Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
-        Entry<InstanceIdentifier, NodeModification> modification = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
+        /*
+         * Walk the tree from the top, looking for the first node between root and
+         * the requested path which has been modified. If no such node exists,
+         * we use the node itself.
+         */
+        final Entry<InstanceIdentifier, NodeModification> entry = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
+        final InstanceIdentifier key = entry.getKey();
+        final NodeModification mod = entry.getValue();
 
-        Optional<StoreMetadataNode> result = resolveSnapshot(modification);
+        final Optional<StoreMetadataNode> result = resolveSnapshot(key, mod);
         if (result.isPresent()) {
             NormalizedNode<?, ?> data = result.get().getData();
-            return NormalizedNodeUtils.findNode(modification.getKey(), data, path);
+            return NormalizedNodeUtils.findNode(key, data, path);
+        } else {
+            return Optional.absent();
         }
-        return Optional.absent();
-    }
-
-    private Optional<StoreMetadataNode> resolveSnapshot(
-            final Entry<InstanceIdentifier, NodeModification> keyModification) {
-        InstanceIdentifier path = keyModification.getKey();
-        NodeModification modification = keyModification.getValue();
-        return resolveSnapshot(path, modification);
     }
 
     private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path,
