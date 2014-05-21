@@ -7,22 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NodeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.StoreMetadataNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface DataTreeCandidate extends AutoCloseable {
-	@Override
-	void close();
-
-	InstanceIdentifier getRootPath();
-
-	@Deprecated
-	NodeModification getModificationRoot();
-
-	@Deprecated
-	StoreMetadataNode getBeforeRoot();
-
-	@Deprecated
-	StoreMetadataNode getAfterRoot();
+public interface DataTreeCandidate {
+    DataTreeCandidateNode getRootNode();
+    InstanceIdentifier getRootPath();
 }

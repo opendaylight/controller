@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
@@ -30,10 +31,8 @@ import com.google.common.base.Predicate;
  *
  * This tree is lazily created and populated via {@link #modifyChild(PathArgument)}
  * and {@link StoreMetadataNode} which represents original state {@link #getOriginal()}.
- *
  */
-// FIXME: hide this class
-public class NodeModification implements StoreTreeNode<NodeModification>, Identifiable<PathArgument> {
+final class NodeModification implements StoreTreeNode<NodeModification>, Identifiable<PathArgument> {
 
     public static final Predicate<NodeModification> IS_TERMINAL_PREDICATE = new Predicate<NodeModification>() {
         @Override
