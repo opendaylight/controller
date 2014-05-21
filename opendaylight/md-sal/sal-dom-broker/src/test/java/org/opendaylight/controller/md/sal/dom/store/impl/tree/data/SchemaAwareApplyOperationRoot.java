@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class SchemaAwareApplyOperationRoot extends SchemaAwareApplyOperation.DataNodeContainerModificationStrategy<ContainerSchemaNode> {
+public class SchemaAwareApplyOperationRoot extends DataNodeContainerModificationStrategy<ContainerSchemaNode> {
     private final SchemaContext context;
 
     public SchemaAwareApplyOperationRoot(final SchemaContext context) {
