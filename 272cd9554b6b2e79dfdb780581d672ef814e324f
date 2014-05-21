@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a60d8339",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/BrokerConfigActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Is the exception thrown from somewhere? If that is the case, the if\u0027s below need try/finally block. If it\u0027s not, remove the declaration (sonar warning).",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4614b743",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/BrokerConfigActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "can we transition to null dataService? If in, Preconditions.checkNotNull()",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_061eaf63",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/BrokerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_660f7b2f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/BrokerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Is this raw Exception thrown, or a more specific one, or none at all?",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c62767b5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Do not catch Throwable, do not use Exceptions.sneakyThrow()",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e62aab7d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Trailing whitespace",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_86215fa1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/MountPointManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Why is this commented-out? Add at least a FIXME...",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_463b57d1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/impl/DataReaderRouter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Please simplify this expression.",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a624a3af",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/impl/DataReaderRouter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "This seems to concatenate collections -- specify allocation size if numbe of elements is known beforehand.",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_66369be9",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/osgi/ProxyFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Add class type",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_06354fd9",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangDataOperations.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "Preconditions.checkArgument()",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_263093e7",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangDataOperations.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-21T08:47:07Z",
+      "side": 1,
+      "message": "\u003cCompositeNode\u003e is not needed here",
+      "revId": "272cd9554b6b2e79dfdb780581d672ef814e324f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
