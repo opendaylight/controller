@@ -108,11 +108,12 @@ final class InMemoryDataTreeModification implements DataTreeModification {
 
     private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path,
             final NodeModification modification) {
+        final Optional<Optional<StoreMetadataNode>> potentialSnapshot = modification.getSnapshotCache();
+        if(potentialSnapshot.isPresent()) {
+            return potentialSnapshot.get();
+        }
+
         try {
-            Optional<Optional<StoreMetadataNode>> potentialSnapshot = modification.getSnapshotCache();
-            if(potentialSnapshot.isPresent()) {
-                return potentialSnapshot.get();
-            }
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
                     StoreUtils.increase(snapshot.getRootNode().getSubtreeVersion()));
         } catch (Exception e) {
