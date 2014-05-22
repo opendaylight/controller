@@ -61,9 +61,8 @@ public class NeutronPort extends ConfigurationObject implements Serializable {
     @XmlElement (name="tenant_id")
     String tenantID;
 
-    // TODO: add security groups
-    //        @XmlElement (name="security_groups")
-    //        List<String> securityGroups;
+    @XmlElement (name="security_groups")
+    List<NeutronSecurityGroup> securityGroups;
 
     /* this attribute stores the floating IP address assigned to
      * each fixed IP address
@@ -160,6 +159,14 @@ public class NeutronPort extends ConfigurationObject implements Serializable {
 
     public void setTenantID(String tenantID) {
         this.tenantID = tenantID;
+    }
+
+    public List<NeutronSecurityGroup> getSecurityGroups() {
+        return securityGroups;
+    }
+
+    public void setSecurityGroups(List<NeutronSecurityGroup> securityGroups) {
+        this.securityGroups = securityGroups;
     }
 
     public NeutronFloatingIP getFloatingIP(String key) {
@@ -259,6 +266,6 @@ public class NeutronPort extends ConfigurationObject implements Serializable {
         return "NeutronPort [portUUID=" + portUUID + ", networkUUID=" + networkUUID + ", name=" + name
                 + ", adminStateUp=" + adminStateUp + ", status=" + status + ", macAddress=" + macAddress
                 + ", fixedIPs=" + fixedIPs + ", deviceID=" + deviceID + ", deviceOwner=" + deviceOwner + ", tenantID="
-                + tenantID + ", floatingIPMap=" + floatingIPMap + "]";
+                + tenantID + ", floatingIPMap=" + floatingIPMap + ", securityGroups=" + securityGroups + "]";
     }
 }
