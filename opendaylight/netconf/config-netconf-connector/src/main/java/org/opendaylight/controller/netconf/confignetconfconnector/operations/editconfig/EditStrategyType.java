@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import com.google.common.collect.Multimap;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
-
 import java.util.EnumSet;
 import java.util.Set;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
 
 public enum EditStrategyType {
     // can be default
@@ -58,12 +56,12 @@ public enum EditStrategyType {
         }
 
     }
-    public EditConfigStrategy getFittingStrategy(Multimap<String, String> providedServices) {
+    public EditConfigStrategy getFittingStrategy() {
         switch (this) {
         case merge:
-            return new MergeEditConfigStrategy(providedServices);
+            return new MergeEditConfigStrategy();
         case replace:
-            return new ReplaceEditConfigStrategy(providedServices);
+            return new ReplaceEditConfigStrategy();
         case delete:
             return new DeleteEditConfigStrategy();
         case remove:

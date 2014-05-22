@@ -49,10 +49,6 @@ public class ModuleElementDefinition {
         return instanceName;
     }
 
-    public EditStrategyType getEditStrategyType() {
-        return editStrategy;
-    }
-
     public EditConfigStrategy getEditStrategy() {
         switch (editStrategy) {
             case delete :

@@ -7,47 +7,30 @@
  */
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
-import org.opendaylight.yangtools.yang.common.QName;
-
+import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.yangtools.yang.common.QName;
 
 public class ServiceRegistryWrapper {
 
     private ServiceReferenceReadableRegistry configServiceRefRegistry;
-
-    private long suffix = 1;
 
     public ServiceRegistryWrapper(ServiceReferenceReadableRegistry configServiceRefRegistry) {
         this.configServiceRefRegistry = configServiceRefRegistry;
     }
 
 
-    public boolean hasRefName(String namespace, String serviceName, ObjectName on) {
-        String qname = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceName);
-        Map<String, ObjectName> forQName = configServiceRefRegistry.getServiceMapping().get(qname);
-        if(forQName==null){
-            return false;
-        }
-        return forQName.values().contains(on);
-    }
-
     public ObjectName getByServiceAndRefName(String namespace, String serviceName, String refName) {
         Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
 
-        Preconditions.checkArgument(serviceNameToRefNameToInstance != null, "No serviceInstances mapped to " + namespace);
+        Preconditions.checkNotNull(serviceNameToRefNameToInstance, "No serviceInstances mapped to " + namespace);
 
         Map<String, String> refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
-        Preconditions.checkArgument(refNameToInstance != null, "No serviceInstances mapped to " + serviceName + " , "
+        Preconditions.checkNotNull(refNameToInstance, "No serviceInstances mapped to " + serviceName + " , "
                 + serviceNameToRefNameToInstance.keySet());
 
         String instanceId = refNameToInstance.get(refName);
@@ -101,51 +84,5 @@ public class ServiceRegistryWrapper {
         }
 
         return retVal;
-    }
-
-    @VisibleForTesting
-    public String getNewDefaultRefName(String namespace, String serviceName, String moduleName, String instanceName) {
-        String refName;
-        refName = "ref_" + instanceName;
-
-        Map<String, Map<String, String>> serviceNameToRefNameToInstance = getMappedServices().get(namespace);
-
-        Map<String, String> refNameToInstance;
-        if(serviceNameToRefNameToInstance == null || !serviceNameToRefNameToInstance.containsKey(serviceName)) {
-            refNameToInstance = Collections.emptyMap();
-        } else {
-            refNameToInstance = serviceNameToRefNameToInstance.get(serviceName);
-        }
-
-        final Set<String> refNamesAsSet = toSet(refNameToInstance.keySet());
-        if (refNamesAsSet.contains(refName)) {
-            refName = findAvailableRefName(refName, refNamesAsSet);
-        }
-
-        return refName;
-    }
-
-
-    private Set<String> toSet(Collection<String> values) {
-        Set<String> refNamesAsSet = Sets.newHashSet();
-
-        for (String refName : values) {
-            boolean resultAdd = refNamesAsSet.add(refName);
-            Preconditions.checkState(resultAdd,
-                    "Error occurred building services element, reference name {} was present twice", refName);
-        }
-
-        return refNamesAsSet;
-    }
-
-    private String findAvailableRefName(String refName, Set<String> refNamesAsSet) {
-        String availableRefName = "";
-
-        while (true) {
-            availableRefName = refName + "_" + suffix++;
-            if (!refNamesAsSet.contains(availableRefName)){
-                return availableRefName;
-            }
-        }
     }
 }

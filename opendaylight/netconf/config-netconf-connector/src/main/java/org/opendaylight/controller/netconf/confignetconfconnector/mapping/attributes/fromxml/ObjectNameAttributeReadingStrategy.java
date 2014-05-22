@@ -8,20 +8,16 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Preconditions;
+import java.util.List;
+import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
 
 public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
 
     private static final Object PREFIX_SEPARATOR = ":";
-    private static final Logger logger = LoggerFactory.getLogger(ObjectNameAttributeReadingStrategy.class);
 
     public ObjectNameAttributeReadingStrategy(String nullableDefault) {
         super(nullableDefault);
@@ -39,8 +35,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
     }
 
     private ObjectNameAttributeMappingStrategy.MappedDependency resolve(XmlElement firstChild) throws NetconfDocumentedException{
-        XmlElement typeElement = null;
-        typeElement = firstChild.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+        XmlElement typeElement = firstChild.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
         Map.Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
         String serviceName = checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
@@ -54,7 +49,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
 
     public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) throws NetconfDocumentedException {
         String serviceName = typeElement.getTextContent();
-
+        // FIXME: comparing Entry with String:
         Preconditions.checkState(!prefixNamespace.equals(""), "Service %s value not prefixed with namespace",
                 XmlNetconfConstants.TYPE_KEY);
         String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;

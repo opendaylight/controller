@@ -46,7 +46,7 @@ public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingSt
             Util.checkType(runtimeBeanInstanceMappingEntry.getValue(), Map.class);
             Map<?, ?> innerMap = (Map<?, ?>) runtimeBeanInstanceMappingEntry.getValue();
             Element runtimeInstanceNode = XmlUtil.createElement(getDocument(), "_"
-                    + (String) runtimeBeanInstanceMappingEntry.getKey(), Optional.<String>absent());
+                    + runtimeBeanInstanceMappingEntry.getKey(), Optional.<String>absent());
             innerNode.appendChild(runtimeInstanceNode);
 
             for (Entry<?, ?> innerObjectEntry : innerMap.entrySet()) {

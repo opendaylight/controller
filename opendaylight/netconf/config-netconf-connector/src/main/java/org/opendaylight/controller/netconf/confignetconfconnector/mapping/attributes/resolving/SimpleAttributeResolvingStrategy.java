@@ -133,7 +133,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
 
         @Override
         protected Object parseObject(Class<?> type, String value)  {
-            return new Character(value.charAt(0));
+            return value.charAt(0);
         }
     }
 

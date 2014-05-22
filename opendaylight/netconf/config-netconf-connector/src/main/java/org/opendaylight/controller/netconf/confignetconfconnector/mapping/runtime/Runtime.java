@@ -8,25 +8,21 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.ObjectName;
-
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class Runtime {
 
@@ -63,7 +59,7 @@ public class Runtime {
         return retVal;
     }
 
-    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, ServiceRegistryWrapper serviceRegistry) {
+    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document) {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
 
         Element modulesElement = XmlUtil.createElement(document, XmlNetconfConstants.MODULES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
@@ -86,11 +82,11 @@ public class Runtime {
                     Element runtimeXml;
                     ModuleConfig moduleConfig = moduleConfigs.get(localNamespace).get(moduleName);
                     if(instanceToRbe==null || !instanceToRbe.containsKey(instanceName)) {
-                        runtimeXml = moduleConfig.toXml(instanceON, serviceRegistry, document, localNamespace);
+                        runtimeXml = moduleConfig.toXml(instanceON, document, localNamespace);
                     } else {
                         ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
                         runtimeXml = moduleRuntime.toXml(localNamespace, instanceToRbe.get(instanceName), document,
-                                moduleConfig, instanceON, serviceRegistry);
+                                moduleConfig, instanceON);
                     }
                     modulesElement.appendChild(runtimeXml);
                 }

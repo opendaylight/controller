@@ -49,7 +49,7 @@ final class NetconfOperationProvider {
         ops.add(new EditConfig(yangStoreSnapshot, transactionProvider, configRegistryClient,
                 netconfSessionIdForReporting));
         ops.add(new Commit(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
-        ops.add(new Get(yangStoreSnapshot, configRegistryClient, netconfSessionIdForReporting, transactionProvider));
+        ops.add(new Get(yangStoreSnapshot, configRegistryClient, netconfSessionIdForReporting));
         ops.add(new DiscardChanges(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
         ops.add(new Validate(transactionProvider, configRegistryClient, netconfSessionIdForReporting));
         ops.add(new RuntimeRpc(yangStoreSnapshot, configRegistryClient, netconfSessionIdForReporting));

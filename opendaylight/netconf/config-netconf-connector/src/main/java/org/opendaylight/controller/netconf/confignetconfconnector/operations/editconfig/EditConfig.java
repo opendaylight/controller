@@ -13,6 +13,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
@@ -21,7 +27,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
-import org.opendaylight.controller.netconf.confignetconfconnector.exception.NetconfConfigHandlingException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
@@ -43,13 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public class EditConfig extends AbstractConfigNetconfOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(EditConfig.class);
@@ -69,7 +67,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     @VisibleForTesting
     Element getResponseInternal(final Document document,
-            final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException, NetconfConfigHandlingException {
+            final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
 
         if (editConfigExecution.shouldTest()) {
             executeTests(getConfigRegistryClient(), editConfigExecution);
@@ -232,11 +230,6 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             return identityNameToSchemaNode.containsKey(idName);
         }
 
-        // FIXME method never used
-        public IdentitySchemaNode getIdentitySchemaNode(String idName) {
-            Preconditions.checkState(identityNameToSchemaNode.containsKey(idName), "No identity under name %s", idName);
-            return identityNameToSchemaNode.get(idName);
-        }
     }
 
     private static Map<String, Map<Date, IdentityMapping>> transformIdentities(Set<Module> modules) {
@@ -281,8 +274,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 ModuleMXBeanEntry moduleMXBeanEntry = moduleNameToMbe.getValue();
 
                 ModuleConfig moduleConfig = new ModuleConfig(moduleName, new InstanceConfig(configRegistryClient,
-                        moduleMXBeanEntry.getAttributes()), moduleMXBeanEntry
-                        .getProvidedServices().values());
+                        moduleMXBeanEntry.getAttributes()));
 
                 Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespace);
                 if(moduleNameToModuleConfig == null) {
@@ -307,7 +299,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
         EditConfigXmlParser.EditConfigExecution editConfigExecution;
         Config cfg = getConfigMapping(getConfigRegistryClient(), yangStoreSnapshot);
-        editConfigExecution = editConfigXmlParser.fromXml(xml, cfg, transactionProvider, getConfigRegistryClient());
+        editConfigExecution = editConfigXmlParser.fromXml(xml, cfg);
 
         Element responseInternal;
         responseInternal = getResponseInternal(document, editConfigExecution);

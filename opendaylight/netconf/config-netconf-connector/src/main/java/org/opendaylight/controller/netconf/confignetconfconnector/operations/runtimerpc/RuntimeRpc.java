@@ -56,7 +56,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) throws NetconfDocumentedException {
-        AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper(null).prepareStrategy(returnType);
+        AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper().prepareStrategy(returnType);
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
         Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, returnType.getOpenType());
 

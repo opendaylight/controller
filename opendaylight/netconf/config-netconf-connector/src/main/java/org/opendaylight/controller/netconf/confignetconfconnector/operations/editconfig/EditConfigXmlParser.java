@@ -11,8 +11,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
+import java.util.Arrays;
+import java.util.Map;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
@@ -20,16 +21,12 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Map;
 
 public class EditConfigXmlParser {
 
@@ -45,8 +42,7 @@ public class EditConfigXmlParser {
     public EditConfigXmlParser() {
     }
 
-    EditConfigXmlParser.EditConfigExecution fromXml(final XmlElement xml, final Config cfgMapping,
-                                                    TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient)
+    EditConfigXmlParser.EditConfigExecution fromXml(final XmlElement xml, final Config cfgMapping)
             throws NetconfDocumentedException {
 
         //TODO remove transactionProvider and CfgRegistry from parameters, accept only service ref store

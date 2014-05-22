@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
-import com.google.common.collect.Multimap;
 import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.exception.OperationNotPermittedException;
@@ -24,20 +23,17 @@ public class InstanceConfigElementResolved {
 
     private final EditStrategyType editStrategy;
     private final Map<String, AttributeConfigElement> configuration;
-    private final Multimap<String, String> providedServices;
 
-    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) throws NetconfDocumentedException {
-        EditStrategyType valueOf = null;
-        valueOf = parseStrategy(currentStrategy, defaultStrategy);
-        this.editStrategy = valueOf;
+    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration,
+                                         EditStrategyType defaultStrategy)
+            throws NetconfDocumentedException {
+        this.editStrategy = parseStrategy(currentStrategy, defaultStrategy);
         this.configuration = configuration;
-        this.providedServices = providedServices;
     }
 
-    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy, Multimap<String, String> providedServices) {
+    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
         editStrategy = defaultStrategy;
         this.configuration = configuration;
-        this.providedServices = providedServices;
     }
 
 
@@ -49,7 +45,7 @@ public class InstanceConfigElementResolved {
 
 
     public EditConfigStrategy getEditStrategy() {
-        return editStrategy.getFittingStrategy(providedServices);
+        return editStrategy.getFittingStrategy();
     }
 
     public Map<String, AttributeConfigElement> getConfiguration() {

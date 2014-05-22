@@ -76,7 +76,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     }
 
     private Element getResponseInternal(final Document document, final ConfigRegistryClient configRegistryClient,
-            final Datastore source) throws NetconfDocumentedException {
+            final Datastore source) {
         Element dataElement = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
         final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
                 .queryInstances(configRegistryClient);

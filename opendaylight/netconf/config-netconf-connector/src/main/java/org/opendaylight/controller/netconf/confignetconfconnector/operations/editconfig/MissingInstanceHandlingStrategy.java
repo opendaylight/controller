@@ -27,9 +27,8 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
             String module, String instance, ServiceRegistryWrapper services) throws NetconfConfigHandlingException {
-        ObjectName on = null;
         try {
-            on = ta.createModule(module, instance);
+            ObjectName on = ta.createModule(module, instance);
             logger.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
             throw new NetconfConfigHandlingException(String.format("Unable to create instance for %s : %s.", module, instance),
@@ -42,6 +41,5 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
     @Override
     void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
             ObjectName objectName, ServiceRegistryWrapper services) {
-        return;
     }
 }

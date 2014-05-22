@@ -9,14 +9,16 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
@@ -24,7 +26,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreSnapshot;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
@@ -35,22 +36,15 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class Get extends AbstractConfigNetconfOperation {
 
     private final YangStoreSnapshot yangStoreSnapshot;
     private static final Logger logger = LoggerFactory.getLogger(Get.class);
-    private final TransactionProvider transactionProvider;
 
     public Get(YangStoreSnapshot yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
-               String netconfSessionIdForReporting, TransactionProvider transactionProvider) {
+               String netconfSessionIdForReporting) {
         super(configRegistryClient, netconfSessionIdForReporting);
         this.yangStoreSnapshot = yangStoreSnapshot;
-        this.transactionProvider = transactionProvider;
     }
 
     private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(ConfigRegistryClient configRegistryClient,
@@ -79,7 +73,7 @@ public class Get extends AbstractConfigNetconfOperation {
                 }
 
                 InstanceRuntime rootInstanceRuntime = createInstanceRuntime(root, cache);
-                ModuleRuntime moduleRuntime = new ModuleRuntime(module, rootInstanceRuntime);
+                ModuleRuntime moduleRuntime = new ModuleRuntime(rootInstanceRuntime);
                 innerMap.put(module, moduleRuntime);
             }
 
@@ -137,9 +131,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
         final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
-        ObjectName txOn = transactionProvider.getOrCreateTransaction();
-        ConfigTransactionClient ta = getConfigRegistryClient().getConfigTransactionClient(txOn);
-        final Element element = runtime.toXml(runtimeBeans, configBeans, document, new ServiceRegistryWrapper(ta));
+        final Element element = runtime.toXml(runtimeBeans, configBeans, document);
 
         logger.trace("{} operation successful", XmlNetconfConstants.GET);
 

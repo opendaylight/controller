@@ -9,8 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.Date;
+import java.util.Map;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
@@ -18,47 +19,20 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
 
 public class ModuleConfig {
 
     private final String moduleName;
     private final InstanceConfig instanceConfig;
-    private final Multimap<String, String> providedServices;
 
-    public ModuleConfig(String moduleName, InstanceConfig mbeanMapping, Collection<QName> providedServices) {
+    public ModuleConfig(String moduleName, InstanceConfig mbeanMapping) {
         this.moduleName = moduleName;
         this.instanceConfig = mbeanMapping;
-        this.providedServices = mapServices(providedServices);
     }
 
-    private Multimap<String, String> mapServices(Collection<QName> providedServices) {
-        Multimap<String, String> mapped = HashMultimap.create();
-
-        for (QName providedService : providedServices) {
-            String key = providedService.getNamespace().toString();
-            mapped.put(key, providedService.getLocalName());
-        }
-
-        return  mapped;
-    }
-
-    public InstanceConfig getMbeanMapping() {
-        return instanceConfig;
-    }
-
-    public Multimap<String, String> getProvidedServices() {
-        return providedServices;
-    }
-
-    public Element toXml(ObjectName instanceON, ServiceRegistryWrapper depTracker, Document document, String namespace) {
+    public Element toXml(ObjectName instanceON, Document document, String namespace) {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.MODULE_KEY, Optional.<String>absent());
 
         // type belongs to config.yang namespace, but needs to be <type prefix:moduleNS>prefix:moduleName</type>
@@ -73,7 +47,7 @@ public class ModuleConfig {
 
         root.appendChild(nameElement);
 
-        root = instanceConfig.toXml(instanceON, depTracker, namespace, document, root);
+        root = instanceConfig.toXml(instanceON, namespace, document, root);
 
         return root;
     }
@@ -81,7 +55,7 @@ public class ModuleConfig {
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
                                          String moduleNamespace, EditStrategyType defaultStrategy, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, providedServices, identityMap);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, identityMap);
         return new ModuleElementResolved(instanceName, ice);
     }
 

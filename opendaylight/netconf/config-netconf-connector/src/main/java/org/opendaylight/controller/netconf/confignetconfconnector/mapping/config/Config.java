@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.config;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -31,7 +33,6 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import static com.google.common.base.Preconditions.checkState;
 
 
 public class Config {
@@ -97,13 +98,12 @@ public class Config {
         Map<String, Map<String, Collection<ObjectName>>> moduleToInstances = getMappedInstances(instancesToMap,
                 moduleConfigs);
 
-        Element root = dataElement;
         if (maybeNamespace.isPresent()) {
-            root.setAttributeNS(maybeNamespace.get(), dataElement.getNodeName(), "xmlns");
+            dataElement.setAttributeNS(maybeNamespace.get(), dataElement.getNodeName(), "xmlns");
         }
 
         Element modulesElement = XmlUtil.createElement(document, XmlNetconfConstants.MODULES_KEY, Optional.of(XmlNetconfConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
-        root.appendChild(modulesElement);
+        dataElement.appendChild(modulesElement);
         for (String moduleNamespace : moduleToInstances.keySet()) {
             for (Entry<String, Collection<ObjectName>> moduleMappingEntry : moduleToInstances.get(moduleNamespace)
                     .entrySet()) {
@@ -115,15 +115,15 @@ public class Config {
                 }
 
                 for (ObjectName objectName : moduleMappingEntry.getValue()) {
-                    modulesElement.appendChild(mapping.toXml(objectName, serviceTracker, document, moduleNamespace));
+                    modulesElement.appendChild(mapping.toXml(objectName, document, moduleNamespace));
                 }
 
             }
         }
 
-        root.appendChild(Services.toXml(serviceTracker, document));
+        dataElement.appendChild(Services.toXml(serviceTracker, document));
 
-        return root;
+        return dataElement;
     }
 
     // TODO refactor, replace string representing namespace with namespace class

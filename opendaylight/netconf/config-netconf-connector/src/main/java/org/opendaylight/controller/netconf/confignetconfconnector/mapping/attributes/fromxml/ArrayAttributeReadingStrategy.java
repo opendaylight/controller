@@ -30,8 +30,8 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
     @Override
     AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException {
         List<Object> innerList = Lists.newArrayList();
-        for (int i = 0; i < configNodes.size(); i++) {
-            innerList.add(innerStrategy.readElement(Lists.newArrayList(configNodes.get(i))).getValue());
+        for (XmlElement configNode : configNodes) {
+            innerList.add(innerStrategy.readElement(Lists.newArrayList(configNode)).getValue());
         }
         return AttributeConfigElement.create(getNullableDefault(), innerList);
     }
