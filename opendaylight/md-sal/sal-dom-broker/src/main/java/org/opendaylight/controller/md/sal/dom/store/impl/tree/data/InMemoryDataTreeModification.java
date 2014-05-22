@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
@@ -29,18 +28,12 @@ import com.google.common.base.Preconditions;
 
 final class InMemoryDataTreeModification implements DataTreeModification {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDataTreeModification.class);
-
-    /*
-     * FIXME: the thread safety of concurrent write/delete/read/seal operations
-     *        needs to be evaluated.
-     */
-    private static final AtomicIntegerFieldUpdater<InMemoryDataTreeModification> SEALED_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(InMemoryDataTreeModification.class, "sealed");
-    private volatile int sealed = 0;
-
     private final ModificationApplyOperation strategyTree;
     private final InMemoryDataTreeSnapshot snapshot;
     private final ModifiedNode rootNode;
+
+    @GuardedBy("this")
+    private boolean sealed = false;
 
     InMemoryDataTreeModification(final InMemoryDataTreeSnapshot snapshot, final ModificationApplyOperation resolver) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
@@ -57,13 +50,13 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
+    public synchronized void write(final InstanceIdentifier path, final NormalizedNode<?, ?> value) {
         checkSealed();
         resolveModificationFor(path).write(value);
     }
 
     @Override
-    public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public synchronized void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkSealed();
         mergeImpl(resolveModificationFor(path),data);
     }
@@ -82,13 +75,13 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public void delete(final InstanceIdentifier path) {
+    public synchronized void delete(final InstanceIdentifier path) {
         checkSealed();
         resolveModificationFor(path).delete();
     }
 
     @Override
-    public Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
+    public synchronized Optional<NormalizedNode<?, ?>> readNode(final InstanceIdentifier path) {
         /*
          * Walk the tree from the top, looking for the first node between root and
          * the requested path which has been modified. If no such node exists,
@@ -139,14 +132,15 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public void seal() {
-        final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
-        Preconditions.checkState(success, "Attempted to seal an already-sealed Data Tree.");
+    public synchronized void seal() {
+        Preconditions.checkState(!sealed, "Attempted to seal an already-sealed Data Tree.");
+        sealed = true;
         rootNode.seal();
     }
 
+    @GuardedBy("this")
     private void checkSealed() {
-        checkState(sealed == 0, "Data Tree is sealed. No further modifications allowed.");
+        Preconditions.checkState(!sealed, "Data Tree is sealed. No further modifications allowed.");
     }
 
     @Override
@@ -155,7 +149,9 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public DataTreeModification newModification() {
+    public synchronized DataTreeModification newModification() {
+        Preconditions.checkState(sealed, "Attempted to chain on an unsealed modification");
+
         // FIXME: transaction chaining
         throw new UnsupportedOperationException("Implement this as part of transaction chaining");
     }
