@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -187,7 +185,7 @@ final class NodeModification implements StoreTreeNode<NodeModification>, Identif
 
     @GuardedBy("this")
     private void checkSealed() {
-        checkState(!sealed, "Node Modification is sealed. No further changes allowed.");
+        Preconditions.checkState(!sealed, "Node Modification is sealed. No further changes allowed.");
     }
 
     public synchronized void seal() {
