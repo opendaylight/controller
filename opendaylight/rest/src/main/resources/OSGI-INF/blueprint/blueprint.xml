@@ -1,0 +1,9 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="featuresServiceRef" interface="org.apache.karaf.features.FeaturesService"/>
+
+    <bean id="rest" class="org.opendaylight.controller.rest.Rest">
+      <property name="featuresService" ref="featuresServiceRef"/>
+    </bean>
+
+</blueprint>
