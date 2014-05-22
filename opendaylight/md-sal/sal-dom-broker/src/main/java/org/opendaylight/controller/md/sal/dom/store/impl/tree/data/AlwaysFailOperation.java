@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
@@ -14,13 +15,13 @@ import com.google.common.primitives.UnsignedLong;
  */
 final class AlwaysFailOperation implements ModificationApplyOperation {
     @Override
-    public Optional<StoreMetadataNode> apply(final NodeModification modification,
-            final Optional<StoreMetadataNode> storeMeta, final UnsignedLong subtreeVersion) {
+    public Optional<TreeNode> apply(final ModifiedNode modification,
+            final Optional<TreeNode> storeMeta, final UnsignedLong subtreeVersion) {
         throw new IllegalStateException("Schema Context is not available.");
     }
 
     @Override
-    public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> storeMetadata) {
+    public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<TreeNode> storeMetadata) {
         throw new IllegalStateException("Schema Context is not available.");
     }
 
@@ -30,7 +31,7 @@ final class AlwaysFailOperation implements ModificationApplyOperation {
     }
 
     @Override
-    public void verifyStructure(final NodeModification modification) {
+    public void verifyStructure(final ModifiedNode modification) {
         throw new IllegalStateException("Schema Context is not available.");
     }
 }

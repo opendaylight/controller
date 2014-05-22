@@ -1,6 +1,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeSnapshot;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeUtils;
@@ -12,16 +13,16 @@ import com.google.common.base.Preconditions;
 final class InMemoryDataTreeSnapshot implements DataTreeSnapshot {
     private final ModificationApplyOperation applyOper;
     private final SchemaContext schemaContext;
-    private final StoreMetadataNode rootNode;
+    private final TreeNode rootNode;
 
-    InMemoryDataTreeSnapshot(final SchemaContext schemaContext, final StoreMetadataNode rootNode,
+    InMemoryDataTreeSnapshot(final SchemaContext schemaContext, final TreeNode rootNode,
             final ModificationApplyOperation applyOper) {
         this.schemaContext = Preconditions.checkNotNull(schemaContext);
         this.rootNode = Preconditions.checkNotNull(rootNode);
         this.applyOper = Preconditions.checkNotNull(applyOper);
     }
 
-    StoreMetadataNode getRootNode() {
+    TreeNode getRootNode() {
         return rootNode;
     }
 

@@ -20,6 +20,8 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNod
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.OrderedMapModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.UnorderedLeafSetModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafModificationStrategy;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
@@ -80,6 +82,13 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         return null;
     }
 
+    public static boolean checkDataPrecondition(final InstanceIdentifier path, final boolean condition, final String message) throws DataPreconditionFailedException {
+        if(!condition) {
+            throw new DataPreconditionFailedException(path, message);
+        }
+        return condition;
+    }
+
     private static SchemaAwareApplyOperation fromListSchemaNode(final ListSchemaNode schemaNode) {
         List<QName> keyDefinition = schemaNode.getKeyDefinition();
         if (keyDefinition == null || keyDefinition.isEmpty()) {
@@ -100,9 +109,11 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
     }
 
-    private static final void checkNotConflicting(final InstanceIdentifier path,final StoreMetadataNode original, final StoreMetadataNode current) throws DataPreconditionFailedException {
-        checkDataPrecondition(path, original.getNodeVersion().equals(current.getNodeVersion()),"Node was replaced by other transaction.");
-        checkDataPrecondition(path,original.getSubtreeVersion().equals(current.getSubtreeVersion()), "Node children was modified by other transaction");
+    private static final void checkNotConflicting(final InstanceIdentifier path, final TreeNode original, final TreeNode current) throws DataPreconditionFailedException {
+        checkDataPrecondition(path, original.getVersion().equals(current.getVersion()),
+                "Node was replaced by other transaction.");
+        checkDataPrecondition(path, original.getSubtreeVersion().equals(current.getSubtreeVersion()),
+                "Node children was modified by other transaction");
     }
 
     protected final ModificationApplyOperation resolveChildOperation(final PathArgument child) {
@@ -112,36 +123,36 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     }
 
     @Override
-    public void verifyStructure(final NodeModification modification) throws IllegalArgumentException {
-        if (modification.getModificationType() == ModificationType.WRITE) {
+    public void verifyStructure(final ModifiedNode modification) throws IllegalArgumentException {
+        if (modification.getType() == ModificationType.WRITE) {
             verifyWrittenStructure(modification.getWrittenValue());
         }
     }
 
     @Override
-    public void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
-        switch (modification.getModificationType()) {
+    public final void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+        switch (modification.getType()) {
         case DELETE:
             checkDeleteApplicable(modification, current);
         case SUBTREE_MODIFIED:
-            checkSubtreeModificationApplicable(path,modification, current);
+            checkSubtreeModificationApplicable(path, modification, current);
             return;
         case WRITE:
-            checkWriteApplicable(path,modification, current);
+            checkWriteApplicable(path, modification, current);
             return;
         case MERGE:
-            checkMergeApplicable(path,modification,current);
+            checkMergeApplicable(path, modification, current);
             return;
         case UNMODIFIED:
             return;
         default:
-            throw new UnsupportedOperationException("Suplied modification type "+modification.getModificationType()+ "is not supported.");
+            throw new UnsupportedOperationException("Suplied modification type "+ modification.getType()+ "is not supported.");
         }
 
     }
 
-    protected void checkMergeApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
-        Optional<StoreMetadataNode> original = modification.getOriginal();
+    protected void checkMergeApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+        Optional<TreeNode> original = modification.getOriginal();
         if (original.isPresent() && current.isPresent()) {
             /*
              * We need to do conflict detection only and only if the value of leaf changed
@@ -150,22 +161,21 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
              * leads to same data.
              */
             if(!original.get().getData().equals(current.get().getData())) {
-
-                checkNotConflicting(path,original.get(), current.get());
+                checkNotConflicting(path, original.get(), current.get());
             }
         }
     }
 
-    protected void checkWriteApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
-        Optional<StoreMetadataNode> original = modification.getOriginal();
+    protected void checkWriteApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+        Optional<TreeNode> original = modification.getOriginal();
         if (original.isPresent() && current.isPresent()) {
-            checkNotConflicting(path,original.get(), current.get());
+            checkNotConflicting(path, original.get(), current.get());
         } else if(original.isPresent()) {
             throw new DataPreconditionFailedException(path,"Node was deleted by other transaction.");
         }
     }
 
-    private void checkDeleteApplicable(final NodeModification modification, final Optional<StoreMetadataNode> current) {
+    private void checkDeleteApplicable(final NodeModification modification, final Optional<TreeNode> current) {
         // Delete is always applicable, we do not expose it to subclasses
         if (current.isPresent()) {
             LOG.trace("Delete operation turned to no-op on missing node {}", modification);
@@ -173,12 +183,12 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     }
 
     @Override
-    public final Optional<StoreMetadataNode> apply(final NodeModification modification,
-            final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
+    public final Optional<TreeNode> apply(final ModifiedNode modification,
+            final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
 
-        switch (modification.getModificationType()) {
+        switch (modification.getType()) {
         case DELETE:
-            return modification.storeSnapshot(Optional.<StoreMetadataNode> absent());
+            return modification.storeSnapshot(Optional.<TreeNode> absent());
         case SUBTREE_MODIFIED:
             Preconditions.checkArgument(currentMeta.isPresent(), "Metadata not available for modification",
                     modification);
@@ -197,17 +207,17 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
     }
 
-    protected abstract StoreMetadataNode applyMerge(NodeModification modification,
-            StoreMetadataNode currentMeta, UnsignedLong subtreeVersion);
+    protected abstract TreeNode applyMerge(ModifiedNode modification,
+            TreeNode currentMeta, UnsignedLong subtreeVersion);
 
-    protected abstract StoreMetadataNode applyWrite(NodeModification modification,
-            Optional<StoreMetadataNode> currentMeta, UnsignedLong subtreeVersion);
+    protected abstract TreeNode applyWrite(ModifiedNode modification,
+            Optional<TreeNode> currentMeta, UnsignedLong subtreeVersion);
 
-    protected abstract StoreMetadataNode applySubtreeChange(NodeModification modification,
-            StoreMetadataNode currentMeta, UnsignedLong subtreeVersion);
+    protected abstract TreeNode applySubtreeChange(ModifiedNode modification,
+            TreeNode currentMeta, UnsignedLong subtreeVersion);
 
-    protected abstract void checkSubtreeModificationApplicable(InstanceIdentifier path,final NodeModification modification,
-            final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException;
+    protected abstract void checkSubtreeModificationApplicable(InstanceIdentifier path, final NodeModification modification,
+            final Optional<TreeNode> current) throws DataPreconditionFailedException;
 
     protected abstract void verifyWrittenStructure(NormalizedNode<?, ?> writtenValue);
 
@@ -220,21 +230,21 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
 
         @Override
-        protected StoreMetadataNode applyMerge(final NodeModification modification, final StoreMetadataNode currentMeta,
+        protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
                 final UnsignedLong subtreeVersion) {
             return applyWrite(modification, Optional.of(currentMeta), subtreeVersion);
         }
 
         @Override
-        protected StoreMetadataNode applySubtreeChange(final NodeModification modification,
-                final StoreMetadataNode currentMeta, final UnsignedLong subtreeVersion) {
+        protected TreeNode applySubtreeChange(final ModifiedNode modification,
+                final TreeNode currentMeta, final UnsignedLong subtreeVersion) {
             throw new UnsupportedOperationException("UnkeyedList does not support subtree change.");
         }
 
         @Override
-        protected StoreMetadataNode applyWrite(final NodeModification modification,
-                final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
-            return StoreMetadataNode.createRecursively(modification.getWrittenValue(), subtreeVersion);
+        protected TreeNode applyWrite(final ModifiedNode modification,
+                final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
+            return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), subtreeVersion);
         }
 
         @Override
@@ -251,17 +261,9 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
 
         @Override
-        protected void checkSubtreeModificationApplicable(final InstanceIdentifier path,final NodeModification modification,
-                final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
+        protected void checkSubtreeModificationApplicable(final InstanceIdentifier path, final NodeModification modification,
+                final Optional<TreeNode> current) throws DataPreconditionFailedException {
             throw new DataPreconditionFailedException(path, "Subtree modification is not allowed.");
         }
     }
-
-    public static boolean checkDataPrecondition(final InstanceIdentifier path, final boolean condition, final String message) throws DataPreconditionFailedException {
-        if(!condition) {
-            throw new DataPreconditionFailedException(path, message);
-        }
-        return condition;
-    }
-
 }

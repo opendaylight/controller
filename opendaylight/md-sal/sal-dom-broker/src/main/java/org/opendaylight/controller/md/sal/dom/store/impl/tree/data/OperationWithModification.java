@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -15,11 +16,11 @@ import com.google.common.primitives.UnsignedLong;
 
 final class OperationWithModification {
 
-    private final NodeModification modification;
+    private final ModifiedNode modification;
 
     private final ModificationApplyOperation applyOperation;
 
-    private OperationWithModification(final ModificationApplyOperation op, final NodeModification mod) {
+    private OperationWithModification(final ModificationApplyOperation op, final ModifiedNode mod) {
         this.modification = mod;
         this.applyOperation = op;
     }
@@ -35,7 +36,7 @@ final class OperationWithModification {
         return this;
     }
 
-    public NodeModification getModification() {
+    public ModifiedNode getModification() {
         return modification;
     }
 
@@ -43,12 +44,12 @@ final class OperationWithModification {
         return applyOperation;
     }
 
-    public Optional<StoreMetadataNode> apply(final Optional<StoreMetadataNode> data, final UnsignedLong subtreeVersion) {
+    public Optional<TreeNode> apply(final Optional<TreeNode> data, final UnsignedLong subtreeVersion) {
         return applyOperation.apply(modification, data, subtreeVersion);
     }
 
     public static OperationWithModification from(final ModificationApplyOperation operation,
-            final NodeModification modification) {
+            final ModifiedNode modification) {
         return new OperationWithModification(operation, modification);
 
     }
@@ -60,7 +61,7 @@ final class OperationWithModification {
     }
 
     public OperationWithModification forChild(final PathArgument childId) {
-        NodeModification childMod = modification.modifyChild(childId);
+        ModifiedNode childMod = modification.modifyChild(childId);
         Optional<ModificationApplyOperation> childOp = applyOperation.getChild(childId);
         return from(childOp.get(),childMod);
     }
