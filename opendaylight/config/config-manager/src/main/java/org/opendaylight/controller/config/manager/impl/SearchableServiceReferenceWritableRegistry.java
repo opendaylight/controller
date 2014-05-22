@@ -21,6 +21,6 @@ public interface SearchableServiceReferenceWritableRegistry extends ServiceRefer
      * @throws java.lang.IllegalArgumentException if any of service qNames is not found
      * @throws java.lang.NullPointerException     if parameter is null
      */
-    Map<String /* service ref */, ServiceInterfaceAnnotation> findServiceInterfaces(ModuleIdentifier moduleIdentifier);
+    Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(ModuleIdentifier moduleIdentifier);
 
 }
