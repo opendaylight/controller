@@ -11,11 +11,9 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.primitives.UnsignedLong;
-
 public interface MutableTreeNode extends StoreTreeNode<TreeNode> {
     void setData(NormalizedNode<?, ?> data);
-    void setSubtreeVersion(UnsignedLong subtreeVersion);
+    void setSubtreeVersion(Version subtreeVersion);
     void addChild(TreeNode child);
     void removeChild(PathArgument id);
     TreeNode seal();

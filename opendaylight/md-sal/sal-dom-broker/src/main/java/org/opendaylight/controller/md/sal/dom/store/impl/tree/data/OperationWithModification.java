@@ -8,11 +8,11 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 final class OperationWithModification {
 
@@ -44,7 +44,7 @@ final class OperationWithModification {
         return applyOperation;
     }
 
-    public Optional<TreeNode> apply(final Optional<TreeNode> data, final UnsignedLong subtreeVersion) {
+    public Optional<TreeNode> apply(final Optional<TreeNode> data, final Version subtreeVersion) {
         return applyOperation.apply(modification, data, subtreeVersion);
     }
 

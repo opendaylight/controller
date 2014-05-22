@@ -13,12 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 final class ValueNode extends AbstractTreeNode {
     private static final Logger LOG = LoggerFactory.getLogger(ValueNode.class);
 
-    protected ValueNode(final NormalizedNode<?, ?> data, final UnsignedLong version) {
+    protected ValueNode(final NormalizedNode<?, ?> data, final Version version) {
         super(data, version);
     }
 
@@ -29,7 +28,7 @@ final class ValueNode extends AbstractTreeNode {
     }
 
     @Override
-    public UnsignedLong getSubtreeVersion() {
+    public Version getSubtreeVersion() {
         return getVersion();
     }
 

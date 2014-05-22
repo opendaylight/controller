@@ -11,16 +11,15 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.UnsignedLong;
 
 /*
  * A very basic data tree node.
  */
 abstract class AbstractTreeNode implements TreeNode {
     private final NormalizedNode<?, ?> data;
-    private final UnsignedLong version;
+    private final Version version;
 
-    protected AbstractTreeNode(final NormalizedNode<?, ?> data, final UnsignedLong version) {
+    protected AbstractTreeNode(final NormalizedNode<?, ?> data, final Version version) {
         this.data = Preconditions.checkNotNull(data);
         this.version = Preconditions.checkNotNull(version);
     }
@@ -31,7 +30,7 @@ abstract class AbstractTreeNode implements TreeNode {
     }
 
     @Override
-    public final UnsignedLong getVersion() {
+    public final Version getVersion() {
         return version;
     }
 

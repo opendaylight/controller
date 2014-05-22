@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNod
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.UnsignedLong;
 
 abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     private static final Logger LOG = LoggerFactory.getLogger(SchemaAwareApplyOperation.class);
@@ -184,7 +184,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
     @Override
     public final Optional<TreeNode> apply(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
+            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
 
         switch (modification.getType()) {
         case DELETE:
@@ -208,13 +208,13 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     }
 
     protected abstract TreeNode applyMerge(ModifiedNode modification,
-            TreeNode currentMeta, UnsignedLong subtreeVersion);
+            TreeNode currentMeta, Version subtreeVersion);
 
     protected abstract TreeNode applyWrite(ModifiedNode modification,
-            Optional<TreeNode> currentMeta, UnsignedLong subtreeVersion);
+            Optional<TreeNode> currentMeta, Version subtreeVersion);
 
     protected abstract TreeNode applySubtreeChange(ModifiedNode modification,
-            TreeNode currentMeta, UnsignedLong subtreeVersion);
+            TreeNode currentMeta, Version subtreeVersion);
 
     protected abstract void checkSubtreeModificationApplicable(InstanceIdentifier path, final NodeModification modification,
             final Optional<TreeNode> current) throws DataPreconditionFailedException;
@@ -231,19 +231,19 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
         @Override
         protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-                final UnsignedLong subtreeVersion) {
+                final Version subtreeVersion) {
             return applyWrite(modification, Optional.of(currentMeta), subtreeVersion);
         }
 
         @Override
         protected TreeNode applySubtreeChange(final ModifiedNode modification,
-                final TreeNode currentMeta, final UnsignedLong subtreeVersion) {
+                final TreeNode currentMeta, final Version subtreeVersion) {
             throw new UnsupportedOperationException("UnkeyedList does not support subtree change.");
         }
 
         @Override
         protected TreeNode applyWrite(final ModifiedNode modification,
-                final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
+                final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
             return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), subtreeVersion);
         }
 
