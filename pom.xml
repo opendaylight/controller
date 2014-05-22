@@ -33,6 +33,7 @@
     <module>opendaylight/containermanager/api</module>
     <module>opendaylight/containermanager/implementation</module>
     <module>opendaylight/appauth</module>
+    <module>opendaylight/rest</module>
     <module>opendaylight/switchmanager/api</module>
     <module>opendaylight/switchmanager/implementation</module>
     <module>opendaylight/statisticsmanager/api</module>

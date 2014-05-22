@@ -17,9 +17,9 @@
   <properties>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
+    <aries.util.version>1.1.0</aries.util.version>
     <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
-    <aries.util.version>1.1.0</aries.util.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
@@ -125,6 +125,7 @@
     <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
     <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
+    <rest.version>1.0.0-SNAPSHOT</rest.version>
     <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.implementation.version>0.4.2-SNAPSHOT</sal.implementation.version>
@@ -192,12 +193,6 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>netconf-netty-util</artifactId>
         <version>${netconf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-netty-util</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -926,6 +921,12 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-monitoring</artifactId>
         <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-netty-util</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
