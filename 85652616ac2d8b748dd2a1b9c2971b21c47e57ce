@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab6c6b9d",
+        "filename": "features/akka/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-22T15:13:27Z",
+      "side": 1,
+      "message": "Karaf 3 supplies OSGi compendium 5.0.0, why is 4.3.0 required?",
+      "revId": "85652616ac2d8b748dd2a1b9c2971b21c47e57ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b6eb796",
+        "filename": "features/akka/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1777
+      },
+      "writtenOn": "2014-05-22T15:13:27Z",
+      "side": 1,
+      "message": "Use version property.",
+      "revId": "85652616ac2d8b748dd2a1b9c2971b21c47e57ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
