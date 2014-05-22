@@ -20,7 +20,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 
 /**
@@ -50,25 +49,17 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
             throw new IllegalArgumentException(String.format("Unhandled modification type %s", input.getType()));
         }
     };
+
+    private final Map<PathArgument, ModifiedNode> children = new LinkedHashMap<>();
+    private final Optional<TreeNode> original;
     private final PathArgument identifier;
     private ModificationType modificationType = ModificationType.UNMODIFIED;
-
-
-    private final Optional<TreeNode> original;
-
-    private NormalizedNode<?, ?> value;
-
     private Optional<TreeNode> snapshotCache;
-
-    private final Map<PathArgument, ModifiedNode> childModification;
-
-    @GuardedBy("this")
-    private boolean sealed = false;
+    private NormalizedNode<?, ?> value;
 
     private ModifiedNode(final PathArgument identifier, final Optional<TreeNode> original) {
         this.identifier = identifier;
         this.original = original;
-        childModification = new LinkedHashMap<>();
     }
 
     /**
@@ -91,7 +82,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      * @return original store metadata
      */
     @Override
-    public final Optional<TreeNode> getOriginal() {
+    public Optional<TreeNode> getOriginal() {
         return original;
     }
 
@@ -101,7 +92,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      * @return modification type
      */
     @Override
-    public final ModificationType getType() {
+    public ModificationType getType() {
         return modificationType;
     }
 
@@ -115,7 +106,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      */
     @Override
     public Optional<ModifiedNode> getChild(final PathArgument child) {
-        return Optional.<ModifiedNode> fromNullable(childModification.get(child));
+        return Optional.<ModifiedNode> fromNullable(children.get(child));
     }
 
     /**
@@ -130,13 +121,12 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      * @return {@link ModifiedNode} for specified child, with {@link #getOriginal()}
      *         containing child metadata if child was present in original data.
      */
-    public synchronized ModifiedNode modifyChild(final PathArgument child) {
-        checkSealed();
+    public ModifiedNode modifyChild(final PathArgument child) {
         clearSnapshot();
         if (modificationType == ModificationType.UNMODIFIED) {
             updateModificationType(ModificationType.SUBTREE_MODIFIED);
         }
-        final ModifiedNode potential = childModification.get(child);
+        final ModifiedNode potential = children.get(child);
         if (potential != null) {
             return potential;
         }
@@ -150,7 +140,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
         }
 
         ModifiedNode newlyCreated = new ModifiedNode(child, currentMetadata);
-        childModification.put(child, newlyCreated);
+        children.put(child, newlyCreated);
         return newlyCreated;
     }
 
@@ -162,7 +152,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      */
     @Override
     public Iterable<ModifiedNode> getChildren() {
-        return childModification.values();
+        return children.values();
     }
 
     /**
@@ -170,11 +160,10 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      * Records a delete for associated node.
      *
      */
-    public synchronized void delete() {
-        checkSealed();
+    public void delete() {
         clearSnapshot();
         updateModificationType(ModificationType.DELETE);
-        childModification.clear();
+        children.clear();
         this.value = null;
     }
 
@@ -184,31 +173,23 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
      *
      * @param value
      */
-    public synchronized void write(final NormalizedNode<?, ?> value) {
-        checkSealed();
+    public void write(final NormalizedNode<?, ?> value) {
         clearSnapshot();
         updateModificationType(ModificationType.WRITE);
-        childModification.clear();
+        children.clear();
         this.value = value;
     }
 
-    public synchronized void merge(final NormalizedNode<?, ?> data) {
-        checkSealed();
+    public void merge(final NormalizedNode<?, ?> data) {
         clearSnapshot();
         updateModificationType(ModificationType.MERGE);
         // FIXME: Probably merge with previous value.
         this.value = data;
     }
 
-    @GuardedBy("this")
-    private void checkSealed() {
-        Preconditions.checkState(!sealed, "Node Modification is sealed. No further changes allowed.");
-    }
-
-    public synchronized void seal() {
-        sealed = true;
+    void seal() {
         clearSnapshot();
-        for(ModifiedNode child : childModification.values()) {
+        for (ModifiedNode child : children.values()) {
             child.seal();
         }
     }
@@ -235,7 +216,7 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
     @Override
     public String toString() {
         return "NodeModification [identifier=" + identifier + ", modificationType="
-                + modificationType + ", childModification=" + childModification + "]";
+                + modificationType + ", childModification=" + children + "]";
     }
 
     public static ModifiedNode createUnmodified(final TreeNode metadataTree) {
