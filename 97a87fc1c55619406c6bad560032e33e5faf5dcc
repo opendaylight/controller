@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c8a53548",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-22T07:53:10Z",
+      "side": 1,
+      "message": "Failure to stop one of the services will prevent processing others. encapsulate this line in a:\n\ntry {\n...\n} catch (Exception e) {\n    LOG.warn(\"Failed to close service {}\", brokerService, e);\n}\n\nAnd get rid of the large block with sneakyThrow!",
+      "revId": "97a87fc1c55619406c6bad560032e33e5faf5dcc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68642922",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ProviderContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-22T07:53:10Z",
+      "side": 1,
+      "message": "Same situation as in the other file, apply the same solution.",
+      "revId": "97a87fc1c55619406c6bad560032e33e5faf5dcc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
