@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -34,9 +35,9 @@ final class InMemoryDataTree implements DataTree {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private ModificationApplyOperation applyOper = new AlwaysFailOperation();
     private SchemaContext currentSchemaContext;
-    private StoreMetadataNode rootNode;
+    private TreeNode rootNode;
 
-    public InMemoryDataTree(StoreMetadataNode rootNode, final SchemaContext schemaContext) {
+    public InMemoryDataTree(final TreeNode rootNode, final SchemaContext schemaContext) {
         this.rootNode = Preconditions.checkNotNull(rootNode);
 
         if (schemaContext != null) {
@@ -80,28 +81,27 @@ final class InMemoryDataTree implements DataTree {
     }
 
     @Override
-    public void validate(DataTreeModification modification) throws DataPreconditionFailedException {
+    public void validate(final DataTreeModification modification) throws DataPreconditionFailedException {
         Preconditions.checkArgument(modification instanceof InMemoryDataTreeModification, "Invalid modification class %s", modification.getClass());
 
         final InMemoryDataTreeModification m = (InMemoryDataTreeModification)modification;
-        m.getStrategy().checkApplicable(PUBLIC_ROOT_PATH, m.getRootModification(), Optional.of(rootNode));
+        m.getStrategy().checkApplicable(PUBLIC_ROOT_PATH, m.getRootModification(), Optional.<TreeNode>of(rootNode));
     }
 
     @Override
-    public synchronized DataTreeCandidate prepare(DataTreeModification modification) {
+    public synchronized DataTreeCandidate prepare(final DataTreeModification modification) {
         Preconditions.checkArgument(modification instanceof InMemoryDataTreeModification, "Invalid modification class %s", modification.getClass());
 
         final InMemoryDataTreeModification m = (InMemoryDataTreeModification)modification;
-        final NodeModification root = m.getRootModification();
+        final ModifiedNode root = m.getRootModification();
 
-        if (root.getModificationType() == ModificationType.UNMODIFIED) {
+        if (root.getType() == ModificationType.UNMODIFIED) {
             return new NoopDataTreeCandidate(PUBLIC_ROOT_PATH, root);
         }
 
         rwLock.writeLock().lock();
         try {
-            // FIXME: rootNode needs to be a read-write snapshot here...
-            final Optional<StoreMetadataNode> newRoot = m.getStrategy().apply(m.getRootModification(), Optional.of(rootNode), StoreUtils.increase(rootNode.getSubtreeVersion()));
+            final Optional<TreeNode> newRoot = m.getStrategy().apply(m.getRootModification(), Optional.<TreeNode>of(rootNode), StoreUtils.increase(rootNode.getSubtreeVersion()));
             Preconditions.checkState(newRoot.isPresent(), "Apply strategy failed to produce root node");
             return new InMemoryDataTreeCandidate(PUBLIC_ROOT_PATH, root, rootNode, newRoot.get());
         } finally {
@@ -110,7 +110,7 @@ final class InMemoryDataTree implements DataTree {
     }
 
     @Override
-    public synchronized void commit(DataTreeCandidate candidate) {
+    public synchronized void commit(final DataTreeCandidate candidate) {
         if (candidate instanceof NoopDataTreeCandidate) {
             return;
         }
@@ -118,7 +118,7 @@ final class InMemoryDataTree implements DataTree {
         Preconditions.checkArgument(candidate instanceof InMemoryDataTreeCandidate, "Invalid candidate class %s", candidate.getClass());
         final InMemoryDataTreeCandidate c = (InMemoryDataTreeCandidate)candidate;
 
-        LOG.debug("Updating Store snapshot version: {} with version:{}", rootNode.getSubtreeVersion(), c.getAfterRoot().getSubtreeVersion());
+        LOG.debug("Updating datastore from {} to {}", rootNode, c.getAfterRoot());
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("Data Tree is {}", StoreUtils.toStringTree(c.getAfterRoot().getData()));

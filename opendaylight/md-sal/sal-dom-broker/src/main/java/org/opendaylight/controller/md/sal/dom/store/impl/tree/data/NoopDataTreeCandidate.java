@@ -46,9 +46,9 @@ final class NoopDataTreeCandidate extends AbstractDataTreeCandidate {
         }
     };
 
-    protected NoopDataTreeCandidate(final InstanceIdentifier rootPath, final NodeModification modificationRoot) {
+    protected NoopDataTreeCandidate(final InstanceIdentifier rootPath, final ModifiedNode modificationRoot) {
         super(rootPath);
-        Preconditions.checkArgument(modificationRoot.getModificationType() == ModificationType.UNMODIFIED);
+        Preconditions.checkArgument(modificationRoot.getType() == ModificationType.UNMODIFIED);
     }
 
     @Override

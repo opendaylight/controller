@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -39,15 +40,15 @@ final class InMemoryDataTreeModification implements DataTreeModification {
 
     private final ModificationApplyOperation strategyTree;
     private final InMemoryDataTreeSnapshot snapshot;
-    private final NodeModification rootNode;
+    private final ModifiedNode rootNode;
 
     InMemoryDataTreeModification(final InMemoryDataTreeSnapshot snapshot, final ModificationApplyOperation resolver) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.strategyTree = Preconditions.checkNotNull(resolver);
-        this.rootNode = NodeModification.createUnmodified(snapshot.getRootNode());
+        this.rootNode = ModifiedNode.createUnmodified(snapshot.getRootNode());
     }
 
-    NodeModification getRootModification() {
+    ModifiedNode getRootModification() {
         return rootNode;
     }
 
@@ -93,11 +94,11 @@ final class InMemoryDataTreeModification implements DataTreeModification {
          * the requested path which has been modified. If no such node exists,
          * we use the node itself.
          */
-        final Entry<InstanceIdentifier, NodeModification> entry = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, NodeModification.IS_TERMINAL_PREDICATE);
+        final Entry<InstanceIdentifier, ModifiedNode> entry = TreeNodeUtils.findClosestsOrFirstMatch(rootNode, path, ModifiedNode.IS_TERMINAL_PREDICATE);
         final InstanceIdentifier key = entry.getKey();
-        final NodeModification mod = entry.getValue();
+        final ModifiedNode mod = entry.getValue();
 
-        final Optional<StoreMetadataNode> result = resolveSnapshot(key, mod);
+        final Optional<TreeNode> result = resolveSnapshot(key, mod);
         if (result.isPresent()) {
             NormalizedNode<?, ?> data = result.get().getData();
             return NormalizedNodeUtils.findNode(key, data, path);
@@ -106,9 +107,9 @@ final class InMemoryDataTreeModification implements DataTreeModification {
         }
     }
 
-    private Optional<StoreMetadataNode> resolveSnapshot(final InstanceIdentifier path,
-            final NodeModification modification) {
-        final Optional<Optional<StoreMetadataNode>> potentialSnapshot = modification.getSnapshotCache();
+    private Optional<TreeNode> resolveSnapshot(final InstanceIdentifier path,
+            final ModifiedNode modification) {
+        final Optional<Optional<TreeNode>> potentialSnapshot = modification.getSnapshotCache();
         if(potentialSnapshot.isPresent()) {
             return potentialSnapshot.get();
         }
@@ -128,7 +129,7 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     private OperationWithModification resolveModificationFor(final InstanceIdentifier path) {
-        NodeModification modification = rootNode;
+        ModifiedNode modification = rootNode;
         // We ensure strategy is present.
         ModificationApplyOperation operation = resolveModificationStrategy(path);
         for (PathArgument pathArg : path.getPath()) {

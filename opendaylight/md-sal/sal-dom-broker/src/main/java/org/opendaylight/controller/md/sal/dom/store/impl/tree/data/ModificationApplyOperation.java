@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
@@ -17,7 +18,7 @@ import com.google.common.primitives.UnsignedLong;
 
 /**
  *
- * Operation responsible for applying {@link NodeModification} on tree.
+ * Operation responsible for applying {@link ModifiedNode} on tree.
  *
  * Operation is composite - operation on top level node consists of
  * suboperations on child nodes. This allows to walk operation hierarchy and
@@ -29,7 +30,7 @@ import com.google.common.primitives.UnsignedLong;
  * Implementations MUST expose all nested suboperations which operates on child
  * nodes expose via {@link #getChild(PathArgument)} method.
  * <li>Same suboperations SHOULD be used when invoked via
- * {@link #apply(NodeModification, Optional)} if applicable.
+ * {@link #apply(ModifiedNode, Optional)} if applicable.
  *
  *
  * Hierarchical composite operation which is responsible for applying
@@ -54,10 +55,10 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      *             If it is not possible to apply Operation on provided Metadata
      *             node
      * @return new {@link StoreMetadataNode} if operation resulted in updating
-     *         node, {@link Optional#absent()} if {@link NodeModification}
+     *         node, {@link Optional#absent()} if {@link ModifiedNode}
      *         resulted in deletion of this node.
      */
-    Optional<StoreMetadataNode> apply(NodeModification modification, Optional<StoreMetadataNode> storeMeta, UnsignedLong subtreeVersion);
+    Optional<TreeNode> apply(ModifiedNode modification, Optional<TreeNode> storeMeta, UnsignedLong subtreeVersion);
 
     /**
      *
@@ -67,7 +68,7 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      * @param modification to be verified.
      * @throws IllegalArgumentException If provided NodeModification does not adhere to the structure.
      */
-    void verifyStructure(NodeModification modification) throws IllegalArgumentException;
+    void verifyStructure(ModifiedNode modification) throws IllegalArgumentException;
 
     /**
      * Returns a suboperation for specified tree node
@@ -88,5 +89,5 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      *         false if modification is no applicable
      * @throws DataPreconditionFailedException
      */
-    void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<StoreMetadataNode> current) throws DataPreconditionFailedException;
+    void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<TreeNode> current) throws DataPreconditionFailedException;
 }

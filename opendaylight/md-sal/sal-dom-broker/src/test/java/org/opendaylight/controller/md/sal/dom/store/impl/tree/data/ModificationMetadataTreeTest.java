@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -149,7 +150,7 @@ public class ModificationMetadataTreeTest {
     @Test
     public void basicReadWrites() {
         DataTreeModification modificationTree = new InMemoryDataTreeModification(new InMemoryDataTreeSnapshot(schemaContext,
-                StoreMetadataNode.createRecursively(createDocumentOne(), UnsignedLong.valueOf(5)), applyOper),
+                TreeNodeFactory.createTreeNode(createDocumentOne(), UnsignedLong.valueOf(5)), applyOper),
                 new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.readNode(OUTER_LIST_2_PATH);
         assertTrue(originalBarNode.isPresent());
