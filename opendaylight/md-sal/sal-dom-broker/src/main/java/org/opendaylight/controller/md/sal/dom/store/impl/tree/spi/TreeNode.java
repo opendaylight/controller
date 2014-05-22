@@ -12,8 +12,6 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.primitives.UnsignedLong;
-
 /*
  * A very basic data tree node. It has a version (when it was last modified),
  * a subtree version (when any of its children were modified) and some read-only
@@ -25,14 +23,14 @@ public interface TreeNode extends Identifiable<PathArgument>, StoreTreeNode<Tree
      *
      * @return Current data node version.
      */
-    UnsignedLong getVersion();
+    Version getVersion();
 
     /**
      * Get the subtree version.
      *
      * @return Current subtree version.
      */
-    UnsignedLong getSubtreeVersion();
+    Version getSubtreeVersion();
 
     /**
      * Get a read-only view of the underlying data.

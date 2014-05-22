@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -22,7 +23,6 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends SchemaAwareApplyOperation {
 
@@ -48,21 +48,21 @@ abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends S
 
     @Override
     protected TreeNode applySubtreeChange(final ModifiedNode modification,
-            final TreeNode currentMeta, final UnsignedLong subtreeVersion) {
+            final TreeNode currentMeta, final Version subtreeVersion) {
         throw new UnsupportedOperationException("Node " + schema.getPath()
                 + "is leaf type node. Subtree change is not allowed.");
     }
 
     @Override
     protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-            final UnsignedLong subtreeVersion) {
+            final Version subtreeVersion) {
         // Just overwrite whatever was there
         return applyWrite(modification, null, subtreeVersion);
     }
 
     @Override
     protected TreeNode applyWrite(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
+            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
         return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), subtreeVersion);
     }
 

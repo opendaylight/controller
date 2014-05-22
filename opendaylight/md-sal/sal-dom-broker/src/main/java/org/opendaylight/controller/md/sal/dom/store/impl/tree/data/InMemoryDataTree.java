@@ -101,7 +101,8 @@ final class InMemoryDataTree implements DataTree {
 
         rwLock.writeLock().lock();
         try {
-            final Optional<TreeNode> newRoot = m.getStrategy().apply(m.getRootModification(), Optional.<TreeNode>of(rootNode), StoreUtils.increase(rootNode.getSubtreeVersion()));
+            final Optional<TreeNode> newRoot = m.getStrategy().apply(m.getRootModification(),
+                    Optional.<TreeNode>of(rootNode), rootNode.getSubtreeVersion().next());
             Preconditions.checkState(newRoot.isPresent(), "Apply strategy failed to produce root node");
             return new InMemoryDataTreeCandidate(PUBLIC_ROOT_PATH, root, rootNode, newRoot.get());
         } finally {

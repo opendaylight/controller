@@ -1,11 +1,11 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 /**
  * An implementation of apply operation which fails to do anything,
@@ -16,7 +16,7 @@ import com.google.common.primitives.UnsignedLong;
 final class AlwaysFailOperation implements ModificationApplyOperation {
     @Override
     public Optional<TreeNode> apply(final ModifiedNode modification,
-            final Optional<TreeNode> storeMeta, final UnsignedLong subtreeVersion) {
+            final Optional<TreeNode> storeMeta, final Version subtreeVersion) {
         throw new IllegalStateException("Schema Context is not available.");
     }
 

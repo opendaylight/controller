@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModi
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.MutableTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
@@ -46,7 +47,6 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.primitives.UnsignedLong;
 
 abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareApplyOperation {
 
@@ -95,10 +95,10 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected TreeNode applyWrite(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
-        final UnsignedLong nodeVersion;
+            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
+        final Version nodeVersion;
         if (currentMeta.isPresent()) {
-            nodeVersion = StoreUtils.increase(currentMeta.get().getVersion());
+            nodeVersion = currentMeta.get().getVersion().next();
         } else {
             nodeVersion = subtreeVersion;
         }
@@ -132,7 +132,7 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private TreeNode mutateChildren(final MutableTreeNode meta, final NormalizedNodeContainerBuilder data,
-            final UnsignedLong nodeVersion, final Iterable<ModifiedNode> modifications) {
+            final Version nodeVersion, final Iterable<ModifiedNode> modifications) {
 
         for (ModifiedNode mod : modifications) {
             final PathArgument id = mod.getIdentifier();
@@ -155,16 +155,16 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-            final UnsignedLong subtreeVersion) {
+            final Version subtreeVersion) {
         // For Node Containers - merge is same as subtree change - we only replace children.
         return applySubtreeChange(modification, currentMeta, subtreeVersion);
     }
 
     @Override
     public TreeNode applySubtreeChange(final ModifiedNode modification,
-            final TreeNode currentMeta, final UnsignedLong subtreeVersion) {
+            final TreeNode currentMeta, final Version subtreeVersion) {
         // Bump subtree version to its new target
-        final UnsignedLong updatedSubtreeVersion = StoreUtils.increase(currentMeta.getSubtreeVersion());
+        final Version updatedSubtreeVersion = currentMeta.getSubtreeVersion().next();
 
         final MutableTreeNode newMeta = currentMeta.mutable();
         newMeta.setSubtreeVersion(updatedSubtreeVersion);
