@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e160d57",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/api/MessageTransformer.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-23T18:31:44Z",
+      "side": 1,
+      "message": "At least a brief description of public interfaces is required.",
+      "revId": "7913b39cf8414911351663b40cb3baecf48e69d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee0cc144",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/api/RemoteDevice.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-23T18:31:44Z",
+      "side": 1,
+      "message": "Please do fill this out...",
+      "revId": "7913b39cf8414911351663b40cb3baecf48e69d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
