@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.spi;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.yangtools.util.MapAdaptor;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
@@ -50,14 +50,14 @@ final class ContainerNode extends AbstractTreeNode {
     }
 
     private static final class Mutable implements MutableTreeNode {
-        private final Map<PathArgument, TreeNode> children;
         private final Version version;
+        private Map<PathArgument, TreeNode> children;
         private NormalizedNode<?, ?> data;
         private Version subtreeVersion;
 
         private Mutable(final ContainerNode parent) {
             this.data = parent.getData();
-            this.children = new HashMap<>(parent.children);
+            this.children = MapAdaptor.getDefaultInstance().takeSnapshot(parent.children);
             this.subtreeVersion = parent.getSubtreeVersion();
             this.version = parent.getVersion();
         }
@@ -84,15 +84,11 @@ final class ContainerNode extends AbstractTreeNode {
 
         @Override
         public TreeNode seal() {
-            final Map<PathArgument, TreeNode> realChildren;
+            final TreeNode ret = new ContainerNode(data, version, MapAdaptor.getDefaultInstance().optimize(children), subtreeVersion);
 
-            if (children.isEmpty()) {
-                realChildren = Collections.emptyMap();
-            } else {
-                realChildren = children;
-            }
-
-            return new ContainerNode(data, version, realChildren, subtreeVersion);
+            // This forces a NPE if this class is accessed again. Better than corruption.
+            children = null;
+            return ret;
         }
 
         @Override
@@ -103,8 +99,8 @@ final class ContainerNode extends AbstractTreeNode {
 
     private static ContainerNode create(final Version version, final NormalizedNode<?, ?> data,
             final Iterable<NormalizedNode<?, ?>> children) {
-        final Map<PathArgument, TreeNode> map = new HashMap<>();
 
+        final Map<PathArgument, TreeNode> map = new HashMap<>();
         for (NormalizedNode<?, ?> child : children) {
             map.put(child.getIdentifier(), TreeNodeFactory.createTreeNode(child, version));
         }
