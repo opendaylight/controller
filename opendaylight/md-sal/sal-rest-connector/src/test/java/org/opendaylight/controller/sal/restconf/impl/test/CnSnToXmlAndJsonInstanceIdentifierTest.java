@@ -64,7 +64,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     @Ignore
     @Test
     public void saveCnSnWithLeafListInstIdentifierToXmlTest() throws WebApplicationException, IOException,
-            URISyntaxException, XMLStreamException {
+    URISyntaxException, XMLStreamException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
@@ -94,7 +94,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
     @Test
     public void saveCnSnWithLeafListInstIdentifierToJsonTest() throws WebApplicationException, IOException,
-            URISyntaxException {
+    URISyntaxException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
         String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
@@ -111,7 +111,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         assertTrue(strInOutput);
     }
 
-    private void validateXmlOutput(String xml) throws XMLStreamException {
+    private void validateXmlOutput(final String xml) throws XMLStreamException {
         XMLInputFactory xmlInFactory = XMLInputFactory.newInstance();
         XMLEventReader eventReader;
 
@@ -152,7 +152,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
     }
 
-    private void validateXmlOutputWithLeafList(String xml) throws XMLStreamException {
+    private void validateXmlOutputWithLeafList(final String xml) throws XMLStreamException {
         XMLInputFactory xmlInFactory = XMLInputFactory.newInstance();
         XMLEventReader eventReader;
 
@@ -188,7 +188,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
     }
 
-    private CompositeNode prepareCnSn(InstanceIdentifier instanceIdentifier) throws URISyntaxException {
+    private CompositeNode prepareCnSn(final InstanceIdentifier instanceIdentifier) throws URISyntaxException {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont", "instance:identifier:module", "2014-01-17"), null, null,null,null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
@@ -200,13 +200,13 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
                 lst11, instanceIdentifier,null,null);
 
 
-        lst11.getChildren().add(lf111);
+        lst11.getValue().add(lf111);
         lst11.init();
 
-        cont1.getChildren().add(lst11);
+        cont1.getValue().add(lst11);
         cont1.init();
 
-        cont.getChildren().add(cont1);
+        cont.getValue().add(cont1);
         cont.init();
 
         return cont;

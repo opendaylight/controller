@@ -34,21 +34,21 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     private QName name;
     private List<NodeWrapper<?>> values = new ArrayList<>();
 
-    public CompositeNodeWrapper(String localName) {
+    public CompositeNodeWrapper(final String localName) {
         this.localName = Preconditions.checkNotNull(localName);
     }
 
-    public CompositeNodeWrapper(URI namespace, String localName) {
+    public CompositeNodeWrapper(final URI namespace, final String localName) {
         this(localName);
         this.namespace = namespace;
     }
-    
+
     @Override
-    public void setQname(QName name) {
+    public void setQname(final QName name) {
         Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
-    
+
     @Override
     public QName getQname() {
         return name;
@@ -71,26 +71,26 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     }
 
     @Override
-    public void setNamespace(URI namespace) {
+    public void setNamespace(final URI namespace) {
         Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
         this.namespace = namespace;
     }
 
-    public void addValue(NodeWrapper<?> value) {
+    public void addValue(final NodeWrapper<?> value) {
         Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
         values.add(value);
     }
 
-    public void removeValue(NodeWrapper<CompositeNode> value) {
+    public void removeValue(final NodeWrapper<CompositeNode> value) {
         Preconditions.checkState(compositeNode == null, "Cannot change the object, due to data inconsistencies.");
         values.remove(value);
     }
-    
+
     public List<NodeWrapper<?>> getValues() {
         Preconditions.checkState(compositeNode == null, "Data can be inconsistent.");
         return Collections.unmodifiableList(values);
     }
-    
+
     @Override
     public boolean isChangeAllowed() {
         return compositeNode == null ? true : false;
@@ -103,13 +103,13 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            
+
             List<Node<?>> nodeValues = new ArrayList<>();
             for (NodeWrapper<?> nodeWrapper : values) {
                 nodeValues.add(nodeWrapper.unwrap());
             }
             compositeNode = NodeFactory.createMutableCompositeNode(name, null, nodeValues, null, null);
-            
+
             values = null;
             namespace = null;
             localName = null;
@@ -123,6 +123,7 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
         return unwrap().getNodeType();
     }
 
+    @Deprecated
     @Override
     public CompositeNode getParent() {
         return unwrap().getParent();
@@ -138,38 +139,42 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
         return unwrap().getModificationAction();
     }
 
+    /**
+     * @deprecated Use {@link #getValue()} instead.
+     */
+    @Deprecated
     @Override
     public List<Node<?>> getChildren() {
-        return unwrap().getChildren();
+        return unwrap().getValue();
     }
 
     @Override
-    public List<CompositeNode> getCompositesByName(QName children) {
+    public List<CompositeNode> getCompositesByName(final QName children) {
         return unwrap().getCompositesByName(children);
     }
 
     @Override
-    public List<CompositeNode> getCompositesByName(String children) {
+    public List<CompositeNode> getCompositesByName(final String children) {
         return unwrap().getCompositesByName(children);
     }
 
     @Override
-    public List<SimpleNode<?>> getSimpleNodesByName(QName children) {
+    public List<SimpleNode<?>> getSimpleNodesByName(final QName children) {
         return unwrap().getSimpleNodesByName(children);
     }
 
     @Override
-    public List<SimpleNode<?>> getSimpleNodesByName(String children) {
+    public List<SimpleNode<?>> getSimpleNodesByName(final String children) {
         return unwrap().getSimpleNodesByName(children);
     }
 
     @Override
-    public CompositeNode getFirstCompositeByName(QName container) {
+    public CompositeNode getFirstCompositeByName(final QName container) {
         return unwrap().getFirstCompositeByName(container);
     }
 
     @Override
-    public SimpleNode<?> getFirstSimpleByName(QName leaf) {
+    public SimpleNode<?> getFirstSimpleByName(final QName leaf) {
         return unwrap().getFirstSimpleByName(leaf);
     }
 
@@ -184,7 +189,7 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     }
 
     @Override
-    public List<Node<?>> setValue(List<Node<?>> value) {
+    public List<Node<?>> setValue(final List<Node<?>> value) {
         return unwrap().setValue(value);
     }
 
@@ -199,32 +204,32 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return unwrap().containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return unwrap().containsValue(value);
     }
 
     @Override
-    public List<Node<?>> get(Object key) {
+    public List<Node<?>> get(final Object key) {
         return unwrap().get(key);
     }
 
     @Override
-    public List<Node<?>> put(QName key, List<Node<?>> value) {
+    public List<Node<?>> put(final QName key, final List<Node<?>> value) {
         return unwrap().put(key, value);
     }
 
     @Override
-    public List<Node<?>> remove(Object key) {
+    public List<Node<?>> remove(final Object key) {
         return unwrap().remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends QName, ? extends List<Node<?>>> m) {
+    public void putAll(final Map<? extends QName, ? extends List<Node<?>>> m) {
         unwrap().putAll(m);
     }
 

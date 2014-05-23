@@ -85,7 +85,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         verifyJsonOutput(jsonOutput);
     }
 
-    private void verifyJsonOutputForEmptyData(String jsonOutput) {
+    private void verifyJsonOutputForEmptyData(final String jsonOutput) {
         assertNotNull(jsonOutput);
         StringReader strReader = new StringReader(jsonOutput);
         JsonReader jReader = new JsonReader(strReader);
@@ -104,7 +104,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         assertNull("Error during reading Json output: " + exception, exception);
     }
 
-    private void verifyJsonOutput(String jsonOutput) {
+    private void verifyJsonOutput(final String jsonOutput) {
         assertNotNull(jsonOutput);
         StringReader strReader = new StringReader(jsonOutput);
         JsonReader jReader = new JsonReader(strReader);
@@ -123,7 +123,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         assertNull("Error during reading Json output: " + exception, exception);
     }
 
-    private Cont jsonReadCont1(JsonReader jReader) throws IOException {
+    private Cont jsonReadCont1(final JsonReader jReader) throws IOException {
         jReader.beginObject();
         assertNotNull("cont1 is missing.", jReader.hasNext());
 
@@ -136,7 +136,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private Cont jsonReadCont1Elements(JsonReader jReader, Cont redData) throws IOException {
+    private Cont jsonReadCont1Elements(final JsonReader jReader, final Cont redData) throws IOException {
         jReader.beginObject();
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
@@ -163,7 +163,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private Lst jsonReadLst11(JsonReader jReader, Lst lst) throws IOException {
+    private Lst jsonReadLst11(final JsonReader jReader, final Lst lst) throws IOException {
         jReader.beginArray();
 
         while (jReader.hasNext()) {
@@ -174,7 +174,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lst;
     }
 
-    private LstItem jsonReadLst11Elements(JsonReader jReader) throws IOException {
+    private LstItem jsonReadLst11Elements(final JsonReader jReader) throws IOException {
         LstItem lstItem = new LstItem();
         jReader.beginObject();
         while (jReader.hasNext()) {
@@ -203,7 +203,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lstItem;
     }
 
-    private Lst jsonReadLst112(JsonReader jReader, Lst lst) throws IOException {
+    private Lst jsonReadLst112(final JsonReader jReader, final Lst lst) throws IOException {
         jReader.beginArray();
         while (jReader.hasNext()) {
             LstItem lstItem = jsonReadLst112Elements(jReader);
@@ -213,7 +213,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lst;
     }
 
-    private LstItem jsonReadLst112Elements(JsonReader jReader) throws IOException {
+    private LstItem jsonReadLst112Elements(final JsonReader jReader) throws IOException {
         LstItem lstItem = new LstItem();
         jReader.beginObject();
         if (jReader.hasNext()) {
@@ -227,7 +227,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private Lst jsonReadLst111(JsonReader jReader, Lst lst) throws IOException {
+    private Lst jsonReadLst111(final JsonReader jReader, final Lst lst) throws IOException {
         jReader.beginArray();
         while (jReader.hasNext()) {
             LstItem lstItem = jsonReadLst111Elements(jReader);
@@ -237,7 +237,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lst;
     }
 
-    private LstItem jsonReadLst111Elements(JsonReader jReader) throws IOException {
+    private LstItem jsonReadLst111Elements(final JsonReader jReader) throws IOException {
         LstItem lstItem = new LstItem();
         jReader.beginObject();
         if (jReader.hasNext()) {
@@ -250,7 +250,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lstItem;
     }
 
-    private Object nextValue(JsonReader jReader) throws IOException {
+    private Object nextValue(final JsonReader jReader) throws IOException {
         if (jReader.peek().equals(JsonToken.NULL)) {
             jReader.nextNull();
             return null;
@@ -261,14 +261,14 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         }
     }
 
-    private Cont jsonReadCont111(JsonReader jReader, Cont cont) throws IOException {
+    private Cont jsonReadCont111(final JsonReader jReader, Cont cont) throws IOException {
         jReader.beginObject();
         cont = jsonReadCont111Elements(jReader, cont);
         jReader.endObject();
         return cont;
     }
 
-    private Cont jsonReadCont111Elements(JsonReader jReader, Cont cont) throws IOException {
+    private Cont jsonReadCont111Elements(final JsonReader jReader, final Cont cont) throws IOException {
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
             if (keyName.equals("lf1111")) {
@@ -289,7 +289,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private Lst jsonReadLst1111(JsonReader jReader, Lst lst) throws IOException {
+    private Lst jsonReadLst1111(final JsonReader jReader, final Lst lst) throws IOException {
         jReader.beginArray();
         while (jReader.hasNext()) {
             LstItem lstItem = jsonReadLst1111Elements(jReader);
@@ -299,7 +299,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lst;
     }
 
-    private LstItem jsonReadLst1111Elements(JsonReader jReader) throws IOException {
+    private LstItem jsonReadLst1111Elements(final JsonReader jReader) throws IOException {
         jReader.beginObject();
         LstItem lstItem = new LstItem();
         while (jReader.hasNext()) {
@@ -312,7 +312,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lstItem;
     }
 
-    private LfLst jsonReadLflstValues(JsonReader jReader, LfLst lfLst) throws IOException {
+    private LfLst jsonReadLflstValues(final JsonReader jReader, final LfLst lfLst) throws IOException {
         jReader.beginArray();
         while (jReader.hasNext()) {
             lfLst.addLf(new Lf(nextValue(jReader)));
@@ -321,7 +321,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         return lfLst;
     }
 
-    private void checkDataFromJsonEmpty(Cont dataFromJson) {
+    private void checkDataFromJsonEmpty(final Cont dataFromJson) {
         assertTrue(dataFromJson.getLfs().isEmpty());
         assertTrue(dataFromJson.getLfLsts().isEmpty());
         assertTrue(dataFromJson.getConts().isEmpty());
@@ -357,9 +357,9 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         assertEquals(1, lst11_1.getLsts().size());
         assertEquals(
                 lst11_1.getLsts().get("lst111"),
-                new Lst("lst111").addLstItem(new LstItem().addLf("lf1111", (int) 35))
-                        .addLstItem(new LstItem().addLf("lf1111", (int) 34)).addLstItem(new LstItem())
-                        .addLstItem(new LstItem()));
+                new Lst("lst111").addLstItem(new LstItem().addLf("lf1111", 35))
+                .addLstItem(new LstItem().addLf("lf1111", 34)).addLstItem(new LstItem())
+                .addLstItem(new LstItem()));
         assertEquals(lst11_1.getConts().get("cont111"), new Cont("cont111"));
         // : lst11_1
 
@@ -378,10 +378,10 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         assertEquals(1, lst11_2_cont111.getLsts().size());
         assertTrue(lst11_2_cont111.getConts().isEmpty());
 
-        assertEquals(new LfLst("lflst1111").addLf((int) 1024).addLf((int) 4096),
+        assertEquals(new LfLst("lflst1111").addLf(1024).addLf(4096),
                 lst11_2_cont111.getLfLsts().get("lflst1111"));
         assertEquals(
-                new Lst("lst1111").addLstItem(new LstItem().addLf("lf1111B", (int) 4)).addLstItem(
+                new Lst("lst1111").addLstItem(new LstItem().addLf("lf1111B", 4)).addLstItem(
                         new LstItem().addLf("lf1111A", "lf1111A str12")), lst11_2_cont111.getLsts().get("lst1111"));
         // :-cont111
         assertEquals(lst11_2.getLsts().get("lst112"), new Lst("lst112").addLstItem(new LstItem()));
@@ -407,7 +407,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private void checkDataFromJson(Cont dataFromJson) {
+    private void checkDataFromJson(final Cont dataFromJson) {
         assertNotNull(dataFromJson.getLfs().get("lf11"));
         assertEquals(dataFromJson.getLfs().get("lf11"), new Lf("lf11", "lf"));
 
@@ -450,7 +450,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         checkLst11_2(lst11_2);
     }
 
-    private void checkLst11_2(LstItem lst11_2) {
+    private void checkLst11_2(final LstItem lst11_2) {
         assertNotNull(lst11_2);
         assertEquals(2, lst11_2.getLfs().size());
         assertEquals(1, lst11_2.getConts().size());
@@ -479,7 +479,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
                 new LstItem().addLf(new Lf("lf1121", "lf1121 str21")));
     }
 
-    private void checkLst11_1(LstItem lst11_1) {
+    private void checkLst11_1(final LstItem lst11_1) {
         assertNotNull(lst11_1);
 
         assertEquals(2, lst11_1.getLfs().size());
@@ -507,7 +507,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         checkLst11x(lst11_1.getLsts().get("lst112"), new LstItem().addLf(new Lf("lf1121", "lf1121 str11")));
     }
 
-    private void checkLst11x(Lst lst, LstItem... lstItems) {
+    private void checkLst11x(final Lst lst, final LstItem... lstItems) {
         assertNotNull(lst);
 
         Lst requiredLst = new Lst(lst.getName());
@@ -519,7 +519,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private void checkLst1111(Set<LstItem> lstItems, Lf lf11, Lf lf12, Lf lf21, Lf lf22) {
+    private void checkLst1111(final Set<LstItem> lstItems, final Lf lf11, final Lf lf12, final Lf lf21, final Lf lf22) {
         LstItem lst11_1_cont_lst1111_1 = null;
         LstItem lst11_1_cont_lst1111_2 = null;
         for (LstItem lstItem : lstItems) {
@@ -541,49 +541,49 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         // lst11_1
         MutableCompositeNode lst11_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
-        cont1.getChildren().add(lst11_1);
+        cont1.getValue().add(lst11_1);
 
         MutableSimpleNode<?> lf111_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_1,
                 (short) 1, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(lf111_1);
+        lst11_1.getValue().add(lf111_1);
 
         // lst111_1_1
         MutableCompositeNode lst111_1_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(lst111_1_1);
+        lst11_1.getValue().add(lst111_1_1);
         MutableSimpleNode<?> lf1111_1_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111","simple:yang:types","2013-11-5"),
-                lst111_1_1, (int) 34, ModifyAction.CREATE, null);
-        lst111_1_1.getChildren().add(lf1111_1_1);
+                lst111_1_1, 34, ModifyAction.CREATE, null);
+        lst111_1_1.getValue().add(lf1111_1_1);
         lst111_1_1.init();
         // :lst111_1_1
 
         // lst111_1_2
         MutableCompositeNode lst111_1_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(lst111_1_2);
+        lst11_1.getValue().add(lst111_1_2);
         MutableSimpleNode<?> lf1111_1_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111","simple:yang:types","2013-11-5"),
-                lst111_1_2, (int) 35, ModifyAction.CREATE, null);
-        lst111_1_2.getChildren().add(lf1111_1_2);
+                lst111_1_2, 35, ModifyAction.CREATE, null);
+        lst111_1_2.getValue().add(lf1111_1_2);
         lst111_1_2.init();
         // :lst111_1_2
 
         // lst111_1_3
         MutableCompositeNode lst111_1_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(lst111_1_3);
+        lst11_1.getValue().add(lst111_1_3);
         lst111_1_2.init();
         // :lst111_1_3
 
         // lst111_1_4
         MutableCompositeNode lst111_1_4 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(lst111_1_4);
+        lst11_1.getValue().add(lst111_1_4);
         lst111_1_2.init();
         // :lst111_1_4
 
         MutableCompositeNode cont111_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_1, null, ModifyAction.CREATE, null);
-        lst11_1.getChildren().add(cont111_1);
+        lst11_1.getValue().add(cont111_1);
 
         lst11_1.init();
         // :lst11_1
@@ -591,39 +591,39 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         // lst11_2
         MutableCompositeNode lst11_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
-        cont1.getChildren().add(lst11_2);
+        cont1.getValue().add(lst11_2);
 
         MutableSimpleNode<?> lf111_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_2,
                 (short) 2, ModifyAction.CREATE, null);
-        lst11_2.getChildren().add(lf111_2);
+        lst11_2.getValue().add(lf111_2);
 
         // cont111_2
         MutableCompositeNode cont111_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_2, null, ModifyAction.CREATE, null);
-        lst11_2.getChildren().add(cont111_2);
+        lst11_2.getValue().add(cont111_2);
 
         MutableSimpleNode<?> lflst1111_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111","simple:yang:types","2013-11-5"),
-                cont111_2, (int) 1024, ModifyAction.CREATE, null);
-        cont111_2.getChildren().add(lflst1111_2_2);
+                cont111_2, 1024, ModifyAction.CREATE, null);
+        cont111_2.getValue().add(lflst1111_2_2);
         MutableSimpleNode<?> lflst1111_2_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lflst1111","simple:yang:types","2013-11-5"),
-                cont111_2, (int) 4096, ModifyAction.CREATE, null);
-        cont111_2.getChildren().add(lflst1111_2_3);
+                cont111_2, 4096, ModifyAction.CREATE, null);
+        cont111_2.getValue().add(lflst1111_2_3);
 
         // lst1111_2
         MutableCompositeNode lst1111_2_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_2, null, ModifyAction.CREATE, null);
-        cont111_2.getChildren().add(lst1111_2_1);
+        cont111_2.getValue().add(lst1111_2_1);
         MutableSimpleNode<?> lf1111B_2_1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111B","simple:yang:types","2013-11-5"),
                 lst1111_2_1, (short) 4, ModifyAction.CREATE, null);
-        lst1111_2_1.getChildren().add(lf1111B_2_1);
+        lst1111_2_1.getValue().add(lf1111B_2_1);
         lst1111_2_1.init();
 
         MutableCompositeNode lst1111_2_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_2, null, ModifyAction.CREATE, null);
-        cont111_2.getChildren().add(lst1111_2_2);
+        cont111_2.getValue().add(lst1111_2_2);
         MutableSimpleNode<?> lf1111A_2_2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1111A","simple:yang:types","2013-11-5"),
                 lst1111_2_2, "lf1111A str12", ModifyAction.CREATE, null);
-        lst1111_2_2.getChildren().add(lf1111A_2_2);
+        lst1111_2_2.getValue().add(lf1111A_2_2);
         lst1111_2_2.init();
         // :lst1111_2
 
@@ -632,7 +632,7 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
 
         MutableCompositeNode lst112_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst112","simple:yang:types","2013-11-5"), lst11_2,
                 null, ModifyAction.CREATE, null);
-        lst11_2.getChildren().add(lst112_2);
+        lst11_2.getValue().add(lst112_2);
         lst112_2.init();
         lst11_2.init();
 
@@ -641,25 +641,25 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
         // lst11_3
         MutableCompositeNode lst11_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst11","simple:yang:types","2013-11-5"), cont1,
                 null, ModifyAction.CREATE, null);
-        cont1.getChildren().add(lst11_3);
+        cont1.getValue().add(lst11_3);
 
         MutableSimpleNode<?> lf111_3 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf111","simple:yang:types","2013-11-5"), lst11_3,
                 (short) 3, ModifyAction.CREATE, null);
-        lst11_3.getChildren().add(lf111_3);
+        lst11_3.getValue().add(lf111_3);
 
         // cont111_3
         MutableCompositeNode cont111_3 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont111","simple:yang:types","2013-11-5"),
                 lst11_3, null, ModifyAction.CREATE, null);
-        lst11_3.getChildren().add(cont111_3);
+        lst11_3.getValue().add(cont111_3);
 
         MutableCompositeNode lst1111_3_1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_3, null, ModifyAction.CREATE, null);
-        cont111_3.getChildren().add(lst1111_3_1);
+        cont111_3.getValue().add(lst1111_3_1);
         lst1111_3_1.init();
 
         MutableCompositeNode lst1111_3_2 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("lst1111","simple:yang:types","2013-11-5"),
                 cont111_3, null, ModifyAction.CREATE, null);
-        cont111_3.getChildren().add(lst1111_3_2);
+        cont111_3.getValue().add(lst1111_3_2);
         lst1111_3_2.init();
 
         cont111_3.init();

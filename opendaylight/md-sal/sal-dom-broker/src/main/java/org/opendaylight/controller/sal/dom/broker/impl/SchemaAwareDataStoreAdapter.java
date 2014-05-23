@@ -45,9 +45,9 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 
 public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataStore> implements //
-        DataStore, //
-        SchemaContextListener, //
-        AutoCloseable {
+DataStore, //
+SchemaContextListener, //
+AutoCloseable {
 
     private final static Logger LOG = LoggerFactory.getLogger(SchemaAwareDataStoreAdapter.class);
 
@@ -56,7 +56,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     private final DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
 
     @Override
-    public boolean containsConfigurationPath(InstanceIdentifier path) {
+    public boolean containsConfigurationPath(final InstanceIdentifier path) {
         try {
             getDelegateReadLock().lock();
             return getDelegate().containsConfigurationPath(path);
@@ -67,7 +67,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     }
 
     @Override
-    public boolean containsOperationalPath(InstanceIdentifier path) {
+    public boolean containsOperationalPath(final InstanceIdentifier path) {
         try {
             getDelegateReadLock().lock();
             return getDelegate().containsOperationalPath(path);
@@ -100,18 +100,18 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     }
 
     @Override
-    public CompositeNode readConfigurationData(InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
         return reader.readConfigurationData(path);
     }
 
     @Override
-    public CompositeNode readOperationalData(InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final InstanceIdentifier path) {
         return reader.readOperationalData(path);
     }
 
     @Override
     public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
-            DataModification<InstanceIdentifier, CompositeNode> modification) {
+            final DataModification<InstanceIdentifier, CompositeNode> modification) {
         validateAgainstSchema(modification);
         NormalizedDataModification cleanedUp = prepareMergedTransaction(modification);
         cleanedUp.status = TransactionStatus.SUBMITED;
@@ -122,11 +122,11 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         return validationEnabled;
     }
 
-    public void setValidationEnabled(boolean validationEnabled) {
+    public void setValidationEnabled(final boolean validationEnabled) {
         this.validationEnabled = validationEnabled;
     }
 
-    private void validateAgainstSchema(DataModification<InstanceIdentifier, CompositeNode> modification) {
+    private void validateAgainstSchema(final DataModification<InstanceIdentifier, CompositeNode> modification) {
         if (!validationEnabled) {
             return;
         }
@@ -138,12 +138,12 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
     }
 
     @Override
-    protected void onDelegateChanged(DataStore oldDelegate, DataStore newDelegate) {
+    protected void onDelegateChanged(final DataStore oldDelegate, final DataStore newDelegate) {
         // NOOP
     }
 
     @Override
-    public void onGlobalContextUpdated(SchemaContext context) {
+    public void onGlobalContextUpdated(final SchemaContext context) {
         this.schema = context;
     }
 
@@ -152,8 +152,8 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         this.schema = null;
     }
 
-    protected CompositeNode mergeData(InstanceIdentifier path, CompositeNode stored, CompositeNode modified,
-            boolean config) {
+    protected CompositeNode mergeData(final InstanceIdentifier path, final CompositeNode stored, final CompositeNode modified,
+            final boolean config) {
         // long startTime = System.nanoTime();
         try {
             DataSchemaNode node = schemaNodeFor(path);
@@ -164,13 +164,13 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         }
     }
 
-    private DataSchemaNode schemaNodeFor(InstanceIdentifier path) {
+    private DataSchemaNode schemaNodeFor(final InstanceIdentifier path) {
         checkState(schema != null, "YANG Schema is not available");
         return YangSchemaUtils.getSchemaNode(schema, path);
     }
 
     private NormalizedDataModification prepareMergedTransaction(
-            DataModification<InstanceIdentifier, CompositeNode> original) {
+            final DataModification<InstanceIdentifier, CompositeNode> original) {
         NormalizedDataModification normalized = new NormalizedDataModification(original);
         LOG.trace("Transaction: {} Removed Configuration {}, Removed Operational {}", original.getIdentifier(),
                 original.getRemovedConfigurationData(), original.getRemovedConfigurationData());
@@ -194,7 +194,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         return normalized;
     }
 
-    private Iterable<InstanceIdentifier> getConfigurationSubpaths(InstanceIdentifier entry) {
+    private Iterable<InstanceIdentifier> getConfigurationSubpaths(final InstanceIdentifier entry) {
         // FIXME: This should be replaced by index
         Iterable<InstanceIdentifier> paths = getStoredConfigurationPaths();
 
@@ -202,15 +202,15 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     }
 
-    public Iterable<InstanceIdentifier> getOperationalSubpaths(InstanceIdentifier entry) {
+    public Iterable<InstanceIdentifier> getOperationalSubpaths(final InstanceIdentifier entry) {
         // FIXME: This should be indexed
         Iterable<InstanceIdentifier> paths = getStoredOperationalPaths();
 
         return getChildrenPaths(entry, paths);
     }
 
-    private static final Iterable<InstanceIdentifier> getChildrenPaths(InstanceIdentifier entry,
-            Iterable<InstanceIdentifier> paths) {
+    private static final Iterable<InstanceIdentifier> getChildrenPaths(final InstanceIdentifier entry,
+            final Iterable<InstanceIdentifier> paths) {
         ImmutableSet.Builder<InstanceIdentifier> children = ImmutableSet.builder();
         for (InstanceIdentifier potential : paths) {
             if (entry.contains(potential)) {
@@ -222,7 +222,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
 
     private final Comparator<Entry<InstanceIdentifier, CompositeNode>> preparationComparator = new Comparator<Entry<InstanceIdentifier, CompositeNode>>() {
         @Override
-        public int compare(Entry<InstanceIdentifier, CompositeNode> o1, Entry<InstanceIdentifier, CompositeNode> o2) {
+        public int compare(final Entry<InstanceIdentifier, CompositeNode> o1, final Entry<InstanceIdentifier, CompositeNode> o2) {
             InstanceIdentifier o1Key = o1.getKey();
             InstanceIdentifier o2Key = o2.getKey();
             return Integer.compare(o1Key.getPath().size(), o2Key.getPath().size());
@@ -242,7 +242,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 CompositeNode original = getDelegate().readConfigurationData(path);
                 ArrayList<Node<?>> childNodes = new ArrayList<Node<?>>();
                 if (original != null) {
-                    childNodes.addAll(original.getChildren());
+                    childNodes.addAll(original.getValue());
                     qname = original.getNodeType();
                 } else {
                     qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
@@ -251,7 +251,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 FluentIterable<InstanceIdentifier> directChildren = FluentIterable.from(getStoredConfigurationPaths())
                         .filter(new Predicate<InstanceIdentifier>() {
                             @Override
-                            public boolean apply(InstanceIdentifier input) {
+                            public boolean apply(final InstanceIdentifier input) {
                                 if (path.contains(input)) {
                                     int nesting = input.getPath().size() - path.getPath().size();
                                     if (nesting == 1) {
@@ -285,7 +285,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 CompositeNode original = getDelegate().readOperationalData(path);
                 ArrayList<Node<?>> childNodes = new ArrayList<Node<?>>();
                 if (original != null) {
-                    childNodes.addAll(original.getChildren());
+                    childNodes.addAll(original.getValue());
                     qname = original.getNodeType();
                 } else {
                     qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
@@ -294,7 +294,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
                 FluentIterable<InstanceIdentifier> directChildren = FluentIterable.from(getStoredOperationalPaths())
                         .filter(new Predicate<InstanceIdentifier>() {
                             @Override
-                            public boolean apply(InstanceIdentifier input) {
+                            public boolean apply(final InstanceIdentifier input) {
                                 if (path.contains(input)) {
                                     int nesting = input.getPath().size() - path.getPath().size();
                                     if (nesting == 1) {
@@ -326,7 +326,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         private final Object identifier;
         private TransactionStatus status;
 
-        public NormalizedDataModification(DataModification<InstanceIdentifier, CompositeNode> original) {
+        public NormalizedDataModification(final DataModification<InstanceIdentifier, CompositeNode> original) {
             super(getDelegate());
             identifier = original;
             status = TransactionStatus.NEW;
@@ -339,7 +339,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
          *
          * @param entry
          */
-        public void deepRemoveOperationalData(InstanceIdentifier entry) {
+        public void deepRemoveOperationalData(final InstanceIdentifier entry) {
             Iterable<InstanceIdentifier> paths = getOperationalSubpaths(entry);
             removeOperationalData(entry);
             for (InstanceIdentifier potential : paths) {
@@ -347,7 +347,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
-        public void deepRemoveConfigurationData(InstanceIdentifier entry) {
+        public void deepRemoveConfigurationData(final InstanceIdentifier entry) {
             Iterable<InstanceIdentifier> paths = getConfigurationSubpaths(entry);
             removeConfigurationData(entry);
             for (InstanceIdentifier potential : paths) {
@@ -355,11 +355,11 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
-        public void putDeepConfigurationData(InstanceIdentifier entryKey, CompositeNode entryData) {
+        public void putDeepConfigurationData(final InstanceIdentifier entryKey, final CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, CONFIGURATIONAL_DATA_STORE_MARKER);
         }
 
-        public void putDeepOperationalData(InstanceIdentifier entryKey, CompositeNode entryData) {
+        public void putDeepOperationalData(final InstanceIdentifier entryKey, final CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, OPERATIONAL_DATA_STORE_MARKER);
         }
 
@@ -379,26 +379,26 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
         }
 
         @Override
-        protected CompositeNode mergeConfigurationData(InstanceIdentifier path, CompositeNode stored,
-                CompositeNode modified) {
+        protected CompositeNode mergeConfigurationData(final InstanceIdentifier path, final CompositeNode stored,
+                final CompositeNode modified) {
             return mergeData(path, stored, modified, true);
         }
 
         @Override
-        protected CompositeNode mergeOperationalData(InstanceIdentifier path, CompositeNode stored,
-                CompositeNode modified) {
+        protected CompositeNode mergeOperationalData(final InstanceIdentifier path, final CompositeNode stored,
+                final CompositeNode modified) {
             return mergeData(path, stored, modified, false);
         }
 
-        private void putData(InstanceIdentifier entryKey, CompositeNode entryData, String dataStoreIdentifier) {
+        private void putData(final InstanceIdentifier entryKey, final CompositeNode entryData, final String dataStoreIdentifier) {
             if (dataStoreIdentifier != null && entryKey != null && entryData != null) {
                 switch (dataStoreIdentifier) {
                 case (CONFIGURATIONAL_DATA_STORE_MARKER):
                     this.putConfigurationData(entryKey, entryData);
-                    break;
+                break;
                 case (OPERATIONAL_DATA_STORE_MARKER):
                     this.putOperationalData(entryKey, entryData);
-                    break;
+                break;
 
                 default:
                     LOG.error(dataStoreIdentifier + " is NOT valid DataStore switch marker");
@@ -407,11 +407,11 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
-        private void putCompositeNodeData(InstanceIdentifier entryKey, CompositeNode entryData,
-                String dataStoreIdentifier) {
+        private void putCompositeNodeData(final InstanceIdentifier entryKey, final CompositeNode entryData,
+                final String dataStoreIdentifier) {
             this.putData(entryKey, entryData, dataStoreIdentifier);
 
-            for (Node<?> child : entryData.getChildren()) {
+            for (Node<?> child : entryData.getValue()) {
                 InstanceIdentifier subEntryId = InstanceIdentifier.builder(entryKey).node(child.getNodeType())
                         .toInstance();
                 if (child instanceof CompositeNode) {
@@ -438,7 +438,7 @@ public class SchemaAwareDataStoreAdapter extends AbstractLockableDelegator<DataS
             }
         }
 
-        private Map<QName, Object> getValuesFromListSchema(ListSchemaNode listSchema, CompositeNode entryData) {
+        private Map<QName, Object> getValuesFromListSchema(final ListSchemaNode listSchema, final CompositeNode entryData) {
             List<QName> keyDef = listSchema.getKeyDefinition();
             if (keyDef != null && !keyDef.isEmpty()) {
                 Map<QName, Object> map = new HashMap<QName, Object>();

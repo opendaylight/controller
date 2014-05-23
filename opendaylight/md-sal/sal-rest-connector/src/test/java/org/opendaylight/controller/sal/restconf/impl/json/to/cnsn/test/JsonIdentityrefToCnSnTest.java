@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -17,7 +19,9 @@ import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class JsonIdentityrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -36,13 +40,13 @@ public class JsonIdentityrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
-        List<Node<?>> childs = compositeNode.getChildren();
+        List<Node<?>> childs = compositeNode.getValue();
         assertEquals(1, childs.size());
         Node<?> nd = childs.iterator().next();
         assertTrue(nd instanceof CompositeNode);
         assertEquals("cont1", nd.getNodeType().getLocalName());
 
-        childs = ((CompositeNode) nd).getChildren();
+        childs = ((CompositeNode) nd).getValue();
         assertEquals(4, childs.size());
         SimpleNode<?> lf11 = null;
         SimpleNode<?> lf12 = null;

@@ -35,7 +35,6 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifie
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +51,9 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
     private final boolean candidateSupported;
     private final boolean rollbackSupported;
 
-    public NetconfDeviceTwoPhaseCommitTransaction(NetconfDevice device,
-            DataModification<InstanceIdentifier, CompositeNode> modification,
-            boolean candidateSupported, boolean rollbackOnErrorSupported) {
+    public NetconfDeviceTwoPhaseCommitTransaction(final NetconfDevice device,
+            final DataModification<InstanceIdentifier, CompositeNode> modification,
+            final boolean candidateSupported, final boolean rollbackOnErrorSupported) {
         this.device = Preconditions.checkNotNull(device);
         this.modification = Preconditions.checkNotNull(modification);
         this.candidateSupported = candidateSupported;
@@ -70,15 +69,15 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
         }
     }
 
-    private void sendMerge(InstanceIdentifier key, CompositeNode value) throws InterruptedException, ExecutionException {
+    private void sendMerge(final InstanceIdentifier key, final CompositeNode value) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditStructure(key, Optional.<String>absent(), Optional.of(value)));
     }
 
-    private void sendDelete(InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
+    private void sendDelete(final InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode> absent()));
     }
 
-    private void sendEditRpc(CompositeNode editStructure) throws InterruptedException, ExecutionException {
+    private void sendEditRpc(final CompositeNode editStructure) throws InterruptedException, ExecutionException {
         CompositeNodeBuilder<ImmutableCompositeNode> builder = configurationRpcBuilder();
         builder.setQName(NETCONF_EDIT_CONFIG_QNAME);
         builder.add(editStructure);
@@ -108,8 +107,8 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
         return ret;
     }
 
-    private CompositeNode createEditStructure(InstanceIdentifier dataPath, Optional<String> operation,
-            Optional<CompositeNode> lastChildOverride) {
+    private CompositeNode createEditStructure(final InstanceIdentifier dataPath, final Optional<String> operation,
+            final Optional<CompositeNode> lastChildOverride) {
         List<PathArgument> path = dataPath.getPath();
         List<PathArgument> reversed = Lists.reverse(path);
         CompositeNode previous = null;
@@ -130,7 +129,7 @@ class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<In
                     builder.setAttribute(NETCONF_OPERATION_QNAME, operation.get());
                 }
                 if (lastChildOverride.isPresent()) {
-                    List<Node<?>> children = lastChildOverride.get().getChildren();
+                    List<Node<?>> children = lastChildOverride.get().getValue();
                     for(Node<?> child : children) {
                         if(!predicates.containsKey(child.getKey())) {
                             builder.add(child);

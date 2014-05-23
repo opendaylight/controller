@@ -50,13 +50,13 @@ public class XmlLeafrefToCnSnTest {
         verifyCommonPartAOfXml(compNode, "", nameSpace);
     }
 
-    private void verifyNullAndEmptyStringSingleNode(CompositeNode compNode, String nameSpace) {
+    private void verifyNullAndEmptyStringSingleNode(final CompositeNode compNode, final String nameSpace) {
         assertEquals("cont", compNode.getNodeType().getLocalName());
 
         SimpleNode<?> lf2 = null;
         SimpleNode<?> lf3 = null;
         int found = 0;
-        for (Node<?> child : compNode.getChildren()) {
+        for (Node<?> child : compNode.getValue()) {
             if (found == 0x3)
                 break;
             if (child instanceof SimpleNode<?>) {
@@ -91,11 +91,11 @@ public class XmlLeafrefToCnSnTest {
         String nameSpaceCont = "data:container:yang";
         assertEquals(nameSpaceCont, compNode.getNodeType().getNamespace().toString());
         assertEquals("cont", compNode.getNodeType().getLocalName());
-        assertEquals(3, compNode.getChildren().size());
+        assertEquals(3, compNode.getValue().size());
         CompositeNode lst1_1 = null;
         CompositeNode lst1_2 = null;
         int loopCount = 0;
-        for (Node<?> node : compNode.getChildren()) {
+        for (Node<?> node : compNode.getValue()) {
             if (node.getNodeType().getLocalName().equals("lf1")) {
                 assertEquals(nameSpaceList, node.getNodeType().getNamespace().toString());
                 assertTrue(node instanceof SimpleNode<?>);
@@ -120,7 +120,7 @@ public class XmlLeafrefToCnSnTest {
         // lst1_2
         SimpleNode<?> lflst11 = null;
         CompositeNode cont11 = null;
-        for (Node<?> node : lst1_2.getChildren()) {
+        for (Node<?> node : lst1_2.getValue()) {
             String nodeName = node.getNodeType().getLocalName();
             if (nodeName.equals("lflst11")) {
                 assertTrue(node instanceof SimpleNode<?>);
@@ -134,9 +134,9 @@ public class XmlLeafrefToCnSnTest {
         }
         assertEquals("221", lflst11.getValue());
 
-        assertEquals(1, cont11.getChildren().size());
-        assertTrue(cont11.getChildren().get(0) instanceof SimpleNode<?>);
-        SimpleNode<?> cont11_lf111 = (SimpleNode<?>) cont11.getChildren().get(0);
+        assertEquals(1, cont11.getValue().size());
+        assertTrue(cont11.getValue().get(0) instanceof SimpleNode<?>);
+        SimpleNode<?> cont11_lf111 = (SimpleNode<?>) cont11.getValue().get(0);
         assertEquals(nameSpaceCont, cont11_lf111.getNodeType().getNamespace().toString());
         assertEquals("lf111", cont11_lf111.getNodeType().getLocalName());
         assertEquals((short) 100, cont11_lf111.getValue());
@@ -154,7 +154,7 @@ public class XmlLeafrefToCnSnTest {
         SimpleNode<?> lflst1_2 = null;
         CompositeNode lst1 = null;
         int lflst1Count = 0;
-        for (Node<?> node : compNode.getChildren()) {
+        for (Node<?> node : compNode.getValue()) {
             if (node.getNodeType().getLocalName().equals("lf1")) {
                 assertTrue(node instanceof SimpleNode<?>);
                 lf1 = (SimpleNode<?>) node;
@@ -183,11 +183,11 @@ public class XmlLeafrefToCnSnTest {
         assertEquals("", lf1.getValue());
         assertEquals("", lflst1_1.getValue());
         assertEquals("", lflst1_2.getValue());
-        assertEquals(1, lst1.getChildren().size());
-        assertEquals("lf11", lst1.getChildren().get(0).getNodeType().getLocalName());
+        assertEquals(1, lst1.getValue().size());
+        assertEquals("lf11", lst1.getValue().get(0).getNodeType().getLocalName());
 
-        assertTrue(lst1.getChildren().get(0) instanceof SimpleNode<?>);
-        assertEquals("", lst1.getChildren().get(0).getValue());
+        assertTrue(lst1.getValue().get(0) instanceof SimpleNode<?>);
+        assertEquals("", lst1.getValue().get(0).getValue());
 
     }
 
@@ -201,7 +201,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <lf11 xmlns="namespace1"
      * xmlns:x="namespace">identity</lf11>
      */
@@ -213,7 +213,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <cont1 xmlns="namespace1"> <lf11
      * xmlns:x="namespace">identity</lf11> </cont1>
      */
@@ -224,7 +224,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace">
      * <lf11>x:identity</lf11> </cont1>
      */
@@ -236,7 +236,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like (without namespace in xml) <cont1> <lf11>x:identity</lf11>
      * </cont1>
      */
@@ -247,7 +247,7 @@ public class XmlLeafrefToCnSnTest {
     }
 
     /**
-     * 
+     *
      * Test case like (without namespace in xml) <cont1> <lf11>identity</lf11>
      * </cont1>
      */
@@ -257,7 +257,7 @@ public class XmlLeafrefToCnSnTest {
                 "/xml-to-cnsn/identityref", "identityref-module", "cont", 2, "iden", "identityref:module");
     }
 
-    private void verifyCommonPartAOfXml(CompositeNode compNode, String suf, String nameSpace) {
+    private void verifyCommonPartAOfXml(final CompositeNode compNode, final String suf, final String nameSpace) {
         SimpleNode<?> lf1suf = null;
         SimpleNode<?> lflst1suf_1 = null;
         SimpleNode<?> lflst1suf_2 = null;
@@ -267,7 +267,7 @@ public class XmlLeafrefToCnSnTest {
 
         int lflstCount = 0;
 
-        for (Node<?> node : compNode.getChildren()) {
+        for (Node<?> node : compNode.getValue()) {
             String localName = node.getNodeType().getLocalName();
             if (localName.equals("lf1" + suf)) {
                 assertTrue(node instanceof SimpleNode<?>);
@@ -307,23 +307,23 @@ public class XmlLeafrefToCnSnTest {
         assertEquals("131", lflst1suf_2.getValue());
         assertEquals("str1", lflst1suf_3.getValue());
 
-        assertEquals(1, lst1suf.getChildren().size());
+        assertEquals(1, lst1suf.getValue().size());
 
-        assertTrue(lst1suf.getChildren().get(0) instanceof SimpleNode<?>);
-        SimpleNode<?> lst11_lf11 = (SimpleNode<?>) lst1suf.getChildren().get(0);
+        assertTrue(lst1suf.getValue().get(0) instanceof SimpleNode<?>);
+        SimpleNode<?> lst11_lf11 = (SimpleNode<?>) lst1suf.getValue().get(0);
         assertEquals(nameSpace, lst11_lf11.getNodeType().getNamespace().toString());
         assertEquals("lf11" + suf, lst11_lf11.getNodeType().getLocalName());
         assertEquals("str2", lst11_lf11.getValue());
 
-        assertTrue(cont1suf.getChildren().get(0) instanceof SimpleNode<?>);
-        SimpleNode<?> cont1_lf11 = (SimpleNode<?>) cont1suf.getChildren().get(0);
+        assertTrue(cont1suf.getValue().get(0) instanceof SimpleNode<?>);
+        SimpleNode<?> cont1_lf11 = (SimpleNode<?>) cont1suf.getValue().get(0);
         assertEquals(nameSpace, cont1_lf11.getNodeType().getNamespace().toString());
         assertEquals("lf11" + suf, cont1_lf11.getNodeType().getLocalName());
         assertEquals((short) 100, cont1_lf11.getValue());
     }
 
-    private void testIdentityrefToCnSn(String xmlPath, String yangPath, String moduleName, String schemaName,
-            int moduleCount, String resultLocalName, String resultNamespace) {
+    private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName, final String schemaName,
+            final int moduleCount, final String resultLocalName, final String resultNamespace) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
@@ -339,16 +339,16 @@ public class XmlLeafrefToCnSnTest {
         assertEquals(resultNamespace, qName.getNamespace().toString());
     }
 
-    private SimpleNode<?> getLf11(CompositeNode compositeNode) {
+    private SimpleNode<?> getLf11(final CompositeNode compositeNode) {
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
-        List<Node<?>> childs = compositeNode.getChildren();
+        List<Node<?>> childs = compositeNode.getValue();
         assertEquals(1, childs.size());
         Node<?> nd = childs.iterator().next();
         assertTrue(nd instanceof CompositeNode);
         assertEquals("cont1", nd.getNodeType().getLocalName());
 
-        childs = ((CompositeNode) nd).getChildren();
+        childs = ((CompositeNode) nd).getValue();
         SimpleNode<?> lf11 = null;
         for (Node<?> child : childs) {
             assertTrue(child instanceof SimpleNode);

@@ -28,11 +28,11 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 
 /**
- * 
+ *
  * CnSn = Composite node and Simple node data structure Class contains test of
  * serializing simple nodes data values according data types from YANG schema to
  * XML file
- * 
+ *
  */
 public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
     @BeforeClass
@@ -139,9 +139,9 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         serializeToXml(
                 prepareCnStructForYangData(
                         TypeDefinitionAwareCodec.BINARY_DEFAULT_CODEC
-                                .deserialize("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"),
+                        .deserialize("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"),
                         elName), "<" + elName + ">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567</"
-                        + elName + ">");
+                                + elName + ">");
     }
 
     @Test
@@ -198,7 +198,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
                         + elName + ">str</" + elName + ">");
     }
 
-    private void serializeToXml(CompositeNode compositeNode, String... xmlRepresentation)
+    private void serializeToXml(final CompositeNode compositeNode, final String... xmlRepresentation)
             throws TransformerFactoryConfigurationError {
         String xmlString = "";
         try {
@@ -220,12 +220,12 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private CompositeNode prepareIdentityrefData(String prefix, boolean valueAsQName) {
+    private CompositeNode prepareIdentityrefData(final String prefix, final boolean valueAsQName) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont", "basic:module", "2013-12-2"), null, null, ModifyAction.CREATE, null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont1", "basic:module", "2013-12-2"), cont, null, ModifyAction.CREATE, null);
-        cont.getChildren().add(cont1);
+        cont.getValue().add(cont1);
 
         Object value = null;
         if (valueAsQName) {
@@ -235,20 +235,20 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         }
         MutableSimpleNode<Object> lf11 = NodeFactory.createMutableSimpleNode(
                 TestUtils.buildQName("lf11", "basic:module", "2013-12-2"), cont1, value, ModifyAction.CREATE, null);
-        cont1.getChildren().add(lf11);
+        cont1.getValue().add(lf11);
         cont1.init();
         cont.init();
 
         return cont;
     }
 
-    private CompositeNode prepareCnStructForYangData(Object data, String leafName) {
+    private CompositeNode prepareCnStructForYangData(final Object data, final String leafName) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
                 ModifyAction.CREATE, null);
 
         MutableSimpleNode<Object> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName(leafName), cont, data,
                 ModifyAction.CREATE, null);
-        cont.getChildren().add(lf1);
+        cont.getValue().add(lf1);
         cont.init();
 
         return cont;
@@ -262,8 +262,8 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
                 cont, Boolean.TRUE, ModifyAction.CREATE, null);
         MutableSimpleNode<Object> lfLfref = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lfLfref"), cont,
                 "true", ModifyAction.CREATE, null);
-        cont.getChildren().add(lfBoolean);
-        cont.getChildren().add(lfLfref);
+        cont.getValue().add(lfBoolean);
+        cont.getValue().add(lfLfref);
         cont.init();
 
         return cont;

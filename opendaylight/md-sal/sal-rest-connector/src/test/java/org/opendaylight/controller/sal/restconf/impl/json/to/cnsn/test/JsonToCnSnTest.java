@@ -58,13 +58,13 @@ public class JsonToCnSnTest {
         CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-leaflist-items.json", true,
                 JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
-        assertEquals(3, compositeNode.getChildren().size());
+        assertEquals(3, compositeNode.getValue().size());
 
         boolean lflst1_1 = false;
         boolean lflst1_2 = false;
         boolean lflst1_3 = false;
 
-        for (Node<?> node : compositeNode.getChildren()) {
+        for (Node<?> node : compositeNode.getValue()) {
             assertEquals("lflst1", node.getNodeType().getLocalName());
             assertTrue(node instanceof SimpleNode<?>);
             SimpleNode<?> simpleNode = (SimpleNode<?>) node;
@@ -105,9 +105,9 @@ public class JsonToCnSnTest {
         assertNotNull(compositeNode);
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
-        assertNotNull(compositeNode.getChildren());
-        assertEquals(1, compositeNode.getChildren().size());
-        Node<?> lfNode = compositeNode.getChildren().iterator().next();
+        assertNotNull(compositeNode.getValue());
+        assertEquals(1, compositeNode.getValue().size());
+        Node<?> lfNode = compositeNode.getValue().iterator().next();
 
         assertTrue(lfNode instanceof SimpleNode<?>);
         assertEquals(null, ((SimpleNode<?>) lfNode).getValue());
@@ -119,7 +119,7 @@ public class JsonToCnSnTest {
         Throwable cause1 = null;
         try {
             TestUtils
-                    .readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
+            .readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause1 = e;
         }
@@ -134,7 +134,7 @@ public class JsonToCnSnTest {
         Throwable cause2 = null;
         try {
             TestUtils
-                    .readInputToCnSn("/json-to-cnsn/wrong-top-level2.json", true, JsonToCompositeNodeProvider.INSTANCE);
+            .readInputToCnSn("/json-to-cnsn/wrong-top-level2.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause2 = e;
         }
@@ -144,7 +144,7 @@ public class JsonToCnSnTest {
         Throwable cause3 = null;
         try {
             TestUtils
-                    .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
+            .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (WebApplicationException e) {
             cause3 = e;
         }
@@ -170,7 +170,7 @@ public class JsonToCnSnTest {
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
         assertTrue(compositeNode instanceof CompositeNode);
-        List<Node<?>> children = ((CompositeNode) compositeNode).getChildren();
+        List<Node<?>> children = compositeNode.getValue();
         assertEquals(1, children.size());
         assertEquals("lflst2", children.get(0).getNodeType().getLocalName());
         assertEquals("45", children.get(0).getValue());
@@ -190,7 +190,7 @@ public class JsonToCnSnTest {
      * Tests whether namespace <b>stay unchanged</b> if concrete values are
      * present in composite or simple node and if the method for update is
      * called.
-     * 
+     *
      */
     @Test
     public void notSupplyNamespaceIfAlreadySupplied() {
@@ -233,13 +233,13 @@ public class JsonToCnSnTest {
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
-        List<Node<?>> childs = compositeNode.getChildren();
+        List<Node<?>> childs = compositeNode.getValue();
         assertEquals(1, childs.size());
         Node<?> nd = childs.iterator().next();
         assertTrue(nd instanceof CompositeNode);
         assertEquals("cont1", nd.getNodeType().getLocalName());
 
-        childs = ((CompositeNode) nd).getChildren();
+        childs = ((CompositeNode) nd).getValue();
         assertEquals(4, childs.size());
         SimpleNode<?> lf11 = null;
         SimpleNode<?> lf12 = null;
@@ -274,7 +274,7 @@ public class JsonToCnSnTest {
         assertEquals("iden_local", ((QName) lf14.getValue()).getLocalName());
         assertEquals("identity:module", ((QName) lf14.getValue()).getNamespace().toString());
     }
-    
+
     @Ignore
     @Test
     public void loadDataAugmentedSchemaMoreEqualNamesTest() {
@@ -285,17 +285,17 @@ public class JsonToCnSnTest {
         } catch (ResponseException e) {
             exceptionCaught = true;
         }
-        
+
         assertFalse(exceptionCaught);
     }
 
-    private void simpleTest(String jsonPath, String yangPath, String topLevelElementName, String namespace,
-            String moduleName) {
+    private void simpleTest(final String jsonPath, final String yangPath, final String topLevelElementName, final String namespace,
+            final String moduleName) {
         CompositeNode compNode = loadAndNormalizeData(jsonPath, yangPath, topLevelElementName, moduleName);
         verifyCompositeNode(compNode, namespace);
     }
 
-    private CompositeNode loadAndNormalizeData(String jsonPath, String yangPath, String topLevelElementName, String moduleName) {
+    private CompositeNode loadAndNormalizeData(final String jsonPath, final String yangPath, final String topLevelElementName, final String moduleName) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
@@ -312,8 +312,8 @@ public class JsonToCnSnTest {
         return compNode;
     }
 
-    private void verityMultipleItemsInList(CompositeNode compositeNode) {
-        List<Node<?>> childrenNodes = compositeNode.getChildren();
+    private void verityMultipleItemsInList(final CompositeNode compositeNode) {
+        List<Node<?>> childrenNodes = compositeNode.getValue();
         assertEquals(4, childrenNodes.size());
         boolean lf11Found = false;
         boolean cont11Found = false;
@@ -322,7 +322,7 @@ public class JsonToCnSnTest {
             assertEquals("lst1", lst1Item.getNodeType().getLocalName());
             assertTrue(lst1Item instanceof CompositeNode);
 
-            List<Node<?>> childrenLst1 = ((CompositeNode) lst1Item).getChildren();
+            List<Node<?>> childrenLst1 = ((CompositeNode) lst1Item).getValue();
             assertEquals(1, childrenLst1.size());
             String localName = childrenLst1.get(0).getNodeType().getLocalName();
             if (localName.equals("lf11")) {
@@ -338,7 +338,7 @@ public class JsonToCnSnTest {
             } else if (localName.equals("lst11")) {
                 lst11Found = true;
                 assertTrue(childrenLst1.get(0) instanceof CompositeNode);
-                assertEquals(0, ((CompositeNode) childrenLst1.get(0)).getChildren().size());
+                assertEquals(0, ((CompositeNode) childrenLst1.get(0)).getValue().size());
             }
 
         }
@@ -347,7 +347,7 @@ public class JsonToCnSnTest {
         assertTrue(lst11Found);
     }
 
-    private void verifyCompositeNode(CompositeNode compositeNode, String namespace) {
+    private void verifyCompositeNode(final CompositeNode compositeNode, final String namespace) {
         boolean cont1Found = false;
         boolean lst1Found = false;
         boolean lflst1_1Found = false;
@@ -357,16 +357,16 @@ public class JsonToCnSnTest {
         // assertEquals(namespace,
         // compositeNode.getNodeType().getNamespace().toString());
 
-        for (Node<?> node : compositeNode.getChildren()) {
+        for (Node<?> node : compositeNode.getValue()) {
             if (node.getNodeType().getLocalName().equals("cont1")) {
                 if (node instanceof CompositeNode) {
                     cont1Found = true;
-                    assertEquals(0, ((CompositeNode) node).getChildren().size());
+                    assertEquals(0, ((CompositeNode) node).getValue().size());
                 }
             } else if (node.getNodeType().getLocalName().equals("lst1")) {
                 if (node instanceof CompositeNode) {
                     lst1Found = true;
-                    assertEquals(0, ((CompositeNode) node).getChildren().size());
+                    assertEquals(0, ((CompositeNode) node).getValue().size());
                 }
             } else if (node.getNodeType().getLocalName().equals("lflst1")) {
                 if (node instanceof SimpleNode) {

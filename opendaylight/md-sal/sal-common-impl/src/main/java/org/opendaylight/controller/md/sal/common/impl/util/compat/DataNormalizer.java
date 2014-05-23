@@ -92,11 +92,11 @@ public class DataNormalizer {
         }
 
         // Write Augmentation data resolution
-        if (legacyData.getChildren().size() == 1) {
+        if (legacyData.getValue().size() == 1) {
             final DataNormalizationOperation<?> potentialOp;
 
             try {
-                final QName childType = legacyData.getChildren().get(0).getNodeType();
+                final QName childType = legacyData.getValue().get(0).getNodeType();
                 potentialOp = currentOp.getChild(childType);
             } catch (DataNormalizationException e) {
                 throw new IllegalArgumentException(String.format("Failed to get child operation for %s", legacyData), e);
