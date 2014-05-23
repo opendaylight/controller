@@ -39,6 +39,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+/**
+ * Base strategy for applying changes to a ContainerNode, irrespective of its
+ * actual type.
+ *
+ * @param <T> Type of the container node
+ */
 abstract class DataNodeContainerModificationStrategy<T extends DataNodeContainer> extends NormalizedNodeContainerModificationStrategy {
 
     private final T schema;
