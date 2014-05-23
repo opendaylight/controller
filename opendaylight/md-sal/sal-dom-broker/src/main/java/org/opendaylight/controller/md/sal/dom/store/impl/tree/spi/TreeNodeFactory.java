@@ -11,8 +11,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.OrderedNodeContainer;
 
-import com.google.common.primitives.UnsignedLong;
-
 public final class TreeNodeFactory {
     private TreeNodeFactory() {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
@@ -26,7 +24,7 @@ public final class TreeNodeFactory {
      * @param version data node version
      * @return new AbstractTreeNode instance, covering the data tree provided
      */
-    public static final TreeNode createTreeNode(final NormalizedNode<?, ?> data, final UnsignedLong version) {
+    public static final TreeNode createTreeNode(final NormalizedNode<?, ?> data, final Version version) {
         if (data instanceof NormalizedNodeContainer<?, ?, ?>) {
             @SuppressWarnings("unchecked")
             NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> container = (NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>>) data;

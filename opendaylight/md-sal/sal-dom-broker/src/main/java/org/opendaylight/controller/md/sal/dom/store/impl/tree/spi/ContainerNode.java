@@ -18,7 +18,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.OrderedNodeContainer;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.UnsignedLong;
 
 /**
  * A TreeNode capable of holding child nodes. The fact that any of the children
@@ -26,17 +25,17 @@ import com.google.common.primitives.UnsignedLong;
  */
 final class ContainerNode extends AbstractTreeNode {
     private final Map<PathArgument, TreeNode> children;
-    private final UnsignedLong subtreeVersion;
+    private final Version subtreeVersion;
 
-    protected ContainerNode(final NormalizedNode<?, ?> data, final UnsignedLong version,
-            final Map<PathArgument, TreeNode> children, final UnsignedLong subtreeVersion) {
+    protected ContainerNode(final NormalizedNode<?, ?> data, final Version version,
+            final Map<PathArgument, TreeNode> children, final Version subtreeVersion) {
         super(data, version);
         this.children = Preconditions.checkNotNull(children);
         this.subtreeVersion = Preconditions.checkNotNull(subtreeVersion);
     }
 
     @Override
-    public UnsignedLong getSubtreeVersion() {
+    public Version getSubtreeVersion() {
         return subtreeVersion;
     }
 
@@ -52,9 +51,9 @@ final class ContainerNode extends AbstractTreeNode {
 
     private static final class Mutable implements MutableTreeNode {
         private final Map<PathArgument, TreeNode> children;
-        private final UnsignedLong version;
+        private final Version version;
         private NormalizedNode<?, ?> data;
-        private UnsignedLong subtreeVersion;
+        private Version subtreeVersion;
 
         private Mutable(final ContainerNode parent) {
             this.data = parent.getData();
@@ -69,7 +68,7 @@ final class ContainerNode extends AbstractTreeNode {
         }
 
         @Override
-        public void setSubtreeVersion(final UnsignedLong subtreeVersion) {
+        public void setSubtreeVersion(final Version subtreeVersion) {
             this.subtreeVersion = Preconditions.checkNotNull(subtreeVersion);
         }
 
@@ -102,7 +101,8 @@ final class ContainerNode extends AbstractTreeNode {
         }
     }
 
-    private static ContainerNode create(final UnsignedLong version, final NormalizedNode<?, ?> data, final Iterable<NormalizedNode<?, ?>> children) {
+    private static ContainerNode create(final Version version, final NormalizedNode<?, ?> data,
+            final Iterable<NormalizedNode<?, ?>> children) {
         final Map<PathArgument, TreeNode> map = new HashMap<>();
 
         for (NormalizedNode<?, ?> child : children) {
@@ -112,11 +112,11 @@ final class ContainerNode extends AbstractTreeNode {
         return new ContainerNode(data, version, map, version);
     }
 
-    public static ContainerNode create(final UnsignedLong version, final NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> container) {
+    public static ContainerNode create(final Version version, final NormalizedNodeContainer<?, ?, NormalizedNode<?, ?>> container) {
         return create(version, container, container.getValue());
     }
 
-    public static ContainerNode create(final UnsignedLong version, final OrderedNodeContainer<NormalizedNode<?, ?>> container) {
+    public static ContainerNode create(final Version version, final OrderedNodeContainer<NormalizedNode<?, ?>> container) {
         return create(version, container, container.getValue());
     }
 }

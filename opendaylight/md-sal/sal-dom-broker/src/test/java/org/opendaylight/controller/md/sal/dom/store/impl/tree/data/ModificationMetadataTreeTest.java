@@ -30,6 +30,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -41,7 +42,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 /**
  *
@@ -150,7 +150,7 @@ public class ModificationMetadataTreeTest {
     @Test
     public void basicReadWrites() {
         DataTreeModification modificationTree = new InMemoryDataTreeModification(new InMemoryDataTreeSnapshot(schemaContext,
-                TreeNodeFactory.createTreeNode(createDocumentOne(), UnsignedLong.valueOf(5)), applyOper),
+                TreeNodeFactory.createTreeNode(createDocumentOne(), Version.initial()), applyOper),
                 new SchemaAwareApplyOperationRoot(schemaContext));
         Optional<NormalizedNode<?, ?>> originalBarNode = modificationTree.readNode(OUTER_LIST_2_PATH);
         assertTrue(originalBarNode.isPresent());

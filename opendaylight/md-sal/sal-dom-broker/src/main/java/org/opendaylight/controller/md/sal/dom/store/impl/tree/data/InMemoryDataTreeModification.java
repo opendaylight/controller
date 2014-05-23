@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -109,7 +108,7 @@ final class InMemoryDataTreeModification implements DataTreeModification {
 
         try {
             return resolveModificationStrategy(path).apply(modification, modification.getOriginal(),
-                    StoreUtils.increase(snapshot.getRootNode().getSubtreeVersion()));
+                    snapshot.getRootNode().getSubtreeVersion().next());
         } catch (Exception e) {
             LOG.error("Could not create snapshot for {}:{}", path,modification,e);
             throw e;

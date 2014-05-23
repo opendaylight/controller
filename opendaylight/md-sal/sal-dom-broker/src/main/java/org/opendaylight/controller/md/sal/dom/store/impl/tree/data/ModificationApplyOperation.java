@@ -10,11 +10,11 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
-import com.google.common.primitives.UnsignedLong;
 
 /**
  *
@@ -58,7 +58,7 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      *         node, {@link Optional#absent()} if {@link ModifiedNode}
      *         resulted in deletion of this node.
      */
-    Optional<TreeNode> apply(ModifiedNode modification, Optional<TreeNode> storeMeta, UnsignedLong subtreeVersion);
+    Optional<TreeNode> apply(ModifiedNode modification, Optional<TreeNode> storeMeta, Version subtreeVersion);
 
     /**
      *
