@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>runtime</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>..</relativePath>
   </parent>
-  <artifactId>distribution.opendaylight-karaf</artifactId>
+  <artifactId>Controller Runtime :: Runtime Distribution</artifactId>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
@@ -25,7 +25,6 @@
     <!-- scope is runtime so the feature repo is listed in the features
       service config file, and features may be installed using the
       karaf-maven-plugin configuration -->
-    <!-- dependencies commented out till we can get them in
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
@@ -36,21 +35,12 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>controller-features</artifactId>
+      <artifactId>runtime-features</artifactId>
       <version>${project.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>features-file</artifactId>
-      <version>${yangtools.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-  -->
   </dependencies>
 
   <build>
