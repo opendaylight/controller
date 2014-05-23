@@ -25,6 +25,7 @@
     <!-- scope is runtime so the feature repo is listed in the features
       service config file, and features may be installed using the
       karaf-maven-plugin configuration -->
+    <!-- dependencies commented out till we can get them in
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
@@ -34,43 +35,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <!-- scope is compile so all features (there is only one) are installed
-            into startup.properties and the feature repo itself is not installed -->
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>base-features</artifactId>
-      <version>${project.version}</version>
-      <type>kar</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-features</artifactId>
-      <version>${config.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-    <!--<dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>base-features</artifactId>
-      <version>${project.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>-->
-    <!-- <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>controller-features</artifactId>
       <version>${project.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-  -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>mdsal-features</artifactId>
-      <version>${mdsal.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -83,6 +50,7 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
+  -->
   </dependencies>
 
   <build>
@@ -203,29 +171,6 @@
         <configuration>
           <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/configuration\/initial\/</excludes>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <!-- here the phase you need -->
-            <phase>process-resources</phase>
-            <configuration>
-              <outputDirectory>${basedir}/target/assembly</outputDirectory>
-              <overwrite>true</overwrite>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/main/resources</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
