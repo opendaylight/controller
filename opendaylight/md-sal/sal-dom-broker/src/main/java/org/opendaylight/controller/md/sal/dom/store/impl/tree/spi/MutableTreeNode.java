@@ -11,6 +11,11 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+/**
+ * A mutable tree node. This is a transient view materialized from a pre-existing
+ * node. Modifications are isolated. Once this object is {@link #seal()}-ed,
+ * any interactions with it will result in undefined behavior.
+ */
 public interface MutableTreeNode extends StoreTreeNode<TreeNode> {
     void setData(NormalizedNode<?, ?> data);
     void setSubtreeVersion(Version subtreeVersion);
