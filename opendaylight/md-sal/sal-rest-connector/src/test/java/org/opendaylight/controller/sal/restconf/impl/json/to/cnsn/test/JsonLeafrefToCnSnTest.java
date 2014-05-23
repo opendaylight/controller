@@ -7,14 +7,18 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -37,7 +41,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
         SimpleNode<?> lf2 = null;
-        for (Node<?> childNode : compositeNode.getChildren()) {
+        for (Node<?> childNode : compositeNode.getValue()) {
             if (childNode instanceof SimpleNode) {
                 if (childNode.getNodeType().getLocalName().equals("lf2")) {
                     lf2 = (SimpleNode<?>) childNode;
@@ -48,7 +52,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
         assertNotNull(lf2);
         assertTrue(lf2.getValue() instanceof String);
-        assertEquals("121", (String) lf2.getValue());
+        assertEquals("121", lf2.getValue());
 
     }
 

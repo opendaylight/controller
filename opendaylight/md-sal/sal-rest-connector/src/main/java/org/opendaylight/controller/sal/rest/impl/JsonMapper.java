@@ -57,7 +57,7 @@ class JsonMapper {
     private MountInstance mountPoint;
     private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
-    public void write(JsonWriter writer, CompositeNode data, DataNodeContainer schema, MountInstance mountPoint)
+    public void write(final JsonWriter writer, final CompositeNode data, final DataNodeContainer schema, final MountInstance mountPoint)
             throws IOException {
         Preconditions.checkNotNull(writer);
         Preconditions.checkNotNull(data);
@@ -81,12 +81,12 @@ class JsonMapper {
         foundLists.clear();
     }
 
-    private void writeChildrenOfParent(JsonWriter writer, CompositeNode parent, DataNodeContainer parentSchema)
+    private void writeChildrenOfParent(final JsonWriter writer, final CompositeNode parent, final DataNodeContainer parentSchema)
             throws IOException {
         checkNotNull(parent);
         checkNotNull(parentSchema);
 
-        for (Node<?> child : parent.getChildren()) {
+        for (Node<?> child : parent.getValue()) {
             DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
 
             if (childSchema == null) {
@@ -122,17 +122,17 @@ class JsonMapper {
             }
         }
 
-        for (Node<?> child : parent.getChildren()) {
+        for (Node<?> child : parent.getValue()) {
             DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchema.getChildNodes());
             if (childSchema instanceof LeafListSchemaNode) {
-                foundLeafLists.remove((LeafListSchemaNode) childSchema);
+                foundLeafLists.remove(childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
-                foundLists.remove((ListSchemaNode) childSchema);
+                foundLists.remove(childSchema);
             }
         }
     }
 
-    private DataSchemaNode findFirstSchemaForNode(Node<?> node, Set<DataSchemaNode> dataSchemaNode) {
+    private DataSchemaNode findFirstSchemaForNode(final Node<?> node, final Set<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
             if (node.getNodeType().equals(dsn.getQName())) {
                 return dsn;
@@ -148,14 +148,14 @@ class JsonMapper {
         return null;
     }
 
-    private void writeContainer(JsonWriter writer, CompositeNode node, ContainerSchemaNode schema) throws IOException {
+    private void writeContainer(final JsonWriter writer, final CompositeNode node, final ContainerSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
         writer.beginObject();
         writeChildrenOfParent(writer, node, schema);
         writer.endObject();
     }
 
-    private void writeList(JsonWriter writer, CompositeNode nodeParent, CompositeNode node, ListSchemaNode schema)
+    private void writeList(final JsonWriter writer, final CompositeNode nodeParent, final CompositeNode node, final ListSchemaNode schema)
             throws IOException {
         writeName(node, schema, writer);
         writer.beginArray();
@@ -176,8 +176,8 @@ class JsonMapper {
         writer.endArray();
     }
 
-    private void writeLeafList(JsonWriter writer, CompositeNode nodeParent, SimpleNode<?> node,
-            LeafListSchemaNode schema) throws IOException {
+    private void writeLeafList(final JsonWriter writer, final CompositeNode nodeParent, final SimpleNode<?> node,
+            final LeafListSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
         writer.beginArray();
 
@@ -188,13 +188,13 @@ class JsonMapper {
         writer.endArray();
     }
 
-    private void writeLeaf(JsonWriter writer, SimpleNode<?> node, LeafSchemaNode schema) throws IOException {
+    private void writeLeaf(final JsonWriter writer, final SimpleNode<?> node, final LeafSchemaNode schema) throws IOException {
         writeName(node, schema, writer);
         writeValueOfNodeByType(writer, node, schema.getType(), schema);
     }
 
-    private void writeValueOfNodeByType(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> type,
-            DataSchemaNode schema) throws IOException {
+    private void writeValueOfNodeByType(final JsonWriter writer, final SimpleNode<?> node, final TypeDefinition<?> type,
+            final DataSchemaNode schema) throws IOException {
 
         TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(type);
 
@@ -245,7 +245,7 @@ class JsonMapper {
         }
     }
 
-    private void writeIdentityValuesDTOToJson(JsonWriter writer, IdentityValuesDTO valueDTO) throws IOException {
+    private void writeIdentityValuesDTOToJson(final JsonWriter writer, final IdentityValuesDTO valueDTO) throws IOException {
         StringBuilder result = new StringBuilder();
         for (IdentityValue identityValue : valueDTO.getValuesWithNamespaces()) {
             result.append("/");
@@ -271,7 +271,7 @@ class JsonMapper {
         writer.value(result.toString());
     }
 
-    private void writeModuleNameAndIdentifier(StringBuilder result, IdentityValue identityValue) {
+    private void writeModuleNameAndIdentifier(final StringBuilder result, final IdentityValue identityValue) {
         String moduleName = ControllerContext.getInstance().findModuleNameByNamespace(
                 URI.create(identityValue.getNamespace()));
         if (moduleName != null && !moduleName.isEmpty()) {
@@ -281,8 +281,8 @@ class JsonMapper {
         result.append(identityValue.getValue());
     }
 
-    private void writeStringRepresentation(JsonWriter writer, SimpleNode<?> node, TypeDefinition<?> baseType,
-            Class<?> requiredType) throws IOException {
+    private void writeStringRepresentation(final JsonWriter writer, final SimpleNode<?> node, final TypeDefinition<?> baseType,
+            final Class<?> requiredType) throws IOException {
         Object value = node.getValue();
         logger.debug("Value of " + baseType.getQName().getNamespace() + ":" + baseType.getQName().getLocalName()
                 + " is not instance of " + requiredType.getClass() + " but is " + node.getValue().getClass());
@@ -293,13 +293,13 @@ class JsonMapper {
         }
     }
 
-    private void writeEmptyDataTypeToJson(JsonWriter writer) throws IOException {
+    private void writeEmptyDataTypeToJson(final JsonWriter writer) throws IOException {
         writer.beginArray();
         writer.nullValue();
         writer.endArray();
     }
 
-    private void writeName(Node<?> node, DataSchemaNode schema, JsonWriter writer) throws IOException {
+    private void writeName(final Node<?> node, final DataSchemaNode schema, final JsonWriter writer) throws IOException {
         String nameForOutput = node.getNodeType().getLocalName();
         if (schema.isAugmenting()) {
             ControllerContext contContext = ControllerContext.getInstance();
@@ -323,7 +323,7 @@ class JsonMapper {
         private static final long serialVersionUID = -3147729419814417666L;
         private final String value;
 
-        public NumberForJsonWriter(String value) {
+        public NumberForJsonWriter(final String value) {
             this.value = value;
         }
 

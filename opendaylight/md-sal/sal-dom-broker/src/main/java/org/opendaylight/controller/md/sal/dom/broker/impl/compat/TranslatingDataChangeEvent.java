@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import com.google.common.collect.Maps;
 
 public abstract class TranslatingDataChangeEvent implements
-        DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
+DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
 
     private TranslatingDataChangeEvent() {
     }
@@ -98,7 +98,6 @@ public abstract class TranslatingDataChangeEvent implements
         return null;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private final static class OperationalChangeEvent extends TranslatingDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> delegate;
@@ -106,7 +105,7 @@ public abstract class TranslatingDataChangeEvent implements
         private Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedCache;
 
         public OperationalChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change,
-                                        final DataNormalizer normalizer) {
+                final DataNormalizer normalizer) {
             this.delegate = change;
             this.normalizer = normalizer;
         }
@@ -179,7 +178,7 @@ public abstract class TranslatingDataChangeEvent implements
         private Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedCache;
 
         public ConfigurationChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change,
-                                        final DataNormalizer normalizer) {
+                final DataNormalizer normalizer) {
             this.delegate = change;
             this.normalizer = normalizer;
         }

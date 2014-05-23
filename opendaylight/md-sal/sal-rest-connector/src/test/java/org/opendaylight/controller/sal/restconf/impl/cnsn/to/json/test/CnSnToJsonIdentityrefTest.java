@@ -73,17 +73,17 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(mtch.matches());
     }
 
-    private CompositeNode prepareCompositeNode(Object value) {
+    private CompositeNode prepareCompositeNode(final Object value) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont","identityref:module","2013-12-2"), null, null,
                 ModifyAction.CREATE, null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont1","identityref:module","2013-12-2"), cont, null,
                 ModifyAction.CREATE, null);
-        cont.getChildren().add(cont1);
+        cont.getValue().add(cont1);
 
         MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1","identityref:module","2013-12-2"), cont1, value,
                 ModifyAction.CREATE, null);
 
-        cont1.getChildren().add(lf1);
+        cont1.getValue().add(lf1);
         cont1.init();
         cont.init();
 

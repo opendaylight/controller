@@ -18,15 +18,18 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 /**
- * 
+ *
  * CnSn = Composite node and Simple node data structure Class contains test of
  * serializing simple nodes data values according data types from YANG schema to
  * XML file
- * 
+ *
  */
 public class CnSnToXmlWithChoiceTest extends YangAndXmlAndDataSchemaLoader {
     @BeforeClass
@@ -56,13 +59,13 @@ public class CnSnToXmlWithChoiceTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private CompositeNode prepareCnStructForYangData(String lfName, Object data) {
+    private CompositeNode prepareCnStructForYangData(final String lfName, final Object data) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
                 ModifyAction.CREATE, null);
 
         MutableSimpleNode<Object> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName(lfName), cont, data,
                 ModifyAction.CREATE, null);
-        cont.getChildren().add(lf1);
+        cont.getValue().add(lf1);
         cont.init();
 
         return cont;

@@ -99,32 +99,32 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
 
         MutableCompositeNode cont_m1 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont_m1", uri1, rev1), data, null, null, null);
-        data.getChildren().add(cont_m1);
+        data.getValue().add(cont_m1);
 
         MutableSimpleNode<?> lf1_m1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1_m1", uri1, rev1),
                 cont_m1, "lf1 m1 value", null, null);
-        cont_m1.getChildren().add(lf1_m1);
+        cont_m1.getValue().add(lf1_m1);
         cont_m1.init();
 
         MutableCompositeNode contB_m1 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("contB_m1", uri1, rev1), data, null, null, null);
-        data.getChildren().add(contB_m1);
+        data.getValue().add(contB_m1);
         contB_m1.init();
 
         String uri2 = "module:two";
         String rev2 = "2014-01-17";
         MutableCompositeNode cont_m2 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont_m2", uri2, rev2), data, null, null, null);
-        data.getChildren().add(cont_m2);
+        data.getValue().add(cont_m2);
 
         MutableSimpleNode<?> lf1_m2 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1_m2", uri2, rev2),
                 cont_m1, "lf1 m2 value", null, null);
-        cont_m2.getChildren().add(lf1_m2);
+        cont_m2.getValue().add(lf1_m2);
         cont_m2.init();
 
         MutableCompositeNode contB_m2 = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("contB_m2", uri2, rev2), data, null, null, null);
-        data.getChildren().add(contB_m2);
+        data.getValue().add(contB_m2);
         contB_m2.init();
 
         data.init();

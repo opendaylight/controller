@@ -63,7 +63,7 @@ public class InvokeRpcMethodTest {
 
     private class AnswerImpl implements Answer<RpcResult<CompositeNode>> {
         @Override
-        public RpcResult<CompositeNode> answer(InvocationOnMock invocation) throws Throwable {
+        public RpcResult<CompositeNode> answer(final InvocationOnMock invocation) throws Throwable {
             CompositeNode compNode = (CompositeNode) invocation.getArguments()[1];
             return new DummyRpcResult.Builder<CompositeNode>().result(compNode).isSuccessful(true).build();
         }
@@ -123,7 +123,7 @@ public class InvokeRpcMethodTest {
                 TestUtils.buildQName("cont", "nmspc", "2013-12-04"), null, null, ModifyAction.CREATE, null);
         MutableSimpleNode<?> lf = NodeFactory.createMutableSimpleNode(
                 TestUtils.buildQName("lf", "nmspc", "2013-12-04"), cont, "any value", ModifyAction.CREATE, null);
-        cont.getChildren().add(lf);
+        cont.getValue().add(lf);
         cont.init();
 
         return cont;
@@ -150,7 +150,7 @@ public class InvokeRpcMethodTest {
         } catch (ResponseException e) {
             assertEquals(e.getMessage(),
                     Status.INTERNAL_SERVER_ERROR.getStatusCode(), e
-                            .getResponse().getStatus());
+                    .getResponse().getStatus());
         }
     }
 
@@ -216,7 +216,7 @@ public class InvokeRpcMethodTest {
         } catch (ResponseException e) {
             assertEquals(e.getMessage(),
                     Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), e
-                            .getResponse().getStatus());
+                    .getResponse().getStatus());
         }
     }
 
@@ -273,8 +273,8 @@ public class InvokeRpcMethodTest {
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
-                        eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)testOutput")),
-                        any( CompositeNode.class ))).thenReturn(rpcResult);
+                eq(QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)testOutput")),
+                any( CompositeNode.class ))).thenReturn(rpcResult);
 
         restconfImpl.setBroker(brokerFacade);
 
@@ -301,7 +301,7 @@ public class InvokeRpcMethodTest {
 
         MountInstance mockMountPoint = mock( MountInstance.class );
         when( mockMountPoint.rpc( eq( cancelToastQName ), any( CompositeNode.class ) ) )
-                                                                        .thenReturn( mockListener );
+        .thenReturn( mockListener );
 
         InstanceIdWithSchemaNode mockedInstanceId = mock( InstanceIdWithSchemaNode.class );
         when( mockedInstanceId.getMountPoint() ).thenReturn( mockMountPoint );
@@ -315,8 +315,8 @@ public class InvokeRpcMethodTest {
 
         restconfImpl.setControllerContext( mockedContext );
         StructuredData output = restconfImpl.invokeRpc(
-               "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/toaster:cancel-toast",
-               "");
+                "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/toaster:cancel-toast",
+                "");
         assertEquals(null, output);
 
         //additional validation in the fact that the restconfImpl does not throw an exception.

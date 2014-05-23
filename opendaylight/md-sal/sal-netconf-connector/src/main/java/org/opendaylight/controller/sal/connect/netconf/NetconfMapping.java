@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,8 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Nullable;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
@@ -41,10 +37,15 @@ import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 public class NetconfMapping {
 
@@ -91,7 +92,7 @@ public class NetconfMapping {
 
     static AtomicInteger messageId = new AtomicInteger(0);
 
-    static Node<?> toFilterStructure(InstanceIdentifier identifier) {
+    static Node<?> toFilterStructure(final InstanceIdentifier identifier) {
         Node<?> previous = null;
         if (identifier.getPath().isEmpty()) {
             return null;
@@ -108,7 +109,7 @@ public class NetconfMapping {
         return filter("subtree", previous);
     }
 
-    static Node<?> toNode(NodeIdentifierWithPredicates argument, Node<?> node) {
+    static Node<?> toNode(final NodeIdentifierWithPredicates argument, final Node<?> node) {
         List<Node<?>> list = new ArrayList<>();
         for (Map.Entry<QName, Object> arg : argument.getKeyValues().entrySet()) {
             list.add(new SimpleNodeTOImpl(arg.getKey(), null, arg.getValue()));
@@ -119,7 +120,7 @@ public class NetconfMapping {
         return new CompositeNodeTOImpl(argument.getNodeType(), null, list);
     }
 
-    static Node<?> toNode(PathArgument argument, Node<?> node) {
+    static Node<?> toNode(final PathArgument argument, final Node<?> node) {
         if (node != null) {
             return new CompositeNodeTOImpl(argument.getNodeType(), null, Collections.<Node<?>> singletonList(node));
         } else {
@@ -127,14 +128,14 @@ public class NetconfMapping {
         }
     }
 
-    static CompositeNode toCompositeNode(NetconfMessage message, Optional<SchemaContext> ctx) {
+    static CompositeNode toCompositeNode(final NetconfMessage message, final Optional<SchemaContext> ctx) {
         // TODO: implement general normalization to normalize incoming Netconf
         // Message
         // for Schema Context counterpart
         return null;
     }
 
-    static CompositeNode toNotificationNode(NetconfMessage message, Optional<SchemaContext> ctx) {
+    static CompositeNode toNotificationNode(final NetconfMessage message, final Optional<SchemaContext> ctx) {
         if (ctx.isPresent()) {
             SchemaContext schemaContext = ctx.get();
             Set<NotificationDefinition> notifications = schemaContext.getNotifications();
@@ -144,7 +145,7 @@ public class NetconfMapping {
         return null;
     }
 
-    static NetconfMessage toRpcMessage(QName rpc, CompositeNode node, Optional<SchemaContext> ctx) {
+    static NetconfMessage toRpcMessage(final QName rpc, final CompositeNode node, final Optional<SchemaContext> ctx) {
         CompositeNodeTOImpl rpcPayload = wrap(NETCONF_RPC_QNAME, flattenInput(node));
         Document w3cPayload = null;
         try {
@@ -164,8 +165,8 @@ public class NetconfMapping {
         if (input instanceof CompositeNode) {
 
             List<Node<?>> nodes = ImmutableList.<Node<?>> builder() //
-                    .addAll(input.getChildren()) //
-                    .addAll(Collections2.filter(node.getChildren(), new Predicate<Node<?>>() {
+                    .addAll(input.getValue()) //
+                    .addAll(Collections2.filter(node.getValue(), new Predicate<Node<?>>() {
                         @Override
                         public boolean apply(@Nullable final Node<?> input) {
                             return input.getNodeType() != inputQName;
@@ -179,7 +180,7 @@ public class NetconfMapping {
         return input;
     }
 
-    static RpcResult<CompositeNode> toRpcResult(NetconfMessage message, final QName rpc, Optional<SchemaContext> context) {
+    static RpcResult<CompositeNode> toRpcResult(final NetconfMessage message, final QName rpc, final Optional<SchemaContext> context) {
         CompositeNode rawRpc;
         if (context.isPresent())
             if (isDataRetrieQNameReply(rpc)) {
@@ -196,7 +197,7 @@ public class NetconfMapping {
                 rawRpc = it.toInstance();
                 // sys(xmlData)
             } else {
-                rawRpc = (CompositeNode) toCompositeNode(message, context);
+                rawRpc = toCompositeNode(message, context);
             }
         else {
             rawRpc = (CompositeNode) toCompositeNode(message.getDocument());
@@ -205,17 +206,17 @@ public class NetconfMapping {
         return Rpcs.getRpcResult(true, rawRpc, Collections.<RpcError> emptySet());
     }
 
-    static Element getDataSubtree(Document doc) {
+    static Element getDataSubtree(final Document doc) {
         return (Element) doc.getElementsByTagNameNS(NETCONF_URI.toString(), "data").item(0);
     }
 
-    static boolean isDataRetrieQNameReply(QName it) {
+    static boolean isDataRetrieQNameReply(final QName it) {
         return NETCONF_URI == it.getNamespace()
                 && (it.getLocalName() == NETCONF_GET_CONFIG_QNAME.getLocalName() || it.getLocalName() == NETCONF_GET_QNAME
-                        .getLocalName());
+                .getLocalName());
     }
 
-    static CompositeNodeTOImpl wrap(QName name, Node<?> node) {
+    static CompositeNodeTOImpl wrap(final QName name, final Node<?> node) {
         if (node != null) {
             return new CompositeNodeTOImpl(name, null, Collections.<Node<?>> singletonList(node));
         } else {
@@ -223,7 +224,7 @@ public class NetconfMapping {
         }
     }
 
-    static CompositeNodeTOImpl wrap(QName name, Node<?> additional, Node<?> node) {
+    static CompositeNodeTOImpl wrap(final QName name, final Node<?> additional, final Node<?> node) {
         if (node != null) {
             return new CompositeNodeTOImpl(name, null, ImmutableList.of(additional, node));
         } else {
@@ -231,7 +232,7 @@ public class NetconfMapping {
         }
     }
 
-    static ImmutableCompositeNode filter(String type, Node<?> node) {
+    static ImmutableCompositeNode filter(final String type, final Node<?> node) {
         CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder(); //
         it.setQName(NETCONF_FILTER_QNAME);
         it.setAttribute(NETCONF_TYPE_QNAME, type);
@@ -242,11 +243,11 @@ public class NetconfMapping {
         }
     }
 
-    public static Node<?> toCompositeNode(Document document) {
+    public static Node<?> toCompositeNode(final Document document) {
         return XmlDocumentUtils.toDomNode(document);
     }
 
-    public static void checkValidReply(NetconfMessage input, NetconfMessage output) {
+    public static void checkValidReply(final NetconfMessage input, final NetconfMessage output) {
         String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
         String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
 
@@ -257,7 +258,7 @@ public class NetconfMapping {
         }
     }
 
-    public static void checkSuccessReply(NetconfMessage output) throws NetconfDocumentedException {
+    public static void checkSuccessReply(final NetconfMessage output) throws NetconfDocumentedException {
         if(NetconfMessageUtil.isErrorMessage(output)) {
             throw new IllegalStateException(String.format("Response contains error: %s", XmlUtil.toString(output.getDocument())));
         }

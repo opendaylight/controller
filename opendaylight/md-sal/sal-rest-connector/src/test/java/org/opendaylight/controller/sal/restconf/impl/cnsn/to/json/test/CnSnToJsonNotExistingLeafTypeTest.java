@@ -27,6 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
         String jsonOutput = null;
         jsonOutput = TestUtils
                 .writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                        Collections.EMPTY_SET, prepareDataSchemaNode(),
+                        Collections.<Module>emptySet(), prepareDataSchemaNode(),
                         StructuredDataToJsonProvider.INSTANCE);
         assertNotNull(jsonOutput);
         assertTrue(jsonOutput.contains("\"lf1\": \"\""));
@@ -57,7 +58,7 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
                 TestUtils.buildQName("cont", "simple:uri", "2012-12-17"), null, null, ModifyAction.CREATE, null);
         MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(
                 TestUtils.buildQName("lf1", "simple:uri", "2012-12-17"), cont, "any value", ModifyAction.CREATE, null);
-        cont.getChildren().add(lf1);
+        cont.getValue().add(lf1);
         cont.init();
         return cont;
     }
