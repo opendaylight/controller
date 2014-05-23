@@ -16,6 +16,9 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.DataNodeContainerModificationStrategy.ListEntryModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafSetEntryModificationStrategy;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.MutableTreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
@@ -42,6 +45,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.UnsignedLong;
 
 abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareApplyOperation {
@@ -53,18 +57,18 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
     }
 
     @Override
-    public void verifyStructure(final NodeModification modification) throws IllegalArgumentException {
-        if (modification.getModificationType() == ModificationType.WRITE) {
+    public void verifyStructure(final ModifiedNode modification) throws IllegalArgumentException {
+        if (modification.getType() == ModificationType.WRITE) {
 
         }
-        for (NodeModification childModification : modification.getModifications()) {
+        for (ModifiedNode childModification : modification.getChildren()) {
             resolveChildOperation(childModification.getIdentifier()).verifyStructure(childModification);
         }
     }
 
     @Override
     protected void checkWriteApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
+            final Optional<TreeNode> current) throws DataPreconditionFailedException {
         // FIXME: Implement proper write check for replacement of node container
         //        prerequisite is to have transaction chain available for clients
         //        otherwise this will break chained writes to same node.
@@ -90,94 +94,110 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
     }
 
     @Override
-    protected StoreMetadataNode applyWrite(final NodeModification modification,
-            final Optional<StoreMetadataNode> currentMeta, final UnsignedLong subtreeVersion) {
-
-        NormalizedNode<?, ?> newValue = modification.getWrittenValue();
-
+    protected TreeNode applyWrite(final ModifiedNode modification,
+            final Optional<TreeNode> currentMeta, final UnsignedLong subtreeVersion) {
         final UnsignedLong nodeVersion;
         if (currentMeta.isPresent()) {
-            nodeVersion = StoreUtils.increase(currentMeta.get().getNodeVersion());
+            nodeVersion = StoreUtils.increase(currentMeta.get().getVersion());
         } else {
             nodeVersion = subtreeVersion;
         }
 
-        final StoreMetadataNode newValueMeta = StoreMetadataNode.createRecursively(newValue, nodeVersion);
-        if (!modification.hasAdditionalModifications()) {
+        final NormalizedNode<?, ?> newValue = modification.getWrittenValue();
+        final TreeNode newValueMeta = TreeNodeFactory.createTreeNode(newValue, nodeVersion);
+
+        if (Iterables.isEmpty(modification.getChildren())) {
             return newValueMeta;
         }
 
-        @SuppressWarnings("rawtypes")
-        NormalizedNodeContainerBuilder dataBuilder = createBuilder(newValue);
-        StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.create(nodeVersion, dataBuilder) //
-                .setSubtreeVersion(subtreeVersion);
+        /*
+         * This is where things get interesting. The user has performed a write and
+         * then she applied some more modifications to it. So we need to make sense
+         * of that an apply the operations on top of the written value. We could have
+         * done it during the write, but this operation is potentially expensive, so
+         * we have left it out of the fast path.
+         *
+         * As it turns out, once we materialize the written data, we can share the
+         * code path with the subtree change. So let's create an unsealed TreeNode
+         * and run the common parts on it -- which end with the node being sealed.
+         */
+        final MutableTreeNode mutable = newValueMeta.mutable();
+        mutable.setSubtreeVersion(subtreeVersion);
 
-        return mutateChildren(modification.getModifications(), newValueMeta, builder, nodeVersion);
+        @SuppressWarnings("rawtypes")
+        final NormalizedNodeContainerBuilder dataBuilder = createBuilder(newValue);
+
+        return mutateChildren(mutable, dataBuilder, nodeVersion, modification.getChildren());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private TreeNode mutateChildren(final MutableTreeNode meta, final NormalizedNodeContainerBuilder data,
+            final UnsignedLong nodeVersion, final Iterable<ModifiedNode> modifications) {
+
+        for (ModifiedNode mod : modifications) {
+            final PathArgument id = mod.getIdentifier();
+            final Optional<TreeNode> cm = meta.getChild(id);
+
+            Optional<TreeNode> result = resolveChildOperation(id).apply(mod, cm, nodeVersion);
+            if (result.isPresent()) {
+                final TreeNode tn = result.get();
+                meta.addChild(tn);
+                data.addChild(tn.getData());
+            } else {
+                meta.removeChild(id);
+                data.removeChild(id);
+            }
+        }
+
+        meta.setData(data.build());
+        return meta.seal();
     }
 
     @Override
-    protected StoreMetadataNode applyMerge(final NodeModification modification, final StoreMetadataNode currentMeta,
+    protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
             final UnsignedLong subtreeVersion) {
         // For Node Containers - merge is same as subtree change - we only replace children.
         return applySubtreeChange(modification, currentMeta, subtreeVersion);
     }
 
     @Override
-    public StoreMetadataNode applySubtreeChange(final NodeModification modification,
-            final StoreMetadataNode currentMeta, final UnsignedLong subtreeVersion) {
+    public TreeNode applySubtreeChange(final ModifiedNode modification,
+            final TreeNode currentMeta, final UnsignedLong subtreeVersion) {
         // Bump subtree version to its new target
         final UnsignedLong updatedSubtreeVersion = StoreUtils.increase(currentMeta.getSubtreeVersion());
 
+        final MutableTreeNode newMeta = currentMeta.mutable();
+        newMeta.setSubtreeVersion(updatedSubtreeVersion);
+
         @SuppressWarnings("rawtypes")
         NormalizedNodeContainerBuilder dataBuilder = createBuilder(currentMeta.getData());
-        StoreNodeCompositeBuilder builder = StoreNodeCompositeBuilder.create(dataBuilder, currentMeta)
-                .setIdentifier(modification.getIdentifier())
-                .setSubtreeVersion(updatedSubtreeVersion);
 
-        return mutateChildren(modification.getModifications(), currentMeta, builder, updatedSubtreeVersion);
-    }
-
-    private StoreMetadataNode mutateChildren(final Iterable<NodeModification> modifications, final StoreMetadataNode meta,
-            final StoreNodeCompositeBuilder builder, final UnsignedLong nodeVersion) {
-
-        for (NodeModification mod : modifications) {
-            final PathArgument id = mod.getIdentifier();
-            final Optional<StoreMetadataNode> cm = meta.getChild(id);
-
-            Optional<StoreMetadataNode> result = resolveChildOperation(id).apply(mod, cm, nodeVersion);
-            if (result.isPresent()) {
-                builder.add(result.get());
-            } else {
-                builder.remove(id);
-            }
-        }
-
-        return builder.build();
+        return mutateChildren(newMeta, dataBuilder, updatedSubtreeVersion, modification.getChildren());
     }
 
     @Override
-    protected void checkSubtreeModificationApplicable(final InstanceIdentifier path,final NodeModification modification,
-            final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
+    protected void checkSubtreeModificationApplicable(final InstanceIdentifier path, final NodeModification modification,
+            final Optional<TreeNode> current) throws DataPreconditionFailedException {
         checkDataPrecondition(path, current.isPresent(), "Node was deleted by other transaction.");
-        checkChildPreconditions(path,modification,current);
-
+        checkChildPreconditions(path, modification, current);
     }
 
-    private void checkChildPreconditions(final InstanceIdentifier path, final NodeModification modification, final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
-        StoreMetadataNode currentMeta = current.get();
-        for (NodeModification childMod : modification.getModifications()) {
-            PathArgument childId = childMod.getIdentifier();
-            Optional<StoreMetadataNode> childMeta = currentMeta.getChild(childId);
+    private void checkChildPreconditions(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+        final TreeNode currentMeta = current.get();
+        for (NodeModification childMod : modification.getChildren()) {
+            final PathArgument childId = childMod.getIdentifier();
+            final Optional<TreeNode> childMeta = currentMeta.getChild(childId);
+
             InstanceIdentifier childPath = StoreUtils.append(path, childId);
-            resolveChildOperation(childId).checkApplicable(childPath,childMod, childMeta);
+            resolveChildOperation(childId).checkApplicable(childPath, childMod, childMeta);
         }
     }
 
     @Override
     protected void checkMergeApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<StoreMetadataNode> current) throws DataPreconditionFailedException {
+            final Optional<TreeNode> current) throws DataPreconditionFailedException {
         if(current.isPresent()) {
-            checkChildPreconditions(path,modification,current);
+            checkChildPreconditions(path, modification,current);
         }
     }
 

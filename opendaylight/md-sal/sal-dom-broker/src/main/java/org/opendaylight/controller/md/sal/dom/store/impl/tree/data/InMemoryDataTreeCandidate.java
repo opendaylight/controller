@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidateNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -13,38 +14,42 @@ import com.google.common.collect.Iterables;
 
 final class InMemoryDataTreeCandidate extends AbstractDataTreeCandidate {
     private static abstract class AbstractNode implements DataTreeCandidateNode {
-        private final StoreMetadataNode newMeta;
-        private final StoreMetadataNode oldMeta;
-        private final NodeModification mod;
+        private final ModifiedNode mod;
+        private final TreeNode newMeta;
+        private final TreeNode oldMeta;
 
-        protected AbstractNode(final NodeModification mod,
-                final StoreMetadataNode oldMeta, final StoreMetadataNode newMeta) {
+        protected AbstractNode(final ModifiedNode mod,
+                final TreeNode oldMeta, final TreeNode newMeta) {
             this.newMeta = newMeta;
             this.oldMeta = oldMeta;
             this.mod = Preconditions.checkNotNull(mod);
         }
 
-        protected final NodeModification getMod() {
+        protected final ModifiedNode getMod() {
             return mod;
         }
 
-        protected final StoreMetadataNode getNewMeta() {
+        protected final TreeNode getNewMeta() {
             return newMeta;
         }
 
-        protected final StoreMetadataNode getOldMeta() {
+        protected final TreeNode getOldMeta() {
             return oldMeta;
         }
 
-        private static final StoreMetadataNode childMeta(final StoreMetadataNode parent, final PathArgument id) {
-            return parent == null ? null : parent.getChild(id).orNull();
+        private static final TreeNode childMeta(final TreeNode parent, final PathArgument id) {
+            if (parent != null) {
+                return parent.getChild(id).orNull();
+            } else {
+                return null;
+            }
         }
 
         @Override
         public Iterable<DataTreeCandidateNode> getChildNodes() {
-            return Iterables.transform(mod.getModifications(), new Function<NodeModification, DataTreeCandidateNode>() {
+            return Iterables.transform(mod.getChildren(), new Function<ModifiedNode, DataTreeCandidateNode>() {
                 @Override
-                public DataTreeCandidateNode apply(final NodeModification input) {
+                public DataTreeCandidateNode apply(final ModifiedNode input) {
                     final PathArgument id = input.getIdentifier();
                     return new ChildNode(input, childMeta(oldMeta, id), childMeta(newMeta, id));
                 }
@@ -53,14 +58,15 @@ final class InMemoryDataTreeCandidate extends AbstractDataTreeCandidate {
 
         @Override
         public ModificationType getModificationType() {
-            return mod.getModificationType();
+            return mod.getType();
         }
 
-        private Optional<NormalizedNode<?, ?>> optionalData(StoreMetadataNode meta) {
-            if (meta == null) {
+        private Optional<NormalizedNode<?, ?>> optionalData(final TreeNode meta) {
+            if (meta != null) {
+                return Optional.<NormalizedNode<?,?>>of(meta.getData());
+            } else {
                 return Optional.absent();
             }
-            return Optional.<NormalizedNode<?,?>>of(meta.getData());
         }
 
         @Override
@@ -75,7 +81,7 @@ final class InMemoryDataTreeCandidate extends AbstractDataTreeCandidate {
     }
 
     private static final class ChildNode extends AbstractNode {
-        public ChildNode(NodeModification mod, StoreMetadataNode oldMeta, StoreMetadataNode newMeta) {
+        public ChildNode(final ModifiedNode mod, final TreeNode oldMeta, final TreeNode newMeta) {
             super(mod, oldMeta, newMeta);
         }
 
@@ -86,7 +92,7 @@ final class InMemoryDataTreeCandidate extends AbstractDataTreeCandidate {
     }
 
     private static final class RootNode extends AbstractNode {
-        public RootNode(NodeModification mod, StoreMetadataNode oldMeta, StoreMetadataNode newMeta) {
+        public RootNode(final ModifiedNode mod, final TreeNode oldMeta, final TreeNode newMeta) {
             super(mod, oldMeta, newMeta);
         }
 
@@ -98,17 +104,17 @@ final class InMemoryDataTreeCandidate extends AbstractDataTreeCandidate {
 
     private final RootNode root;
 
-    InMemoryDataTreeCandidate(final InstanceIdentifier rootPath, final NodeModification modificationRoot,
-            final StoreMetadataNode oldRoot, final StoreMetadataNode newRoot) {
+    InMemoryDataTreeCandidate(final InstanceIdentifier rootPath, final ModifiedNode modificationRoot,
+            final TreeNode beforeRoot, final TreeNode afterRoot) {
         super(rootPath);
-        this.root = new RootNode(modificationRoot, oldRoot, newRoot);
+        this.root = new RootNode(modificationRoot, beforeRoot, afterRoot);
     }
 
-    StoreMetadataNode getAfterRoot() {
+    TreeNode getAfterRoot() {
         return root.getNewMeta();
     }
 
-    StoreMetadataNode getBeforeRoot() {
+    TreeNode getBeforeRoot() {
         return root.getOldMeta();
     }
 
