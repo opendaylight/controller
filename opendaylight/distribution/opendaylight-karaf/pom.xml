@@ -47,6 +47,13 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>extras-features</artifactId>
+      <version>${project.version}</version>
+      <type>kar</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-features</artifactId>
       <version>${config.version}</version>
       <classifier>features</classifier>
