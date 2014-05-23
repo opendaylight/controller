@@ -63,6 +63,7 @@
     <compiler.version>2.3.2</compiler.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
+    <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
@@ -112,10 +113,13 @@
     <karaf.branding.version>1.0.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
+    <leveldb.version>0.7</leveldb.version>
+    <leveldbjni.version>1.8</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
+    <mimepull.version>1.9.4</mimepull.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
@@ -129,6 +133,8 @@
     <northbound.jolokia.version>1.4.2-SNAPSHOT</northbound.jolokia.version>
     <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
     <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
+    <parboiled.version>1.1.6</parboiled.version>
+    <parboiled.scala.version>1.1.6</parboiled.scala.version>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
     <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
@@ -143,8 +149,10 @@
     <samples.loadbalancer.northbound.version>0.4.2-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.4.2-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
-    <scala.version>2.11</scala.version>
+    <scala.version>2.10</scala.version>
+    <scala.micro.version>4</scala.micro.version>
     <security.version>0.4.2-SNAPSHOT</security.version>
+    <shapeless.version>1.2.4</shapeless.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <sonar.branch>${user.name}-private-view</sonar.branch>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
@@ -152,6 +160,8 @@
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
+    <spray.version>1.3.1</spray.version>
+    <spray.json.version>1.2.6</spray.json.version>
     <statistics.northbound.version>0.4.2-SNAPSHOT</statistics.northbound.version>
     <statisticsmanager.implementation.version>0.4.2-SNAPSHOT</statisticsmanager.implementation.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>

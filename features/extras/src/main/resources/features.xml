@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="extras-features-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+
+   <feature name="osgi-compendium" description="OSGi compendium feature" version="${osgi.version}" resolver="(obr)">
+      <bundle start-level="10">mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
+   </feature>
+
+   <feature name="runtime-scala" description="Scala Runtime for OpenDaylight" version="${scala.version}" resolver="(obr)" start-level="10">
+      <bundle>mvn:org.scala-lang/scala-library/${scala.version}.${scala.micro.version}</bundle>
+      <bundle>mvn:org.scala-lang/scala-reflect/${scala.version}.${scala.micro.version}</bundle>
+   </feature>
+
+   <feature name="runtime-akka-system" description="Akka Actor Framework System Bundles" version="${akka.version}" resolver="(obr)" start-level="15">
+      <feature version="${scala.version}">runtime-scala</feature>
+      <bundle dependency="true">mvn:com.typesafe/config/${typesafe.config.version}</bundle>
+      <bundle dependency="true">mvn:com.typesafe.akka/akka-actor_${scala.version}/${akka.version}</bundle>
+      <bundle dependency="true">mvn:com.typesafe.akka/akka-slf4j_${scala.version}/${akka.version}</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-osgi_${scala.version}/${akka.version}</bundle>
+   </feature>
+
+   <feature name="runtime-akka-clustering" description="Akka Clustering Support" version="${akka.version}" resolver="(obr)" start-level="20">
+      <feature version="${akka.version}">runtime-akka-system</feature>
+      <bundle dependency="true">wrap:mvn:org.uncommons.maths/uncommons-maths/${uncommons.maths.version}</bundle>
+      <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+      <bundle dependency="true">mvn:io.netty/netty/${netty.version}</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-remote_${scala.version}/${akka.version}</bundle>
+      <bundle>mvn:com.typesafe.akka/akka-cluster_${scala.version}/${akka.version}</bundle>
+   </feature>
+
+   <feature name='runtime-leveldb' description='LevelDB feature' version='0.7' resolver='(obr)'>
+      <bundle start-level="20">wrap:mvn:org.iq80.leveldb/leveldb/${leveldb.version}</bundle>
+      <bundle start-level="20">wrap:mvn:org.fusesource.leveldbjni/leveldbjni-all/${leveldbjni.version}</bundle>
+   </feature>
+
+  <feature name="runtime-akka-spray" description="Akka Spray (REST) Support" version="${spray.version}" resolver="(obr)" start-level="50">
+    <feature version="${akka.version}">runtime-akka-system</feature>
+    <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_3.0_spec/1.0</bundle>
+    <bundle>wrap:mvn:com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/${concurrentlinkedhashmap.version}</bundle>
+    <bundle>mvn:org.jvnet.mimepull/mimepull/${mimepull.version}</bundle>
+    <bundle>mvn:org.parboiled/parboiled-core/${parboiled.version}</bundle>
+    <bundle>mvn:org.parboiled/parboiled-scala_${scala.version}/${parboiled.version}</bundle>
+    <bundle>wrap:mvn:com.chuusai/shapeless_${scala.version}/${shapeless.version}</bundle>
+    <bundle>mvn:io.spray/spray-util/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-http/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-httpx/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-servlet/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-caching/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-io/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-can/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-routing/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-client/${spray.version}</bundle>
+    <bundle>mvn:io.spray/spray-json_${scala.version}/${spray.json.version}</bundle>
+  </feature>
+
+</features>
