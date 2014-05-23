@@ -23,6 +23,7 @@
         <feature version='${yangtools.version}'>yangtools-binding</feature>
         <feature version='${mdsal.version}'>odl-mdsal-commons</feature>
         <feature version='${config.version}'>odl-config-subsystem</feature>
+        <feature version='${ctrie-map.version}'>base-ctrie-map</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>

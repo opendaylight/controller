@@ -58,6 +58,10 @@
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.github.romix</groupId>
+      <artifactId>java-concurrent-hash-trie-map</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.google.code.gson</groupId>

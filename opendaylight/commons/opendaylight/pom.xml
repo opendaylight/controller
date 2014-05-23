@@ -49,6 +49,7 @@
     <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
     <controllermanager.northbound.version>0.0.2-SNAPSHOT</controllermanager.northbound.version>
     <corsfilter.version>7.0.42</corsfilter.version>
+    <ctrie.version>0.2.0</ctrie.version>
     <devices.web.version>0.4.2-SNAPSHOT</devices.web.version>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <!-- enforcer version -->
@@ -241,6 +242,11 @@
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.github.romix</groupId>
+        <artifactId>java-concurrent-hash-trie-map</artifactId>
+        <version>${ctrie.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
         <version>${jsr305.api.version}</version>
@@ -255,6 +261,7 @@
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
+
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-client</artifactId>

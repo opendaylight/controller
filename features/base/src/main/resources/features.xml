@@ -147,4 +147,7 @@
       <bundle>mvn:org.springframework.security/spring-security-taglibs/${spring-security.version}</bundle>
       <bundle>mvn:org.springframework.security/spring-security-web/${spring-security.version}</bundle>
    </feature>
+   <feature name="base-ctrie-map" description="OpenDaylight Concurrent Trie Map support" version="${ctrie.version}">
+      <bundle>mvn:com.github.romix/java-concurrent-hash-trie-map/${ctrie.version}</bundle>
+    </feature>
 </features>
