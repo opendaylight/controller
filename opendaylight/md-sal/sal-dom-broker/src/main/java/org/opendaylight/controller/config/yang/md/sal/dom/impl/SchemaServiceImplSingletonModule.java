@@ -16,12 +16,16 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
 *
 */
 public final class SchemaServiceImplSingletonModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModule {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaServiceImplSingletonModule.class);
 
     BundleContext bundleContext;
 
@@ -83,28 +87,41 @@ public final class SchemaServiceImplSingletonModule extends
         public void close() throws Exception {
             if (delegate != null) {
                 delegate = null;
-                bundleContext.ungetService(reference);
+
+                try {
+                    bundleContext.ungetService(reference);
+                } catch (IllegalStateException e) {
+                    // Indicates the service was already unregistered which can happen normally
+                    // on shutdown.
+                    LOG.debug( "Error unregistering service", e );
+                }
+
                 reference = null;
                 bundleContext = null;
             }
         }
 
+        @Override
         public void addModule(Module arg0) {
             delegate.addModule(arg0);
         }
 
+        @Override
         public SchemaContext getGlobalContext() {
             return delegate.getGlobalContext();
         }
 
+        @Override
         public SchemaContext getSessionContext() {
             return delegate.getSessionContext();
         }
 
+        @Override
         public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener arg0) {
             return delegate.registerSchemaServiceListener(arg0);
         }
 
+        @Override
         public void removeModule(Module arg0) {
             delegate.removeModule(arg0);
         }
