@@ -68,6 +68,10 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.romix</groupId>
+      <artifactId>java-concurrent-hash-trie-map</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
     </dependency>
