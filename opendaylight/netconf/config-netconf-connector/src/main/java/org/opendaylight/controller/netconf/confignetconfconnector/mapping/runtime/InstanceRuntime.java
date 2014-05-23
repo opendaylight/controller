@@ -80,10 +80,7 @@ public class InstanceRuntime {
                 if (on.getKeyPropertyList().size() != keyListSize + 1){
                     return false;
                 }
-                if (!on.getKeyPropertyList().containsKey(string)){
-                    return false;
-                }
-                return true;
+                return on.getKeyPropertyList().containsKey(string);
             }
         }));
     }
@@ -94,7 +91,7 @@ public class InstanceRuntime {
 
     public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, String instanceIndex,
                          Element parentElement, String namespace) {
-        Element xml = instanceMapping.toXml(rootOn, null, namespace, document, parentElement);
+        Element xml = instanceMapping.toXml(rootOn, namespace, document, parentElement);
 
         if (instanceIndex != null) {
             xml.setAttribute(KEY_ATTRIBUTE_KEY, instanceIndex);

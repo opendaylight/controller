@@ -9,25 +9,19 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime;
 
 import com.google.common.collect.Sets;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.management.ObjectName;
 import java.util.Collection;
 import java.util.Set;
+import javax.management.ObjectName;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class ModuleRuntime {
 
     private final InstanceRuntime instanceRuntime;
 
-    public ModuleRuntime(String moduleName, InstanceRuntime instanceRuntime) {
+    public ModuleRuntime(InstanceRuntime instanceRuntime) {
         this.instanceRuntime = instanceRuntime;
-    }
-
-    public InstanceRuntime getMbeanMapping() {
-        return instanceRuntime;
     }
 
     private ObjectName findRoot(Collection<ObjectName> runtimeBeanOns) {
@@ -40,15 +34,16 @@ public class ModuleRuntime {
     }
 
     public Element toXml(String namespace, Collection<ObjectName> runtimeBeanOns,
-                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON, ServiceRegistryWrapper serviceTracker) {
+                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON) {
 
-        Element moduleElement = moduleConfig.toXml(configBeanON, serviceTracker, document, namespace);
+        Element moduleElement = moduleConfig.toXml(configBeanON, document, namespace);
 
         ObjectName rootName = findRoot(runtimeBeanOns);
 
         Set<ObjectName> childrenRuntimeBeans = Sets.newHashSet(runtimeBeanOns);
         childrenRuntimeBeans.remove(rootName);
 
+        // FIXME: why is this called and not used?
         instanceRuntime.toXml(rootName, childrenRuntimeBeans, document, moduleElement, namespace);
 
         return moduleElement;

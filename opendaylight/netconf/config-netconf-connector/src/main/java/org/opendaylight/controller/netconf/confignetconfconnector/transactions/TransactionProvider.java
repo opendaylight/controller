@@ -156,17 +156,16 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     public void wipeTestTransaction(ObjectName taON) {
-        wipeInternal(taON, true, null);
+        wipeInternal(taON, true);
     }
 
     /**
      * Wiping means removing all module instances keeping the transaction open + service references.
      */
-    synchronized void wipeInternal(ObjectName taON, boolean isTest, String moduleName) {
+    synchronized void wipeInternal(ObjectName taON, boolean isTest) {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
 
-        Set<ObjectName> lookupConfigBeans = moduleName == null ? transactionClient.lookupConfigBeans()
-                : transactionClient.lookupConfigBeans(moduleName);
+        Set<ObjectName> lookupConfigBeans = transactionClient.lookupConfigBeans();
         int i = lookupConfigBeans.size();
         for (ObjectName instance : lookupConfigBeans) {
             try {
@@ -190,7 +189,7 @@ public class TransactionProvider implements AutoCloseable {
     public void wipeTransaction() {
         Optional<ObjectName> taON = getTransaction();
         Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
-        wipeInternal(taON.get(), false, null);
+        wipeInternal(taON.get(), false);
     }
 
 }

@@ -194,33 +194,33 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         edit("netconfMessages/editConfig.xml");
         Document config = getConfigCandidate();
-        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1"));
 
 
         edit("netconfMessages/editConfig_addServiceName.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         edit("netconfMessages/editConfig_addServiceNameOnTest.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         commit();
         config = getConfigRunning();
         assertCorrectRefNamesForDependencies(config);
-        assertCorrectServiceNames(config, Sets.newHashSet("ref_test2", "user_to_instance_from_code", "ref_dep_user",
+        assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
 
         edit("netconfMessages/editConfig_replace_default.xml");
         config = getConfigCandidate();
-        assertCorrectServiceNames(config, Sets.newHashSet("ref_dep", "ref_dep2"));
+        assertCorrectServiceNames(config, Collections.<String>emptySet());
 
         edit("netconfMessages/editConfig_remove.xml");
         config = getConfigCandidate();
@@ -259,8 +259,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         nt.performTest(tester, Node.TEXT_NODE);
     }
 
-    private void assertCorrectServiceNames(Document configCandidate, final Set<String> refNames) throws NodeTestException {
-
+    private void assertCorrectServiceNames(Document configCandidate, Set<String> refNames) throws NodeTestException {
+        final Set<String> refNames2 = new HashSet<>(refNames);
         NodeList servicesNodes = configCandidate.getElementsByTagName("services");
         assertEquals(1, servicesNodes.getLength());
 
@@ -272,9 +272,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 if(element.getNodeName() != null) {
                     if(element.getNodeName().equals("name")) {
                         String elmText = element.getTextContent();
-                        if(refNames.contains(elmText)) {
-                            refNames.remove(elmText);
-                            return;
+                        if(refNames2.contains(elmText)) {
+                            refNames2.remove(elmText);
                         } else {
                             throw new NodeTestException("Unexpected services defined: " + elmText);
                         }
@@ -284,7 +283,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
             @Override
             public void noMoreNodes(NodeTest forTest) throws NodeTestException {
-                assertTrue(refNames.isEmpty());
+                assertEquals(Collections.<String>emptySet(), refNames2);
+                assertTrue(refNames2.toString(), refNames2.isEmpty());
             }
         };
         nt.performTest(tester, Node.ELEMENT_NODE);
@@ -688,7 +688,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private Document get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
-        Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID, transactionProvider);
+        Get getOp = new Get(yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getOp, "netconfMessages/get.xml");
     }
 

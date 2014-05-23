@@ -50,7 +50,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     private final Map<String /* service qName */, ServiceInterfaceAnnotation> serviceQNamesToAnnotations;
     // all Service Interface qNames for sanity checking
     private final Set<String /* qName */> allQNames;
-    Map<ModuleIdentifier, Map<String /* service ref name */, ServiceInterfaceAnnotation >> modulesToServiceRef = new HashMap<>();
+    Map<ModuleIdentifier, Map<ServiceInterfaceAnnotation, String /* service ref name */>> modulesToServiceRef = new HashMap<>();
 
 
     // actual reference database
@@ -241,8 +241,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public Map<String /* service ref */, ServiceInterfaceAnnotation> findServiceInterfaces(ModuleIdentifier moduleIdentifier) {
-        Map<String, ServiceInterfaceAnnotation> result = modulesToServiceRef.get(moduleIdentifier);
+    public Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(ModuleIdentifier moduleIdentifier) {
+        Map<ServiceInterfaceAnnotation, String /* service ref name */> result = modulesToServiceRef.get(moduleIdentifier);
         if (result == null) {
             return Collections.emptyMap();
         }
@@ -417,7 +417,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
         // save to refNames
         refNames.put(serviceReference, moduleIdentifier);
-        Map<String, ServiceInterfaceAnnotation> refNamesToAnnotations = modulesToServiceRef.get(moduleIdentifier);
+        Map<ServiceInterfaceAnnotation, String /* service ref name */> refNamesToAnnotations = modulesToServiceRef.get(moduleIdentifier);
         if (refNamesToAnnotations == null){
             refNamesToAnnotations = new HashMap<>();
             modulesToServiceRef.put(moduleIdentifier, refNamesToAnnotations);
@@ -425,7 +425,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
         ServiceInterfaceAnnotation annotation = serviceQNamesToAnnotations.get(serviceReference.getServiceInterfaceQName());
         checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);
-        refNamesToAnnotations.put(serviceReference.getRefName(), annotation);
+        refNamesToAnnotations.put(annotation, serviceReference.getRefName());
         return result;
     }
 

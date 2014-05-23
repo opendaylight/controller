@@ -359,7 +359,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
 
             // register services to OSGi
-            Map<String, ServiceInterfaceAnnotation> annotationMapping = configTransactionController.getWritableRegistry().findServiceInterfaces(moduleIdentifier);
+            Map<ServiceInterfaceAnnotation, String /* service ref name */> annotationMapping = configTransactionController.getWritableRegistry().findServiceInterfaces(moduleIdentifier);
             BundleContext bc = configTransactionController.getModuleFactoryBundleContext(
                     entry.getModuleFactory().getImplementationName());
             if (osgiRegistration == null) {

@@ -11,7 +11,12 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -34,13 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.management.ObjectName;
-import javax.management.openmbean.OpenType;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 public final class InstanceConfig {
     private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
 
@@ -54,10 +52,10 @@ public final class InstanceConfig {
         this.configRegistryClient = configRegistryClient;
     }
 
-    private Map<String, Object> getMappedConfiguration(ObjectName on, ServiceRegistryWrapper depTracker) {
+    private Map<String, Object> getMappedConfiguration(ObjectName on) {
 
         // TODO make field, mappingStrategies can be instantiated only once
-        Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> mappingStrategies = new ObjectMapper(depTracker)
+        Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> mappingStrategies = new ObjectMapper()
                 .prepareMapping(jmxToAttrConfig);
 
         Map<String, Object> toXml = Maps.newHashMap();
@@ -84,24 +82,22 @@ public final class InstanceConfig {
         return toXml;
     }
 
-    public Element toXml(ObjectName on, ServiceRegistryWrapper depTracker, String namespace, Document document, Element rootElement) {
-
-        Element cfgElement = rootElement;
+    public Element toXml(ObjectName on, String namespace, Document document, Element rootElement) {
 
         Map<String, AttributeWritingStrategy> strats = new ObjectXmlWriter().prepareWriting(yangToAttrConfig, document);
 
-        Map<String, Object> mappedConfig = getMappedConfiguration(on, depTracker);
+        Map<String, Object> mappedConfig = getMappedConfiguration(on);
 
         for (Entry<String, ?> mappingEntry : mappedConfig.entrySet()) {
             try {
-                strats.get(mappingEntry.getKey()).writeElement(cfgElement, namespace, mappingEntry.getValue());
+                strats.get(mappingEntry.getKey()).writeElement(rootElement, namespace, mappingEntry.getValue());
             } catch (Exception e) {
                 throw new IllegalStateException("Unable to write value " + mappingEntry.getValue() + " for attribute "
                         + mappingEntry.getValue(), e);
             }
         }
 
-        return cfgElement;
+        return rootElement;
     }
 
     private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, ServiceRegistryWrapper depTracker) {
@@ -129,14 +125,15 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
-                                                 EditStrategyType defaultStrategy, Multimap<String, String> providedServices, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
+                                                 EditStrategyType defaultStrategy,
+                                                 Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        XmlElement type = null;
-        XmlElement name = null;
+        XmlElement type;
+        XmlElement name;
         type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
         name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
         List<XmlElement> typeAndName = Lists.newArrayList(type, name);
@@ -156,7 +153,7 @@ public final class InstanceConfig {
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
         InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
-                retVal, defaultStrategy, providedServices) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy, providedServices);
+                retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
         resolveConfiguration(instanceConfigElementResolved, services);
         return instanceConfigElementResolved;

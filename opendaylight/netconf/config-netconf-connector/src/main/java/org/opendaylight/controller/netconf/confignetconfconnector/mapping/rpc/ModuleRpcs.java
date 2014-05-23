@@ -56,11 +56,4 @@ public final class ModuleRpcs {
         return rpc;
     }
 
-    public Map<String, String> getYangToJavaNames() {
-        return yangToJavaNames;
-    }
-
-    public Map<String, Map<String, InstanceRuntimeRpc>> getRpcMapping() {
-        return rpcMapping;
-    }
 }
