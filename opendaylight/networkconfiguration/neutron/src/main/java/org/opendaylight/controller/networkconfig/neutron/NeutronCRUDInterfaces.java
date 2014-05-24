@@ -36,4 +36,14 @@ public class NeutronCRUDInterfaces {
         INeutronFloatingIPCRUD answer = (INeutronFloatingIPCRUD) ServiceHelper.getGlobalInstance(INeutronFloatingIPCRUD.class, o);
         return answer;
     }
+
+    public static INeutronSecurityGroupCRUD getINeutronSecurityGroupCRUD(Object o) {
+        INeutronSecurityGroupCRUD answer = (INeutronSecurityGroupCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityGroupCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronSecurityRuleCRUD getINeutronSecurityRuleCRUD(Object o) {
+        INeutronSecurityRuleCRUD answer = (INeutronSecurityRuleCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityRuleCRUD.class, o);
+        return answer;
+    }
 }
