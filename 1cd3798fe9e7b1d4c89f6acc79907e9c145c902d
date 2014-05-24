@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_51a9d0dd",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "It would be good to avoid all these formatting changes.\nFew reasons for such request. \n1. It is unrelated to the Security group changes.\n2. As a reviewer and any future reference to these patches, it is too distracting and might result in inadvertent mistakes.",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_11ab48d7",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityGroupInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "I know it is not specific to your fix. And no change needed now.\nBut it is confusing to see an Interface in the name but it is a Class and not an Interface.\nThis is true for all the \"Interface\" classes in this Implementation package. \nWe should fix it at later point in time.",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b1b93c30",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityGroupInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Copy + Paste error ? Please change HostTracker to SecurityGroups :)",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d1b40037",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityGroupInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Did you mean Existing ?",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_91867864",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityRuleInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Do we really need these logs ?\nWe can always use the OSGI\u003e dm command to find out all the declared dependencies being resolved, etc...\nThis comment applies for all other places such debugs are used that were not so useful at runtime.",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_317d2c6f",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityRuleInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5180f045",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/src/main/java/org/opendaylight/controller/networkconfig/neutron/implementation/NeutronSecurityRuleInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d18ba066",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronSecurityGroupsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-24T14:21:05Z",
+      "side": 1,
+      "message": "Seriously ? Are you sure ? ;)",
+      "revId": "1cd3798fe9e7b1d4c89f6acc79907e9c145c902d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
