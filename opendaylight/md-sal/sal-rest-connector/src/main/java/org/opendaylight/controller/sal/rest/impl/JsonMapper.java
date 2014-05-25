@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -122,6 +123,13 @@ class JsonMapper {
                 Preconditions.checkState(child instanceof SimpleNode<?>,
                         "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
                 writeLeaf(writer, (SimpleNode<?>) child, (LeafSchemaNode) childSchema);
+            } else if (childSchema instanceof AnyXmlSchemaNode) {
+                if( child instanceof CompositeNode ) {
+                    writeContainer(writer, (CompositeNode) child, null);
+                }
+                else {
+                    handleNoSchemaFound( writer, child, parent );
+                }
             } else {
                 throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode, ListSchemaNode, "
                         + "LeafListSchemaNode, or LeafSchemaNode. Other types are not supported yet.");
