@@ -29,15 +29,14 @@
 	<lfunion3>55</lfunion3>
 	<lfunion4>true</lfunion4>
 	<lfunion5>true</lfunion5>
-	<lfunion6>false</lfunion6>
+	<lfunion6>10</lfunion6>
 	<lfunion7></lfunion7>
 	<lfunion8></lfunion8>
 	<lfunion9></lfunion9>
 	<lfunion10>bt1</lfunion10>
 	<lfunion11>33</lfunion11>
 	<lfunion12>false</lfunion12>
-	<lfunion13>44</lfunion13>
-	<lfunion14>21</lfunion14>
-	<lfempty />
+	<lfunion13>b1</lfunion13>
+	<lfunion14>zero</lfunion14>
 	<identityref1 xmlns:x="simple:data:types">x:iden</identityref1>
 </cont>
