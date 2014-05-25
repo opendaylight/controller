@@ -56,6 +56,6 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         Response response = target("/config/number:cont").request(MediaType.APPLICATION_XML).put(
                 Entity.entity("<cont xmlns=\"number\"><lf>3f</lf></cont>", MediaType.APPLICATION_XML));
         String exceptionMessage = response.readEntity(String.class);
-        assertTrue(exceptionMessage.contains("Incorrect lexical representation of Integer value: 3f"));
+        assertTrue(exceptionMessage.contains("invalid-value"));
     }
 }
