@@ -34,6 +34,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -612,6 +613,52 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
+    private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
+
+        protected AnyXmlNormalization( NodeIdentifier identifier ) {
+            super( identifier );
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild( PathArgument child ) throws DataNormalizationException {
+            return null;
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild( QName child ) throws DataNormalizationException {
+            return null;
+        }
+
+        @Override
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        public NormalizedNode<?, ?> normalize( Node<?> legacyData ) {
+
+            if( legacyData instanceof CompositeNode ) {
+                NormalizedNodeContainerBuilder builder =
+                        Builders.containerBuilder().withNodeIdentifier(
+                                                    new NodeIdentifier( legacyData.getNodeType() ) );
+                for( Node<?> childLegacy : ((CompositeNode) legacyData).getValue() ) {
+                    builder.addChild( normalize( childLegacy ) );
+                }
+
+                return builder.build();
+            }
+            else {
+                return ImmutableNodes.leafNode( legacyData.getNodeType(), legacyData.getValue() );
+            }
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault( PathArgument currentArg ) {
+            return null;
+        }
+    }
+
     private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
         DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
@@ -712,6 +759,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return new ChoiceNodeNormalization((org.opendaylight.yangtools.yang.model.api.ChoiceNode) potential);
         } else if (potential instanceof LeafListSchemaNode) {
             return fromLeafListSchemaNode((LeafListSchemaNode) potential);
+        } else if (potential instanceof AnyXmlSchemaNode) {
+            return new AnyXmlNormalization( new NodeIdentifier(potential.getQName() ) );
         }
         return null;
     }
