@@ -116,6 +116,41 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
 
     }
 
+    static class ComplexAnyXmlVerifier extends LeafVerifier {
+
+        ComplexAnyXmlVerifier() {
+            super( null, JsonToken.BEGIN_OBJECT );
+        }
+
+        @Override
+        void verify( JsonReader reader, String keyName ) throws IOException {
+
+            reader.beginObject();
+            String innerKey = reader.nextName();
+            assertEquals( "Json reader child key for " + keyName, "data-inner", innerKey );
+            assertEquals( "Json token type for key " + innerKey, JsonToken.BEGIN_OBJECT, reader.peek() );
+
+            reader.beginObject();
+            String nextName = reader.nextName();
+            assertEquals( "Json reader child key for " + innerKey, "data-inner1", nextName );
+            assertEquals( "Json token type for key " + innerKey, JsonToken.STRING, reader.peek() );
+            assertEquals( "Json value for key " + nextName, "data1", reader.nextString() );
+
+            nextName = reader.nextName();
+            assertEquals( "Json reader child key for " + innerKey, "data-inner2", nextName );
+            assertEquals( "Json token type for key " + innerKey, JsonToken.STRING, reader.peek() );
+            assertEquals( "Json value for key " + nextName, "data2", reader.nextString() );
+
+            reader.endObject();
+            reader.endObject();
+        }
+
+        @Override
+        Object getActualValue( JsonReader reader ) throws IOException {
+            return null;
+        }
+    }
+
     @BeforeClass
     public static void initialize() {
         dataLoad("/cnsn-to-json/simple-data-types");
@@ -208,6 +243,9 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
         expectedMap.put( "lfunion14", new StringVerifier( "zero" ) );
         expectedMap.put( "lfempty", new EmptyVerifier() );
         expectedMap.put( "identityref1", new StringVerifier( "simple-data-types:iden" ) );
+        expectedMap.put( "complex-any", new ComplexAnyXmlVerifier() );
+        expectedMap.put( "simple-any", new StringVerifier( "simple" ) );
+        expectedMap.put( "empty-any", new StringVerifier( "" ) );
 
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
