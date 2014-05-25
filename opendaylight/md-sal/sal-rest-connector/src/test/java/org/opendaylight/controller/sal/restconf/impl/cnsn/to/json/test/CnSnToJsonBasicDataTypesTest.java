@@ -11,28 +11,110 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
+import com.google.common.collect.Maps;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
 public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader {
+
+    static abstract class LeafVerifier {
+
+        Object expectedValue;
+        JsonToken expectedToken;
+
+        LeafVerifier( Object expectedValue, JsonToken expectedToken ) {
+            this.expectedValue = expectedValue;
+            this.expectedToken = expectedToken;
+        }
+
+        abstract Object getActualValue( JsonReader reader ) throws IOException;
+
+        void verify( JsonReader reader, String keyName ) throws IOException {
+            assertEquals( "Json value for key " + keyName, expectedValue, getActualValue( reader ) );
+        }
+
+        JsonToken expectedTokenType() {
+            return expectedToken;
+        }
+    }
+
+    static class BooleanVerifier extends LeafVerifier {
+
+        public BooleanVerifier( boolean expected ) {
+            super( expected, JsonToken.BOOLEAN );
+        }
+
+        @Override
+        Object getActualValue( JsonReader reader ) throws IOException {
+            return reader.nextBoolean();
+        }
+    }
+
+    static class NumberVerifier extends LeafVerifier {
+
+        public NumberVerifier( Number expected ) {
+            super( expected, JsonToken.NUMBER );
+        }
+
+        @Override
+        Object getActualValue( JsonReader reader ) throws IOException {
+            if( expectedValue instanceof Double ) {
+                return reader.nextDouble();
+            }
+            else if( expectedValue instanceof Long ) {
+                return reader.nextLong();
+            }
+            else if( expectedValue instanceof Integer ) {
+                return reader.nextInt();
+            }
+
+            return null;
+        }
+    }
+
+    static class StringVerifier extends LeafVerifier {
+
+        StringVerifier( String expected ) {
+            super( expected, JsonToken.STRING );
+        }
+
+        @Override
+        Object getActualValue( JsonReader reader ) throws IOException {
+            return reader.nextString();
+        }
+    }
+
+    static class EmptyVerifier extends LeafVerifier {
+
+        EmptyVerifier() {
+            super( null, null );
+        }
+
+        @Override
+        Object getActualValue( JsonReader reader ) throws IOException {
+            reader.beginArray();
+            reader.nextNull();
+            reader.endArray();
+            return null;
+        }
+
+    }
 
     @BeforeClass
     public static void initialize() {
@@ -40,20 +122,16 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
     }
 
     @Test
-    public void simpleYangDataTest() {
+    public void simpleYangDataTest() throws Exception {
 
         CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
 
-        String jsonOutput = null;
-
         TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
 
-        try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+        String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
-        } catch (WebApplicationException | IOException e) {
-        }
+
         assertNotNull(jsonOutput);
 
         verifyJsonOutput(jsonOutput);
@@ -88,167 +166,84 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
 
     private void jsonReadContElements(JsonReader jReader) throws IOException {
         jReader.beginObject();
-        List<String> loadedLfs = new ArrayList<>();
-        boolean enumChecked = false;
-        boolean bitsChecked = false;
-        boolean lfdecimal6Checked = false;
-        boolean lfdecimal4Checked = false;
-        boolean lfdecimal3Checked = false;
-        boolean lfdecimal2Checked = false;
-        boolean lfdecimal1Checked = false;
-        boolean lfbool1Checked = false;
-        boolean lfbool2Checked = false;
-        boolean lfstrChecked = false;
-        boolean lfbinaryChecked = false;
-        boolean lfemptyChecked = false;
-        boolean lfstr1Checked = false;
-        boolean lfidentityrefChecked = false;
+
+        Map<String,LeafVerifier> expectedMap = Maps.newHashMap();
+        expectedMap.put( "lfnint8Min", new NumberVerifier( Integer.valueOf( -128 ) ) );
+        expectedMap.put( "lfnint8Max", new NumberVerifier( Integer.valueOf( 127 ) ) );
+        expectedMap.put( "lfnint16Min", new NumberVerifier( Integer.valueOf( -32768 ) ) );
+        expectedMap.put( "lfnint16Max", new NumberVerifier( Integer.valueOf( 32767 ) ) );
+        expectedMap.put( "lfnint32Min", new NumberVerifier( Integer.valueOf( -2147483648 ) ) );
+        expectedMap.put( "lfnint32Max", new NumberVerifier( Long.valueOf( 2147483647 ) ) );
+        expectedMap.put( "lfnint64Min", new NumberVerifier( Long.valueOf( -9223372036854775808L ) ) );
+        expectedMap.put( "lfnint64Max", new NumberVerifier( Long.valueOf( 9223372036854775807L ) ) );
+        expectedMap.put( "lfnuint8Max", new NumberVerifier( Integer.valueOf( 255 ) ) );
+        expectedMap.put( "lfnuint16Max", new NumberVerifier( Integer.valueOf( 65535 ) ) );
+        expectedMap.put( "lfnuint32Max", new NumberVerifier( Long.valueOf( 4294967295L ) ) );
+        expectedMap.put( "lfstr", new StringVerifier( "lfstr" ) );
+        expectedMap.put( "lfstr1", new StringVerifier( "" ) );
+        expectedMap.put( "lfbool1", new BooleanVerifier( true ) );
+        expectedMap.put( "lfbool2", new BooleanVerifier( false ) );
+        expectedMap.put( "lfbool3", new BooleanVerifier( false ) );
+        expectedMap.put( "lfdecimal1", new NumberVerifier( new Double( 43.32 ) ) );
+        expectedMap.put( "lfdecimal2", new NumberVerifier( new Double( -0.43 ) ) );
+        expectedMap.put( "lfdecimal3", new NumberVerifier( new Double( 43 ) ) );
+        expectedMap.put( "lfdecimal4", new NumberVerifier( new Double( 43E3 ) ) );
+        expectedMap.put( "lfdecimal6", new NumberVerifier( new Double( 33.12345 ) ) );
+        expectedMap.put( "lfenum", new StringVerifier( "enum3" ) );
+        expectedMap.put( "lfbits", new StringVerifier( "bit3 bit2" ) );
+        expectedMap.put( "lfbinary", new StringVerifier( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" ) );
+        expectedMap.put( "lfunion1", new StringVerifier( "324" ) );
+        expectedMap.put( "lfunion2", new StringVerifier( "33.3" ) );
+        expectedMap.put( "lfunion3", new StringVerifier( "55" ) );
+        expectedMap.put( "lfunion4", new StringVerifier( "true" ) );
+        expectedMap.put( "lfunion5", new StringVerifier( "true" ) );
+        expectedMap.put( "lfunion6", new StringVerifier( "10" ) );
+        expectedMap.put( "lfunion7", new StringVerifier( "" ) );
+        expectedMap.put( "lfunion8", new StringVerifier( "" ) );
+        expectedMap.put( "lfunion9", new StringVerifier( "" ) );
+        expectedMap.put( "lfunion10", new StringVerifier( "bt1" ) );
+        expectedMap.put( "lfunion11", new StringVerifier( "33" ) );
+        expectedMap.put( "lfunion12", new StringVerifier( "false" ) );
+        expectedMap.put( "lfunion13", new StringVerifier( "b1" ) );
+        expectedMap.put( "lfunion14", new StringVerifier( "zero" ) );
+        expectedMap.put( "lfempty", new EmptyVerifier() );
+        expectedMap.put( "identityref1", new StringVerifier( "simple-data-types:iden" ) );
 
         while (jReader.hasNext()) {
             String keyName = jReader.nextName();
-            JsonToken peek = null;
-            try {
-                peek = jReader.peek();
-            } catch (IOException e) {
-                assertTrue("Key " + keyName + " has incorrect value for specifed type", false);
+            JsonToken peek = jReader.peek();
+
+            LeafVerifier verifier = expectedMap.remove( keyName );
+            assertNotNull( "Found unexpected leaf: " + keyName , verifier );
+
+            JsonToken expToken = verifier.expectedTokenType();
+            if( expToken != null ) {
+                assertEquals( "Json token type for key " + keyName, expToken, peek );
             }
 
-            if (keyName.startsWith("lfnint") || keyName.startsWith("lfnuint")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                try {
-                    jReader.nextLong();
-                } catch (NumberFormatException e) {
-                    assertTrue("Key " + keyName + " has incorrect value - " + e.getMessage(), false);
-                }
-                loadedLfs.add(keyName.substring(3));
-            } else if (keyName.equals("identityref1")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-                assertEquals("simple-data-types:iden", jReader.nextString());
-                lfidentityrefChecked = true;
-            } else if (keyName.equals("lfstr")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-                assertEquals("lfstr", jReader.nextString());
-                lfstrChecked = true;
-            } else if (keyName.equals("lfstr1")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-                assertEquals("", jReader.nextString());
-                lfstr1Checked = true;
-            } else if (keyName.equals("lfbool1")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
-                assertEquals(true, jReader.nextBoolean());
-                lfbool1Checked = true;
-            } else if (keyName.equals("lfbool2")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
-                assertEquals(false, jReader.nextBoolean());
-                lfbool2Checked = true;
-            } else if (keyName.equals("lfbool3")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.BOOLEAN, peek);
-                assertEquals(false, jReader.nextBoolean());
-            } else if (keyName.equals("lfdecimal1")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                assertEquals(new Double(43.32), (Double) jReader.nextDouble());
-                lfdecimal1Checked = true;
-            } else if (keyName.equals("lfdecimal2")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                assertEquals(new Double(-0.43), (Double) jReader.nextDouble());
-                lfdecimal2Checked = true;
-            } else if (keyName.equals("lfdecimal3")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                assertEquals(new Double(43), (Double) jReader.nextDouble());
-                lfdecimal3Checked = true;
-            } else if (keyName.equals("lfdecimal4")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                assertEquals(new Double(43E3), (Double) jReader.nextDouble());
-                lfdecimal4Checked = true;
-            } else if (keyName.equals("lfdecimal6")) {
-                assertEquals("Key " + keyName + " has incorrect type", JsonToken.NUMBER, peek);
-                assertEquals(new Double(33.12345), (Double) jReader.nextDouble());
-                lfdecimal6Checked = true;
-            } else if (keyName.equals("lfenum")) {
-                assertEquals("enum3", jReader.nextString());
-                enumChecked = true;
-            } else if (keyName.equals("lfbits")) {
-                assertEquals("bit3 bit2", jReader.nextString());
-                bitsChecked = true;
-            } else if (keyName.equals("lfbinary")) {
-                assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", jReader.nextString());
-                lfbinaryChecked = true;
-            } else if (keyName.equals("lfempty")) {
-                jReader.beginArray();
-                jReader.nextNull();
-                jReader.endArray();
-                lfemptyChecked = true;
-            } else if (keyName.startsWith("lfunion")) {
-                checkLfUnion(jReader, keyName, peek);
-            } else {
-                assertTrue("Key " + keyName + " doesn't exists in yang file.", false);
-            }
-
+            verifier.verify( jReader, keyName );;
         }
-        Collections.sort(loadedLfs);
-        String expectedLfsStr = "[int16Max, int16Min, int32Max, int32Min, int64Max, int64Min, int8Max, int8Min, uint16Max, uint32Max, uint8Max]";
-        String actualLfsStr = loadedLfs.toString();
-        assertEquals("Some leaves are missing", expectedLfsStr, actualLfsStr);
-        assertTrue("Enum wasn't checked", enumChecked);
-        assertTrue("Bits wasn't checked", bitsChecked);
-        assertTrue("Decimal1 wasn't checked", lfdecimal1Checked);
-        assertTrue("Decimal2 wasn't checked", lfdecimal2Checked);
-        assertTrue("Decimal3 wasn't checked", lfdecimal3Checked);
-        assertTrue("Decimal4 wasn't checked", lfdecimal4Checked);
-        assertTrue("Decimal5 wasn't checked", lfdecimal6Checked);
-        assertTrue("lfbool1 wasn't checked", lfbool1Checked);
-        assertTrue("lfbool2 wasn't checked", lfbool2Checked);
-        assertTrue("lfstr wasn't checked", lfstrChecked);
-        assertTrue("lfstr1 wasn't checked", lfstr1Checked);
-        assertTrue("lfbinary wasn't checked", lfbinaryChecked);
-        assertTrue("lfempty wasn't checked", lfemptyChecked);
-        assertTrue("lfidentityref wasn't checked", lfidentityrefChecked);
+
+        if( !expectedMap.isEmpty() ) {
+            fail( "Missing leaf nodes in Json output: " +expectedMap.keySet() );
+        }
+
         jReader.endObject();
     }
 
-    private void checkLfUnion(JsonReader jReader, String keyName, JsonToken peek) throws IOException {
-        if (keyName.equals("lfunion1")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("324", jReader.nextString());
-        } else if (keyName.equals("lfunion2")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("33.3", jReader.nextString());
-        } else if (keyName.equals("lfunion3")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("55", jReader.nextString());
-        } else if (keyName.equals("lfunion4")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("true", jReader.nextString());
-        } else if (keyName.equals("lfunion5")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("true", jReader.nextString());
-        } else if (keyName.equals("lfunion6")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("false", jReader.nextString());
-        } else if (keyName.equals("lfunion7")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("", jReader.nextString());
-        } else if (keyName.equals("lfunion8")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("", jReader.nextString());
-        } else if (keyName.equals("lfunion9")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("", jReader.nextString());
-        } else if (keyName.equals("lfunion10")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("bt1", jReader.nextString());
-        } else if (keyName.equals("lfunion11")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("33", jReader.nextString());
-        } else if (keyName.equals("lfunion12")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("false", jReader.nextString());
-        } else if (keyName.equals("lfunion13")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("44", jReader.nextString());
-        } else if (keyName.equals("lfunion14")) {
-            assertEquals("Key " + keyName + " has incorrect type", JsonToken.STRING, peek);
-            assertEquals("21", jReader.nextString());
+    @Test
+    public void testBadData() throws Exception {
+
+        try {
+            CompositeNode compositeNode = TestUtils.readInputToCnSn(
+                                               "/cnsn-to-json/simple-data-types/xml/bad-data.xml",
+                                               XmlToCompositeNodeProvider.INSTANCE);
+
+            TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
+            fail( "Expected RestconfDocumentedException" );
+        }
+        catch( RestconfDocumentedException e ) {
+            assertEquals( "getErrorTag", ErrorTag.INVALID_VALUE, e.getErrors().get( 0 ).getErrorTag() );
         }
     }
 }
