@@ -36,48 +36,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-public class GlobalBundleScanningSchemaServiceImpl implements //
-SchemaContextProvider, //
-SchemaService, //
-ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
-AutoCloseable {
+public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService, ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
+    private final ListenerRegistry<SchemaServiceListener> listeners = new ListenerRegistry<>();
     private final URLSchemaContextResolver contextResolver = new URLSchemaContextResolver();
     private final BundleScanner scanner = new BundleScanner();
+    private final BundleContext context;
+
     private ServiceTracker<SchemaServiceListener, SchemaServiceListener> listenerTracker;
     private BundleTracker<Iterable<Registration<URL>>> bundleTracker;
-    private ListenerRegistry<SchemaServiceListener> listeners;
     private boolean starting = true;
-    private BundleContext context;
 
-    public ListenerRegistry<SchemaServiceListener> getListeners() {
-        return listeners;
-    }
-
-    public void setListeners(final ListenerRegistry<SchemaServiceListener> listeners) {
-        this.listeners = listeners;
+    public GlobalBundleScanningSchemaServiceImpl(final BundleContext context) {
+        this.context = Preconditions.checkNotNull(context);
     }
 
     public BundleContext getContext() {
         return context;
     }
 
-    public void setContext(final BundleContext context) {
-        this.context = context;
-    }
-
     public void start() {
         checkState(context != null);
-        if (listeners == null) {
-            listeners = new ListenerRegistry<>();
-        }
 
         listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, GlobalBundleScanningSchemaServiceImpl.this);
-        bundleTracker = new BundleTracker<Iterable<Registration<URL>>>(context, BundleEvent.RESOLVED
-                | BundleEvent.UNRESOLVED, scanner);
+        bundleTracker = new BundleTracker<>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
         listenerTracker.open();
         starting = false;
@@ -219,7 +205,7 @@ AutoCloseable {
     }
 
     public synchronized void tryToUpdateSchemaContext() {
-        if(starting ) {
+        if (starting) {
             return;
         }
         Optional<SchemaContext> schema = contextResolver.tryToUpdateSchemaContext();

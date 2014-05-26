@@ -19,29 +19,26 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
-*
-*/
 public final class SchemaServiceImplSingletonModule extends
-        org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModule {
+org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaServiceImplSingletonModule.class);
 
     BundleContext bundleContext;
 
-    public SchemaServiceImplSingletonModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public SchemaServiceImplSingletonModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public SchemaServiceImplSingletonModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            SchemaServiceImplSingletonModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public SchemaServiceImplSingletonModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final SchemaServiceImplSingletonModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override
-    public boolean canReuseInstance(AbstractSchemaServiceImplSingletonModule oldModule) {
+    public boolean canReuseInstance(final AbstractSchemaServiceImplSingletonModule oldModule) {
         return true;
     }
 
@@ -49,7 +46,7 @@ public final class SchemaServiceImplSingletonModule extends
         return bundleContext;
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
@@ -65,8 +62,7 @@ public final class SchemaServiceImplSingletonModule extends
             return new GlobalSchemaServiceProxy(getBundleContext(), ref);
         }
 
-        GlobalBundleScanningSchemaServiceImpl newInstance = new GlobalBundleScanningSchemaServiceImpl();
-        newInstance.setContext(getBundleContext());
+        GlobalBundleScanningSchemaServiceImpl newInstance = new GlobalBundleScanningSchemaServiceImpl(getBundleContext());
         newInstance.start();
         return newInstance;
     }
@@ -77,7 +73,7 @@ public final class SchemaServiceImplSingletonModule extends
         private ServiceReference<SchemaService> reference;
         private SchemaService delegate;
 
-        public GlobalSchemaServiceProxy(BundleContext bundleContext, ServiceReference<SchemaService> ref) {
+        public GlobalSchemaServiceProxy(final BundleContext bundleContext, final ServiceReference<SchemaService> ref) {
             this.bundleContext = bundleContext;
             this.reference = ref;
             this.delegate = bundleContext.getService(reference);
@@ -102,7 +98,7 @@ public final class SchemaServiceImplSingletonModule extends
         }
 
         @Override
-        public void addModule(Module arg0) {
+        public void addModule(final Module arg0) {
             delegate.addModule(arg0);
         }
 
@@ -117,12 +113,12 @@ public final class SchemaServiceImplSingletonModule extends
         }
 
         @Override
-        public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(SchemaServiceListener arg0) {
+        public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener arg0) {
             return delegate.registerSchemaServiceListener(arg0);
         }
 
         @Override
-        public void removeModule(Module arg0) {
+        public void removeModule(final Module arg0) {
             delegate.removeModule(arg0);
         }
 
