@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -25,7 +26,6 @@ public class InMemoryDataStoreTest {
     private SchemaContext schemaContext;
     private InMemoryDOMDataStore domStore;
 
-
     @Before
     public void setupStore() {
         domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor());
@@ -34,12 +34,10 @@ public class InMemoryDataStoreTest {
 
     }
 
-
     @Test
     public void testTransactionIsolation() throws InterruptedException, ExecutionException {
 
         assertNotNull(domStore);
-
 
         DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
         assertNotNull(readTx);
@@ -47,27 +45,25 @@ public class InMemoryDataStoreTest {
         DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
         assertNotNull(writeTx);
         /**
-         *
+         * 
          * Writes /test in writeTx
-         *
+         * 
          */
         writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         /**
-         *
-         * Reads /test from writeTx
-         * Read should return container.
-         *
+         * 
+         * Reads /test from writeTx Read should return container.
+         * 
          */
         ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(TestModel.TEST_PATH);
         assertTrue(writeTxContainer.get().isPresent());
 
         /**
-        *
-        * Reads /test from readTx
-        * Read should return Absent.
-        *
-        */
+         * 
+         * Reads /test from readTx Read should return Absent.
+         * 
+         */
         ListenableFuture<Optional<NormalizedNode<?, ?>>> readTxContainer = readTx.read(TestModel.TEST_PATH);
         assertFalse(readTxContainer.get().isPresent());
     }
@@ -78,17 +74,16 @@ public class InMemoryDataStoreTest {
         DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
         assertNotNull(writeTx);
         /**
-         *
+         * 
          * Writes /test in writeTx
-         *
+         * 
          */
         writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         /**
-         *
-         * Reads /test from writeTx
-         * Read should return container.
-         *
+         * 
+         * Reads /test from writeTx Read should return container.
+         * 
          */
         ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(TestModel.TEST_PATH);
         assertTrue(writeTxContainer.get().isPresent());
@@ -97,7 +92,8 @@ public class InMemoryDataStoreTest {
 
         assertThreePhaseCommit(cohort);
 
-        Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH).get();
+        Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH)
+                .get();
         assertTrue(afterCommitRead.isPresent());
     }
 
@@ -115,8 +111,89 @@ public class InMemoryDataStoreTest {
         cohort.preCommit().get();
         cohort.abort().get();
 
-        Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH).get();
+        Optional<NormalizedNode<?, ?>> afterCommitRead = domStore.newReadOnlyTransaction().read(TestModel.TEST_PATH)
+                .get();
         assertFalse(afterCommitRead.isPresent());
+    }
+
+    @Test
+    public void testTransactionChain() throws InterruptedException, ExecutionException {
+        DOMStoreTransactionChain txChain = domStore.createTransactionChain();
+        assertNotNull(txChain);
+
+        /**
+         * We alocate new read-write transaction and write /test
+         * 
+         * 
+         */
+        DOMStoreReadWriteTransaction firstTx = txChain.newReadWriteTransaction();
+        assertTestContainerWrite(firstTx);
+
+        /**
+         * First transaction is marked as ready, we are able to allocate chained
+         * transactions
+         */
+        DOMStoreThreePhaseCommitCohort firstWriteTxCohort = firstTx.ready();
+
+        /**
+         * We alocate chained transaction - read transaction, note first one is
+         * still not commited to datastore.
+         */
+        DOMStoreReadTransaction secondReadTx = txChain.newReadOnlyTransaction();
+
+        /**
+         * 
+         * We test if we are able to read data from tx, read should not fail
+         * since we are using chained transaction.
+         * 
+         * 
+         */
+        assertTestContainerExists(secondReadTx);
+
+        /**
+         * 
+         * We alocate next transaction, which is still based on first one, but
+         * is read-write.
+         * 
+         */
+        DOMStoreReadWriteTransaction thirdDeleteTx = txChain.newReadWriteTransaction();
+
+        /**
+         * We test existence of /test in third transaction container should
+         * still be visible from first one (which is still uncommmited).
+         * 
+         * 
+         */
+        assertTestContainerExists(thirdDeleteTx);
+
+        /**
+         * We delete node in third transaction
+         */
+        thirdDeleteTx.delete(TestModel.TEST_PATH);
+
+        /**
+         * third transaction is sealed.
+         */
+        DOMStoreThreePhaseCommitCohort thirdDeleteTxCohort = thirdDeleteTx.ready();
+
+        /**
+         * We commit first transaction
+         * 
+         */
+        assertThreePhaseCommit(firstWriteTxCohort);
+
+        // Alocates store transacion
+        DOMStoreReadTransaction storeReadTx = domStore.newReadOnlyTransaction();
+        /**
+         * We verify transaction is commited to store, container should exists
+         * in datastore.
+         */
+        assertTestContainerExists(storeReadTx);
+        /**
+         * We commit third transaction
+         * 
+         */
+        assertThreePhaseCommit(thirdDeleteTxCohort);
     }
 
     @Test
@@ -138,32 +215,36 @@ public class InMemoryDataStoreTest {
         assertFalse(txTwo.ready().canCommit().get());
     }
 
-
-
-    private static void assertThreePhaseCommit(final DOMStoreThreePhaseCommitCohort cohort) throws InterruptedException, ExecutionException {
+    private static void assertThreePhaseCommit(final DOMStoreThreePhaseCommitCohort cohort)
+            throws InterruptedException, ExecutionException {
         assertTrue(cohort.canCommit().get().booleanValue());
         cohort.preCommit().get();
         cohort.commit().get();
     }
 
-
-    private static Optional<NormalizedNode<?, ?>> assertTestContainerWrite(final DOMStoreReadWriteTransaction writeTx) throws InterruptedException, ExecutionException {
+    private static Optional<NormalizedNode<?, ?>> assertTestContainerWrite(final DOMStoreReadWriteTransaction writeTx)
+            throws InterruptedException, ExecutionException {
         /**
-        *
-        * Writes /test in writeTx
-        *
-        */
-       writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+         * 
+         * Writes /test in writeTx
+         * 
+         */
+        writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-       /**
-        *
-        * Reads /test from writeTx
-        * Read should return container.
-        *
-        */
-       ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(TestModel.TEST_PATH);
-       assertTrue(writeTxContainer.get().isPresent());
-       return writeTxContainer.get();
+        return assertTestContainerExists(writeTx);
+    }
+
+    /**
+     * 
+     * Reads /test from readTx Read should return container.
+     * 
+     */
+    private static Optional<NormalizedNode<?, ?>> assertTestContainerExists(DOMStoreReadTransaction readTx)
+            throws InterruptedException, ExecutionException {
+
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = readTx.read(TestModel.TEST_PATH);
+        assertTrue(writeTxContainer.get().isPresent());
+        return writeTxContainer.get();
     }
 
 }
