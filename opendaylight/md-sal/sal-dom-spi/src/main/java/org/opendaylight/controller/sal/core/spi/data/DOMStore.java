@@ -14,29 +14,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public interface DOMStore {
-
-    /**
-     *
-     * Creates a read only transaction
-     *
-     * @return
-     */
-    DOMStoreReadTransaction newReadOnlyTransaction();
-
-    /**
-     * Creates write only transaction
-     *
-     * @return
-     */
-    DOMStoreWriteTransaction newWriteOnlyTransaction();
-
-    /**
-     * Creates Read-Write transaction
-     *
-     * @return
-     */
-    DOMStoreReadWriteTransaction newReadWriteTransaction();
+public interface DOMStore extends DOMStoreTransactionFactory {
 
     /**
      * Registers {@link DataChangeListener} for Data Change callbacks
@@ -56,5 +34,16 @@ public interface DOMStore {
      */
     <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
             InstanceIdentifier path, L listener, DataChangeScope scope);
+
+
+    /**
+     *
+     * Creates new transaction chain.
+     *
+     * Transaction chain is set of linked transactions.
+     *
+     * @return Newly created transaction chain.
+     */
+    DOMStoreTransactionChain createTransactionChain();
 
 }
