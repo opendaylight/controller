@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.ssh.authentication;
 
+import java.security.NoSuchAlgorithmException;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.openssl.PEMWriter;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class PEMGenerator {
     private static final Logger logger = LoggerFactory.getLogger(PEMGenerator.class);
     private static final int KEY_SIZE = 4096;
 
-    public static String generateTo(File privateFile) throws Exception {
+    public static String generateTo(File privateFile) throws IOException, NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         SecureRandom sr = new SecureRandom();
         keyGen.initialize(KEY_SIZE, sr);
