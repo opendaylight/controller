@@ -7,17 +7,21 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainFactory;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.sal.core.api.BrokerService;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public interface DOMDataBroker extends //
-        AsyncDataBroker<InstanceIdentifier, NormalizedNode<?, ?>, DOMDataChangeListener>, //
-        TransactionChainFactory<InstanceIdentifier, NormalizedNode<?, ?>>, //
-        BrokerService {
+/**
+ * A chain of DOM Data transactions.
+ *
+ * Transactions in a chain need to be committed in sequence and each
+ * transaction should see the effects of previous transactions as if they happened. A chain
+ * makes no guarantees of atomicity, in fact transactions are committed as soon as possible.
+ *
+ * <p>
+ * This interface is type capture of {@link TransactionChain} for DOM Data Contracts.
+ */
+public interface DOMTransactionChain extends TransactionChain<InstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override
     DOMDataReadTransaction newReadOnlyTransaction();
@@ -28,6 +32,4 @@ public interface DOMDataBroker extends //
     @Override
     DOMDataWriteTransaction newWriteOnlyTransaction();
 
-    @Override
-    DOMTransactionChain createTransactionChain(TransactionChainListener listener);
 }
