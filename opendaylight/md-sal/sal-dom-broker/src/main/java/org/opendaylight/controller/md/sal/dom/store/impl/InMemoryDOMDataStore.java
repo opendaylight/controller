@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
@@ -27,7 +27,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
@@ -40,15 +39,22 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener {
+/**
+ * In-memory DOM Data Store
+ *
+ * Implementation of {@link DOMStore} which uses {@link DataTree}
+ * and other classes such as {@link SnapshotBackedWriteTransaction}.
+ * {@link SnapshotBackedReadTransaction} and {@link ResolveDataChangeEventsTask}
+ * to implement {@link DOMStore} contract.
+ *
+ */
+public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener, TransactionReadyPrototype {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
     private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
     private final ListenerTree listenerTree = ListenerTree.create();
@@ -83,7 +89,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return new DOMStoreTransactionChainImpl();
     }
 
     @Override
@@ -130,7 +136,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         };
     }
 
-    private synchronized DOMStoreThreePhaseCommitCohort submit(final SnapshotBackedWriteTransaction writeTx) {
+    @Override
+    public synchronized DOMStoreThreePhaseCommitCohort ready(final SnapshotBackedWriteTransaction writeTx) {
         LOG.debug("Tx: {} is submitted. Modifications: {}", writeTx.getIdentifier(), writeTx.getMutatedView());
         return new ThreePhaseCommitImpl(writeTx);
     }
@@ -139,162 +146,61 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         return name + "-" + txCounter.getAndIncrement();
     }
 
-    private static abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
-        private final Object identifier;
+    private class DOMStoreTransactionChainImpl implements DOMStoreTransactionChain, TransactionReadyPrototype {
 
-        protected AbstractDOMStoreTransaction(final Object identifier) {
-            this.identifier = identifier;
+        private SnapshotBackedWriteTransaction previousOutstandingTx;
+
+        @Override
+        public synchronized DOMStoreReadTransaction newReadOnlyTransaction() {
+            final DataTreeSnapshot snapshot;
+            if(previousOutstandingTx != null) {
+                checkState(previousOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
+                snapshot = previousOutstandingTx.getMutatedView();
+            } else {
+                snapshot = dataTree.takeSnapshot();
+            }
+            return new SnapshotBackedReadTransaction(nextIdentifier(), snapshot);
         }
 
         @Override
-        public final Object getIdentifier() {
-            return identifier;
+        public synchronized DOMStoreReadWriteTransaction newReadWriteTransaction() {
+            final DataTreeSnapshot snapshot;
+            if(previousOutstandingTx != null) {
+                checkState(previousOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
+                snapshot = previousOutstandingTx.getMutatedView();
+            } else {
+                snapshot = dataTree.takeSnapshot().newModification();
+            }
+            SnapshotBackedReadWriteTransaction ret = new SnapshotBackedReadWriteTransaction(nextIdentifier(), snapshot,this);
+            return ret;
         }
 
         @Override
-        public final String toString() {
-            return addToStringAttributes(Objects.toStringHelper(this)).toString();
+        public synchronized DOMStoreWriteTransaction newWriteOnlyTransaction() {
+            final DataTreeSnapshot snapshot;
+            if(previousOutstandingTx != null) {
+                checkState(previousOutstandingTx.isReady(), "Previous transaction in chain must be ready.");
+                snapshot = previousOutstandingTx.getMutatedView();
+            } else {
+                snapshot = dataTree.takeSnapshot().newModification();
+            }
+            SnapshotBackedWriteTransaction ret =new SnapshotBackedWriteTransaction(nextIdentifier(), snapshot,this);
+            return ret;
         }
 
-        /**
-         * Add class-specific toString attributes.
-         *
-         * @param toStringHelper
-         *            ToStringHelper instance
-         * @return ToStringHelper instance which was passed in
-         */
-        protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-            return toStringHelper.add("id", identifier);
-        }
-    }
-
-    private static final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements
-    DOMStoreReadTransaction {
-        private DataTreeSnapshot stableSnapshot;
-
-        public SnapshotBackedReadTransaction(final Object identifier, final DataTreeSnapshot snapshot) {
-            super(identifier);
-            this.stableSnapshot = Preconditions.checkNotNull(snapshot);
-            LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot);
+        @Override
+        public DOMStoreThreePhaseCommitCohort ready(final SnapshotBackedWriteTransaction tx) {
+            DOMStoreThreePhaseCommitCohort storeCohort = InMemoryDOMDataStore.this.ready(tx);
+            // FIXME: We probably want to add Transaction Chain cohort
+            return storeCohort;
         }
 
         @Override
         public void close() {
-            LOG.debug("Store transaction: {} : Closed", getIdentifier());
-            stableSnapshot = null;
+            // TODO Auto-generated method stub
+
         }
 
-        @Override
-        public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
-            checkNotNull(path, "Path must not be null.");
-            checkState(stableSnapshot != null, "Transaction is closed");
-            return Futures.immediateFuture(stableSnapshot.readNode(path));
-        }
-    }
-
-    private static class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements
-    DOMStoreWriteTransaction {
-        private DataTreeModification mutableTree;
-        private InMemoryDOMDataStore store;
-        private boolean ready = false;
-
-        public SnapshotBackedWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-                final InMemoryDOMDataStore store) {
-            super(identifier);
-            mutableTree = snapshot.newModification();
-            this.store = store;
-            LOG.debug("Write Tx: {} allocated with snapshot {}", identifier, snapshot);
-        }
-
-        @Override
-        public void close() {
-            LOG.debug("Store transaction: {} : Closed", getIdentifier());
-            this.mutableTree = null;
-            this.store = null;
-        }
-
-        @Override
-        public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
-            checkNotReady();
-            try {
-                LOG.trace("Tx: {} Write: {}:{}", getIdentifier(), path, data);
-                mutableTree.write(path, data);
-                // FIXME: Add checked exception
-            } catch (Exception e) {
-                LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
-            }
-        }
-
-        @Override
-        public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
-            checkNotReady();
-            try {
-                LOG.trace("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
-                mutableTree.merge(path, data);
-                // FIXME: Add checked exception
-            } catch (Exception e) {
-                LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, mutableTree, e);
-            }
-        }
-
-        @Override
-        public void delete(final InstanceIdentifier path) {
-            checkNotReady();
-            try {
-                LOG.trace("Tx: {} Delete: {}", getIdentifier(), path);
-                mutableTree.delete(path);
-                // FIXME: Add checked exception
-            } catch (Exception e) {
-                LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, mutableTree, e);
-            }
-        }
-
-        protected final boolean isReady() {
-            return ready;
-        }
-
-        protected final void checkNotReady() {
-            checkState(!ready, "Transaction %s is ready. No further modifications allowed.", getIdentifier());
-        }
-
-        @Override
-        public synchronized DOMStoreThreePhaseCommitCohort ready() {
-            checkState(!ready, "Transaction %s is already ready.", getIdentifier());
-            ready = true;
-
-            LOG.debug("Store transaction: {} : Ready", getIdentifier());
-            mutableTree.ready();
-            return store.submit(this);
-        }
-
-        protected DataTreeModification getMutatedView() {
-            return mutableTree;
-        }
-
-        @Override
-        protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-            return toStringHelper.add("ready", isReady());
-        }
-    }
-
-    private static class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction implements
-    DOMStoreReadWriteTransaction {
-
-        protected SnapshotBackedReadWriteTransaction(final Object identifier, final DataTreeSnapshot snapshot,
-                final InMemoryDOMDataStore store) {
-            super(identifier, snapshot, store);
-        }
-
-        @Override
-        public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
-            LOG.trace("Tx: {} Read: {}", getIdentifier(), path);
-            try {
-                return Futures.immediateFuture(getMutatedView().readNode(path));
-            } catch (Exception e) {
-                LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
-                throw e;
-            }
-        }
     }
 
     private class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
