@@ -28,6 +28,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -78,6 +79,11 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new SnapshotBackedWriteTransaction(nextIdentifier(), dataTree.takeSnapshot(), this);
+    }
+
+    @Override
+    public DOMStoreTransactionChain createTransactionChain() {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @Override
