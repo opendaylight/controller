@@ -192,42 +192,44 @@ module config-threads-java {
     augment "/config:modules/config:module/config:configuration" {
         case threadpool-dynamic {
             when "/config:modules/config:module/config:type = 'threadpool-dynamic'";
-            leaf core-size {
-                type uint32;
-            }
+            container threadpool-dynamic {
+                leaf core-size {
+                    type uint32;
+                }
 
-            leaf keep-alive {
-                type uint32;
-                units seconds;
-                default 10;
-            }
+                leaf keep-alive {
+                    type uint32;
+                    units seconds;
+                    default 10;
+                }
 
-            leaf maximum-size {
-                type uint32;
-                description "maximum-size description";
-            }
+                leaf maximum-size {
+                    type uint32;
+                    description "maximum-size description";
+                }
 
-            leaf binary {
-                type binary;
-            }
+                leaf binary {
+                    type binary;
+                }
 
-            container threadfactory {
-                description "threadfactory description";
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity th2:threadfactory;
+                container threadfactory {
+                    description "threadfactory description";
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity th2:threadfactory;
+                        }
                     }
                 }
-            }
 
-            leaf-list users  {
-                type string;
-            }
+                leaf-list users  {
+                    type string;
+                }
 
-             leaf-list users-numbers {
-                type uint32;
-                description "numbers of users description";
+                 leaf-list users-numbers {
+                    type uint32;
+                    description "numbers of users description";
+                }
             }
         }
     }
@@ -235,9 +237,11 @@ module config-threads-java {
     augment "/config:modules/config:module/config:state" {
         case threadpool-dynamic {
             when "/config:modules/config:module/config:type = 'threadpool-dynamic'";
-            // root runtime bean
-            leaf created-sessions {
-                type uint32;
+            container threadpool-dynamic {
+                // root runtime bean
+                leaf created-sessions {
+                    type uint32;
+                }
             }
         }
     }

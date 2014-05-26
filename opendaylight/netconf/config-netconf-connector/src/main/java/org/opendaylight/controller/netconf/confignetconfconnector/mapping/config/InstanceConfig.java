@@ -34,6 +34,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -43,11 +44,15 @@ public final class InstanceConfig {
     private static final Logger logger = LoggerFactory.getLogger(InstanceConfig.class);
 
     private final Map<String, AttributeIfc> yangToAttrConfig;
+    private final String nullableDummyContainerName;
     private final Map<String, AttributeIfc> jmxToAttrConfig;
     private final ConfigRegistryClient configRegistryClient;
 
-    public InstanceConfig(ConfigRegistryClient configRegistryClient, Map<String, AttributeIfc> yangNamesToAttributes) {
+    public InstanceConfig(ConfigRegistryClient configRegistryClient, Map<String, AttributeIfc> yangNamesToAttributes,
+                          String nullableDummyContainerName) {
+
         this.yangToAttrConfig = yangNamesToAttributes;
+        this.nullableDummyContainerName = nullableDummyContainerName;
         this.jmxToAttrConfig = reverseMap(yangNamesToAttributes);
         this.configRegistryClient = configRegistryClient;
     }
@@ -83,20 +88,24 @@ public final class InstanceConfig {
     }
 
     public Element toXml(ObjectName on, String namespace, Document document, Element rootElement) {
-
         Map<String, AttributeWritingStrategy> strats = new ObjectXmlWriter().prepareWriting(yangToAttrConfig, document);
-
         Map<String, Object> mappedConfig = getMappedConfiguration(on);
-
+        Element parentElement;
+        if (nullableDummyContainerName != null) {
+            Element dummyElement = XmlUtil.createElement(document, nullableDummyContainerName, Optional.of(namespace));
+            rootElement.appendChild(dummyElement);
+            parentElement = dummyElement;
+        } else {
+            parentElement = rootElement;
+        }
         for (Entry<String, ?> mappingEntry : mappedConfig.entrySet()) {
             try {
-                strats.get(mappingEntry.getKey()).writeElement(rootElement, namespace, mappingEntry.getValue());
+                strats.get(mappingEntry.getKey()).writeElement(parentElement, namespace, mappingEntry.getValue());
             } catch (Exception e) {
                 throw new IllegalStateException("Unable to write value " + mappingEntry.getValue() + " for attribute "
                         + mappingEntry.getValue(), e);
             }
         }
-
         return rootElement;
     }
 
@@ -132,22 +141,46 @@ public final class InstanceConfig {
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
-        XmlElement type;
-        XmlElement name;
-        type = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
-        name = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
-        List<XmlElement> typeAndName = Lists.newArrayList(type, name);
+        XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.TYPE_KEY);
+        XmlElement nameElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlNetconfConstants.NAME_KEY);
+        List<XmlElement> typeAndNameElements = Lists.newArrayList(typeElement, nameElement);
+
+        // if dummy container was defined in yang, set moduleElement to its content
+        if (nullableDummyContainerName != null) {
+            int size = moduleElement.getChildElements().size();
+            int expectedChildNodes = 1 + typeAndNameElements.size();
+            if (size > expectedChildNodes) {
+                throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
+                        nameElement.getTextContent() + " - Expected " + expectedChildNodes +" child nodes, " +
+                        "one of them with name " + nullableDummyContainerName +
+                        ", got " + size + " elements.");
+            }
+            if (size == expectedChildNodes) {
+                try {
+                    moduleElement = moduleElement.getOnlyChildElement(nullableDummyContainerName, moduleNamespace);
+                } catch (NetconfDocumentedException e) {
+                    throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
+                            nameElement.getTextContent() + " - Expected child node with name " + nullableDummyContainerName +
+                            "." + e.getMessage());
+                }
+            } // else 2 elements, no need to descend
+        }
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
             List<XmlElement> configNodes = getConfigNodes(moduleElement, moduleNamespace, readStratEntry.getKey(),
-                    recognisedChildren, typeAndName);
+                    recognisedChildren, typeAndNameElements);
             AttributeConfigElement readElement = readStratEntry.getValue().readElement(configNodes);
             retVal.put(readStratEntry.getKey(), readElement);
         }
 
-        recognisedChildren.addAll(typeAndName);
-        moduleElement.checkUnrecognisedElements(recognisedChildren);
-
+        recognisedChildren.addAll(typeAndNameElements);
+        try {
+            moduleElement.checkUnrecognisedElements(recognisedChildren);
+        } catch (NetconfDocumentedException e) {
+            throw new NetconfDocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
+                    nameElement.getTextContent() + " - " +
+                    e.getMessage(), e.getErrorType(), e.getErrorTag(),e.getErrorSeverity(),e.getErrorInfo());
+        }
         // TODO: add check for conflicts between global and local edit strategy
         String perInstanceEditStrategy = moduleElement.getAttribute(XmlNetconfConstants.OPERATION_ATTR_KEY,
                 XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);

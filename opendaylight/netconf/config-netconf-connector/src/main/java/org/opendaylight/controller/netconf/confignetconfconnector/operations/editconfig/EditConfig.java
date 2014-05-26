@@ -273,8 +273,8 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 String moduleName = moduleNameToMbe.getKey();
                 ModuleMXBeanEntry moduleMXBeanEntry = moduleNameToMbe.getValue();
 
-                ModuleConfig moduleConfig = new ModuleConfig(moduleName, new InstanceConfig(configRegistryClient,
-                        moduleMXBeanEntry.getAttributes()));
+                ModuleConfig moduleConfig = new ModuleConfig(moduleName,
+                        new InstanceConfig(configRegistryClient,moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
 
                 Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespace);
                 if(moduleNameToModuleConfig == null) {

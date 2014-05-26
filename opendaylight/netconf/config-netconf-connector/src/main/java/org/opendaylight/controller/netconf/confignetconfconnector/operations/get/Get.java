@@ -62,7 +62,7 @@ public class Get extends AbstractConfigNetconfOperation {
                 Map<RuntimeBeanEntry, InstanceConfig> cache = Maps.newHashMap();
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
-                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap()));
+                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(), mbe.getNullableDummyContainerName()));
                     if (rbe.isRoot()){
                         root = rbe;
                     }

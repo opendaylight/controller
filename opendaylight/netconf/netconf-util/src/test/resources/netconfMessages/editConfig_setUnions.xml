@@ -15,10 +15,10 @@
                     </type>
 
                     <name>instance-from-code</name>
-
-                    <ip xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">127.1.2.3</ip>
-                    <union-test-attr xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">randomStringForUnion</union-test-attr>
-
+                    <impl-netconf xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        <ip xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">127.1.2.3</ip>
+                        <union-test-attr xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">randomStringForUnion</union-test-attr>
+                    </impl-netconf>
                 </module>
             </modules>
 

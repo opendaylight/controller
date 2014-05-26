@@ -62,6 +62,14 @@ public class NetconfDocumentedException extends Exception {
     private final ErrorSeverity errorSeverity;
     private final Map<String, String> errorInfo;
 
+    public NetconfDocumentedException(String message) {
+        this(message,
+                NetconfDocumentedException.ErrorType.application,
+                NetconfDocumentedException.ErrorTag.invalid_value,
+                NetconfDocumentedException.ErrorSeverity.error
+        );
+    }
+
     public NetconfDocumentedException(final String message, final ErrorType errorType, final ErrorTag errorTag,
             final ErrorSeverity errorSeverity) {
         this(message, errorType, errorTag, errorSeverity, Collections.<String, String> emptyMap());

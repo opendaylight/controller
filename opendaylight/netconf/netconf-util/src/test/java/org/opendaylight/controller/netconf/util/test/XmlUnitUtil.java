@@ -16,6 +16,7 @@ import org.custommonkey.xmlunit.AbstractNodeTester;
 import org.custommonkey.xmlunit.NodeTest;
 import org.custommonkey.xmlunit.NodeTestException;
 import org.custommonkey.xmlunit.NodeTester;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -88,7 +89,7 @@ public class XmlUnitUtil {
 
             @Override
             public void noMoreNodes(NodeTest forTest) throws NodeTestException {
-                assertTrue(elementFound);
+                assertTrue(XmlUtil.toString(doc), elementFound);
             }
         };
         assertNodeTestPasses(nt, tester, new short[]{Node.ELEMENT_NODE}, true);
