@@ -17,20 +17,19 @@ import org.osgi.framework.ServiceRegistration;
 
 public class SchemaServiceActivator implements BundleActivator {
 
-    
+
     private ServiceRegistration<SchemaService> schemaServiceReg;
     private GlobalBundleScanningSchemaServiceImpl schemaService;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        schemaService = new GlobalBundleScanningSchemaServiceImpl();
-        schemaService.setContext(context);
+    public void start(final BundleContext context) {
+        schemaService = new GlobalBundleScanningSchemaServiceImpl(context);
         schemaService.start();
         schemaServiceReg = context.registerService(SchemaService.class, schemaService, new Hashtable<String,String>());
     }
-    
+
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         schemaServiceReg.unregister();
         schemaService.close();
     }

@@ -10,7 +10,10 @@ package org.opendaylight.controller.sal.dom.broker;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
@@ -33,54 +36,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
-public class GlobalBundleScanningSchemaServiceImpl implements //
-        SchemaContextProvider, //
-        SchemaService, //
-        ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, //
-        AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
+public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService, ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
-    private ListenerRegistry<SchemaServiceListener> listeners;
-
-    private BundleContext context;
-    private final BundleScanner scanner = new BundleScanner();
-
-    private BundleTracker<ImmutableSet<Registration<URL>>> bundleTracker;
-
+    private final ListenerRegistry<SchemaServiceListener> listeners = new ListenerRegistry<>();
     private final URLSchemaContextResolver contextResolver = new URLSchemaContextResolver();
+    private final BundleScanner scanner = new BundleScanner();
+    private final BundleContext context;
 
     private ServiceTracker<SchemaServiceListener, SchemaServiceListener> listenerTracker;
-
+    private BundleTracker<Iterable<Registration<URL>>> bundleTracker;
     private boolean starting = true;
 
-    public ListenerRegistry<SchemaServiceListener> getListeners() {
-        return listeners;
-    }
-
-    public void setListeners(final ListenerRegistry<SchemaServiceListener> listeners) {
-        this.listeners = listeners;
+    public GlobalBundleScanningSchemaServiceImpl(final BundleContext context) {
+        this.context = Preconditions.checkNotNull(context);
     }
 
     public BundleContext getContext() {
         return context;
     }
 
-    public void setContext(final BundleContext context) {
-        this.context = context;
-    }
-
     public void start() {
         checkState(context != null);
-        if (listeners == null) {
-            listeners = new ListenerRegistry<>();
-        }
 
         listenerTracker = new ServiceTracker<>(context, SchemaServiceListener.class, GlobalBundleScanningSchemaServiceImpl.this);
-        bundleTracker = new BundleTracker<ImmutableSet<Registration<URL>>>(context, BundleEvent.RESOLVED
-                        | BundleEvent.UNRESOLVED, scanner);
+        bundleTracker = new BundleTracker<>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
         bundleTracker.open();
         listenerTracker.open();
         starting = false;
@@ -139,7 +122,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
             try {
                 listener.getInstance().onGlobalContextUpdated(snapshot);
             } catch (Exception e) {
-                logger.error("Exception occured during invoking listener", e);
+                LOG.error("Exception occured during invoking listener", e);
             }
         }
         if (services != null) {
@@ -148,37 +131,47 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
                 try {
                     listener.onGlobalContextUpdated(snapshot);
                 } catch (Exception e) {
-                    logger.error("Exception occured during invoking listener", e);
+                    LOG.error("Exception occured during invoking listener {}", listener, e);
                 }
             }
         }
     }
 
-    private class BundleScanner implements BundleTrackerCustomizer<ImmutableSet<Registration<URL>>> {
+    private class BundleScanner implements BundleTrackerCustomizer<Iterable<Registration<URL>>> {
         @Override
-        public ImmutableSet<Registration<URL>> addingBundle(final Bundle bundle, final BundleEvent event) {
+        public Iterable<Registration<URL>> addingBundle(final Bundle bundle, final BundleEvent event) {
 
             if (bundle.getBundleId() == 0) {
-                return ImmutableSet.of();
+                return Collections.emptyList();
             }
 
-            Enumeration<URL> enumeration = bundle.findEntries("META-INF/yang", "*.yang", false);
-            Builder<Registration<URL>> builder = ImmutableSet.<Registration<URL>> builder();
-            while (enumeration != null && enumeration.hasMoreElements()) {
-                Registration<URL> reg = contextResolver.registerSource(enumeration.nextElement());
-                builder.add(reg);
+            final Enumeration<URL> enumeration = bundle.findEntries("META-INF/yang", "*.yang", false);
+            if (enumeration == null) {
+                return Collections.emptyList();
             }
-            ImmutableSet<Registration<URL>> urls = builder.build();
-            if(urls.isEmpty()) {
-                return urls;
+
+            final List<Registration<URL>> urls = new ArrayList<>();
+            while (enumeration.hasMoreElements()) {
+                final URL u = enumeration.nextElement();
+                try {
+                    urls.add(contextResolver.registerSource(u));
+                    LOG.debug("Registered {}", u);
+                } catch (Exception e) {
+                    LOG.warn("Failed to register {}, ignoring it", e);
+                }
             }
-            tryToUpdateSchemaContext();
-            return urls;
+
+            if (!urls.isEmpty()) {
+                LOG.debug("Loaded {} new URLs, rebuilding schema context", urls.size());
+                tryToUpdateSchemaContext();
+            }
+
+            return ImmutableList.copyOf(urls);
         }
 
         @Override
-        public void modifiedBundle(final Bundle bundle, final BundleEvent event, final ImmutableSet<Registration<URL>> object) {
-            logger.debug("Modified bundle {} {} {}", bundle, event, object);
+        public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration<URL>> object) {
+            LOG.debug("Modified bundle {} {} {}", bundle, event, object);
         }
 
         /**
@@ -188,12 +181,12 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
          */
 
         @Override
-        public synchronized void removedBundle(final Bundle bundle, final BundleEvent event, final ImmutableSet<Registration<URL>> urls) {
+        public synchronized void removedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration<URL>> urls) {
             for (Registration<URL> url : urls) {
                 try {
                     url.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.warn("Failed do unregister URL {}, proceeding", url, e);
                 }
             }
             tryToUpdateSchemaContext();
@@ -212,7 +205,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements //
     }
 
     public synchronized void tryToUpdateSchemaContext() {
-        if(starting ) {
+        if (starting) {
             return;
         }
         Optional<SchemaContext> schema = contextResolver.tryToUpdateSchemaContext();
