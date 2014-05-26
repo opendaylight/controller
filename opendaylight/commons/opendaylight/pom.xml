@@ -71,6 +71,8 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <messaging.clustering.version>1.0.0-SNAPSHOT</messaging.clustering.version>
+    <messaging.datastore.version>1.0.0-SNAPSHOT</messaging.datastore.version>
     <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
     <netty.version>4.0.17.Final</netty.version>
@@ -813,6 +815,17 @@
         <version>${logging.bridge.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>messaging.clustering</artifactId>
+        <version>${messaging.clustering.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>messaging.datastore</artifactId>
+        <version>${messaging.datastore.version}</version>
+      </dependency>
+
       <!-- Netconf -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -920,7 +933,6 @@
         <artifactId>protocol-framework</artifactId>
         <version>${protocol-framework.version}</version>
       </dependency>
-
       <!-- Southbound bundles -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1289,6 +1301,11 @@
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>org.openflow.openflowj</artifactId>
         <version>1.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.uncommons.maths.random</groupId>
+        <artifactId>uncommons</artifactId>
+        <version>1.2.2</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
@@ -2090,6 +2107,30 @@
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
       <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
+    </repository>
+    <repository>
+      <id>TypesafeSnapshots</id>
+      <name>Typesafe Snapshots</name>
+      <url>http://repo.typesafe.com/typesafe/snapshots/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>TypesafeReleases</id>
+      <name>Typesafe Releases</name>
+      <url>http://repo.typesafe.com/typesafe/releases/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>SprayioNightly</id>
+      <name>Spray.io Nightly</name>
+      <url>http://nightlies.spray.io/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>sprayrepo</id>
+      <name>spray repo</name>
+      <url>http://repo.spray.io/</url>
+      <layout>default</layout>
     </repository>
   </repositories>
 
