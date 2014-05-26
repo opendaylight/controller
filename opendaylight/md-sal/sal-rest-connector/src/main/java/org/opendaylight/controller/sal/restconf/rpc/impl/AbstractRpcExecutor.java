@@ -30,6 +30,28 @@ public abstract class AbstractRpcExecutor implements RpcExecutor {
         return rpcDef;
     }
 
+    @Override
+    public RpcResult<CompositeNode> invokeRpc( CompositeNode rpcRequest )
+                                                   throws RestconfDocumentedException {
+        try {
+            return getRpcResult( invokeRpcUnchecked( rpcRequest ) );
+        }
+        catch( IllegalArgumentException e ) {
+            throw new RestconfDocumentedException(
+                                e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
+        }
+        catch( UnsupportedOperationException e ) {
+            throw new RestconfDocumentedException(
+                                e.getMessage(), ErrorType.RPC, ErrorTag.OPERATION_NOT_SUPPORTED );
+        }
+        catch( Exception e ) {
+            throw new RestconfDocumentedException(
+                    "The operation encountered an unexpected error while executing.", e );
+        }
+    }
+
+    protected abstract Future<RpcResult<CompositeNode>> invokeRpcUnchecked( CompositeNode rpcRequest );
+
     protected RpcResult<CompositeNode> getRpcResult(
                                             Future<RpcResult<CompositeNode>> fromFuture ) {
         try {

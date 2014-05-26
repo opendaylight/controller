@@ -21,7 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -100,7 +99,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
                                     .entity( " " ).build();
         }
 
-        Status status = errors.iterator().next().getErrorTag().getStatusCode();
+        int status = errors.iterator().next().getErrorTag().getStatusCode();
 
         ControllerContext context = ControllerContext.getInstance();
         DataNodeContainer errorsSchemaNode = (DataNodeContainer)context.getRestconfModuleErrorsSchemaNode();

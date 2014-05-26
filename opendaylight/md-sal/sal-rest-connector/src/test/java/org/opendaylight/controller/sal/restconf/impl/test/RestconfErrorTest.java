@@ -15,8 +15,6 @@ import static org.junit.Assert.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.Response.Status;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -88,33 +86,34 @@ public class RestconfErrorTest {
     @Test
     public void testErrorTagStatusCodes()
     {
-        Map<String,Status> lookUpMap = new HashMap<String,Status>();
+        Map<String,Integer> lookUpMap = new HashMap<String,Integer>();
 
-        lookUpMap.put( "in-use", Status.fromStatusCode(409));
-        lookUpMap.put( "invalid-value", Status.fromStatusCode(400));
-        lookUpMap.put( "too-big", Status.fromStatusCode(413));
-        lookUpMap.put( "missing-attribute", Status.fromStatusCode(400));
-        lookUpMap.put( "bad-attribute", Status.fromStatusCode(400));
-        lookUpMap.put( "unknown-attribute", Status.fromStatusCode(400));
-        lookUpMap.put( "bad-element", Status.fromStatusCode(400));
-        lookUpMap.put( "unknown-element", Status.fromStatusCode(400));
-        lookUpMap.put( "unknown-namespace", Status.fromStatusCode(400));
-        lookUpMap.put( "access-denied", Status.fromStatusCode(403));
-        lookUpMap.put( "lock-denied", Status.fromStatusCode(409));
-        lookUpMap.put( "resource-denied", Status.fromStatusCode(409));
-        lookUpMap.put( "rollback-failed", Status.fromStatusCode(500));
-        lookUpMap.put( "data-exists", Status.fromStatusCode(409));
-        lookUpMap.put( "data-missing", Status.fromStatusCode(409));
-        lookUpMap.put( "operation-not-supported", Status.fromStatusCode(501));
-        lookUpMap.put( "operation-failed", Status.fromStatusCode(500));
-        lookUpMap.put( "partial-operation", Status.fromStatusCode(500));
-        lookUpMap.put( "malformed-message", Status.fromStatusCode(400));
+        lookUpMap.put( "in-use", 409);
+        lookUpMap.put( "invalid-value", 400);
+        lookUpMap.put( "too-big", 413);
+        lookUpMap.put( "missing-attribute", 400);
+        lookUpMap.put( "bad-attribute", 400);
+        lookUpMap.put( "unknown-attribute", 400);
+        lookUpMap.put( "bad-element", 400);
+        lookUpMap.put( "unknown-element", 400);
+        lookUpMap.put( "unknown-namespace", 400);
+        lookUpMap.put( "access-denied", 403);
+        lookUpMap.put( "lock-denied", 409);
+        lookUpMap.put( "resource-denied", 409);
+        lookUpMap.put( "rollback-failed", 500);
+        lookUpMap.put( "data-exists", 409);
+        lookUpMap.put( "data-missing", 409);
+        lookUpMap.put( "operation-not-supported", 501);
+        lookUpMap.put( "operation-failed", 500);
+        lookUpMap.put( "partial-operation", 500);
+        lookUpMap.put( "malformed-message", 400);
 
         for( ErrorTag tag : ErrorTag.values() )
         {
-            Status expectedStatusCode = lookUpMap.get( tag.getTagValue() );
+            Integer expectedStatusCode = lookUpMap.get( tag.getTagValue() );
             assertNotNull( "Failed to find " + tag.getTagValue(), expectedStatusCode );
-            assertEquals( "Status Code does not match", expectedStatusCode, tag.getStatusCode() );
+            assertEquals( "Status Code does not match", expectedStatusCode,
+                          Integer.valueOf( tag.getStatusCode() ) );
         }
     }
 

@@ -174,8 +174,12 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         if (potentialImpl != null) {
             return potentialImpl;
         }
+
         potentialImpl = defaultImplementation;
-        checkState(potentialImpl != null, "Implementation is not available.");
+        if( potentialImpl == null ) {
+            throw new UnsupportedOperationException( "No implementation for this operation is available." );
+        }
+
         return potentialImpl;
     }
 
@@ -326,7 +330,8 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
             SimpleNode<?> routeContainer = inputContainer.getFirstSimpleByName(strategy.getLeaf());
             checkArgument(routeContainer != null, "Leaf %s must be set with value", strategy.getLeaf());
             Object route = routeContainer.getValue();
-            checkArgument(route instanceof InstanceIdentifier);
+            checkArgument(route instanceof InstanceIdentifier,
+                          "The routed node %s is not an instance identifier", route);
             RpcImplementation potential = null;
             if (route != null) {
                 RoutedRpcRegImpl potentialReg = implementations.get(route);

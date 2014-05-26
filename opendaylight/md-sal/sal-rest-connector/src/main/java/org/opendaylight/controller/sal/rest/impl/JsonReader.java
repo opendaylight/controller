@@ -87,7 +87,7 @@ class JsonReader {
             }
         } else if (childType.isJsonPrimitive()) {
             JsonPrimitive childPrimitive = childType.getAsJsonPrimitive();
-            String value = childPrimitive.getAsString();
+            String value = childPrimitive.getAsString().trim();
             parent.addValue(new SimpleNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName),
                     resolveValueOfElement(value)));
         }
