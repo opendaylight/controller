@@ -42,12 +42,11 @@ class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> 
     @Override
     public Optional<String> getSchemaSource(String moduleName, Optional<String> revision) {
         CompositeNodeBuilder<ImmutableCompositeNode> request = ImmutableCompositeNode.builder(); //
-        request.setQName(GET_SCHEMA_QNAME) //
-                .addLeaf("format", "yang") //
-                .addLeaf("identifier", moduleName); //
+        request.setQName(GET_SCHEMA_QNAME).addLeaf("identifier", moduleName);
         if (revision.isPresent()) {
             request.addLeaf("version", revision.get());
         }
+        request.addLeaf("format", "yang");
 
         logger.trace("Loading YANG schema source for {}:{}", moduleName, revision);
         try {
