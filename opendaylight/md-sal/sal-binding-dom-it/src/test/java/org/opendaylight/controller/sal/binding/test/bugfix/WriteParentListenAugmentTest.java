@@ -81,6 +81,41 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     }
 
+    @Test
+    public void deleteNodeListenAugment() throws Exception {
+
+        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
+
+        ListenerRegistration<DataChangeListener> dclRegistration = baDataService.registerDataChangeListener(
+                AUGMENT_WILDCARDED_PATH, new DataChangeListener() {
+
+                    @Override
+                    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+                        if(!change.getRemovedOperationalData().isEmpty()) {
+                            event.set(change);
+                        }
+                    }
+                });
+
+        DataModificationTransaction modification = baDataService.beginTransaction();
+
+        Node node = new NodeBuilder() //
+                .setKey(NODE_KEY) //
+                .addAugmentation(FlowCapableNode.class, flowCapableNode("one")).build();
+        modification.putOperationalData(NODE_INSTANCE_ID_BA, node);
+        modification.commit().get();
+
+        dclRegistration.close();
+
+        DataModificationTransaction mod2 = baDataService.beginTransaction();
+        mod2.removeOperationalData(NODE_INSTANCE_ID_BA);
+        mod2.commit().get();
+
+        DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get(1000, TimeUnit.MILLISECONDS);
+        assertTrue(receivedEvent.getCreatedOperationalData().containsKey(AUGMENT_NODE_PATH));
+
+    }
+
     private FlowCapableNode flowCapableNode(final String description) {
         return new FlowCapableNodeBuilder() //
                 .setDescription(description) //
