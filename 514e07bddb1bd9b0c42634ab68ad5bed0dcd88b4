@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dcf8977e",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "so what does this patch do?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bced93b9",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "Class documetation is missing",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fcf31b9d",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "... and what else? where should I look for more information?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5c2c8702",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "Copyright header",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7c2f0bf7",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "it should, or it does see?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1c36ff52",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "I think the class needs to have better documentation. There seems to be an underlying concept of interactions between transactions in a chain, but it\u0027s not described anywhere.",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3c398341",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "so what does close() do? does it commit all outstanding transactions?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc3f3724",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fc3a3b33",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "what is this class? what sort of concept is it? what is its relationship with other concepts?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9c49afd2",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-26T13:37:49Z",
+      "side": 1,
+      "message": "missing documentation. can this method fail?",
+      "revId": "514e07bddb1bd9b0c42634ab68ad5bed0dcd88b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
