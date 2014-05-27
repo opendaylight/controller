@@ -66,7 +66,9 @@ public class Activator extends ComponentActivatorAbstractBase {
                 NeutronRouterInterface.class,
                 NeutronPortInterface.class,
                 NeutronSubnetInterface.class,
-                NeutronNetworkInterface.class };
+                NeutronNetworkInterface.class,
+                NeutronSecurityGroupInterface.class,
+                NeutronSecurityRuleInterface.class};
         return res;
     }
 
