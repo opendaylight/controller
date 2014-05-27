@@ -930,12 +930,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-netty-util</artifactId>
-        <version>${netconf.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-ssh</artifactId>
         <version>${netconf.version}</version>
       </dependency>
