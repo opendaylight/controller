@@ -1,0 +1,29 @@
+package org.opendaylight.controller
+
+import org.scalatest._
+
+class ConfigurationUtilsSpec extends FlatSpec with Matchers{
+  it should "find all members given a module name" in {
+    val moduleName = "opendaylight-inventory"
+    val memberNames = ConfigurationUtils.membersByModuleName(moduleName);
+    memberNames should contain ("member-1", 1)
+    memberNames should contain ("member-2", 2)
+  }
+
+  it should "find all shards given a member name" in {
+    val memberName = "member-1";
+
+    val shards = ConfigurationUtils.shardsByMemberName(memberName);
+
+    shards should contain("inventory")
+  }
+
+  it should "find all members with a given shard" in {
+    val shardName ="inventory";
+    val members = ConfigurationUtils.membersByShardName(shardName);
+
+    members should contain("member-1", 1)
+    members should contain("member-2", 2)
+  }
+
+}
