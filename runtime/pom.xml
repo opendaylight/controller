@@ -15,12 +15,13 @@
   <modules>
     <module>runtime-features</module>
     <module>runtime-distribution</module>
-    <!--    <module>featureservice-northbound</module> -->
+    <module>featureservice-northbound</module> 
   </modules>
 
   <properties>
     <akka.version>2.3.3</akka.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
+    <featureservice.northbound.version>1.0</featureservice.northbound.version>
     <karaf.tooling.exam.version>${karaf.version}</karaf.tooling.exam.version>
     <karaf.version>3.0.0</karaf.version>
     <leveldb.version>0.5</leveldb.version>
