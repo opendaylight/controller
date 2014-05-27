@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c250acd6",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-05-27T14:46:47Z",
+      "side": 1,
+      "message": "Should be probably TRACE",
+      "revId": "8fc8bce7967c6fea4e127ff3eeb7d9960d8a0a82",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
