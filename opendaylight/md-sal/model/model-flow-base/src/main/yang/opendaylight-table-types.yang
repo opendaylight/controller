@@ -188,6 +188,10 @@ module opendaylight-table-types {
         base match-field;
         description "Match for IPv6 Extension Header pseudo-field";
     }
+    identity tcp_flag {
+        base match-field;
+        description "TCP Flag Match";
+    }
         
     grouping set-field-match {
         list set-field-match {
