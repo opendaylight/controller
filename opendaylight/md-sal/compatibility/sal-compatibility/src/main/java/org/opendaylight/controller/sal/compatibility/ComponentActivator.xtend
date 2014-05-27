@@ -13,12 +13,6 @@ import java.util.Hashtable
 import org.apache.felix.dm.Component
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
-import org.opendaylight.controller.sal.binding.api.NotificationService
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter
 import org.opendaylight.controller.sal.compatibility.topology.TopologyAdapter
 import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider
@@ -39,12 +33,6 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
 import org.opendaylight.controller.sal.utils.GlobalConstants
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory
 import org.opendaylight.controller.sal.utils.INodeFactory
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService
-import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService
 import org.osgi.framework.BundleContext
 
 import static org.opendaylight.controller.sal.compatibility.NodeMapping.*
@@ -202,57 +190,5 @@ class ComponentActivator extends ComponentActivatorAbstractBase {
         props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString, MD_SAL_TYPE)
         props.put("protocolName", MD_SAL_TYPE);
         return props;
-    }
-}
-package class SalCompatibilityProvider implements BindingAwareProvider {
-    
-    private val ComponentActivator activator;
-    
-    new(ComponentActivator cmpAct) {
-        activator = cmpAct;
-    }
-    
-    override getFunctionality() {
-        // Noop
-    }
-    
-    override getImplementations() {
-        // Noop
-    }
-    
-    
-    override onSessionInitialized(ConsumerContext session) {
-        // Noop
-    }
-    
-    
-    override onSessionInitiated(ProviderContext session) {
-        val it = activator
-                val subscribe = session.getSALService(NotificationService)
-
-        // Registration of Flow Service
-        flow.delegate = session.getRpcService(SalFlowService)
-        flow.dataBrokerService = session.getSALService(DataBrokerService);
-        subscribe.registerNotificationListener(flow);
-
-        // Data Packet Service
-        subscribe.registerNotificationListener(inventory);
-        dataPacketService.delegate = session.getRpcService(PacketProcessingService)
-
-        // Inventory Service
-        inventory.dataService = session.getSALService(DataBrokerService);
-        inventory.flowStatisticsService = session.getRpcService(OpendaylightFlowStatisticsService);
-        inventory.flowTableStatisticsService = session.getRpcService(OpendaylightFlowTableStatisticsService);
-        inventory.nodeConnectorStatisticsService = session.getRpcService(OpendaylightPortStatisticsService);
-        inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
-        inventory.dataProviderService = session.getSALService(DataProviderService)
-        topology.dataService = session.getSALService(DataProviderService)
-        tpProvider.dataService = session.getSALService(DataProviderService)
-
-        inventory.startAdapter();
-
-        tpProvider.startAdapter();
-
-        subscribe.registerNotificationListener(dataPacket)
     }
 }
