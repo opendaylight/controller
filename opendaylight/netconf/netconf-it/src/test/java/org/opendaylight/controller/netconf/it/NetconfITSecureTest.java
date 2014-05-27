@@ -16,13 +16,13 @@ import static org.mockito.Mockito.mock;
 
 import ch.ethz.ssh2.Connection;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import junit.framework.Assert;
@@ -50,16 +50,14 @@ import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
+import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.controller.sal.authorization.AuthResultEnum;
-import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 
 public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
     private static final InetSocketAddress tlsAddress = new InetSocketAddress("127.0.0.1", 12024);
-    private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
 
     private DefaultCommitNotificationProducer commitNot;
     private NetconfSSHServer sshServer;
@@ -79,13 +77,10 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
 
 
         final NetconfServerDispatcher dispatchS = createDispatcher(factoriesListener);
-        ChannelFuture s = dispatchS.createServer(tcpAddress);
+        ChannelFuture s = dispatchS.createLocalServer(NetconfConfigUtil.getNetconfLocalAddress());
         s.await();
-
-        sshServer = NetconfSSHServer.start(tlsAddress.getPort(), tcpAddress, getAuthProvider());
-        Thread thread = new Thread(sshServer);
-        thread.setDaemon(true);
-        thread.start();
+        EventLoopGroup bossGroup  = new NioEventLoopGroup();
+        sshServer = NetconfSSHServer.start(tlsAddress.getPort(), NetconfConfigUtil.getNetconfLocalAddress(), getAuthProvider(), bossGroup);
     }
 
     private NetconfServerDispatcher createDispatcher(NetconfOperationServiceFactoryListenerImpl factoriesListener) {
@@ -140,13 +135,10 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     public AuthProvider getAuthProvider() throws Exception {
-        final IUserManager userManager = mock(IUserManager.class);
-        doReturn(AuthResultEnum.AUTH_ACCEPT).when(userManager).authenticate(anyString(), anyString());
-
-        final File privateKeyFile = Files.createTempFile("tmp-netconf-test", "pk").toFile();
-        privateKeyFile.deleteOnExit();
-        String privateKeyPEMString = PEMGenerator.generateTo(privateKeyFile);
-        return new AuthProvider(userManager, privateKeyPEMString);
+        AuthProvider mock = mock(AuthProvider.class);
+        doReturn(true).when(mock).authenticated(anyString(), anyString());
+        doReturn(PEMGenerator.generate().toCharArray()).when(mock).getPEMAsCharArray();
+        return mock;
     }
 
     public AuthenticationHandler getAuthHandler() throws IOException {

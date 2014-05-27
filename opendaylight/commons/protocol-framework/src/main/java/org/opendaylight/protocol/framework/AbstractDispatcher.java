@@ -7,12 +7,16 @@
  */
 package org.opendaylight.protocol.framework;
 
+import com.google.common.base.Preconditions;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
+import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -21,14 +25,11 @@ import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
-
 import java.io.Closeable;
 import java.net.InetSocketAddress;
-
+import java.net.SocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Dispatcher class for creating servers and clients. The idea is to first create servers and clients and the run the
@@ -36,7 +37,8 @@ import com.google.common.base.Preconditions;
  */
 public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends SessionListener<?, ?, ?>> implements Closeable {
 
-    protected interface PipelineInitializer<S extends ProtocolSession<?>> {
+
+    protected interface ChannelPipelineInitializer<CH extends Channel, S extends ProtocolSession<?>> {
         /**
          * Initializes channel by specifying the handlers in its pipeline. Handlers are protocol specific, therefore this
          * method needs to be implemented in protocol specific Dispatchers.
@@ -44,7 +46,11 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
          * @param channel whose pipeline should be defined, also to be passed to {@link SessionNegotiatorFactory}
          * @param promise to be passed to {@link SessionNegotiatorFactory}
          */
-        void initializeChannel(SocketChannel channel, Promise<S> promise);
+        void initializeChannel(CH channel, Promise<S> promise);
+    }
+
+    protected interface PipelineInitializer<S extends ProtocolSession<?>> extends ChannelPipelineInitializer<SocketChannel, S> {
+
     }
 
 
@@ -76,25 +82,43 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      * @return ChannelFuture representing the binding process
      */
     protected ChannelFuture createServer(final InetSocketAddress address, final PipelineInitializer<S> initializer) {
+        return createServer(address, NioServerSocketChannel.class, initializer);
+    }
+
+    /**
+     * Creates server. Each server needs factories to pass their instances to client sessions.
+     *
+     * @param address address to which the server should be bound
+     * @param channelClass The {@link Class} which is used to create {@link Channel} instances from.
+     * @param initializer instance of PipelineInitializer used to initialize the channel pipeline
+     *
+     * @return ChannelFuture representing the binding process
+     */
+    protected <CH extends Channel> ChannelFuture createServer(SocketAddress address, Class<? extends ServerChannel> channelClass,
+                                                              final ChannelPipelineInitializer<CH, S> initializer) {
         final ServerBootstrap b = new ServerBootstrap();
-        b.childHandler(new ChannelInitializer<SocketChannel>() {
+        b.childHandler(new ChannelInitializer<CH>() {
 
             @Override
-            protected void initChannel(final SocketChannel ch) {
+            protected void initChannel(final CH ch) {
                 initializer.initializeChannel(ch, new DefaultPromise<S>(executor));
             }
         });
 
         b.option(ChannelOption.SO_BACKLOG, 128);
-        b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        if (LocalServerChannel.class.equals(channelClass) == false) {
+            // makes no sense for LocalServer and produces warning
+            b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        }
         customizeBootstrap(b);
 
         if (b.group() == null) {
             b.group(bossGroup, workerGroup);
         }
         try {
-            b.channel(NioServerSocketChannel.class);
+            b.channel(channelClass);
         } catch (IllegalStateException e) {
+            // FIXME: if this is ok, document why
             LOG.trace("Not overriding channelFactory on bootstrap {}", b, e);
         }
 

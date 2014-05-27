@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -17,6 +16,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.netty.channel.ChannelFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -29,10 +32,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -66,32 +67,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.netty.channel.ChannelFuture;
-
 public class NetconfITTest extends AbstractNetconfConfigTest {
 
     // TODO refactor, pull common code up to AbstractNetconfITTest
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfITTest.class);
-
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
-    private static final InetSocketAddress sshAddress = new InetSocketAddress("127.0.0.1", 10830);
-    private static final String USERNAME = "netconf";
-    private static final String PASSWORD = "netconf";
 
-    private NetconfMessage getConfig, getConfigCandidate, editConfig,
-            closeSession, startExi, stopExi;
+
+    private NetconfMessage getConfig, getConfigCandidate, editConfig, closeSession;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch;
 
@@ -139,10 +128,6 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         this.editConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/edit_config.xml");
         this.getConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
         this.getConfigCandidate = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig_candidate.xml");
-        this.startExi = XmlFileLoader
-                .xmlFileToNetconfMessage("netconfMessages/startExi.xml");
-        this.stopExi = XmlFileLoader
-                .xmlFileToNetconfMessage("netconfMessages/stopExi.xml");
         this.closeSession = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/closeSession.xml");
     }
 
@@ -166,7 +151,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
                 yangDependencies.add(resourceAsStream);
             }
         }
-        assertEquals("Some yang files were not found", emptyList(), failedToFind);
+        assertEquals("Some yang files were not found", Collections.<String>emptyList(), failedToFind);
         return yangDependencies;
     }
 
@@ -198,6 +183,7 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
     public void testTwoSessions() throws Exception {
         try (TestingNetconfClient netconfClient = new TestingNetconfClient("1", clientDispatcher, getClientConfiguration(tcpAddress, 10000)))  {
             try (TestingNetconfClient netconfClient2 = new TestingNetconfClient("2", clientDispatcher, getClientConfiguration(tcpAddress, 10000))) {
+                assertNotNull(netconfClient2.getCapabilities());
             }
         }
     }

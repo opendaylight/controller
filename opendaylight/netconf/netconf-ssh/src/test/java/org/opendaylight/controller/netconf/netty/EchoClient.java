@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.netconf.netty;
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalChannel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Sends one message when a connection is open and echoes back any received
+ * data to the server.  Simply put, the echo client initiates the ping-pong
+ * traffic between the echo client and server by sending the first message to
+ * the server.
+ */
+public class EchoClient implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(EchoClient.class);
+
+    private final ChannelHandler clientHandler;
+
+
+    public EchoClient(ChannelHandler clientHandler) {
+        this.clientHandler = clientHandler;
+    }
+
+    public void run() {
+        // Configure the client.
+        EventLoopGroup group = new NioEventLoopGroup();
+        try {
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(LocalChannel.class)
+                    .handler(new ChannelInitializer<LocalChannel>() {
+                        @Override
+                        public void initChannel(LocalChannel ch) throws Exception {
+                            ch.pipeline().addLast(clientHandler);
+                        }
+                    });
+
+            // Start the client.
+            LocalAddress localAddress = new LocalAddress("foo");
+            ChannelFuture f = b.connect(localAddress).sync();
+
+            // Wait until the connection is closed.
+            f.channel().closeFuture().sync();
+        } catch (Exception e) {
+            logger.error("Error in client", e);
+            throw new RuntimeException("Error in client", e);
+        } finally {
+            // Shut down the event loop to terminate all threads.
+            logger.info("Client is shutting down");
+            group.shutdownGracefully();
+        }
+    }
+}

@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.netconf.nettyutil;
 
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.Channel;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.nettyutil.handler.FramingMechanismHandlerFactory;
@@ -25,7 +25,7 @@ public abstract class AbstractChannelInitializer<S extends NetconfSession> {
     public static final String NETCONF_MESSAGE_FRAME_ENCODER = "frameEncoder";
     public static final String NETCONF_SESSION_NEGOTIATOR = "negotiator";
 
-    public void initialize(SocketChannel ch, Promise<S> promise) {
+    public void initialize(Channel ch, Promise<S> promise) {
         ch.pipeline().addLast(NETCONF_MESSAGE_AGGREGATOR, new NetconfEOMAggregator());
         initializeMessageDecoder(ch);
         ch.pipeline().addLast(NETCONF_MESSAGE_FRAME_ENCODER, FramingMechanismHandlerFactory.createHandler(FramingMechanism.EOM));
@@ -34,13 +34,13 @@ public abstract class AbstractChannelInitializer<S extends NetconfSession> {
         initializeSessionNegotiator(ch, promise);
     }
 
-    protected void initializeMessageEncoder(SocketChannel ch) {
+    protected void initializeMessageEncoder(Channel ch) {
         // Special encoding handler for hello message to include additional header if available,
         // it is thrown away after successful negotiation
         ch.pipeline().addLast(NETCONF_MESSAGE_ENCODER, new NetconfHelloMessageToXMLEncoder());
     }
 
-    protected void initializeMessageDecoder(SocketChannel ch) {
+    protected void initializeMessageDecoder(Channel ch) {
         // Special decoding handler for hello message to parse additional header if available,
         // it is thrown away after successful negotiation
         ch.pipeline().addLast(NETCONF_MESSAGE_DECODER, new NetconfXMLToHelloMessageDecoder());
@@ -50,6 +50,6 @@ public abstract class AbstractChannelInitializer<S extends NetconfSession> {
      * Insert session negotiator into the pipeline. It must be inserted after message decoder
      * identified by {@link AbstractChannelInitializer#NETCONF_MESSAGE_DECODER}, (or any other custom decoder processor)
      */
-    protected abstract void initializeSessionNegotiator(SocketChannel ch, Promise<S> promise);
+    protected abstract void initializeSessionNegotiator(Channel ch, Promise<S> promise);
 
 }

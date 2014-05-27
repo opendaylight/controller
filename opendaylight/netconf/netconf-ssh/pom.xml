@@ -56,21 +56,25 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.7</version>
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.ssh.osgi.NetconfSSHActivator</Bundle-Activator>
             <Import-Package>com.google.common.base,
-                            ch.ethz.ssh2,
-                            ch.ethz.ssh2.signature,
-                            org.apache.commons.io,
-                            org.opendaylight.controller.netconf.util.osgi,
-                            org.opendaylight.controller.usermanager,
-                            org.opendaylight.controller.sal.authorization,
-                            org.opendaylight.controller.sal.utils,
-                            org.osgi.framework,
-                            org.osgi.util.tracker,
-                            org.slf4j,
-                            org.bouncycastle.openssl</Import-Package>
+              ch.ethz.ssh2,
+              ch.ethz.ssh2.signature,
+              org.apache.commons.io,
+              org.opendaylight.controller.netconf.util.osgi,
+              org.opendaylight.controller.usermanager,
+              org.opendaylight.controller.sal.authorization,
+              org.opendaylight.controller.sal.utils,
+              org.osgi.framework,
+              org.osgi.util.tracker,
+              org.slf4j,
+              org.bouncycastle.openssl,
+              io.netty.bootstrap, io.netty.buffer, io.netty.channel, io.netty.channel.local, io.netty.channel.nio,
+              io.netty.handler.stream, io.netty.util.concurrent, org.apache.commons.lang3,
+              org.opendaylight.controller.netconf.util.messages</Import-Package>
           </instructions>
         </configuration>
       </plugin>

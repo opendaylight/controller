@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import io.netty.channel.local.LocalAddress;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
 import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
@@ -26,9 +27,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.HashedWheelTimer;
-
 public class NetconfImplActivator implements BundleActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfImplActivator.class);
@@ -40,16 +38,15 @@ public class NetconfImplActivator implements BundleActivator {
     private ServiceRegistration<NetconfMonitoringService> regMonitoring;
 
     @Override
-    public void start(final BundleContext context) {
-        final InetSocketAddress address = NetconfConfigUtil.extractTCPNetconfServerAddress(context,
-                NetconfConfigUtil.DEFAULT_NETCONF_TCP_ADDRESS);
-        final NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
+    public void start(final BundleContext context)  {
+
+        NetconfOperationServiceFactoryListenerImpl factoriesListener = new NetconfOperationServiceFactoryListenerImpl();
         startOperationServiceFactoryTracker(context, factoriesListener);
 
-        final SessionIdProvider idProvider = new SessionIdProvider();
+        SessionIdProvider idProvider = new SessionIdProvider();
         timer = new HashedWheelTimer();
-
         long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
+
 
         commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
@@ -62,24 +59,24 @@ public class NetconfImplActivator implements BundleActivator {
 
         NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory);
+        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
-        NetconfServerDispatcher dispatch = new NetconfServerDispatcher(serverChannelInitializer, eventLoopGroup,
-                eventLoopGroup);
-
-        logger.info("Starting TCP netconf server at {}", address);
-        dispatch.createServer(address);
+        LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
+        logger.trace("Starting local netconf server at {}", address);
+        dispatch.createLocalServer(address);
 
         context.registerService(NetconfOperationProvider.class, factoriesListener, null);
+
     }
 
-    private void startOperationServiceFactoryTracker(final BundleContext context, final NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+    private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
         factoriesTracker = new NetconfOperationServiceFactoryTracker(context, factoriesListener);
         factoriesTracker.open();
     }
 
-    private NetconfMonitoringServiceImpl startMonitoringService(final BundleContext context, final NetconfOperationServiceFactoryListenerImpl factoriesListener) {
-        final NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl(factoriesListener);
-        final Dictionary<String, ?> dic = new Hashtable<>();
+    private NetconfMonitoringServiceImpl startMonitoringService(BundleContext context, NetconfOperationServiceFactoryListenerImpl factoriesListener) {
+        NetconfMonitoringServiceImpl netconfMonitoringServiceImpl = new NetconfMonitoringServiceImpl(factoriesListener);
+        Dictionary<String, ?> dic = new Hashtable<>();
         regMonitoring = context.registerService(NetconfMonitoringService.class, netconfMonitoringServiceImpl, dic);
 
         return netconfMonitoringServiceImpl;
