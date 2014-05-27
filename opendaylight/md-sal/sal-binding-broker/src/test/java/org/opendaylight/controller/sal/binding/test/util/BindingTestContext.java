@@ -45,7 +45,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
-import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -85,12 +84,9 @@ public class BindingTestContext implements AutoCloseable {
     private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
     private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataLegacyBroker;
     private BrokerImpl biBrokerImpl;
-    private HashMapDataStore rawDataStore;
     private SchemaAwareDataStoreAdapter schemaAwareDataStore;
     private DataStoreStatsWrapper dataStoreStats;
     private DataStore dataStore;
-
-    private final boolean dataStoreStatisticsEnabled = false;
 
     private final ListeningExecutorService executor;
     private final ClassPool classPool;
@@ -121,25 +117,6 @@ public class BindingTestContext implements AutoCloseable {
         this.executor = executor;
         this.classPool = classPool;
         this.startWithSchema = startWithSchema;
-    }
-
-    @Deprecated
-    public void startDomDataStore() {
-        checkState(dataStore == null, "DataStore already started.");
-        checkState(biDataImpl != null, "Dom Data Broker not present");
-        rawDataStore = new HashMapDataStore();
-        schemaAwareDataStore = new SchemaAwareDataStoreAdapter();
-        schemaAwareDataStore.changeDelegate(rawDataStore);
-        if (dataStoreStatisticsEnabled) {
-            dataStoreStats = new DataStoreStatsWrapper(schemaAwareDataStore);
-            dataStore = dataStoreStats;
-        } else {
-            dataStore = schemaAwareDataStore;
-        }
-        mockSchemaService.registerSchemaServiceListener(schemaAwareDataStore);
-        biDataImpl.registerConfigurationReader(TREE_ROOT, dataStore);
-        biDataImpl.registerOperationalReader(TREE_ROOT, dataStore);
-        biDataImpl.registerCommitHandler(TREE_ROOT, dataStore);
     }
 
     public void startDomDataBroker() {
@@ -300,7 +277,6 @@ public class BindingTestContext implements AutoCloseable {
         startBindingNotificationBroker();
         startBindingBroker();
         startDomDataBroker();
-        startDomDataStore();
         startDomBroker();
         startDomMountPoint();
         startBindingToDomMappingService();
