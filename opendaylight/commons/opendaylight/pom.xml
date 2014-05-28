@@ -1395,6 +1395,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>util</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>object-cache-api</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
