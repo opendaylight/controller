@@ -95,16 +95,9 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected TreeNode applyWrite(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
-        final Version nodeVersion;
-        if (currentMeta.isPresent()) {
-            nodeVersion = currentMeta.get().getVersion().next();
-        } else {
-            nodeVersion = subtreeVersion;
-        }
-
+            final Optional<TreeNode> currentMeta, final Version version) {
         final NormalizedNode<?, ?> newValue = modification.getWrittenValue();
-        final TreeNode newValueMeta = TreeNodeFactory.createTreeNode(newValue, nodeVersion);
+        final TreeNode newValueMeta = TreeNodeFactory.createTreeNode(newValue, version);
 
         if (Iterables.isEmpty(modification.getChildren())) {
             return newValueMeta;
@@ -122,12 +115,12 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
          * and run the common parts on it -- which end with the node being sealed.
          */
         final MutableTreeNode mutable = newValueMeta.mutable();
-        mutable.setSubtreeVersion(subtreeVersion);
+        mutable.setSubtreeVersion(version);
 
         @SuppressWarnings("rawtypes")
         final NormalizedNodeContainerBuilder dataBuilder = createBuilder(newValue);
 
-        return mutateChildren(mutable, dataBuilder, nodeVersion, modification.getChildren());
+        return mutateChildren(mutable, dataBuilder, version, modification.getChildren());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -155,24 +148,21 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-            final Version subtreeVersion) {
+            final Version version) {
         // For Node Containers - merge is same as subtree change - we only replace children.
-        return applySubtreeChange(modification, currentMeta, subtreeVersion);
+        return applySubtreeChange(modification, currentMeta, version);
     }
 
     @Override
     public TreeNode applySubtreeChange(final ModifiedNode modification,
-            final TreeNode currentMeta, final Version subtreeVersion) {
-        // Bump subtree version to its new target
-        final Version updatedSubtreeVersion = currentMeta.getSubtreeVersion().next();
-
+            final TreeNode currentMeta, final Version version) {
         final MutableTreeNode newMeta = currentMeta.mutable();
-        newMeta.setSubtreeVersion(updatedSubtreeVersion);
+        newMeta.setSubtreeVersion(version);
 
         @SuppressWarnings("rawtypes")
         NormalizedNodeContainerBuilder dataBuilder = createBuilder(currentMeta.getData());
 
-        return mutateChildren(newMeta, dataBuilder, updatedSubtreeVersion, modification.getChildren());
+        return mutateChildren(newMeta, dataBuilder, version, modification.getChildren());
     }
 
     @Override

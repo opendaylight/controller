@@ -50,7 +50,7 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      * @param storeMeta
      *            Store Metadata Node on which NodeModification should be
      *            applied
-     * @param subtreeVersion New subtree version of parent node
+     * @param version New subtree version of parent node
      * @throws IllegalArgumentException
      *             If it is not possible to apply Operation on provided Metadata
      *             node
@@ -58,7 +58,7 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      *         node, {@link Optional#absent()} if {@link ModifiedNode}
      *         resulted in deletion of this node.
      */
-    Optional<TreeNode> apply(ModifiedNode modification, Optional<TreeNode> storeMeta, Version subtreeVersion);
+    Optional<TreeNode> apply(ModifiedNode modification, Optional<TreeNode> storeMeta, Version version);
 
     /**
      *
