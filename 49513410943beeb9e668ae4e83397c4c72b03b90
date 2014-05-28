@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7de145cf",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "can we load these one by one, and have debugs inbetween?",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3debbdb1",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "final class with private constructor (which throws UnsupportedOperationException)",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ddd171fc",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "final",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fdcc7563",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "precompile the implicit Pattern here",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9ddbe91a",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigurationLoader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "2014 (and in other places)",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5d056178",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigurationLoader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "final, private contructor",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1dffd968",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigurationLoader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "final",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3d02dd6f",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigurationLoader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "(Object... args), to support variadic arguments",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fdf3159d",
+        "filename": "opendaylight/config/logback-config-loader/src/main/java/org/opendaylight/controller/logback/config/loader/impl/LogbackConfigurationLoader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "If not?",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9df20999",
+        "filename": "opendaylight/config/logback-config-loader/src/test/java/org/opendaylight/controller/logback/config/loader/test/TestAppender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-28T12:34:02Z",
+      "side": 1,
+      "message": "Can we perhaps mock it using Mockito?",
+      "revId": "49513410943beeb9e668ae4e83397c4c72b03b90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
