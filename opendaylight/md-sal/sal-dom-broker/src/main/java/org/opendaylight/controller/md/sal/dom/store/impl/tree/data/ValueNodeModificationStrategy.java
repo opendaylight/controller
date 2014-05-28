@@ -48,22 +48,22 @@ abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends S
 
     @Override
     protected TreeNode applySubtreeChange(final ModifiedNode modification,
-            final TreeNode currentMeta, final Version subtreeVersion) {
+            final TreeNode currentMeta, final Version version) {
         throw new UnsupportedOperationException("Node " + schema.getPath()
                 + "is leaf type node. Subtree change is not allowed.");
     }
 
     @Override
     protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-            final Version subtreeVersion) {
+            final Version version) {
         // Just overwrite whatever was there
-        return applyWrite(modification, null, subtreeVersion);
+        return applyWrite(modification, null, version);
     }
 
     @Override
     protected TreeNode applyWrite(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
-        return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), subtreeVersion);
+            final Optional<TreeNode> currentMeta, final Version version) {
+        return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), version);
     }
 
     @Override

@@ -16,7 +16,7 @@ import com.google.common.base.Optional;
 final class AlwaysFailOperation implements ModificationApplyOperation {
     @Override
     public Optional<TreeNode> apply(final ModifiedNode modification,
-            final Optional<TreeNode> storeMeta, final Version subtreeVersion) {
+            final Optional<TreeNode> storeMeta, final Version version) {
         throw new IllegalStateException("Schema Context is not available.");
     }
 

@@ -184,7 +184,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
     @Override
     public final Optional<TreeNode> apply(final ModifiedNode modification,
-            final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
+            final Optional<TreeNode> currentMeta, final Version version) {
 
         switch (modification.getType()) {
         case DELETE:
@@ -193,13 +193,13 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
             Preconditions.checkArgument(currentMeta.isPresent(), "Metadata not available for modification",
                     modification);
             return modification.storeSnapshot(Optional.of(applySubtreeChange(modification, currentMeta.get(),
-                    subtreeVersion)));
+                    version)));
         case MERGE:
             if(currentMeta.isPresent()) {
-                return modification.storeSnapshot(Optional.of(applyMerge(modification,currentMeta.get(),subtreeVersion)));
+                return modification.storeSnapshot(Optional.of(applyMerge(modification,currentMeta.get(), version)));
             } // Fallback to write is intentional - if node is not preexisting merge is same as write
         case WRITE:
-            return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, subtreeVersion)));
+            return modification.storeSnapshot(Optional.of(applyWrite(modification, currentMeta, version)));
         case UNMODIFIED:
             return currentMeta;
         default:
@@ -208,13 +208,13 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     }
 
     protected abstract TreeNode applyMerge(ModifiedNode modification,
-            TreeNode currentMeta, Version subtreeVersion);
+            TreeNode currentMeta, Version version);
 
     protected abstract TreeNode applyWrite(ModifiedNode modification,
-            Optional<TreeNode> currentMeta, Version subtreeVersion);
+            Optional<TreeNode> currentMeta, Version version);
 
     protected abstract TreeNode applySubtreeChange(ModifiedNode modification,
-            TreeNode currentMeta, Version subtreeVersion);
+            TreeNode currentMeta, Version version);
 
     protected abstract void checkSubtreeModificationApplicable(InstanceIdentifier path, final NodeModification modification,
             final Optional<TreeNode> current) throws DataPreconditionFailedException;
@@ -231,20 +231,20 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
         @Override
         protected TreeNode applyMerge(final ModifiedNode modification, final TreeNode currentMeta,
-                final Version subtreeVersion) {
-            return applyWrite(modification, Optional.of(currentMeta), subtreeVersion);
+                final Version version) {
+            return applyWrite(modification, Optional.of(currentMeta), version);
         }
 
         @Override
         protected TreeNode applySubtreeChange(final ModifiedNode modification,
-                final TreeNode currentMeta, final Version subtreeVersion) {
+                final TreeNode currentMeta, final Version version) {
             throw new UnsupportedOperationException("UnkeyedList does not support subtree change.");
         }
 
         @Override
         protected TreeNode applyWrite(final ModifiedNode modification,
-                final Optional<TreeNode> currentMeta, final Version subtreeVersion) {
-            return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), subtreeVersion);
+                final Optional<TreeNode> currentMeta, final Version version) {
+            return TreeNodeFactory.createTreeNode(modification.getWrittenValue(), version);
         }
 
         @Override

@@ -44,8 +44,8 @@ final class OperationWithModification {
         return applyOperation;
     }
 
-    public Optional<TreeNode> apply(final Optional<TreeNode> data, final Version subtreeVersion) {
-        return applyOperation.apply(modification, data, subtreeVersion);
+    public Optional<TreeNode> apply(final Optional<TreeNode> data, final Version version) {
+        return applyOperation.apply(modification, data, version);
     }
 
     public static OperationWithModification from(final ModificationApplyOperation operation,
