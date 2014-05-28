@@ -1413,6 +1413,11 @@
         <artifactId>restconf-client-impl</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>util</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
 
       <!-- yangtools dependencies -->
       <dependency>
