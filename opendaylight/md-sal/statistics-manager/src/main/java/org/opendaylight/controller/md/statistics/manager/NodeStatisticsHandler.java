@@ -313,6 +313,9 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         meterStats.close();
         queueStats.close();
 
+        //Clean up queued statistics request from scheduler queue 
+        srScheduler.removeRequestsFromSchedulerQueue(this.getNodeRef());
+
         logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());
     }
 

@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction.DataTransactionListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,19 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
         requestQueue.put(statsRequest, null);
     }
     
+    public void removeRequestsFromSchedulerQueue(NodeRef node){
+        AbstractStatsTracker stats = null;
+        synchronized(requestQueue){
+            Iterator<Map.Entry<AbstractStatsTracker, Integer>> nodesItr = requestQueue.entrySet().iterator();
+            while(nodesItr.hasNext()){
+                stats = nodesItr.next().getKey();
+                if(stats.getNodeRef().equals(node)){
+                    nodesItr.remove();
+                }
+            }
+        }
+
+    }
     public AbstractStatsTracker getNextRequestFromSchedulerQueue(){
         //Remove first element
         AbstractStatsTracker stats = null;
@@ -79,10 +93,7 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
 
     private void requestStatistics(){
         AbstractStatsTracker stats = this.getNextRequestFromSchedulerQueue();
-        if(stats != null) {
-            stats.request();
-            stats.increaseRequestCounter();
-        }
+        sendStatsRequest(stats);
     }
     @Override
     public void onStatusUpdated(DataModificationTransaction transaction, TransactionStatus status) {
@@ -106,12 +117,19 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
                 break;
             }
         }
-        if(stats != null){
-            stats.request();
-            stats.increaseRequestCounter();
-        }
+        sendStatsRequest(stats);
     }
     
+    private void sendStatsRequest(AbstractStatsTracker stats){
+        if(stats != null){
+            try{
+                stats.request();
+                stats.increaseRequestCounter();
+            }catch(Exception e){
+                srsLogger.warn("Statistics request was not sent successfully. Reason : {}",e.getMessage());
+            }
+        }
+    }
     public void start(){
         timer.schedule(task, 0, REQUEST_MONITOR_INTERVAL);
     }
