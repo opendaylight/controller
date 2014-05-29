@@ -8,13 +8,6 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,21 +31,11 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.rpc.impl.BrokerRpcExecutor;
 import org.opendaylight.controller.sal.restconf.rpc.impl.MountPointRpcExecutor;
 import org.opendaylight.controller.sal.restconf.rpc.impl.RpcExecutor;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
-import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.RestCodec;
-import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
@@ -83,6 +66,13 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
+
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class RestconfImpl implements RestconfService {
     private final static RestconfImpl INSTANCE = new RestconfImpl();
@@ -401,11 +391,34 @@ public class RestconfImpl implements RestconfService {
         URI rpcNamespace = rpcName.getNamespace();
         if (Objects.equal(rpcNamespace.toString(), SAL_REMOTE_NAMESPACE) &&
             Objects.equal(rpcName.getLocalName(), SAL_REMOTE_RPC_SUBSRCIBE)) {
-
             return invokeSalRemoteRpcSubscribeRPC(payload, rpc.getRpcDefinition());
         }
 
+        validateInput( rpc.getRpcDefinition().getInput(), payload );
+
         return callRpc(rpc, payload);
+    }
+
+    private void validateInput(DataSchemaNode inputSchema, CompositeNode payload) {
+        if( inputSchema != null && payload == null )
+        {
+            //expected a non null payload
+            throw new RestconfDocumentedException( "Input is required.",
+                                                   ErrorType.PROTOCOL,
+                                                   ErrorTag.MALFORMED_MESSAGE );
+        }
+        else if( inputSchema == null && payload != null )
+        {
+            //did not expect any input
+            throw new RestconfDocumentedException( "No input expected.",
+                                                   ErrorType.PROTOCOL,
+                                                   ErrorTag.MALFORMED_MESSAGE );
+        }
+        //else
+        //{
+            //TODO: Validate "mandatory" and "config" values here??? Or should those be
+        // validate in a more central location inside MD-SAL core.
+        //}
     }
 
     private StructuredData invokeSalRemoteRpcSubscribeRPC(final CompositeNode payload,
@@ -455,8 +468,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException(
                     "Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
-        final RpcExecutor rpc = resolveIdentifierInInvokeRpc(identifier);
-        return callRpc(rpc, null);
+        return invokeRpc( identifier, (CompositeNode)null );
     }
 
     private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
@@ -586,6 +598,9 @@ public class RestconfImpl implements RestconfService {
     @Override
     public Response updateConfigurationData(final String identifier, final CompositeNode payload) {
         final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+
+        validateInput(iiWithData.getSchemaNode(), payload);
+
         MountInstance mountPoint = iiWithData.getMountPoint();
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
         RpcResult<TransactionStatus> status = null;
@@ -610,6 +625,12 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response createConfigurationData(final String identifier, final CompositeNode payload) {
+        if( payload == null ) {
+            throw new RestconfDocumentedException( "Input is required.",
+                    ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE );
+        }
+
         URI payloadNS = this.namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
@@ -685,6 +706,12 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response createConfigurationData(final CompositeNode payload) {
+        if( payload == null ) {
+            throw new RestconfDocumentedException( "Input is required.",
+                    ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE );
+        }
+
         URI payloadNS = this.namespace(payload);
         if (payloadNS == null) {
             throw new RestconfDocumentedException(
