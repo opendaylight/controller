@@ -107,6 +107,7 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
                 nodeConnectorFactory,
                 topology,
                 tpProvider,
+                this // Used for setBroker callback
         };
     }
 

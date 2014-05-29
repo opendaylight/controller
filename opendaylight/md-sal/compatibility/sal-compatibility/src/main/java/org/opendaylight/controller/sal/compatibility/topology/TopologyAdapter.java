@@ -23,8 +23,10 @@ public class TopologyAdapter implements IPluginInTopologyService {
     private final InstanceIdentifier<Topology> topology = InstanceIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("flow:1"))).toInstance();
 
-    // FIXME: seems to be unused
+    // Injected via Apache DM
     private IPluginOutTopologyService topologyPublisher;
+
+
     private DataProviderService dataService;
 
     public void setDataService(final DataProviderService dataService) {
@@ -36,5 +38,13 @@ public class TopologyAdapter implements IPluginInTopologyService {
         final TypeSafeDataReader reader = TypeSafeDataReader.forReader(dataService);
         final Topology t = reader.readOperationalData(topology);
         topologyPublisher.edgeUpdate(TopologyMapping.toADEdgeUpdates(t, reader));
+    }
+
+    public IPluginOutTopologyService getTopologyPublisher() {
+        return topologyPublisher;
+    }
+
+    public void setTopologyPublisher(final IPluginOutTopologyService topologyPublisher) {
+        this.topologyPublisher = topologyPublisher;
     }
 }
