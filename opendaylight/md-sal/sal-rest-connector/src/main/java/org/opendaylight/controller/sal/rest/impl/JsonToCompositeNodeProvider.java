@@ -38,7 +38,7 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return true;
+        return type.equals( CompositeNode.class );
     }
 
     @Override
@@ -50,9 +50,9 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
             return jsonReader.read(entityStream);
         } catch (Exception e) {
             LOG.debug( "Error parsing json input", e );
-            throw new RestconfDocumentedException(
-                            "Error parsing input: " + e.getMessage(),
-                            ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE );
+            throw new RestconfDocumentedException( "Error parsing input: " + e.getMessage(),
+                                                   ErrorType.PROTOCOL,
+                                                   ErrorTag.MALFORMED_MESSAGE );
         }
     }
 
