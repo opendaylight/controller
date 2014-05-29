@@ -147,6 +147,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>logback-config</artifactId>
       <scope>test</scope>
@@ -166,11 +171,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-broker-impl</artifactId>
       <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>mockito-configuration</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
