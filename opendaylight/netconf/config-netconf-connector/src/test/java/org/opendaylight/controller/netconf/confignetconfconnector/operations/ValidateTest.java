@@ -11,9 +11,9 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 

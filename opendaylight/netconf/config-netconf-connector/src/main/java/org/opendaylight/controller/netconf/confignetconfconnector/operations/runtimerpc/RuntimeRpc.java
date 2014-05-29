@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ru
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.AttributeMappingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectMapper;
@@ -31,7 +33,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStore
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
+
 import java.util.Map;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
