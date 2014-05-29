@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml;
 
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectNameAttributeMappingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
