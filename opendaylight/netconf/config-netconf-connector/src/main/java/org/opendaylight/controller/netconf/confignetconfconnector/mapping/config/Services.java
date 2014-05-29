@@ -11,16 +11,18 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.confi
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;

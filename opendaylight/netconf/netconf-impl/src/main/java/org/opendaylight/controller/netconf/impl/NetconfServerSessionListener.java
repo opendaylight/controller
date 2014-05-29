@@ -11,16 +11,17 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -9,14 +9,15 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Preconditions;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import java.io.InputStream;
-import java.util.Map.Entry;
 
 public final class SendErrorExceptionUtil {
     private static final Logger logger = LoggerFactory.getLogger(SendErrorExceptionUtil.class);
@@ -86,56 +81,8 @@ public final class SendErrorExceptionUtil {
         }
     }
 
-    private static XPathExpression rpcErrorExpression = XMLNetconfUtil
-            .compileXPath("/netconf:rpc-reply/netconf:rpc-error");
-    private static XPathExpression errorTypeExpression = XMLNetconfUtil.compileXPath("netconf:error-type");
-    private static XPathExpression errorTagExpression = XMLNetconfUtil.compileXPath("netconf:error-tag");
-    private static XPathExpression errorSeverityExpression = XMLNetconfUtil.compileXPath("netconf:error-severity");
-
     private static Document createDocument(final NetconfDocumentedException sendErrorException) {
-
-        final InputStream errIS = SendErrorExceptionUtil.class.getResourceAsStream("server_error.xml");
-        Document originalErrorDocument;
-        try {
-            originalErrorDocument = XmlUtil.readXmlToDocument(errIS);
-        } catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
-
-        final Document errorDocument = XmlUtil.createDocumentCopy(originalErrorDocument);
-        final Node rootNode = errorDocument.getFirstChild();
-
-        final Node rpcErrorNode = (Node) XmlUtil.evaluateXPath(rpcErrorExpression, rootNode, XPathConstants.NODE);
-
-        final Node errorTypeNode = (Node) XmlUtil.evaluateXPath(errorTypeExpression, rpcErrorNode, XPathConstants.NODE);
-        errorTypeNode.setTextContent(sendErrorException.getErrorType().getTagValue());
-
-        final Node errorTagNode = (Node) XmlUtil.evaluateXPath(errorTagExpression, rpcErrorNode, XPathConstants.NODE);
-        errorTagNode.setTextContent(sendErrorException.getErrorTag().getTagValue());
-
-        final Node errorSeverityNode = (Node) XmlUtil.evaluateXPath(errorSeverityExpression, rpcErrorNode,
-                XPathConstants.NODE);
-        errorSeverityNode.setTextContent(sendErrorException.getErrorSeverity().getTagValue());
-
-        if (sendErrorException.getErrorInfo() != null && !sendErrorException.getErrorInfo().isEmpty()) {
-            /*
-             * <error-info> <bad-attribute>message-id</bad-attribute>
-             * <bad-element>rpc</bad-element> </error-info>
-             */
-            final Node errorInfoNode = errorDocument.createElementNS(
-                    XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, "error-info");
-
-            errorInfoNode.setPrefix(rootNode.getPrefix());
-            rpcErrorNode.appendChild(errorInfoNode);
-            for (final Entry<String, String> errorInfoEntry : sendErrorException.getErrorInfo().entrySet()) {
-                final Node node = errorDocument.createElementNS(
-                        XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, errorInfoEntry.getKey());
-                node.setTextContent(errorInfoEntry.getValue());
-                errorInfoNode.appendChild(node);
-            }
-
-        }
-        return errorDocument;
+        return sendErrorException.toXMLDocument();
     }
 
     /**

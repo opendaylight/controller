@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.netconf.util.xml;
+package org.opendaylight.controller.netconf.api.xml;
 
 public final class XmlNetconfConstants {
 
@@ -34,6 +34,13 @@ public final class XmlNetconfConstants {
     public static final String RPC_KEY = "rpc";
     public static final String RPC_REPLY_KEY = "rpc-reply";
     public static final String RPC_ERROR = "rpc-error";
+    public static final String ERROR_TYPE = "error-type";
+    public static final String ERROR_TAG = "error-tag";
+    public static final String ERROR_SEVERITY = "error-severity";
+    public static final String ERROR_APP_TAG = "error-app-tag";
+    public static final String ERROR_PATH = "error-path";
+    public static final String ERROR_MESSAGE = "error-message";
+    public static final String ERROR_INFO = "error-info";
     public static final String NAME_KEY = "name";
     public static final String NOTIFICATION_ELEMENT_NAME = "notification";
 
