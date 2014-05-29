@@ -1,0 +1,55 @@
+package org.opendaylight.controller.netconf.cli.reader.impl;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import jline.console.completer.Completer;
+import jline.console.completer.StringsCompleter;
+
+import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
+import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
+import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
+import org.opendaylight.controller.netconf.cli.reader.ReadingException;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+
+public class ContainerReader extends AbstractReader<ContainerSchemaNode> {
+
+    public ContainerReader(ConsoleIO console) {
+        super(console);
+    }
+
+    @Override
+    public List<Node<?>> readInner(ContainerSchemaNode containerNode) throws IOException, ReadingException {
+        CompositeNodeBuilder<ImmutableCompositeNode> compositeNodeBuilder = ImmutableCompositeNode.builder();
+        compositeNodeBuilder.setQName(containerNode.getQName());
+        for (DataSchemaNode childNode : containerNode.getChildNodes()) {
+            compositeNodeBuilder.addAll(new GenericReader(console).read(childNode));
+        }
+        CompositeNode newNode = compositeNodeBuilder.toInstance();
+        return Collections.<Node<?>> singletonList(newNode);
+    }
+
+    @Override
+    protected ConsoleContext getContext(final ContainerSchemaNode schemaNode) {
+        return new ConsoleContext() {
+
+            @Override
+            public String getPrompt() {
+                return schemaNode.getQName().getLocalName();
+            }
+
+            @Override
+            public Completer getCompleter() {
+                // FIXME
+                return new StringsCompleter();
+            }
+        };
+    }
+
+}
