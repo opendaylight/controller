@@ -1,0 +1,55 @@
+module netconf-cli {
+
+  namespace "netconf:cli";
+
+  prefix ncli;
+
+    revision 2014-05-22 {
+      description
+       "Initial revision.";
+    }
+
+  extension java-class {
+      description
+          "This could be used to link between rpc yang definition and custom command implementation";
+
+      argument "name";
+  }
+
+  rpc help {
+
+    input {
+       leaf arg {
+         type string;
+       }
+    }
+
+    output {
+      anyxml help {
+      }
+    }
+  }
+
+  rpc close {
+
+  }
+
+
+  rpc connect {
+
+      input {
+         leaf server {
+           type string;
+         }
+
+          leaf user {
+           type string;
+         }
+
+           leaf password {
+            type string;
+          }
+      }
+    }
+
+}
