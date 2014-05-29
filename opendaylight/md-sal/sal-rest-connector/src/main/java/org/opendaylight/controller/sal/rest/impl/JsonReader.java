@@ -31,6 +31,12 @@ class JsonReader {
         JsonParser parser = new JsonParser();
 
         JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
+        if( rootElement.isJsonNull() )
+        {
+            //no content, so return null to indicate no input
+            return null;
+        }
+
         if (!rootElement.isJsonObject()) {
             throw new UnsupportedFormatException("Root element of Json has to be Object");
         }

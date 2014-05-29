@@ -149,6 +149,8 @@ public class RestPostOperationTest extends JerseyTest {
 
         mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
+
+        assertEquals( 400, post(uri, MediaType.APPLICATION_JSON, "" ));
     }
 
     @Test
@@ -172,6 +174,8 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData4));
         uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(204, post(uri, Draft02.MediaTypes.DATA + XML, xmlData3));
+
+        assertEquals( 400, post(uri, MediaType.APPLICATION_JSON, "" ));
     }
 
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {

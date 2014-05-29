@@ -308,7 +308,7 @@ public class InvokeRpcMethodTest {
         ListenableFuture<RpcResult<CompositeNode>> mockListener = mock( ListenableFuture.class );
         when( mockListener.get() ).thenReturn( rpcResult );
 
-        QName cancelToastQName = QName.create( "cancelToast" );
+        QName cancelToastQName = QName.create( "namespace", "2014-05-28", "cancelToast" );
 
         RpcDefinition mockRpc = mock( RpcDefinition.class );
         when( mockRpc.getQName() ).thenReturn( cancelToastQName );
