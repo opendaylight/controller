@@ -16,6 +16,24 @@
       "revId": "c3acce135d19955f72616c4c956668bb539f80f2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e5713745",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-05-29T18:51:26Z",
+      "side": 1,
+      "message": "I believe so. The resolveValueOfElement method that is called after doesn\u0027t check for null so I didn\u0027t check here either.",
+      "parentUuid": "fa82b9bf_45a6e311",
+      "revId": "c3acce135d19955f72616c4c956668bb539f80f2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
