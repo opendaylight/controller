@@ -9,14 +9,18 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
 import com.google.common.collect.Maps;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
@@ -30,7 +34,6 @@ import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceExcept
 import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
 import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
