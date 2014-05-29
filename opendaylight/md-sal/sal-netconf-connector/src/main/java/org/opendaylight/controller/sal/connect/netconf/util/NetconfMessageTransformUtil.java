@@ -12,14 +12,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -36,6 +39,7 @@ import org.w3c.dom.Element;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -99,20 +103,68 @@ public class NetconfMessageTransformUtil {
         return new CompositeNodeTOImpl(argument.getNodeType(), null, list);
     }
 
-    public static void checkValidReply(final NetconfMessage input, final NetconfMessage output) {
+    public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
+        throws NetconfDocumentedException {
         final String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
         final String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
 
         if(inputMsgId.equals(outputMsgId) == false) {
-            final String requestXml = XmlUtil.toString(input.getDocument());
-            final String responseXml = XmlUtil.toString(output.getDocument());
-            throw new IllegalStateException(String.format("Rpc request and reply message IDs must be same. Request: %s, response: %s", requestXml, responseXml));
+            Map<String,String> errorInfo = ImmutableMap.<String,String>builder()
+                .put( "actual-message-id", outputMsgId )
+                .put( "expected-message-id", inputMsgId )
+                .build();
+
+            throw new NetconfDocumentedException( "Response message contained unknown \"message-id\"",
+                    null, NetconfDocumentedException.ErrorType.protocol,
+                    NetconfDocumentedException.ErrorTag.bad_attribute,
+                    NetconfDocumentedException.ErrorSeverity.error, errorInfo );
         }
     }
 
     public static void checkSuccessReply(final NetconfMessage output) throws NetconfDocumentedException {
         if(NetconfMessageUtil.isErrorMessage(output)) {
-            throw new IllegalStateException(String.format("Response contains error: %s", XmlUtil.toString(output.getDocument())));
+            throw NetconfDocumentedException.fromXMLDocument( output.getDocument() );
+        }
+    }
+
+    public static RpcError toRpcError( NetconfDocumentedException ex )
+    {
+        StringBuilder infoBuilder = new StringBuilder();
+        Map<String, String> errorInfo = ex.getErrorInfo();
+        if( errorInfo != null )
+        {
+            for( Entry<String,String> e: errorInfo.entrySet() ) {
+                infoBuilder.append( '<' ).append( e.getKey() ).append( '>' ).append( e.getValue() )
+                           .append( "</" ).append( e.getKey() ).append( '>' );
+
+            }
+        }
+
+        return RpcErrors.getRpcError( null, ex.getErrorTag().getTagValue(), infoBuilder.toString(),
+                                      toRpcErrorSeverity( ex.getErrorSeverity() ), ex.getLocalizedMessage(),
+                                      toRpcErrorType( ex.getErrorType() ), ex.getCause() );
+    }
+
+    private static ErrorSeverity toRpcErrorSeverity( NetconfDocumentedException.ErrorSeverity severity ) {
+        switch( severity ) {
+            case warning:
+                return RpcError.ErrorSeverity.WARNING;
+            default:
+                return RpcError.ErrorSeverity.ERROR;
+        }
+    }
+
+    private static RpcError.ErrorType toRpcErrorType( NetconfDocumentedException.ErrorType type )
+    {
+        switch( type ) {
+            case protocol:
+                return RpcError.ErrorType.PROTOCOL;
+            case rpc:
+                return RpcError.ErrorType.RPC;
+            case transport:
+                return RpcError.ErrorType.TRANSPORT;
+            default:
+                return RpcError.ErrorType.APPLICATION;
         }
     }
 
