@@ -19,7 +19,7 @@ import org.opendaylight.controller.netconf.nettyutil.handler.NetconfXMLToMessage
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
+public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSession, NetconfClientSessionListener> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
