@@ -27,6 +27,7 @@ public class TestHelper {
     public static Option mdSalCoreBundles() {
         return new DefaultCompositeOption( //
                 mavenBundle(YANGTOOLS, "concepts").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS, "util").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-binding").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), // //

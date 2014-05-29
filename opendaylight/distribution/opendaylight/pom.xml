@@ -1145,6 +1145,10 @@
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>restconf-client-impl</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>util</artifactId>
+        </dependency>
         <!-- yangtools dependencies I'm pretty sure we can trim -->
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
