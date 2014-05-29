@@ -10,17 +10,17 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
+
 /**
- *
- * Tree node which contains references to it's leafs
+ * A tree node which has references to its child leaves. This are typically
+ * internal non-data leaves, such as containers, lists, etc.
  *
  * @param <C> Final node type
  */
 public interface StoreTreeNode<C extends StoreTreeNode<C>> {
 
     /**
-     *
-     * Returns direct child of the node
+     * Returns a direct child of the node
      *
      * @param child Identifier of child
      * @return Optional with node if the child is existing, {@link Optional#absent()} otherwise.

@@ -131,7 +131,7 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public synchronized void seal() {
+    public synchronized void ready() {
         Preconditions.checkState(!sealed, "Attempted to seal an already-sealed Data Tree.");
         sealed = true;
         rootNode.seal();

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.builder;
-import static org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils.append;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -46,23 +45,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 /**
- *
  * Resolve Data Change Events based on modifications and listeners
  *
  * Computes data change events for all affected registered listeners in data
  * tree.
- *
- * Prerequisites for computation is to set all parameters properly:
- * <ul>
- * <li>{@link #setRootPath(InstanceIdentifier)} - Root path of datastore
- * <li>{@link #setListenerRoot(ListenerTree)} - Root of listener registration
- * tree, which contains listeners to be notified
- * <li>{@link #setModificationRoot(NodeModification)} - Modification root, for
- * which events should be computed
- * <li>{@link #setBeforeRoot(Optional)} - State of before modification occurred
- * <li>{@link #setAfterRoot(Optional)} - State of after modification occurred
- * </ul>
- *
  */
 final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListenerNotifyTask>> {
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
@@ -72,7 +58,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private final DataTreeCandidate candidate;
     private final ListenerTree listenerRoot;
 
-    public ResolveDataChangeEventsTask(DataTreeCandidate candidate, ListenerTree listenerTree) {
+    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
         this.candidate = Preconditions.checkNotNull(candidate);
         this.listenerRoot = Preconditions.checkNotNull(listenerTree);
     }
@@ -83,7 +69,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * Implementation of done as Map-Reduce with two steps: 1. resolving events
      * and their mapping to listeners 2. merging events affecting same listener
      *
-     * @return Iterable of Notification Tasks which needs to be executed in
+     * @return An {@link Iterable} of Notification Tasks which needs to be executed in
      *         order to delivery data change events.
      */
     @Override
@@ -329,7 +315,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         for (NormalizedNode<PathArgument, ?> beforeChild : beforeCont.getValue()) {
             PathArgument childId = beforeChild.getIdentifier();
             alreadyProcessed.add(childId);
-            InstanceIdentifier childPath = append(path, childId);
+            InstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
             Optional<NormalizedNode<PathArgument, ?>> afterChild = afterCont.getChild(childId);
             DOMImmutableDataChangeEvent childChange = resolveNodeContainerChildUpdated(childPath, childListeners,
@@ -348,7 +334,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                 // and it was not present in previous loop, that means it is
                 // created.
                 Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
-                InstanceIdentifier childPath = append(path,childId);
+                InstanceIdentifier childPath = path.node(childId);
                 childChanges.add(resolveSameEventRecursivelly(childPath , childListeners, afterChild,
                         DOMImmutableDataChangeEvent.getCreateEventFactory()));
             }
@@ -432,7 +418,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                 PathArgument childId = child.getIdentifier();
                 LOG.trace("Resolving event for child {}", childId);
                 Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
-                eventBuilder.merge(resolveSameEventRecursivelly(append(path, childId), childListeners, child, eventFactory));
+                eventBuilder.merge(resolveSameEventRecursivelly(path.node(childId), childListeners, child, eventFactory));
             }
             propagateEvent = eventBuilder.build();
         } else {
@@ -460,7 +446,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
 
         for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
             PathArgument childId = childMod.getIdentifier();
-            InstanceIdentifier childPath = append(path, childId);
+            InstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
 
             switch (childMod.getModificationType()) {
@@ -522,7 +508,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         }
     }
 
-    public static ResolveDataChangeEventsTask create(DataTreeCandidate candidate, ListenerTree listenerTree) {
+    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
         return new ResolveDataChangeEventsTask(candidate, listenerTree);
     }
 }

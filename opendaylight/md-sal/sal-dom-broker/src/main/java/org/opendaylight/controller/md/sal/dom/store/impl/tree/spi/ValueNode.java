@@ -14,6 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
+/**
+ * Concretization of AbstractTreeNode for leaf nodes which only contain data.
+ * Instances of this class report all children as absent, subtree version
+ * equal to this node's version and do not support mutable view.
+ */
 final class ValueNode extends AbstractTreeNode {
     private static final Logger LOG = LoggerFactory.getLogger(ValueNode.class);
 

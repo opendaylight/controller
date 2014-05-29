@@ -18,6 +18,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+/**
+ * Internal utility class for an empty candidate. We instantiate this class
+ * for empty modifications, saving memory and processing speed. Instances
+ * of this class are explicitly recognized and processing of them is skipped.
+ */
 final class NoopDataTreeCandidate extends AbstractDataTreeCandidate {
     private static final DataTreeCandidateNode ROOT = new DataTreeCandidateNode() {
         @Override

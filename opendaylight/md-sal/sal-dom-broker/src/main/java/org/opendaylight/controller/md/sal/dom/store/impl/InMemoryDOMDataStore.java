@@ -257,7 +257,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
             ready = true;
 
             LOG.debug("Store transaction: {} : Ready", getIdentifier());
-            mutableTree.seal();
+            mutableTree.ready();
             return store.submit(this);
         }
 
