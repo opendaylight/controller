@@ -14,8 +14,31 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
 import com.google.common.base.Optional;
 
+/**
+ * Internal interface representing a modification action of a particular node.
+ * It is used by the validation code to allow for a read-only view of the
+ * modification tree as we should never modify that during validation.
+ */
 interface NodeModification extends Identifiable<PathArgument> {
+    /**
+     * Get the type of modification.
+     *
+     * @return Modification type.
+     */
     ModificationType getType();
+
+    /**
+     * Get the original tree node to which the modification is to be applied.
+     *
+     * @return The original node, or {@link Optional#absent()} if the node is
+     *         a new node.
+     */
     Optional<TreeNode> getOriginal();
+
+    /**
+     * Get a read-only view of children nodes.
+     *
+     * @return Iterable of all children nodes.
+     */
     Iterable<? extends NodeModification> getChildren();
 }

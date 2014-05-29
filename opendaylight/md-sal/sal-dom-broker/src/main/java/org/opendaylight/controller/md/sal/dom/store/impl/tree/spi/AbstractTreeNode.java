@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
 
-/*
+/**
  * A very basic data tree node.
  */
 abstract class AbstractTreeNode implements TreeNode {

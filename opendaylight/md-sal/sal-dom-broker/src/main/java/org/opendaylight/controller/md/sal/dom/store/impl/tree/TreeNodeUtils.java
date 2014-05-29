@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
@@ -21,6 +22,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
+/**
+ * A set of utility methods for interacting with {@link TreeNode} objects.
+ */
 public final class TreeNodeUtils {
     private TreeNodeUtils() {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
@@ -32,7 +36,6 @@ public final class TreeNodeUtils {
      * @param tree Data Tree
      * @param path Path to the node
      * @return Optional with node if the node is present in tree, {@link Optional#absent()} otherwise.
-     *
      */
     public static <T extends StoreTreeNode<T>> Optional<T> findNode(final T tree, final InstanceIdentifier path) {
         Optional<T> current = Optional.<T> of(tree);

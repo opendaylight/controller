@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-/*
+/**
  * A very basic data tree node. It has a version (when it was last modified),
  * a subtree version (when any of its children were modified) and some read-only
  * data.

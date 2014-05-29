@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.DataNodeContainerModificationStrategy.ListEntryModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafSetEntryModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.MutableTreeNode;
@@ -178,7 +177,7 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
             final PathArgument childId = childMod.getIdentifier();
             final Optional<TreeNode> childMeta = currentMeta.getChild(childId);
 
-            InstanceIdentifier childPath = StoreUtils.append(path, childId);
+            InstanceIdentifier childPath = path.node(childId);
             resolveChildOperation(childId).checkApplicable(childPath, childMod, childMeta);
         }
     }

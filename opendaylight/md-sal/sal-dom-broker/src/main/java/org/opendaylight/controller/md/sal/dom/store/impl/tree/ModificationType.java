@@ -7,37 +7,39 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
+/**
+ * Enumeration of all possible node modification states. These are used in
+ * data tree modification context to quickly assess what sort of modification
+ * the node is undergoing.
+ */
 public enum ModificationType {
-
     /**
-     *
-     * Node is unmodified
-     *
-     *
+     * Node is currently unmodified.
      */
     UNMODIFIED,
+
     /**
-     *
-     * Child of tree node was modified
-     *
+     * A child node, either direct or indirect, has been modified. This means
+     * that the data representation of this node has potentially changed.
      */
     SUBTREE_MODIFIED,
+
     /**
-     * Tree node was replaced with new value / subtree
-     *
+     * This node has been placed into the tree, potentially completely replacing
+     * pre-existing contents.
      */
     WRITE,
+
     /**
-     *
-     * Tree node is to be deleted.
-     *
+     * This node has been deleted along with any of its child nodes.
      */
     DELETE,
 
     /**
-     *
-     * Tree node is to be merged with existing one.
-     *
+     * Node has been written into the tree, but instead of replacing pre-existing
+     * contents, it has been merged. This means that any incoming nodes which
+     * were present in the tree have been replaced, but their child nodes have
+     * been retained.
      */
-    MERGE
+    MERGE,
 }

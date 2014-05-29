@@ -33,15 +33,24 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+/**
+ * A set of listeners organized as a tree by node to which they listen. This class
+ * allows for efficient lookup of listeners when we walk the DataTreeCandidate.
+ */
 public final class ListenerTree {
     private static final Logger LOG = LoggerFactory.getLogger(ListenerTree.class);
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final Node rootNode = new Node(null, null);
 
     private ListenerTree() {
-
+        // Private to disallow direct instantiation
     }
 
+    /**
+     * Create a new empty instance of the listener tree.
+     *
+     * @return An empty instance.
+     */
     public static ListenerTree create() {
         return new ListenerTree();
     }
@@ -110,6 +119,14 @@ public final class ListenerTree {
         }
     }
 
+    /**
+     * Obtain a tree walking context. This context ensures a consistent view of
+     * the listener registrations. The context should be closed as soon as it
+     * is not required, because each unclosed instance blocks modification of
+     * the listener tree.
+     *
+     * @return A walker instance.
+     */
     public Walker getWalker() {
         /*
          * TODO: The only current user of this method is local to the datastore.
@@ -124,6 +141,10 @@ public final class ListenerTree {
         return ret;
     }
 
+    /**
+     * A walking context, pretty much equivalent to an iterator, but it
+     * exposes the undelying tree structure.
+     */
     public static final class Walker implements AutoCloseable {
         private final Lock lock;
         private final Node node;
