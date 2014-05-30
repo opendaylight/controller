@@ -3,81 +3,54 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <artifactId>runtime</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <relativePath>..</relativePath>
   </parent>
   <groupId>org.opendaylight.controller</groupId>
-  <artifactId>rest</artifactId>
-  <version>${rest.version}</version>
+  <artifactId>features-northbound</artifactId>
+  <version>${rest.api.version}</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <description>Rest interface to install features</description>
+  <description>Akka-based Datastore</description>
   <dependencies>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_2.10</artifactId>
-      <version>2.3.2</version>
+      <artifactId>akka-actor_${scala.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-cluster_2.10</artifactId>
-      <version>2.3.2</version>
+      <artifactId>akka-cluster_${scala.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-contrib_2.10</artifactId>
-      <version>2.3.2</version>
+      <artifactId>akka-contrib_${scala.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-osgi_2.10</artifactId>
-      <version>2.3.2</version>
+      <artifactId>akka-osgi_${scala.version}</artifactId>
     </dependency>
     <dependency>
       <groupId>io.spray</groupId>
       <artifactId>spray-can</artifactId>
-      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>io.spray</groupId>
       <artifactId>spray-http</artifactId>
-      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>io.spray</groupId>
       <artifactId>spray-io</artifactId>
-      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>io.spray</groupId>
-      <artifactId>spray-json_2.10</artifactId>
+      <artifactId>spray-json_${scala.version}</artifactId>
       <version>1.2.6</version>
     </dependency>
     <dependency>
       <groupId>io.spray</groupId>
       <artifactId>spray-routing</artifactId>
-      <version>1.1-M7</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.blueprint</groupId>
-      <artifactId>org.apache.aries.blueprint.api</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.blueprint</groupId>
-      <artifactId>org.apache.aries.blueprint.cm</artifactId>
-      <version>1.0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.blueprint</groupId>
-      <artifactId>org.apache.aries.blueprint.core</artifactId>
-      <version>1.4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>org.apache.karaf.features.core</artifactId>
-      <version>3.0.1</version>
+      <!--<version>1.1-M7</version>-->
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -124,7 +97,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.opendaylight.controller.messaging.datastore.memory</Export-Package>
+            <Export-Package></Export-Package>
             <Import-Package>scala.reflect,
               javax.crypto,
               javax.net.ssl,
@@ -150,9 +123,9 @@
               spray.can,
               spray.json,
               spray.http,
-              spray.io,
-              org.apache.karaf.features</Import-Package>
+              spray.io</Import-Package>
             <Embed-Dependency></Embed-Dependency>
+            <Bundle-Activator>org.opendaylight.controller.rest.Activator</Bundle-Activator>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>

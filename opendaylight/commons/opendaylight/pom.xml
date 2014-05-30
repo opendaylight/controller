@@ -126,7 +126,7 @@
     <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
     <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
-    <rest.version>1.0.0-SNAPSHOT</rest.version>
+    <rest.api.version>1.0.0-SNAPSHOT</rest.api.version>
     <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.implementation.version>0.4.2-SNAPSHOT</sal.implementation.version>

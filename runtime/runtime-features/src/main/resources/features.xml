@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="runtime-features-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+   <feature name="runtime-all">
+       <feature>runtime-scala</feature>
+       <feature>runtime-akka-system</feature>
+       <feature>runtime-akka-clustering</feature>
+       <feature>runtime-leveldb</feature>
+       <feature>runtime-akka-spray</feature>
+   </feature>
+
    <feature name="osgi-compendium" description="OSGi compendium feature" version="${osgi.version}" resolver="(obr)">
       <bundle start-level="10">mvn:org.osgi/org.osgi.compendium/${osgi.version}</bundle>
    </feature>
@@ -16,10 +24,11 @@
       <bundle dependency="true">mvn:com.typesafe.akka/akka-actor_${scala.version}/${akka.version}</bundle>
       <bundle dependency="true">mvn:com.typesafe.akka/akka-slf4j_${scala.version}/${akka.version}</bundle>
       <bundle>mvn:com.typesafe.akka/akka-osgi_${scala.version}/${akka.version}</bundle>
+      <bundle>wrap:mvn:com.typesafe.akka/akka-contrib_${scala.version}/${akka.version}</bundle>
    </feature>
 
    <feature name="runtime-akka-clustering" description="Akka Clustering Support" version="${akka.version}" resolver="(obr)" start-level="20">
-      <feature version="${akka.version}">runtime-akka</feature>
+      <feature version="${akka.version}">runtime-akka-system</feature>
       <bundle dependency="true">wrap:mvn:org.uncommons.maths/uncommons-maths/${uncommons.maths.version}</bundle>
       <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
       <bundle dependency="true">mvn:io.netty/netty/${netty.version}</bundle>
@@ -33,7 +42,7 @@
    </feature>
 
   <feature name="runtime-akka-spray" description="Akka Spray (REST) Support" version="${spray.version}" resolver="(obr)" start-level="50">
-    <feature version="${project.version}">runtime-akka</feature>
+    <feature version="${akka.version}">runtime-akka-system</feature>
     <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_3.0_spec/1.0</bundle>
     <bundle>wrap:mvn:com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/${concurrentlinkedhashmap.version}</bundle>
     <bundle>mvn:org.jvnet.mimepull/mimepull/${mimepull.version}</bundle>
