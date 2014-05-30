@@ -10,8 +10,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import javax.ws.rs.core.Response.Status;
-
 import org.opendaylight.yangtools.yang.common.RpcError;
 
 import com.google.common.base.Preconditions;
@@ -52,30 +50,30 @@ public class RestconfError {
     }
 
     public static enum ErrorTag {
-        IN_USE( "in-use", Status.fromStatusCode(409)),
-        INVALID_VALUE( "invalid-value", Status.fromStatusCode(400)),
-        TOO_BIG( "too-big", Status.fromStatusCode(413)),
-        MISSING_ATTRIBUTE( "missing-attribute", Status.fromStatusCode(400)),
-        BAD_ATTRIBUTE( "bad-attribute", Status.fromStatusCode(400)),
-        UNKNOWN_ATTRIBUTE( "unknown-attribute", Status.fromStatusCode(400)),
-        BAD_ELEMENT( "bad-element", Status.fromStatusCode(400)),
-        UNKNOWN_ELEMENT( "unknown-element", Status.fromStatusCode(400)),
-        UNKNOWN_NAMESPACE( "unknown-namespace", Status.fromStatusCode(400)),
-        ACCESS_DENIED( "access-denied", Status.fromStatusCode(403)),
-        LOCK_DENIED( "lock-denied", Status.fromStatusCode(409)),
-        RESOURCE_DENIED( "resource-denied", Status.fromStatusCode(409)),
-        ROLLBACK_FAILED( "rollback-failed", Status.fromStatusCode(500)),
-        DATA_EXISTS( "data-exists", Status.fromStatusCode(409)),
-        DATA_MISSING( "data-missing", Status.fromStatusCode(409)),
-        OPERATION_NOT_SUPPORTED( "operation-not-supported", Status.fromStatusCode(501)),
-        OPERATION_FAILED( "operation-failed", Status.fromStatusCode(500)),
-        PARTIAL_OPERATION( "partial-operation", Status.fromStatusCode(500)),
-        MALFORMED_MESSAGE( "malformed-message", Status.fromStatusCode(400));
+        IN_USE( "in-use", 409 /*Conflict*/ ),
+        INVALID_VALUE( "invalid-value", 400 /*Bad Request*/ ),
+        TOO_BIG( "too-big", 413 /*Request Entity Too Large*/ ),
+        MISSING_ATTRIBUTE( "missing-attribute", 400 /*Bad Request*/ ),
+        BAD_ATTRIBUTE( "bad-attribute", 400 /*Bad Request*/ ),
+        UNKNOWN_ATTRIBUTE( "unknown-attribute", 400 /*Bad Request*/ ),
+        BAD_ELEMENT( "bad-element", 400 /*Bad Request*/ ),
+        UNKNOWN_ELEMENT( "unknown-element", 400 /*Bad Request*/ ),
+        UNKNOWN_NAMESPACE( "unknown-namespace", 400 /*Bad Request*/ ),
+        ACCESS_DENIED( "access-denied", 403 /*Forbidden*/ ),
+        LOCK_DENIED( "lock-denied", 409 /*Conflict*/ ),
+        RESOURCE_DENIED( "resource-denied", 409 /*Conflict*/ ),
+        ROLLBACK_FAILED( "rollback-failed", 500 /*INTERNAL_SERVER_ERROR*/ ),
+        DATA_EXISTS( "data-exists", 409 /*Conflict*/ ),
+        DATA_MISSING( "data-missing", 409 /*Conflict*/ ),
+        OPERATION_NOT_SUPPORTED( "operation-not-supported", 501 /*Not Implemented*/ ),
+        OPERATION_FAILED( "operation-failed", 500 /*INTERNAL_SERVER_ERROR*/ ),
+        PARTIAL_OPERATION( "partial-operation", 500 /*INTERNAL_SERVER_ERROR*/ ),
+        MALFORMED_MESSAGE( "malformed-message", 400 /*Bad Request*/ );
 
         private final String tagValue;
-        private final Status statusCode;
+        private final int statusCode;
 
-        ErrorTag(final String tagValue, final Status statusCode) {
+        ErrorTag(final String tagValue, final int statusCode) {
             this.tagValue = tagValue;
             this.statusCode = statusCode;
         }
@@ -94,7 +92,7 @@ public class RestconfError {
             }
         }
 
-        public Status getStatusCode() {
+        public int getStatusCode() {
             return statusCode;
         }
     }

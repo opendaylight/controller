@@ -165,7 +165,7 @@ public class XmlReader {
                 }
             }
         }
-        return data;
+        return data == null ? null : data.trim();
     }
 
     private String getAdditionalData(XMLEvent event) throws XMLStreamException {
