@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" 
+name="md-sal-apps"
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     
+  <requiredProperties>
+    <requiredProperty key="appName">
+      <defaultValue>task</defaultValue>
+    </requiredProperty>
+    <requiredProperty key="modelFields">
+      <defaultValue>{"title":"string", "desc":"string"}</defaultValue>
+    </requiredProperty>
+  </requiredProperties>
+  <modules>
+    <module id="sample-generate" dir="generate" name="sample-generate">
+    <fileSets>
+     <fileSet filtered="true" packaged="true" encoding="UTF-8">
+        <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>src/main/template</directory>
+          <includes>
+            <include>**/*.vm</include>
+          </includes>
+        </fileSet>
+  </fileSets>
+    </module>
+    <module id="sample-model" dir="model" name="sample-model">
+      <fileSets>
+        <fileSet encoding="UTF-8">
+          <directory>META-INF</directory>
+          <includes>
+            <include>**/*.MF</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+    <module id="sample-provider" dir="provider" name="sample-provider">
+      <fileSets>
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+          <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>META-INF</directory>
+          <includes>
+            <include>**/*.MF</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+    <module id="sample-consumer" dir="consumer" name="sample-consumer">
+      <fileSets>
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+          <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>META-INF</directory>
+          <includes>
+            <include>**/*.MF</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+    <module id="sample-web" dir="web" name="sample-web">
+      <fileSets>
+        <fileSet encoding="UTF-8">
+          <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>src/main/resources/META-INF</directory>
+          <includes>
+            <include>**/*</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>src/main/resources/WEB-INF</directory>
+          <includes>
+            <include>**/*.xml</include>
+            <include>**/*.jsp</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+  </modules>
+</archetype-descriptor>

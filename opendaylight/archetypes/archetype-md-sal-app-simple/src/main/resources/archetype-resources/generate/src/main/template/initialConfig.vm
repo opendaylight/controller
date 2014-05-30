@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:${app}-provider:impl">
+                        prefix:${app}-provider-impl
+                    </type>
+                    <name>${app}-provider-impl</name>
+
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+                    <data-broker>
+                       <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
+                       <name>binding-data-broker</name>
+                    </data-broker>
+                </module>
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:${app}-consumer:impl">
+                        prefix:${app}-consumer-impl
+                    </type>
+                    <name>${app}-consumer-impl</name>
+
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+                </module>
+            </modules>
+             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+               <service>
+                   <type xmlns:${app}="urn:opendaylight:params:xml:ns:yang:controller:config:${app}-consumer:impl">
+                       ${app}:${app}-consumer-service
+                   </type>
+                   <instance>
+                       <name>${app}-consumer-service</name>
+                       <provider>/modules/module[type='${app}-consumer-impl'][name='${app}-consumer-impl']</provider>
+                   </instance>
+               </service>
+           </services>
+        </data>
+
+    </configuration>
+
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:${app}-consumer:impl?module=${app}-consumer-impl&amp;revision=2014-05-23</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:${app}-provider:impl?module=${app}-provider-impl&amp;revision=2014-05-23</capability>
+    </required-capabilities>
+
+</snapshot>
+

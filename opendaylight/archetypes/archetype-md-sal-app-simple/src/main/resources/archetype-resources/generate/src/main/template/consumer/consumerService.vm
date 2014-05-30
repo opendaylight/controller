@@ -1,0 +1,8 @@
+package ${package}.consumer;
+
+import java.util.Map;
+
+public interface ${capitalApp}ConsumerService {
+    public void createEntry(Map<String, String> data);
+
+}

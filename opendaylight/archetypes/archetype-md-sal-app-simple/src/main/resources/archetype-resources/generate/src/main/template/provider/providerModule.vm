@@ -1,0 +1,53 @@
+package org.opendaylight.controller.config.yang.config.${app}_provider.impl;
+
+import ${package}.provider.${capitalApp}Provider;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yang.gen.v1.opendaylight.sample.rev140407.${capitalApp}Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ${capitalApp}ProviderModule extends org.opendaylight.controller.config.yang.config.${app}_provider.impl.Abstract${capitalApp}ProviderModule {
+    private static final Logger log = LoggerFactory.getLogger(${capitalApp}ProviderModule.class);
+
+    public ${capitalApp}ProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+        super(identifier, dependencyResolver);
+    }
+
+    public ${capitalApp}ProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.controller.config.yang.config.${app}_provider.impl.${capitalApp}ProviderModule oldModule, AutoCloseable oldInstance) {
+        super(identifier, dependencyResolver, oldModule, oldInstance);
+    }
+
+    @Override
+    public void customValidation() {
+        // add custom validation form module attributes here.
+    }
+
+    @Override
+    public AutoCloseable createInstance() {
+        final ${capitalApp}Provider appProvider = new ${capitalApp}Provider();
+
+        DataProviderService dataBrokerService = getDataBrokerDependency();
+        appProvider.setDataService(dataBrokerService);
+        final BindingAwareBroker.RpcRegistration<${capitalApp}Service> rpcRegistration = getRpcRegistryDependency()
+                .addRpcImplementation(${capitalApp}Service.class, appProvider);
+
+        // Wrap toaster as AutoCloseable and close registrations to md-sal at
+        // close()
+        final class AutoCloseableToaster implements AutoCloseable {
+
+            @Override
+            public void close() throws Exception {
+                rpcRegistration.close();
+                appProvider.close();
+                log.info("${capitalApp}Provider (instance {}) torn down.", this);
+            }
+        }
+
+        AutoCloseable ret = new AutoCloseableToaster();
+        log.info("${capitalApp}Provider (instance {}) initialized.", ret);
+        return ret;
+    }
+
+
+}

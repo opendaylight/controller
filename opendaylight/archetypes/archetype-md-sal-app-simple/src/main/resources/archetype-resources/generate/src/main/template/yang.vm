@@ -1,0 +1,68 @@
+module $app {
+
+    yang-version 1;
+
+    namespace "opendaylight:sample";
+
+    prefix $app;
+
+	import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG version of the sample app models";
+
+    revision "2014-04-07" {
+      description
+        "MD-SAL sample app";
+    }
+    
+    typedef entry-id {
+      type inet:uri;
+      description "An identifier for app entry.";
+    }
+    
+    container $app {
+      description
+        "Top-level container for all application database objects.";
+      list entry {
+      	key "entry-id";
+        leaf entry-id {
+          type entry-id;
+          description "identifier of single list of entries.";
+        }
+        #foreach( $field in $fields )
+        leaf $field.name {
+          type $field.type;
+        }
+        #end
+      }
+    }
+    
+    rpc saveEntry {
+     description " Method to add a new entry into datastore.";
+     input {
+       list entryField {
+         leaf key {
+           type string;
+           description "name of the field";
+         }
+         
+         leaf value {
+           type string;
+           description "value of the field";
+         }
+       }
+       
+       leaf entryId {
+         type string;
+         description "entry Identifier";
+       }
+     }
+    }
+    
+}

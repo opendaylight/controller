@@ -1,0 +1,52 @@
+package org.opendaylight.controller.config.yang.config.${app}_consumer.impl;
+
+import ${package}.consumer.${capitalApp}ConsumerImpl;
+import ${package}.consumer.${capitalApp}ConsumerService;
+import org.opendaylight.yang.gen.v1.opendaylight.sample.rev140407.${capitalApp}Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+public class ${capitalApp}ConsumerModule extends org.opendaylight.controller.config.yang.config.${app}_consumer.impl.Abstract${capitalApp}ConsumerModule {
+    private static final Logger log = LoggerFactory.getLogger(${capitalApp}ConsumerModule.class);
+
+    public ${capitalApp}ConsumerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+        super(identifier, dependencyResolver);
+    }
+
+    public ${capitalApp}ConsumerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.controller.config.yang.config.${app}_consumer.impl.${capitalApp}ConsumerModule oldModule, AutoCloseable oldInstance) {
+        super(identifier, dependencyResolver, oldModule, oldInstance);
+    }
+
+    @Override
+    public void customValidation() {
+        // add custom validation form module attributes here.
+    }
+
+    @Override
+    public AutoCloseable createInstance() {
+        ${capitalApp}Service service = getRpcRegistryDependency().getRpcService(${capitalApp}Service.class);
+
+        final ${capitalApp}ConsumerImpl consumerImpl = new ${capitalApp}ConsumerImpl(service);
+
+
+        final class AutoCloseableService implements ${capitalApp}ConsumerService, AutoCloseable {
+
+            @Override
+            public void close() throws Exception {
+                log.info("${capitalApp}ConsumerService (instance {}) torn down.", this);
+            }
+
+            @Override
+            public void createEntry(Map<String, String> data) {
+                consumerImpl.createEntry(data);
+            }
+        }
+
+        AutoCloseable ret = new AutoCloseableService();
+        log.info("${capitalApp}ConsumerService (instance {}) initialized.", ret );
+        return ret;
+    }
+
+}
