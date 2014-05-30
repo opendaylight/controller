@@ -16,6 +16,24 @@
       "revId": "a9e88d533b3ae6380b06bfce4aefe438139b7f19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_25087f2c",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-05-30T06:45:22Z",
+      "side": 1,
+      "message": "I agree with you on that, I think I was wanting to be clear for future readers of the model but really the high-level model should offer some sort of abstraction. Ty.",
+      "parentUuid": "fa82b9bf_055f7b42",
+      "revId": "a9e88d533b3ae6380b06bfce4aefe438139b7f19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
