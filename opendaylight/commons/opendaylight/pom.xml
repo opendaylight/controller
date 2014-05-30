@@ -17,12 +17,16 @@
   <properties>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
+    <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
     <!-- Controller Modules Versions -->
+    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
+    <bundlescanner.api.version>0.4.2-SNAPSHOT</bundlescanner.api.version>
+    <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.10</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
@@ -30,13 +34,19 @@
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
     <clustering.test.version>0.4.2-SNAPSHOT</clustering.test.version>
     <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
+    <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
     <!-- Third Party Versions -->
     <commons.codec.version>1.7</commons.codec.version>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang.version>3.1</commons.lang.version>
+    <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
+    <commons.opendaylight.commons.httpclient>0.1.2-SNAPSHOT</commons.opendaylight.commons.httpclient>
+    <commons.opendaylight.concepts.version>0.5.2-SNAPSHOT</commons.opendaylight.concepts.version>
+    <commons.opendaylight.version>1.4.2-SNAPSHOT</commons.opendaylight.version>
+    <commons.parent.version>1.0.2-SNAPSHOT</commons.parent.version>
     <compiler.version>2.3.2</compiler.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
@@ -49,6 +59,7 @@
     <controllermanager.northbound.version>0.0.2-SNAPSHOT</controllermanager.northbound.version>
     <corsfilter.version>7.0.42</corsfilter.version>
     <devices.web.version>0.4.2-SNAPSHOT</devices.web.version>
+    <dummy-console.version>1.1.0-SNAPSHOT</dummy-console.version>
     <eclipse.persistence.version>2.5.0</eclipse.persistence.version>
     <!-- enforcer version -->
     <enforcer.version>1.3.1</enforcer.version>
@@ -76,6 +87,8 @@
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker_new.implementation.version>0.4.2-SNAPSHOT</hosttracker_new.implementation.version>
+    <httpservice-bridge.northbound.version>0.0.2-SNAPSHOT</httpservice-bridge.northbound.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
@@ -90,11 +103,13 @@
     <jersey.version>1.17</jersey.version>
     <jettison.version>1.3.3</jettison.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
+    <jolokia-bridge.version>0.0.2-SNAPSHOT</jolokia-bridge.version>
     <jolokia.version>1.1.4</jolokia.version>
     <jsr305.api.version>2.0.1</jsr305.api.version>
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
     <karaf.version>3.0.1</karaf.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
@@ -111,6 +126,9 @@
     <networkconfig.neutron.version>0.4.2-SNAPSHOT</networkconfig.neutron.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <northbound.commons.version>0.4.2-SNAPSHOT</northbound.commons.version>
+    <northbound.hosttracker.version>1.4.2-SNAPSHOT</northbound.hosttracker.version>
+    <northbound.jolokia.version>1.4.2-SNAPSHOT</northbound.jolokia.version>
     <opendaylight-l2-types.version>2013.08.27.4-SNAPSHOT</opendaylight-l2-types.version>
     <org.json.version>20080701</org.json.version>
     <osgi-brandfragment.web.version>0.0.2-SNAPSHOT</osgi-brandfragment.web.version>
@@ -161,6 +179,7 @@
     <topology.northbound.version>0.4.2-SNAPSHOT</topology.northbound.version>
     <topology.web.version>0.4.2-SNAPSHOT</topology.web.version>
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
+    <topologymanager.shell.version>1.0.0-SNAPSHOT</topologymanager.shell.version>
     <troubleshoot.web.version>0.4.2-SNAPSHOT</troubleshoot.web.version>
     <url.version>1.5.0</url.version>
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
@@ -172,6 +191,7 @@
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
+    <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
   </properties>
 
   <dependencyManagement>

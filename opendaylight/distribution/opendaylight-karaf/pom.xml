@@ -25,13 +25,21 @@
     <!-- scope is runtime so the feature repo is listed in the features
       service config file, and features may be installed using the
       karaf-maven-plugin configuration -->
-    <!-- dependencies commented out till we can get them in
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
       <version>${karaf.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- scope is compile so all features (there is only one) are installed
+            into startup.properties and the feature repo itself is not installed -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>base-features</artifactId>
+      <version>${project.version}</version>
+      <type>kar</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -42,7 +50,7 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
+    <!--  <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-file</artifactId>
       <version>${yangtools.version}</version>

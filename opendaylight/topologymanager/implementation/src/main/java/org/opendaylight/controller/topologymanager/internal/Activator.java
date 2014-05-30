@@ -26,6 +26,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
+import org.opendaylight.controller.topologymanager.ITopologyManagerShell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.setInterface(new String[] { IListenTopoUpdates.class.getName(),
                     ITopologyManager.class.getName(),
+                    ITopologyManagerShell.class.getName(),
                     IConfigurationContainerAware.class.getName(),
                     ICacheUpdateAware.class.getName() }, props);
 
