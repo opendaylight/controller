@@ -182,6 +182,7 @@
     <url.version>1.5.0</url.version>
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.shell.version>1.0.0-SNAPSHOT</usermanager.shell.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
     <virgo.version>3.6.0.RELEASE</virgo.version>
     <web.version>0.4.2-SNAPSHOT</web.version>

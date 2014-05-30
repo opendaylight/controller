@@ -1,0 +1,43 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="UserManagerRef" interface="org.opendaylight.controller.usermanager.IUserManagerShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.AddAAAServer">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.PrintAAAServers">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.RemoveAAAServer">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.UmAddUser">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.UmGetUsers">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    <command>
+       <action class="org.opendaylight.controller.usermanager.shell.UmRemUser">
+          <property name="userManager" ref="UserManagerRef"/>
+       </action>
+    </command>
+
+    </command-bundle>
+</blueprint>
