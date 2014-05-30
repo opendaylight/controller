@@ -18,8 +18,8 @@
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -182,14 +182,15 @@
     <url.version>1.5.0</url.version>
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.shell.version>1.0.0-SNAPSHOT</usermanager.shell.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
     <virgo.version>3.6.0.RELEASE</virgo.version>
     <web.version>0.4.2-SNAPSHOT</web.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
     <xtend.version>2.4.3</xtend.version>
     <yang-ext.version>2013.09.07.4-SNAPSHOT</yang-ext.version>
-    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <yang-jmx-generator.version>1.0.0-SNAPSHOT</yang-jmx-generator.version>
+    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
   </properties>
 
   <dependencyManagement>
