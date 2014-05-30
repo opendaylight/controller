@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_055f7b42",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-30T05:43:48Z",
+      "side": 1,
+      "message": "Being a generic Flow yang and has no particular tight relationship with the Openflow southbound plugin, I guess the description should also be free of OXM / NXM. Having said that, I do see some of the fields above (like tunnel_id carrying description such as Port Metadata which is seems like an Openflow based description).\n\nMaybe It would make sense to change the description to be more generic and move this near to other TCP elements such as tcp_src, tcp_dst which is more readable.",
+      "revId": "a9e88d533b3ae6380b06bfce4aefe438139b7f19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
