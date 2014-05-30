@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c5819390",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/BackwardsCompatibleDataBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-30T05:36:07Z",
+      "side": 1,
+      "message": "checkNotNull?",
+      "revId": "4b7dfc4aa3c037ae6aeb12bd99febd891f54b2a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6571a7df",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/TranslatingDataChangeEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-30T05:36:07Z",
+      "side": 1,
+      "message": "final instead, it cannot be subclassed",
+      "revId": "4b7dfc4aa3c037ae6aeb12bd99febd891f54b2a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0578dbc2",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/TranslatingListenerInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-30T05:36:07Z",
+      "side": 1,
+      "message": "checkNotNull?",
+      "revId": "4b7dfc4aa3c037ae6aeb12bd99febd891f54b2a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_25739fe8",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-05-30T05:36:07Z",
+      "side": 1,
+      "message": "Why are these needed?",
+      "revId": "4b7dfc4aa3c037ae6aeb12bd99febd891f54b2a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
