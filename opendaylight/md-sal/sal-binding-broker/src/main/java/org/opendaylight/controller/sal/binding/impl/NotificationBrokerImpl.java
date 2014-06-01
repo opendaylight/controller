@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.binding.impl;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -28,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -86,15 +83,10 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
         };
         final Set<NotifyTask> tasks = IterableExtensions.<NotifyTask>toSet(
                 IterableExtensions.<NotificationListener<?>, NotifyTask>map(listenerToNotify, _function));
-        this.submitAll(executor, tasks);
-    }
 
-    private ImmutableSet<Future<Object>> submitAll(final ExecutorService service, final Set<NotifyTask> tasks) {
-        final Builder<Future<Object>> ret = ImmutableSet.<Future<Object>>builder();
         for (final NotifyTask task : tasks) {
-            ret.add(service.submit(task));
+            service.submit(task);
         }
-        return ret.build();
     }
 
     @Override
