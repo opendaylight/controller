@@ -12,26 +12,28 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
-public class GeneratedListenerRegistration extends AbstractObjectRegistration<NotificationListener> implements ListenerRegistration<NotificationListener> {
-    private final NotificationInvoker _invoker;
+import com.google.common.base.Preconditions;
 
-    public NotificationInvoker getInvoker() {
-        return this._invoker;
-    }
-
+class GeneratedListenerRegistration extends AbstractObjectRegistration<NotificationListener> implements ListenerRegistration<NotificationListener> {
     private NotificationBrokerImpl notificationBroker;
+    private final NotificationInvoker invoker;
 
     public GeneratedListenerRegistration(final NotificationListener instance, final NotificationInvoker invoker, final NotificationBrokerImpl broker) {
         super(instance);
-        this._invoker = invoker;
-        this.notificationBroker = broker;
+        this.invoker = Preconditions.checkNotNull(invoker);
+        this.notificationBroker = Preconditions.checkNotNull(broker);
+    }
+
+    public NotificationInvoker getInvoker() {
+        // There is a race with NotificationBrokerImpl:
+        // the invoker can be closed here
+        return invoker;
     }
 
     @Override
     protected void removeRegistration() {
-        this.notificationBroker.unregisterListener(this);
-        this.notificationBroker = null;
-        NotificationInvoker _invoker = this.getInvoker();
-        _invoker.close();
+        notificationBroker.unregisterListener(this);
+        notificationBroker = null;
+        invoker.close();
     }
 }
