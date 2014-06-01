@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.eclipse.xtext.xbase.lib.Conversions;
-import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.Functions.Function0;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
@@ -30,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -39,33 +38,13 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
 public class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
-    private final ListenerRegistry<NotificationInterestListener> interestListeners = new Function0<ListenerRegistry<NotificationInterestListener>>() {
-        @Override
-        public ListenerRegistry<NotificationInterestListener> apply() {
-            ListenerRegistry<NotificationInterestListener> _create = ListenerRegistry.<NotificationInterestListener>create();
-            return _create;
-        }
-    }.apply();
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationBrokerImpl.class);
+
+    private final ListenerRegistry<NotificationInterestListener> interestListeners =
+            ListenerRegistry.create();
 
     private final Multimap<Class<? extends Notification>,NotificationListener<? extends Object>> listeners;
-
-    private ExecutorService _executor;
-
-    public ExecutorService getExecutor() {
-        return this._executor;
-    }
-
-    public void setExecutor(final ExecutorService executor) {
-        this._executor = executor;
-    }
-
-    private final Logger logger = new Function0<Logger>() {
-        @Override
-        public Logger apply() {
-            Logger _logger = LoggerFactory.getLogger(NotificationBrokerImpl.class);
-            return _logger;
-        }
-    }.apply();
+    private ExecutorService executor;
 
     public NotificationBrokerImpl() {
         HashMultimap<Class<? extends Notification>,NotificationListener<? extends Object>> _create = HashMultimap.<Class<? extends Notification>, NotificationListener<? extends Object>>create();
@@ -79,6 +58,10 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
         SetMultimap<Class<? extends Notification>,NotificationListener<? extends Object>> _synchronizedSetMultimap = Multimaps.<Class<? extends Notification>, NotificationListener<? extends Object>>synchronizedSetMultimap(_create);
         this.listeners = _synchronizedSetMultimap;
         this.setExecutor(executor);
+    }
+
+    public void setExecutor(final ExecutorService executor) {
+        this.executor = Preconditions.checkNotNull(executor);
     }
 
     public Iterable<Class<? extends Object>> getNotificationTypes(final Notification notification) {
@@ -104,8 +87,7 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
 
     @Override
     public void publish(final Notification notification) {
-        ExecutorService _executor = this.getExecutor();
-        this.publish(notification, _executor);
+        this.publish(notification, executor);
     }
 
     @Override
@@ -126,8 +108,7 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
         };
         Iterable<NotifyTask> _map = IterableExtensions.<NotificationListener<? extends Object>, NotifyTask>map(listenerToNotify, _function);
         final Set<NotifyTask> tasks = IterableExtensions.<NotifyTask>toSet(_map);
-        ExecutorService _executor = this.getExecutor();
-        this.submitAll(_executor, tasks);
+        this.submitAll(executor, tasks);
     }
 
     public ImmutableSet<Future<Object>> submitAll(final ExecutorService service, final Set<NotifyTask> tasks) {
@@ -148,19 +129,13 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
         return reg;
     }
 
-    public void announceNotificationSubscription(final Class<? extends Notification> notification) {
-        for (final ListenerRegistration<NotificationInterestListener> listener : this.interestListeners) {
+    private void announceNotificationSubscription(final Class<? extends Notification> notification) {
+        for (final ListenerRegistration<NotificationInterestListener> listener : interestListeners) {
             try {
-                NotificationInterestListener _instance = listener.getInstance();
-                _instance.onNotificationSubscribtion(notification);
-            } catch (final Throwable _t) {
-                if (_t instanceof Exception) {
-                    final Exception e = (Exception)_t;
-                    String _message = e.getMessage();
-                    this.logger.error("", _message);
-                } else {
-                    throw Exceptions.sneakyThrow(_t);
-                }
+                listener.getInstance().onNotificationSubscribtion(notification);
+            } catch (Exception e) {
+                LOG.warn("Listener {} reported unexpected error on notification {}",
+                        listener.getInstance(), notification, e);
             }
         }
     }
