@@ -12,24 +12,25 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
-public class GenericNotificationRegistration<T extends Notification> extends AbstractObjectRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {
-    private final Class<T> _type;
+import com.google.common.base.Preconditions;
 
-    public Class<T> getType() {
-        return this._type;
-    }
-
+class GenericNotificationRegistration<T extends Notification> extends AbstractObjectRegistration<NotificationListener<T>> implements ListenerRegistration<NotificationListener<T>> {
+    private final Class<T> type;
     private NotificationBrokerImpl notificationBroker;
 
     public GenericNotificationRegistration(final Class<T> type, final NotificationListener<T> instance, final NotificationBrokerImpl broker) {
         super(instance);
-        this._type = type;
-        this.notificationBroker = broker;
+        this.type = Preconditions.checkNotNull(type);
+        this.notificationBroker = Preconditions.checkNotNull(broker);
+    }
+
+    public Class<T> getType() {
+        return type;
     }
 
     @Override
     protected void removeRegistration() {
-        this.notificationBroker.unregisterListener(this);
-        this.notificationBroker = null;
+        notificationBroker.unregisterListener(this);
+        notificationBroker = null;
     }
 }
