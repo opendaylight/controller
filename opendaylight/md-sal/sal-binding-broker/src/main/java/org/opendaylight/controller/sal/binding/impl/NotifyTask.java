@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import java.util.concurrent.Callable;
-
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
@@ -17,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-class NotifyTask implements Callable<Object> {
+class NotifyTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NotifyTask.class);
 
     private final NotificationListener<?> listener;
@@ -34,7 +32,7 @@ class NotifyTask implements Callable<Object> {
     }
 
     @Override
-    public Object call() {
+    public void run() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Delivering notification {} to {}", notification, listener);
         } else {
@@ -52,8 +50,6 @@ class NotifyTask implements Callable<Object> {
         } else {
             LOG.trace("Notification delivered {} to {}", notification.getClass().getName(), listener);
         }
-
-        return null;
     }
 
     @Override
