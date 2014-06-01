@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,37 +17,37 @@ import com.google.common.base.Preconditions;
 class NotifyTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NotifyTask.class);
 
-    private final NotificationListener<?> listener;
+    private final NotificationListenerRegistration<?> registration;
     private final Notification notification;
 
-    public NotifyTask(final NotificationListener<?> listener, final Notification notification) {
-        this.listener = Preconditions.checkNotNull(listener);
+    public NotifyTask(final NotificationListenerRegistration<?> registration, final Notification notification) {
+        this.registration = Preconditions.checkNotNull(registration);
         this.notification = Preconditions.checkNotNull(notification);
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Notification> NotificationListener<T> getListener() {
-        return (NotificationListener<T>)listener;
+    private <T extends Notification> NotificationListenerRegistration<T> getRegistration() {
+        return (NotificationListenerRegistration<T>)registration;
     }
 
     @Override
     public void run() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Delivering notification {} to {}", notification, listener);
+            LOG.debug("Delivering notification {} to {}", notification, registration.getInstance());
         } else {
-            LOG.trace("Delivering notification {} to {}", notification.getClass().getName(), listener);
+            LOG.trace("Delivering notification {} to {}", notification.getClass().getName(), registration.getInstance());
         }
 
         try {
-            getListener().onNotification(notification);
+            getRegistration().notify(notification);
         } catch (final Exception e) {
-            LOG.error("Unhandled exception thrown by listener: {}", listener, e);
+            LOG.error("Unhandled exception thrown by listener: {}", registration.getInstance(), e);
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Notification delivered {} to {}", notification, listener);
+            LOG.debug("Notification delivered {} to {}", notification, registration.getInstance());
         } else {
-            LOG.trace("Notification delivered {} to {}", notification.getClass().getName(), listener);
+            LOG.trace("Notification delivered {} to {}", notification.getClass().getName(), registration.getInstance());
         }
     }
 
@@ -56,7 +55,7 @@ class NotifyTask implements Runnable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((listener== null) ? 0 : listener.hashCode());
+        result = prime * result + ((registration== null) ? 0 : registration.hashCode());
         result = prime * result + ((notification== null) ? 0 : notification.hashCode());
         return result;
     }
@@ -70,10 +69,10 @@ class NotifyTask implements Runnable {
         if (getClass() != obj.getClass())
             return false;
         NotifyTask other = (NotifyTask) obj;
-        if (listener == null) {
-            if (other.listener != null)
+        if (registration == null) {
+            if (other.registration != null)
                 return false;
-        } else if (!listener.equals(other.listener))
+        } else if (!registration.equals(other.registration))
             return false;
         if (notification == null) {
             if (other.notification != null)
@@ -86,7 +85,7 @@ class NotifyTask implements Runnable {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("listener", listener)
+                .add("listener", registration)
                 .add("notification", notification.getClass())
                 .toString();
     }
