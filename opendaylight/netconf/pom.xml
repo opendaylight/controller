@@ -65,12 +65,12 @@
         <plugin>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-maven-plugin</artifactId>
-          <version>${yangtools.version}</version>
+          <version>0.6.2-v20140601202136_b3e9bdc</version>
           <dependencies>
             <dependency>
               <groupId>org.opendaylight.yangtools</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>${yangtools.version}</version>
+              <version>0.6.2-v20140601202136_b3e9bdc</version>
             </dependency>
           </dependencies>
           <executions>
