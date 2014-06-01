@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.binding.impl;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -17,8 +17,8 @@ import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
@@ -37,8 +37,8 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
     private final ListenerRegistry<NotificationInterestListener> interestListeners =
             ListenerRegistry.create();
 
-    private final Multimap<Class<? extends Notification>, NotificationListener<?>> listeners =
-            Multimaps.synchronizedSetMultimap(HashMultimap.<Class<? extends Notification>, NotificationListener<?>>create());
+    private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
+            Multimaps.synchronizedSetMultimap(HashMultimap.<Class<? extends Notification>, NotificationListenerRegistration<?>>create());
     private ExecutorService executor;
 
     @Deprecated
@@ -70,26 +70,43 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
 
     @Override
     public void publish(final Notification notification, final ExecutorService service) {
-        Iterable<NotificationListener<?>> listenerToNotify = Collections.emptySet();
+        final Set<NotificationListenerRegistration<?>> toNotify = new HashSet<>();
+
         for (final Class<?> type : getNotificationTypes(notification)) {
-            listenerToNotify = Iterables.concat(listenerToNotify, listeners.get(((Class<? extends Notification>) type)));
+            final Collection<NotificationListenerRegistration<?>> l = listeners.get((Class<? extends Notification>) type);
+            if (l != null) {
+                toNotify.addAll(l);
+            }
         }
 
-        final Set<NotifyTask> tasks = new HashSet<>();
-        for (NotificationListener<?> l : listenerToNotify) {
-            tasks.add(new NotifyTask(l, notification));
+        for (NotificationListenerRegistration<?> r : toNotify) {
+            service.submit(new NotifyTask(r, notification));
         }
+    }
 
-        for (final NotifyTask task : tasks) {
-            service.submit(task);
+    private void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
+        for (NotificationListenerRegistration<?> reg : registrations) {
+            listeners.put(reg.getType(), reg);
+            this.announceNotificationSubscription(reg.getType());
+        }
+    }
+
+    void removeRegistrations(final NotificationListenerRegistration<?>... registrations) {
+        for (NotificationListenerRegistration<?> reg : registrations) {
+            listeners.remove(reg.getType(), reg);
         }
     }
 
     @Override
-    public <T extends Notification> Registration<NotificationListener<T>> registerNotificationListener(final Class<T> notificationType, final NotificationListener<T> listener) {
-        final GenericNotificationRegistration<T> reg = new GenericNotificationRegistration<T>(notificationType, listener, this);
-        this.listeners.put(notificationType, listener);
-        this.announceNotificationSubscription(notificationType);
+    public <T extends Notification> NotificationListenerRegistration<T> registerNotificationListener(final Class<T> notificationType, final NotificationListener<T> listener) {
+        final NotificationListenerRegistration<T> reg = new AbstractNotificationListenerRegistration<T>(notificationType, listener) {
+            @Override
+            protected void removeRegistration() {
+                removeRegistrations(this);
+            }
+        };
+
+        addRegistrations(reg);
         return reg;
     }
 
@@ -105,25 +122,36 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
     }
 
     @Override
-    public Registration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(final org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(final org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         final NotificationInvoker invoker = SingletonHolder.INVOKER_FACTORY.invokerFor(listener);
-        for (final Class<? extends Notification> notifyType : invoker.getSupportedNotifications()) {
-            listeners.put(notifyType, invoker.getInvocationProxy());
-            announceNotificationSubscription(notifyType);
+        final Set<Class<? extends Notification>> types = invoker.getSupportedNotifications();
+        final NotificationListenerRegistration<?>[] regs = new NotificationListenerRegistration<?>[types.size()];
+
+        // Populate the registrations...
+        int i = 0;
+        for (Class<? extends Notification> type : types) {
+            regs[i] = new AggregatedNotificationListenerRegistration<Notification, Object>(type, invoker.getInvocationProxy(), regs) {
+                @Override
+                protected void removeRegistration() {
+                    // Nothing to do, will be cleaned up by parent (below)
+                }
+            };
+            ++i;
         }
 
-        return new GeneratedListenerRegistration(listener, invoker, this);
-    }
+        // ... now put them to use ...
+        addRegistrations(regs);
 
-    protected boolean unregisterListener(final GenericNotificationRegistration<?> reg) {
-        return listeners.remove(reg.getType(), reg.getInstance());
-    }
-
-    protected void unregisterListener(final GeneratedListenerRegistration reg) {
-        final NotificationInvoker invoker = reg.getInvoker();
-        for (final Class<? extends Notification> notifyType : invoker.getSupportedNotifications()) {
-            this.listeners.remove(notifyType, invoker.getInvocationProxy());
-        }
+        // ... finally return the parent registration
+        return new AbstractListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener>(listener) {
+            @Override
+            protected void removeRegistration() {
+                removeRegistrations(regs);
+                for (ListenerRegistration<?> reg : regs) {
+                    reg.close();
+                }
+            }
+        };
     }
 
     @Override
