@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2-v20140601202136_82eb3f9</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <artifactId>hosttracker.implementation</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2-v20140601202136_82eb3f9</version>
   <packaging>bundle</packaging>
 
   <properties>
@@ -114,7 +114,7 @@
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>autorelease-tag-v20140601202136_82eb3f9</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
 </project>
