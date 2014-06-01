@@ -11,10 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
-import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class MountPointManagerImpl implements MountProviderService {
 
     private final ConcurrentMap<InstanceIdentifier<?>, BindingMountPointImpl> mountPoints;
     private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
-    
+
     private ListeningExecutorService notificationExecutor;
     private ListeningExecutorService dataCommitExecutor;
 
@@ -39,7 +39,7 @@ public class MountPointManagerImpl implements MountProviderService {
         return notificationExecutor;
     }
 
-    public void setNotificationExecutor(ListeningExecutorService notificationExecutor) {
+    public void setNotificationExecutor(final ListeningExecutorService notificationExecutor) {
         this.notificationExecutor = notificationExecutor;
     }
 
@@ -47,12 +47,12 @@ public class MountPointManagerImpl implements MountProviderService {
         return dataCommitExecutor;
     }
 
-    public void setDataCommitExecutor(ListeningExecutorService dataCommitExecutor) {
+    public void setDataCommitExecutor(final ListeningExecutorService dataCommitExecutor) {
         this.dataCommitExecutor = dataCommitExecutor;
     }
 
     @Override
-    public synchronized BindingMountPointImpl createMountPoint(InstanceIdentifier<?> path) {
+    public synchronized BindingMountPointImpl createMountPoint(final InstanceIdentifier<?> path) {
         BindingMountPointImpl potential = mountPoints.get(path);
         if (potential != null) {
             throw new IllegalStateException("Mount point already exists.");
@@ -61,7 +61,7 @@ public class MountPointManagerImpl implements MountProviderService {
     }
 
     @Override
-    public BindingMountPointImpl createOrGetMountPoint(InstanceIdentifier<?> path) {
+    public BindingMountPointImpl createOrGetMountPoint(final InstanceIdentifier<?> path) {
         BindingMountPointImpl potential = getMountPoint(path);
         if (potential != null) {
             return potential;
@@ -70,18 +70,17 @@ public class MountPointManagerImpl implements MountProviderService {
     }
 
     @Override
-    public BindingMountPointImpl getMountPoint(InstanceIdentifier<?> path) {
+    public BindingMountPointImpl getMountPoint(final InstanceIdentifier<?> path) {
         return mountPoints.get(path);
     }
 
-    private synchronized BindingMountPointImpl createOrGetMountPointImpl(InstanceIdentifier<?> path) {
+    private synchronized BindingMountPointImpl createOrGetMountPointImpl(final InstanceIdentifier<?> path) {
         BindingMountPointImpl potential = getMountPoint(path);
         if (potential != null) {
             return potential;
         }
         RpcProviderRegistryImpl rpcRegistry = new RpcProviderRegistryImpl("mount");
-        NotificationBrokerImpl notificationBroker = new NotificationBrokerImpl();
-        notificationBroker.setExecutor(getNotificationExecutor());
+        NotificationBrokerImpl notificationBroker = new NotificationBrokerImpl(getNotificationExecutor());
         DataBrokerImpl dataBroker = new DataBrokerImpl();
         dataBroker.setExecutor(getDataCommitExecutor());
         BindingMountPointImpl mountInstance = new BindingMountPointImpl(path, rpcRegistry, notificationBroker,
@@ -91,7 +90,7 @@ public class MountPointManagerImpl implements MountProviderService {
         return mountInstance;
     }
 
-    private void notifyMountPointCreated(InstanceIdentifier<?> path) {
+    private void notifyMountPointCreated(final InstanceIdentifier<?> path) {
         for (ListenerRegistration<MountProvisionListener> listener : listeners) {
             try {
                 listener.getInstance().onMountPointCreated(path);
@@ -102,28 +101,28 @@ public class MountPointManagerImpl implements MountProviderService {
     }
 
     @Override
-    public ListenerRegistration<MountProvisionListener> registerProvisionListener(MountProvisionListener listener) {
+    public ListenerRegistration<MountProvisionListener> registerProvisionListener(final MountProvisionListener listener) {
         return listeners.register(listener);
     }
 
     public class BindingMountPointImpl extends
-            AbstractBindingSalProviderInstance<DataBrokerImpl, NotificationBrokerImpl, RpcProviderRegistryImpl>
+    AbstractBindingSalProviderInstance<DataBrokerImpl, NotificationBrokerImpl, RpcProviderRegistryImpl>
     implements MountProviderInstance {
 
-        private InstanceIdentifier<?> identifier;
+        private final InstanceIdentifier<?> identifier;
 
-        public BindingMountPointImpl(org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> identifier,
-                RpcProviderRegistryImpl rpcRegistry, NotificationBrokerImpl notificationBroker,
-                DataBrokerImpl dataBroker) {
+        public BindingMountPointImpl(final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> identifier,
+                final RpcProviderRegistryImpl rpcRegistry, final NotificationBrokerImpl notificationBroker,
+                final DataBrokerImpl dataBroker) {
             super(rpcRegistry, notificationBroker, dataBroker);
             this.identifier = identifier;
         }
 
         // Needed only for BI Connector
         public DataBrokerImpl getDataBrokerImpl() {
-            return (DataBrokerImpl) getDataBroker();
+            return getDataBroker();
         }
-        
+
         @Override
         public InstanceIdentifier<?> getIdentifier() {
             return this.identifier;
