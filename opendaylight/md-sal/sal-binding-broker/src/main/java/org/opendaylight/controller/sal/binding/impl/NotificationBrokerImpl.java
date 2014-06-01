@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import org.eclipse.xtext.xbase.lib.Conversions;
-import org.eclipse.xtext.xbase.lib.Functions.Function1;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
@@ -26,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -51,17 +51,16 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
     }
 
     public Iterable<Class<?>> getNotificationTypes(final Notification notification) {
-        Class<?>[] _interfaces = notification.getClass().getInterfaces();
-        final Function1<Class<?>, Boolean> _function = new Function1<Class<?>, Boolean>() {
+        final Class<?>[] ifaces = notification.getClass().getInterfaces();
+        return Iterables.filter(Arrays.asList(ifaces), new Predicate<Class<?>>() {
             @Override
-            public Boolean apply(final Class<?> it) {
-                if (Notification.class.equals(it)) {
+            public boolean apply(final Class<?> input) {
+                if (Notification.class.equals(input)) {
                     return false;
                 }
-                return Notification.class.isAssignableFrom(it);
+                return Notification.class.isAssignableFrom(input);
             }
-        };
-        return IterableExtensions.filter(((Iterable<Class<?>>)Conversions.doWrapArray(_interfaces)), _function);
+        });
     }
 
     @Override
@@ -75,14 +74,11 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
         for (final Class<?> type : getNotificationTypes(notification)) {
             listenerToNotify = Iterables.concat(listenerToNotify, listeners.get(((Class<? extends Notification>) type)));
         }
-        final Function1<NotificationListener<?>,NotifyTask> _function = new Function1<NotificationListener<?>, NotifyTask>() {
-            @Override
-            public NotifyTask apply(final NotificationListener<?> it) {
-                return new NotifyTask(it, notification);
-            }
-        };
-        final Set<NotifyTask> tasks = IterableExtensions.<NotifyTask>toSet(
-                IterableExtensions.<NotificationListener<?>, NotifyTask>map(listenerToNotify, _function));
+
+        final Set<NotifyTask> tasks = new HashSet<>();
+        for (NotificationListener<?> l : listenerToNotify) {
+            tasks.add(new NotifyTask(l, notification));
+        }
 
         for (final NotifyTask task : tasks) {
             service.submit(task);
