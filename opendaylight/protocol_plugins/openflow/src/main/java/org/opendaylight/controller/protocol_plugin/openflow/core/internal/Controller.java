@@ -13,9 +13,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IControllerShell;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
@@ -43,7 +46,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Controller implements IController, CommandProvider, IPluginInConnectionService {
+public class Controller implements IController, IControllerShell, CommandProvider, IPluginInConnectionService {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
     private ControllerIO controllerIO;
@@ -426,5 +429,72 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     public void notifyNodeDisconnectFromMaster(Node node) {
         ISwitch sw = switches.get((Long)node.getID());
         if (sw != null) notifySwitchAdded(sw);
+    }
+
+    public List<String> controllerShowQueueSize() {
+        List<String> result = new ArrayList<String>();
+        result.add("switchEvents queue size: " + switchEvents.size() + "\n");
+        return result;
+    }
+
+    public List<String> controllerShowSwitches() {
+        List<String> result = new ArrayList<String>();
+        Set<Long> sids = switches.keySet();
+        StringBuffer s = new StringBuffer();
+        int size = sids.size();
+        if (size == 0) {
+            result.add("switches: empty");
+            return result;
+        }
+        Iterator<Long> iter = sids.iterator();
+        s.append("Total: " + size + " switches\n");
+        while (iter.hasNext()) {
+            Long sid = iter.next();
+            Date date = switches.get(sid).getConnectedDate();
+            String switchInstanceName = ((SwitchHandler) switches.get(sid))
+                    .getInstanceName();
+            s.append(switchInstanceName + "/" + HexString.toHexString(sid)
+                    + " connected since " + date.toString() + "\n");
+        }
+        result.add(s.toString());
+        return result;
+    }
+
+    public List<String> controllerReset() {
+        List<String> result = new ArrayList<String>();
+        result.add("...Disconnecting the communication to all switches...\n");
+        stop();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+        } finally {
+            result.add("...start to accept connections from switches...\n");
+            start();
+        }
+        return result;
+    }
+
+    public List<String> controllerShowConnConfig() {
+        List<String> result = new ArrayList<String>();
+        String str = System.getProperty("secureChannelEnabled");
+        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) {
+            result.add("The Controller and Switch should communicate through TLS connetion.\n");
+
+            String keyStoreFile = System.getProperty("controllerKeyStore");
+            String trustStoreFile = System.getProperty("controllerTrustStore");
+            if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {
+                result.add("controllerKeyStore not specified\n");
+            } else {
+                result.add("controllerKeyStore=" + keyStoreFile + "\n");
+            }
+            if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {
+                result.add("controllerTrustStore not specified\n");
+            } else {
+                result.add("controllerTrustStore=" + trustStoreFile + "\n");
+            }
+        } else {
+            result.add("The Controller and Switch should communicate through TCP connetion.\n");
+        }
+        return result;
     }
 }

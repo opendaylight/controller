@@ -109,6 +109,7 @@
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <junit.version>4.8.1</junit.version>
     <karaf.version>3.0.1</karaf.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
@@ -139,6 +140,7 @@
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <protocol-framework.version>0.5.0-SNAPSHOT</protocol-framework.version>
     <protocol_plugins.openflow.version>0.4.2-SNAPSHOT</protocol_plugins.openflow.version>
+    <protocol_plugins.openflow.shell.version>1.0.0-SNAPSHOT</protocol_plugins.openflow.shell.version>
     <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>

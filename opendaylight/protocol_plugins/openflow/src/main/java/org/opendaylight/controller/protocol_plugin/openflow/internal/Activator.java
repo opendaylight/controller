@@ -26,6 +26,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IControllerShell;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
@@ -246,6 +247,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("name", "Controller");
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
             c.setInterface(new String[] { IController.class.getName(),
+                                          IControllerShell.class.getName(),
                                           IPluginInConnectionService.class.getName()},
                                           props);
         }

@@ -181,4 +181,10 @@
    <feature name="logging" description="Logging">
       <bundle>mvn:org.opendaylight.controller/logging.bridge/${logging.bridge.version}</bundle>
    </feature>
+   <feature name="odl-protocol_plugins" description="Controller Protocol plugins service">
+      <feature>base-apache-commons</feature>
+      <feature>base-felix-dm</feature>
+      <feature>odl-sal</feature>
+      <bundle>mvn:org.opendaylight.controller/protocol_plugins.openflow/${protocol_plugins.openflow.version}</bundle>
+   </feature>
 </features>
