@@ -1,0 +1,31 @@
+module ietf-netconf-cli {
+
+  namespace "urn:ietf:params:xml:ns:netconf:base:1.0:cli";
+
+  prefix ncli;
+
+/*
+  import ietf-netconf { prefix nc; revision-date 2011-06-01; }
+*/
+    revision 2014-05-26 {
+      description
+        "Initial revision";
+    }
+/*
+  augment "/nc:edit-config/nc:input" {
+    leaf subtree {
+        // TODO this argument has to be handled before data
+        type string;
+        description "
+        ";
+    }
+  }
+*/
+
+  extension argument-handler {
+    description
+        "Links custom argument reader to an input argument";
+    argument "name";
+  }
+
+}
