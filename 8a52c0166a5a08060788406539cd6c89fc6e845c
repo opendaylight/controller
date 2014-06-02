@@ -16,6 +16,24 @@
       "revId": "8a52c0166a5a08060788406539cd6c89fc6e845c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_397d0a6f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/SnapshotBackedWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T16:21:39Z",
+      "side": 1,
+      "message": "Added Throwasbles.propagateIfPossible, otherwise wrap in illegalArgumentException.",
+      "parentUuid": "fa82b9bf_bee7c03f",
+      "revId": "8a52c0166a5a08060788406539cd6c89fc6e845c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
