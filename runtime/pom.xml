@@ -40,8 +40,8 @@
     <scalatest.version>2.0</scalatest.version>
     <shapeless.version>1.2.4</shapeless.version>
     <spray.json.version>1.2.6</spray.json.version>
-    <spray.version>1.3.1</spray.version>
     <spray.routing.version>1.3.1</spray.routing.version>
+    <spray.version>1.3.1</spray.version>
     <typesafe.config.version>1.2.1</typesafe.config.version>
     <uncommons.maths.version>1.2.2</uncommons.maths.version>
   </properties>
