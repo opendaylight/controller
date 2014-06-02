@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,6 +25,7 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ForwardingBlockingQueue;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -62,41 +64,49 @@ public class SingletonHolder {
                 try {
                     queueSize = Integer.parseInt(queueValue);
                     logger.trace("Queue size was set to {}", queueSize);
-                }catch(NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     logger.warn("Cannot parse {} as set by {}, using default {}", queueValue,
                             NOTIFICATION_QUEUE_SIZE_PROPERTY, queueSize);
                 }
             }
+
             // Overriding the queue:
             // ThreadPoolExecutor would not create new threads if the queue is not full, thus adding
             // occurs in RejectedExecutionHandler.
             // This impl saturates threadpool first, then queue. When both are full caller will get blocked.
-            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(queueSize) {
-                private static final long serialVersionUID = 1L;
+            final BlockingQueue<Runnable> delegate = new LinkedBlockingQueue<>(queueSize);
+            final BlockingQueue<Runnable> queue = new ForwardingBlockingQueue<Runnable>() {
+                @Override
+                protected BlockingQueue<Runnable> delegate() {
+                    return delegate;
+                }
 
                 @Override
-                public boolean offer(Runnable r) {
-                    // ThreadPoolExecutor will spawn a new thread after core size is reached only if the queue.offer returns false.
+                public boolean offer(final Runnable r) {
+                    // ThreadPoolExecutor will spawn a new thread after core size is reached only
+                    // if the queue.offer returns false.
                     return false;
                 }
             };
 
-            ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-notification-%d").build();
+            final ThreadFactory factory = new ThreadFactoryBuilder()
+            .setDaemon(true)
+            .setNameFormat("md-sal-binding-notification-%d")
+            .build();
 
-            ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_NOTIFICATION_THREADS, MAX_NOTIFICATION_THREADS,
-                    NOTIFICATION_THREAD_LIFE, TimeUnit.SECONDS, queue , factory,
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_NOTIFICATION_THREADS, MAX_NOTIFICATION_THREADS,
+                    NOTIFICATION_THREAD_LIFE, TimeUnit.SECONDS, queue, factory,
                     new RejectedExecutionHandler() {
-                        // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
-                        @Override
-                        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                            try {
-                                executor.getQueue().put(r);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();// set interrupt flag after clearing
-                                throw new IllegalStateException(e);
-                            }
-                        }
-                    });
+                // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
+                @Override
+                public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
+                    try {
+                        executor.getQueue().put(r);
+                    } catch (InterruptedException e) {
+                        throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
+                    }
+                }
+            });
 
             NOTIFICATION_EXECUTOR = MoreExecutors.listeningDecorator(executor);
         }
