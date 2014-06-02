@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
-final class NotificationListenerMap {
+final class GenerationalListenerMap {
     private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
             HashMultimap.create();
 

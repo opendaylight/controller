@@ -28,7 +28,7 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
 
     private final ListenerRegistry<NotificationInterestListener> interestListeners =
             ListenerRegistry.create();
-    private final NotificationListenerMap listeners = new NotificationListenerMap();
+    private final GenerationalListenerMap listeners = new GenerationalListenerMap();
     private final ExecutorService executor;
 
     public NotificationBrokerImpl(final ExecutorService executor) {
