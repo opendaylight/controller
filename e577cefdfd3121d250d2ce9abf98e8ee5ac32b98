@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3c8743d9",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5c2d6745",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7c306b9e",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMTransactionChain.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "class documentation",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc6df733",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7c306b9e",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f746d420",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3c2ae32c",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9c1a0f16",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "abstract class -\u003e protected contructor",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_79eab210",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9c1a0f16",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_99ed3628",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bc1593e6",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3ce183fe",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "missing documentation (or @Override?)",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_39f42af1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3ce183fe",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_59f7aef5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Same as in storeTxFactories, currently limited by Enum LogicalDatastoreType to 2",
+      "parentUuid": "fa82b9bf_9cf1afcf",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5cbb27e5",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "Why is the map exposed directly? What operations are expected on it by subclasses?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5738e09f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5cbb27e5",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_773ba49c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7cbe2bd6",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1cb59fed",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -183,6 +345,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "Add documentation",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_17425810",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1cb59fed",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +403,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_37451c17",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fcc9db79",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9cc8cf75",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -234,6 +432,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "can it be null?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d74b9029",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9cc8cf75",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +473,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_975508c8",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done, getCohorts removed... ready used.",
+      "parentUuid": "fa82b9bf_bcc35356",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5ca247af",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 3
@@ -268,6 +502,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "Missing code?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7504cd5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Will addresa in next patchset.",
+      "parentUuid": "fa82b9bf_5ca247af",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +543,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7762c4ae",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Will address in next patchset.",
+      "parentUuid": "fa82b9bf_1cacbf9f",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fc90fb4f",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMBrokerTransactionChainImpl.java",
         "patchSetId": 3
@@ -302,6 +572,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "Copyright herader",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_375c3ced",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMBrokerTransactionChainImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fc90fb4f",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -342,6 +630,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f76d749a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMBrokerTransactionChainImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7c8ceb35",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1c835f05",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMBrokerTransactionChainImpl.java",
         "patchSetId": 3
@@ -359,6 +665,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_976c289e",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMBrokerTransactionChainImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Will address by next patchset.",
+      "parentUuid": "fa82b9bf_1c835f05",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_dc7c1723",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
         "patchSetId": 3
@@ -370,6 +694,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "what is the relationship between super\u0027s view of datastores and us?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b767ecb6",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_dc7c1723",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -410,6 +752,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5706a0cf",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Will address by next patchset.",
+      "parentUuid": "fa82b9bf_9c768f3d",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bc711346",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
         "patchSetId": 3
@@ -421,6 +781,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "log the creation somewhere?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_770964dc",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "done.",
+      "parentUuid": "fa82b9bf_bc711346",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -444,6 +822,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_17101800",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Will address by next patchset.",
+      "parentUuid": "fa82b9bf_5c900743",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7c938b4f",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
         "patchSetId": 3
@@ -455,6 +851,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "class documentation",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_996216ac",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7c938b4f",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -529,6 +943,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9930d69f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3cb423d0",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fcc55b3d",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
         "patchSetId": 3
@@ -540,6 +972,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "where is Exception thrown precisly?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_792dd245",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fcc55b3d",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -580,6 +1030,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_592a4e2d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3cebc3b1",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_dcd177fc",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
         "patchSetId": 3
@@ -591,6 +1059,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "okay.,.. and what is it used for? three sentences at least.",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_19f5a6ca",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_dcd177fc",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -614,6 +1100,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b9035ab7",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9cdbef1a",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bcd6f3ef",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
         "patchSetId": 3
@@ -625,6 +1129,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "public is implied by interface, so lose the superfluous declaration (sonar)",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9fe5eae",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bcd6f3ef",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -648,6 +1170,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_790632d0",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitExecutor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5c056778",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7c086b91",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitExecutor.java",
         "patchSetId": 3
@@ -665,6 +1205,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3910aa00",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitExecutor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7c086b91",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1cffdf68",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitExecutor.java",
         "patchSetId": 3
@@ -676,6 +1234,24 @@
       "writtenOn": "2014-05-26T13:30:44Z",
       "side": 1,
       "message": "soo... what is the return?",
+      "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_59132e0d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitExecutor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-02T17:24:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1cffdf68",
       "revId": "e577cefdfd3121d250d2ce9abf98e8ee5ac32b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
