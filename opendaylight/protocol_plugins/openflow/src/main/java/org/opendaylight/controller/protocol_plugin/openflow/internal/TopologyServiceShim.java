@@ -32,6 +32,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
+import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimShell;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
-        IInventoryShimExternalListener, IContainerAware {
+        IInventoryShimExternalListener, IContainerAware, ITopologyServiceShimShell {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
@@ -955,5 +956,22 @@ public class TopologyServiceShim implements IDiscoveryListener,
             }
         }
         edgeMap.remove(containerName);
+    }
+
+    @Override
+    public String bwfactor(String arg0) {
+        String factorString = arg0;
+        if (factorString == null) {
+            String msg = "Bw threshold: " + this.bwThresholdFactor;
+            msg = msg + "\nInsert a non null bw threshold";
+            return msg;
+        }
+        bwThresholdFactor = Float.parseFloat(factorString);
+        return "New Bw threshold: " + this.bwThresholdFactor;
+    }
+
+    @Override
+    public String pem(String arg0) {
+        return "";
     }
 }

@@ -1,0 +1,33 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="controllerRef" interface="org.opendaylight.controller.protocol_plugin.openflow.core.IControllerShell"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+        <command>
+        <action class="org.opendaylight.controller.protocol_plugin.openflow.shell.ControllerReset">
+            <property name="controller" ref="controllerRef"/>
+            </action>
+        </command>
+
+        <command>
+        <action class="org.opendaylight.controller.protocol_plugin.openflow.shell.ControllerShowConnConfig">
+            <property name="controller" ref="controllerRef"/>
+            </action>
+        </command>
+
+        <command>
+        <action class="org.opendaylight.controller.protocol_plugin.openflow.shell.ControllerShowQueueSize">
+            <property name="controller" ref="controllerRef"/>
+            </action>
+        </command>
+
+        <command>
+        <action class="org.opendaylight.controller.protocol_plugin.openflow.shell.ControllerShowSwitches">
+            <property name="controller" ref="controllerRef"/>
+            </action>
+        </command>
+
+    </command-bundle>
+
+
+</blueprint>
