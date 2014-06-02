@@ -269,6 +269,12 @@ module opendaylight-match-types {
         }
     }
 
+    grouping "tcp-flag-match-fields" {
+        leaf tcp-flag {
+            type uint16;
+        }
+    }
+
     grouping match {
         leaf in-port {
             type inv:node-connector-id;
@@ -339,6 +345,10 @@ module opendaylight-match-types {
 
         container "protocol-match-fields" {
             uses "protocol-match-fields";
+        }
+
+        container tcp-flag-match {
+            uses "tcp-flag-match-fields";
         }
     }
 }
