@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,62 +7,54 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.yangtools.yang.binding.Notification;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
+/**
+ * A multi-generation, isolated notification type to listener map.
+ */
 final class GenerationalListenerMap {
-    private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
-            HashMultimap.create();
+    private final AtomicReference<ListenerMapGeneration> current = new AtomicReference<>(new ListenerMapGeneration());
 
-    private static Iterable<Class<?>> getNotificationTypes(final Notification notification) {
-        final Class<?>[] ifaces = notification.getClass().getInterfaces();
-        return Iterables.filter(Arrays.asList(ifaces), new Predicate<Class<?>>() {
-            @Override
-            public boolean apply(final Class<?> input) {
-                if (Notification.class.equals(input)) {
-                    return false;
-                }
-                return Notification.class.isAssignableFrom(input);
-            }
-        });
+    Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
+        return current.get().listenersFor(notification);
     }
 
-    synchronized Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
-        final Set<NotificationListenerRegistration<?>> toNotify = new HashSet<>();
-
-        for (final Class<?> type : getNotificationTypes(notification)) {
-            final Collection<NotificationListenerRegistration<?>> l = listeners.get((Class<? extends Notification>) type);
-            if (l != null) {
-                toNotify.addAll(l);
-            }
-        }
-
-        return toNotify;
+    Iterable<Class<? extends Notification>> getKnownTypes() {
+        // Note: this relies on current having immutable listeners
+        return current.get().getListeners().keySet();
     }
 
-    synchronized Iterable<Class<? extends Notification>> getKnownTypes() {
-        return ImmutableList.copyOf(listeners.keySet());
+    @GuardedBy("this")
+    private Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> mutableListeners() {
+        return HashMultimap.create(current.get().getListeners());
     }
 
     synchronized void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
+        Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
+                mutableListeners();
+
         for (NotificationListenerRegistration<?> reg : registrations) {
             listeners.put(reg.getType(), reg);
         }
+
+        current.set(new ListenerMapGeneration(listeners));
     }
 
     synchronized void removeRegistrations(final NotificationListenerRegistration<?>... registrations) {
+        Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
+                mutableListeners();
+
         for (NotificationListenerRegistration<?> reg : registrations) {
             listeners.remove(reg.getType(), reg);
         }
+
+        current.set(new ListenerMapGeneration(listeners));
     }
 }
