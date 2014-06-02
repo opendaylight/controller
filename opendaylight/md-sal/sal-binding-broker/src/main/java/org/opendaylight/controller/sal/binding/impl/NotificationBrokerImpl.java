@@ -36,17 +36,11 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
 
     private final ListenerRegistry<NotificationInterestListener> interestListeners =
             ListenerRegistry.create();
-
     private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
             Multimaps.synchronizedSetMultimap(HashMultimap.<Class<? extends Notification>, NotificationListenerRegistration<?>>create());
-    private ExecutorService executor;
+    private final ExecutorService executor;
 
-    @Deprecated
     public NotificationBrokerImpl(final ExecutorService executor) {
-        this.setExecutor(executor);
-    }
-
-    public void setExecutor(final ExecutorService executor) {
         this.executor = Preconditions.checkNotNull(executor);
     }
 
