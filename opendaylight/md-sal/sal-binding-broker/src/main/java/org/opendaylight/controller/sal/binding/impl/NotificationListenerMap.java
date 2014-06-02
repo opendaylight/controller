@@ -19,11 +19,10 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 
 final class NotificationListenerMap {
     private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners =
-            Multimaps.synchronizedSetMultimap(HashMultimap.<Class<? extends Notification>, NotificationListenerRegistration<?>>create());
+            HashMultimap.create();
 
     private static Iterable<Class<?>> getNotificationTypes(final Notification notification) {
         final Class<?>[] ifaces = notification.getClass().getInterfaces();
@@ -38,7 +37,7 @@ final class NotificationListenerMap {
         });
     }
 
-    Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
+    synchronized Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
         final Set<NotificationListenerRegistration<?>> toNotify = new HashSet<>();
 
         for (final Class<?> type : getNotificationTypes(notification)) {
@@ -51,20 +50,19 @@ final class NotificationListenerMap {
         return toNotify;
     }
 
-    Iterable<Class<? extends Notification>> getKnownTypes() {
+    synchronized Iterable<Class<? extends Notification>> getKnownTypes() {
         return ImmutableList.copyOf(listeners.keySet());
     }
 
-    void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
+    synchronized void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
         for (NotificationListenerRegistration<?> reg : registrations) {
             listeners.put(reg.getType(), reg);
         }
     }
 
-    void removeRegistrations(final NotificationListenerRegistration<?>... registrations) {
+    synchronized void removeRegistrations(final NotificationListenerRegistration<?>... registrations) {
         for (NotificationListenerRegistration<?> reg : registrations) {
             listeners.remove(reg.getType(), reg);
         }
     }
-
 }
