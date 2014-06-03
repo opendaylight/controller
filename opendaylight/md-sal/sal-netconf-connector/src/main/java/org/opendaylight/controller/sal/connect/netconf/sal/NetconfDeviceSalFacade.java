@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
@@ -29,11 +29,9 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionCapabilities> {
 
-    private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceTwoPhaseCommitTransaction.class);
+    private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceSalFacade.class);
     private static final InstanceIdentifier ROOT_PATH = InstanceIdentifier.builder().toInstance();
 
     private final RemoteDeviceId id;
@@ -88,7 +86,11 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
         }
 
         if (failedRpcs.isEmpty() == false) {
-            logger.warn("{}: Some rpcs from netconf device were not registered: {}", id, failedRpcs);
+            if (logger.isDebugEnabled()) {
+                logger.warn("{}: Some rpcs from netconf device were not registered: {}", id, failedRpcs);
+            } else {
+                logger.warn("{}: Some rpcs from netconf device were not registered: {}", id, failedRpcs.keySet());
+            }
         }
     }
 
