@@ -15,7 +15,11 @@ import java.util.Set;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 import com.google.common.base.Predicate;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
@@ -23,14 +27,44 @@ import com.google.common.collect.Multimap;
  * An immutable view of the current generation of listeners.
  */
 final class ListenerMapGeneration {
-    private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners;
+    private static final int CACHE_MAX_ENTRIES = 1000;
+
+    /**
+     * Constant map of notification type to subscribed listeners.
+     */
+    private final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> typeToListeners;
+
+    /**
+     * Dynamic cache of notification implementation to matching listeners. This cache loads entries based on
+     * the contents of the {@link #typeToListeners} map.
+     */
+    private final LoadingCache<Class<?>, Iterable<NotificationListenerRegistration<?>>> implementationToListeners =
+            CacheBuilder.newBuilder()
+            .weakKeys()
+            .maximumSize(CACHE_MAX_ENTRIES)
+            .build(new CacheLoader<Class<?>, Iterable<NotificationListenerRegistration<?>>>() {
+                @Override
+                public Iterable<NotificationListenerRegistration<?>> load(final Class<?> key) {
+                    final Set<NotificationListenerRegistration<?>> regs = new HashSet<>();
+
+                    for (final Class<?> type : getNotificationTypes(key)) {
+                        @SuppressWarnings("unchecked")
+                        final Collection<NotificationListenerRegistration<?>> l = typeToListeners.get((Class<? extends Notification>) type);
+                        if (l != null) {
+                            regs.addAll(l);
+                        }
+                    }
+
+                    return ImmutableSet.copyOf(regs);
+                }
+            });
 
     ListenerMapGeneration() {
-        listeners = ImmutableMultimap.of();
+        typeToListeners = ImmutableMultimap.of();
     }
 
     ListenerMapGeneration(final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners) {
-        this.listeners = ImmutableMultimap.copyOf(listeners);
+        this.typeToListeners = ImmutableMultimap.copyOf(listeners);
     }
 
     /**
@@ -39,11 +73,26 @@ final class ListenerMapGeneration {
      * @return Current type-to-listener map.
      */
     Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> getListeners() {
-        return listeners;
+        return typeToListeners;
     }
 
-    private static Iterable<Class<?>> getNotificationTypes(final Notification notification) {
-        final Class<?>[] ifaces = notification.getClass().getInterfaces();
+    /**
+     * Look up the listeners which need to see this notification delivered.
+     *
+     * @param notification Notification object
+     * @return Iterable of listeners, guaranteed to be nonnull.
+     */
+    public Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
+        // Safe to use, as our loader does not throw checked exceptions
+        return implementationToListeners.getUnchecked(notification.getClass());
+    }
+
+    public Iterable<Class<? extends Notification>> getKnownTypes() {
+        return typeToListeners.keySet();
+    }
+
+    private static Iterable<Class<?>> getNotificationTypes(final Class<?> cls) {
+        final Class<?>[] ifaces = cls.getInterfaces();
         return Iterables.filter(Arrays.asList(ifaces), new Predicate<Class<?>>() {
             @Override
             public boolean apply(final Class<?> input) {
@@ -53,30 +102,5 @@ final class ListenerMapGeneration {
                 return Notification.class.isAssignableFrom(input);
             }
         });
-    }
-
-    /**
-     * Look up the listeners which need to see this notification delivered.
-     *
-     * @param notification Notification object
-     * @return Iterable of listeners, may be null
-     *
-     * FIXME: improve such that it always returns non-null.
-     */
-    public Iterable<NotificationListenerRegistration<?>> listenersFor(final Notification notification) {
-        final Set<NotificationListenerRegistration<?>> ret = new HashSet<>();
-
-        for (final Class<?> type : getNotificationTypes(notification)) {
-            final Collection<NotificationListenerRegistration<?>> l = listeners.get((Class<? extends Notification>) type);
-            if (l != null) {
-                ret.addAll(l);
-            }
-        }
-
-        return ret;
-    }
-
-    public Iterable<Class<? extends Notification>> getKnownTypes() {
-        return listeners.keySet();
     }
 }
