@@ -1,0 +1,74 @@
+module netconf-cli {
+
+  namespace "netconf:cli";
+  prefix ncli;
+
+  import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+
+
+    revision 2014-05-22 {
+      description
+       "Initial revision.";
+    }
+
+  extension java-class {
+      description
+          "This could be used to link between rpc yang definition and custom command implementation";
+
+      argument "name";
+  }
+
+  rpc help {
+    output {
+      leaf help {
+        type string;
+      }
+    }
+  }
+
+  rpc close {
+  }
+
+  rpc connect {
+
+      input {
+
+         // TODO replace address port with ip address from inet types, we need to support unions
+         // TODO yangtools keep input arguments unordered so the ordering in cli is random
+         leaf address-name {
+           type string;
+           default localhost;
+         }
+
+         leaf address-port {
+           type int32;
+           default 830;
+         }
+
+          leaf user-name {
+           type string;
+         }
+
+        leaf user-password {
+            type string;
+        }
+      }
+
+      output {
+        leaf status {
+            type string;
+        }
+      }
+  }
+
+
+  rpc disconnect {
+
+      output {
+        leaf status {
+            type string;
+        }
+      }
+    }
+
+}
