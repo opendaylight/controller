@@ -58,7 +58,7 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>-->
-    <!-- <dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>controller-features</artifactId>
       <version>${project.version}</version>
@@ -66,7 +66,6 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-  -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>mdsal-features</artifactId>
