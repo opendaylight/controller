@@ -1,0 +1,68 @@
+package org.opendaylight.controller.netconf.cli.reader.impl;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import jline.console.completer.Completer;
+import jline.console.completer.StringsCompleter;
+import org.opendaylight.controller.netconf.cli.io.BaseConsoleContext;
+import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
+import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
+import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
+import org.opendaylight.controller.netconf.cli.reader.ReadingException;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+
+public class ChoiceReader extends AbstractReader<ChoiceNode> {
+
+    public ChoiceReader(final ConsoleIO console) {
+        super(console);
+    }
+
+    @Override
+    public List<Node<?>> readInner(final ChoiceNode choiceNode) throws IOException, ReadingException {
+        final Map<String, ChoiceCaseNode> availableCases = collectAllCases(choiceNode);
+        console.formatLn("Select case for choice %s from %s", choiceNode.getQName().getLocalName(), availableCases.keySet());
+
+        ChoiceCaseNode selectedCase = null;
+        while (selectedCase == null) {
+            final String rawValue = console.read();
+            if (isSkipInput(rawValue)) {
+                return Collections.emptyList();
+            }
+
+            selectedCase = availableCases.get(rawValue);
+        }
+
+        final List<Node<?>> newNodes = new ArrayList<>();
+        for (final DataSchemaNode schemaNode : selectedCase.getChildNodes()) {
+            newNodes.addAll(new GenericReader(console).read(schemaNode));
+        }
+        return newNodes;
+    }
+
+    private Map<String, ChoiceCaseNode> collectAllCases(final ChoiceNode schemaNode) {
+        return Maps.uniqueIndex(schemaNode.getCases(), new Function<ChoiceCaseNode, String>() {
+            @Override
+            public String apply(final ChoiceCaseNode input) {
+                return input.getQName().getLocalName();
+            }
+        });
+    }
+
+    @Override
+    protected ConsoleContext getContext(final ChoiceNode schemaNode) {
+        return new BaseConsoleContext<ChoiceNode>(schemaNode) {
+            @Override
+            public List<Completer> getAdditionalCompleters() {
+                return Collections.<Completer>singletonList(new StringsCompleter(collectAllCases(schemaNode).keySet()));
+            }
+        };
+    }
+}
