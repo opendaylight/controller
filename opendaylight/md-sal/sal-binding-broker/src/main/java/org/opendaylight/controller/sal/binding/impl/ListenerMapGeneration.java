@@ -75,4 +75,8 @@ final class ListenerMapGeneration {
 
         return ret;
     }
+
+    public Iterable<Class<? extends Notification>> getKnownTypes() {
+        return listeners.keySet();
+    }
 }
