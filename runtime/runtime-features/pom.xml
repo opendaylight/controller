@@ -5,12 +5,13 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>runtime</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>runtime-features</artifactId>
-  <packaging>pom</packaging>
-  <name>Controller Runtime :: Features</name>
-  <description>Base Features POM</description>
+  <packaging>bundle</packaging>
+  <name>${project.artifactId}</name>
+  <description>Runtime Features POM</description>
   <properties>
     <features.file>features.xml</features.file>
   </properties>

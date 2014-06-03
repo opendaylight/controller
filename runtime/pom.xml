@@ -15,7 +15,7 @@
   <modules>
     <module>runtime-features</module>
     <module>runtime-distribution</module>
-    <module>featureservice-northbound</module> 
+    <module>featureservice-northbound</module>
   </modules>
 
   <properties>

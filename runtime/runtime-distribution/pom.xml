@@ -5,9 +5,9 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>runtime</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <relativePath>../</relativePath>
   </parent>
-  <artifactId>Controller Runtime :: Runtime Distribution</artifactId>
+  <artifactId>runtime-distribution</artifactId>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
