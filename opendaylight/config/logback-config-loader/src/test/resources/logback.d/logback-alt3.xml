@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+  <root level="INFO">
+    <appender-ref ref="TEST" />
+  </root>
+
+  <logger name="org.opendaylight.controller.logback.config.loader.test.logwork.Informer" level="INFO"/>
+  <logger name="org.opendaylight.controller.logback.config.loader.test.logwork.Warner" level="WARN"/>
+
+  <logger name="org.opendaylight.controller.logback.config.loader.test.LogbackConfigurationLoaderTest" level="TRACE"/>
+</configuration>
