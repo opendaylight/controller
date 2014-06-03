@@ -9,6 +9,8 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Stack;
@@ -32,7 +34,17 @@ public class XmlReader {
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     private XMLEventReader eventReader;
 
-    public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException {
+    public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException,
+                                                                      UnsupportedFormatException,
+                                                                      IOException {
+        //Get an XML stream which can be marked, and reset, so we can check and see if there is
+        //any content being provided.
+        entityStream = getMarkableStream(entityStream);
+
+        if( isInputStreamEmpty( entityStream ) ) {
+            return null;
+        }
+
         eventReader = xmlInputFactory.createXMLEventReader(entityStream);
 
         if (eventReader.hasNext()) {
@@ -89,6 +101,31 @@ public class XmlReader {
         }
 
         return root;
+    }
+
+    /**
+     * If the input stream is not markable, then it wraps the input stream with a buffered stream,
+     * which is mark able. That way we can check if the stream is empty safely.
+     * @param entityStream
+     * @return
+     */
+    private InputStream getMarkableStream(InputStream entityStream) {
+        if( !entityStream.markSupported() )
+        {
+            entityStream = new BufferedInputStream( entityStream );
+        }
+        return entityStream;
+    }
+
+    private boolean isInputStreamEmpty(InputStream entityStream)
+            throws IOException {
+        boolean isEmpty = false;
+        entityStream.mark( 1 );
+        if( entityStream.read() == -1 ){
+            isEmpty = true;
+        }
+        entityStream.reset();
+        return isEmpty;
     }
 
     private boolean isSimpleNodeEvent(final XMLEvent event) throws XMLStreamException {

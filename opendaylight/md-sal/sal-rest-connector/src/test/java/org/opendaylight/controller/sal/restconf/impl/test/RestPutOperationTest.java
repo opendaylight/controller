@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -86,6 +88,7 @@ public class RestPutOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
+        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
@@ -100,6 +103,15 @@ public class RestPutOperationTest extends JerseyTest {
 
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
+
+        assertEquals( 400, put(uri, MediaType.APPLICATION_JSON, "" ));
+    }
+
+    @Test
+    public void putConfigStatusCodesEmptyBody() throws UnsupportedEncodingException {
+        String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
+        Response resp = target(uri).request( MediaType.APPLICATION_JSON).put(Entity.entity( "", MediaType.APPLICATION_JSON));
+        assertEquals( 400, put(uri, MediaType.APPLICATION_JSON, "" ));
     }
 
     @Test

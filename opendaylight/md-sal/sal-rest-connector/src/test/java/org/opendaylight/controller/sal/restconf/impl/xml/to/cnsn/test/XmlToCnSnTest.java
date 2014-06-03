@@ -9,7 +9,11 @@ package org.opendaylight.controller.sal.restconf.impl.xml.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +54,29 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
         assertNotNull(lf2);
         assertTrue(lf2.getValue() instanceof String);
         assertEquals("121", lf2.getValue());
+    }
+
+    @Test
+    public void testXmlBlankInput() throws Exception{
+        InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
+        CompositeNode compositeNode =
+                XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+
+        assertNull( compositeNode );
+    }
+
+    @Test
+    public void testXmlBlankInputUnmarkableStream() throws Exception{
+        InputStream inputStream = new ByteArrayInputStream( "".getBytes() ){
+            @Override
+            public boolean markSupported() {
+                return false;
+            }
+        };
+        CompositeNode compositeNode =
+                XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+
+        assertNull( compositeNode );
     }
 
 }

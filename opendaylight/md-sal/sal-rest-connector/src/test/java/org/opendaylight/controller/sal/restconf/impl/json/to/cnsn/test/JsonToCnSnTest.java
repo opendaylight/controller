@@ -9,8 +9,11 @@ package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -174,6 +177,14 @@ public class JsonToCnSnTest {
 
         assertTrue(reason.contains("Expected value at line"));
 
+    }
+
+    @Test
+    public void testJsonBlankInput() throws Exception{
+        InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
+        CompositeNode compositeNode =
+                JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+        assertNull( compositeNode );
     }
 
     /**
