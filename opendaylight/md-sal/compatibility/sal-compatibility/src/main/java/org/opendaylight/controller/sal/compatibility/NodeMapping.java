@@ -7,11 +7,8 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.common.util.Arguments;
 import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -44,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortFeatures;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.flow.capable.port.State;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated;
@@ -57,8 +55,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 public final class NodeMapping {
     public final static String MD_SAL_TYPE = "MD_SAL";
@@ -133,15 +133,15 @@ public final class NodeMapping {
     }
 
     public static NodeConnectorId toControllerNodeConnectorId(final NodeId node) {
-        return new NodeConnectorId(node.getValue() + ":" + 4294967293L);
+        return new NodeConnectorId(node.getValue() + ":" + OutputPortValues.CONTROLLER.toString());
     }
 
     public static NodeConnectorId toLocalNodeConnectorId(final NodeId node) {
-        return new NodeConnectorId(node.getValue() + ":" + 4294967294L);
+        return new NodeConnectorId(node.getValue() + ":" + OutputPortValues.LOCAL.toString());
     }
 
     public static NodeConnectorId toNormalNodeConnectorId(final NodeId node) {
-        return new NodeConnectorId(node.getValue() + ":" + 4294967290L);
+        return new NodeConnectorId(node.getValue() + ":" + OutputPortValues.NORMAL.toString());
     }
 
     public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
