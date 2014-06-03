@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_742717b7",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-06-03T11:29:33Z",
+      "side": 1,
+      "message": "Why change from mockito with config to mockito all ?",
+      "revId": "dd5181fe04ef8f600ff4144fefbfc2d1d45f0c46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_74907743",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfDocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-06-03T11:29:33Z",
+      "side": 1,
+      "message": "I am not sure if this code should be present in netconf-api. It would fit somewhere in NetconfMessageUtil, where it could use utility code from netconf-util (XmlUtil + XmlElement).\n\n(Or even use jaxB to do the xml \u003c-\u003e NetconfDocumentedException translation)\n\nAlso the Netconf xml constants could stay in the netconf-util that way.",
+      "revId": "dd5181fe04ef8f600ff4144fefbfc2d1d45f0c46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
