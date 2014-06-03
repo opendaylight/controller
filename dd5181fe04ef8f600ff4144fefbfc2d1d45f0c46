@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b4ad9f8a",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-03T12:49:52Z",
+      "side": 1,
+      "message": "I was getting a strange error at runtime from mockito - after  switching the dependency the error went away.",
+      "parentUuid": "fa82b9bf_742717b7",
+      "revId": "dd5181fe04ef8f600ff4144fefbfc2d1d45f0c46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_74907743",
         "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfDocumentedException.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-03T11:29:33Z",
       "side": 1,
       "message": "I am not sure if this code should be present in netconf-api. It would fit somewhere in NetconfMessageUtil, where it could use utility code from netconf-util (XmlUtil + XmlElement).\n\n(Or even use jaxB to do the xml \u003c-\u003e NetconfDocumentedException translation)\n\nAlso the Netconf xml constants could stay in the netconf-util that way.",
+      "revId": "dd5181fe04ef8f600ff4144fefbfc2d1d45f0c46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_34b18fe1",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/NetconfDocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-03T12:49:52Z",
+      "side": 1,
+      "message": "I thought it made sense for NetconfDocumentedEx to have the logic for marshaling itself to/from XML rather than being buried in some utility class somewhere. \n\nIt is is unfortunate that such util classes as XmlUtil and XmlElement couldn\u0027t be used in NetconfDocumentedEx. My thought on that is why such general XML utility/helper classes are in netconf-util and not in a more common bundle that netconf-api could reference?\n\nI think NetconfXmlXonstants belongs in api. I could move  XmlUtil and XmlElement to the api bindle as well. \n\nBetter yet, I propose we eliminate the netconf-util bundle altogther and move the classes into netconf-api. I\u0027m not sure what the distinction is between \"api\" and \"util\".  Eg, NetconfHelloMessage derives from NetconfMessage and thus is a type of NetconfMessage, so why is NetconfHelloMessage in util and not api?\n\nMerging util and api simplifies everything.",
+      "parentUuid": "fa82b9bf_74907743",
       "revId": "dd5181fe04ef8f600ff4144fefbfc2d1d45f0c46",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
