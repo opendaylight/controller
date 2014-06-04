@@ -30,7 +30,8 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import com.google.common.base.Splitter;
 
 public class TopologyMapping {
-    private static final Splitter QUAD_COLON_SPLITTER = Splitter.on("::::");
+    private static final String HEAD_TAIL_STRING = "::::";
+    private static final Splitter HEAD_TAIL_SPLITTER = Splitter.on(HEAD_TAIL_STRING);
 
     public TopologyMapping(final TopologyKey path, final InstanceIdentifier<Topology> key) {
         // No-op for now. Multi-instance will require fixing InventoryMapping first.
@@ -40,7 +41,7 @@ public class TopologyMapping {
         @SuppressWarnings("unchecked")
         final LinkKey linkKey = ((KeyedInstanceIdentifier<Link, LinkKey>)identifier).getKey();
 
-        final Iterator<String> it = QUAD_COLON_SPLITTER.split(linkKey.getLinkId().getValue()).iterator();
+        final Iterator<String> it = HEAD_TAIL_SPLITTER.split(linkKey.getLinkId().getValue()).iterator();
         final NodeConnector tail = InventoryMapping.nodeConnectorFromId(it.next());
         final NodeConnector head = InventoryMapping.nodeConnectorFromId(it.next());
         return new Edge(tail, head);
@@ -74,7 +75,7 @@ public class TopologyMapping {
 
         final StringBuilder sb = new StringBuilder();
         sb.append(sourceTp.getTpId().toString());
-        sb.append("::::");
+        sb.append(HEAD_TAIL_STRING);
         sb.append(destTp.getTpId().toString());
         return new LinkKey(new LinkId(sb.toString()));
     }
