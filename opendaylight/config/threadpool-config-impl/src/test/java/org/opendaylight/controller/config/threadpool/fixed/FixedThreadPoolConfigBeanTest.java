@@ -7,6 +7,15 @@
  */
 package org.opendaylight.controller.config.threadpool.fixed;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.containsString;
+
+import java.lang.management.ManagementFactory;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -19,14 +28,6 @@ import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFacto
 import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFactoryModuleMXBean;
 import org.opendaylight.controller.config.yang.threadpool.impl.fixed.FixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.yang.threadpool.impl.fixed.FixedThreadPoolModuleMXBean;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
 
@@ -92,17 +93,24 @@ public class FixedThreadPoolConfigBeanTest extends AbstractConfigTest {
     @Test
     public void testDestroy() throws InstanceAlreadyExistsException, ValidationException, ConflictingVersionException,
             InstanceNotFoundException {
-        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        createFixed(transaction, nameInstance, 1);
 
+        int numberOfThreads = 100;
+        int threadCount1 = ManagementFactory.getThreadMXBean().getThreadCount();
+        assertTrue("Expected less than " + numberOfThreads + " threads, got " + threadCount1, threadCount1 < numberOfThreads);
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        createFixed(transaction, nameInstance, numberOfThreads);
         transaction.commit();
+        int threadCount2 = ManagementFactory.getThreadMXBean().getThreadCount();
+        assertTrue("Expected more than " + numberOfThreads + " threads, got " + threadCount2, threadCount2 > numberOfThreads);
 
         transaction = configRegistryClient.createTransaction();
-        transaction.destroyConfigBean(factory.getImplementationName(), nameInstance);
+        transaction.destroyModule(factory.getImplementationName(), nameInstance);
         CommitStatus status = transaction.commit();
 
         assertBeanCount(0, factory.getImplementationName());
         assertStatus(status, 0, 0, 1);
+        int threadCount3 = ManagementFactory.getThreadMXBean().getThreadCount();
+        assertTrue("Expected less than " + numberOfThreads + " threads, got " + threadCount3, threadCount3 < numberOfThreads);
     }
 
     @Test
