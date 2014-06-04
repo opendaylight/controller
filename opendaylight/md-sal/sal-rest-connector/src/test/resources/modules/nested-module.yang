@@ -1,0 +1,47 @@
+module nested-module {
+    namespace "urn:nested:module";
+    prefix "nested";
+    revision "2014-06-3";
+
+    container depth1-cont {
+        container depth2-cont1 {
+            container depth3-cont1 {
+                container depth4-cont1 {
+                    leaf depth5-leaf1 {
+                        type string;
+                    }
+                }
+                
+                leaf depth4-leaf1 {
+                    type string;
+                }
+            }
+            
+            leaf depth3-leaf1 {
+                type string;
+            }
+        }
+        
+        container depth2-cont2 {
+            container depth3-cont2 {
+                container depth4-cont2 {
+                    leaf depth5-leaf2 {
+                        type string;
+                    }
+                }
+                
+                leaf depth4-leaf2 {
+                    type string;
+                }
+            }
+            
+            leaf depth3-leaf2 {
+                type string;
+            }
+        }
+        
+        leaf depth2-leaf1 {
+            type string;
+        }
+    }
+} 
