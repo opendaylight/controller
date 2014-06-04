@@ -6,25 +6,22 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
-
-@SuppressWarnings("all")
 public class BrokerImplClassLoader extends ClassLoader {
-  private final ClassLoader spiClassLoader;
+    private final ClassLoader spiClassLoader;
 
-  public BrokerImplClassLoader(final ClassLoader model, final ClassLoader spi) {
-    super(model);
-    this.spiClassLoader = spi;
-  }
-
-  public Class<? extends Object> loadClass(final String name) throws ClassNotFoundException {
-    try {
-      return super.loadClass(name);
-    } catch (ClassNotFoundException e) {
-        return this.spiClassLoader.loadClass(name);
+    public BrokerImplClassLoader(final ClassLoader model, final ClassLoader spi) {
+        super(model);
+        this.spiClassLoader = spi;
     }
-  }
+
+    @Override
+    public Class<? extends Object> loadClass(final String name) throws ClassNotFoundException {
+        try {
+            return super.loadClass(name);
+        } catch (ClassNotFoundException e) {
+            return this.spiClassLoader.loadClass(name);
+        }
+    }
 }
