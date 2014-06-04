@@ -107,7 +107,7 @@
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
     <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
-    <netty.version>4.0.17.Final</netty.version>
+    <netty.version>4.0.19.Final</netty.version>
     <networkconfig.bridgedomain.northbound.version>0.0.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <networkconfig.neutron.implementation.version>0.4.2-SNAPSHOT</networkconfig.neutron.implementation.version>
     <networkconfig.neutron.northbound.version>0.4.2-SNAPSHOT</networkconfig.neutron.northbound.version>
