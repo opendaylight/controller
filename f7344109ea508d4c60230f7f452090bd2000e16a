@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_bcb02544",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedCompositeTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-04T18:24:31Z",
+      "side": 1,
+      "message": "move inside the loop, so we close what we can",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9cb52133",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-04T18:24:31Z",
+      "side": 1,
+      "message": "not throwing, should not be declared.",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bc97c58f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-04T18:24:31Z",
+      "side": 1,
+      "message": "doesn\u0027t look right, as it is also triggered with abort.get(). Can you split this into several methods, please?",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
