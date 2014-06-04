@@ -15,10 +15,6 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
-      <artifactId>org.eclipse.xtend.lib</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
     </dependency>
@@ -57,10 +53,6 @@
                             org.opendaylight.controller.md.sal.common.impl.*</Export-Package>
           </instructions>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
