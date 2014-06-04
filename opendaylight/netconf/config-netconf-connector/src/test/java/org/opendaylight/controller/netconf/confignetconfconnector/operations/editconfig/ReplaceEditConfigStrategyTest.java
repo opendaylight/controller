@@ -8,24 +8,23 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig;
 
-import com.google.common.collect.Sets;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-
-import javax.management.Attribute;
-import javax.management.ObjectName;
-import java.util.Map;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.collect.Sets;
+import java.util.Map;
+import javax.management.Attribute;
+import javax.management.ObjectName;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 
 public class ReplaceEditConfigStrategyTest {
 
@@ -35,7 +34,7 @@ public class ReplaceEditConfigStrategyTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doNothing().when(ta).destroyConfigBean(anyString(), anyString());
+        doNothing().when(ta).destroyModule(anyString(), anyString());
         doReturn(mockON()).when(ta).lookupConfigBean(anyString(), anyString());
         doNothing().when(ta).setAttribute(any(ObjectName.class), anyString(), any(Attribute.class));
     }
