@@ -1,104 +1,99 @@
 /**
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.xbase.lib.Conversions;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
+import java.util.Iterator;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-import java.util.List;
+import com.google.common.base.Splitter;
 
-@SuppressWarnings("all")
-public class InventoryMapping {
-  public static NodeConnector toAdNodeConnector(final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector> identifier) {
-    final List<PathArgument> path = identifier.getPath();
-    final PathArgument lastPathArgument = IterableExtensions.<PathArgument>last(path);
-    final NodeConnectorKey tpKey = ((IdentifiableItem<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector,NodeConnectorKey>) lastPathArgument).getKey();
-    return InventoryMapping.nodeConnectorFromId(tpKey.getId().getValue());
-  }
-  
-  public static Node toAdNode(final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> identifier) {
-    final List<PathArgument> path = identifier.getPath();
-    final PathArgument lastPathArgument = IterableExtensions.<PathArgument>last(path);
-    final NodeKey tpKey = ((IdentifiableItem<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node,NodeKey>) lastPathArgument).getKey();
-    return InventoryMapping.nodeFromNodeId(tpKey.getId().getValue());
-  }
-  
-  public static NodeRef toNodeRef(final Node node) {
-    final NodeId nodeId = new NodeId(InventoryMapping.toNodeId(node));
-    final NodeKey nodeKey = new NodeKey(nodeId);
-    final InstanceIdentifierBuilder<Nodes> nodes = InstanceIdentifier.builder(Nodes.class);
-    final InstanceIdentifierBuilder<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> child =
-            nodes.<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node, NodeKey>child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeKey);
-    final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> path = child.toInstance();
-    return new NodeRef(path);
-  }
-  
-  public static NodeKey toNodeKey(final Node node) {
-    final NodeId nodeId = new NodeId(InventoryMapping.toNodeId(node));
-    return new NodeKey(nodeId);
-  }
-  
-  public static NodeConnectorKey toNodeConnectorKey(final NodeConnector nc) {
-    final NodeConnectorId nodeConnectorId = new NodeConnectorId(InventoryMapping.toNodeConnectorId(nc));
-    return new NodeConnectorKey(nodeConnectorId);
-  }
-  
-  public static String toNodeId(final Node node) {
-    final StringConcatenation builder = new StringConcatenation();
-    builder.append("ad-sal:");
-    builder.append(node.getType(), "");
-    builder.append("::");
-    builder.append(node.getNodeIDString(), "");
-    return builder.toString();
-  }
-  
-  public static String toNodeConnectorId(final NodeConnector nc) {
-    final StringConcatenation builder = new StringConcatenation();
-    builder.append(InventoryMapping.toNodeId(nc.getNode()), "");
-    builder.append("::");
-    builder.append(nc.getNodeConnectorIDString(), "");
-    return builder.toString();
-  }
-  
-  public static Node nodeFromNodeId(final String nodeId) {
-    final String[] split = nodeId.split("::");
-    return InventoryMapping.nodeFromString(split);
-  }
-  
-  public static NodeConnector nodeConnectorFromId(final String invId) {
-    final String[] split = invId.split("::");
-    return InventoryMapping.nodeConnectorFromString(split);
-  }
-  
-  private static NodeConnector nodeConnectorFromString(final String[] string) {
-    final List<String> subList = ((List<String>)Conversions.doWrapArray(string)).subList(0, 1);
-    final Node node = InventoryMapping.nodeFromString(((String[])Conversions.unwrapArray(subList, String.class)));
-    final String index3 = string[2];
-    return NodeConnector.fromStringNoNode(index3, node);
-  }
-  
-  private static Node nodeFromString(final String[] strings) {
-      String index0 = strings[0];
-      final String type = index0.substring(6);
-      String id = strings[1];
-      return Node.fromString(type, id);
-  }
+public final class InventoryMapping {
+    private static final String NODE_TYPE_STRING = "::";
+    private static final Splitter NODE_TYPE_SPLITTER = Splitter.on(NODE_TYPE_STRING);
+
+    private InventoryMapping() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
+    public static org.opendaylight.controller.sal.core.NodeConnector toAdNodeConnector(final InstanceIdentifier<NodeConnector> identifier) {
+        @SuppressWarnings("unchecked")
+        final NodeConnectorKey tpKey = ((KeyedInstanceIdentifier<NodeConnector, NodeConnectorKey>) identifier).getKey();
+        return InventoryMapping.nodeConnectorFromId(tpKey.getId().getValue());
+    }
+
+    public static org.opendaylight.controller.sal.core.Node toAdNode(final InstanceIdentifier<Node> identifier) {
+        @SuppressWarnings("unchecked")
+        final NodeKey tpKey = ((KeyedInstanceIdentifier<Node,NodeKey>)identifier).getKey();
+        return InventoryMapping.nodeFromNodeId(tpKey.getId().getValue());
+    }
+
+    public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
+        final NodeKey nodeKey = new NodeKey(new NodeId(InventoryMapping.toNodeId(node)));
+        final InstanceIdentifier<Node> path = InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class, nodeKey).toInstance();
+        return new NodeRef(path);
+    }
+
+    public static NodeKey toNodeKey(final org.opendaylight.controller.sal.core.Node node) {
+        final NodeId nodeId = new NodeId(InventoryMapping.toNodeId(node));
+        return new NodeKey(nodeId);
+    }
+
+    public static NodeConnectorKey toNodeConnectorKey(final org.opendaylight.controller.sal.core.NodeConnector nc) {
+        final NodeConnectorId nodeConnectorId = new NodeConnectorId(InventoryMapping.toNodeConnectorId(nc));
+        return new NodeConnectorKey(nodeConnectorId);
+    }
+
+    private static StringBuilder nodeIdBulder(final org.opendaylight.controller.sal.core.Node node) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("ad-sal:");
+        sb.append(node.getType());
+        sb.append(NODE_TYPE_STRING);
+        sb.append(node.getNodeIDString());
+        return sb;
+    }
+
+    public static String toNodeId(final org.opendaylight.controller.sal.core.Node node) {
+        return nodeIdBulder(node).toString();
+    }
+
+    public static String toNodeConnectorId(final org.opendaylight.controller.sal.core.NodeConnector nc) {
+        final StringBuilder sb = nodeIdBulder(nc.getNode());
+        sb.append(NODE_TYPE_STRING);
+        sb.append(nc.getNodeConnectorIDString());
+        return sb.toString();
+    }
+
+    public static org.opendaylight.controller.sal.core.Node nodeFromNodeId(final String nodeId) {
+        return InventoryMapping.nodeFromStrings(NODE_TYPE_SPLITTER.split(nodeId).iterator());
+    }
+
+    public static org.opendaylight.controller.sal.core.NodeConnector nodeConnectorFromId(final String invId) {
+        return InventoryMapping.nodeConnectorFromString(NODE_TYPE_SPLITTER.split(invId).iterator());
+    }
+
+    private static org.opendaylight.controller.sal.core.NodeConnector nodeConnectorFromString(final Iterator<String> it) {
+        final org.opendaylight.controller.sal.core.Node node = InventoryMapping.nodeFromStrings(it);
+        return org.opendaylight.controller.sal.core.NodeConnector.fromStringNoNode(it.next(), node);
+    }
+
+    private static org.opendaylight.controller.sal.core.Node nodeFromStrings(final Iterator<String> it) {
+        final String type = it.next().substring(6);
+        return org.opendaylight.controller.sal.core.Node.fromString(type, it.next());
+    }
 }
