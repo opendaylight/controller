@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -63,22 +64,25 @@ public class CompatibleTopologyManager extends ConfigurableLinkManager implement
         final Topology topology = getDataReader().readOperationalData(topologyMapping.getTopologyPath());
         final HashMap<org.opendaylight.controller.sal.core.Node, Set<Edge>> ret = new HashMap<>();
         for (final Node node : topology.getNode()) {
-            final org.opendaylight.controller.sal.core.Node adNode = topologyMapping.toAdNode(node);
-            ret.put(adNode, topologyMapping.toEdges(
-                    FluentIterable.from(topology.getLink()).filter(new Predicate<Link>() {
-                        @Override
-                        public boolean apply(final Link input) {
-                            final NodeId nodeId = node.getNodeId();
-                            if (nodeId.equals(input.getSource().getSourceNode())) {
-                                return true;
-                            }
-                            if (nodeId.equals(input.getDestination().getDestNode())) {
-                                return true;
-                            }
+            try {
+                ret.put(topologyMapping.toAdNode(node), topologyMapping.toEdges(
+                        FluentIterable.from(topology.getLink()).filter(new Predicate<Link>() {
+                            @Override
+                            public boolean apply(final Link input) {
+                                final NodeId nodeId = node.getNodeId();
+                                if (nodeId.equals(input.getSource().getSourceNode())) {
+                                    return true;
+                                }
+                                if (nodeId.equals(input.getDestination().getDestNode())) {
+                                    return true;
+                                }
 
-                            return false;
-                        }
-                    })));
+                                return false;
+                            }
+                        })));
+            } catch (ConstructionException e) {
+                throw new IllegalStateException(String.format("Failed to construct node for {}", node), e);
+            }
         }
         return ret;
     }
@@ -86,7 +90,7 @@ public class CompatibleTopologyManager extends ConfigurableLinkManager implement
     /**
      * Returns true if point is connected to link
      */
-    public boolean isInternal(final TerminationPoint point) {
+    private boolean isInternal(final TerminationPoint point) {
         final Topology topology = getDataReader().readConfigurationData(topologyMapping.getTopologyPath());
         final TpId tpId = point.getKey().getTpId();
         return FluentIterable.from(topology.getLink()).anyMatch(new Predicate<Link>() {
