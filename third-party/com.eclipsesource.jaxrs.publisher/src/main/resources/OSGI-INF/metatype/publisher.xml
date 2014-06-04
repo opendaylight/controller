@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.1.0">
+	<OCD name="OSGi REST Publisher" id="com.eclipsesource.jaxrs.connector" description="OSGi REST Publisher Configuration">
+		<AD name="Root" id="root" type="String" description="The root URI for publishing web services.  Defaults to /services"/>
+	</OCD>
+	<Designate pid="com.eclipsesource.jaxrs.connector">
+		<Object ocdref="com.eclipsesource.jaxrs.connector"/>
+	</Designate>
+</MetaData>
