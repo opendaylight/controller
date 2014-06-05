@@ -88,6 +88,7 @@
     <java.version.source>1.7</java.version.source>
     <java.version.target>1.7</java.version.target>
     <javassist.version>3.17.1-GA</javassist.version>
+    <javax.annotation.version>1.2</javax.annotation.version>
     <!-- Third party version -->
     <jersey-servlet.version>1.17</jersey-servlet.version>
     <jersey.version>1.17</jersey.version>
