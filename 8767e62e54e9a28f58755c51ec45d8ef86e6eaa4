@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dffe3b38",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/InventoryUtils.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "For QNames you could use generated code from inventory models and uses e.g. Nodes.QNAME or Node.QNAME to retrieve QNames.\n\nThis will ensure that namespaces are in sync with model and does not require you to redeclare this QNames.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7ffdaf39",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/InventoryUtils.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Please use QName.parseRevision()  which has same functionality.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3fbe4766",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/PingService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Does NOT_FOUND represents absance of host? \n\nIf yes, maybe it will bebetter to have interface contract such as Optional\u003cDouble\u003e ping() - if present - it contains ping values, if not present host was not found (Thus ping statistic unavailable).\n\nOptional is present in com.google.common.base package in Guava libraries.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bfb1f790",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/PingUtils.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Consider using com.google.common.net.InetAddresses for getting string representation of IP Address and working with IP Addresses. This utilities contains lot of nice utility functions\nfor working with IP Addresses.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9fa67352",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/DeviceManagerImpl.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Could be this done in Asynchronous way, via JdkFuturesAdapter and Futures.trasform? To illustrate proper asynchronous style of coding and chaining futures?",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7fab6f1d",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/DeviceManagerImpl.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "If statement is uncessary.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1f7263e5",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/IcmpDiscoveryServiceImpl.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Could you please add thread pool from start? Users are learning from all examples available and Futures.immediateFuture may lead them to code synchronous.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf7817c5",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/IcmpProfileManagerImpl.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Could you please remove if statement.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3f4c079e",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/PingServiceExecSystemImpl.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "This code seems to be platform dependant. Could you please add that into comments for this example.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1f49038b",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/java/org/opendaylight/controller/sample/pingdiscovery/impl/PingableDeviceHandler.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Could this be converted to fully asynchronous version? Will be better example for incoming developers.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7f304f01",
+        "filename": "opendaylight/md-sal/samples/pingDiscovery/src/main/resources/configuration/initial/06-icmpdiscovery.xml",
+        "patchSetId": 16
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T13:39:59Z",
+      "side": 1,
+      "message": "Could we move samples to some higher number - so they are not loaded first before downstream projects starts adding their work?\nE.g. Openflow plugin is 50-*.xml. I would suggest using 9x-*.xml for samples.",
+      "revId": "8767e62e54e9a28f58755c51ec45d8ef86e6eaa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
