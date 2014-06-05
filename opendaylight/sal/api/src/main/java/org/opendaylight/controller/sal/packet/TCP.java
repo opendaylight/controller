@@ -230,4 +230,12 @@ public class TCP extends Packet {
         return (BitBufferHelper.getShort(fieldValues.get(DESTPORT)));
     }
 
+    /**
+     * Get the stored checksum value of the TCP header
+     * @return short - the checksum
+     */
+    public short getChecksum() {
+        return (BitBufferHelper.getShort(fieldValues.get(CHECKSUM)));
+    }
+
 }

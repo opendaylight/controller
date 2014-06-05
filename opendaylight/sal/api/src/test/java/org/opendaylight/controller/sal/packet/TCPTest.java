@@ -104,4 +104,13 @@ public class TCPTest {
         Assert.assertTrue(urgentPointer[1] == 10);
 
     }
+
+    @Test
+    public void testGetChecksum() {
+        UDP udp = new UDP();
+        byte[] udpChecksum = { 0, -56 };
+        udp.hdrFieldsMap.put("Checksum", udpChecksum);
+        short checksum = udp.getChecksum();
+        Assert.assertTrue(checksum == 200);
+    }
 }
