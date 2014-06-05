@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.IncorrectDataStructureException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
@@ -68,8 +68,8 @@ abstract class ValueNodeModificationStrategy<T extends DataSchemaNode> extends S
 
     @Override
     protected void checkSubtreeModificationApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<TreeNode> current) throws DataPreconditionFailedException {
-        throw new DataPreconditionFailedException(path, "Subtree modification is not allowed.");
+            final Optional<TreeNode> current) throws IncorrectDataStructureException {
+        throw new IncorrectDataStructureException(path, "Subtree modification is not allowed.");
     }
 
     public static class LeafSetEntryModificationStrategy extends ValueNodeModificationStrategy<LeafListSchemaNode> {
