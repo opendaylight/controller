@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9cc0c12b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/modules/nested-module.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-05T11:33:53Z",
+      "side": 1,
+      "message": "Need to remove the tabs here",
+      "revId": "a26e0903cbc3ad5c1b4392120c5270fa8a57bfa7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
