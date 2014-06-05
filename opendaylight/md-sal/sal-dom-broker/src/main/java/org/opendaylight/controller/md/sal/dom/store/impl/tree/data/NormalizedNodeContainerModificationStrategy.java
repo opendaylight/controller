@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Map;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.DataNodeContainerModificationStrategy.ListEntryModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafSetEntryModificationStrategy;
@@ -67,7 +67,7 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected void checkWriteApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<TreeNode> current) throws DataPreconditionFailedException {
+            final Optional<TreeNode> current) throws DataValidationFailedException {
         // FIXME: Implement proper write check for replacement of node container
         //        prerequisite is to have transaction chain available for clients
         //        otherwise this will break chained writes to same node.
@@ -166,12 +166,12 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected void checkSubtreeModificationApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<TreeNode> current) throws DataPreconditionFailedException {
-        checkDataPrecondition(path, current.isPresent(), "Node was deleted by other transaction.");
+            final Optional<TreeNode> current) throws DataValidationFailedException {
+        checkConflicting(path, current.isPresent(), "Node was deleted by other transaction.");
         checkChildPreconditions(path, modification, current);
     }
 
-    private void checkChildPreconditions(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+    private void checkChildPreconditions(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataValidationFailedException {
         final TreeNode currentMeta = current.get();
         for (NodeModification childMod : modification.getChildren()) {
             final PathArgument childId = childMod.getIdentifier();
@@ -184,7 +184,7 @@ abstract class NormalizedNodeContainerModificationStrategy extends SchemaAwareAp
 
     @Override
     protected void checkMergeApplicable(final InstanceIdentifier path, final NodeModification modification,
-            final Optional<TreeNode> current) throws DataPreconditionFailedException {
+            final Optional<TreeNode> current) throws DataValidationFailedException {
         if(current.isPresent()) {
             checkChildPreconditions(path, modification,current);
         }

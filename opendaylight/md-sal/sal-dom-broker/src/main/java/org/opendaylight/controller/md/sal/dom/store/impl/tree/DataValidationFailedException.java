@@ -17,7 +17,7 @@ import com.google.common.base.Preconditions;
  * the datastore has been concurrently modified such that a conflicting
  * node is present, or the modification is structurally incorrect.
  */
-public class DataPreconditionFailedException extends Exception {
+public class DataValidationFailedException extends Exception {
     private static final long serialVersionUID = 1L;
     private final InstanceIdentifier path;
 
@@ -27,7 +27,7 @@ public class DataPreconditionFailedException extends Exception {
      * @param path Object path which caused this exception
      * @param message Specific message describing the failure
      */
-    public DataPreconditionFailedException(final InstanceIdentifier path, final String message) {
+    public DataValidationFailedException(final InstanceIdentifier path, final String message) {
         this(path, message, null);
     }
     /**
@@ -37,7 +37,7 @@ public class DataPreconditionFailedException extends Exception {
      * @param message Specific message describing the failure
      * @param cause Exception which triggered this failure, may be null
      */
-    public DataPreconditionFailedException(final InstanceIdentifier path, final String message, final Throwable cause) {
+    public DataValidationFailedException(final InstanceIdentifier path, final String message, final Throwable cause) {
         super(message, cause);
         this.path = Preconditions.checkNotNull(path);
     }

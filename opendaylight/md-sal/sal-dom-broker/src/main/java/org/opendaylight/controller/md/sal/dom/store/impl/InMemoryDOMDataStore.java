@@ -17,12 +17,15 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ConflictingModificationAppliedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeSnapshot;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.InMemoryDataTreeFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -302,15 +305,19 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public ListenableFuture<Boolean> canCommit() {
             return executor.submit(new Callable<Boolean>() {
                 @Override
-                public Boolean call() {
+                public Boolean call() throws TransactionCommitFailedException {
                     try {
                         dataTree.validate(modification);
                         LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
                         return true;
-                    } catch (DataPreconditionFailedException e) {
+                    } catch (ConflictingModificationAppliedException e) {
+                        LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
+                                e.getPath());
+                        throw new OptimisticLockFailedException("Optimistic lock failed.",e);
+                    } catch (DataValidationFailedException e) {
                         LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                                 e.getPath(), e);
-                        return false;
+                        throw new TransactionCommitFailedException("Data did not pass validation.",e);
                     }
                 }
             });
