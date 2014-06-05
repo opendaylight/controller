@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl
 
-import java.util.HashMap
-import java.util.HashSet
 import java.util.Map
 import java.util.WeakHashMap
 import javassist.ClassPool
@@ -268,22 +266,6 @@ package class RuntimeGeneratedInvoker implements NotificationInvoker {
 
     override close() {
     }
-}
-
-package class RpcServiceMetadata {
-
-    @Property
-    val contexts = new HashSet<Class<? extends BaseIdentity>>();
-
-    @Property
-    val rpcMethods = new HashMap<String, RpcMetadata>();
-
-    @Property
-    val rpcInputs = new HashMap<Class<? extends DataContainer>, RpcMetadata>();
-
-
-    @Property
-    val supportedInputs = new HashSet<Class<? extends DataContainer>>();
 }
 
 @Data
