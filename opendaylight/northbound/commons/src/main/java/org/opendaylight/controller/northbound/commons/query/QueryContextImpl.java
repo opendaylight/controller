@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.northbound.commons.query;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ *
+ */
+/*package*/ class QueryContextImpl implements QueryContext {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(QueryContext.class);
+
+  @Override
+  public <T> Query<T> createQuery(String queryString, Class<T> type) {
+    if (queryString == null || queryString.trim().length() == 0) return null;
+    try {
+      if (LOGGER.isDebugEnabled()) LOGGER.debug("Processing query: {}", queryString);
+      Expression expression = FiqlParser.parse(queryString, type);
+      if (LOGGER.isDebugEnabled()) LOGGER.debug("Query expression: {}", expression);
+      // create Query and return;
+      return new QueryImpl<T>(type, expression);
+    } catch (Exception ex) {
+      if (LOGGER.isDebugEnabled()) LOGGER.error("Query processing failed = {}",
+          queryString, ex);
+      throw new IllegalStateException(ex);
+    }
+  }
+}

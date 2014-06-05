@@ -19,10 +19,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -31,12 +33,15 @@ import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.MethodNotAllowedException;
 import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.Query;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -61,6 +66,14 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 public class FlowProgrammerNorthbound {
 
     private String username;
+
+    private QueryContext queryContext;
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -194,14 +207,25 @@ public class FlowProgrammerNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
         @ResponseCode(code = 404, condition = "The containerName is not found"),
-        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public FlowConfigs getStaticFlows(@PathParam("containerName") String containerName) {
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable"),
+        @ResponseCode(code = 400, condition = "Incorrect query syntex")})
+    public FlowConfigs getStaticFlows(@PathParam("containerName") String containerName,
+                   @QueryParam("_q") String queryString) {
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
 
         List<FlowConfig> flowConfigs = getStaticFlowsInternal(containerName, null);
+        if (queryString != null) {
+          try {
+            Query<FlowConfig> query = queryContext.createQuery(queryString,
+              FlowConfig.class);
+            flowConfigs = query.filter(flowConfigs);
+          } catch (IllegalStateException ex) {
+            throw new BadRequestException("Incorrect query syntex");
+          }
+        }
         return new FlowConfigs(flowConfigs);
     }
 

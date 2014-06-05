@@ -23,21 +23,26 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.ContextResolver;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.query.Query;
+import org.opendaylight.controller.northbound.commons.query.QueryContext;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -60,6 +65,14 @@ import org.opendaylight.controller.switchmanager.SwitchConfig;
 public class SwitchNorthbound {
 
     private String username;
+    private QueryContext queryContext;
+
+    @Context
+    public void setQueryContext(ContextResolver<QueryContext> queryCtxResolver) {
+      if (queryCtxResolver != null) {
+        queryContext = queryCtxResolver.getContext(QueryContext.class);
+      }
+    }
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -200,8 +213,9 @@ public class SwitchNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
         @ResponseCode(code = 404, condition = "The containerName is not found"),
-        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public Nodes getNodes(@PathParam("containerName") String containerName) {
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable"),
+        @ResponseCode(code = 400, condition = "Incorrect query syntex") })
+    public Nodes getNodes(@PathParam("containerName") String containerName, @QueryParam("_q") String queryString) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
@@ -233,7 +247,15 @@ public class SwitchNorthbound {
             NodeProperties nodeProps = new NodeProperties(node, props);
             res.add(nodeProps);
         }
-
+        if (queryString != null) {
+          try {
+            Query<NodeProperties> query = queryContext.createQuery(queryString,
+                NodeProperties.class);
+            res = query.filter(res);
+          } catch (IllegalStateException ex) {
+              throw new BadRequestException("Incorrect query syntex");
+          }
+        }
         return new Nodes(res);
     }
 
@@ -564,9 +586,11 @@ public class SwitchNorthbound {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
         @ResponseCode(code = 404, condition = "The containerName is not found"),
-        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable"),
+        @ResponseCode(code = 400, condition = "Incorrect query syntex") })
     public NodeConnectors getNodeConnectors(@PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId) {
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+            @QueryParam("_q") String queryString) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
@@ -598,7 +622,15 @@ public class SwitchNorthbound {
             NodeConnectorProperties ncProps = new NodeConnectorProperties(nc, props);
             res.add(ncProps);
         }
-
+        if (queryString != null) {
+          try {
+            Query<NodeConnectorProperties> query = queryContext.createQuery(queryString,
+              NodeConnectorProperties.class);
+            res = query.filter(res);
+          } catch (IllegalStateException ex){
+            throw new BadRequestException("Incorrect query syntex");
+          }
+        }
         return new NodeConnectors(res);
     }
 
