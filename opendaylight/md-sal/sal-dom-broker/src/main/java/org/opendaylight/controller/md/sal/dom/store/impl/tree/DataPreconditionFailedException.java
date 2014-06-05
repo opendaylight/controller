@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 import com.google.common.base.Preconditions;
@@ -17,7 +18,7 @@ import com.google.common.base.Preconditions;
  * the datastore has been concurrently modified such that a conflicting
  * node is present, or the modification is structurally incorrect.
  */
-public class DataPreconditionFailedException extends Exception {
+public class DataPreconditionFailedException extends OptimisticLockFailedException {
     private static final long serialVersionUID = 1L;
     private final InstanceIdentifier path;
 
