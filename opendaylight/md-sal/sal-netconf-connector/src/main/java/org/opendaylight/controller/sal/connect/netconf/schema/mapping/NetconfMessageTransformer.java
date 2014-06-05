@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
+import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
@@ -30,8 +29,6 @@ import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Optional;
 
 public class NetconfMessageTransformer implements MessageTransformer<NetconfMessage> {
 
@@ -65,7 +62,11 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                 NetconfMessageTransformUtil.NETCONF_RPC_QNAME, NetconfMessageTransformUtil.flattenInput(node));
         final Document w3cPayload;
         try {
-            w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, XmlDocumentUtils.defaultValueCodecProvider());
+            if(schemaContext.isPresent()) {
+                w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), XmlDocumentUtils.defaultValueCodecProvider());
+            } else {
+                w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, XmlDocumentUtils.defaultValueCodecProvider());
+            }
         } catch (final UnsupportedDataTypeException e) {
             throw new IllegalArgumentException("Unable to create message", e);
         }
