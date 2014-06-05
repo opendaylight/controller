@@ -16,17 +16,15 @@ import javassist.LoaderClassPath
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
-import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
-import org.opendaylight.yangtools.yang.binding.BaseIdentity
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.binding.Notification
 import org.opendaylight.yangtools.yang.binding.NotificationListener
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
 import org.opendaylight.yangtools.yang.binding.RpcService
-import org.opendaylight.yangtools.yang.binding.annotations.QName
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
+import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils
 
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
@@ -161,13 +159,13 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         return inputClass.rpcMethodMetadata(inputClass,method.name);
     }
 
-    private def RpcMetadata rpcMethodMetadata(CtClass dataClass,CtClass inputClass,String rpcMethod) {
+    private def RpcMetadata rpcMethodMetadata(CtClass dataClass, CtClass inputClass, String rpcMethod) {
         for (method : dataClass.methods) {
             if (method.name.startsWith("get") && method.parameterTypes.size === 0) {
                 for (annotation : method.availableAnnotations) {
                     if (annotation instanceof RoutingContext) {
                         val encapsulated = !method.returnType.equals(InstanceIdentifier.asCtClass);
-                        return new RpcMetadata(null,rpcMethod,(annotation as RoutingContext).value, method, encapsulated,inputClass);
+                        return new RpcMetadata(rpcMethod,(annotation as RoutingContext).value, method, encapsulated,inputClass);
                     }
                 }
             }
@@ -264,25 +262,4 @@ package class RuntimeGeneratedInvoker implements NotificationInvoker {
 
     override close() {
     }
-}
-
-@Data
-package class RpcMetadata {
-
-    @Property
-    val QName qname;
-
-    @Property
-    val String methodName;
-
-    @Property
-    val Class<? extends BaseIdentity> context;
-    @Property
-    val CtMethod inputRouteGetter;
-
-    @Property
-    val boolean routeEncapsulated;
-
-    @Property
-    val CtClass inputType;
 }
