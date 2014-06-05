@@ -16,7 +16,7 @@ import javassist.LoaderClassPath
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
-import org.opendaylight.yangtools.sal.binding.generator.util.ClassLoaderUtils
+import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
 import org.opendaylight.yangtools.yang.binding.BaseIdentity
 import org.opendaylight.yangtools.yang.binding.DataContainer
@@ -27,8 +27,6 @@ import org.opendaylight.yangtools.yang.binding.RpcImplementation
 import org.opendaylight.yangtools.yang.binding.RpcService
 import org.opendaylight.yangtools.yang.binding.annotations.QName
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
-
-import static org.opendaylight.yangtools.concepts.util.ClassLoaderUtils.*
 
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
@@ -48,7 +46,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     }
 
     override <T extends RpcService> getDirectProxyFor(Class<T> iface) {
-        val T instance =  withClassLoaderAndLock(iface.classLoader,lock) [|
+        val T instance = ClassLoaderUtils.withClassLoaderAndLock(iface.classLoader,lock) [|
             val proxyName = iface.directProxyName;
             val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(proxyName)
             if(potentialClass != null) {
@@ -83,12 +81,12 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     }
 
     override <T extends RpcService> getRouterFor(Class<T> iface,String routerInstanceName) {
-        val metadata = withClassLoader(iface.classLoader) [|
+        val metadata = ClassLoaderUtils.withClassLoader(iface.classLoader) [|
             val supertype = iface.asCtClass
             return supertype.rpcMetadata;
         ]
 
-        val instance = <T>withClassLoaderAndLock(iface.classLoader,lock) [ |
+        val instance = ClassLoaderUtils.<T>withClassLoaderAndLock(iface.classLoader,lock) [ |
             val supertype = iface.asCtClass
             val routerName = iface.routerName;
             val potentialClass = ClassLoaderUtils.tryToLoadClassWithTCCL(routerName)
@@ -228,7 +226,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
 
 
     protected def resolveInvokerClass(Class<? extends NotificationListener> class1) {
-        return <RuntimeGeneratedInvokerPrototype>withClassLoaderAndLock(class1.classLoader,lock) [|
+        return ClassLoaderUtils.<RuntimeGeneratedInvokerPrototype>withClassLoaderAndLock(class1.classLoader,lock) [|
             val invoker = invokerClasses.get(class1);
             if (invoker !== null) {
                 return invoker;
