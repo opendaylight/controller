@@ -1,0 +1,14 @@
+module model2 {
+  namespace "ns:model2";  
+  prefix "mod2";
+
+  revision "2014-05-01" {    
+  }
+  
+  container contA {
+  }
+  
+  container contB {
+  }
+	  
+}
