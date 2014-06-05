@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.binding.Notification
 import org.opendaylight.yangtools.yang.binding.NotificationListener
 import org.opendaylight.yangtools.yang.binding.RpcImplementation
 import org.opendaylight.yangtools.yang.binding.RpcService
-import org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils
 
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
@@ -113,7 +113,7 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
     }
 
     protected override generateListenerInvoker(Class<? extends NotificationListener> iface) {
-        val callbacks = iface.methods.filter[YangtoolsMappingHelper.isNotificationCallback(it)]
+        val callbacks = iface.methods.filter[BindingReflections.isNotificationCallback(it)]
 
         val supportedNotification = callbacks.map[parameterTypes.get(0) as Class<? extends Notification>].toSet;
 
