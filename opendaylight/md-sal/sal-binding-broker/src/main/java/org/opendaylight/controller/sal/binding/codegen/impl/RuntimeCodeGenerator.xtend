@@ -13,9 +13,7 @@ import javassist.ClassPool
 import javassist.CtClass
 import javassist.CtMethod
 import javassist.LoaderClassPath
-import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
-import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
 import org.opendaylight.yangtools.yang.binding.DataContainer
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
@@ -189,7 +187,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         val cls = instance.class
         val prototype = resolveInvokerClass(cls);
 
-        return new RuntimeGeneratedInvoker(instance, prototype)
+        return RuntimeGeneratedInvoker.create(instance, prototype)
     }
 
     protected def generateListenerInvoker(Class<? extends NotificationListener> iface) {
@@ -219,10 +217,6 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener<?>>);
     }
 
-
-
-
-
     protected def resolveInvokerClass(Class<? extends NotificationListener> class1) {
         return ClassLoaderUtils.<RuntimeGeneratedInvokerPrototype>withClassLoaderAndLock(class1.classLoader,lock) [|
             val invoker = invokerClasses.get(class1);
@@ -232,34 +226,6 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             val newInvoker = generateListenerInvoker(class1);
             invokerClasses.put(class1, newInvoker);
             return newInvoker
-
         ]
-    }
-}
-
-@Data
-package class RuntimeGeneratedInvoker implements NotificationInvoker {
-
-    @Property
-    val NotificationListener delegate;
-
-    @Property
-    var org.opendaylight.controller.sal.binding.api.NotificationListener<Notification> invocationProxy;
-
-    @Property
-    var RuntimeGeneratedInvokerPrototype prototype;
-
-    new(NotificationListener delegate, RuntimeGeneratedInvokerPrototype prototype) {
-        _delegate = delegate;
-        _prototype = prototype;
-        _invocationProxy = prototype.protoClass.newInstance as org.opendaylight.controller.sal.binding.api.NotificationListener<Notification>;
-        RuntimeCodeHelper.setDelegate(_invocationProxy, delegate);
-    }
-
-    override getSupportedNotifications() {
-        prototype.supportedNotifications;
-    }
-
-    override close() {
     }
 }

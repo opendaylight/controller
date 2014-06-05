@@ -28,7 +28,7 @@ final class RuntimeGeneratedInvokerPrototype {
         return supportedNotifications;
     }
 
-    public Class<? extends NotificationListener<? extends Object>> getProtoClass() {
+    public Class<? extends NotificationListener<?>> getProtoClass() {
         return protoClass;
     }
 
