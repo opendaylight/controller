@@ -13,10 +13,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
+import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.osgi.SessionMonitoringService;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -98,7 +98,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             session.onIncommingRpcFail();
             throw new IllegalStateException("Unable to process incoming message " + netconfMessage, e);
         } catch (NetconfDocumentedException e) {
-            logger.trace("Error occured while processing mesage {}",e);
+            logger.trace("Error occurred while processing message",e);
             session.onOutgoingRpcError();
             session.onIncommingRpcFail();
             SendErrorExceptionUtil.sendErrorMessage(session, e, netconfMessage);
@@ -111,6 +111,8 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         logger.info("Session {} closed successfully", session.getSessionId());
     }
 
+
+
     private NetconfMessage processDocument(final NetconfMessage netconfMessage, NetconfServerSession session)
             throws NetconfDocumentedException {
 
@@ -122,6 +124,8 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             checkMessageId(rootNode);
 
             Document rpcReply = operationRouter.onNetconfMessage(incomingDocument, session);
+
+            rpcReply = SubtreeFilter.applySubtreeFilter(incomingDocument, rpcReply);
 
             session.onIncommingRpcSuccess();
 

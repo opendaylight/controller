@@ -30,7 +30,7 @@ public class SSHTest {
         AuthProvider authProvider = mock(AuthProvider.class);
         doReturn(PEMGenerator.generate().toCharArray()).when(authProvider).getPEMAsCharArray();
         doReturn(true).when(authProvider).authenticated(anyString(), anyString());
-        NetconfSSHServer thread = NetconfSSHServer.start(1831, NetconfConfigUtil.getNetconfLocalAddress(), authProvider, new NioEventLoopGroup());
+        NetconfSSHServer thread = NetconfSSHServer.start(10831, NetconfConfigUtil.getNetconfLocalAddress(), authProvider, new NioEventLoopGroup());
         Thread.sleep(2000);
         logger.info("Closing socket");
         thread.close();

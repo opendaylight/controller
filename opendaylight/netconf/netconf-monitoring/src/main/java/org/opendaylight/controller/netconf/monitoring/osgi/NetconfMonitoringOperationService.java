@@ -20,7 +20,7 @@ import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 
 public class NetconfMonitoringOperationService implements NetconfOperationService {
 
-    public static final Set<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
+    private static final Set<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
 
         @Override
         public String getCapabilityUri() {
