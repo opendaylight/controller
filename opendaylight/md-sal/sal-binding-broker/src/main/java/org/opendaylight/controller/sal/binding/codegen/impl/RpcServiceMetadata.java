@@ -9,29 +9,31 @@ package org.opendaylight.controller.sal.binding.codegen.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
+
+import com.google.common.collect.Iterables;
 
 final class RpcServiceMetadata {
-    private final HashMap<Class<? extends DataContainer>, RpcMetadata> rpcInputs = new HashMap<>();
-    private final HashSet<Class<? extends DataContainer>> supportedInputs = new HashSet<>();
-    private final HashSet<Class<? extends BaseIdentity>> contexts = new HashSet<>();
-    private final HashMap<String, RpcMetadata> rpcMethods = new HashMap<>();
+    private final Set<Class<? extends BaseIdentity>> contexts = new HashSet<>();
+    private final Map<String, RpcMetadata> rpcMethods = new HashMap<>();
+    private final Iterable<Class<? extends BaseIdentity>> roContexts = Iterables.unmodifiableIterable(contexts);
 
-    public HashSet<Class<? extends BaseIdentity>> getContexts() {
-        return this.contexts;
+    public Iterable<Class<? extends BaseIdentity>> getContexts() {
+        return roContexts;
     }
 
-    public HashMap<String, RpcMetadata> getRpcMethods() {
-        return this.rpcMethods;
+    public RpcMetadata getRpcMethod(final String name) {
+        return rpcMethods.get(name);
     }
 
-    public HashMap<Class<? extends DataContainer>, RpcMetadata> getRpcInputs() {
-        return this.rpcInputs;
+    public void addContext(final Class<? extends BaseIdentity> context) {
+        contexts.add(context);
     }
 
-    public HashSet<Class<? extends DataContainer>> getSupportedInputs() {
-        return this.supportedInputs;
+    public void addRpcMethod(final String name, final RpcMetadata routingPair) {
+        rpcMethods.put(name, routingPair);
     }
 }
