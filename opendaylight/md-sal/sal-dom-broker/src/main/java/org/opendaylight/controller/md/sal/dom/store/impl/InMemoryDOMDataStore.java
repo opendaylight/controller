@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- *
+ * Copyright (c) 2014 Cisco Systems, Inc. and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -17,12 +16,15 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ConflictingModificationAppliedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeSnapshot;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.InMemoryDataTreeFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -50,12 +52,12 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
  * In-memory DOM Data Store
- * 
+ *
  * Implementation of {@link DOMStore} which uses {@link DataTree} and other
  * classes such as {@link SnapshotBackedWriteTransaction}.
  * {@link SnapshotBackedReadTransaction} and {@link ResolveDataChangeEventsTask}
  * to implement {@link DOMStore} contract.
- * 
+ *
  */
 public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener,
         TransactionReadyPrototype {
@@ -108,7 +110,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         /*
          * Make sure commit is not occurring right now. Listener has to be
          * registered and its state capture enqueued at a consistent point.
-         * 
          * FIXME: improve this to read-write lock, such that multiple listener
          * registrations can occur simultaneously
          */
@@ -302,15 +303,19 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         public ListenableFuture<Boolean> canCommit() {
             return executor.submit(new Callable<Boolean>() {
                 @Override
-                public Boolean call() {
+                public Boolean call() throws TransactionCommitFailedException {
                     try {
                         dataTree.validate(modification);
                         LOG.debug("Store Transaction: {} can be committed", transaction.getIdentifier());
                         return true;
-                    } catch (DataPreconditionFailedException e) {
+                    } catch (ConflictingModificationAppliedException e) {
+                        LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
+                                e.getPath());
+                        throw new OptimisticLockFailedException("Optimistic lock failed.",e);
+                    } catch (DataValidationFailedException e) {
                         LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                                 e.getPath(), e);
-                        return false;
+                        throw new TransactionCommitFailedException("Data did not pass validation.",e);
                     }
                 }
             });

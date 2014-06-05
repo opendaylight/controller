@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.Version;
@@ -87,7 +87,7 @@ interface ModificationApplyOperation extends StoreTreeNode<ModificationApplyOper
      * @param current Metadata Node to which modification should be applied
      * @return true if modification is applicable
      *         false if modification is no applicable
-     * @throws DataPreconditionFailedException
+     * @throws DataValidationFailedException
      */
-    void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<TreeNode> current) throws DataPreconditionFailedException;
+    void checkApplicable(InstanceIdentifier path, NodeModification modification, Optional<TreeNode> current) throws DataValidationFailedException;
 }
