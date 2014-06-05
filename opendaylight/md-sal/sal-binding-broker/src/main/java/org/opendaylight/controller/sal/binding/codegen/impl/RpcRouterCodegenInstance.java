@@ -24,7 +24,6 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class RpcRouterCodegenInstance<T extends RpcService> implements //
-        RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
+RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpcRouterCodegenInstance.class);
 
@@ -53,8 +52,7 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
     private final String name;
 
     @SuppressWarnings("unchecked")
-    public RpcRouterCodegenInstance(String name,Class<T> type, T routerImpl, Set<Class<? extends BaseIdentity>> contexts,
-            Set<Class<? extends DataContainer>> inputs) {
+    public RpcRouterCodegenInstance(final String name,final Class<T> type, final T routerImpl, final Iterable<Class<? extends BaseIdentity>> contexts) {
         this.name = name;
         this.listeners = ListenerRegistry.create();
         this.serviceType = type;
@@ -86,7 +84,7 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
 
     @Override
     @SuppressWarnings("unchecked")
-    public <C extends BaseIdentity> RpcRoutingTable<C, T> getRoutingTable(Class<C> routeContext) {
+    public <C extends BaseIdentity> RpcRoutingTable<C, T> getRoutingTable(final Class<C> routeContext) {
         return (RpcRoutingTable<C, T>) routingTables.get(routeContext);
     }
 
@@ -102,12 +100,12 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
 
     @Override
     public <L extends RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            L listener) {
+            final L listener) {
         return listeners.registerWithType(listener);
     }
 
     @Override
-    public void onRouteChange(RouteChange<Class<? extends BaseIdentity>, InstanceIdentifier<?>> change) {
+    public void onRouteChange(final RouteChange<Class<? extends BaseIdentity>, InstanceIdentifier<?>> change) {
         for (ListenerRegistration<RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentifier<?>>> listener : listeners) {
             try {
                 listener.getInstance().onRouteChange(change);
@@ -118,17 +116,17 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
     }
 
     @Override
-    public T getService(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+    public T getService(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
         return routingTables.get(context).getRoute(path);
     }
 
     @Override
-    public RoutedRpcRegistration<T> addRoutedRpcImplementation(T service) {
+    public RoutedRpcRegistration<T> addRoutedRpcImplementation(final T service) {
         return new RoutedRpcRegistrationImpl(service);
     }
 
     @Override
-    public RpcRegistration<T> registerDefaultService(T service) {
+    public RpcRegistration<T> registerDefaultService(final T service) {
         // TODO Auto-generated method stub
         RuntimeCodeHelper.setDelegate(invocationProxy, service);
         return null;
@@ -136,7 +134,7 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
 
     private class RoutedRpcRegistrationImpl extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
 
-        public RoutedRpcRegistrationImpl(T instance) {
+        public RoutedRpcRegistrationImpl(final T instance) {
             super(instance);
         }
 
@@ -146,22 +144,22 @@ public class RpcRouterCodegenInstance<T extends RpcService> implements //
         }
 
         @Override
-        public void registerPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+        public void registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
             routingTables.get(context).updateRoute(path, getInstance());
         }
 
         @Override
-        public void unregisterPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+        public void unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
             routingTables.get(context).removeRoute(path, getInstance());
         }
 
         @Override
-        public void registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance) {
+        public void registerInstance(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> instance) {
             registerPath(context, instance);
         }
 
         @Override
-        public void unregisterInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance) {
+        public void unregisterInstance(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> instance) {
             unregisterPath(context, instance);
         }
 
