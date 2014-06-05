@@ -665,6 +665,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         removeProdEdge(nodeConnector);
     }
 
+    // CISCO INTERNAL PATCH
+    // FIX for N3K gap: CSCup11085
+    private NodeConnector findRemoteNodeConnector(NodeConnector localNodeConnector) {
+        Edge edge = edgeMap.get(localNodeConnector);
+        return (edge != null) ? edge.getTailNodeConnector() : null;
+    }
+    // CISCO INTERNAL PATCH
+
     private void checkTimeout() {
         Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
         int ticks;
@@ -1394,11 +1402,27 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 addDiscovery(nodeConnector);
                 logger.trace("CHANGED enabled {}", nodeConnector);
             } else {
+                // >>> CISCO INTERNAL PATCH <<<
+                // FIX for N3K gap: CSCup11085
+                NodeConnector remoteNodeConnector = findRemoteNodeConnector(nodeConnector);
+                if (remoteNodeConnector != null) {
+                    removeDiscovery(remoteNodeConnector);
+                    logger.trace("REMOVED enabled {}", remoteNodeConnector);
+                }
+                // >>> CISCO INTERNAL PATCH <<<
                 removeDiscovery(nodeConnector);
                 logger.trace("CHANGED disabled {}", nodeConnector);
             }
             break;
         case REMOVED:
+            // >>> CISCO INTERNAL PATCH <<<
+            // FIX for N3K gap: CSCup11085
+            NodeConnector remoteNodeConnector = findRemoteNodeConnector(nodeConnector);
+            if (remoteNodeConnector != null) {
+                removeDiscovery(remoteNodeConnector);
+                logger.trace("REMOVED enabled {}", remoteNodeConnector);
+            }
+            // >>> CISCO INTERNAL PATCH <<<
             removeDiscovery(nodeConnector);
             logger.trace("REMOVED enabled {}", nodeConnector);
             break;
