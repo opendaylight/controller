@@ -1,0 +1,8 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <!--<bean id="karafService" class="org.apache.karaf.features.FeaturesService"/>
+    <reference id="karafServiceRef" interface="org.apache.karaf.features.FeaturesService"/>
+
+    <bean id="activator" class="org.opendaylight.controller.featuresservice.Activator">
+        <property name="service" ref="karafServiceRef"/>
+    </bean>-->
+</blueprint>
