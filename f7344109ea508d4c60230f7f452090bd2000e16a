@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7c593d59",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedCompositeTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T15:47:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bcb02544",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9cb52133",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
         "patchSetId": 9
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5f046b14",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T15:47:03Z",
+      "side": 1,
+      "message": "Removed declaration, moved to AbstractTransactionFactory added check to not instantiate transactions after factory is closed.",
+      "parentUuid": "fa82b9bf_9cb52133",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bc97c58f",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
         "patchSetId": 9
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-04T18:24:31Z",
       "side": 1,
       "message": "doesn\u0027t look right, as it is also triggered with abort.get(). Can you split this into several methods, please?",
+      "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a316ba1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-05T15:47:03Z",
+      "side": 1,
+      "message": "Splitted in several methods, which throws TransactionCommitFailedException.\n\nWhen fail occurs, abort is triggered.\n\nClient failure notifications are done via Future listener now.",
+      "parentUuid": "fa82b9bf_bc97c58f",
       "revId": "f7344109ea508d4c60230f7f452090bd2000e16a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
