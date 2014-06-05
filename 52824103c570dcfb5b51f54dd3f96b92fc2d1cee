@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ca21974e",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/InventoryAndReadAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1045
+      },
+      "writtenOn": "2014-06-05T15:50:12Z",
+      "side": 1,
+      "message": "Given that ncpsm is HashMap and ncps is a HashMap and assuming that ncps is a map of property name to name, why not just use ncpsm.putAll(ncps) here?\n\nNot sure if there is much difference in performance, but might make it more readable.",
+      "revId": "52824103c570dcfb5b51f54dd3f96b92fc2d1cee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
