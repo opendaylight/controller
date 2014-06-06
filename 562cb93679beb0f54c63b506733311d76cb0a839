@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d0b14890",
+        "filename": "features/base/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T13:05:54Z",
+      "side": 1,
+      "message": "Version should not be hardcoded",
+      "revId": "562cb93679beb0f54c63b506733311d76cb0a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b0a60452",
+        "filename": "opendaylight/northbound/featuresservice/src/main/java/org/opendaylight/controller/featuresservice/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T13:05:54Z",
+      "side": 1,
+      "message": "No proper index checking will crash if references[0] is null.. also ServiceReferences can come and go at any time I recommend using service tracker.. or blueprint..\n\nRead this: http://www.knopflerfish.org/osgi_service_tutorial.html#best\n\nand make changes accordingly",
+      "revId": "562cb93679beb0f54c63b506733311d76cb0a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f0ac8c37",
+        "filename": "opendaylight/northbound/featuresservice/src/main/java/org/opendaylight/controller/featuresservice/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T13:05:54Z",
+      "side": 1,
+      "message": "Variable name is not descriptive enough",
+      "revId": "562cb93679beb0f54c63b506733311d76cb0a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3072f4e5",
+        "filename": "opendaylight/northbound/featuresservice/src/main/java/org/opendaylight/controller/featuresservice/northbound/Feature.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T13:05:54Z",
+      "side": 1,
+      "message": "Why is this needed vs Karaf built-in Feature class?",
+      "revId": "562cb93679beb0f54c63b506733311d76cb0a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f05a4c4f",
+        "filename": "opendaylight/northbound/featuresservice/src/test/java/org/opendaylight/controller/featuresservice/northbound/FeaturesServiceNorthboundTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T13:05:54Z",
+      "side": 1,
+      "message": "Please write unit test \nhttps://jersey.java.net/documentation/latest/test-framework.html\n\nA case for using blueprint instead of Activator code is that it can run in there injecting a Mock FeatureService object with fake data... via a setter.. see me for questions.",
+      "revId": "562cb93679beb0f54c63b506733311d76cb0a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
