@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_65c19ce3",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/util/NetconfMessageTransformUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-06T08:02:55Z",
+      "side": 1,
+      "message": "move it to a separete file, please",
+      "revId": "15266d997dc5e4337e8c8abfbb0174fa459f3e9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_05b8d074",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/util/NetconfMessageTransformUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-06T08:02:55Z",
+      "side": 1,
+      "message": "Preconditions. checkNotNull()?",
+      "revId": "15266d997dc5e4337e8c8abfbb0174fa459f3e9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
