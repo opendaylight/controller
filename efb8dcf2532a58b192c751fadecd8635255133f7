@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_253ab436",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-06-06T04:42:22Z",
+      "side": 1,
+      "message": "Question, before i lose a few days to this. Why didn\u0027t any of the other IPv4 matches not use ip-prefix? \n\nOther setField that inherit from AbstractOxmIpv4AddressDeserializer in openflowjava should use the same model in my opinion to avoid confusion but since no one has used it and the type conversions seem to want more specific unique entries from what I see. \n\nipv4-match-fields was the closest reusable object that all below use, but all use specific references to \"type inet:ipv4-prefix\"\n\nI was thinking would be a vetted path since it at least ARP, IPv4 and TunnelIP all inherit AbstractOxmIpv4AddressDeserializer, but after a few hours debugging, I don\u0027t think the plumbing is in place to allow you to reference the same case/use without a loop in ofplugin. \n\nIf we want to use ip-prefix, wouldn\u0027t the the layer-3-match containers look like so?:\n\n        choice layer-3-match {\n            case \"ipv4-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"ipv6-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"arp-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"tunnel-ipv4-match\" {\n                uses \"ip-prefix\";\n            }\n        }\n\nor at least if we want to use as high level a data type a mode like so (this is what I beat up debugging below):\n\n        choice layer-3-match {\n            case \"ipv4-match\" {\n                uses \"ipv4-match-fields\";\n            }\n            case \"ipv6-match\" {\n                uses \"ipv4-match-fields\";\n            }\n            case \"arp-match\" {\n                uses \"ipv4-match-fields\";\n            }\n            case \"tunnel-ipv4-match\" {\n                uses \"ipv4-match-fields\";\n            }\n        }\n---\nI detailed  uses \"ipv4-match-fields\" with the following ridiculously long amount of data in case anyone wanted to Tshoot it further because it would take more reworking then they probably would want me or people outside the project to tackle:\n\n###\n\nI changed the two controller models to the following:\n---\nopendaylight-match-types.yang\n---\nhttps://gist.github.com/d180e1b78a9285119868\n\nopendaylight-table-types.yang\n---\nhttps://gist.github.com/57d76c4a2a7a8b7f5266\n\n###\nOftestcommandprovider now returns:\n\nosgi\u003e addMDFlow foo:node:1 f84\ngogo: IllegalArgumentException: duplicate key: (urn:opendaylight:flow:inventory?revision\u003d2013-08-19)ipv4-destination\nosgi\u003e addMDFlow foo:node:1 f85\ngogo: IllegalArgumentException: duplicate key: (urn:opendaylight:flow:inventory?revision\u003d2013-08-19)ipv4-source\n\n###\nI did a screen recording of a trace of the problem and it is clearly looping somewhere. Since type checking in the conversions does an \u0027else if\u0027 on each field, it cannot match for both SetField:Ipv4Dst and SetField:Ipv4TunnelDst. I remember I ran into this when I first started trying to extend the model.\n\n###\nAn example of a potential type checking issue is in setSetFieldTableFeatureProperty. Its not clear what the impact of leaving the check out is. In the video trace it is all together commented out since it would never be hit anyways and casted to the lower level openflowjava model. Class with comments in the conversion. Search ipv4tunnel or look towards the bottom on the right margin for a long comment.\nhttps://gist.github.com/b8568bea8bfc04126f2b\n\n###\nHere is the link to the screencase of the IDE trace in case you have run into this before and it jogs the memory. \n\nScreencast link: https://www.dropbox.com/s/vkugag5brghae49/ip-Match-Duplicate-Key-commitID-7634.mp4\n\n###\nLast thing is a step-in trace that goes into the DOM brokers that Im not touching as none of it is familair to me:\nhttps://gist.github.com/4cdde7ed3cb5a00649fb\n\nThis burned a few hours so Im going to move on for now until I hear back to avoid a blackhole. Thanks. -B",
+      "parentUuid": "fa82b9bf_3f65e71d",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
