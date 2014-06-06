@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8507001c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/config/yang/md/sal/remote/rpc/ZeroMQServerModule.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-06T08:35:28Z",
+      "side": 1,
+      "message": "Could you extract this to seperate commit - seems unrelated to the original commit.",
+      "revId": "033c1431617539440914603b6b76e565b2c67c7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
