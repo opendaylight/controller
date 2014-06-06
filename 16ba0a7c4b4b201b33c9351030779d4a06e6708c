@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_05a1b046",
+        "filename": "opendaylight/netconf/netconf-cli/src/main/java/org/opendaylight/controller/netconf/cli/Cli.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-06T08:01:00Z",
+      "side": 1,
+      "message": "can this be null?",
+      "revId": "16ba0a7c4b4b201b33c9351030779d4a06e6708c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_25a4f455",
+        "filename": "opendaylight/netconf/netconf-cli/src/main/java/org/opendaylight/controller/netconf/cli/io/BaseConsoleContext.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-06T08:01:00Z",
+      "side": 1,
+      "message": "Copyright",
+      "revId": "16ba0a7c4b4b201b33c9351030779d4a06e6708c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c58ae8be",
+        "filename": "opendaylight/netconf/netconf-cli/src/main/java/org/opendaylight/controller/netconf/cli/reader/AbstractReader.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-06T08:01:00Z",
+      "side": 1,
+      "message": "since there a lot of readers, abstract methods need to be very well documented",
+      "revId": "16ba0a7c4b4b201b33c9351030779d4a06e6708c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
