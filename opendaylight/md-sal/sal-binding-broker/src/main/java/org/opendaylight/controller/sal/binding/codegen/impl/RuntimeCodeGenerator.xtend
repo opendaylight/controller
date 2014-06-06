@@ -7,38 +7,33 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl
 
+import java.util.HashMap
+import java.util.HashSet
+import java.util.Map
+import java.util.WeakHashMap
 import javassist.ClassPool
-import org.opendaylight.yangtools.yang.binding.RpcService
-
 import javassist.CtClass
 import javassist.CtMethod
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
-import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
-import org.opendaylight.yangtools.yang.binding.BaseIdentity
-
-import java.util.Map
-import java.util.HashMap
-
-
-import org.opendaylight.yangtools.yang.binding.NotificationListener
-import org.opendaylight.yangtools.yang.binding.Notification
-
-
-import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
-import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
-import java.util.HashSet
-import static org.opendaylight.yangtools.concepts.util.ClassLoaderUtils.*
+import javassist.LoaderClassPath
+import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
-import java.util.Set
-import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
-import java.util.WeakHashMap
-import org.opendaylight.yangtools.yang.binding.annotations.QName
-import org.opendaylight.yangtools.yang.binding.DataContainer
-import org.opendaylight.yangtools.yang.binding.RpcImplementation
-import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
 import org.opendaylight.yangtools.sal.binding.generator.util.ClassLoaderUtils
-import javassist.LoaderClassPath
+import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils
+import org.opendaylight.yangtools.yang.binding.BaseIdentity
+import org.opendaylight.yangtools.yang.binding.DataContainer
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.yangtools.yang.binding.Notification
+import org.opendaylight.yangtools.yang.binding.NotificationListener
+import org.opendaylight.yangtools.yang.binding.RpcImplementation
+import org.opendaylight.yangtools.yang.binding.RpcService
+import org.opendaylight.yangtools.yang.binding.annotations.QName
+import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext
+
+import static org.opendaylight.yangtools.concepts.util.ClassLoaderUtils.*
+
+import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
+import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
@@ -273,16 +268,6 @@ package class RuntimeGeneratedInvoker implements NotificationInvoker {
 
     override close() {
     }
-}
-
-@Data
-package class RuntimeGeneratedInvokerPrototype {
-
-    @Property
-    val Set<Class<? extends Notification>> supportedNotifications;
-
-    @Property
-    val Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener<?>> protoClass;
 }
 
 package class RpcServiceMetadata {
