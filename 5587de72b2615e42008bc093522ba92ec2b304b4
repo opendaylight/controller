@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e51ccc15",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-06T01:32:22Z",
+      "side": 0,
+      "message": "Already fixed",
+      "revId": "5587de72b2615e42008bc093522ba92ec2b304b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
