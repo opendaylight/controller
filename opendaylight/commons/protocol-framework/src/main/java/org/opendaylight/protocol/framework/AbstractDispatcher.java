@@ -9,6 +9,7 @@ package org.opendaylight.protocol.framework;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -87,6 +88,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
 
         b.option(ChannelOption.SO_BACKLOG, 128);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         customizeBootstrap(b);
 
         if (b.group() == null) {
