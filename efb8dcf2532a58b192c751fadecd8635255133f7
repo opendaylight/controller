@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2b3a8536",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-06-06T18:25:41Z",
+      "side": 1,
+      "message": "/* Had a typo in the example models */\n\n        choice layer-3-match {\n            case \"ipv4-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"ipv6-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"arp-match\" {\n                uses \"ip-prefix\";\n            }\n            case \"tunnel-ipv4-match\" {\n                uses \"ip-prefix\";\n            }\n        }\n\n        choice layer-3-match {\n            case \"ipv4-match\" {\n                uses \"ipv4-match-fields\";\n            }\n            case \"ipv6-match\" {\n                uses \"ipv6-match-fields\"; (edited)\n            }\n            case \"arp-match\" {\n                uses \"ipv4-match-fields\";\n            }\n            case \"tunnel-ipv4-match\" {\n                uses \"ipv4-match-fields\";\n            }\n        }\n\n/* Same would apply to L4 ports that all use inet:port-number \n    the logic of L3/L4match may have already been to have \n    explicitly typed \"uses\" since the choice wraps Port/IpPrefixes */ \n    \n\n        //parent\n        choice layer-4-match {\n            case \"udp-match\" {\n                uses \"udp-match-fields\";\n            }\n            case \"tcp-match\" {\n                uses \"tcp-match-fields\";\n            }\n            case \"sctp-match\" {\n                uses \"sctp-match-fields\";\n            }\n        }\n\n        //parent  (fictitious grouping \"L4-ports\" )\n        choice layer-4-match {\n            case \"udp-match\" {\n                uses \"L4-ports\";\n            }\n            case \"tcp-match\" {\n                uses \"L4-ports\";\n            }\n            case \"sctp-match\" {\n                uses \"L4-ports\";\n            }\n        }",
+      "parentUuid": "fa82b9bf_253ab436",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
