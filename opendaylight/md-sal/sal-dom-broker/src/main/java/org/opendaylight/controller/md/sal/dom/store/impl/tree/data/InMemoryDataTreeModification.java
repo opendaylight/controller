@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.TreeNodeUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -151,7 +152,27 @@ final class InMemoryDataTreeModification implements DataTreeModification {
     public synchronized DataTreeModification newModification() {
         Preconditions.checkState(sealed, "Attempted to chain on an unsealed modification");
 
-        // FIXME: transaction chaining
-        throw new UnsupportedOperationException("Implement this as part of transaction chaining");
+        if(rootNode.getType() == ModificationType.UNMODIFIED) {
+            return snapshot.newModification();
+        }
+
+        /*
+         *  FIXME: Add advanced transaction chaining for modification of not rebased
+         *  modification.
+         *
+         *  Current computation of tempRoot may yeld incorrect subtree versions
+         *  if there are multiple concurrent transactions, which may break
+         *  versioning preconditions for modification of previously occured write,
+         *  directly nested under parent node, since node version is derived from
+         *  subtree version.
+         *
+         *  For deeper nodes subtree version is derived from their respective metadata
+         *  nodes, so this incorrect root subtree version is not affecting us.
+         */
+        TreeNode originalSnapshotRoot = snapshot.getRootNode();
+        Optional<TreeNode> tempRoot = strategyTree.apply(rootNode, Optional.of(originalSnapshotRoot), originalSnapshotRoot.getSubtreeVersion().next());
+
+        InMemoryDataTreeSnapshot tempTree = new InMemoryDataTreeSnapshot(snapshot.getSchemaContext(), tempRoot.get(), strategyTree);
+        return tempTree.newModification();
     }
 }
