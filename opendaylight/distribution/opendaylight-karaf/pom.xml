@@ -208,24 +208,27 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <version>2.6</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
+            <id>copy</id>
             <goals>
-              <goal>copy-resources</goal>
+              <goal>copy</goal>
             </goals>
             <!-- here the phase you need -->
-            <phase>process-resources</phase>
+            <phase>generate-resources</phase>
             <configuration>
-              <outputDirectory>${basedir}/target/assembly</outputDirectory>
-              <overwrite>true</overwrite>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/main/resources</directory>
-                </resource>
-              </resources>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.opendaylight.controller</groupId>
+                  <artifactId>karaf.branding</artifactId>
+                  <version>${karaf.branding.version}</version>
+                  <outputDirectory>target/assembly/lib</outputDirectory>
+                  <destFileName>karaf.branding-${branding.version}.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
