@@ -69,13 +69,11 @@ public final class NetconfRemoteSchemaSourceProvider implements SchemaSourceProv
 
     private ImmutableCompositeNode createGetSchemaRequest(final String moduleName, final Optional<String> revision) {
         final CompositeNodeBuilder<ImmutableCompositeNode> request = ImmutableCompositeNode.builder();
-        request.setQName(GET_SCHEMA_QNAME)
-                .addLeaf("format", "yang")
-                .addLeaf("identifier", moduleName);
-
+        request.setQName(GET_SCHEMA_QNAME).addLeaf("identifier", moduleName);
         if (revision.isPresent()) {
             request.addLeaf("version", revision.get());
         }
+        request.addLeaf("format", "yang");
         return request.toInstance();
     }
 
