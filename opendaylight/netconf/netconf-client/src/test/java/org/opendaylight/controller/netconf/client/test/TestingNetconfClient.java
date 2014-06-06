@@ -8,24 +8,35 @@
 
 package org.opendaylight.controller.netconf.client.test;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
+import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import io.netty.util.concurrent.Future;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration.NetconfClientProtocol;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 
 
 /**
@@ -94,5 +105,30 @@ public class TestingNetconfClient implements Closeable {
     public Set<String> getCapabilities() {
         Preconditions.checkState(clientSession != null, "Client was not initialized successfully");
         return Sets.newHashSet(clientSession.getServerCapabilities());
+    }
+
+    public static void main(String[] args) throws Exception {
+        HashedWheelTimer hashedWheelTimer = new HashedWheelTimer();
+        NioEventLoopGroup nettyGroup = new NioEventLoopGroup();
+        NetconfClientDispatcherImpl netconfClientDispatcher = new NetconfClientDispatcherImpl(nettyGroup, nettyGroup, hashedWheelTimer);
+        LoginPassword authHandler = new LoginPassword("admin", "admin");
+        TestingNetconfClient client = new TestingNetconfClient("client", netconfClientDispatcher, getClientConfig("127.0.0.1", 1830, true, Optional.of(authHandler)));
+        System.out.println(client.getCapabilities());
+    }
+
+    private static NetconfClientConfiguration getClientConfig(String host ,int port, boolean ssh, Optional<? extends AuthenticationHandler> maybeAuthHandler) throws UnknownHostException {
+        InetSocketAddress netconfAddress = new InetSocketAddress(InetAddress.getByName(host), port);
+        final NetconfClientConfigurationBuilder b = NetconfClientConfigurationBuilder.create();
+        b.withAddress(netconfAddress);
+        b.withSessionListener(new SimpleNetconfClientSessionListener());
+        b.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
+                NetconfClientConfigurationBuilder.DEFAULT_CONNECTION_TIMEOUT_MILLIS));
+        if (ssh) {
+            b.withProtocol(NetconfClientProtocol.SSH);
+            b.withAuthHandler(maybeAuthHandler.get());
+        } else {
+            b.withProtocol(NetconfClientProtocol.TCP);
+        }
+        return b.build();
     }
 }

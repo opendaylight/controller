@@ -9,36 +9,35 @@
 package org.opendaylight.controller.netconf.util.osgi;
 
 import com.google.common.base.Optional;
+import io.netty.channel.local.LocalAddress;
+import java.net.InetSocketAddress;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-
 public final class NetconfConfigUtil {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConfigUtil.class);
-
-    public static final InetSocketAddress DEFAULT_NETCONF_TCP_ADDRESS
-            = new InetSocketAddress("127.0.0.1", 8383);
-    public static final InetSocketAddress DEFAULT_NETCONF_SSH_ADDRESS
-            = new InetSocketAddress("0.0.0.0", 1830);
 
     private static final String PREFIX_PROP = "netconf.";
 
     private NetconfConfigUtil() {
     }
 
-    private enum InfixProp {
+    public enum InfixProp {
         tcp, ssh
     }
 
     private static final String PORT_SUFFIX_PROP = ".port";
     private static final String ADDRESS_SUFFIX_PROP = ".address";
-    private static final String CLIENT_PROP = ".client";
     private static final String PRIVATE_KEY_PATH_PROP = ".pk.path";
 
     private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
     private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
+    private static final LocalAddress netconfLocalAddress = new LocalAddress("netconf");
+
+    public static LocalAddress getNetconfLocalAddress() {
+        return netconfLocalAddress;
+    }
 
     public static long extractTimeoutMillis(final BundleContext bundleContext) {
         final String key = PREFIX_PROP + CONNECTION_TIMEOUT_MILLIS_PROP;
@@ -52,22 +51,6 @@ public final class NetconfConfigUtil {
             logger.warn("Cannot parse {} property: {}, using defaults", key, timeoutString, e);
             return DEFAULT_TIMEOUT_MILLIS;
         }
-    }
-
-    public static InetSocketAddress extractTCPNetconfServerAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
-        final Optional<InetSocketAddress> extracted = extractNetconfServerAddress(context, InfixProp.tcp);
-        final InetSocketAddress netconfTcpAddress = getNetconfAddress(defaultAddress, extracted, InfixProp.tcp);
-        logger.debug("Using {} as netconf tcp address", netconfTcpAddress);
-        if (netconfTcpAddress.getAddress().isAnyLocalAddress()) {
-            logger.warn("Unprotected netconf TCP address is configured to ANY local address. This is a security risk. " +
-                    "Consider changing {} to 127.0.0.1", PREFIX_PROP + InfixProp.tcp + ADDRESS_SUFFIX_PROP);
-        }
-        return netconfTcpAddress;
-    }
-
-    public static InetSocketAddress extractTCPNetconfClientAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
-        final Optional<InetSocketAddress> extracted = extractNetconfClientAddress(context, InfixProp.tcp);
-        return getNetconfAddress(defaultAddress, extracted, InfixProp.tcp);
     }
 
     /**
@@ -93,15 +76,12 @@ public final class NetconfConfigUtil {
         return inetSocketAddress;
     }
 
-    public static InetSocketAddress extractSSHNetconfAddress(final BundleContext context, final InetSocketAddress defaultAddress) {
-        Optional<InetSocketAddress> extractedAddress = extractNetconfServerAddress(context, InfixProp.ssh);
-        InetSocketAddress netconfSSHAddress = getNetconfAddress(defaultAddress, extractedAddress, InfixProp.ssh);
-        logger.debug("Using {} as netconf SSH address", netconfSSHAddress);
-        return netconfSSHAddress;
+    public static String getPrivateKeyPath(final BundleContext context) {
+        return getPropertyValue(context, getPrivateKeyKey());
     }
 
-    public static String getPrivateKeyPath(final BundleContext context) {
-        return getPropertyValue(context, PREFIX_PROP + InfixProp.ssh + PRIVATE_KEY_PATH_PROP);
+    public static String getPrivateKeyKey() {
+        return PREFIX_PROP + InfixProp.ssh + PRIVATE_KEY_PATH_PROP;
     }
 
     private static String getPropertyValue(final BundleContext context, final String propertyName) {
@@ -112,16 +92,20 @@ public final class NetconfConfigUtil {
         return propertyValue;
     }
 
+    public static String getNetconfServerAddressKey(InfixProp infixProp) {
+        return PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP;
+    }
+
     /**
      * @param context   from which properties are being read.
      * @param infixProp either tcp or ssh
      * @return value if address and port are present and valid, Optional.absent otherwise.
      * @throws IllegalStateException if address or port are invalid, or configuration is missing
      */
-    private static Optional<InetSocketAddress> extractNetconfServerAddress(final BundleContext context,
+    public static Optional<InetSocketAddress> extractNetconfServerAddress(final BundleContext context,
                                                                            final InfixProp infixProp) {
 
-        final Optional<String> address = getProperty(context, PREFIX_PROP + infixProp + ADDRESS_SUFFIX_PROP);
+        final Optional<String> address = getProperty(context, getNetconfServerAddressKey(infixProp));
         final Optional<String> port = getProperty(context, PREFIX_PROP + infixProp + PORT_SUFFIX_PROP);
 
         if (address.isPresent() && port.isPresent()) {
@@ -138,24 +122,6 @@ public final class NetconfConfigUtil {
     private static InetSocketAddress parseAddress(final Optional<String> address, final Optional<String> port) {
         final int portNumber = Integer.valueOf(port.get());
         return new InetSocketAddress(address.get(), portNumber);
-    }
-
-    private static Optional<InetSocketAddress> extractNetconfClientAddress(final BundleContext context,
-                                                                           final InfixProp infixProp) {
-        final Optional<String> address = getProperty(context,
-                PREFIX_PROP + infixProp + CLIENT_PROP + ADDRESS_SUFFIX_PROP);
-        final Optional<String> port = getProperty(context,
-                PREFIX_PROP + infixProp + CLIENT_PROP + PORT_SUFFIX_PROP);
-
-        if (address.isPresent() && port.isPresent()) {
-            try {
-                return Optional.of(parseAddress(address, port));
-            } catch (final RuntimeException e) {
-                logger.warn("Unable to parse client {} netconf address from {}:{}, fallback to server address",
-                        infixProp, address, port, e);
-            }
-        }
-        return extractNetconfServerAddress(context, infixProp);
     }
 
     private static Optional<String> getProperty(final BundleContext context, final String propKey) {

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.netconf.client;
 
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.Channel;
 import io.netty.util.concurrent.Promise;
 import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
@@ -24,12 +24,7 @@ class TcpClientChannelInitializer extends AbstractChannelInitializer<NetconfClie
     }
 
     @Override
-    public void initialize(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
-        super.initialize(ch, promise);
-    }
-
-    @Override
-    protected void initializeSessionNegotiator(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+    protected void initializeSessionNegotiator(final Channel ch, final Promise<NetconfClientSession> promise) {
         ch.pipeline().addAfter(NETCONF_MESSAGE_DECODER, AbstractChannelInitializer.NETCONF_SESSION_NEGOTIATOR,
                 negotiatorFactory.getSessionNegotiator(new SessionListenerFactory<NetconfClientSessionListener>() {
                     @Override

@@ -7,79 +7,94 @@
  */
 package org.opendaylight.controller.netconf.ssh;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.local.LocalAddress;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
-import org.opendaylight.controller.netconf.ssh.threads.SocketThread;
-import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.netconf.ssh.threads.Handshaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.concurrent.ThreadSafe;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.util.concurrent.atomic.AtomicLong;
-
+/**
+ * Thread that accepts client connections. Accepted socket is forwarded to {@link org.opendaylight.controller.netconf.ssh.threads.Handshaker},
+ * which is executed in {@link #handshakeExecutor}.
+ */
 @ThreadSafe
-public final class NetconfSSHServer implements Runnable {
+public final class NetconfSSHServer extends Thread implements AutoCloseable {
 
-    private ServerSocket ss = null;
-    private static final Logger logger =  LoggerFactory.getLogger(NetconfSSHServer.class);
-    private static final AtomicLong sesssionId = new AtomicLong();
-    private final InetSocketAddress clientAddress;
+    private static final Logger logger = LoggerFactory.getLogger(NetconfSSHServer.class);
+    private static final AtomicLong sessionIdCounter = new AtomicLong();
+
+    private final ServerSocket serverSocket;
+    private final LocalAddress localAddress;
+    private final EventLoopGroup bossGroup;
     private final AuthProvider authProvider;
-    private volatile boolean up = false;
+    private final ExecutorService handshakeExecutor;
+    private volatile boolean up;
 
-    private NetconfSSHServer(int serverPort,InetSocketAddress clientAddress, AuthProvider authProvider) throws IllegalStateException, IOException {
-
-        logger.trace("Creating SSH server socket on port {}",serverPort);
-        this.ss = new ServerSocket(serverPort);
-        if (!ss.isBound()){
-            throw new IllegalStateException("Socket can't be bound to requested port :"+serverPort);
+    private NetconfSSHServer(int serverPort, LocalAddress localAddress, AuthProvider authProvider, EventLoopGroup bossGroup) throws IOException {
+        super(NetconfSSHServer.class.getSimpleName());
+        this.bossGroup = bossGroup;
+        logger.trace("Creating SSH server socket on port {}", serverPort);
+        this.serverSocket = new ServerSocket(serverPort);
+        if (serverSocket.isBound() == false) {
+            throw new IllegalStateException("Socket can't be bound to requested port :" + serverPort);
         }
         logger.trace("Server socket created.");
-        this.clientAddress = clientAddress;
+        this.localAddress = localAddress;
         this.authProvider = authProvider;
         this.up = true;
+        handshakeExecutor = Executors.newFixedThreadPool(10);
     }
 
-    public static NetconfSSHServer start(int serverPort, InetSocketAddress clientAddress,AuthProvider authProvider) throws IllegalStateException, IOException {
-        return new NetconfSSHServer(serverPort, clientAddress,authProvider);
+    public static NetconfSSHServer start(int serverPort, LocalAddress localAddress, AuthProvider authProvider, EventLoopGroup bossGroup) throws IOException {
+        NetconfSSHServer netconfSSHServer = new NetconfSSHServer(serverPort, localAddress, authProvider, bossGroup);
+        netconfSSHServer.start();
+        return netconfSSHServer;
     }
 
-    public void stop() throws IOException {
+    @Override
+    public void close() throws IOException {
         up = false;
         logger.trace("Closing SSH server socket.");
-        ss.close();
+        serverSocket.close();
+        bossGroup.shutdownGracefully();
         logger.trace("SSH server socket closed.");
     }
 
-    public void removeUserManagerService(){
-        this.authProvider.removeUserManagerService();
-    }
-
-    public void addUserManagerService(IUserManager userManagerService){
-        this.authProvider.addUserManagerService(userManagerService);
-    }
-    public boolean isUp(){
-        return this.up;
-    }
     @Override
     public void run() {
         while (up) {
-            logger.trace("Starting new socket thread.");
+            Socket acceptedSocket = null;
             try {
-                SocketThread.start(ss.accept(), clientAddress, sesssionId.incrementAndGet(), authProvider);
-            }
-            catch (IOException e) {
-                if( up ) {
-                    logger.error("Exception occurred during socket thread initialization", e);
+                acceptedSocket = serverSocket.accept();
+            } catch (IOException e) {
+                if (up == false) {
+                    logger.trace("Exiting server thread", e);
+                } else {
+                    logger.warn("Exception occurred during socket.accept", e);
                 }
-                else {
-                    // We're shutting down so an exception is expected as the socket's been closed.
-                    // Log to debug.
-                    logger.debug("Shutting down - got expected exception: " + e);
+            }
+            if (acceptedSocket != null) {
+                try {
+                    Handshaker task = new Handshaker(acceptedSocket, localAddress, sessionIdCounter.incrementAndGet(), authProvider, bossGroup);
+                    handshakeExecutor.submit(task);
+                } catch (IOException e) {
+                    logger.warn("Cannot set PEMHostKey, closing connection", e);
+                    try {
+                        acceptedSocket.close();
+                    } catch (IOException e1) {
+                        logger.warn("Ignoring exception while closing socket", e);
+                    }
                 }
             }
         }
+        logger.debug("Server thread is exiting");
     }
 }
