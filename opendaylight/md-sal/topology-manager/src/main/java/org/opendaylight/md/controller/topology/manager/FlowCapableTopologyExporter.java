@@ -57,13 +57,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 
-class FlowCapableTopologyExporter implements //
-        FlowTopologyDiscoveryListener, //
-        OpendaylightInventoryListener //
-{
-
+class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, OpendaylightInventoryListener {
     protected final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyExporter.class);
-    public static TopologyKey topology = new TopologyKey(new TopologyId("flow:1"));
+    public static final TopologyKey TOPOLOGY = new TopologyKey(new TopologyId("flow:1"));
 
     // FIXME: Flow capable topology exporter should use transaction chaining API
     private DataProviderService dataService;
@@ -80,8 +76,8 @@ class FlowCapableTopologyExporter implements //
 
     public void start() {
         TopologyBuilder tb = new TopologyBuilder();
-        tb.setKey(topology);
-        topologyPath = InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, topology).build();
+        tb.setKey(TOPOLOGY);
+        topologyPath = InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY).build();
         Topology top = tb.build();
         DataModificationTransaction tx = dataService.beginTransaction();
         tx.putOperationalData(topologyPath, top);
@@ -89,42 +85,49 @@ class FlowCapableTopologyExporter implements //
     }
 
     @Override
-    public synchronized void onNodeRemoved(final NodeRemoved notification) {
+    public void onNodeRemoved(final NodeRemoved notification) {
         NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeRef()).getId());
         InstanceIdentifier<Node> nodeInstance = toNodeIdentifier(notification.getNodeRef());
 
-        DataModificationTransaction tx = dataService.beginTransaction();
-        tx.removeOperationalData(nodeInstance);
-        removeAffectedLinks(tx, nodeId);
-        listenOnTransactionState(tx.getIdentifier(),tx.commit());
-    }
-
-    @Override
-    public synchronized void onNodeUpdated(final NodeUpdated notification) {
-        FlowCapableNodeUpdated fcnu = notification.getAugmentation(FlowCapableNodeUpdated.class);
-        if (fcnu != null) {
-            Node node = toTopologyNode(toTopologyNodeId(notification.getId()), notification.getNodeRef());
-            InstanceIdentifier<Node> path = getNodePath(toTopologyNodeId(notification.getId()));
+        synchronized (this) {
             DataModificationTransaction tx = dataService.beginTransaction();
-            tx.putOperationalData(path, node);
+            tx.removeOperationalData(nodeInstance);
+            removeAffectedLinks(tx, nodeId);
             listenOnTransactionState(tx.getIdentifier(),tx.commit());
         }
     }
 
     @Override
-    public synchronized void onNodeConnectorRemoved(final NodeConnectorRemoved notification) {
-        InstanceIdentifier<TerminationPoint> tpInstance = toTerminationPointIdentifier(notification
-                .getNodeConnectorRef());
-        TpId tpId = toTerminationPointId(getNodeConnectorKey(notification.getNodeConnectorRef()).getId());
-        DataModificationTransaction tx = dataService.beginTransaction();
-        tx.removeOperationalData(tpInstance);
-        removeAffectedLinks(tx, tpId);
-        listenOnTransactionState(tx.getIdentifier(),tx.commit());
+    public void onNodeUpdated(final NodeUpdated notification) {
+        FlowCapableNodeUpdated fcnu = notification.getAugmentation(FlowCapableNodeUpdated.class);
+        if (fcnu != null) {
+            Node node = toTopologyNode(toTopologyNodeId(notification.getId()), notification.getNodeRef());
+            InstanceIdentifier<Node> path = getNodePath(toTopologyNodeId(notification.getId()));
 
+            synchronized (this) {
+                DataModificationTransaction tx = dataService.beginTransaction();
+                tx.putOperationalData(path, node);
+                listenOnTransactionState(tx.getIdentifier(),tx.commit());
+            }
+        }
     }
 
     @Override
-    public synchronized void onNodeConnectorUpdated(final NodeConnectorUpdated notification) {
+    public void onNodeConnectorRemoved(final NodeConnectorRemoved notification) {
+        InstanceIdentifier<TerminationPoint> tpInstance = toTerminationPointIdentifier(notification
+                .getNodeConnectorRef());
+        TpId tpId = toTerminationPointId(getNodeConnectorKey(notification.getNodeConnectorRef()).getId());
+
+        synchronized (this) {
+            DataModificationTransaction tx = dataService.beginTransaction();
+            tx.removeOperationalData(tpInstance);
+            removeAffectedLinks(tx, tpId);
+            listenOnTransactionState(tx.getIdentifier(),tx.commit());
+        }
+    }
+
+    @Override
+    public void onNodeConnectorUpdated(final NodeConnectorUpdated notification) {
         FlowCapableNodeConnectorUpdated fcncu = notification.getAugmentation(FlowCapableNodeConnectorUpdated.class);
         if (fcncu != null) {
             NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeConnectorRef()).getId());
@@ -132,41 +135,48 @@ class FlowCapableTopologyExporter implements //
                     notification.getNodeConnectorRef());
             InstanceIdentifier<TerminationPoint> path = tpPath(nodeId, point.getKey().getTpId());
 
-            DataModificationTransaction tx = dataService.beginTransaction();
-            tx.putOperationalData(path, point);
-            if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
-                    || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
-                removeAffectedLinks(tx, point.getTpId());
+            synchronized (this) {
+                DataModificationTransaction tx = dataService.beginTransaction();
+                tx.putOperationalData(path, point);
+                if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
+                        || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
+                    removeAffectedLinks(tx, point.getTpId());
+                }
+                listenOnTransactionState(tx.getIdentifier(),tx.commit());
             }
+        }
+    }
+
+    @Override
+    public void onLinkDiscovered(final LinkDiscovered notification) {
+        Link link = toTopologyLink(notification);
+        InstanceIdentifier<Link> path = linkPath(link);
+
+        synchronized (this) {
+            DataModificationTransaction tx = dataService.beginTransaction();
+            tx.putOperationalData(path, link);
             listenOnTransactionState(tx.getIdentifier(),tx.commit());
         }
     }
 
     @Override
-    public synchronized void onLinkDiscovered(final LinkDiscovered notification) {
-        Link link = toTopologyLink(notification);
-        InstanceIdentifier<Link> path = linkPath(link);
-        DataModificationTransaction tx = dataService.beginTransaction();
-        tx.putOperationalData(path, link);
-        listenOnTransactionState(tx.getIdentifier(),tx.commit());
-
-    }
-
-    @Override
-    public synchronized void onLinkOverutilized(final LinkOverutilized notification) {
+    public void onLinkOverutilized(final LinkOverutilized notification) {
         // NOOP
     }
 
     @Override
-    public synchronized void onLinkRemoved(final LinkRemoved notification) {
+    public void onLinkRemoved(final LinkRemoved notification) {
         InstanceIdentifier<Link> path = linkPath(toTopologyLink(notification));
-        DataModificationTransaction tx = dataService.beginTransaction();
-        tx.removeOperationalData(path);
-        listenOnTransactionState(tx.getIdentifier(),tx.commit());
+
+        synchronized (this) {
+            DataModificationTransaction tx = dataService.beginTransaction();
+            tx.removeOperationalData(path);
+            listenOnTransactionState(tx.getIdentifier(),tx.commit());
+        }
     }
 
     @Override
-    public synchronized void onLinkUtilizationNormal(final LinkUtilizationNormal notification) {
+    public void onLinkUtilizationNormal(final LinkUtilizationNormal notification) {
         // NOOP
     }
 
@@ -174,11 +184,11 @@ class FlowCapableTopologyExporter implements //
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey invNodeKey = getNodeKey(ref);
 
         NodeKey nodeKey = new NodeKey(toTopologyNodeId(invNodeKey.getId()));
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, topology)
+        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
                 .child(Node.class, nodeKey).build();
     }
 
-    private InstanceIdentifier<TerminationPoint> toTerminationPointIdentifier(final NodeConnectorRef ref) {
+    private static InstanceIdentifier<TerminationPoint> toTerminationPointIdentifier(final NodeConnectorRef ref) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey invNodeKey = getNodeKey(ref);
         NodeConnectorKey invNodeConnectorKey = getNodeConnectorKey(ref);
         return tpPath(toTopologyNodeId(invNodeKey.getId()), toTerminationPointId(invNodeConnectorKey.getId()));
@@ -213,22 +223,22 @@ class FlowCapableTopologyExporter implements //
         }
     }
 
-    private InstanceIdentifier<Node> getNodePath(final NodeId nodeId) {
+    private static InstanceIdentifier<Node> getNodePath(final NodeId nodeId) {
         NodeKey nodeKey = new NodeKey(nodeId);
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, topology)
+        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
                 .child(Node.class, nodeKey).build();
     }
 
-    private InstanceIdentifier<TerminationPoint> tpPath(final NodeId nodeId, final TpId tpId) {
+    private static InstanceIdentifier<TerminationPoint> tpPath(final NodeId nodeId, final TpId tpId) {
         NodeKey nodeKey = new NodeKey(nodeId);
         TerminationPointKey tpKey = new TerminationPointKey(tpId);
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, topology)
+        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
                 .child(Node.class, nodeKey).child(TerminationPoint.class, tpKey).build();
     }
 
-    private InstanceIdentifier<Link> linkPath(final Link link) {
+    private static InstanceIdentifier<Link> linkPath(final Link link) {
         InstanceIdentifier<Link> linkInstanceId = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, topology).child(Link.class, link.getKey()).build();
+                .child(Topology.class, TOPOLOGY).child(Link.class, link.getKey()).build();
         return linkInstanceId;
     }
 
@@ -236,17 +246,15 @@ class FlowCapableTopologyExporter implements //
      * @param txId transaction identificator
      * @param future transaction result
      */
-    private static void listenOnTransactionState(final Object txId, Future<RpcResult<TransactionStatus>> future) {
+    private static void listenOnTransactionState(final Object txId, final Future<RpcResult<TransactionStatus>> future) {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),new FutureCallback<RpcResult<TransactionStatus>>() {
-
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 LOG.error("Topology export failed for Tx:{}", txId, t);
-
             }
 
             @Override
-            public void onSuccess(RpcResult<TransactionStatus> result) {
+            public void onSuccess(final RpcResult<TransactionStatus> result) {
                 if(!result.isSuccessful()) {
                     LOG.error("Topology export failed for Tx:{}", txId);
                 }
