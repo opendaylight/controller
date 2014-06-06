@@ -12,11 +12,13 @@ package org.opendaylight.controller.sal.core;
 import java.io.Serializable;
 
 import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.PushVlan;
 import org.opendaylight.controller.sal.action.SetDlType;
 import org.opendaylight.controller.sal.action.SetNwDst;
 import org.opendaylight.controller.sal.action.SetNwSrc;
 import org.opendaylight.controller.sal.action.SetTpDst;
 import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -54,18 +56,23 @@ public class ContainerFlow implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ContainerFlow other = (ContainerFlow) obj;
         if (match == null) {
-            if (other.match != null)
+            if (other.match != null) {
                 return false;
-        } else if (!match.equals(other.match))
+            }
+        } else if (!match.equals(other.match)) {
             return false;
+        }
         return true;
     }
 
@@ -95,6 +102,11 @@ public class ContainerFlow implements Serializable {
         Match actionMatch = new Match();
         for (Action action : flow.getActions()) {
             switch (action.getType()) {
+            case SET_VLAN_ID:
+                actionMatch.setField(MatchType.DL_VLAN,
+                        ((Integer) ((SetVlanId) action).getVlanId())
+                                .shortValue());
+                break;
             case SET_DL_TYPE:
                 actionMatch.setField(MatchType.DL_TYPE,
                         ((Integer) ((SetDlType) action).getDlType())
