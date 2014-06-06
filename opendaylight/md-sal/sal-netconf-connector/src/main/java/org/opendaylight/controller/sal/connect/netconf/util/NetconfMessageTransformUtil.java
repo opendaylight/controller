@@ -152,7 +152,7 @@ public class NetconfMessageTransformUtil {
     }
 
     public static boolean isDataRetrievalOperation(final QName rpc) {
-        return NETCONF_URI == rpc.getNamespace()
+        return NETCONF_URI.equals(rpc.getNamespace())
                 && (rpc.getLocalName().equals(NETCONF_GET_CONFIG_QNAME.getLocalName()) || rpc.getLocalName().equals(
                         NETCONF_GET_QNAME.getLocalName()));
     }
