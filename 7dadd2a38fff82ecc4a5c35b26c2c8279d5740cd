@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3da08cf3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-07T09:06:28Z",
+      "side": 1,
+      "message": "let\u0027s number from 1, so we can keep track of this",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d9d88bc",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-07T09:06:28Z",
+      "side": 1,
+      "message": "protected",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dda64010",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-07T09:06:28Z",
+      "side": 1,
+      "message": "remove, message should be mandatory",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fda9c4df",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/DataPreconditionFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-07T09:06:28Z",
+      "side": 1,
+      "message": "This is not correct -- note the \"structurally incorrent\" bit -- that is *not* a subclass of OptimisticLockFailed",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
