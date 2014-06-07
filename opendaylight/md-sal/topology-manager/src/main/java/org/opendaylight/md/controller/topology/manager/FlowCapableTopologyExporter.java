@@ -60,6 +60,8 @@ import com.google.common.util.concurrent.JdkFutureAdapters;
 class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, OpendaylightInventoryListener {
     protected final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyExporter.class);
     public static final TopologyKey TOPOLOGY = new TopologyKey(new TopologyId("flow:1"));
+    private static final InstanceIdentifier<Topology> TOPOLOGY_PATH =
+            InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY).build();
 
     // FIXME: Flow capable topology exporter should use transaction chaining API
     private DataProviderService dataService;
@@ -72,15 +74,10 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
         this.dataService = dataService;
     }
 
-    private InstanceIdentifier<Topology> topologyPath;
-
     public void start() {
-        TopologyBuilder tb = new TopologyBuilder();
-        tb.setKey(TOPOLOGY);
-        topologyPath = InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY).build();
-        Topology top = tb.build();
+        TopologyBuilder tb = new TopologyBuilder().setKey(TOPOLOGY);
         DataModificationTransaction tx = dataService.beginTransaction();
-        tx.putOperationalData(topologyPath, top);
+        tx.putOperationalData(TOPOLOGY_PATH, tb.build());
         listenOnTransactionState(tx.getIdentifier(),tx.commit());
     }
 
@@ -182,10 +179,8 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
 
     private static InstanceIdentifier<Node> toNodeIdentifier(final NodeRef ref) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey invNodeKey = getNodeKey(ref);
-
         NodeKey nodeKey = new NodeKey(toTopologyNodeId(invNodeKey.getId()));
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
-                .child(Node.class, nodeKey).build();
+        return TOPOLOGY_PATH.child(Node.class, nodeKey);
     }
 
     private static InstanceIdentifier<TerminationPoint> toTerminationPointIdentifier(final NodeConnectorRef ref) {
@@ -197,49 +192,42 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
     private void removeAffectedLinks(final DataModificationTransaction transaction, final NodeId id) {
         TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
 
-        Topology topologyData = reader.readOperationalData(topologyPath);
+        Topology topologyData = reader.readOperationalData(TOPOLOGY_PATH);
         if (topologyData == null) {
             return;
         }
         for (Link link : topologyData.getLink()) {
             if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
-                InstanceIdentifier<Link> path = topologyPath.child(Link.class, link.getKey());
-                transaction.removeOperationalData(path);
+                transaction.removeOperationalData(linkPath(link));
             }
         }
     }
 
     private void removeAffectedLinks(final DataModificationTransaction transaction, final TpId id) {
         TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
-        Topology topologyData = reader.readOperationalData(topologyPath);
+        Topology topologyData = reader.readOperationalData(TOPOLOGY_PATH);
         if (topologyData == null) {
             return;
         }
         for (Link link : topologyData.getLink()) {
             if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
-                InstanceIdentifier<Link> path = topologyPath.child(Link.class, link.getKey());
-                transaction.removeOperationalData(path);
+                transaction.removeOperationalData(linkPath(link));
             }
         }
     }
 
     private static InstanceIdentifier<Node> getNodePath(final NodeId nodeId) {
-        NodeKey nodeKey = new NodeKey(nodeId);
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
-                .child(Node.class, nodeKey).build();
+        return TOPOLOGY_PATH.child(Node.class, new NodeKey(nodeId));
     }
 
     private static InstanceIdentifier<TerminationPoint> tpPath(final NodeId nodeId, final TpId tpId) {
         NodeKey nodeKey = new NodeKey(nodeId);
         TerminationPointKey tpKey = new TerminationPointKey(tpId);
-        return InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY)
-                .child(Node.class, nodeKey).child(TerminationPoint.class, tpKey).build();
+        return TOPOLOGY_PATH.child(Node.class, nodeKey).child(TerminationPoint.class, tpKey);
     }
 
     private static InstanceIdentifier<Link> linkPath(final Link link) {
-        InstanceIdentifier<Link> linkInstanceId = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, TOPOLOGY).child(Link.class, link.getKey()).build();
-        return linkInstanceId;
+        return TOPOLOGY_PATH.child(Link.class, link.getKey());
     }
 
     /**
