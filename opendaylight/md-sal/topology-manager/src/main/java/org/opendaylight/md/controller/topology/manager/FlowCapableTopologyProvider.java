@@ -7,11 +7,20 @@
  */
 package org.opendaylight.md.controller.topology.manager;
 
+import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -19,44 +28,8 @@ import org.slf4j.LoggerFactory;
 
 public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider implements AutoCloseable {
     private final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyProvider.class);
-
-    private DataProviderService dataService;
-
-    public DataProviderService getDataService() {
-        return this.dataService;
-    }
-
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
-    }
-
-    private NotificationProviderService notificationService;
-
-    public NotificationProviderService getNotificationService() {
-        return this.notificationService;
-    }
-
-    public void setNotificationService(final NotificationProviderService notificationService) {
-        this.notificationService = notificationService;
-    }
-
-    private final FlowCapableTopologyExporter exporter = new FlowCapableTopologyExporter();
     private Registration<NotificationListener> listenerRegistration;
-
-    @Override
-    public void close() {
-
-        FlowCapableTopologyProvider.LOG.info("FlowCapableTopologyProvider stopped.");
-        dataService = null;
-        notificationService = null;
-        if (this.listenerRegistration != null) {
-            try {
-                this.listenerRegistration.close();
-            } catch (Exception e) {
-                throw new IllegalStateException("Exception during close of listener registration.",e);
-            }
-        }
-    }
+    private Thread thread;
 
     /**
      * Gets called on start of a bundle.
@@ -64,13 +37,50 @@ public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider im
      * @param session
      */
     @Override
-    public void onSessionInitiated(final ProviderContext session) {
-        dataService = session.getSALService(DataProviderService.class);
-        notificationService = session.getSALService(NotificationProviderService.class);
-        this.exporter.setDataService(dataService);
-        this.exporter.start();
-        this.listenerRegistration = notificationService.registerNotificationListener(this.exporter);
-        ;
+    public synchronized void onSessionInitiated(final ProviderContext session) {
+        final DataProviderService dataService = session.getSALService(DataProviderService.class);
+        final NotificationProviderService notificationService = session.getSALService(NotificationProviderService.class);
+
+        final String name = "flow:1";
+        final TopologyKey key = new TopologyKey(new TopologyId(name));
+        final InstanceIdentifier<Topology> path = InstanceIdentifier
+                .builder(NetworkTopology.class)
+                .child(Topology.class, key)
+                .build();
+
+        final OperationProcessor processor = new OperationProcessor(dataService);
+        final FlowCapableTopologyExporter listener = new FlowCapableTopologyExporter(processor, path);
+        this.listenerRegistration = notificationService.registerNotificationListener(listener);
+
+        final DataModificationTransaction tx = dataService.beginTransaction();
+        tx.putOperationalData(path, new TopologyBuilder().setKey(key).build());
+        try {
+            tx.commit().get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Initial topology export failed, continuing anyway", e);
+        }
+
+        thread = new Thread(processor);
+        thread.setDaemon(true);
+        thread.setName("FlowCapableTopologyExporter-" + name);
+        thread.start();
+    }
+
+    @Override
+    public synchronized void close() {
+        LOG.info("FlowCapableTopologyProvider stopped.");
+        if (this.listenerRegistration != null) {
+            try {
+                this.listenerRegistration.close();
+            } catch (Exception e) {
+                LOG.error("Failed to close listener registration", e);
+            }
+            listenerRegistration = null;
+        }
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
+        }
     }
 
     /**
