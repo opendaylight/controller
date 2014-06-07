@@ -15,7 +15,12 @@ import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMap
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNode;
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNodeId;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -56,12 +61,60 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, OpendaylightInventoryListener {
-    protected final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyExporter.class);
     public static final TopologyKey TOPOLOGY = new TopologyKey(new TopologyId("flow:1"));
+
+    private static final Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyExporter.class);
     private static final InstanceIdentifier<Topology> TOPOLOGY_PATH =
             InstanceIdentifier.builder(NetworkTopology.class).child(Topology.class, TOPOLOGY).build();
+    private static final int MAX_TRANSACTION_OPERATIONS = 100;
+    private static final int OPERATION_QUEUE_DEPTH = 500;
+
+    /**
+     * Internal interface for submitted tasks. Implementations of this interface are
+     * enqueued and batched into data store transactions.
+     */
+    private interface TopologyTask {
+        /**
+         * Execute the task on top of the transaction.
+         *
+         * @param transaction Datastore transaction
+         */
+        void runTask(DataModificationTransaction transaction);
+    }
+
+    private final BlockingQueue<TopologyTask> operations = new LinkedBlockingQueue<>(OPERATION_QUEUE_DEPTH);
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder()
+            .setNameFormat("FlowCapableTopologyExporter-" + TOPOLOGY.getTopologyId().getValue())
+            .build());
+    private final Callable<Void> committer = new Callable<Void>() {
+        @Override
+        public Void call() throws InterruptedException {
+            TopologyTask op = operations.take();
+
+            LOG.debug("New operations available, starting transaction");
+            final DataModificationTransaction tx = dataService.beginTransaction();
+
+            int ops = 0;
+            do {
+                op.runTask(tx);
+
+                ops++;
+                if (ops < MAX_TRANSACTION_OPERATIONS) {
+                    op = operations.poll();
+                } else {
+                    op = null;
+                }
+            } while (op != null);
+
+            LOG.debug("Processed {} operations, submitting transaction", ops);
+            listenOnTransactionState(tx.getIdentifier(), tx.commit());
+            return null;
+        }
+    };
 
     // FIXME: Flow capable topology exporter should use transaction chaining API
     private DataProviderService dataService;
@@ -81,79 +134,89 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
         listenOnTransactionState(tx.getIdentifier(),tx.commit());
     }
 
+    private void enqueueOperation(final TopologyTask task) {
+        try {
+            operations.put(task);
+        } catch (InterruptedException e) {
+            LOG.warn("Interrupted while submitting task {}", task, e);
+        }
+    }
+
     @Override
     public void onNodeRemoved(final NodeRemoved notification) {
-        NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeRef()).getId());
-        InstanceIdentifier<Node> nodeInstance = toNodeIdentifier(notification.getNodeRef());
-
-        synchronized (this) {
-            DataModificationTransaction tx = dataService.beginTransaction();
-            tx.removeOperationalData(nodeInstance);
-            removeAffectedLinks(tx, nodeId);
-            listenOnTransactionState(tx.getIdentifier(),tx.commit());
-        }
+        enqueueOperation(new TopologyTask() {
+            @Override
+            public void runTask(final DataModificationTransaction transaction) {
+                NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeRef()).getId());
+                InstanceIdentifier<Node> nodeInstance = toNodeIdentifier(notification.getNodeRef());
+                transaction.removeOperationalData(nodeInstance);
+                removeAffectedLinks(transaction, nodeId);
+            }
+        });
     }
 
     @Override
     public void onNodeUpdated(final NodeUpdated notification) {
         FlowCapableNodeUpdated fcnu = notification.getAugmentation(FlowCapableNodeUpdated.class);
         if (fcnu != null) {
-            Node node = toTopologyNode(toTopologyNodeId(notification.getId()), notification.getNodeRef());
-            InstanceIdentifier<Node> path = getNodePath(toTopologyNodeId(notification.getId()));
-
-            synchronized (this) {
-                DataModificationTransaction tx = dataService.beginTransaction();
-                tx.putOperationalData(path, node);
-                listenOnTransactionState(tx.getIdentifier(),tx.commit());
-            }
+            enqueueOperation(new TopologyTask() {
+                @Override
+                public void runTask(final DataModificationTransaction transaction) {
+                    Node node = toTopologyNode(toTopologyNodeId(notification.getId()), notification.getNodeRef());
+                    InstanceIdentifier<Node> path = getNodePath(toTopologyNodeId(notification.getId()));
+                    transaction.putOperationalData(path, node);
+                }
+            });
         }
     }
 
     @Override
     public void onNodeConnectorRemoved(final NodeConnectorRemoved notification) {
-        InstanceIdentifier<TerminationPoint> tpInstance = toTerminationPointIdentifier(notification
-                .getNodeConnectorRef());
-        TpId tpId = toTerminationPointId(getNodeConnectorKey(notification.getNodeConnectorRef()).getId());
+        enqueueOperation(new TopologyTask() {
+            @Override
+            public void runTask(final DataModificationTransaction transaction) {
+                InstanceIdentifier<TerminationPoint> tpInstance = toTerminationPointIdentifier(notification
+                        .getNodeConnectorRef());
+                TpId tpId = toTerminationPointId(getNodeConnectorKey(notification.getNodeConnectorRef()).getId());
 
-        synchronized (this) {
-            DataModificationTransaction tx = dataService.beginTransaction();
-            tx.removeOperationalData(tpInstance);
-            removeAffectedLinks(tx, tpId);
-            listenOnTransactionState(tx.getIdentifier(),tx.commit());
-        }
+                transaction.removeOperationalData(tpInstance);
+                removeAffectedLinks(transaction, tpId);
+            }
+        });
     }
 
     @Override
     public void onNodeConnectorUpdated(final NodeConnectorUpdated notification) {
-        FlowCapableNodeConnectorUpdated fcncu = notification.getAugmentation(FlowCapableNodeConnectorUpdated.class);
+        final FlowCapableNodeConnectorUpdated fcncu = notification.getAugmentation(FlowCapableNodeConnectorUpdated.class);
         if (fcncu != null) {
-            NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeConnectorRef()).getId());
-            TerminationPoint point = toTerminationPoint(toTerminationPointId(notification.getId()),
-                    notification.getNodeConnectorRef());
-            InstanceIdentifier<TerminationPoint> path = tpPath(nodeId, point.getKey().getTpId());
+            enqueueOperation(new TopologyTask() {
+                @Override
+                public void runTask(final DataModificationTransaction transaction) {
+                    NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeConnectorRef()).getId());
+                    TerminationPoint point = toTerminationPoint(toTerminationPointId(notification.getId()),
+                            notification.getNodeConnectorRef());
+                    InstanceIdentifier<TerminationPoint> path = tpPath(nodeId, point.getKey().getTpId());
 
-            synchronized (this) {
-                DataModificationTransaction tx = dataService.beginTransaction();
-                tx.putOperationalData(path, point);
-                if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
-                        || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
-                    removeAffectedLinks(tx, point.getTpId());
+                    transaction.putOperationalData(path, point);
+                    if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
+                            || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
+                        removeAffectedLinks(transaction, point.getTpId());
+                    }
                 }
-                listenOnTransactionState(tx.getIdentifier(),tx.commit());
-            }
+            });
         }
     }
 
     @Override
     public void onLinkDiscovered(final LinkDiscovered notification) {
-        Link link = toTopologyLink(notification);
-        InstanceIdentifier<Link> path = linkPath(link);
-
-        synchronized (this) {
-            DataModificationTransaction tx = dataService.beginTransaction();
-            tx.putOperationalData(path, link);
-            listenOnTransactionState(tx.getIdentifier(),tx.commit());
-        }
+        enqueueOperation(new TopologyTask() {
+            @Override
+            public void runTask(final DataModificationTransaction transaction) {
+                Link link = toTopologyLink(notification);
+                InstanceIdentifier<Link> path = linkPath(link);
+                transaction.putOperationalData(path, link);
+            }
+        });
     }
 
     @Override
@@ -163,13 +226,12 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
 
     @Override
     public void onLinkRemoved(final LinkRemoved notification) {
-        InstanceIdentifier<Link> path = linkPath(toTopologyLink(notification));
-
-        synchronized (this) {
-            DataModificationTransaction tx = dataService.beginTransaction();
-            tx.removeOperationalData(path);
-            listenOnTransactionState(tx.getIdentifier(),tx.commit());
-        }
+        enqueueOperation(new TopologyTask() {
+            @Override
+            public void runTask(final DataModificationTransaction transaction) {
+                transaction.removeOperationalData(linkPath(toTopologyLink(notification)));
+            }
+        });
     }
 
     @Override
@@ -191,14 +253,12 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
 
     private void removeAffectedLinks(final DataModificationTransaction transaction, final NodeId id) {
         TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
-
         Topology topologyData = reader.readOperationalData(TOPOLOGY_PATH);
-        if (topologyData == null) {
-            return;
-        }
-        for (Link link : topologyData.getLink()) {
-            if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
-                transaction.removeOperationalData(linkPath(link));
+        if (topologyData != null) {
+            for (Link link : topologyData.getLink()) {
+                if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
+                    transaction.removeOperationalData(linkPath(link));
+                }
             }
         }
     }
@@ -206,12 +266,11 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
     private void removeAffectedLinks(final DataModificationTransaction transaction, final TpId id) {
         TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
         Topology topologyData = reader.readOperationalData(TOPOLOGY_PATH);
-        if (topologyData == null) {
-            return;
-        }
-        for (Link link : topologyData.getLink()) {
-            if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
-                transaction.removeOperationalData(linkPath(link));
+        if (topologyData != null) {
+            for (Link link : topologyData.getLink()) {
+                if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
+                    transaction.removeOperationalData(linkPath(link));
+                }
             }
         }
     }
@@ -234,11 +293,12 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
      * @param txId transaction identificator
      * @param future transaction result
      */
-    private static void listenOnTransactionState(final Object txId, final Future<RpcResult<TransactionStatus>> future) {
+    private void listenOnTransactionState(final Object txId, final Future<RpcResult<TransactionStatus>> future) {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),new FutureCallback<RpcResult<TransactionStatus>>() {
             @Override
             public void onFailure(final Throwable t) {
                 LOG.error("Topology export failed for Tx:{}", txId, t);
+                executor.submit(committer);
             }
 
             @Override
@@ -246,6 +306,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 if(!result.isSuccessful()) {
                     LOG.error("Topology export failed for Tx:{}", txId);
                 }
+                executor.submit(committer);
             }
         });
     }
