@@ -31,9 +31,9 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.Generated
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.JavaFileInputBuilder;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.osgi.framework.BundleContext;
 
 public class AbsFactoryGeneratedObjectFactory {
+    private static final String BUNDLE_CONTEXT = "org.osgi.framework.BundleContext";
 
     public GeneratedObject toGeneratedObject(ModuleMXBeanEntry mbe, Optional<String> copyright) {
         FullyQualifiedName absFactoryFQN = new FullyQualifiedName(mbe.getPackageName(), mbe.getAbstractFactoryName());
@@ -91,7 +91,7 @@ public class AbsFactoryGeneratedObjectFactory {
             "public %s createModule(String instanceName, %s dependencyResolver, %s bundleContext) {\n"+
                 "return instantiateModule(instanceName, dependencyResolver, bundleContext);\n"+
             "}\n",
-                Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(), BundleContext.class.getCanonicalName()));
+                Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(), BUNDLE_CONTEXT));
 
         b.addToBody(getCreateModule(moduleFQN, moduleFields));
 
@@ -100,12 +100,12 @@ public class AbsFactoryGeneratedObjectFactory {
                 "return new %s(new %s(NAME, instanceName), dependencyResolver, oldModule, oldInstance);\n"+
             "}\n",
                 moduleFQN, DependencyResolver.class.getCanonicalName(), moduleFQN, AutoCloseable.class.getCanonicalName(),
-                BundleContext.class.getCanonicalName(), moduleFQN, ModuleIdentifier.class.getCanonicalName()));
+                BUNDLE_CONTEXT, moduleFQN, ModuleIdentifier.class.getCanonicalName()));
 
         b.addToBody(format("\n"+
             "public %s instantiateModule(String instanceName, %s dependencyResolver, %s bundleContext) {\n"+
                 "return new %s(new %s(NAME, instanceName), dependencyResolver);\n"+
-            "}\n", moduleFQN, DependencyResolver.class.getCanonicalName(), BundleContext.class.getCanonicalName(),
+            "}\n", moduleFQN, DependencyResolver.class.getCanonicalName(), BUNDLE_CONTEXT,
                 moduleFQN, ModuleIdentifier.class.getCanonicalName()
         ));
 
@@ -118,7 +118,7 @@ public class AbsFactoryGeneratedObjectFactory {
             "@Override\n"+
             "public java.util.Set<%s> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory, %s bundleContext) {\n"+
                 "return new java.util.HashSet<%s>();\n"+
-            "}\n", moduleFQN, BundleContext.class.getCanonicalName(), moduleFQN));
+            "}\n", moduleFQN, BUNDLE_CONTEXT, moduleFQN));
 
         return new GeneratedObjectBuilder(b.build()).toGeneratedObject();
     }
@@ -127,8 +127,8 @@ public class AbsFactoryGeneratedObjectFactory {
         String result = "\n"+
             "@Override\n"+
             format("public %s createModule(String instanceName, %s dependencyResolver, %s old, %s bundleContext) throws Exception {\n",
-                                Module.class.getCanonicalName(),DependencyResolver.class.getCanonicalName(),
-                                DynamicMBeanWithInstance.class.getCanonicalName(),BundleContext.class.getCanonicalName())+
+                                Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(),
+                                DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT)+
                 format("%s oldModule = null;\n",moduleFQN)+
                 "try {\n"+
                     format("oldModule = (%s) old.getModule();\n",moduleFQN)+
