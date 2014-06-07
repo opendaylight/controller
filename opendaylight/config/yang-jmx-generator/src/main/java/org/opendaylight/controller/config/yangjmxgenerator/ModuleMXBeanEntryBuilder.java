@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,14 +95,10 @@ final class ModuleMXBeanEntryBuilder {
     // TODO: the XPath should be parsed by code generator IMO
     private static final String MAGIC_STRING = "MAGIC_STRING";
     private static final String MODULE_CONDITION_XPATH_TEMPLATE = "^/MAGIC_STRING:modules/MAGIC_STRING:module/MAGIC_STRING:type\\s*=\\s*['\"](.+)['\"]$";
-    private static final SchemaPath expectedConfigurationAugmentationSchemaPath = new SchemaPath(
-            Arrays.asList(createConfigQName("modules"),
-                    createConfigQName("module"),
-                    createConfigQName("configuration")), true);
-    private static final SchemaPath expectedStateAugmentationSchemaPath = new SchemaPath(
-            Arrays.asList(createConfigQName("modules"),
-                    createConfigQName("module"), createConfigQName("state")),
-            true);
+    private static final SchemaPath expectedConfigurationAugmentationSchemaPath = SchemaPath.create(true,
+            createConfigQName("modules"), createConfigQName("module"), createConfigQName("configuration"));
+    private static final SchemaPath expectedStateAugmentationSchemaPath = SchemaPath.create(true,
+            createConfigQName("modules"), createConfigQName("module"), createConfigQName("state"));
     private static final Pattern PREFIX_COLON_LOCAL_NAME = Pattern
             .compile("^(.+):(.+)$");
 
