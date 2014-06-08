@@ -9,6 +9,8 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.xml.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,9 +20,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
@@ -166,9 +165,9 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         serializeToXml(
                 prepareCnStructForYangData(
                         TypeDefinitionAwareCodec.from(BinaryType.getInstance())
-                                .deserialize("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"),
+                        .deserialize("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567"),
                         elName), "<" + elName + ">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567</"
-                        + elName + ">");
+                                + elName + ">");
     }
 
     @Test
@@ -182,9 +181,9 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         String elName = "lfBits";
         serializeToXml(
                 prepareCnStructForYangData(TypeDefinitionAwareCodec.from(
-                                BitsType.create( mock( SchemaPath.class ), bitList ) )
-                                                               .deserialize("one two"), elName),
-                "<" + elName + ">one two</" + elName + ">", "<" + elName + ">two one</" + elName + ">");
+                        BitsType.create( mock( SchemaPath.class ), bitList ) )
+                        .deserialize("one two"), elName),
+                        "<" + elName + ">one two</" + elName + ">", "<" + elName + ">two one</" + elName + ">");
     }
 
     @Test
@@ -196,10 +195,10 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         String elName = "lfEnumeration";
         serializeToXml(
                 prepareCnStructForYangData(TypeDefinitionAwareCodec.from(
-                    EnumerationType.create( mock( SchemaPath.class ), enumList,
-                                            Optional.<EnumTypeDefinition.EnumPair>absent() ) )
-                                                                                    .deserialize("enum2"),
-                        elName), "<" + elName + ">enum2</" + elName + ">");
+                        EnumerationType.create( mock( SchemaPath.class ), enumList,
+                                Optional.<EnumTypeDefinition.EnumPair>absent() ) )
+                                .deserialize("enum2"),
+                                elName), "<" + elName + ">enum2</" + elName + ">");
     }
 
     @Test
@@ -231,9 +230,9 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList( mockBit1, mockBit2 );
 
         List<TypeDefinition<?>> types = Lists.<TypeDefinition<?>>newArrayList(
-                                                            Int8.getInstance(),
-                                                            BitsType.create( mock( SchemaPath.class ) , bitList ),
-                                                            BooleanType.getInstance() );
+                Int8.getInstance(),
+                BitsType.create( mock( SchemaPath.class ) , bitList ),
+                BooleanType.getInstance() );
         UnionType unionType = UnionType.create( types );
 
         String elName = "lfUnion";
@@ -253,7 +252,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
                         + elName + ">str</" + elName + ">");
     }
 
-    private void serializeToXml(CompositeNode compositeNode, String... xmlRepresentation)
+    private void serializeToXml(final CompositeNode compositeNode, final String... xmlRepresentation)
             throws TransformerFactoryConfigurationError {
         String xmlString = "";
         try {
@@ -275,7 +274,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
 
     }
 
-    private CompositeNode prepareIdentityrefData(String prefix, boolean valueAsQName) {
+    private CompositeNode prepareIdentityrefData(final String prefix, final boolean valueAsQName) {
         MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
                 TestUtils.buildQName("cont", "basic:module", "2013-12-2"), null, null, ModifyAction.CREATE, null);
         MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(
@@ -298,11 +297,11 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     private CompositeNode prepareCnStructForYangData(final Object data, final String leafName) {
-        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont"), null, null,
-                ModifyAction.CREATE, null);
+        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont", "basic:module", "2013-12-2"), null, null, ModifyAction.CREATE, null);
 
-        MutableSimpleNode<Object> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName(leafName), cont, data,
-                ModifyAction.CREATE, null);
+        MutableSimpleNode<Object> lf1 = NodeFactory.createMutableSimpleNode(
+                TestUtils.buildQName(leafName, "basic:module", "2013-12-2"), cont, data, ModifyAction.CREATE, null);
         cont.getValue().add(lf1);
         cont.init();
 
