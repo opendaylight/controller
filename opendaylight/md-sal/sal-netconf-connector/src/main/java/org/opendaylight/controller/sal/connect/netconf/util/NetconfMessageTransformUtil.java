@@ -11,8 +11,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -26,8 +26,10 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,6 +37,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class NetconfMessageTransformUtil {
 
@@ -149,9 +152,39 @@ public class NetconfMessageTransformUtil {
     }
 
     public static boolean isDataRetrievalOperation(final QName rpc) {
-        return NETCONF_URI == rpc.getNamespace()
+        return NETCONF_URI.equals(rpc.getNamespace())
                 && (rpc.getLocalName().equals(NETCONF_GET_CONFIG_QNAME.getLocalName()) || rpc.getLocalName().equals(
                         NETCONF_GET_QNAME.getLocalName()));
+    }
+
+    public static boolean isDataEditOperation(final QName rpc) {
+        return NETCONF_URI.equals(rpc.getNamespace())
+                && rpc.getLocalName().equals(NETCONF_EDIT_CONFIG_QNAME.getLocalName());
+    }
+
+    /**
+     * Creates artificial schema node for edit-config rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   edit-config
+     *     config
+     *         // All schema nodes from remote schema
+     *     config
+     *   edit-config
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of rpc edit-config request(especially the config node)
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForEdit(final SchemaContext schemaContext) {
+        final QName config = QName.create(NETCONF_EDIT_CONFIG_QNAME, "config");
+        final QName editConfig = QName.create(NETCONF_EDIT_CONFIG_QNAME, "edit-config");
+        final NodeContainerProxy configProxy = new NodeContainerProxy(config, schemaContext.getChildNodes());
+        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(editConfig, Sets.<DataSchemaNode>newHashSet(configProxy));
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
     }
 
     public static CompositeNodeTOImpl wrap(final QName name, final Node<?> node) {

@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
+import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
@@ -24,14 +23,14 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlCodecProvider;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Optional;
 
 public class NetconfMessageTransformer implements MessageTransformer<NetconfMessage> {
 
@@ -65,7 +64,17 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                 NetconfMessageTransformUtil.NETCONF_RPC_QNAME, NetconfMessageTransformUtil.flattenInput(node));
         final Document w3cPayload;
         try {
-            w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, XmlDocumentUtils.defaultValueCodecProvider());
+            final XmlCodecProvider codecProvider = XmlDocumentUtils.defaultValueCodecProvider();
+            if(schemaContext.isPresent()) {
+                if (NetconfMessageTransformUtil.isDataEditOperation(rpc)) {
+                    final DataNodeContainer schemaForEdit = NetconfMessageTransformUtil.createSchemaForEdit(schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForEdit, codecProvider);
+                } else {
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), codecProvider);
+                }
+            } else {
+                w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, codecProvider);
+            }
         } catch (final UnsupportedDataTypeException e) {
             throw new IllegalArgumentException("Unable to create message", e);
         }
