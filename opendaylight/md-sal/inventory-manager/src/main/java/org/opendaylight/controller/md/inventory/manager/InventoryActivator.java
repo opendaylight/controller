@@ -14,21 +14,23 @@ import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
 
 public class InventoryActivator extends AbstractBindingAwareProvider {
-
-    private static FlowCapableInventoryProvider provider = new FlowCapableInventoryProvider();
+    private FlowCapableInventoryProvider provider;
 
     @Override
     public void onSessionInitiated(final ProviderContext session) {
-        DataProviderService salDataService = session.<DataProviderService> getSALService(DataProviderService.class);
+        DataProviderService salDataService = session.getSALService(DataProviderService.class);
         NotificationProviderService salNotifiService =
-                session.<NotificationProviderService> getSALService(NotificationProviderService.class);
-        InventoryActivator.provider.setDataService(salDataService);
-        InventoryActivator.provider.setNotificationService(salNotifiService);
-        InventoryActivator.provider.start();
+                session.getSALService(NotificationProviderService.class);
+
+        provider = new FlowCapableInventoryProvider(salDataService, salNotifiService);
+        provider.start();
     }
 
     @Override
     protected void stopImpl(final BundleContext context) {
-        InventoryActivator.provider.close();
+        if (provider != null) {
+            provider.close();
+            provider = null;
+        }
     }
 }
