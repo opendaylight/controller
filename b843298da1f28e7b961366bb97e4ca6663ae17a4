@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c0cdf35e",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/test/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-09T11:28:55Z",
+      "side": 1,
+      "message": "Missing copyright",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_80d7ebec",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/test/resources/normalization-test.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-09T11:28:55Z",
+      "side": 1,
+      "message": "missing copyright (usually in description of module)",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_60dc2713",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/test/resources/normalization-test.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-09T11:28:55Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_20061f87",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-09T11:28:55Z",
+      "side": 1,
+      "message": "please refrain from trailing comments: they elicit sonar warnings",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a0f9cf81",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/XmlReader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-09T11:28:55Z",
+      "side": 1,
+      "message": "collapsible conditional, emits sonar warning",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
