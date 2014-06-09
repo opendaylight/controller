@@ -73,7 +73,7 @@
     <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
     <gson.version>2.2.4</gson.version>
-    <guava.version>14.0.1</guava.version>
+    <guava.version>17.0</guava.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>

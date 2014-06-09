@@ -82,7 +82,7 @@ public class ConfigPusher {
      */
     private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws NetconfDocumentedException {
         ConflictingVersionException lastException;
-        Stopwatch stopwatch = new Stopwatch().start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         do {
             try (NetconfOperationService operationService = getOperationServiceWithRetries(configSnapshotHolder.getCapabilities(), configSnapshotHolder.toString())) {
                 return pushConfig(configSnapshotHolder, operationService);
@@ -97,7 +97,7 @@ public class ConfigPusher {
     }
 
     private NetconfOperationService getOperationServiceWithRetries(Set<String> expectedCapabilities, String idForReporting) {
-        Stopwatch stopwatch = new Stopwatch().start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         NotEnoughCapabilitiesException lastException;
         do {
             try {
@@ -190,7 +190,7 @@ public class ConfigPusher {
             throw new IllegalStateException("Cannot parse " + configSnapshotHolder);
         }
         logger.trace("Pushing last configuration to netconf: {}", configSnapshotHolder);
-        Stopwatch stopwatch = new Stopwatch().start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         NetconfMessage editConfigMessage = createEditConfigMessage(xmlToBePersisted);
 
         Document editResponseMessage = sendRequestGetResponseCheckIsOK(editConfigMessage, operationService,
