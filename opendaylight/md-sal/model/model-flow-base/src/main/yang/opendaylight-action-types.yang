@@ -337,7 +337,18 @@ module opendaylight-action-types {
             case sw-path-action-case {            
                 container sw-path-action {
                 }  
-             }  
+             }
+
+            case experimenter-action-case {
+                container experimenter-action {
+                 leaf experimenter {
+                     type uint32;
+                 }
+                 leaf data {
+                     type string;
+                 }
+                }
+             }
          }
      }
 }
