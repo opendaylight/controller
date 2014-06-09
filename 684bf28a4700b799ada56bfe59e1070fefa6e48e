@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_534c5f70",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataBroker.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fd5b042c",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3d796c93",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-07T09:02:51Z",
       "side": 1,
       "message": "This won\u0027t work as advertized, as there are still race conditions around close(). You have two options: either make all methods which call checkNotClosed() synchronized, or document the class as not-thread-safe. I would opt for option 2.",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_936987c0",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedTransactionFactory.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3d796c93",
       "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d3a62f10",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataBrokerTransactionChainImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_dd6f20c4",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fd7224ac",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
         "patchSetId": 11
@@ -81,6 +135,24 @@
       "writtenOn": "2014-06-07T09:02:51Z",
       "side": 1,
       "message": "What is this function doing?",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3a9f3df",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_fd7224ac",
       "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_93b0a744",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitErrorListener.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9d6998c0",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bd649ce5",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
         "patchSetId": 11
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_33875b63",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Underlaying transaction in \nDOMStoreWriteTransaction contract also throws IllegalStateException if subtransaction was closed.\nSo this is actually double-checked per API requirement, in case of InMemoryDOMDataStore (this is triple checked - here in DOMForwardedTransaction, In SnapshotBackedWriteTransaction\nand in InMemoryDataTreeModification.",
+      "parentUuid": "fa82b9bf_bd649ce5",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5d6310dc",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/TransactionCommitFailedExceptionMapper.java",
         "patchSetId": 11
@@ -132,6 +240,24 @@
       "writtenOn": "2014-06-07T09:02:51Z",
       "side": 1,
       "message": "private?",
+      "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93974790",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/TransactionCommitFailedExceptionMapper.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T13:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5d6310dc",
       "revId": "684bf28a4700b799ada56bfe59e1070fefa6e48e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
