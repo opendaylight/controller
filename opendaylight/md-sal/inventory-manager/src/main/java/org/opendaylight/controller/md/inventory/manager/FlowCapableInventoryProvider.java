@@ -7,61 +7,117 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingDeque;
+
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlowCapableInventoryProvider implements AutoCloseable {
+import com.google.common.base.Preconditions;
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlowCapableInventoryProvider.class);
+class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(FlowCapableInventoryProvider.class);
+    private static final int QUEUE_DEPTH = 500;
+    private static final int MAX_BATCH = 100;
 
-    private DataProviderService dataService;
-    private NotificationProviderService notificationService;
-    private Registration<NotificationListener> listenerRegistration;
-    private final NodeChangeCommiter changeCommiter = new NodeChangeCommiter(FlowCapableInventoryProvider.this);
+    private final BlockingQueue<InventoryOperation> queue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
+    private final NotificationProviderService notificationService;
+    private final DataProviderService dataService;
+    private Registration<?> listenerRegistration;
+    private Thread thread;
 
-    public void start() {
-        this.listenerRegistration = this.notificationService.registerNotificationListener(this.changeCommiter);
+    FlowCapableInventoryProvider(final DataProviderService dataService, final NotificationProviderService notificationService) {
+        this.dataService = Preconditions.checkNotNull(dataService);
+        this.notificationService = Preconditions.checkNotNull(notificationService);
+    }
+
+    void start() {
+        final NodeChangeCommiter changeCommiter = new NodeChangeCommiter(FlowCapableInventoryProvider.this);
+        this.listenerRegistration = this.notificationService.registerNotificationListener(changeCommiter);
+
+        thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.setName("FlowCapableInventoryProvider");
+        thread.start();
+
         LOG.info("Flow Capable Inventory Provider started.");
     }
 
-    protected DataModificationTransaction startChange() {
-        DataProviderService _dataService = this.dataService;
-        return _dataService.beginTransaction();
-    }
-
-    @Override
-    public void close() {
+    void enqueue(final InventoryOperation op) {
         try {
-            LOG.info("Flow Capable Inventory Provider stopped.");
-            if (this.listenerRegistration != null) {
-                this.listenerRegistration.close();
-            }
-        } catch (Exception e) {
-            String errMsg = "Error by stop Flow Capable Inventory Provider.";
-            LOG.error(errMsg, e);
-            throw new RuntimeException(errMsg, e);
+            queue.put(op);
+        } catch (InterruptedException e) {
+            LOG.warn("Failed to enqueue operation {}", op, e);
         }
     }
 
-    public DataProviderService getDataService() {
-        return this.dataService;
+    @Override
+    public void close() throws InterruptedException {
+        LOG.info("Flow Capable Inventory Provider stopped.");
+        if (this.listenerRegistration != null) {
+            try {
+                this.listenerRegistration.close();
+            } catch (Exception e) {
+                LOG.error("Failed to stop inventory provider", e);
+            }
+            listenerRegistration = null;
+        }
+
+        if (thread != null) {
+            thread.interrupt();
+            thread.join();
+            thread = null;
+        }
+
+
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
-    }
+    @Override
+    public void run() {
+        try {
+            for (;;) {
+                InventoryOperation op = queue.take();
 
-    public NotificationProviderService getNotificationService() {
-        return this.notificationService;
-    }
+                final DataModificationTransaction tx = dataService.beginTransaction();
+                LOG.debug("New operations available, starting transaction {}", tx.getIdentifier());
 
-    public void setNotificationService(
-            final NotificationProviderService notificationService) {
-        this.notificationService = notificationService;
+                int ops = 0;
+                do {
+                    op.applyOperation(tx);
+
+                    ops++;
+                    if (ops < MAX_BATCH) {
+                        op = queue.poll();
+                    } else {
+                        op = null;
+                    }
+                } while (op != null);
+
+                LOG.debug("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
+
+                try {
+                    final RpcResult<TransactionStatus> result = tx.commit().get();
+                    if(!result.isSuccessful()) {
+                        LOG.error("Transaction {} failed", tx.getIdentifier());
+                    }
+                } catch (ExecutionException e) {
+                    LOG.warn("Failed to commit inventory change", e.getCause());
+                }
+            }
+        } catch (InterruptedException e) {
+            LOG.info("Processing interrupted, terminating", e);
+        }
+
+        // Drain all events, making sure any blocked threads are unblocked
+        while (!queue.isEmpty()) {
+            queue.poll();
+        }
     }
 }
