@@ -1,0 +1,5 @@
+name := "akka-persistence"
+
+
+
+    
