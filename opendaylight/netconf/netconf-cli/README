@@ -1,0 +1,101 @@
+usage: Netconf cli [-h] [--server SERVER] [--port PORT] --username USERNAME --password PASSWORD
+
+Netconf cli
+
+optional arguments:
+  -h, --help             show this help message and exit
+  --server SERVER        Specify address for a netconf server
+  --port PORT            Specify port for a netconf server (default: 830)
+  --username USERNAME    Specify username
+  --password PASSWORD    Specify password
+
+
+------------------------------------------------------------------------
+
+To run the cli execute:
+
+java -jar netconf-cli-0.2.5-SNAPSHOT-executable.jar --username user --password password --server serverIP --port optionalPort
+
+The cli will connect to the remote device automatically.
+The initialization may take a few moments depending on the size of schemas provided by the device.
+To view the progress, one can take a look inside netconfcli.log file (All logs are in this file starting with level TRACE).
+Cli does not print any logging messages to the console, only to the file.
+
+------------------------------------------------------------------------
+
+Correct initialization + connection should display following output:
+
+Initializing remote connection to localhost/127.0.0.1:830 as maros
+Remote connection initialized
+netconf-client(/)>
+
+------------------------------------------------------------------------
+
+At this stage, any supported rpc can be invoked. To see all possible rpcs press TAB (serves as autocomplete). The output should look similar to this:
+
+backup                cancel-commit         cancel-subscription   close                 close-session         commit                copy-config           create-subscription
+delete-backup         delete-config         discard-changes       edit-config           get                   get-config            get-my-session        get-schema
+help                  kill-session          load                  lock                  no-op                 partial-lock          partial-unlock        replay-config
+restart               restore               set-log-level         set-my-session        shutdown              unload                unlock                validate
+
+------------------------------------------------------------------------
+
+Example step-by-step execution of get-config rpc:
+
+1. Type get-config, hit enter
+2. Cli will now walk all the input arguments of get-config rpc and ask for value
+3. Cli asks for filter value
+4. Submit filter (using TAB autocomplete) as a schema path or type "skip" (to not add any filter) and hit enter
+5. Cli asks for config source (e.g. which data-store to query)
+6. Use TAB to view options and submit either running or candidate data-store
+7. Cli now asks for value of running or candidate leaf, do not submit any value, just hit enter (This step is a little misleading but it reflects the yang model for get-config rpc)
+8. Cli will display configuration of the remote device e.g. :
+
+data {
+  a {
+    address {
+      last-name a
+      first-name o
+      street aaaaa
+    }
+    address {
+      last-name a
+      first-name t
+    }
+    address {
+      last-name a
+      first-name y
+    }
+  }
+}
+
+
+------------------------------------------------------------------------
+Sample edit-config on candidate datastore execution:
+
+netconf()>edit-config(ietf-netconf) 
+Leaf default-operation(enumeration)
+netconf(/default-operation)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)default-operation
+Select case for choice edit-content from [config, url]
+netconf(/edit-content)>config 
+ config
+netconf(/edit-content/config)>b(address)/
+c(address)   d(address)   
+netconf(/edit-content/config)>b(address)/d(address)/e(address)
+Leaf f(string)
+netconf(/edit-content/config/e/f)>newValue
+Leaf error-option(enumeration)
+netconf(/error-option)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)error-option
+Select case for choice config-target from [candidate, running]
+netconf(/target/config-target)>candidate 
+Leaf candidate(empty)
+Add empty type leaf candidate ?
+netconf(/target/config-target/candidate)>Y
+Leaf test-option(enumeration)
+netconf(/test-option)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)test-option
+rpc-reply {
+  ok null
+}
