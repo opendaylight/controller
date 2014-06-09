@@ -84,7 +84,7 @@ public class SSHTest {
 
         final EchoClientHandler echoClientHandler = connectClient(addr);
 
-        Stopwatch stopwatch = new Stopwatch().start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         while(echoClientHandler.isConnected() == false && stopwatch.elapsed(TimeUnit.SECONDS) < 30) {
             Thread.sleep(500);
         }
@@ -131,7 +131,7 @@ public class SSHTest {
     public void testClientWithoutServer() throws Exception {
         final InetSocketAddress address = new InetSocketAddress(12345);
         final EchoClientHandler echoClientHandler = connectClient(address);
-        final Stopwatch stopwatch = new Stopwatch().start();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         while(echoClientHandler.getState() == State.CONNECTING && stopwatch.elapsed(TimeUnit.SECONDS) < 5) {
             Thread.sleep(100);
         }

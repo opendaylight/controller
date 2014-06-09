@@ -55,8 +55,7 @@ public class FollowerLogInformationImplTest {
     // hence getting the actual elapsed time and do a match.
     // if the sleep has spilled over, then return the test gracefully
     private long sleepWithElaspsedTimeReturned(long millis) {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Uninterruptibles.sleepUninterruptibly(millis, TimeUnit.MILLISECONDS);
         stopwatch.stop();
         return stopwatch.elapsed(TimeUnit.MILLISECONDS);

@@ -19,7 +19,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final String id;
 
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
     private final long followerTimeoutMillis;
 

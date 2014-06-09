@@ -80,8 +80,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
             compositeModification.addModification(new WriteModification(writePath, writeData));
         }
 
-        Stopwatch sw = new Stopwatch();
-        sw.start();
+        Stopwatch sw = Stopwatch.createStarted();
         for(int i = 0; i < 1000; i++) {
             new ModificationPayload(compositeModification);
         }
