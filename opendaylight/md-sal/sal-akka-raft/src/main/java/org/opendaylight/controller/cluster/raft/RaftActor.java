@@ -126,8 +126,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private void initRecoveryTimer() {
         if(recoveryTimer == null) {
-            recoveryTimer = new Stopwatch();
-            recoveryTimer.start();
+            recoveryTimer = Stopwatch.createStarted();
         }
     }
 
@@ -190,8 +189,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
 
-        Stopwatch timer = new Stopwatch();
-        timer.start();
+        Stopwatch timer = Stopwatch.createStarted();
 
         // Apply the snapshot to the actors state
         applyRecoverySnapshot(snapshot.getState());
