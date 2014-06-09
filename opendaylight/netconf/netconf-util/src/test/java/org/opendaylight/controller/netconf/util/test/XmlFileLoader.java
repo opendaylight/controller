@@ -10,11 +10,9 @@ package org.opendaylight.controller.netconf.util.test;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import javax.xml.parsers.ParserConfigurationException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -51,17 +49,13 @@ public class XmlFileLoader {
     public static String fileToString(final String fileName) throws IOException {
         try (InputStream resourceAsStream = XmlFileLoader.class.getClassLoader().getResourceAsStream(fileName)) {
             Preconditions.checkNotNull(resourceAsStream);
-
-            InputSupplier<? extends InputStream> supplier = new InputSupplier<InputStream>() {
+            return new ByteSource() {
                 @Override
-                public InputStream getInput() throws IOException {
+                public InputStream openStream() {
                     return resourceAsStream;
                 }
-            };
+            }.asCharSource(Charsets.UTF_8).read();
 
-            InputSupplier<InputStreamReader> readerSupplier = CharStreams.newReaderSupplier(supplier, Charsets.UTF_8);
-
-            return CharStreams.toString(readerSupplier);
         }
     }
 
