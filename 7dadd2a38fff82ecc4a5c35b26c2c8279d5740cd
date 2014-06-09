@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b36e0b95",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T14:13:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3da08cf3",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1d9d88bc",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-07T09:06:28Z",
       "side": 1,
       "message": "protected",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f35c93ef",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T14:13:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1d9d88bc",
       "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9373c77f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/OptimisticLockFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T14:13:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_dda64010",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fda9c4df",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/DataPreconditionFailedException.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-07T09:06:28Z",
       "side": 1,
       "message": "This is not correct -- note the \"structurally incorrent\" bit -- that is *not* a subclass of OptimisticLockFailed",
+      "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73688387",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/DataPreconditionFailedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-09T14:13:21Z",
+      "side": 1,
+      "message": "Renamed this exception to DataValidationFailedException, removed relationship with OptimisticLockFailedException, so this exceptions do not use publid Data Broker APIs.\n\nIntroduced 2 new subclasses ConflictingModificationAppliedException and IncorrectDataSturctureException.\n\nMade sure only subclasses are thrown in existing code in approriate place.",
+      "parentUuid": "fa82b9bf_fda9c4df",
       "revId": "7dadd2a38fff82ecc4a5c35b26c2c8279d5740cd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
