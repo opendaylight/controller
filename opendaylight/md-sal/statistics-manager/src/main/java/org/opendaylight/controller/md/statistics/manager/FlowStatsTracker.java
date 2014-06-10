@@ -7,14 +7,21 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCookieMapping;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.nodes.node.table.FlowCookieMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.nodes.node.table.FlowCookieMapBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.nodes.node.table.FlowCookieMapKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
@@ -29,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.O
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.and.statistics.map.list.FlowAndStatisticsMapListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.flow.statistics.FlowStatisticsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -37,9 +45,11 @@ import org.slf4j.LoggerFactory;
 
 final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(FlowStatsTracker.class);
+    private static final String ALIEN_SYSTEM_FLOW_ID = "#UF$TABLE*";
     private final OpendaylightFlowStatisticsService flowStatsService;
     private FlowTableStatsTracker flowTableStats;
     private int unaccountedFlowsCounter = 1;
+
 
     FlowStatsTracker(final OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context) {
         super(context);
@@ -128,75 +138,91 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         logger.debug("Statistics to augment : {}",flowStatistics.build().toString());
 
         InstanceIdentifier<Table> tableRef = getNodeIdentifierBuilder()
-                .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(tableId)).toInstance();
 
-        //TODO: Not a good way to do it, need to figure out better way.
-        //TODO: major issue in any alternate approach is that flow key is incrementally assigned
-        //to the flows stored in data store.
-        // Augment same statistics to all the matching masked flow
-        Table table= (Table)trans.readConfigurationData(tableRef);
-        if(table != null){
-            for(Flow existingFlow : table.getFlow()){
-                logger.debug("Existing flow in data store : {}",existingFlow.toString());
-                if(FlowComparator.flowEquals(flowRule,existingFlow)){
-                    InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
-                            .augmentation(FlowCapableNode.class)
-                            .child(Table.class, new TableKey(tableId))
-                            .child(Flow.class,existingFlow.getKey()).toInstance();
-                    flowBuilder.setKey(existingFlow.getKey());
-                    flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                    logger.debug("Found matching flow in the datastore, augmenting statistics");
-                    // Update entry with timestamp of latest response
-                    flow.setKey(existingFlow.getKey());
-                    FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                    trans.putOperationalData(flowRef, flowBuilder.build());
-                    return flowStatsEntry;
-                }
-            }
-        }
+        final FlowCookie flowCookie =
+                flow.getCookie() != null ? flow.getCookie() : new FlowCookie(BigInteger.ZERO);
 
-        table = (Table)trans.readOperationalData(tableRef);
-        if(table != null){
-            for(Flow existingFlow : table.getFlow()){
-                FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
-                if(augmentedflowStatisticsData != null){
-                    FlowBuilder existingOperationalFlow = new FlowBuilder();
-                    existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
-                    logger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
-                    if(FlowComparator.flowEquals(flowRule,existingOperationalFlow.build())){
-                        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
-                                .augmentation(FlowCapableNode.class)
-                                .child(Table.class, new TableKey(tableId))
-                                .child(Flow.class,existingFlow.getKey()).toInstance();
-                        flowBuilder.setKey(existingFlow.getKey());
-                        flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                        logger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
-                        // Update entry with timestamp of latest response
-                        flow.setKey(existingFlow.getKey());
-                        FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                        trans.putOperationalData(flowRef, flowBuilder.build());
-                        return flowStatsEntry;
-                    }
-                }
-            }
-        }
-
-        String flowKey = "#UF$TABLE*"+Short.toString(tableId)+"*"+Integer.toString(this.unaccountedFlowsCounter);
-        this.unaccountedFlowsCounter++;
-        FlowKey newFlowKey = new FlowKey(new FlowId(flowKey));
-        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                    .child(Table.class, new TableKey(tableId))
-                    .child(Flow.class,newFlowKey).toInstance();
-        flowBuilder.setKey(newFlowKey);
+        /* find flowKey in FlowCookieMap from Operational DataStore */
+        FlowKey flowKey = this.getFlowKey(flowCookie, flowRule, tableRef, trans);
+        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(tableId))
+                .child(Flow.class,flowKey).toInstance();
+        flowBuilder.setKey(flowKey);
         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-        logger.debug("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",
-                    flowBuilder.build());
-
         // Update entry with timestamp of latest response
-        flow.setKey(newFlowKey);
+        flow.setKey(flowKey);
         FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
         trans.putOperationalData(flowRef, flowBuilder.build());
         return flowStatsEntry;
+    }
+
+    /* Returns FlowKey created from FlowId which is identified by cookie
+     * and by switch flow identification (priority and match) */
+    private FlowKey getFlowKey(final FlowCookie flowCookie,
+                               final Flow flow,
+                               final InstanceIdentifier<Table> tableRef,
+                               final DataModificationTransaction trans) {
+
+        InstanceIdentifier<FlowCookieMap> flowCookieRef = tableRef
+                .augmentation(FlowCookieMapping.class)
+                .child(FlowCookieMap.class, new FlowCookieMapKey(flowCookie));
+
+        FlowCookieMap cookie = (FlowCookieMap) trans.readOperationalData(flowCookieRef);
+        if (cookie != null) {
+            FlowId flowId = findFlowId(cookie.getFlowIds(), flow, tableRef, trans);
+            if (flowId != null) {
+                return new FlowKey(flowId);
+            }
+        }
+        /* Doesn't exist in DataStore for now */
+        StringBuilder sBuilder = new StringBuilder(ALIEN_SYSTEM_FLOW_ID)
+            .append(flow.getTableId()).append("-").append(this.unaccountedFlowsCounter);
+        this.unaccountedFlowsCounter++;
+        final FlowId flowId = new FlowId(sBuilder.toString());
+        if (cookie != null) {
+            cookie.getFlowIds().add(flowId);
+        } else {
+            final FlowCookieMapBuilder flowCookieMapBuilder = new FlowCookieMapBuilder();
+            flowCookieMapBuilder.setCookie(flowCookie);
+            flowCookieMapBuilder.setFlowIds(new ArrayList<FlowId>(2) {{ this.add(flowId); }});
+            cookie = flowCookieMapBuilder.build();
+        }
+        trans.putOperationalData(flowCookieRef, cookie);
+        return new FlowKey(flowId);
+    }
+
+    /* Returns FlowId identified by cookie and by switch flow identification (priority and match) */
+    private FlowId findFlowId (final List<FlowId> flowIds,
+                               final Flow flow,
+                               final InstanceIdentifier<Table> tableRef,
+                               final DataModificationTransaction trans) {
+
+        for (FlowId flowId : flowIds) {
+            InstanceIdentifier<Flow> flowIdent = tableRef.child(Flow.class, new FlowKey(flowId));
+            if (flowId.getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
+                logger.debug("Search for flow in the operational datastore by flowID: {} ", flowIdent);
+                Flow readedFlow = (Flow) trans.readOperationalData(flowIdent);
+                FlowStatisticsData augmentedflowStatisticsData = readedFlow.getAugmentation(FlowStatisticsData.class);
+                if(augmentedflowStatisticsData != null){
+                    FlowBuilder existingOperationalFlow = new FlowBuilder();
+                    existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
+                    if (FlowComparator.flowEquals(flow, existingOperationalFlow.build())) {
+                        return flowId;
+                    }
+                }
+            } else {
+                logger.debug("Search for flow in the configuration datastore by flowID: {} ", flowIdent);
+                Flow readedFlow = (Flow) trans.readConfigurationData(flowIdent);
+                if (FlowComparator.flowEquals(flow, readedFlow)) {
+                    return flowId;
+                }
+            }
+        }
+        logger.debug("Flow was not found in the datastore. Flow {} ", flow);
+        return null;
     }
 
     @Override

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.frm.group;
 
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -24,44 +25,71 @@ import org.slf4j.LoggerFactory;
 
 public class GroupProvider implements AutoCloseable {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GroupProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupProvider.class);
 
     private SalGroupService salGroupService;
     private DataProviderService dataService;
+
+    public void init (final DataProviderService dataService) {
+        LOG.info("FRM Group Config Provider initialization.");
+        if (dataService == null) {
+            throw new IllegalArgumentException("DataService can not be null !");
+        }
+        this.dataService = dataService;
+    }
 
     /* DataChangeListener */
     private GroupChangeListener groupDataChangeListener;
     ListenerRegistration<DataChangeListener> groupDataChangeListenerRegistration;
 
-    public void start() {
+    public void start(final RpcConsumerRegistry rpcRegistry) {
+        if (rpcRegistry == null) {
+            throw new IllegalArgumentException("RpcConsumerRegistry can not be null !");
+        }
+        if (rpcRegistry.getRpcService(SalGroupService.class) == null) {
+            throw new IllegalStateException("RPC SalGroupService not found.");
+        }
+
+        this.salGroupService = rpcRegistry.getRpcService(SalGroupService.class);
         /* Build Path */
-        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
-        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
-        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode = nodeChild.<FlowCapableNode> augmentation(FlowCapableNode.class);
-        InstanceIdentifierBuilder<Group> groupChild = augmentFlowCapNode.<Group> child(Group.class);
+        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.builder(Nodes.class);
+        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.child(Node.class);
+        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode =
+                nodeChild.augmentation(FlowCapableNode.class);
+        InstanceIdentifierBuilder<Group> groupChild = augmentFlowCapNode.child(Group.class);
         final InstanceIdentifier<? extends DataObject> groupDataObjectPath = groupChild.toInstance();
 
         /* DataChangeListener registration */
-        this.groupDataChangeListener = new GroupChangeListener(this.salGroupService);
-        this.groupDataChangeListenerRegistration = this.dataService.registerDataChangeListener(groupDataObjectPath, groupDataChangeListener);
-        LOG.info("Group Config Provider started.");
+        this.groupDataChangeListener = new GroupChangeListener(GroupProvider.this);
+        this.groupDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(groupDataObjectPath, groupDataChangeListener);
+        LOG.info("FRM Group Config Provider started.");
     }
 
     protected DataModificationTransaction startChange() {
         return this.dataService.beginTransaction();
     }
 
-    public void close() throws Exception {
+    @Override
+    public void close() {
+        LOG.info("FRM Group Config Provider stopped.");
         if(groupDataChangeListenerRegistration != null){
-            groupDataChangeListenerRegistration.close();
+            try {
+                groupDataChangeListenerRegistration.close();
+            }
+            catch (Exception e) {
+                String errMsg = "Error by stop FRM Group Config Provider.";
+                LOG.error(errMsg, e);
+                throw new IllegalStateException(errMsg, e);
+            }
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public SalGroupService getSalGroupService() {
+        return salGroupService;
     }
 
-    public void setSalGroupService(final SalGroupService salGroupService) {
-        this.salGroupService = salGroupService;
+    public DataProviderService getDataService() {
+        return dataService;
     }
 }
