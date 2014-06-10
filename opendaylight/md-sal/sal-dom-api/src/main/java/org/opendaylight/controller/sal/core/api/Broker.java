@@ -11,10 +11,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.core.api.data.DataProviderService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -39,11 +35,11 @@ import org.osgi.framework.BundleContext;
  * <li>RPC Invocation - see {@link ConsumerSession#rpc(QName, CompositeNode)},
  * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)} and
  * {@link RpcImplementation}
- * <li>Notification Service - see {@link NotificationService} and
- * {@link NotificationPublishService}
+ * <li>Notification Service - see {@link org.opendaylight.controller.sal.core.api.notify.NotificationService} and
+ * {@link org.opendaylight.controller.sal.core.api.notify.NotificationPublishService}
  * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link DataBrokerService} and
- * {@link DataProviderService}
+ * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.core.api.data.DataBrokerService} and
+ * {@link org.opendaylight.controller.sal.core.api.data.DataProviderService}
  * </ul>
  *
  * The services are exposed via session.
@@ -227,7 +223,7 @@ public interface Broker {
          * functionality of the provider from the system.
          */
         @Override
-        public void close();
+        void close();
 
         @Override
         boolean isClosed();
@@ -244,7 +240,6 @@ public interface Broker {
         void close();
     }
 
-    public interface RoutedRpcRegistration extends RpcRegistration,
-            RoutedRegistration<QName, InstanceIdentifier, RpcImplementation> {
+    public interface RoutedRpcRegistration extends RpcRegistration, RoutedRegistration<QName, InstanceIdentifier, RpcImplementation> {
     }
 }
