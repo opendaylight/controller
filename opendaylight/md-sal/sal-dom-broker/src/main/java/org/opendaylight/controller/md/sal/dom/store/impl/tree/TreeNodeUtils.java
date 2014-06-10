@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 
@@ -23,7 +22,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
 /**
- * A set of utility methods for interacting with {@link TreeNode} objects.
+ * A set of utility methods for interacting with {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode} objects.
  */
 public final class TreeNodeUtils {
     private TreeNodeUtils() {

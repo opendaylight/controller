@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.dom.broker.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,17 +18,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
-import static com.google.common.base.Preconditions.*;
+public final class YangDataUtils {
 
-public class YangDataUtils {
-
-    public YangDataUtils() {
-        // TODO Auto-generated constructor stub
+    private YangDataUtils() {
+        throw new UnsupportedOperationException("Utility class");
     }
 
-
-
-    public static Map<Map<QName,Object>,CompositeNode> toIndexMap(List<CompositeNode> nodes,List<QName> keys) {
+    public static Map<Map<QName,Object>,CompositeNode> toIndexMap(final List<CompositeNode> nodes,final List<QName> keys) {
         ConcurrentHashMap<Map<QName,Object>,CompositeNode> ret = new ConcurrentHashMap<>();
         for(CompositeNode node : nodes) {
             Map<QName, Object> key = getKeyMap(node,keys);
@@ -35,9 +33,7 @@ public class YangDataUtils {
         return ret;
     }
 
-
-
-    public static Map<QName,Object> getKeyMap(CompositeNode node, List<QName> keys) {
+    public static Map<QName,Object> getKeyMap(final CompositeNode node, final List<QName> keys) {
         Map<QName,Object> map = new HashMap<>();
         for(QName key : keys) {
             SimpleNode<?> keyNode = node.getFirstSimpleByName(QName.create(node.getNodeType(), key.getLocalName()));

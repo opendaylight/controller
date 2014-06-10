@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.dom.broker.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,17 +34,15 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
-import static com.google.common.base.Preconditions.*;
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 
-public class YangSchemaUtils {
+public final class YangSchemaUtils {
 
     private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = new Function<PathArgument, QName>(){
 
         @Override
-        public QName apply(PathArgument input) {
+        public QName apply(final PathArgument input) {
             if(input == null) {
                 return null;
             }
@@ -50,18 +50,17 @@ public class YangSchemaUtils {
         }
     };
 
-    private  YangSchemaUtils() {
+    private YangSchemaUtils() {
         throw new UnsupportedOperationException("Utility class.");
     }
 
-
-    public static DataSchemaNode getSchemaNode(SchemaContext schema,InstanceIdentifier path) {
+    public static DataSchemaNode getSchemaNode(final SchemaContext schema,final InstanceIdentifier path) {
         checkArgument(schema != null,"YANG Schema must not be null.");
         checkArgument(path != null,"Path must not be null.");
         return getSchemaNode(schema, FluentIterable.from(path.getPath()).transform(QNAME_FROM_PATH_ARGUMENT));
     }
 
-    public static DataSchemaNode getSchemaNode(SchemaContext schema,Iterable<QName> path) {
+    public static DataSchemaNode getSchemaNode(final SchemaContext schema,final Iterable<QName> path) {
         checkArgument(schema != null,"YANG Schema must not be null.");
         checkArgument(path != null,"Path must not be null.");
         if(!path.iterator().hasNext()){
@@ -92,7 +91,7 @@ public class YangSchemaUtils {
         return (DataSchemaNode) previous;
     }
 
-    private static DataSchemaNode searchInChoices(DataNodeContainer node, QName arg) {
+    private static DataSchemaNode searchInChoices(final DataNodeContainer node, final QName arg) {
         Set<DataSchemaNode> children = node.getChildNodes();
         for (DataSchemaNode child : children) {
             if (child instanceof ChoiceNode) {
@@ -106,7 +105,7 @@ public class YangSchemaUtils {
         return null;
     }
 
-    private static DataSchemaNode searchInCases(ChoiceNode choiceNode, QName arg) {
+    private static DataSchemaNode searchInCases(final ChoiceNode choiceNode, final QName arg) {
         Set<ChoiceCaseNode> cases = choiceNode.getCases();
         for (ChoiceCaseNode caseNode : cases) {
             DataSchemaNode node = caseNode.getDataChildByName(arg);
@@ -117,13 +116,13 @@ public class YangSchemaUtils {
         return null;
     }
 
-    private static ContainerSchemaNode toRootDataNode(SchemaContext schema) {
+    private static ContainerSchemaNode toRootDataNode(final SchemaContext schema) {
         return new NetconfDataRootNode(schema);
     }
 
     private static final class NetconfDataRootNode implements ContainerSchemaNode {
 
-        public NetconfDataRootNode(SchemaContext schema) {
+        public NetconfDataRootNode(final SchemaContext schema) {
             // TODO Auto-generated constructor stub
         }
 
@@ -146,13 +145,13 @@ public class YangSchemaUtils {
         }
 
         @Override
-        public DataSchemaNode getDataChildByName(QName name) {
+        public DataSchemaNode getDataChildByName(final QName name) {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public DataSchemaNode getDataChildByName(String name) {
+        public DataSchemaNode getDataChildByName(final String name) {
             // TODO Auto-generated method stub
             return null;
         }

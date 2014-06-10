@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,14 +17,13 @@ import java.util.Set;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.osgi.framework.ServiceReference;
-import static com.google.common.base.Preconditions.*;
 
 public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implements AutoCloseable, BrokerService {
 
     private T delegate;
     private final ServiceReference<T> reference;
 
-    public AbstractBrokerServiceProxy(ServiceReference<T> ref, T delegate) {
+    public AbstractBrokerServiceProxy(final ServiceReference<T> ref, final T delegate) {
         this.delegate = checkNotNull(delegate, "Delegate should not be null.");
         this.reference = checkNotNull(ref, "Reference should not be null.");
     }
@@ -35,9 +37,9 @@ public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implem
         return reference;
     }
 
-    private Set<Registration<?>> registrations = Collections.synchronizedSet(new HashSet<Registration<?>>());
+    private final Set<Registration<?>> registrations = Collections.synchronizedSet(new HashSet<Registration<?>>());
 
-    protected <R extends Registration<?>> R addRegistration(R registration) {
+    protected <R extends Registration<?>> R addRegistration(final R registration) {
         if (registration != null) {
             registrations.add(registration);
         }
