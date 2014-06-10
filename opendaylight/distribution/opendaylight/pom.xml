@@ -8,7 +8,7 @@
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <artifactId>distribution.opendaylight</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
@@ -505,11 +505,6 @@
       <artifactId>osgi-brandfragment.web</artifactId>
     </dependency>
 
-    <!-- Southbound bundles -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>protocol_plugins.openflow</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>routing.dijkstra_implementation</artifactId>
@@ -639,8 +634,32 @@
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.thirdparty</groupId>
-      <artifactId>org.openflow.openflowj</artifactId>
+      <groupId>org.opendaylight.openflowjava</groupId>
+      <artifactId>openflow-protocol-api</artifactId>
+      <version>0.4-1-SNAPSHOT</version>
+    </dependency>
+    <!-- openflowjava -->
+    <dependency>
+      <groupId>org.opendaylight.openflowjava</groupId>
+      <artifactId>openflow-protocol-impl</artifactId>
+      <version>0.4-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowjava</groupId>
+      <artifactId>openflow-protocol-spi</artifactId>
+      <version>0.4-1-SNAPSHOT</version>
+    </dependency>
+
+    <!-- openflowplugin -->
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin</artifactId>
+      <version>0.0.2-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-controller-config</artifactId>
+      <version>0.0.2-1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -760,6 +779,27 @@
         <configuration>
           <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/configuration\/initial\/</excludes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <id>unpack-provided-configs</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/provided-configs</outputDirectory>
+              <includeArtifactIds>openflowplugin-controller-config</includeArtifactIds>
+              <includes>**\/*.xml</includes>
+              <excludeTransitive>true</excludeTransitive>
+              <ignorePermissions>false</ignorePermissions>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
