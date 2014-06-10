@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import java.util.concurrent.Future;
-
 import org.opendaylight.yangtools.concepts.Path;
 
 import com.google.common.base.Optional;
