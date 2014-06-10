@@ -1,0 +1,37 @@
+module sal-node-reconciliation {
+    namespace "urn:opendaylight:flow:inventory:reconcil";
+    prefix reconcil;
+
+
+    import opendaylight-group-types {prefix group;revision-date "2013-10-18";}
+    import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
+    import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
+
+
+    revision "2014-06-16" {
+        description "Initial revision of node reconciliation";
+    }
+
+    notification node-reconcil-add {
+
+        description "Notification NodeReconilAdd is used in a new device 
+                     registration process for the reconciliation all 
+                     pre-configured flows, meters and groups from 
+                     configuration DataStore.";
+
+        leaf node-ref {
+            type inv:node-ref;
+        }
+    }
+
+    notification node-reconcil-del {
+
+        description "Notification NodeReconilDel is used in an unregistration
+                     disconnected device process for cleaning an internal 
+                     MapHolder for a relation flow_cookie to flow_id.";
+
+        leaf node-ref {
+            type inv:node-ref;
+        }
+    }
+}
