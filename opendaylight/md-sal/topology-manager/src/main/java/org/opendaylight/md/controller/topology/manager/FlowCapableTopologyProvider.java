@@ -70,7 +70,6 @@ public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider im
         this.exporter.setDataService(dataService);
         this.exporter.start();
         this.listenerRegistration = notificationService.registerNotificationListener(this.exporter);
-        ;
     }
 
     /**
