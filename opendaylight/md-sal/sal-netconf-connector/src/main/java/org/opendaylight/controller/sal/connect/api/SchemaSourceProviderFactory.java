@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.connect.api;
 
-import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 
