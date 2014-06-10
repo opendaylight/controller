@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_623507d9",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T20:21:47Z",
+      "side": 1,
+      "message": "do a fast return for (name !\u003d null)",
+      "revId": "d68cfd58ff576a92b3379ef58fe275baa956a6a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_224fff6c",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T20:21:47Z",
+      "side": 1,
+      "message": "You can\u0027t have a transient method.",
+      "revId": "d68cfd58ff576a92b3379ef58fe275baa956a6a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
