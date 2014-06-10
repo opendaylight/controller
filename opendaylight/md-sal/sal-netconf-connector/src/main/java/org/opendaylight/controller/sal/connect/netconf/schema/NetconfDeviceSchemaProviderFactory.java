@@ -12,11 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import org.opendaylight.controller.sal.connect.api.SchemaContextProviderFactory;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
