@@ -34,6 +34,24 @@
       "revId": "68b64cb07b98715cbbc30f01ece91022e65268ec",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_51653743",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-port-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-10T14:01:00Z",
+      "side": 1,
+      "message": "Why is the logical port work being done in raw port numbers here?  It should be done in the URI for nodeconnectors, as we should never be referencing the raw port number as it pushes openflowisms up into the high level model... I would expect the nodeconnectorId to simply sprount openflow:\u003cdpid\u003e:controller etc",
+      "parentUuid": "fa82b9bf_4a14a79f",
+      "revId": "68b64cb07b98715cbbc30f01ece91022e65268ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
