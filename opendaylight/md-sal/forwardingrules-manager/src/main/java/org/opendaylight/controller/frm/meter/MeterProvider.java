@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.frm.meter;
 
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -33,7 +34,12 @@ public class MeterProvider implements AutoCloseable {
     private MeterChangeListener meterDataChangeListener;
     ListenerRegistration<DataChangeListener> meterDataChangeListenerRegistration;
 
-    public void start() {
+    public void init( final DataProviderService dataService ) {
+        this.dataService = dataService;
+    }
+
+    public void start( final RpcConsumerRegistry rpcRegistry ) {
+        this.salMeterService = rpcRegistry.<SalMeterService>getRpcService(SalMeterService.class);
         /* Build Path */
         InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
         InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
@@ -42,26 +48,34 @@ public class MeterProvider implements AutoCloseable {
         final InstanceIdentifier<? extends DataObject> meterDataObjectPath = meterChild.toInstance();
 
         /* DataChangeListener registration */
-        this.meterDataChangeListener = new MeterChangeListener(this.salMeterService);
+        this.meterDataChangeListener = new MeterChangeListener(MeterProvider.this);
         this.meterDataChangeListenerRegistration = this.dataService.registerDataChangeListener(meterDataObjectPath, meterDataChangeListener);
-        LOG.info("Meter Config Provider started.");
     }
 
     protected DataModificationTransaction startChange() {
         return this.dataService.beginTransaction();
     }
 
+    @Override
     public void close() throws Exception {
-        if(meterDataChangeListenerRegistration != null){
-            meterDataChangeListenerRegistration.close();
+        try {
+            LOG.info( "FRM Meter Config Provider stopped." );
+            if(meterDataChangeListenerRegistration != null){
+                meterDataChangeListenerRegistration.close();
+            }
+        }
+        catch (Exception e) {
+            String errMsg = "Error by stop FRM Meter Config Provider.";
+            LOG.error( errMsg );
+            throw new RuntimeException(errMsg);
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public DataProviderService getDataService() {
+        return dataService;
     }
 
-    public void setSalMeterService(final SalMeterService salMeterService) {
-        this.salMeterService = salMeterService;
+    public SalMeterService getSalMeterService() {
+        return salMeterService;
     }
 }

@@ -9,8 +9,8 @@ package org.opendaylight.controller.frm;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -48,7 +48,9 @@ public abstract class AbstractChangeListener implements DataChangeListener {
         for (final Entry<InstanceIdentifier<? extends DataObject>, DataObject> createdEntry : createdEntries) {
             InstanceIdentifier<? extends DataObject> c_key = createdEntry.getKey();
             DataObject c_value = createdEntry.getValue();
-            this.add(c_key, c_value);
+            if (this.isNodeAvaliable(c_key)) {
+                this.add(c_key, c_value);
+            }
         }
 
         for (final Entry<InstanceIdentifier<?>, DataObject> updatedEntrie : updatedEntries) {
@@ -58,7 +60,9 @@ public abstract class AbstractChangeListener implements DataChangeListener {
             InstanceIdentifier<? extends Object> u_key = updatedEntrie.getKey();
             final DataObject originalFlow = origConfigData.get(u_key);
             final DataObject updatedFlow = updatedEntrie.getValue();
-            this.update(u_key, originalFlow, updatedFlow);
+            if (this.isNodeAvaliable( u_key )) {
+                this.update(u_key, originalFlow, updatedFlow);
+            }
         }
 
         for (final InstanceIdentifier<?> instanceId : removeEntriesInstanceIdentifiers) {
@@ -66,7 +70,9 @@ public abstract class AbstractChangeListener implements DataChangeListener {
                     changeEvent.getOriginalConfigurationData();
 
             final DataObject removeValue = origConfigData.get(instanceId);
-            this.remove(instanceId, removeValue);
+            if (this.isNodeAvaliable( instanceId )) {
+                this.remove(instanceId, removeValue);
+            }
         }
     }
 
@@ -79,6 +85,9 @@ public abstract class AbstractChangeListener implements DataChangeListener {
     }
 
     protected abstract void validate() throws IllegalStateException;
+
+    protected abstract boolean isNodeAvaliable(
+            final InstanceIdentifier<? extends DataObject> identifier );
 
     protected abstract void remove(
             final InstanceIdentifier<? extends DataObject> identifier,

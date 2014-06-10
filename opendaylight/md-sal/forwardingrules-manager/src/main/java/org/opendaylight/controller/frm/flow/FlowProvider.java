@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.frm.flow;
 
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -29,12 +31,20 @@ public class FlowProvider implements AutoCloseable {
 
     private SalFlowService salFlowService;
     private DataProviderService dataService;
+    private NotificationProviderService notificationService;
 
     /* DataChangeListener */
     private FlowChangeListener flowDataChangeListener;
     ListenerRegistration<DataChangeListener> flowDataChangeListenerRegistration;
 
-    public void start() {
+    public void init (final DataProviderService dataService,
+                      final NotificationProviderService nps) {
+        this.dataService = dataService;
+        this.notificationService = nps;
+    }
+
+    public void start( final RpcConsumerRegistry rpcRegistry ) {
+        this.salFlowService = rpcRegistry.<SalFlowService>getRpcService(SalFlowService.class);
         /* Build Path */
         InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
         InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
@@ -44,9 +54,11 @@ public class FlowProvider implements AutoCloseable {
         final InstanceIdentifier<? extends DataObject> flowDataObjectPath = flowChild.toInstance();
 
         /* DataChangeListener registration */
-        this.flowDataChangeListener = new FlowChangeListener(this.salFlowService);
-        this.flowDataChangeListenerRegistration = this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);
-        LOG.info("Flow Config Provider started.");
+        this.flowDataChangeListener = new FlowChangeListener( FlowProvider.this );
+//        this.flowDataChangeListener = new FlowChangeListener(this.salFlowService, this.notificationService);
+        this.flowDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);
+        LOG.info("FRM Flow Config Provider started.");
     }
 
     protected DataModificationTransaction startChange() {
@@ -55,16 +67,27 @@ public class FlowProvider implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if(flowDataChangeListenerRegistration != null){
-            flowDataChangeListenerRegistration.close();
+        try {
+            LOG.info("FRM Flow Config Provider stopped.");
+            if (flowDataChangeListenerRegistration != null) {
+                flowDataChangeListenerRegistration.close();
+            }
+        } catch (Exception e) {
+            String errMsg = "Error by stop FRM Flow Config Provider.";
+            LOG.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public SalFlowService getSalFlowService() {
+        return salFlowService;
     }
 
-    public void setSalFlowService(final SalFlowService salFlowService) {
-        this.salFlowService = salFlowService;
+    public DataProviderService getDataService() {
+        return dataService;
+    }
+
+    public NotificationProviderService getNotificationService() {
+        return notificationService;
     }
 }

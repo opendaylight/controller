@@ -11,16 +11,10 @@ import org.opendaylight.controller.frm.AbstractChangeListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.RemoveMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.RemoveMeterInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.OriginalMeter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.OriginalMeterBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.UpdatedMeter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.meter.update.UpdatedMeterBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterRef;
@@ -38,14 +32,10 @@ public class MeterChangeListener extends AbstractChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(MeterChangeListener.class);
 
-    private final SalMeterService salMeterService;
+    private final MeterProvider provider;
 
-    public SalMeterService getSalMeterService() {
-        return this.salMeterService;
-    }
-
-    public MeterChangeListener(final SalMeterService manager) {
-        this.salMeterService = manager;
+    public MeterChangeListener ( final MeterProvider provider ) {
+        this.provider = provider;
     }
 
     @Override
@@ -66,7 +56,7 @@ public class MeterChangeListener extends AbstractChangeListener {
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salMeterService.removeMeter((RemoveMeterInput) builder.build());
+            this.provider.getSalMeterService().removeMeter(builder.build());
             LOG.debug("Transaction {} - Remove Meter has removed meter: {}", new Object[]{uri, removeDataObj});
         }
     }
@@ -86,10 +76,10 @@ public class MeterChangeListener extends AbstractChangeListener {
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
 
-            builder.setUpdatedMeter((UpdatedMeter) (new UpdatedMeterBuilder(updatedMeter)).build());
-            builder.setOriginalMeter((OriginalMeter) (new OriginalMeterBuilder(originalMeter)).build());
+            builder.setUpdatedMeter((new UpdatedMeterBuilder(updatedMeter)).build());
+            builder.setOriginalMeter((new OriginalMeterBuilder(originalMeter)).build());
 
-            this.salMeterService.updateMeter((UpdateMeterInput) builder.build());
+            this.provider.getSalMeterService().updateMeter(builder.build());
             LOG.debug("Transaction {} - Update Meter has updated meter {} with {}", new Object[]{uri, original, update});
         }
     }
@@ -107,8 +97,15 @@ public class MeterChangeListener extends AbstractChangeListener {
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salMeterService.addMeter((AddMeterInput) builder.build());
+            this.provider.getSalMeterService().addMeter(builder.build());
             LOG.debug("Transaction {} - Add Meter has added meter: {}", new Object[]{uri, addDataObj});
         }
+    }
+
+    @Override
+    protected boolean isNodeAvaliable(
+            InstanceIdentifier<? extends DataObject> identifier ) {
+        final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
+        return this.provider.getDataService().readOperationalData( nodeInstanceId ) != null;
     }
 }

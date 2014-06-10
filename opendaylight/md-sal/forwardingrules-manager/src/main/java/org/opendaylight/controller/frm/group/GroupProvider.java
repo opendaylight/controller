@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.frm.group;
 
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -29,39 +30,55 @@ public class GroupProvider implements AutoCloseable {
     private SalGroupService salGroupService;
     private DataProviderService dataService;
 
+    public void init ( final DataProviderService dataService ) {
+        this.dataService = dataService;
+    }
+
     /* DataChangeListener */
     private GroupChangeListener groupDataChangeListener;
     ListenerRegistration<DataChangeListener> groupDataChangeListenerRegistration;
 
-    public void start() {
+    public void start( final RpcConsumerRegistry rpcRegistry ) {
+        this.salGroupService = rpcRegistry.<SalGroupService>getRpcService(SalGroupService.class);
         /* Build Path */
         InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
         InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
         InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode = nodeChild.<FlowCapableNode> augmentation(FlowCapableNode.class);
-        InstanceIdentifierBuilder<Group> groupChild = augmentFlowCapNode.<Group> child(Group.class);
+        InstanceIdentifierBuilder<Group> groupChild = augmentFlowCapNode.<Group> child( Group.class );
         final InstanceIdentifier<? extends DataObject> groupDataObjectPath = groupChild.toInstance();
 
         /* DataChangeListener registration */
-        this.groupDataChangeListener = new GroupChangeListener(this.salGroupService);
-        this.groupDataChangeListenerRegistration = this.dataService.registerDataChangeListener(groupDataObjectPath, groupDataChangeListener);
-        LOG.info("Group Config Provider started.");
+//        this.groupDataChangeListener = new GroupChangeListener(this.salGroupService);
+        this.groupDataChangeListener = new GroupChangeListener( GroupProvider.this );
+        this.groupDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(groupDataObjectPath, groupDataChangeListener);
+        LOG.info("FRM Group Config Provider started.");
     }
 
     protected DataModificationTransaction startChange() {
         return this.dataService.beginTransaction();
     }
 
+    @Override
     public void close() throws Exception {
-        if(groupDataChangeListenerRegistration != null){
-            groupDataChangeListenerRegistration.close();
+        try {
+            LOG.info( "FRM Group Config Provider stopped." );
+            if(groupDataChangeListenerRegistration != null){
+                groupDataChangeListenerRegistration.close();
+            }
+        }
+        catch (Exception e) {
+            String errMsg = "Error by stop FRM Group Config Provider.";
+            LOG.error( errMsg );
+            throw new RuntimeException(errMsg);
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public SalGroupService getSalGroupService() {
+        return salGroupService;
     }
 
-    public void setSalGroupService(final SalGroupService salGroupService) {
-        this.salGroupService = salGroupService;
+    public DataProviderService getDataService() {
+        return dataService;
     }
 }

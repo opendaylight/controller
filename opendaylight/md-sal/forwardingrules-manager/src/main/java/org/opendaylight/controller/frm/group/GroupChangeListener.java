@@ -9,16 +9,10 @@ package org.opendaylight.controller.frm.group;
 
 import org.opendaylight.controller.frm.AbstractChangeListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.AddGroupInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.AddGroupInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.RemoveGroupInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.RemoveGroupInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.UpdateGroupInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.OriginalGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.OriginalGroupBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.group.update.UpdatedGroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
@@ -38,14 +32,10 @@ public class GroupChangeListener extends AbstractChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(GroupChangeListener.class);
 
-    private final SalGroupService salGroupService;
+    private final GroupProvider provider;
 
-    public SalGroupService getSalGroupService() {
-        return this.salGroupService;
-    }
-
-    public GroupChangeListener(final SalGroupService manager) {
-        this.salGroupService = manager;
+    public GroupChangeListener( final GroupProvider provider ) {
+        this.provider = provider;
     }
 
     @Override
@@ -66,7 +56,7 @@ public class GroupChangeListener extends AbstractChangeListener {
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salGroupService.removeGroup((RemoveGroupInput) builder.build());
+            this.provider.getSalGroupService().removeGroup(builder.build());
             LOG.debug("Transaction {} - Remove Group has removed group: {}", new Object[]{uri, removeDataObj});
         }
     }
@@ -86,10 +76,10 @@ public class GroupChangeListener extends AbstractChangeListener {
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
 
-            builder.setUpdatedGroup((UpdatedGroup) (new UpdatedGroupBuilder(updatedGroup)).build());
-            builder.setOriginalGroup((OriginalGroup) (new OriginalGroupBuilder(originalGroup)).build());
+            builder.setUpdatedGroup((new UpdatedGroupBuilder(updatedGroup)).build());
+            builder.setOriginalGroup((new OriginalGroupBuilder(originalGroup)).build());
 
-            this.salGroupService.updateGroup((UpdateGroupInput) builder.build());
+            this.provider.getSalGroupService().updateGroup(builder.build());
             LOG.debug("Transaction {} - Update Group has updated group {} with group {}", new Object[]{uri, original, update});
         }
     }
@@ -106,8 +96,14 @@ public class GroupChangeListener extends AbstractChangeListener {
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salGroupService.addGroup((AddGroupInput) builder.build());
+            this.provider.getSalGroupService().addGroup(builder.build());
             LOG.debug("Transaction {} - Add Group has added group: {}", new Object[]{uri, addDataObj});
         }
+    }
+
+    @Override
+    protected boolean isNodeAvaliable(InstanceIdentifier<? extends DataObject> identifier ) {
+        final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
+        return this.provider.getDataService().readOperationalData( nodeInstanceId ) != null;
     }
 }
