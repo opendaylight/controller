@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.impl.util;
 
-import java.util.Iterator;
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@SuppressWarnings("all")
 public class BindingAwareDataReaderRouter extends AbstractDataReadRouter<InstanceIdentifier<? extends DataObject>,DataObject> {
-  protected DataObject merge(final InstanceIdentifier<? extends DataObject> path, final Iterable<DataObject> data) {
-    return data.iterator().next();
-  }
+    @Override
+    protected DataObject merge(final InstanceIdentifier<? extends DataObject> path, final Iterable<DataObject> data) {
+        return data.iterator().next();
+    }
 }

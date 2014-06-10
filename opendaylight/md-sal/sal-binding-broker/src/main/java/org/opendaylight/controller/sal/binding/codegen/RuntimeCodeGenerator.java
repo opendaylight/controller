@@ -9,9 +9,7 @@ package org.opendaylight.controller.sal.binding.codegen;
 
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 
 public interface RuntimeCodeGenerator {
 
@@ -23,18 +21,18 @@ public interface RuntimeCodeGenerator {
      * Returned instance:
      * <ul>
      * <li>implements provided subclass of RpcService type and
-     * {@link DelegateProxy} interface.
+     * {@link org.opendaylight.controller.sal.binding.spi.DelegateProxy} interface.
      * <li>
      * <p>
      * delegates all invocations of methods, which are defined in RpcService
      * subtype to delegate which is defined by
-     * {@link DelegateProxy#setDelegate(Object)}.
+     * {@link org.opendaylight.controller.sal.binding.spi.DelegateProxy#setDelegate(Object)}.
      * <p>
      * If delegate is not defined (<code>getDelegate() == null</code>)
      * implementation throws {@link IllegalStateException}
-     * <li>{@link DelegateProxy#getDelegate()} - returns the delegate to which
+     * <li>{@link org.opendaylight.controller.sal.binding.spi.DelegateProxy#getDelegate()} - returns the delegate to which
      * all calls are delegated.
-     * <li>{@link DelegateProxy#setDelegate(Object)} - sets the delegate for
+     * <li>{@link org.opendaylight.controller.sal.binding.spi.DelegateProxy#setDelegate(Object)} - sets the delegate for
      * particular instance
      *
      * </ul>
@@ -43,7 +41,7 @@ public interface RuntimeCodeGenerator {
      *            - Subclass of RpcService for which direct proxy is to be
      *            generated.
      * @return Instance of RpcService of provided serviceType which implements
-     *         and {@link DelegateProxy}
+     *         and {@link org.opendaylight.controller.sal.binding.spi.DelegateProxy}
      * @throws IllegalArgumentException
      *
      */
@@ -58,7 +56,7 @@ public interface RuntimeCodeGenerator {
      * <ul>
      * <li>Implements:
      * <ul>
-     * <li>{@link DelegateProxy}
+     * <li>{@link org.opendaylight.controller.sal.binding.spi.DelegateProxy}
      * <li>{@link RpcRouter}
      * </ul>
      * <li>
@@ -69,14 +67,15 @@ public interface RuntimeCodeGenerator {
      * <ul>
      * <li>
      * Implementation uses
-     * {@link RpcRouter#getService(Class, InstanceIdentifier)} method to
+     * {@link RpcRouter#getService(Class, org.opendaylight.yangtools.yang.binding.InstanceIdentifier)} method to
      * retrieve particular instance to which call will be routed.
      * <li>
-     * Instance of {@link InstanceIdentifier} is determined by first argument of
+     * Instance of {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} is determined by first argument of
      * method and is retrieved via method which is annotated with
-     * {@link RoutingContext}. Class representing Routing Context Identifier is
-     * retrieved by {@link RoutingContext}.
-     * <li>If first argument is not defined / {@link RoutingContext} annotation
+     * {@link org.opendaylight.yangtools.yang.binding.annotations.RoutingContext}.
+     * Class representing Routing Context Identifier is retrieved by a
+     * {@link org.opendaylight.yangtools.yang.binding.annotations.RoutingContext}.
+     * <li>If first argument is not defined / {@link org.opendaylight.yangtools.yang.binding.annotations.RoutingContext} annotation
      * is not present on any field invocation will be delegated to default
      * service {@link RpcRouter#getDefaultService()}.
      * </ul>
@@ -84,7 +83,7 @@ public interface RuntimeCodeGenerator {
      * @param serviceType
      *            - Subclass of RpcService for which Router is to be generated.
      * @return Instance of RpcService of provided serviceType which implements
-     *         also {@link RpcRouter}<T> and {@link DelegateProxy}
+     *         also {@link RpcRouter}<T> and {@link org.opendaylight.controller.sal.binding.spi.DelegateProxy}
      */
     <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType,String name) throws IllegalArgumentException;
 
