@@ -95,9 +95,9 @@ public class ModelGenerator {
     for(DataSchemaNode childNode : childNodes){
       JSONObject moduleJSON=null;
       String filename = childNode.getQName().getLocalName();
-			/*
-			 * For every container in the module
-			 */
+            /*
+             * For every container in the module
+             */
       if(childNode instanceof ContainerSchemaNode) {
         moduleJSON = processContainer((ContainerSchemaNode)childNode, moduleName, true, models);
       }
@@ -307,11 +307,11 @@ public class ModelGenerator {
     childSchema.put(TYPE_KEY, OBJECT_TYPE);
     childSchema.put(PROPERTIES_KEY, childSchemaProperties);
 
-		/*
-		 * Due to a limitation of the RAML--->JAX-RS tool, sub-properties
-		 * must be in a separate JSON schema file. Hence, we have to write
-		 * some properties to a new file, while continuing to process the rest.
-		 */
+        /*
+         * Due to a limitation of the RAML--->JAX-RS tool, sub-properties
+         * must be in a separate JSON schema file. Hence, we have to write
+         * some properties to a new file, while continuing to process the rest.
+         */
     //writeToFile(fileName, childSchema.toString(2), moduleName);
     childSchema.put("id", fileName);
     models.put(fileName, childSchema);

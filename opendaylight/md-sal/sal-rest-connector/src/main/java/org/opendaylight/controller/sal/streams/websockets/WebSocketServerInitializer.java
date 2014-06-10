@@ -12,14 +12,14 @@ import io.netty.handler.codec.http.HttpServerCodec;
  * {@link ChannelPipeline} of a {@link Channel}.
  */
 public class WebSocketServerInitializer extends
-		ChannelInitializer<SocketChannel> {
+        ChannelInitializer<SocketChannel> {
 
-	@Override
-	protected void initChannel(SocketChannel ch) throws Exception {
-		ChannelPipeline pipeline = ch.pipeline();
-		pipeline.addLast("codec-http", new HttpServerCodec());
-		pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
-		pipeline.addLast("handler", new WebSocketServerHandler());
-	}
+    @Override
+    protected void initChannel(SocketChannel ch) throws Exception {
+        ChannelPipeline pipeline = ch.pipeline();
+        pipeline.addLast("codec-http", new HttpServerCodec());
+        pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
+        pipeline.addLast("handler", new WebSocketServerHandler());
+    }
 
 }

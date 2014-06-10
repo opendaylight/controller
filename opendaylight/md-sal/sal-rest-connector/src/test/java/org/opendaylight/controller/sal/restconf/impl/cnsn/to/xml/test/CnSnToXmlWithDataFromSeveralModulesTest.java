@@ -42,10 +42,10 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
 
 //         String output =
 //         String.format("<data>" +
-//         		 "\n<cont_m1>" +
-//         		        "\n\t<lf1_m1>" +
-//         		            "\n\t\tlf1 m1 value" +
-//     		                "\n\t</lf1_m1>" +
+//                  "\n<cont_m1>" +
+//                         "\n\t<lf1_m1>" +
+//                             "\n\t\tlf1 m1 value" +
+//                             "\n\t</lf1_m1>" +
 //                         "\n</cont_m1>" +
 //                         "\n<cont_m2>" +
 //                             "\n\t<lf1_m2>" +

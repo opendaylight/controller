@@ -168,7 +168,7 @@ public class ToSalConversionsUtils {
     public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions, Node node) {
         List<org.opendaylight.controller.sal.action.Action> targetAction = new ArrayList<>();
         for (Action action : actions) {
-        	org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action sourceAction = action
+            org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action sourceAction = action
                     .getAction();
 
             if (sourceAction instanceof ControllerActionCase) {

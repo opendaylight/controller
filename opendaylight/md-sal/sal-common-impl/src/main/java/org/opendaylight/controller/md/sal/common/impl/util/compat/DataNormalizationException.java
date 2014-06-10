@@ -8,13 +8,13 @@
 package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
 public class DataNormalizationException extends Exception {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public DataNormalizationException(String message) {
-		super(message);
-	}
+    public DataNormalizationException(String message) {
+        super(message);
+    }
 
-	public DataNormalizationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public DataNormalizationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

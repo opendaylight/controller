@@ -11,10 +11,10 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
  * Factory interface for creating data trees.
  */
 public interface DataTreeFactory {
-	/**
-	 * Create a new data tree.
-	 *
-	 * @return A data tree instance.
-	 */
-	DataTree create();
+    /**
+     * Create a new data tree.
+     *
+     * @return A data tree instance.
+     */
+    DataTree create();
 }
