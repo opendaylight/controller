@@ -33,7 +33,7 @@ public interface DataBrokerService extends //
      * @return new blank data modification transaction.
      */
     @Override
-	DataModificationTransaction beginTransaction();
+    DataModificationTransaction beginTransaction();
 
     /**
      * Reads data subtree from configurational store.

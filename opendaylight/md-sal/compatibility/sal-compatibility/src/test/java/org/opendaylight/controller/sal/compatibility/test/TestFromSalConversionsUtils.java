@@ -249,7 +249,7 @@ public class TestFromSalConversionsUtils {
             boolean b) {
         int numOfFoundActions = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action action : actions) {
-        	org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action innerAction = action
+            org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action innerAction = action
                     .getAction();
             if (cl.isInstance(innerAction)) {
                 numOfFoundActions++;
