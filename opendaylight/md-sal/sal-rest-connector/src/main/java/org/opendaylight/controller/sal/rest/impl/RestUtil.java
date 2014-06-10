@@ -20,7 +20,7 @@ import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public final class RestUtil {
-    
+
     public static final String SQUOTE = "'";
     public static final String DQUOTE = "\"";
     private static final Pattern PREDICATE_PATTERN = Pattern.compile("\\[(.*?)\\]");
@@ -45,29 +45,29 @@ public final class RestUtil {
         IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
         for (int i = 1; i < xPathParts.length; i++) {
             String xPathPartTrimmed = xPathParts[i].trim();
-            
+
             String xPathPartStr = getIdAndPrefixAsStr(xPathPartTrimmed);
             IdentityValue identityValue = toIdentity(xPathPartStr, prefixMap);
             if (identityValue == null) {
                 return null;
             }
-            
+
             List<Predicate> predicates = toPredicates(xPathPartTrimmed, prefixMap);
             if (predicates == null) {
                 return null;
             }
             identityValue.setPredicates(predicates);
-            
+
             identityValuesDTO.add(identityValue);
         }
         return identityValuesDTO.getValuesWithNamespaces().isEmpty() ? null : identityValuesDTO;
     }
-    
+
     private static String getIdAndPrefixAsStr(String pathPart) {
         int predicateStartIndex = pathPart.indexOf("[");
         return predicateStartIndex == -1 ? pathPart : pathPart.substring(0, predicateStartIndex);
     }
-    
+
     private static IdentityValue toIdentity(String xPathPart, PrefixesMaping prefixMap) {
         String xPathPartTrimmed = xPathPart.trim();
         if (xPathPartTrimmed.isEmpty()) {

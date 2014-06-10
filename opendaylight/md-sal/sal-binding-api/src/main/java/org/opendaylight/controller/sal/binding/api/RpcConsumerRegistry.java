@@ -12,13 +12,13 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 /**
  * Base interface defining contract for retrieving MD-SAL
  * version of RpcServices
- * 
+ *
  */
 public interface RpcConsumerRegistry extends BindingAwareService {
     /**
      * Returns a session specific instance (implementation) of requested
      * YANG module implementation / service provided by consumer.
-     * 
+     *
      * @return Session specific implementation of service
      */
     <T extends RpcService> T getRpcService(Class<T> module);

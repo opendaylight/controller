@@ -25,14 +25,14 @@ import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchem
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
- * 
+ *
  * CnSn = Composite node and Simple node data structure Class contains test of
  * serializing simple nodes data values according data types from YANG schema to
  * XML file
- * 
+ *
  */
 public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoader {
-    
+
     @BeforeClass
     public static void initialization() throws URISyntaxException {
         dataLoad("/instanceidentifier/yang", 4, "instance-identifier-module", "cont");

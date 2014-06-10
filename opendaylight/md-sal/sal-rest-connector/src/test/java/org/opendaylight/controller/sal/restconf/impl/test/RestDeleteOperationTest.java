@@ -76,13 +76,13 @@ public class RestDeleteOperationTest extends JerseyTest {
         when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
         Response response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(200, response.getStatus());
-        
+
         dummyFuture = createFuture(TransactionStatus.FAILED);
         when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
         response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(500, response.getStatus());
     }
-    
+
     private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName).build();
         return DummyFuture.builder().rpcResult(rpcResult).build();

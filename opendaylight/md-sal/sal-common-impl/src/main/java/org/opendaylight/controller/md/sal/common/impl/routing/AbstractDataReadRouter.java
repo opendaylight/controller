@@ -24,7 +24,7 @@ import com.google.common.collect.Multimaps;
 /**
  * Base abstract implementation of DataReadRouter, which performs
  * a read operation on multiple data readers and then merges result.
- * 
+ *
  * @param <P>
  * @param <D>
  */
@@ -50,7 +50,7 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
 
     /**
      * Merges data readed by reader instances from specified path
-     * 
+     *
      * @param path Path on which read was performed
      * @param data Data which was returned by read operation.
      * @return Merged result.
@@ -59,11 +59,11 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
 
     /**
      * Returns a function which performs configuration read for supplied path
-     * 
+     *
      * @param path
      * @return function which performs configuration read for supplied path
      */
-    
+
     private Function<DataReader<P, D>, D> configurationRead(final P path) {
         return new Function<DataReader<P, D>, D>() {
             @Override
@@ -75,7 +75,7 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
 
     /**
      * Returns a function which performs operational read for supplied path
-     * 
+     *
      * @param path
      * @return function which performs operational read for supplied path
      */
@@ -92,10 +92,10 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
 
     /**
      * Register's a reader for operational data.
-     * 
+     *
      * @param path Path which is served by this reader
      * @param reader Reader instance which is responsible for reading particular subpath.
-     * @return 
+     * @return
      */
     public Registration<DataReader<P, D>> registerOperationalReader(P path, DataReader<P, D> reader) {
         OperationalDataReaderRegistration<P, D> ret = new OperationalDataReaderRegistration<>(path, reader);
@@ -142,15 +142,15 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
     }
 
     private Predicate<? super Entry<P, DataReaderRegistration<P, D>>> affects(final P path) {
-        
+
         return new Predicate<Entry<P, DataReaderRegistration<P, D>>>() {
-            
+
             @Override
             public boolean apply(Entry<P, DataReaderRegistration<P, D>> input) {
                 final P key = input.getKey();
                 return key.contains(path) || ((P) path).contains(key);
             }
-            
+
         };
     }
 

@@ -15,12 +15,12 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier, CompositeNode> 
+public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier, CompositeNode>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();
-    
-    
-    
+
+
+
     public DataTransactionImpl(Object identifier,DataBrokerImpl dataBroker) {
         super(identifier,dataBroker);
     }

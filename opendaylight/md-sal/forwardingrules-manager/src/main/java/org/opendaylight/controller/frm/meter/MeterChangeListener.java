@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  */
@@ -43,7 +43,7 @@ public class MeterChangeListener extends AbstractChangeListener {
     public SalMeterService getSalMeterService() {
         return this.salMeterService;
     }
-    
+
     public MeterChangeListener(final SalMeterService manager) {
         this.salMeterService = manager;
     }
@@ -56,14 +56,14 @@ public class MeterChangeListener extends AbstractChangeListener {
     @Override
     protected void remove(InstanceIdentifier<? extends DataObject> identifier, DataObject removeDataObj) {
         if ((removeDataObj instanceof Meter)) {
-            
+
             final Meter meter = ((Meter) removeDataObj);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final RemoveMeterInputBuilder builder = new RemoveMeterInputBuilder(meter);
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
             this.salMeterService.removeMeter((RemoveMeterInput) builder.build());
@@ -74,21 +74,21 @@ public class MeterChangeListener extends AbstractChangeListener {
     @Override
     protected void update(InstanceIdentifier<? extends DataObject> identifier, DataObject original, DataObject update) {
         if (original instanceof Meter && update instanceof Meter) {
-            
+
             final Meter originalMeter = ((Meter) original);
             final Meter updatedMeter = ((Meter) update);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final UpdateMeterInputBuilder builder = new UpdateMeterInputBuilder();
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            
+
             builder.setUpdatedMeter((UpdatedMeter) (new UpdatedMeterBuilder(updatedMeter)).build());
             builder.setOriginalMeter((OriginalMeter) (new OriginalMeterBuilder(originalMeter)).build());
-            
+
             this.salMeterService.updateMeter((UpdateMeterInput) builder.build());
             LOG.debug("Transaction {} - Update Meter has updated meter {} with {}", new Object[]{uri, original, update});
         }
@@ -97,14 +97,14 @@ public class MeterChangeListener extends AbstractChangeListener {
     @Override
     protected void add(InstanceIdentifier<? extends DataObject> identifier, DataObject addDataObj) {
         if ((addDataObj instanceof Meter)) {
-            
+
             final Meter meter = ((Meter) addDataObj);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final AddMeterInputBuilder builder = new AddMeterInputBuilder(meter);
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setMeterRef(new MeterRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
             this.salMeterService.addMeter((AddMeterInput) builder.build());

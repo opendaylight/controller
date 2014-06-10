@@ -32,7 +32,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
      * Test when some data are in one case node and other in another. This isn't
      * correct. Next Json validator should return error because nodes has to be
      * from one case below concrete choice.
-     * 
+     *
      */
     @Test
     public void nodeSchemasOnVariousChoiceCasePathTest() {
@@ -44,7 +44,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
      * Additionally data are loadef from various choices. This isn't correct.
      * Next Json validator should return error because nodes has to be from one
      * case below concrete choice.
-     * 
+     *
      */
     @Test
     public void nodeSchemasOnVariousChoiceCasePathAndMultipleChoicesTest() {
@@ -95,7 +95,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * 
+     *
      */
     @Test
     public void nodeSchemasInMultipleChoicesTest() {

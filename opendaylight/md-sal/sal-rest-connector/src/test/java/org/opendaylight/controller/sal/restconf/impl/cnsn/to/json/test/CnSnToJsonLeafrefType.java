@@ -25,9 +25,9 @@ import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchem
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
- * 
+ *
  * All tests are commented now because leafref isn't supported now
- * 
+ *
  */
 
 public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {

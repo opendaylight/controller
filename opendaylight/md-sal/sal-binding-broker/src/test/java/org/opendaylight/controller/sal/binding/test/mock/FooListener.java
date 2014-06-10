@@ -12,5 +12,5 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 public interface FooListener extends NotificationListener {
 
     void onFooUpdate(FooUpdate notification);
-    
+
 }

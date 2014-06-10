@@ -12,13 +12,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 public interface RemoteRpcRouter {
 
 
-    
-    
-    
-    
+
+
+
+
     ListenerRegistration<RouteChangeListener> registerRouteChangeListener(RouteChangeListener listener);
 
-    
-    
+
+
 
 }

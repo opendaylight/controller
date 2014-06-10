@@ -37,7 +37,7 @@ public class Notificator {
 
 	/**
 	 * Gets {@link ListenerAdapter} specified by stream name.
-	 * 
+	 *
 	 * @param streamName
 	 *            The name of the stream.
 	 * @return {@link ListenerAdapter} specified by stream name.
@@ -49,7 +49,7 @@ public class Notificator {
 	/**
 	 * Gets {@link ListenerAdapter} listener specified by
 	 * {@link InstanceIdentifier} path.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data repository.
 	 * @return ListenerAdapter
@@ -61,7 +61,7 @@ public class Notificator {
 	/**
 	 * Checks if the listener specified by {@link InstanceIdentifier} path
 	 * exist.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data repository.
 	 * @return True if the listener exist, false otherwise.
@@ -73,7 +73,7 @@ public class Notificator {
 	/**
 	 * Creates new {@link ListenerAdapter} listener from
 	 * {@link InstanceIdentifier} path and stream name.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data repository.
 	 * @param streamName
@@ -97,7 +97,7 @@ public class Notificator {
 	/**
 	 * Looks for listener determined by {@link InstanceIdentifier} path and
 	 * removes it.
-	 * 
+	 *
 	 * @param path
 	 *            InstanceIdentifier
 	 */
@@ -109,7 +109,7 @@ public class Notificator {
 	/**
 	 * Creates String representation of stream name from URI. Removes slash from
 	 * URI in start and end position.
-	 * 
+	 *
 	 * @param uri
 	 *            URI for creation stream name.
 	 * @return String representation of stream name.
@@ -150,7 +150,7 @@ public class Notificator {
 	/**
 	 * Checks if listener has at least one subscriber. In case it doesn't have any, delete
 	 * listener.
-	 * 
+	 *
 	 * @param listener
 	 *            ListenerAdapter
 	 */
@@ -163,7 +163,7 @@ public class Notificator {
 
 	/**
 	 * Delete {@link ListenerAdapter} listener specified in parameter.
-	 * 
+	 *
 	 * @param listener
 	 *            ListenerAdapter
 	 */

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  */
@@ -43,7 +43,7 @@ public class GroupChangeListener extends AbstractChangeListener {
     public SalGroupService getSalGroupService() {
         return this.salGroupService;
     }
-    
+
     public GroupChangeListener(final SalGroupService manager) {
         this.salGroupService = manager;
     }
@@ -56,14 +56,14 @@ public class GroupChangeListener extends AbstractChangeListener {
     @Override
     protected void remove(InstanceIdentifier<? extends DataObject> identifier, DataObject removeDataObj) {
         if ((removeDataObj instanceof Group)) {
-            
+
             final Group group = ((Group) removeDataObj);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final RemoveGroupInputBuilder builder = new RemoveGroupInputBuilder(group);
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setGroupRef(new GroupRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
             this.salGroupService.removeGroup((RemoveGroupInput) builder.build());
@@ -74,21 +74,21 @@ public class GroupChangeListener extends AbstractChangeListener {
     @Override
     protected void update(InstanceIdentifier<? extends DataObject> identifier, DataObject original, DataObject update) {
         if (original instanceof Group && update instanceof Group) {
-            
+
             final Group originalGroup = ((Group) original);
             final Group updatedGroup = ((Group) update);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final UpdateGroupInputBuilder builder = new UpdateGroupInputBuilder();
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setGroupRef(new GroupRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            
+
             builder.setUpdatedGroup((UpdatedGroup) (new UpdatedGroupBuilder(updatedGroup)).build());
             builder.setOriginalGroup((OriginalGroup) (new OriginalGroupBuilder(originalGroup)).build());
-            
+
             this.salGroupService.updateGroup((UpdateGroupInput) builder.build());
             LOG.debug("Transaction {} - Update Group has updated group {} with group {}", new Object[]{uri, original, update});
         }
@@ -100,10 +100,10 @@ public class GroupChangeListener extends AbstractChangeListener {
             final Group group = ((Group) addDataObj);
             final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
             final AddGroupInputBuilder builder = new AddGroupInputBuilder(group);
-            
+
             builder.setNode(new NodeRef(nodeInstanceId));
             builder.setGroupRef(new GroupRef(identifier));
-            
+
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
             this.salGroupService.addGroup((AddGroupInput) builder.build());

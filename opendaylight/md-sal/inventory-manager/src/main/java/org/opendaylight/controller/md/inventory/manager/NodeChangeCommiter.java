@@ -126,7 +126,7 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
         Future<RpcResult<TransactionStatus>> commitResult = it.commit();
         listenOnTransactionState(it.getIdentifier(), commitResult, "node update", ref.getValue());
     }
-    
+
     /**
      * @param txId transaction identificator
      * @param future transaction result
@@ -136,13 +136,13 @@ public class NodeChangeCommiter implements OpendaylightInventoryListener {
     private static void listenOnTransactionState(final Object txId, Future<RpcResult<TransactionStatus>> future,
             final String action, final InstanceIdentifier<?> nodeConnectorPath) {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future),new FutureCallback<RpcResult<TransactionStatus>>() {
-            
+
             @Override
             public void onFailure(Throwable t) {
                 LOG.error("Action {} [{}] failed for Tx:{}", action, nodeConnectorPath, txId, t);
-                
+
             }
-            
+
             @Override
             public void onSuccess(RpcResult<TransactionStatus> result) {
                 if(!result.isSuccessful()) {

@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 public interface RpcConsumptionRegistry {
     /**
      * Sends an RPC to other components registered to the broker.
-     * 
+     *
      * @see RpcImplementation
      * @param rpc
      *            Name of RPC

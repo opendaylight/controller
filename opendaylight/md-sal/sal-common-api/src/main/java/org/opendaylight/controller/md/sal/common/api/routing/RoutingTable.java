@@ -14,10 +14,10 @@ import org.opendaylight.yangtools.concepts.Path;
 public interface RoutingTable<C, P extends Path<P>, T> {
 
     C getIdentifier();
-    
+
     T getDefaultRoute();
-    
+
     Map<P,T> getRoutes();
-    
+
     T getRoute(P path);
 }

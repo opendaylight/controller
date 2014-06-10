@@ -19,9 +19,9 @@ import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import com.google.common.base.Preconditions;
 
 public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, SimpleNode<Object> {
-    
+
     private SimpleNode<Object> simpleNode;
-    
+
     private String localName;
     private Object value;
     private URI namespace;
@@ -31,23 +31,23 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
         this.localName = Preconditions.checkNotNull(localName);
         this.value = value;
     }
-    
+
     public SimpleNodeWrapper(URI namespace, String localName, Object value) {
         this(localName, value);
         this.namespace = namespace;
     }
-    
+
     @Override
     public void setQname(QName name) {
         Preconditions.checkState(simpleNode == null, "Cannot change the object, due to data inconsistencies.");
         this.name = name;
     }
-    
+
     @Override
     public QName getQname() {
         return name;
     }
-    
+
     @Override
     public String getLocalName() {
         if (simpleNode != null) {
@@ -55,7 +55,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
         }
         return localName;
     }
-    
+
     @Override
     public URI getNamespace() {
         if (simpleNode != null) {
@@ -83,7 +83,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
                 name = new QName(namespace, localName);
             }
             simpleNode = NodeFactory.createImmutableSimpleNode(name, null, value);
-            
+
             value = null;
             namespace = null;
             localName = null;
@@ -126,7 +126,7 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     public Object setValue(Object value) {
         return unwrap().setValue(value);
     }
-    
+
 
 
 }

@@ -24,9 +24,9 @@ public class DataChangeEventImpl<P extends Path<P>, D> implements DataChangeEven
     private final D updatedOperationalSubtree;
     private final D updatedConfigurationSubtree;
 
-    
-    
-    
+
+
+
     public DataChangeEventImpl(DataChange<P, D> dataChange, D originalConfigurationSubtree,
             D originalOperationalSubtree, D updatedOperationalSubtree, D updatedConfigurationSubtree) {
         super();

@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 public class BindingAwareZeroMqRpcRouter implements BindingAwareRpcRouter {
 
     BindingAwareRpcRouter mdSalRouter;
-    
+
     public BindingAwareRpcRouter getMdSalRouter() {
         return mdSalRouter;
     }
@@ -28,10 +28,10 @@ public class BindingAwareZeroMqRpcRouter implements BindingAwareRpcRouter {
         // Write message down to the wire
         return null;
     }
-    
+
     // Receiver part - invoked when request is received and deserialized
     private Future<RpcReply<byte[]>> receivedRequest(RpcRequest<String, String, String, byte[]> input) {
-        
+
         return mdSalRouter.sendRpc(input);
     }
 

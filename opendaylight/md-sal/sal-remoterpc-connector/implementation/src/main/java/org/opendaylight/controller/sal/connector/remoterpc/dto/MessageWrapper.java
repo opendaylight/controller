@@ -16,7 +16,7 @@ public class MessageWrapper {
 
   private Message _message;
   private ZMQ.Socket _receiveSocket;
-  
+
   public MessageWrapper(Message message, ZMQ.Socket receiveSocket) {
     this._message = message;
     this._receiveSocket = receiveSocket;

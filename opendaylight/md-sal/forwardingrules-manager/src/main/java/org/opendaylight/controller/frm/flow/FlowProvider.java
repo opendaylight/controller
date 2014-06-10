@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -42,7 +42,7 @@ public class FlowProvider implements AutoCloseable {
         InstanceIdentifierBuilder<Table> tableChild = augmentFlowCapNode.<Table> child(Table.class);
         InstanceIdentifierBuilder<Flow> flowChild = tableChild.<Flow> child(Flow.class);
         final InstanceIdentifier<? extends DataObject> flowDataObjectPath = flowChild.toInstance();
-        
+
         /* DataChangeListener registration */
         this.flowDataChangeListener = new FlowChangeListener(this.salFlowService);
         this.flowDataChangeListenerRegistration = this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);

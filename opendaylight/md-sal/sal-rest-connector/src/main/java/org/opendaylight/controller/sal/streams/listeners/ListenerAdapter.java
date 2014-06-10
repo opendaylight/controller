@@ -80,7 +80,7 @@ public class ListenerAdapter implements DataChangeListener {
 	/**
 	 * Creates new {@link ListenerAdapter} listener specified by path and stream
 	 * name.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data store.
 	 * @param streamName
@@ -157,7 +157,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Creates new event specified by {@link EventType} type.
-		 * 
+		 *
 		 * @param type
 		 *            EventType
 		 */
@@ -167,7 +167,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Gets the {@link Channel} subscriber.
-		 * 
+		 *
 		 * @return Channel
 		 */
 		public Channel getSubscriber() {
@@ -176,7 +176,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Sets subscriber for event.
-		 * 
+		 *
 		 * @param subscriber
 		 *            Channel
 		 */
@@ -186,7 +186,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Gets event data.
-		 * 
+		 *
 		 * @return String representation of event data.
 		 */
 		public String getData() {
@@ -195,7 +195,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Sets event data.
-		 * 
+		 *
 		 * @param String
 		 *            data.
 		 */
@@ -205,7 +205,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 		/**
 		 * Gets event type.
-		 * 
+		 *
 		 * @return The type of the event.
 		 */
 		public EventType getType() {
@@ -222,7 +222,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Prepare data in printable form and transform it to String.
-	 * 
+	 *
 	 * @param change
 	 *            DataChangeEvent
 	 * @return Data in printable form.
@@ -270,7 +270,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Formats data specified by RFC3339.
-	 * 
+	 *
 	 * @param d
 	 *            Date
 	 * @return Data specified by RFC3339.
@@ -281,7 +281,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Creates {@link Document} document.
-	 * 
+	 *
 	 * @return {@link Document} document.
 	 */
 	private Document createDocument() {
@@ -298,7 +298,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Adds values to data changed notification event element.
-	 * 
+	 *
 	 * @param doc
 	 *            {@link Document}
 	 * @param dataChangedNotificationEventElement
@@ -336,7 +336,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Adds values from data to element.
-	 * 
+	 *
 	 * @param doc
 	 *            {@link Document}
 	 * @param data
@@ -363,7 +363,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Adds values from data to element.
-	 * 
+	 *
 	 * @param doc
 	 *            {@link Document}
 	 * @param data
@@ -390,7 +390,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Creates changed event element from data.
-	 * 
+	 *
 	 * @param doc
 	 *            {@link Document}
 	 * @param path
@@ -433,7 +433,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Translates {@link CompositeNode} data to XML format.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data store.
 	 * @param data
@@ -462,7 +462,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Adds path as value to element.
-	 * 
+	 *
 	 * @param path
 	 *            Path to data in data store.
 	 * @param element
@@ -504,7 +504,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Writes identifier that consists of prefix and QName.
-	 * 
+	 *
 	 * @param element
 	 *            {@link Element}
 	 * @param textContent
@@ -536,7 +536,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Generates new prefix which consists of four random characters <a-z>.
-	 * 
+	 *
 	 * @param prefixes
 	 *            Collection of prefixes.
 	 * @return New prefix which consists of four random characters <a-z>.
@@ -557,7 +557,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Gets path pointed to data in data store.
-	 * 
+	 *
 	 * @return Path pointed to data in data store.
 	 */
 	public InstanceIdentifier getPath() {
@@ -566,7 +566,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Sets {@link ListenerRegistration} registration.
-	 * 
+	 *
 	 * @param registration
 	 *            ListenerRegistration<DataChangeListener>
 	 */
@@ -577,7 +577,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Gets the name of the stream.
-	 * 
+	 *
 	 * @return The name of the stream.
 	 */
 	public String getStreamName() {
@@ -597,7 +597,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Checks if {@link ListenerRegistration} registration exist.
-	 * 
+	 *
 	 * @return True if exist, false otherwise.
 	 */
 	public boolean isListening() {
@@ -607,7 +607,7 @@ public class ListenerAdapter implements DataChangeListener {
 	/**
 	 * Creates event of type {@link EventType#REGISTER}, set {@link Channel}
 	 * subscriber to the event and post event into event bus.
-	 * 
+	 *
 	 * @param subscriber
 	 *            Channel
 	 */
@@ -624,7 +624,7 @@ public class ListenerAdapter implements DataChangeListener {
 	/**
 	 * Creates event of type {@link EventType#DEREGISTER}, sets {@link Channel}
 	 * subscriber to the event and posts event into event bus.
-	 * 
+	 *
 	 * @param subscriber
 	 */
 	public void removeSubscriber(Channel subscriber) {
@@ -636,7 +636,7 @@ public class ListenerAdapter implements DataChangeListener {
 
 	/**
 	 * Checks if exists at least one {@link Channel} subscriber.
-	 * 
+	 *
 	 * @return True if exist at least one {@link Channel} subscriber, false
 	 *         otherwise.
 	 */

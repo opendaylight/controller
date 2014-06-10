@@ -11,7 +11,7 @@ import org.opendaylight.yangtools.concepts.Mutable;
 import org.opendaylight.yangtools.concepts.Path;
 
 public interface MutableRoutingTable<C, P extends Path<P>, T> extends RoutingTable<C,P,T>, Mutable {
-    
+
     void setDefaultRoute(T target);
     void updateRoute(P path,T target);
     void removeRoute(P path);

@@ -14,13 +14,13 @@ import org.opendaylight.controller.sal.dom.broker.DataBrokerImpl;
 
 public class DomBrokerRuntimeMXBeanImpl implements
         DomBrokerImplRuntimeMXBean {
-    
+
     private final DataBrokerImpl dataService;
     private final Transactions transactions = new Transactions();
     private final Data data = new Data();
-    
+
     public DomBrokerRuntimeMXBeanImpl(DataBrokerImpl dataService) {
-        this.dataService = dataService; 
+        this.dataService = dataService;
     }
 
     public Transactions getTransactions() {

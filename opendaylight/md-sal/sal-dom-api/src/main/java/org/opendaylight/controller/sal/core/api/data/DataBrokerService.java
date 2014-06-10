@@ -18,12 +18,12 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 /**
  * DataBrokerService provides unified access to the data stores available in the
  * system.
- * 
- * 
+ *
+ *
  * @see DataProviderService
- * 
+ *
  */
-public interface DataBrokerService extends 
+public interface DataBrokerService extends
     BrokerService, //
     DataReader<InstanceIdentifier, CompositeNode>, //
     DataModificationTransactionFactory<InstanceIdentifier, CompositeNode>, //

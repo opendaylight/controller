@@ -83,7 +83,7 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
     public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
         getDelegate().removeValidator(store, validator);
     }
-    
+
     @Override
     public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
             RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {

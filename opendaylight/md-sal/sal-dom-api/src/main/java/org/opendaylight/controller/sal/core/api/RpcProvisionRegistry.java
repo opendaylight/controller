@@ -18,17 +18,17 @@ public interface RpcProvisionRegistry extends RpcImplementation, BrokerService, 
 
     /**
      * Registers an implementation of the rpc.
-     * 
+     *
      * <p>
      * The registered rpc functionality will be available to all other
      * consumers and providers registered to the broker, which are aware of
      * the {@link QName} assigned to the rpc.
-     * 
+     *
      * <p>
      * There is no assumption that rpc type is in the set returned by
      * invoking {@link RpcImplementation#getSupportedRpcs()}. This allows
      * for dynamic rpc implementations.
-     * 
+     *
      * @param rpcType
      *            Name of Rpc
      * @param implementation
@@ -38,7 +38,7 @@ public interface RpcProvisionRegistry extends RpcImplementation, BrokerService, 
      */
     RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
             throws IllegalArgumentException;
-    
+
     ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
 
     RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);

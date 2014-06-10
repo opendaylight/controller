@@ -18,7 +18,7 @@ public interface NotificationRouter {
 
     /**
      * Registers a notification listener for supplied notification type.
-     * 
+     *
      * @param notification
      * @param listener
      */

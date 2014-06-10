@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 public class LLDPDiscoveryUtils {
     static Logger LOG = LoggerFactory.getLogger(LLDPDiscoveryUtils.class);
-    
+
     public static final Long LLDP_INTERVAL = (long) (1000*5); // Send LLDP every five seconds
     public static final Long LLDP_EXPIRATION_TIME = LLDP_INTERVAL*3; // Let up to three intervals pass before we decide we are expired.
-    
+
     public static String macToString(byte[] mac) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < mac.length; i++) {
@@ -39,7 +39,7 @@ public class LLDPDiscoveryUtils {
 
         return b.toString();
     }
-    
+
     public static NodeConnectorRef lldpToNodeConnectorRef(byte[] payload)  {
         Ethernet ethPkt = new Ethernet();
         try {
@@ -50,7 +50,7 @@ public class LLDPDiscoveryUtils {
 
         if (ethPkt.getPayload() instanceof LLDP) {
             LLDP lldp = (LLDP) ethPkt.getPayload();
-    
+
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;

@@ -37,6 +37,6 @@ public class DataBrokerServiceProxy extends AbstractBrokerServiceProxy<DataBroke
     public DataModificationTransaction beginTransaction() {
         return getDelegate().beginTransaction();
     }
-    
-    
+
+
 }
