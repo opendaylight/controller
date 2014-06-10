@@ -20,8 +20,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
@@ -68,7 +66,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * Subtransaction for reading is selected by supplied
      * {@link LogicalDatastoreType} as parameter for
-     * {@link DOMDataReadTransaction#read(LogicalDatastoreType, InstanceIdentifier)}
+     * {@link DOMDataReadTransaction#read(LogicalDatastoreType,org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)}
      * .
      *
      * Id of returned transaction is retrieved via
@@ -99,19 +97,19 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * <ul>
      * <li>
-     * {@link DOMDataWriteTransaction#put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+     * {@link DOMDataWriteTransaction#put(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#write(InstanceIdentifier, NormalizedNode)}
+     * {@link DOMStoreWriteTransaction#write(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * is invoked on selected subtransaction.
      * <li>
-     * {@link DOMDataWriteTransaction#merge(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+     * {@link DOMDataWriteTransaction#merge(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#merge(InstanceIdentifier, NormalizedNode)}
+     * {@link DOMStoreWriteTransaction#merge(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * is invoked on selected subtransaction.
      * <li>
-     * {@link DOMDataWriteTransaction#delete(LogicalDatastoreType, InstanceIdentifier)
+     * {@link DOMDataWriteTransaction#delete(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#delete(InstanceIdentifier)} is invoked on
+     * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)} is invoked on
      * selected subtransaction.
      * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
@@ -147,24 +145,24 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * <ul>
      * <li>
-     * {@link DOMDataWriteTransaction#read(LogicalDatastoreType, InstanceIdentifier)}
+     * {@link DOMDataWriteTransaction#read(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)}
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#read(InstanceIdentifier)} is invoked on
+     * {@link DOMStoreWriteTransaction#read(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)} is invoked on
      * selected subtransaction.
      * <li>
-     * {@link DOMDataWriteTransaction#put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+     * {@link DOMDataWriteTransaction#put(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#write(InstanceIdentifier, NormalizedNode)}
+     * {@link DOMStoreWriteTransaction#write(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * is invoked on selected subtransaction.
      * <li>
-     * {@link DOMDataWriteTransaction#merge(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+     * {@link DOMDataWriteTransaction#merge(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#merge(InstanceIdentifier, NormalizedNode)}
+     * {@link DOMStoreWriteTransaction#merge(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode)}
      * is invoked on selected subtransaction.
      * <li>
-     * {@link DOMDataWriteTransaction#delete(LogicalDatastoreType, InstanceIdentifier)
+     * {@link DOMDataWriteTransaction#delete(LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)
      * - backing subtransaction is selected by {@link LogicalDatastoreType},
-     * {@link DOMStoreWriteTransaction#delete(InstanceIdentifier)} is invoked on
+     * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)} is invoked on
      * selected subtransaction.
      * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts

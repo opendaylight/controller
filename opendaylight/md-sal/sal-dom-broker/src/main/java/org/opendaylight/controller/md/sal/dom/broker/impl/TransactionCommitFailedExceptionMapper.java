@@ -13,14 +13,13 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
 
 /**
  *
  * Utility exception mapper which translates {@link Exception}
  * to {@link TransactionCommitFailedException}.
  *
- * This mapper is intended to be used with {@link Futures#makeChecked(com.google.common.util.concurrent.ListenableFuture, Function)}
+ * This mapper is intended to be used with {@link com.google.common.util.concurrent.Futures#makeChecked(com.google.common.util.concurrent.ListenableFuture, Function)}
  * <ul>
  * <li>if exception is {@link TransactionCommitFailedException} or one of its subclasses returns original exception.
  * <li>if exception is {@link ExecutionException} and cause is  {@link TransactionCommitFailedException} return cause
@@ -28,6 +27,7 @@ import com.google.common.util.concurrent.Futures;
  * </ul>
  *
  */
+
 final class TransactionCommitFailedExceptionMapper implements
         Function<Exception, TransactionCommitFailedException> {
 

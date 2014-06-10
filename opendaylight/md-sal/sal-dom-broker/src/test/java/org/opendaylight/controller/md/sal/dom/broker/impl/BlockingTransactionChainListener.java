@@ -15,11 +15,11 @@ import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * Simple implementation of {@link TransactionChainListener} for testing.
- * 
+ *
  * This transaction chain listener does not contain any logic, only update
  * futures ({@link #getFailFuture()} and {@link #getSuccessFuture()} when
  * transaction chain event is retrieved.
- * 
+ *
  */
 class BlockingTransactionChainListener implements TransactionChainListener {
 
@@ -27,13 +27,13 @@ class BlockingTransactionChainListener implements TransactionChainListener {
     private final SettableFuture<Void> successFuture = SettableFuture.create();
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction,
-            Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
+            final Throwable cause) {
         failFuture.set(cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         successFuture.set(null);
     }
 

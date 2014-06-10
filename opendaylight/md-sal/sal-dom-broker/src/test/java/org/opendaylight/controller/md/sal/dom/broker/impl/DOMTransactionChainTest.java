@@ -25,7 +25,6 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -71,8 +70,8 @@ public class DOMTransactionChainTest {
 
         /**
          * We alocate new read-write transaction and write /test
-         * 
-         * 
+         *
+         *
          */
         DOMDataReadWriteTransaction firstTx = allocateAndWrite(txChain);
 
@@ -88,19 +87,19 @@ public class DOMTransactionChainTest {
         DOMDataReadTransaction secondReadTx = txChain.newReadOnlyTransaction();
 
         /**
-         * 
+         *
          * We test if we are able to read data from tx, read should not fail
          * since we are using chained transaction.
-         * 
-         * 
+         *
+         *
          */
         assertTestContainerExists(secondReadTx);
 
         /**
-         * 
+         *
          * We alocate next transaction, which is still based on first one, but
          * is read-write.
-         * 
+         *
          */
         DOMDataReadWriteTransaction thirdDeleteTx = allocateAndDelete(txChain);
 
@@ -111,7 +110,7 @@ public class DOMTransactionChainTest {
 
         /**
          * We commit first transaction
-         * 
+         *
          */
         assertCommitSuccessful(firstWriteTxFuture);
 
@@ -124,7 +123,7 @@ public class DOMTransactionChainTest {
         assertTestContainerExists(storeReadTx);
         /**
          * We commit third transaction
-         * 
+         *
          */
         assertCommitSuccessful(thirdDeleteTxFuture);
 
@@ -144,8 +143,8 @@ public class DOMTransactionChainTest {
 
         /**
          * We alocate new read-write transaction and write /test
-         * 
-         * 
+         *
+         *
          */
         allocateAndWrite(txChain);
 
@@ -162,14 +161,14 @@ public class DOMTransactionChainTest {
         }
     }
 
-    private static DOMDataReadWriteTransaction allocateAndDelete(DOMTransactionChain txChain)
+    private static DOMDataReadWriteTransaction allocateAndDelete(final DOMTransactionChain txChain)
             throws InterruptedException, ExecutionException {
         DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
 
         /**
          * We test existence of /test in third transaction container should
          * still be visible from first one (which is still uncommmited).
-         * 
+         *
          */
         assertTestContainerExists(tx);
 
@@ -180,28 +179,28 @@ public class DOMTransactionChainTest {
         return tx;
     }
 
-    private static DOMDataReadWriteTransaction allocateAndWrite(DOMTransactionChain txChain)
+    private static DOMDataReadWriteTransaction allocateAndWrite(final DOMTransactionChain txChain)
             throws InterruptedException, ExecutionException {
         DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
         assertTestContainerWrite(tx);
         return tx;
     }
 
-    private static void assertCommitSuccessful(ListenableFuture<RpcResult<TransactionStatus>> future)
+    private static void assertCommitSuccessful(final ListenableFuture<RpcResult<TransactionStatus>> future)
             throws InterruptedException, ExecutionException {
         RpcResult<TransactionStatus> rpcResult = future.get();
         assertTrue(rpcResult.isSuccessful());
         assertEquals(TransactionStatus.COMMITED, rpcResult.getResult());
     }
 
-    private static void assertTestContainerExists(DOMDataReadTransaction readTx) throws InterruptedException,
+    private static void assertTestContainerExists(final DOMDataReadTransaction readTx) throws InterruptedException,
             ExecutionException {
         ListenableFuture<Optional<NormalizedNode<?, ?>>> readFuture = readTx.read(OPERATIONAL, TestModel.TEST_PATH);
         Optional<NormalizedNode<?, ?>> readedData = readFuture.get();
         assertTrue(readedData.isPresent());
     }
 
-    private static void assertTestContainerWrite(DOMDataReadWriteTransaction tx) throws InterruptedException,
+    private static void assertTestContainerWrite(final DOMDataReadWriteTransaction tx) throws InterruptedException,
             ExecutionException {
         tx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
         assertTestContainerExists(tx);
