@@ -9,8 +9,6 @@ package org.opendaylight.controller.sal.core.spi.data;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -25,13 +23,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Read and write access to stored data is provided only via transactions
  * created using {@link #newReadOnlyTransaction()},
  * {@link #newWriteOnlyTransaction()} and {@link #newReadWriteTransaction()}, or
- * by creating {@link TransactionChain}.
+ * by creating {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain}.
  *
  */
 public interface DOMStore extends DOMStoreTransactionFactory {
 
     /**
-     * Registers {@link DataChangeListener} for Data Change callbacks which will
+     * Registers {@link org.opendaylight.controller.md.sal.common.api.data.DataChangeListener} for Data Change callbacks which will
      * be triggered on the change of provided subpath. What constitutes a change
      * depends on the @scope parameter.
      *

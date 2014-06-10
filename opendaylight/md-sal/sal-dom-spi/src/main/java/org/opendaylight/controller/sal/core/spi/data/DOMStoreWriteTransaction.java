@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -20,7 +18,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * specified path.
      *
      * If you need add or merge of current object with specified use
-     * {@link #merge(LogicalDatastoreType, Path, Object)}
+     * {@link #merge(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, org.opendaylight.yangtools.concepts.Path, Object)}
      *
      *
      * @param path
@@ -39,7 +37,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * specified path.
      *
      * If you need add or merge of current object with specified use
-     * {@link #merge(LogicalDatastoreType, Path, Object)}
+     * {@link #merge(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, org.opendaylight.yangtools.concepts.Path, Object)}
      *
      *
      * @param path
