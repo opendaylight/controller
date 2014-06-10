@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.frm.meter;
 
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class MeterProvider implements AutoCloseable {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MeterProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MeterProvider.class);
 
     private DataProviderService dataService;
     private SalMeterService salMeterService;
@@ -33,35 +34,56 @@ public class MeterProvider implements AutoCloseable {
     private MeterChangeListener meterDataChangeListener;
     ListenerRegistration<DataChangeListener> meterDataChangeListenerRegistration;
 
-    public void start() {
+    public void init(final DataProviderService dataService) {
+        if (dataService == null) {
+            throw new IllegalArgumentException("DataProviderService can not be null !");
+        }
+        this.dataService = dataService;
+    }
+
+    public void start(final RpcConsumerRegistry rpcRegistry) {
+        if (rpcRegistry == null) {
+            throw new IllegalArgumentException("RpcConsumerRegistry can not be null !");
+        }
+        this.salMeterService = rpcRegistry.getRpcService(SalMeterService.class);
         /* Build Path */
-        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
-        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
-        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode = nodeChild.<FlowCapableNode> augmentation(FlowCapableNode.class);
-        InstanceIdentifierBuilder<Meter> meterChild = augmentFlowCapNode.<Meter> child(Meter.class);
+        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.builder(Nodes.class);
+        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.child(Node.class);
+        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode =
+                nodeChild.augmentation(FlowCapableNode.class);
+        InstanceIdentifierBuilder<Meter> meterChild = augmentFlowCapNode.child(Meter.class);
         final InstanceIdentifier<? extends DataObject> meterDataObjectPath = meterChild.toInstance();
 
         /* DataChangeListener registration */
-        this.meterDataChangeListener = new MeterChangeListener(this.salMeterService);
-        this.meterDataChangeListenerRegistration = this.dataService.registerDataChangeListener(meterDataObjectPath, meterDataChangeListener);
-        LOG.info("Meter Config Provider started.");
+        this.meterDataChangeListener = new MeterChangeListener(MeterProvider.this);
+        this.meterDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(meterDataObjectPath, meterDataChangeListener);
     }
 
     protected DataModificationTransaction startChange() {
         return this.dataService.beginTransaction();
     }
 
-    public void close() throws Exception {
+    @Override
+    public void close() {
+        LOG.info("FRM Meter Config Provider stopped.");
         if(meterDataChangeListenerRegistration != null){
-            meterDataChangeListenerRegistration.close();
+            try {
+                meterDataChangeListenerRegistration.close();
+            }
+            catch (Exception e) {
+                String errMsg = "Error by stop FRM Meter Config Provider.";
+                LOG.error(errMsg, e);
+                throw new IllegalStateException(errMsg, e);
+            }
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public DataProviderService getDataService() {
+        return dataService;
     }
 
-    public void setSalMeterService(final SalMeterService salMeterService) {
-        this.salMeterService = salMeterService;
+    public SalMeterService getSalMeterService() {
+        return salMeterService;
     }
 }

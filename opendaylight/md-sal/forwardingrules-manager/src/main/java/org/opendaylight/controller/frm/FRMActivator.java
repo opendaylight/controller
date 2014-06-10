@@ -12,10 +12,8 @@ import org.opendaylight.controller.frm.group.GroupProvider;
 import org.opendaylight.controller.frm.meter.MeterProvider;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.SalMeterService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,24 +25,30 @@ public class FRMActivator extends AbstractBindingAwareProvider {
     private static FlowProvider flowProvider = new FlowProvider();
     private static GroupProvider groupProvider = new GroupProvider();
     private static MeterProvider meterProvider = new MeterProvider();
+    private static FlowNodeReconcilProvider flowNodeReconcilProvider =
+            new FlowNodeReconcilProvider();
 
     @Override
     public void onSessionInitiated(final ProviderContext session) {
-        DataProviderService flowSalService = session.<DataProviderService>getSALService(DataProviderService.class);
-        FRMActivator.flowProvider.setDataService(flowSalService);
-        SalFlowService rpcFlowSalService = session.<SalFlowService>getRpcService(SalFlowService.class);
-        FRMActivator.flowProvider.setSalFlowService(rpcFlowSalService);
-        FRMActivator.flowProvider.start();
-        DataProviderService groupSalService = session.<DataProviderService>getSALService(DataProviderService.class);
-        FRMActivator.groupProvider.setDataService(groupSalService);
-        SalGroupService rpcGroupSalService = session.<SalGroupService>getRpcService(SalGroupService.class);
-        FRMActivator.groupProvider.setSalGroupService(rpcGroupSalService);
-        FRMActivator.groupProvider.start();
-        DataProviderService meterSalService = session.<DataProviderService>getSALService(DataProviderService.class);
-        FRMActivator.meterProvider.setDataService(meterSalService);
-        SalMeterService rpcMeterSalService = session.<SalMeterService>getRpcService(SalMeterService.class);
-        FRMActivator.meterProvider.setSalMeterService(rpcMeterSalService);
-        FRMActivator.meterProvider.start();
+        /* Flow */
+        final DataProviderService flowSalService = session.getSALService(DataProviderService.class);
+        final NotificationProviderService salNotificationService =
+                session.getSALService(NotificationProviderService.class);
+        FRMActivator.flowProvider.init(flowSalService, salNotificationService);
+        FRMActivator.flowProvider.start(session);
+        /* Group */
+        final DataProviderService groupSalService = session.getSALService(DataProviderService.class);
+        FRMActivator.groupProvider.init(groupSalService);
+        FRMActivator.groupProvider.start(session);
+        /* Meter */
+        final DataProviderService meterSalService = session.getSALService(DataProviderService.class);
+        FRMActivator.meterProvider.init(meterSalService);
+        FRMActivator.meterProvider.start(session);
+        /* FlowNode Reconciliation */
+        final DataProviderService dps = session.getSALService(DataProviderService.class);
+        final NotificationProviderService nps = session.getSALService(NotificationProviderService.class);
+        FRMActivator.flowNodeReconcilProvider.init(dps, nps);
+        FRMActivator.flowNodeReconcilProvider.start(session);
     }
 
     @Override
@@ -53,9 +57,11 @@ public class FRMActivator extends AbstractBindingAwareProvider {
             FRMActivator.flowProvider.close();
             FRMActivator.groupProvider.close();
             FRMActivator.meterProvider.close();
+            FRMActivator.flowNodeReconcilProvider.close();
         } catch (Throwable e) {
-            LOG.error("Unexpected error by stopping FRMActivator", e);
-            throw new RuntimeException(e);
+            String errMsg = "Unexpected error by stopping FRMActivator";
+            LOG.error(errMsg, e);
+            throw new IllegalStateException(errMsg, e);
         }
     }
   }
