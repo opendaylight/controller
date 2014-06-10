@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_11400f55",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/main/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizationOperation.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-10T14:29:15Z",
+      "side": 1,
+      "message": "Could we use AnyXmlNode from https://git.opendaylight.org/gerrit/#/c/7771/1 ?\nAdditional of AnyXmlNode will provide us with more information that this node is not normal container, but holds string value or xml data.",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c0cdf35e",
         "filename": "opendaylight/md-sal/sal-common-impl/src/test/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizerTest.java",
         "patchSetId": 9
