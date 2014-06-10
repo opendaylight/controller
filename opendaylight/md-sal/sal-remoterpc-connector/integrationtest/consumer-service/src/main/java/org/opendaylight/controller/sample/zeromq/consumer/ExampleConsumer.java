@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Hashtable;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.core.api.AbstractConsumer;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
@@ -25,7 +25,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.yangtools.yang.data.impl.XmlTreeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 
 import javax.xml.stream.XMLStreamException;
 

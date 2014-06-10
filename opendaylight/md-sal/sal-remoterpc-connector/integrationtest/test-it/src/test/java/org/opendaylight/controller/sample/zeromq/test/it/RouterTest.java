@@ -9,8 +9,6 @@ package org.opendaylight.controller.sample.zeromq.test.it;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,12 +40,11 @@ import javax.inject.Inject;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Hashtable;
 
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
 import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
+//import static org.ops4j.pax.exam.CoreOptions.*;
 
 @RunWith(PaxExam.class)
 public class RouterTest {
