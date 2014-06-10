@@ -229,4 +229,16 @@ module flow-node-inventory {
         uses flow-node-connector;
     }
 
+    augment "/inv:nodes/inv:node/table" {
+        ext:augment-identifier "flow-cookie-mapping";
+        list flow-cookie-map {
+            key "cookie";
+            leaf cookie {
+                type flow:flow-cookie;
+            }
+            leaf-list flow-ids {
+                type flow-id;
+            }
+        }
+    }
 }
