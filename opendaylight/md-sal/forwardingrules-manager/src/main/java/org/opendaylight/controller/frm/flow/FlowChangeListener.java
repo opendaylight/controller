@@ -8,21 +8,18 @@
 package org.opendaylight.controller.frm.flow;
 
 import org.opendaylight.controller.frm.AbstractChangeListener;
+import org.opendaylight.controller.frm.FlowCookieProducer;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowTableRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -31,90 +28,94 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
+ * Flow Change Listener
+ *  add, update and remove {@link Flow} processing from {@link org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent}.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  */
 public class FlowChangeListener extends AbstractChangeListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlowChangeListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlowChangeListener.class);
 
-    private final SalFlowService salFlowService;
+    private final FlowProvider provider;
 
-    public SalFlowService getSalFlowService() {
-        return this.salFlowService;
-    }
-
-    public FlowChangeListener(final SalFlowService manager) {
-        this.salFlowService = manager;
+    public FlowChangeListener (final FlowProvider provider) {
+        this.provider = Preconditions.checkNotNull(provider, "FlowProvider can not be null !");
     }
 
     @Override
-    protected void validate() throws IllegalStateException {
-        FlowTransactionValidator.validate(this);
+    protected void remove(final InstanceIdentifier<? extends DataObject> identifier,
+                          final DataObject removeDataObj) {
+
+        final Flow flow = ((Flow) removeDataObj);
+        final InstanceIdentifier<Table> tableIdent = identifier.firstIdentifierOf(Table.class);
+        final InstanceIdentifier<Node> nodeIdent = identifier.firstIdentifierOf(Node.class);
+        final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(flow);
+
+        builder.setFlowRef(new FlowRef(identifier));
+        builder.setNode(new NodeRef(nodeIdent));
+        builder.setFlowTable(new FlowTableRef(tableIdent));
+
+        Uri uri = new Uri(this.getTransactionId());
+        builder.setTransactionUri(uri);
+        this.provider.getSalFlowService().removeFlow(builder.build());
+        LOG.debug("Transaction {} - Removed Flow has removed flow: {}", new Object[]{uri, removeDataObj});
     }
 
     @Override
-    protected void remove(InstanceIdentifier<? extends DataObject> identifier, DataObject removeDataObj) {
-        if ((removeDataObj instanceof Flow)) {
+    protected void update(final InstanceIdentifier<? extends DataObject> identifier,
+                          final DataObject original, final DataObject update) {
 
-            final Flow flow = ((Flow) removeDataObj);
-            final InstanceIdentifier<Table> tableInstanceId = identifier.<Table> firstIdentifierOf(Table.class);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
-            final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(flow);
+        final Flow originalFlow = ((Flow) original);
+        final Flow updatedFlow = ((Flow) update);
+        final InstanceIdentifier<Node> nodeIdent = identifier.firstIdentifierOf(Node.class);
+        final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
 
-            builder.setFlowRef(new FlowRef(identifier));
-            builder.setNode(new NodeRef(nodeInstanceId));
-            builder.setFlowTable(new FlowTableRef(tableInstanceId));
+        builder.setNode(new NodeRef(nodeIdent));
+        builder.setFlowRef(new FlowRef(identifier));
 
-            Uri uri = new Uri(this.getTransactionId());
-            builder.setTransactionUri(uri);
-            this.salFlowService.removeFlow((RemoveFlowInput) builder.build());
-            LOG.debug("Transaction {} - Removed Flow has removed flow: {}", new Object[]{uri, removeDataObj});
-        }
+        Uri uri = new Uri(this.getTransactionId());
+        builder.setTransactionUri(uri);
+
+        builder.setUpdatedFlow((new UpdatedFlowBuilder(updatedFlow)).build());
+        builder.setOriginalFlow((new OriginalFlowBuilder(originalFlow)).build());
+
+        this.provider.getSalFlowService().updateFlow(builder.build());
+        LOG.debug("Transaction {} - Update Flow has updated flow {} with {}", new Object[]{uri, original, update});
     }
 
     @Override
-    protected void update(InstanceIdentifier<? extends DataObject> identifier, DataObject original, DataObject update) {
-        if (original instanceof Flow && update instanceof Flow) {
+    protected void add(final InstanceIdentifier<? extends DataObject> identifier,
+                       final DataObject addDataObj) {
 
-            final Flow originalFlow = ((Flow) original);
-            final Flow updatedFlow = ((Flow) update);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node>firstIdentifierOf(Node.class);
-            final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
+        final Flow flow = ((Flow) addDataObj);
+        final InstanceIdentifier<Table> tableIdent = identifier.firstIdentifierOf(Table.class);
+        final NodeRef nodeRef = new NodeRef(identifier.firstIdentifierOf(Node.class));
+        final FlowCookie flowCookie = new FlowCookie(FlowCookieProducer.INSTANCE.getNewCookie(tableIdent));
+        final AddFlowInputBuilder builder = new AddFlowInputBuilder(flow);
 
-            builder.setNode(new NodeRef(nodeInstanceId));
-            builder.setFlowRef(new FlowRef(identifier));
+        builder.setNode(nodeRef);
+        builder.setFlowRef(new FlowRef(identifier));
+        builder.setFlowTable(new FlowTableRef(tableIdent));
+        builder.setCookie( flowCookie );
 
-            Uri uri = new Uri(this.getTransactionId());
-            builder.setTransactionUri(uri);
-
-            builder.setUpdatedFlow((UpdatedFlow) (new UpdatedFlowBuilder(updatedFlow)).build());
-            builder.setOriginalFlow((OriginalFlow) (new OriginalFlowBuilder(originalFlow)).build());
-
-            this.salFlowService.updateFlow((UpdateFlowInput) builder.build());
-            LOG.debug("Transaction {} - Update Flow has updated flow {} with {}", new Object[]{uri, original, update});
-      }
+        Uri uri = new Uri(this.getTransactionId());
+        builder.setTransactionUri(uri);
+        this.provider.getSalFlowService().addFlow(builder.build());
+        LOG.debug("Transaction {} - Add Flow has added flow: {}", new Object[]{uri, addDataObj});
     }
 
     @Override
-    protected void add(InstanceIdentifier<? extends DataObject> identifier, DataObject addDataObj) {
-        if ((addDataObj instanceof Flow)) {
+    protected boolean preconditionForChange(final InstanceIdentifier<? extends DataObject> identifier,
+            final DataObject dataObj, final DataObject update) {
 
-            final Flow flow = ((Flow) addDataObj);
-            final InstanceIdentifier<Table> tableInstanceId = identifier.<Table> firstIdentifierOf(Table.class);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
-            final AddFlowInputBuilder builder = new AddFlowInputBuilder(flow);
-
-            builder.setNode(new NodeRef(nodeInstanceId));
-            builder.setFlowRef(new FlowRef(identifier));
-            builder.setFlowTable(new FlowTableRef(tableInstanceId));
-
-            Uri uri = new Uri(this.getTransactionId());
-            builder.setTransactionUri(uri);
-            this.salFlowService.addFlow((AddFlowInput) builder.build());
-            LOG.debug("Transaction {} - Add Flow has added flow: {}", new Object[]{uri, addDataObj});
-        }
+        final ReadOnlyTransaction trans = this.provider.getDataService().newReadOnlyTransaction();
+        return update != null
+                ? (dataObj instanceof Flow && update instanceof Flow && isNodeAvailable(identifier, trans))
+                : (dataObj instanceof Flow && isNodeAvailable(identifier, trans));
     }
 }
