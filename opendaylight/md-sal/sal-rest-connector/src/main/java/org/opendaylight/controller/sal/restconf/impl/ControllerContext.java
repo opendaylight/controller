@@ -648,7 +648,7 @@ public class ControllerContext implements SchemaContextListener {
             }
 
             targetNode = this.findInstanceDataChildByNameAndNamespace(
-                                          parentNode, nodeName, module.getNamespace() );;
+                                          parentNode, nodeName, module.getNamespace() );
             if( targetNode == null ) {
                 throw new RestconfDocumentedException(
                         "URI has bad format. Possible reasons:\n" +

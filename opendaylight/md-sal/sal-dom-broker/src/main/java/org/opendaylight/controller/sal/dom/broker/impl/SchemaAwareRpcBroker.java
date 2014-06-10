@@ -229,7 +229,6 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
             if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
                 return Optional.fromNullable(extension.getQName());
             }
-            ;
         }
         return Optional.absent();
     }
