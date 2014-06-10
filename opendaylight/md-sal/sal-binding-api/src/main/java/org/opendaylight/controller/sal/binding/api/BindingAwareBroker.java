@@ -9,8 +9,6 @@ package org.opendaylight.controller.sal.binding.api;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -39,8 +37,8 @@ import org.osgi.framework.BundleContext;
  * <li>Notification Service - see {@link NotificationService} and
  * {@link NotificationProviderService}
  * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link DataBrokerService} and
- * {@link DataProviderService}
+ * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.binding.api.data.DataBrokerService} and
+ * {@link org.opendaylight.controller.sal.binding.api.data.DataProviderService}
  * </ul>
  *
  * The services are exposed via session.
@@ -52,9 +50,6 @@ import org.osgi.framework.BundleContext;
  *
  * For more information about session-based access see {@link ConsumerContext}
  * and {@link ProviderContext}
- *
- *
- *
  */
 public interface BindingAwareBroker {
     /**
@@ -122,9 +117,6 @@ public interface BindingAwareBroker {
      * functionality) for the consumer and provides access to the SAL
      * infrastructure services and other functionality provided by
      * {@link Provider}s.
-     *
-     *
-     *
      */
     public interface ConsumerContext extends RpcConsumerRegistry {
 
@@ -137,8 +129,6 @@ public interface BindingAwareBroker {
          * @return Session specific implementation of service
          */
         <T extends BindingAwareService> T getSALService(Class<T> service);
-
-
     }
 
     /**
