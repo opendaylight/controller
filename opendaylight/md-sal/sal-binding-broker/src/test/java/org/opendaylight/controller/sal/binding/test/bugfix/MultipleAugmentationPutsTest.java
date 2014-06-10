@@ -89,7 +89,6 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
 
         Nodes nodes = checkForNodes();
         verifyNode(nodes, flowCapableNode).assertHasAugmentation(FlowCapableNode.class);
-        ;
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
 //        Node meterStatsNode = createTestNode(NodeMeterStatistics.class, nodeMeterStatistics());
 //        commitNodeAndVerifyTransaction(meterStatsNode);

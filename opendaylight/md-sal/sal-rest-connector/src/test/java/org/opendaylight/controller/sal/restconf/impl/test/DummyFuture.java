@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -26,7 +29,7 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
         result = null;
     }
 
-    private DummyFuture(Builder builder) {
+    private DummyFuture(final Builder builder) {
         cancel = builder.cancel;
         isCancelled = builder.isCancelled;
         isDone = builder.isDone;
@@ -38,7 +41,7 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
     }
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
         return cancel;
     }
 
@@ -58,8 +61,8 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
     }
 
     @Override
-    public RpcResult<TransactionStatus> get(long timeout, TimeUnit unit) throws InterruptedException,
-            ExecutionException, TimeoutException {
+    public RpcResult<TransactionStatus> get(final long timeout, final TimeUnit unit) throws InterruptedException,
+    ExecutionException, TimeoutException {
         return result;
     }
 
@@ -70,22 +73,22 @@ public class DummyFuture implements Future<RpcResult<TransactionStatus>> {
         private boolean isDone;
         private RpcResult<TransactionStatus> result;
 
-        public Builder cancel(boolean cancel) {
+        public Builder cancel(final boolean cancel) {
             this.cancel = cancel;
             return this;
         }
 
-        public Builder isCancelled(boolean isCancelled) {
+        public Builder isCancelled(final boolean isCancelled) {
             this.isCancelled = isCancelled;
             return this;
         }
 
-        public Builder isDone(boolean isDone) {
+        public Builder isDone(final boolean isDone) {
             this.isDone = isDone;
             return this;
         }
 
-        public Builder rpcResult(RpcResult<TransactionStatus> result) {
+        public Builder rpcResult(final RpcResult<TransactionStatus> result) {
             this.result = result;
             return this;
         }

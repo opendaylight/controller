@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public class StructuredData {
 
@@ -17,7 +17,7 @@ public class StructuredData {
     private final DataSchemaNode schema;
     private final MountInstance mountPoint;
 
-    public StructuredData(CompositeNode data, DataSchemaNode schema, MountInstance mountPoint) {
+    public StructuredData(final CompositeNode data, final DataSchemaNode schema, final MountInstance mountPoint) {
         this.data = data;
         this.schema = schema;
         this.mountPoint = mountPoint;

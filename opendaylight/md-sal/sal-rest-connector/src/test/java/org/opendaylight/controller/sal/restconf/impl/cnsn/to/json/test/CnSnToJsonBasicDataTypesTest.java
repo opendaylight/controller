@@ -221,7 +221,7 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
                 assertEquals( "Json token type for key " + keyName, expToken, peek );
             }
 
-            verifier.verify( jReader, keyName );;
+            verifier.verify( jReader, keyName );
         }
 
         if( !expectedMap.isEmpty() ) {

@@ -8,6 +8,15 @@
 
 package org.opendaylight.controller.sal.rest.impl;
 
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERRORS_CONTAINER_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_APP_TAG_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_INFO_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_LIST_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_MESSAGE_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TAG_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TYPE_QNAME;
+import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.NAMESPACE;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -32,8 +41,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.*;
 
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -70,7 +77,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
     private HttpHeaders headers;
 
     @Override
-    public Response toResponse( RestconfDocumentedException exception ) {
+    public Response toResponse( final RestconfDocumentedException exception ) {
 
         LOG.debug( "In toResponse: {}", exception.getMessage() );
 
@@ -95,8 +102,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
             // single space char in the entity.
 
             return Response.status( exception.getStatus() )
-                                    .type( MediaType.TEXT_PLAIN_TYPE )
-                                    .entity( " " ).build();
+                    .type( MediaType.TEXT_PLAIN_TYPE )
+                    .entity( " " ).build();
         }
 
         int status = errors.iterator().next().getErrorTag().getStatusCode();
@@ -106,8 +113,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         if( errorsSchemaNode == null ) {
             return Response.status( status )
-                           .type( MediaType.TEXT_PLAIN_TYPE )
-                           .entity( exception.getMessage() ).build();
+                    .type( MediaType.TEXT_PLAIN_TYPE )
+                    .entity( exception.getMessage() ).build();
         }
 
         ImmutableList.Builder<Node<?>> errorNodes = ImmutableList.<Node<?>> builder();
@@ -116,7 +123,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         }
 
         ImmutableCompositeNode errorsNode =
-                         ImmutableCompositeNode.create( ERRORS_CONTAINER_QNAME, errorNodes.build() );
+                ImmutableCompositeNode.create( ERRORS_CONTAINER_QNAME, errorNodes.build() );
 
         Object responseBody;
         if( mediaType.getSubtype().endsWith( "json" ) ) {
@@ -129,8 +136,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return Response.status( status ).type( mediaType ).entity( responseBody ).build();
     }
 
-    private Object toJsonResponseBody( ImmutableCompositeNode errorsNode,
-                                       DataNodeContainer errorsSchemaNode ) {
+    private Object toJsonResponseBody( final ImmutableCompositeNode errorsNode,
+            final DataNodeContainer errorsSchemaNode ) {
 
         JsonMapper jsonMapper = new JsonMapper();
 
@@ -152,8 +159,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return responseBody;
     }
 
-    private Object toXMLResponseBody( ImmutableCompositeNode errorsNode,
-                                      DataNodeContainer errorsSchemaNode ) {
+    private Object toXMLResponseBody( final ImmutableCompositeNode errorsNode,
+            final DataNodeContainer errorsSchemaNode ) {
 
         XmlMapper xmlMapper = new XmlMapper();
 
@@ -170,7 +177,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return responseBody;
     }
 
-    private String documentToString( Document doc ) throws TransformerException, UnsupportedEncodingException {
+    private String documentToString( final Document doc ) throws TransformerException, UnsupportedEncodingException {
         Transformer transformer = createTransformer();
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
@@ -180,7 +187,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
     }
 
     private Transformer createTransformer() throws TransformerFactoryConfigurationError,
-        TransformerConfigurationException {
+    TransformerConfigurationException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "no" );
@@ -191,7 +198,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return transformer;
     }
 
-    private Node<?> toDomNode( RestconfError error ) {
+    private Node<?> toDomNode( final RestconfError error ) {
 
         CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
         builder.setQName( ERROR_LIST_QNAME );
@@ -209,7 +216,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return builder.toInstance();
     }
 
-    private Node<?> parseErrorInfo( String errorInfo ) {
+    private Node<?> parseErrorInfo( final String errorInfo ) {
         if( Strings.isNullOrEmpty( errorInfo ) ) {
             return null;
         }
@@ -226,19 +233,19 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         String errorInfoWithRoot =
                 new StringBuilder( "<error-info xmlns=\"" ).append( NAMESPACE ).append( "\">" )
-                        .append( errorInfo ).append( "</error-info>" ).toString();
+                .append( errorInfo ).append( "</error-info>" ).toString();
 
         Document doc = null;
         try {
             doc = factory.newDocumentBuilder().parse(
-                                 new InputSource( new StringReader( errorInfoWithRoot ) ) );
+                    new InputSource( new StringReader( errorInfoWithRoot ) ) );
         }
         catch( Exception e ) {
             // TODO: what if the content is text that happens to contain invalid markup? Could
             // wrap in CDATA and try again.
 
             LOG.warn( "Error parsing restconf error-info, \"" + errorInfo + "\", as XML: " +
-                      e.toString() );
+                    e.toString() );
             return null;
         }
 
@@ -263,8 +270,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return errorInfoNode;
     }
 
-    private void addLeaf( CompositeNodeBuilder<ImmutableCompositeNode> builder, QName qname,
-                          String value ) {
+    private void addLeaf( final CompositeNodeBuilder<ImmutableCompositeNode> builder, final QName qname,
+            final String value ) {
         if( !Strings.isNullOrEmpty( value ) ) {
             builder.addLeaf( qname, value );
         }

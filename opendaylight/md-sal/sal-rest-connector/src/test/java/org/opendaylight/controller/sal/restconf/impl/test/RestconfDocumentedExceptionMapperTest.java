@@ -8,9 +8,15 @@
 
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,8 +27,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -48,9 +54,9 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -79,12 +85,12 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         Map<String, String> expErrorInfo;
 
-        public ComplexErrorInfoVerifier( Map<String, String> expErrorInfo ) {
+        public ComplexErrorInfoVerifier( final Map<String, String> expErrorInfo ) {
             this.expErrorInfo = expErrorInfo;
         }
 
         @Override
-        public void verifyXML( Node errorInfoNode ) {
+        public void verifyXML( final Node errorInfoNode ) {
 
             Map<String, String> mutableExpMap = Maps.newHashMap( expErrorInfo );
             NodeList childNodes = errorInfoNode.getChildNodes();
@@ -93,9 +99,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
                 if( child  instanceof Element ) {
                     String expValue = mutableExpMap.remove( child.getNodeName() );
                     assertNotNull( "Found unexpected \"error-info\" child node: " +
-                                   child.getNodeName(), expValue );
+                            child.getNodeName(), expValue );
                     assertEquals( "Text content for \"error-info\" child node " +
-                                   child.getNodeName(), expValue, child.getTextContent() );
+                            child.getNodeName(), expValue, child.getTextContent() );
                 }
             }
 
@@ -105,7 +111,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         }
 
         @Override
-        public void verifyJson( JsonElement errorInfoElement ) {
+        public void verifyJson( final JsonElement errorInfoElement ) {
 
             assertTrue( "\"error-info\" Json element is not an Object",
                     errorInfoElement.isJsonObject() );
@@ -121,9 +127,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
             for( Entry<String,String> actual: actualErrorInfo.entrySet() ) {
                 String expValue = mutableExpMap.remove( actual.getKey() );
                 assertNotNull( "Found unexpected \"error-info\" child node: " +
-                                actual.getKey(), expValue );
+                        actual.getKey(), expValue );
                 assertEquals( "Text content for \"error-info\" child node " +
-                              actual.getKey(), expValue, actual.getValue() );
+                        actual.getKey(), expValue, actual.getValue() );
             }
 
             if( !mutableExpMap.isEmpty() ) {
@@ -136,22 +142,22 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         String expTextContent;
 
-        public SimpleErrorInfoVerifier( String expErrorInfo ) {
+        public SimpleErrorInfoVerifier( final String expErrorInfo ) {
             this.expTextContent = expErrorInfo;
         }
 
-        void verifyContent( String actualContent ) {
+        void verifyContent( final String actualContent ) {
             assertNotNull( "Actual \"error-info\" text content is null", actualContent );
             assertTrue( "", actualContent.contains( expTextContent ) );
         }
 
         @Override
-        public void verifyXML( Node errorInfoNode ) {
+        public void verifyXML( final Node errorInfoNode ) {
             verifyContent( errorInfoNode.getTextContent() );
         }
 
         @Override
-        public void verifyJson( JsonElement errorInfoElement ) {
+        public void verifyJson( final JsonElement errorInfoElement ) {
             verifyContent( errorInfoElement.getAsString() );
         }
     }
@@ -172,17 +178,17 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         NamespaceContext nsContext = new NamespaceContext() {
             @Override
-            public Iterator getPrefixes( String namespaceURI ) {
+            public Iterator<?> getPrefixes( final String namespaceURI ) {
                 return null;
             }
 
             @Override
-            public String getPrefix( String namespaceURI ) {
+            public String getPrefix( final String namespaceURI ) {
                 return null;
             }
 
             @Override
-            public String getNamespaceURI( String prefix ) {
+            public String getNamespaceURI( final String prefix ) {
                 return "ietf-restconf".equals( prefix ) ? Draft02.RestConfModule.NAMESPACE : null;
             }
         };
@@ -207,19 +213,19 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     protected Application configure() {
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances( mockRestConf, StructuredDataToXmlProvider.INSTANCE,
-                                                           StructuredDataToJsonProvider.INSTANCE );
+                StructuredDataToJsonProvider.INSTANCE );
         resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
         return resourceConfig;
     }
 
-    void stageMockEx( RestconfDocumentedException ex ) {
+    void stageMockEx( final RestconfDocumentedException ex ) {
         reset( mockRestConf );
         when( mockRestConf.readOperationalData( any( String.class ) ) ).thenThrow( ex );
     }
 
-    void testJsonResponse( RestconfDocumentedException ex, Status expStatus, ErrorType expErrorType,
-                           ErrorTag expErrorTag, String expErrorMessage, String expErrorAppTag,
-                           ErrorInfoVerifier errorInfoVerifier ) throws Exception {
+    void testJsonResponse( final RestconfDocumentedException ex, final Status expStatus, final ErrorType expErrorType,
+            final ErrorTag expErrorTag, final String expErrorMessage, final String expErrorAppTag,
+            final ErrorInfoVerifier errorInfoVerifier ) throws Exception {
 
         stageMockEx( ex );
 
@@ -228,51 +234,51 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         InputStream stream = verifyResponse( resp, MediaType.APPLICATION_JSON, expStatus );
 
         verifyJsonResponseBody( stream, expErrorType, expErrorTag, expErrorMessage,
-                                expErrorAppTag, errorInfoVerifier );
+                expErrorAppTag, errorInfoVerifier );
     }
 
     @Test
     public void testToJsonResponseWithMessageOnly() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error" ), Status.INTERNAL_SERVER_ERROR,
-                          ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null );
+                ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null );
 
         // To test verification code
-//        String json =
-//            "{ errors: {" +
-//            "    error: [{" +
-//            "      error-tag : \"operation-failed\"" +
-//            "      ,error-type : \"application\"" +
-//            "      ,error-message : \"An error occurred\"" +
-//            "      ,error-info : {" +
-//            "        session-id: \"123\"" +
-//            "        ,address: \"1.2.3.4\"" +
-//            "      }" +
-//            "    }]" +
-//            "  }" +
-//            "}";
-//
-//        verifyJsonResponseBody( new java.io.StringBufferInputStream(json ), ErrorType.APPLICATION,
-//            ErrorTag.OPERATION_FAILED, "An error occurred", null,
-//            com.google.common.collect.ImmutableMap.of( "session-id", "123", "address", "1.2.3.4" ) );
+        //        String json =
+        //            "{ errors: {" +
+        //            "    error: [{" +
+        //            "      error-tag : \"operation-failed\"" +
+        //            "      ,error-type : \"application\"" +
+        //            "      ,error-message : \"An error occurred\"" +
+        //            "      ,error-info : {" +
+        //            "        session-id: \"123\"" +
+        //            "        ,address: \"1.2.3.4\"" +
+        //            "      }" +
+        //            "    }]" +
+        //            "  }" +
+        //            "}";
+        //
+        //        verifyJsonResponseBody( new java.io.StringBufferInputStream(json ), ErrorType.APPLICATION,
+        //            ErrorTag.OPERATION_FAILED, "An error occurred", null,
+        //            com.google.common.collect.ImmutableMap.of( "session-id", "123", "address", "1.2.3.4" ) );
     }
 
     @Test
     public void testToJsonResponseWithInUseErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.IN_USE ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.IN_USE, "mock error", null, null );
+                ErrorTag.IN_USE ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.IN_USE, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithInvalidValueErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.RPC,
-                                                           ErrorTag.INVALID_VALUE ),
-                          Status.BAD_REQUEST, ErrorType.RPC,
-                          ErrorTag.INVALID_VALUE, "mock error", null, null );
+                ErrorTag.INVALID_VALUE ),
+                Status.BAD_REQUEST, ErrorType.RPC,
+                ErrorTag.INVALID_VALUE, "mock error", null, null );
 
     }
 
@@ -280,9 +286,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     public void testToJsonResponseWithTooBigErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.TRANSPORT,
-                                                           ErrorTag.TOO_BIG ),
-                          Status.REQUEST_ENTITY_TOO_LARGE, ErrorType.TRANSPORT,
-                          ErrorTag.TOO_BIG, "mock error", null, null );
+                ErrorTag.TOO_BIG ),
+                Status.REQUEST_ENTITY_TOO_LARGE, ErrorType.TRANSPORT,
+                ErrorTag.TOO_BIG, "mock error", null, null );
 
     }
 
@@ -290,153 +296,153 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     public void testToJsonResponseWithMissingAttributeErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.MISSING_ATTRIBUTE ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.MISSING_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.MISSING_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.MISSING_ATTRIBUTE, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithBadAttributeErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.BAD_ATTRIBUTE ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.BAD_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.BAD_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.BAD_ATTRIBUTE, "mock error", null, null );
     }
     @Test
     public void testToJsonResponseWithUnknownAttributeErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_ATTRIBUTE ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.UNKNOWN_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.UNKNOWN_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_ATTRIBUTE, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithBadElementErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.BAD_ELEMENT ),
-                          Status.BAD_REQUEST,
-                          ErrorType.PROTOCOL, ErrorTag.BAD_ELEMENT, "mock error", null, null );
+                ErrorTag.BAD_ELEMENT ),
+                Status.BAD_REQUEST,
+                ErrorType.PROTOCOL, ErrorTag.BAD_ELEMENT, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithUnknownElementErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_ELEMENT ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.UNKNOWN_ELEMENT, "mock error", null, null );
+                ErrorTag.UNKNOWN_ELEMENT ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_ELEMENT, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithUnknownNamespaceErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_NAMESPACE ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.UNKNOWN_NAMESPACE, "mock error", null, null );
+                ErrorTag.UNKNOWN_NAMESPACE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_NAMESPACE, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithMalformedMessageErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.MALFORMED_MESSAGE ),
-                          Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                          ErrorTag.MALFORMED_MESSAGE, "mock error", null, null );
+                ErrorTag.MALFORMED_MESSAGE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.MALFORMED_MESSAGE, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithAccessDeniedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.ACCESS_DENIED ),
-                          Status.FORBIDDEN, ErrorType.PROTOCOL,
-                          ErrorTag.ACCESS_DENIED, "mock error", null, null );
+                ErrorTag.ACCESS_DENIED ),
+                Status.FORBIDDEN, ErrorType.PROTOCOL,
+                ErrorTag.ACCESS_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithLockDeniedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.LOCK_DENIED ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.LOCK_DENIED, "mock error", null, null );
+                ErrorTag.LOCK_DENIED ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.LOCK_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithResourceDeniedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.RESOURCE_DENIED ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.RESOURCE_DENIED, "mock error", null, null );
+                ErrorTag.RESOURCE_DENIED ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.RESOURCE_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithRollbackFailedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.ROLLBACK_FAILED ),
-                          Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                          ErrorTag.ROLLBACK_FAILED, "mock error", null, null );
+                ErrorTag.ROLLBACK_FAILED ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.ROLLBACK_FAILED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithDataExistsErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.DATA_EXISTS ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.DATA_EXISTS, "mock error", null, null );
+                ErrorTag.DATA_EXISTS ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.DATA_EXISTS, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithDataMissingErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.DATA_MISSING ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.DATA_MISSING, "mock error", null, null );
+                ErrorTag.DATA_MISSING ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.DATA_MISSING, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithOperationNotSupportedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.OPERATION_NOT_SUPPORTED ),
-                          Status.NOT_IMPLEMENTED, ErrorType.PROTOCOL,
-                          ErrorTag.OPERATION_NOT_SUPPORTED, "mock error", null, null );
+                ErrorTag.OPERATION_NOT_SUPPORTED ),
+                Status.NOT_IMPLEMENTED, ErrorType.PROTOCOL,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithOperationFailedErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.OPERATION_FAILED ),
-                          Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                          ErrorTag.OPERATION_FAILED, "mock error", null, null );
+                ErrorTag.OPERATION_FAILED ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.OPERATION_FAILED, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithPartialOperationErrorTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.PARTIAL_OPERATION ),
-                          Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                          ErrorTag.PARTIAL_OPERATION, "mock error", null, null );
+                ErrorTag.PARTIAL_OPERATION ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.PARTIAL_OPERATION, "mock error", null, null );
     }
 
     @Test
     public void testToJsonResponseWithErrorAppTag() throws Exception {
 
         testJsonResponse( new RestconfDocumentedException( new RestconfError(
-                                   ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                                   "mock error", "mock-app-tag" ) ),
-                          Status.BAD_REQUEST, ErrorType.APPLICATION,
-                          ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", null );
+                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "mock error", "mock-app-tag" ) ),
+                Status.BAD_REQUEST, ErrorType.APPLICATION,
+                ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", null );
     }
 
     @Test
@@ -456,10 +462,10 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         assertEquals( "\"error\" Json array element length", 2, arrayElement.size() );
 
         verifyJsonErrorNode( arrayElement.get( 0 ), ErrorType.APPLICATION, ErrorTag.LOCK_DENIED,
-                             "mock error1", null, null );
+                "mock error1", null, null );
 
         verifyJsonErrorNode( arrayElement.get( 1 ), ErrorType.RPC, ErrorTag.ROLLBACK_FAILED,
-                             "mock error2", null, null );
+                "mock error2", null, null );
     }
 
     @Test
@@ -467,12 +473,12 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         String errorInfo = "<address>1.2.3.4</address> <session-id>123</session-id>";
         testJsonResponse( new RestconfDocumentedException( new RestconfError(
-                                               ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                                               "mock error", "mock-app-tag", errorInfo ) ),
-                          Status.BAD_REQUEST, ErrorType.APPLICATION,
-                          ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
-                          new ComplexErrorInfoVerifier( ImmutableMap.of(
-                                                "session-id", "123", "address", "1.2.3.4" ) ) );
+                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "mock error", "mock-app-tag", errorInfo ) ),
+                Status.BAD_REQUEST, ErrorType.APPLICATION,
+                ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
+                new ComplexErrorInfoVerifier( ImmutableMap.of(
+                        "session-id", "123", "address", "1.2.3.4" ) ) );
     }
 
     @Test
@@ -480,14 +486,14 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         Exception cause = new Exception( "mock exception cause" );
         testJsonResponse( new RestconfDocumentedException( "mock error", cause ),
-                          Status.INTERNAL_SERVER_ERROR, ErrorType.APPLICATION,
-                          ErrorTag.OPERATION_FAILED, "mock error", null,
-                          new SimpleErrorInfoVerifier( cause.getMessage() ) );
+                Status.INTERNAL_SERVER_ERROR, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_FAILED, "mock error", null,
+                new SimpleErrorInfoVerifier( cause.getMessage() ) );
     }
 
-    void testXMLResponse( RestconfDocumentedException ex, Status expStatus, ErrorType expErrorType,
-                          ErrorTag expErrorTag, String expErrorMessage,
-                          String expErrorAppTag, ErrorInfoVerifier errorInfoVerifier ) throws Exception
+    void testXMLResponse( final RestconfDocumentedException ex, final Status expStatus, final ErrorType expErrorType,
+            final ErrorTag expErrorTag, final String expErrorMessage,
+            final String expErrorAppTag, final ErrorInfoVerifier errorInfoVerifier ) throws Exception
     {
         stageMockEx( ex );
 
@@ -496,212 +502,212 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         InputStream stream = verifyResponse( resp, MediaType.APPLICATION_XML, expStatus );
 
         verifyXMLResponseBody( stream, expErrorType, expErrorTag, expErrorMessage,
-                               expErrorAppTag, errorInfoVerifier );
+                expErrorAppTag, errorInfoVerifier );
     }
 
     @Test
     public void testToXMLResponseWithMessageOnly() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error" ), Status.INTERNAL_SERVER_ERROR,
-                         ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null );
+                ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null );
 
         // To test verification code
-//        String xml =
-//            "<errors xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\">"+
-//            "  <error>" +
-//            "    <error-type>application</error-type>"+
-//            "    <error-tag>operation-failed</error-tag>"+
-//            "    <error-message>An error occurred</error-message>"+
-//            "    <error-info>" +
-//            "      <session-id>123</session-id>" +
-//            "      <address>1.2.3.4</address>" +
-//            "    </error-info>" +
-//            "  </error>" +
-//            "</errors>";
-//
-//        verifyXMLResponseBody( new java.io.StringBufferInputStream(xml), ErrorType.APPLICATION,
-//                ErrorTag.OPERATION_FAILED, "An error occurred", null,
-//                com.google.common.collect.ImmutableMap.of( "session-id", "123", "address", "1.2.3.4" ) );
+        //        String xml =
+        //            "<errors xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\">"+
+        //            "  <error>" +
+        //            "    <error-type>application</error-type>"+
+        //            "    <error-tag>operation-failed</error-tag>"+
+        //            "    <error-message>An error occurred</error-message>"+
+        //            "    <error-info>" +
+        //            "      <session-id>123</session-id>" +
+        //            "      <address>1.2.3.4</address>" +
+        //            "    </error-info>" +
+        //            "  </error>" +
+        //            "</errors>";
+        //
+        //        verifyXMLResponseBody( new java.io.StringBufferInputStream(xml), ErrorType.APPLICATION,
+        //                ErrorTag.OPERATION_FAILED, "An error occurred", null,
+        //                com.google.common.collect.ImmutableMap.of( "session-id", "123", "address", "1.2.3.4" ) );
     }
 
     @Test
     public void testToXMLResponseWithInUseErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.IN_USE ),
-                         Status.CONFLICT, ErrorType.PROTOCOL,
-                         ErrorTag.IN_USE, "mock error", null, null );
+                ErrorTag.IN_USE ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.IN_USE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithInvalidValueErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.RPC,
-                                                           ErrorTag.INVALID_VALUE ),
-                         Status.BAD_REQUEST, ErrorType.RPC,
-                         ErrorTag.INVALID_VALUE, "mock error", null, null );
+                ErrorTag.INVALID_VALUE ),
+                Status.BAD_REQUEST, ErrorType.RPC,
+                ErrorTag.INVALID_VALUE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithTooBigErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.TRANSPORT,
-                                                           ErrorTag.TOO_BIG ),
-                         Status.REQUEST_ENTITY_TOO_LARGE, ErrorType.TRANSPORT,
-                         ErrorTag.TOO_BIG, "mock error", null, null );
+                ErrorTag.TOO_BIG ),
+                Status.REQUEST_ENTITY_TOO_LARGE, ErrorType.TRANSPORT,
+                ErrorTag.TOO_BIG, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithMissingAttributeErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.MISSING_ATTRIBUTE ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.MISSING_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.MISSING_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.MISSING_ATTRIBUTE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithBadAttributeErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.BAD_ATTRIBUTE ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.BAD_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.BAD_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.BAD_ATTRIBUTE, "mock error", null, null );
     }
     @Test
     public void testToXMLResponseWithUnknownAttributeErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_ATTRIBUTE ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.UNKNOWN_ATTRIBUTE, "mock error", null, null );
+                ErrorTag.UNKNOWN_ATTRIBUTE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_ATTRIBUTE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithBadElementErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.BAD_ELEMENT ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.BAD_ELEMENT, "mock error", null, null );
+                ErrorTag.BAD_ELEMENT ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.BAD_ELEMENT, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithUnknownElementErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_ELEMENT ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.UNKNOWN_ELEMENT, "mock error", null, null );
+                ErrorTag.UNKNOWN_ELEMENT ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_ELEMENT, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithUnknownNamespaceErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.UNKNOWN_NAMESPACE ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.UNKNOWN_NAMESPACE, "mock error", null, null );
+                ErrorTag.UNKNOWN_NAMESPACE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.UNKNOWN_NAMESPACE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithMalformedMessageErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.MALFORMED_MESSAGE ),
-                         Status.BAD_REQUEST, ErrorType.PROTOCOL,
-                         ErrorTag.MALFORMED_MESSAGE, "mock error", null, null );
+                ErrorTag.MALFORMED_MESSAGE ),
+                Status.BAD_REQUEST, ErrorType.PROTOCOL,
+                ErrorTag.MALFORMED_MESSAGE, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithAccessDeniedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.ACCESS_DENIED ),
-                         Status.FORBIDDEN, ErrorType.PROTOCOL,
-                         ErrorTag.ACCESS_DENIED, "mock error", null, null );
+                ErrorTag.ACCESS_DENIED ),
+                Status.FORBIDDEN, ErrorType.PROTOCOL,
+                ErrorTag.ACCESS_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithLockDeniedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.LOCK_DENIED ),
-                          Status.CONFLICT, ErrorType.PROTOCOL,
-                          ErrorTag.LOCK_DENIED, "mock error", null, null );
+                ErrorTag.LOCK_DENIED ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.LOCK_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithResourceDeniedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.RESOURCE_DENIED ),
-                         Status.CONFLICT, ErrorType.PROTOCOL,
-                         ErrorTag.RESOURCE_DENIED, "mock error", null, null );
+                ErrorTag.RESOURCE_DENIED ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.RESOURCE_DENIED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithRollbackFailedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.ROLLBACK_FAILED ),
-                         Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                         ErrorTag.ROLLBACK_FAILED, "mock error", null, null );
+                ErrorTag.ROLLBACK_FAILED ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.ROLLBACK_FAILED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithDataExistsErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.DATA_EXISTS ),
-                         Status.CONFLICT, ErrorType.PROTOCOL,
-                         ErrorTag.DATA_EXISTS, "mock error", null, null );
+                ErrorTag.DATA_EXISTS ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.DATA_EXISTS, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithDataMissingErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.DATA_MISSING ),
-                         Status.CONFLICT, ErrorType.PROTOCOL,
-                         ErrorTag.DATA_MISSING, "mock error", null, null );
+                ErrorTag.DATA_MISSING ),
+                Status.CONFLICT, ErrorType.PROTOCOL,
+                ErrorTag.DATA_MISSING, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithOperationNotSupportedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.OPERATION_NOT_SUPPORTED ),
-                         Status.NOT_IMPLEMENTED, ErrorType.PROTOCOL,
-                         ErrorTag.OPERATION_NOT_SUPPORTED, "mock error", null, null );
+                ErrorTag.OPERATION_NOT_SUPPORTED ),
+                Status.NOT_IMPLEMENTED, ErrorType.PROTOCOL,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithOperationFailedErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.OPERATION_FAILED ),
-                         Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                         ErrorTag.OPERATION_FAILED, "mock error", null, null );
+                ErrorTag.OPERATION_FAILED ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.OPERATION_FAILED, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithPartialOperationErrorTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( "mock error", ErrorType.PROTOCOL,
-                                                           ErrorTag.PARTIAL_OPERATION ),
-                         Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
-                         ErrorTag.PARTIAL_OPERATION, "mock error", null, null );
+                ErrorTag.PARTIAL_OPERATION ),
+                Status.INTERNAL_SERVER_ERROR, ErrorType.PROTOCOL,
+                ErrorTag.PARTIAL_OPERATION, "mock error", null, null );
     }
 
     @Test
     public void testToXMLResponseWithErrorAppTag() throws Exception {
 
         testXMLResponse( new RestconfDocumentedException( new RestconfError(
-                                              ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                                              "mock error", "mock-app-tag" ) ),
-                         Status.BAD_REQUEST, ErrorType.APPLICATION,
-                         ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", null );
+                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "mock error", "mock-app-tag" ) ),
+                Status.BAD_REQUEST, ErrorType.APPLICATION,
+                ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", null );
     }
 
     @Test
@@ -709,12 +715,12 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         String errorInfo = "<address>1.2.3.4</address> <session-id>123</session-id>";
         testXMLResponse( new RestconfDocumentedException( new RestconfError(
-                                               ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                                               "mock error", "mock-app-tag", errorInfo ) ),
-                         Status.BAD_REQUEST, ErrorType.APPLICATION,
-                         ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
-                         new ComplexErrorInfoVerifier( ImmutableMap.of(
-                                              "session-id", "123", "address", "1.2.3.4" ) ) );
+                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "mock error", "mock-app-tag", errorInfo ) ),
+                Status.BAD_REQUEST, ErrorType.APPLICATION,
+                ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
+                new ComplexErrorInfoVerifier( ImmutableMap.of(
+                        "session-id", "123", "address", "1.2.3.4" ) ) );
     }
 
     @Test
@@ -722,9 +728,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         Exception cause = new Exception( "mock exception cause" );
         testXMLResponse( new RestconfDocumentedException( "mock error", cause ),
-                         Status.INTERNAL_SERVER_ERROR, ErrorType.APPLICATION,
-                         ErrorTag.OPERATION_FAILED, "mock error", null,
-                         new SimpleErrorInfoVerifier( cause.getMessage() ) );
+                Status.INTERNAL_SERVER_ERROR, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_FAILED, "mock error", null,
+                new SimpleErrorInfoVerifier( cause.getMessage() ) );
     }
 
     @Test
@@ -744,10 +750,10 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         NodeList children = getXMLErrorList( doc, 2 );
 
         verifyXMLErrorNode( children.item( 0 ), ErrorType.APPLICATION, ErrorTag.LOCK_DENIED,
-                            "mock error1", null, null );
+                "mock error1", null, null );
 
         verifyXMLErrorNode( children.item( 1 ), ErrorType.RPC, ErrorTag.ROLLBACK_FAILED,
-                            "mock error2", null, null );
+                "mock error2", null, null );
     }
 
     @Test
@@ -756,13 +762,13 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         stageMockEx( new RestconfDocumentedException( "mock error" ) );
 
         Response resp = target("/operational/foo")
-                                  .request().header( "Accept", MediaType.APPLICATION_JSON ).get();
+                .request().header( "Accept", MediaType.APPLICATION_JSON ).get();
 
         InputStream stream = verifyResponse( resp, MediaType.APPLICATION_JSON,
-                                             Status.INTERNAL_SERVER_ERROR );
+                Status.INTERNAL_SERVER_ERROR );
 
         verifyJsonResponseBody( stream, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error",
-                                null, null );
+                null, null );
     }
 
     @Test
@@ -771,14 +777,14 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         // The StructuredDataToJsonProvider should throw a RestconfDocumentedException with no data
 
         when( mockRestConf.readOperationalData( any( String.class ) ) )
-            .thenReturn( new StructuredData( null, null, null ) );
+        .thenReturn( new StructuredData( null, null, null ) );
 
         Response resp = target("/operational/foo").request( MediaType.APPLICATION_JSON ).get();
 
         verifyResponse( resp, MediaType.TEXT_PLAIN, Status.NOT_FOUND );
     }
 
-    InputStream verifyResponse( Response resp, String expMediaType, Status expStatus ) {
+    InputStream verifyResponse( final Response resp, final String expMediaType, final Status expStatus ) {
         assertEquals( "getMediaType", MediaType.valueOf( expMediaType ), resp.getMediaType() );
         assertEquals( "getStatus", expStatus.getStatusCode(), resp.getStatus() );
 
@@ -788,19 +794,19 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         return stream;
     }
 
-    void verifyJsonResponseBody( InputStream stream, ErrorType expErrorType, ErrorTag expErrorTag,
-                                 String expErrorMessage, String expErrorAppTag,
-                                 ErrorInfoVerifier errorInfoVerifier ) throws Exception {
+    void verifyJsonResponseBody( final InputStream stream, final ErrorType expErrorType, final ErrorTag expErrorTag,
+            final String expErrorMessage, final String expErrorAppTag,
+            final ErrorInfoVerifier errorInfoVerifier ) throws Exception {
 
         JsonArray arrayElement = parseJsonErrorArrayElement( stream );
 
         assertEquals( "\"error\" Json array element length", 1, arrayElement.size() );
 
         verifyJsonErrorNode( arrayElement.get( 0 ),  expErrorType, expErrorTag, expErrorMessage,
-                             expErrorAppTag, errorInfoVerifier );
+                expErrorAppTag, errorInfoVerifier );
     }
 
-    private JsonArray parseJsonErrorArrayElement( InputStream stream ) throws IOException {
+    private JsonArray parseJsonErrorArrayElement( final InputStream stream ) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ByteStreams.copy( stream, bos );
 
@@ -811,7 +817,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         try {
             rootElement = parser.parse(
-                          new InputStreamReader( new ByteArrayInputStream( bos.toByteArray() ) ) );
+                    new InputStreamReader( new ByteArrayInputStream( bos.toByteArray() ) ) );
         }
         catch( Exception e ) {
             throw new IllegalArgumentException( "Invalid JSON response:\n" + bos.toString(), e );
@@ -832,15 +838,15 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         JsonElement errorListElement = errorListEntrySet.iterator().next().getValue();
         assertEquals( "\"errors\" child Json element name", "error",
-                      errorListEntrySet.iterator().next().getKey() );
+                errorListEntrySet.iterator().next().getKey() );
         assertTrue( "\"error\" Json element is not an Array", errorListElement.isJsonArray() );
 
         return errorListElement.getAsJsonArray();
     }
 
-    void verifyJsonErrorNode( JsonElement errorEntryElement, ErrorType expErrorType, ErrorTag expErrorTag,
-                              String expErrorMessage, String expErrorAppTag,
-                              ErrorInfoVerifier errorInfoVerifier ) {
+    void verifyJsonErrorNode( final JsonElement errorEntryElement, final ErrorType expErrorType, final ErrorTag expErrorTag,
+            final String expErrorMessage, final String expErrorAppTag,
+            final ErrorInfoVerifier errorInfoVerifier ) {
 
         JsonElement errorInfoElement = null;
         Map<String, String> actualErrorInfo = null;
@@ -855,7 +861,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
             }
             else {
                 assertTrue( "\"error\" leaf Json element " + leafName +
-                            " is not a Primitive", leafElement.isJsonPrimitive() );
+                        " is not a Primitive", leafElement.isJsonPrimitive() );
 
                 leafMap.put( leafName, leafElement.getAsString() );
             }
@@ -877,7 +883,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         }
     }
 
-    void verifyOptionalJsonLeaf( String actualValue, String expValue, String tagName ) {
+    void verifyOptionalJsonLeaf( final String actualValue, final String expValue, final String tagName ) {
         if( expValue != null ) {
             assertEquals( tagName, expValue, actualValue );
         }
@@ -886,20 +892,20 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         }
     }
 
-    void verifyXMLResponseBody( InputStream stream, ErrorType expErrorType, ErrorTag expErrorTag,
-                                String expErrorMessage, String expErrorAppTag,
-                                ErrorInfoVerifier errorInfoVerifier )
-                                                                    throws Exception {
+    void verifyXMLResponseBody( final InputStream stream, final ErrorType expErrorType, final ErrorTag expErrorTag,
+            final String expErrorMessage, final String expErrorAppTag,
+            final ErrorInfoVerifier errorInfoVerifier )
+                    throws Exception {
 
         Document doc = parseXMLDocument( stream );
 
         NodeList children = getXMLErrorList( doc, 1 );
 
         verifyXMLErrorNode( children.item( 0 ), expErrorType, expErrorTag, expErrorMessage,
-                            expErrorAppTag, errorInfoVerifier );
+                expErrorAppTag, errorInfoVerifier );
     }
 
-    private Document parseXMLDocument( InputStream stream ) throws IOException {
+    private Document parseXMLDocument( final InputStream stream ) throws IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setCoalescing(true);
@@ -921,9 +927,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         return doc;
     }
 
-    void verifyXMLErrorNode( Node errorNode, ErrorType expErrorType, ErrorTag expErrorTag,
-                             String expErrorMessage, String expErrorAppTag,
-                             ErrorInfoVerifier errorInfoVerifier ) throws Exception {
+    void verifyXMLErrorNode( final Node errorNode, final ErrorType expErrorType, final ErrorTag expErrorTag,
+            final String expErrorMessage, final String expErrorAppTag,
+            final ErrorInfoVerifier errorInfoVerifier ) throws Exception {
 
         String errorType = (String)ERROR_TYPE.evaluate( errorNode, XPathConstants.STRING );
         assertEquals( "error-type", expErrorType.getErrorTypeTag(), errorType );
@@ -945,19 +951,19 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         }
     }
 
-    void verifyOptionalXMLLeaf( Node fromNode, XPathExpression xpath, String expValue,
-                                String tagName ) throws Exception {
+    void verifyOptionalXMLLeaf( final Node fromNode, final XPathExpression xpath, final String expValue,
+            final String tagName ) throws Exception {
         if( expValue != null ) {
             String actual = (String)xpath.evaluate( fromNode, XPathConstants.STRING );
             assertEquals( tagName, expValue, actual );
         }
         else {
             assertNull( "Found unexpected \"error\" leaf entry for: " + tagName,
-                        xpath.evaluate( fromNode, XPathConstants.NODE ) );
+                    xpath.evaluate( fromNode, XPathConstants.NODE ) );
         }
     }
 
-    NodeList getXMLErrorList( Node fromNode, int count ) throws Exception {
+    NodeList getXMLErrorList( final Node fromNode, final int count ) throws Exception {
         NodeList errorList = (NodeList)ERROR_LIST.evaluate( fromNode, XPathConstants.NODESET );
         assertNotNull( "Root errors node is empty", errorList );
         assertEquals( "Root errors node child count", count, errorList.getLength() );

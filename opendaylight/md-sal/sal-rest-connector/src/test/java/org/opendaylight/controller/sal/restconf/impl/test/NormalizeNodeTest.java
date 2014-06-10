@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,7 +50,7 @@ public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
         TestUtils.normalizeCompositeNode(prepareCnSn("normalize-node-module"), modules, schemaNodePath);
     }
 
-    private CompositeNode prepareCnSn(String namespace) {
+    private CompositeNode prepareCnSn(final String namespace) {
         URI uri = null;
         if (namespace != null) {
             try {
