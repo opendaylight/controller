@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.frm.flow;
 
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
@@ -17,54 +19,89 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalF
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
+/**
+ * Flow Provider registers the {@link FlowChangeListener} and it holds all needed
+ * services for {@link FlowChangeListener}.
+ *
+ * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
+ *
+ */
 public class FlowProvider implements AutoCloseable {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlowProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlowProvider.class);
 
     private SalFlowService salFlowService;
-    private DataProviderService dataService;
+    private DataBroker dataService;
 
     /* DataChangeListener */
-    private FlowChangeListener flowDataChangeListener;
-    ListenerRegistration<DataChangeListener> flowDataChangeListenerRegistration;
+    private DataChangeListener flowDataChangeListener;
+    private ListenerRegistration<DataChangeListener> flowDataChangeListenerRegistration;
 
-    public void start() {
-        /* Build Path */
-        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
-        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
-        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode = nodeChild.<FlowCapableNode> augmentation(FlowCapableNode.class);
-        InstanceIdentifierBuilder<Table> tableChild = augmentFlowCapNode.<Table> child(Table.class);
-        InstanceIdentifierBuilder<Flow> flowChild = tableChild.<Flow> child(Flow.class);
-        final InstanceIdentifier<? extends DataObject> flowDataObjectPath = flowChild.toInstance();
-
-        /* DataChangeListener registration */
-        this.flowDataChangeListener = new FlowChangeListener(this.salFlowService);
-        this.flowDataChangeListenerRegistration = this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);
-        LOG.info("Flow Config Provider started.");
+    /**
+     * Provider Initialization Phase.
+     *
+     * @param DataProviderService dataService
+     */
+    public void init (final DataBroker dataService) {
+        LOG.info("FRM Flow Config Provider initialization.");
+        this.dataService = Preconditions.checkNotNull(dataService, "DataProviderService can not be null !");
     }
 
-    protected DataModificationTransaction startChange() {
-        return this.dataService.beginTransaction();
+    /**
+     * Listener Registration Phase
+     *
+     * @param RpcConsumerRegistry rpcRegistry
+     */
+    public void start(final RpcConsumerRegistry rpcRegistry) {
+        Preconditions.checkArgument(rpcRegistry != null, "RpcConsumerRegistry can not be null !");
+
+        this.salFlowService = Preconditions.checkNotNull(rpcRegistry.getRpcService(SalFlowService.class),
+                "RPC SalFlowService not found.");
+
+        /* Build Path */
+        InstanceIdentifier<Flow> flowIdentifier = InstanceIdentifier.create(Nodes.class)
+                .child(Node.class).augmentation(FlowCapableNode.class).child(Table.class).child(Flow.class);
+
+        /* DataChangeListener registration */
+        this.flowDataChangeListener = new FlowChangeListener(FlowProvider.this);
+        this.flowDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                        flowIdentifier, flowDataChangeListener, DataChangeScope.SUBTREE);
+
+        LOG.info("FRM Flow Config Provider started.");
     }
 
     @Override
-    public void close() throws Exception {
-        if(flowDataChangeListenerRegistration != null){
-            flowDataChangeListenerRegistration.close();
+    public void close() {
+        LOG.info("FRM Flow Config Provider stopped.");
+        if (flowDataChangeListenerRegistration != null) {
+            try {
+                flowDataChangeListenerRegistration.close();
+            } catch (Exception e) {
+                String errMsg = "Error by stop FRM Flow Config Provider.";
+                LOG.error(errMsg, e);
+                throw new IllegalStateException(errMsg, e);
+            } finally {
+                flowDataChangeListenerRegistration = null;
+            }
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public DataChangeListener getFlowDataChangeListener() {
+        return flowDataChangeListener;
     }
 
-    public void setSalFlowService(final SalFlowService salFlowService) {
-        this.salFlowService = salFlowService;
+    public SalFlowService getSalFlowService() {
+        return salFlowService;
+    }
+
+    public DataBroker getDataService() {
+        return dataService;
     }
 }
