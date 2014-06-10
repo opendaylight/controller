@@ -6,7 +6,7 @@
     <lfnint32Min>-2147483648</lfnint32Min>
     <lfnint32Max>2147483647</lfnint32Max>
     <lfnint64Min>-9223372036854775808</lfnint64Min>
-    <lfnint64Max>9223372036854775807</lfnint64Max>    
+    <lfnint64Max>9223372036854775807</lfnint64Max>
     <lfnuint8Max>255</lfnuint8Max>
     <lfnuint16Max>65535</lfnuint16Max>
     <lfnuint32Max>4294967295</lfnuint32Max>
@@ -21,7 +21,7 @@
     <lfdecimal4>43E3</lfdecimal4>
     <lfdecimal6>33.12345</lfdecimal6>
     <lfenum>enum3</lfenum>
-    <lfbits>bit3 bit2</lfbits>    
+    <lfbits>bit3 bit2</lfbits>
     <lfbinary>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</lfbinary>
     <lfempty />
     <lfunion1>324</lfunion1>
