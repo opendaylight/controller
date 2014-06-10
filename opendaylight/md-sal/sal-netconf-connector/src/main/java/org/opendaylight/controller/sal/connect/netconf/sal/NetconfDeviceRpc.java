@@ -11,10 +11,6 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
