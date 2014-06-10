@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e2f4b7f3",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 866
+      },
+      "writtenOn": "2014-06-10T21:29:02Z",
+      "side": 0,
+      "message": "The checkstyle maven plugin was added by commit\nhttps://git.opendaylight.org/gerrit/#/c/7710/\nand it should be preserved.\nIt replaced the previous configuration (dummy override) (BUG-272)",
+      "revId": "def85878437256907879623007d53209b5ae8c1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
