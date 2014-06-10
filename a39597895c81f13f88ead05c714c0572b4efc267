@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a7b00144",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "Separate out based on class accesstype. Makes it more readable.\n\ngetTypeName(Field f) {\n  // ignore static, transient and xmltransient fields\n  if (Modifier.isTransient(f.getModifiers()) || \n      Modifier.isStatic(f.getModifiers()) || \n      f.getAnnotation(XmlTransient.class) \u003d\u003d null ) {\n    return null;\n  }\n\n  String name \u003d getTypeName(f.getAnnotations(), f.getName());\n\n  if (_accessType \u003d\u003d XmlAccessType.NONE) {\n    return name;\n  } else if (_accessType \u003d\u003d XmlAccessType.FIELD) {\n    return name !\u003d null ? name : f.getName();\n  } else if (_accessType \u003d\u003d XmlAccessType.PUBLIC_MEMBER) {\n    if (!Modifier.isPublic(f.getModifiers())) return null;\n    return name !\u003d null ? name : f.getName();\n  } else {\n    return null;\n  }\n\n}",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6c07401d",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "* You have to avoid fields which are marked \u0027transient\u0027",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c7abc5d4",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "Adjust this method as previous comment.",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_47a015f4",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/TypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "* The name has to be the bean property name. Not method name.\n* Use bean introspector http://docs.oracle.com/javase/6/docs/api/java/beans/Introspector.html#getBeanInfo(java.lang.Class) to lookup property descriptors",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_878cdd80",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/WrapperTypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "_accessor.getAccessibleObject() is being used multiple times. Consider using a local var",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_67919998",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/query/WrapperTypeInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-06-10T18:02:18Z",
+      "side": 1,
+      "message": "space after if, else if",
+      "revId": "a39597895c81f13f88ead05c714c0572b4efc267",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
