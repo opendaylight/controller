@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.api.notify;
 
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
@@ -17,11 +15,11 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * The simplified process of the notification publishing is following:
  *
  * <ol>
- * <li> {@link Provider} invokes {@link #sendNotification(CompositeNode)}
- * <li> {@link Broker} finds {@link NotificationListener}s which subscribed for
+ * <li> {@link org.opendaylight.controller.sal.core.api.Provider} invokes {@link #sendNotification(CompositeNode)}
+ * <li> {@link org.opendaylight.controller.sal.core.api.Broker} finds {@link NotificationListener}s which subscribed for
  * the notification type.
  *
- * <li>For each subscriber {@link Broker} invokes
+ * <li>For each subscriber {@link org.opendaylight.controller.sal.core.api.Broker} invokes
  * {@link NotificationListener#onNotification(CompositeNode)}
  * </ol>
  */

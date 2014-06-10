@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.api;
 
-import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
-
 /**
  *
  * Session-specific instance of the broker functionality.
@@ -21,7 +19,7 @@ import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
  *
  * <p>
  * The consumer's (or provider's) instance of specific service could be obtained
- * by invoking {@link ConsumerSession#getService(Class)} method on session
+ * by invoking {@link org.opendaylight.controller.sal.core.api.Broker.ConsumerSession#getService(Class)} method on session
  * assigned to the consumer.
  *
  * <p>

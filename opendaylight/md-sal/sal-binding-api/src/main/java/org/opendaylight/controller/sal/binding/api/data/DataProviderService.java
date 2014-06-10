@@ -7,22 +7,17 @@
  */
 package org.opendaylight.controller.sal.binding.api.data;
 
-
 import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * DataProviderService is common access point for {@link BindingAwareProvider} providers
+ * DataProviderService is common access point for {@link org.opendaylight.controller.sal.binding.api.BindingAwareProvider} providers
  * to access data trees described by the YANG model.
- *
  */
 public interface DataProviderService extends DataBrokerService, DataProvisionService<InstanceIdentifier<? extends DataObject>, DataObject> {
-
-
     /**
      * Registers a data reader for particular subtree of overal YANG data tree.
      *

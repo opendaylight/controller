@@ -11,7 +11,6 @@ import java.util.EventListener;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -19,13 +18,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public interface DataModificationTransaction extends DataModification<InstanceIdentifier<? extends DataObject>, DataObject> {
-
     /**
      * Returns an unique identifier for transaction
      *
      */
     @Override
-    public Object getIdentifier();
+    Object getIdentifier();
 
     /**
      * Initiates a two-phase commit of candidate data.
@@ -44,7 +42,7 @@ public interface DataModificationTransaction extends DataModification<InstanceId
      * of this changes.
      *
      *
-     * @see DataCommitHandler for further information how two-phase commit is
+     * @see org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler for further information how two-phase commit is
      *      processed.
      * @param store
      *            Identifier of the store, where commit should occur.
@@ -52,9 +50,7 @@ public interface DataModificationTransaction extends DataModification<InstanceId
      *         encountered errors, if commit was not successful.
      */
     @Override
-    public Future<RpcResult<TransactionStatus>> commit();
-
-
+    Future<RpcResult<TransactionStatus>> commit();
 
     /**
      * Register a listener for transaction
@@ -64,12 +60,8 @@ public interface DataModificationTransaction extends DataModification<InstanceId
      */
     ListenerRegistration<DataTransactionListener> registerListener(DataTransactionListener listener);
 
-
-
     /**
      * Listener for transaction state changes
-     *
-     *
      */
     public interface DataTransactionListener extends EventListener {
         /**

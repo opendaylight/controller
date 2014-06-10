@@ -9,8 +9,6 @@ package org.opendaylight.controller.sal.core.api;
 
 import java.util.Set;
 
-import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -29,14 +27,14 @@ import com.google.common.util.concurrent.ListenableFuture;
  * {@link Provider#getProviderFunctionality()}
  * <li>passing an instance of implementation and {@link QName} of rpc as
  * arguments to the
- * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)}
+ * {@link org.opendaylight.controller.sal.core.api.Broker.ProviderSession#addRpcImplementation(QName, RpcImplementation)}
  * </ul>
  *
  * The simplified process of the invocation of rpc is following:
  *
  * <ol>
  * <li> {@link Consumer} invokes
- * {@link ConsumerSession#rpc(QName, CompositeNode)}
+ * {@link org.opendaylight.controller.sal.core.api.Broker.ConsumerSession#rpc(QName, CompositeNode)}
  * <li> {@link Broker} finds registered {@link RpcImplementation}s
  * <li> {@link Broker} invokes
  * {@link RpcImplementation#invokeRpc(QName, CompositeNode)}

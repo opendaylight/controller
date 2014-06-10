@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import java.util.concurrent.Future;
-
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -27,10 +25,10 @@ public interface DOMStoreReadTransaction extends DOMStoreTransaction {
      *            read
      * @return Listenable Future which contains read result
      *         <ul>
-     *         <li>If data at supplied path exists the {@link Future#get()}
+     *         <li>If data at supplied path exists the {@link java.util.concurrent.Future#get()}
      *         returns Optional object containing data
      *         <li>If data at supplied path does not exists the
-     *         {@link Future#get()} returns {@link Optional#absent()}.
+     *         {@link java.util.concurrent.Future#get()} returns {@link Optional#absent()}.
      *         </ul>
      */
     ListenableFuture<Optional<NormalizedNode<?,?>>> read(InstanceIdentifier path);

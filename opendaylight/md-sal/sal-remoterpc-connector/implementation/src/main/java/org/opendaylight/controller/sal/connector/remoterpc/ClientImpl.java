@@ -26,7 +26,6 @@ import org.opendaylight.controller.sal.connector.remoterpc.api.SystemException;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.Message;
 import org.opendaylight.controller.sal.connector.remoterpc.dto.RouteIdentifierImpl;
 import org.opendaylight.controller.sal.connector.remoterpc.util.XmlUtils;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -41,7 +40,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * An implementation of {@link RpcImplementation} that makes
+ * An implementation of {@link org.opendaylight.controller.sal.core.api.RpcImplementation} that makes
  * remote RPC calls
  */
 public class ClientImpl implements RemoteRpcClient {

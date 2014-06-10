@@ -8,9 +8,6 @@
 package org.opendaylight.controller.sal.core.api.notify;
 
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 
@@ -25,10 +22,10 @@ import org.opendaylight.yangtools.yang.common.QName;
  * The registration of notification listeners could be done by:
  * <ul>
  * <li>returning an instance of implementation in the return value of
- * {@link Provider#getProviderFunctionality()}
- * <li>passing an instance of implementation and {@link QName} of rpc as an
- * arguments to the
- * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)}
+ * {@link org.opendaylight.controller.sal.core.api.Provider#getProviderFunctionality()}
+ * <li>passing an instance of implementation and {@link QName} of an RPC as an
+ * argument to
+ * {@link org.opendaylight.controller.sal.core.api.Broker.ProviderSession#addRpcImplementation(QName, org.opendaylight.controller.sal.core.api.RpcImplementation)}
  * </ul>
  *
  *
