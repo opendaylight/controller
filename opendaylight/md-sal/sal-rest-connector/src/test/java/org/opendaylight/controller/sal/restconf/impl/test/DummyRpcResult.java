@@ -9,7 +9,8 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import java.util.Collection;
 
-import org.opendaylight.yangtools.yang.common.*;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class DummyRpcResult<T> implements RpcResult<T> {
 
@@ -23,7 +24,7 @@ public class DummyRpcResult<T> implements RpcResult<T> {
         errors = null;
     }
 
-    private DummyRpcResult(Builder<T> builder) {
+    private DummyRpcResult(final Builder<T> builder) {
         isSuccessful = builder.isSuccessful;
         result = builder.result;
         errors = builder.errors;
@@ -49,17 +50,17 @@ public class DummyRpcResult<T> implements RpcResult<T> {
         private T result;
         private Collection<RpcError> errors;
 
-        public Builder<T> isSuccessful(boolean isSuccessful) {
+        public Builder<T> isSuccessful(final boolean isSuccessful) {
             this.isSuccessful = isSuccessful;
             return this;
         }
 
-        public Builder<T> result(T result) {
+        public Builder<T> result(final T result) {
             this.result = result;
             return this;
         }
 
-        public Builder<T> errors(Collection<RpcError> errors) {
+        public Builder<T> errors(final Collection<RpcError> errors) {
             this.errors = errors;
             return this;
         }
