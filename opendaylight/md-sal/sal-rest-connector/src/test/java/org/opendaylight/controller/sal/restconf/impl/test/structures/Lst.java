@@ -7,17 +7,18 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test.structures;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Lst extends YangElement {
-    private Set<LstItem> lstItems;
+    private final Set<LstItem> lstItems;
 
-    public Lst(String name) {
+    public Lst(final String name) {
         super(name);
         lstItems = new HashSet<>();
     }
 
-    public Lst addLstItem(LstItem lstItem) {
+    public Lst addLstItem(final LstItem lstItem) {
         lstItem.setLstName(name);
         while (this.lstItems.contains(lstItem)) {
             lstItem.incNumOfEqualItems();
@@ -31,7 +32,7 @@ public class Lst extends YangElement {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -59,5 +60,4 @@ public class Lst extends YangElement {
         result = prime * result + ((lstItems == null) ? 0 : lstItems.hashCode());
         return result;
     }
-
 }
