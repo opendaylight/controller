@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.Path;
 public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable, AsyncDataTransactionFactory<P, D> {
 
     /**
-     * Create a new read only transaction which will continue the chain.
+     * Allocates a new read only transaction which will continue the chain.
      * The previous read-write transaction has to be either COMMITED or CANCELLED.
      *
      * @return New transaction in the chain.
@@ -31,8 +31,20 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable, A
 
 
     /**
-     * Create a new read write transaction which will continue the chain.
-     * The previous read-write transaction has to be either COMMITED or CANCELLED.
+     * Allocates a new write-only transaction which will continue the chain.
+     * The previous write transaction has to be either COMMITED or CANCELLED.
+     *
+     * @return New transaction in the chain.
+     * @throws IllegalStateException if the previous transaction was not COMMITTED
+     *    or CANCELLED.
+     * @throws TransactionChainClosedException if the chain has been closed.
+     */
+    @Override
+    public AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
+
+    /**
+     * Allocates a new read write transaction which will continue the chain.
+     * The previous write transaction has to be either COMMITED or CANCELLED.
      *
      * @return New transaction in the chain.
      * @throws IllegalStateException if the previous transaction was not COMMITTED

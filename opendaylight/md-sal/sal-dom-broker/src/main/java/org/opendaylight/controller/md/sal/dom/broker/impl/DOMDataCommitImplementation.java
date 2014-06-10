@@ -15,28 +15,29 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * 
+ *
  * Implementation prototype of commit method for
  * {@link DOMForwardedWriteTransaction}.
- * 
+ *
  */
 public interface DOMDataCommitImplementation {
 
     /**
      * User-supplied implementation of {@link DOMDataWriteTransaction#commit()}
      * for transaction.
-     * 
+     *
      * Callback invoked when {@link DOMDataWriteTransaction#commit()} is invoked
      * on transaction created by this factory.
-     * 
+     *
      * @param transaction
      *            Transaction on which {@link DOMDataWriteTransaction#commit()}
      *            was invoked.
      * @param cohorts
      *            Iteration of cohorts for subtransactions associated with
      *            commited transaction.
-     * 
+     *
      */
     ListenableFuture<RpcResult<TransactionStatus>> commit(final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts);
 }
+

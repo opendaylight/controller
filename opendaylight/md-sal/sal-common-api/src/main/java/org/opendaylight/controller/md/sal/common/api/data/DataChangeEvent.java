@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
 
+@Deprecated
 public interface DataChangeEvent<P extends Path<P>,D> extends DataChange<P, D>, Immutable {
 
     /**

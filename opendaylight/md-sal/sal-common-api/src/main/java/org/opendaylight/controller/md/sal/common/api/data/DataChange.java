@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.opendaylight.yangtools.concepts.Path;
 
+@Deprecated
 public interface DataChange<P extends Path<P>, D> {
 
     /**

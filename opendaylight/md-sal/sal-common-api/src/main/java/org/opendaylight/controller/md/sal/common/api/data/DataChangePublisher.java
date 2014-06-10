@@ -10,6 +10,16 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ *
+ *
+ *
+ * @param <P>
+ * @param <D>
+ * @param <L>
+ * @deprecated Use {@link AsyncDataBroker} instead.
+ */
+@Deprecated
 public interface DataChangePublisher<P extends Path<P>, D, L extends DataChangeListener<P,D>> {
 
     ListenerRegistration<L> registerDataChangeListener(P path, L listener);

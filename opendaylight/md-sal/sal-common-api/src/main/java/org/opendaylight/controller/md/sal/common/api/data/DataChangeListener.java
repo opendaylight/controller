@@ -10,7 +10,14 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import java.util.EventListener;
 
 import org.opendaylight.yangtools.concepts.Path;
-
+/**
+ *
+ *
+ * @param <P>
+ * @param <D>
+ * @deprecated Use {@link AsyncDataChangeListener} or one of its type captures instead.
+ */
+@Deprecated
 public interface DataChangeListener<P extends Path<P>, D> extends EventListener {
     /**
      * Note that this method may be invoked from a shared thread pool, so
