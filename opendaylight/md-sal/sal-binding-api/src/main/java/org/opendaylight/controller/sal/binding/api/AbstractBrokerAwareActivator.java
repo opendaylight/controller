@@ -31,7 +31,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
                 @Override
                 public void run() {
-                    onBrokerAvailable(broker, context);;
+                    onBrokerAvailable(broker, context);
                 }
             });
             return broker;
