@@ -110,8 +110,10 @@ public interface AsyncWriteTransaction<P extends Path<P>, D>  extends AsyncTrans
      * @param store Identifier of the store, where commit should occur.
      * @return Result of the Commit, containing success information or list of
      *         encountered errors, if commit was not successful. The Future
-     *         blocks until {@link TransactionStatus#COMMITED} or
-     *         {@link TransactionStatus#FAILED} is reached.
+     *         blocks until {@link TransactionStatus#COMMITED} is reached.
+     *         Future will fail with {@link TransactionCommitFailedException}
+     *         if Commit of this transaction failed.
+     *
      * @throws IllegalStateException if the transaction is not {@link TransactionStatus#NEW}
      */
     public ListenableFuture<RpcResult<TransactionStatus>> commit();
