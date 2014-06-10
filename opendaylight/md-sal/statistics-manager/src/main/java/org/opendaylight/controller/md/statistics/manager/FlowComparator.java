@@ -32,6 +32,9 @@ final class FlowComparator {
     }
 
     public static boolean flowEquals(Flow statsFlow, Flow storedFlow) {
+        if (statsFlow == null || storedFlow == null) {
+            return false;
+        }
         if (statsFlow.getClass() != storedFlow.getClass()) {
             return false;
         }
@@ -42,19 +45,18 @@ final class FlowComparator {
         } else if(!statsFlow.getContainerName().equals(storedFlow.getContainerName())) {
             return false;
         }
-        if (statsFlow.getMatch()== null) {
-            if (storedFlow.getMatch() != null) {
-                return false;
-            }
-        } //else if(!statsFlow.getMatch().equals(storedFlow.getMatch())) {
-        else if(!matchEquals(statsFlow.getMatch(), storedFlow.getMatch())) {
-            return false;
-        }
         if (storedFlow.getPriority() == null) {
             if (statsFlow.getPriority() != null && statsFlow.getPriority()!= 0x8000) {
                 return false;
             }
         } else if(!statsFlow.getPriority().equals(storedFlow.getPriority())) {
+            return false;
+        }
+        if (statsFlow.getMatch()== null) {
+            if (storedFlow.getMatch() != null) {
+                return false;
+            }
+        } else if(!matchEquals(statsFlow.getMatch(), storedFlow.getMatch())) {
             return false;
         }
         if (statsFlow.getTableId() == null) {
