@@ -55,7 +55,7 @@
                               <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
                               <name>ref_binding-data-broker</name>
                             </data-broker>
-                    
+
                             <notification-service>
                                 <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
                                     binding:binding-notification-service
