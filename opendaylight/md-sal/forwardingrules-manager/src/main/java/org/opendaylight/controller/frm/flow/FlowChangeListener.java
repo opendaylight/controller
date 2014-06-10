@@ -8,21 +8,17 @@
 package org.opendaylight.controller.frm.flow;
 
 import org.opendaylight.controller.frm.AbstractChangeListener;
+import org.opendaylight.controller.frm.FlowCookieManager;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowTableRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -36,23 +32,17 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  */
-public class FlowChangeListener extends AbstractChangeListener {
+class FlowChangeListener extends AbstractChangeListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlowChangeListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlowChangeListener.class);
 
-    private final SalFlowService salFlowService;
+    private final FlowProvider provider;
 
-    public SalFlowService getSalFlowService() {
-        return this.salFlowService;
-    }
-
-    public FlowChangeListener(final SalFlowService manager) {
-        this.salFlowService = manager;
-    }
-
-    @Override
-    protected void validate() throws IllegalStateException {
-        FlowTransactionValidator.validate(this);
+    public FlowChangeListener (final FlowProvider provider) {
+        if (provider == null) {
+            throw new IllegalArgumentException("FlowProvider can not be null !");
+        }
+        this.provider = provider;
     }
 
     @Override
@@ -60,8 +50,8 @@ public class FlowChangeListener extends AbstractChangeListener {
         if ((removeDataObj instanceof Flow)) {
 
             final Flow flow = ((Flow) removeDataObj);
-            final InstanceIdentifier<Table> tableInstanceId = identifier.<Table> firstIdentifierOf(Table.class);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
+            final InstanceIdentifier<Table> tableInstanceId = identifier.firstIdentifierOf(Table.class);
+            final InstanceIdentifier<Node> nodeInstanceId = identifier.firstIdentifierOf(Node.class);
             final RemoveFlowInputBuilder builder = new RemoveFlowInputBuilder(flow);
 
             builder.setFlowRef(new FlowRef(identifier));
@@ -70,7 +60,9 @@ public class FlowChangeListener extends AbstractChangeListener {
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salFlowService.removeFlow((RemoveFlowInput) builder.build());
+            this.provider.getSalFlowService().removeFlow(builder.build());
+            FlowCookieManager.flowCookieMapRemove( provider.getDataService(),
+                    flow.getCookie(), flow.getId(), tableInstanceId );
             LOG.debug("Transaction {} - Removed Flow has removed flow: {}", new Object[]{uri, removeDataObj});
         }
     }
@@ -81,7 +73,7 @@ public class FlowChangeListener extends AbstractChangeListener {
 
             final Flow originalFlow = ((Flow) original);
             final Flow updatedFlow = ((Flow) update);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node>firstIdentifierOf(Node.class);
+            final InstanceIdentifier<Node> nodeInstanceId = identifier.firstIdentifierOf(Node.class);
             final UpdateFlowInputBuilder builder = new UpdateFlowInputBuilder();
 
             builder.setNode(new NodeRef(nodeInstanceId));
@@ -90,10 +82,10 @@ public class FlowChangeListener extends AbstractChangeListener {
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
 
-            builder.setUpdatedFlow((UpdatedFlow) (new UpdatedFlowBuilder(updatedFlow)).build());
-            builder.setOriginalFlow((OriginalFlow) (new OriginalFlowBuilder(originalFlow)).build());
+            builder.setUpdatedFlow((new UpdatedFlowBuilder(updatedFlow)).build());
+            builder.setOriginalFlow((new OriginalFlowBuilder(originalFlow)).build());
 
-            this.salFlowService.updateFlow((UpdateFlowInput) builder.build());
+            this.provider.getSalFlowService().updateFlow(builder.build());
             LOG.debug("Transaction {} - Update Flow has updated flow {} with {}", new Object[]{uri, original, update});
       }
     }
@@ -103,18 +95,31 @@ public class FlowChangeListener extends AbstractChangeListener {
         if ((addDataObj instanceof Flow)) {
 
             final Flow flow = ((Flow) addDataObj);
-            final InstanceIdentifier<Table> tableInstanceId = identifier.<Table> firstIdentifierOf(Table.class);
-            final InstanceIdentifier<Node> nodeInstanceId = identifier.<Node> firstIdentifierOf(Node.class);
+            final InstanceIdentifier<Table> tableInstanceId = identifier.firstIdentifierOf(Table.class);
+            final InstanceIdentifier<Node> nodeInstanceId = identifier.firstIdentifierOf(Node.class);
+            final NodeRef nodeRef = new NodeRef(nodeInstanceId);
+            final FlowCookie flowCookie = new FlowCookie(FlowCookieManager.INSTANCE.getNewCookie(tableInstanceId));
+
+            FlowCookieManager.flowCookieMapUpdate( this.provider.getDataService(),
+                    flowCookie, flow.getId(), tableInstanceId);
+
             final AddFlowInputBuilder builder = new AddFlowInputBuilder(flow);
 
-            builder.setNode(new NodeRef(nodeInstanceId));
+            builder.setNode(nodeRef);
             builder.setFlowRef(new FlowRef(identifier));
             builder.setFlowTable(new FlowTableRef(tableInstanceId));
+            builder.setCookie( flowCookie );
 
             Uri uri = new Uri(this.getTransactionId());
             builder.setTransactionUri(uri);
-            this.salFlowService.addFlow((AddFlowInput) builder.build());
+            this.provider.getSalFlowService().addFlow(builder.build());
             LOG.debug("Transaction {} - Add Flow has added flow: {}", new Object[]{uri, addDataObj});
         }
+    }
+
+    @Override
+    protected boolean isNodeAvaliable(InstanceIdentifier<? extends DataObject> identifier) {
+        final InstanceIdentifier<Node> nodeInstanceId = identifier.firstIdentifierOf(Node.class);
+        return this.provider.getDataService().readOperationalData(nodeInstanceId) != null;
     }
 }

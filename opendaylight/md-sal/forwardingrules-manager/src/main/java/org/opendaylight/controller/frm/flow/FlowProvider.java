@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.frm.flow;
 
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -25,28 +27,52 @@ import org.slf4j.LoggerFactory;
 
 public class FlowProvider implements AutoCloseable {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlowProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlowProvider.class);
 
     private SalFlowService salFlowService;
     private DataProviderService dataService;
+    private NotificationProviderService notificationService;
 
     /* DataChangeListener */
-    private FlowChangeListener flowDataChangeListener;
-    ListenerRegistration<DataChangeListener> flowDataChangeListenerRegistration;
+    private DataChangeListener flowDataChangeListener;
+    private ListenerRegistration<DataChangeListener> flowDataChangeListenerRegistration;
 
-    public void start() {
+    public void init (final DataProviderService dataService,
+                      final NotificationProviderService nps) {
+        LOG.info("FRM Flow Config Provider initialization.");
+        if (dataService == null) {
+            throw new IllegalArgumentException("DataProviderService can not be null !");
+        }
+        if (nps == null) {
+            throw new IllegalArgumentException("NotificationProviderService can not be null !");
+        }
+        this.dataService = dataService;
+        this.notificationService = nps;
+    }
+
+    public void start(final RpcConsumerRegistry rpcRegistry) {
+        if (rpcRegistry == null) {
+            throw new IllegalArgumentException("RpcConsumerRegistry can not be null !");
+        }
+        if (rpcRegistry.getRpcService(SalFlowService.class) == null) {
+            throw new IllegalStateException("RPC SalFlowService not found.");
+        }
+
+        this.salFlowService = rpcRegistry.getRpcService(SalFlowService.class);
         /* Build Path */
-        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.<Nodes> builder(Nodes.class);
-        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.<Node> child(Node.class);
-        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode = nodeChild.<FlowCapableNode> augmentation(FlowCapableNode.class);
-        InstanceIdentifierBuilder<Table> tableChild = augmentFlowCapNode.<Table> child(Table.class);
-        InstanceIdentifierBuilder<Flow> flowChild = tableChild.<Flow> child(Flow.class);
+        InstanceIdentifierBuilder<Nodes> nodesBuilder = InstanceIdentifier.builder(Nodes.class);
+        InstanceIdentifierBuilder<Node> nodeChild = nodesBuilder.child(Node.class);
+        InstanceIdentifierBuilder<FlowCapableNode> augmentFlowCapNode =
+                nodeChild.augmentation(FlowCapableNode.class);
+        InstanceIdentifierBuilder<Table> tableChild = augmentFlowCapNode.child(Table.class);
+        InstanceIdentifierBuilder<Flow> flowChild = tableChild.child(Flow.class);
         final InstanceIdentifier<? extends DataObject> flowDataObjectPath = flowChild.toInstance();
 
         /* DataChangeListener registration */
-        this.flowDataChangeListener = new FlowChangeListener(this.salFlowService);
-        this.flowDataChangeListenerRegistration = this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);
-        LOG.info("Flow Config Provider started.");
+        this.flowDataChangeListener = new FlowChangeListener(FlowProvider.this);
+        this.flowDataChangeListenerRegistration =
+                this.dataService.registerDataChangeListener(flowDataObjectPath, flowDataChangeListener);
+        LOG.info("FRM Flow Config Provider started.");
     }
 
     protected DataModificationTransaction startChange() {
@@ -54,17 +80,33 @@ public class FlowProvider implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        if(flowDataChangeListenerRegistration != null){
-            flowDataChangeListenerRegistration.close();
+    public void close() {
+        LOG.info("FRM Flow Config Provider stopped.");
+        if (flowDataChangeListenerRegistration != null) {
+            try {
+                flowDataChangeListenerRegistration.close();
+            }
+            catch (Exception e) {
+                String errMsg = "Error by stop FRM Flow Config Provider.";
+                LOG.error(errMsg, e);
+                throw new IllegalStateException(errMsg, e);
+            }
         }
     }
 
-    public void setDataService(final DataProviderService dataService) {
-        this.dataService = dataService;
+    public DataChangeListener getFlowDataChangeListener() {
+        return flowDataChangeListener;
     }
 
-    public void setSalFlowService(final SalFlowService salFlowService) {
-        this.salFlowService = salFlowService;
+    public SalFlowService getSalFlowService() {
+        return salFlowService;
+    }
+
+    public DataProviderService getDataService() {
+        return dataService;
+    }
+
+    public NotificationProviderService getNotificationService() {
+        return notificationService;
     }
 }
