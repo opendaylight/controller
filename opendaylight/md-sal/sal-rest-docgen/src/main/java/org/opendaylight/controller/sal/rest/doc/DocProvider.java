@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.sal.rest.doc;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -20,74 +22,69 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
+public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Broker, Broker>, Provider, AutoCloseable {
 
+    private static final Logger _logger = LoggerFactory.getLogger(DocProvider.class);
 
-public class DocProvider implements BundleActivator,
-                                    ServiceTrackerCustomizer<Broker, Broker>,
-                                    Provider,
-                                    AutoCloseable {
+    private ServiceTracker<Broker, Broker> brokerServiceTracker;
+    private BundleContext bundleContext;
+    private Broker.ProviderSession session;
 
-  private Logger _logger = LoggerFactory.getLogger(DocProvider.class);
+    @Override
+    public void close() throws Exception {
+        stop(bundleContext);
+    }
 
-  private ServiceTracker<Broker, Broker> brokerServiceTracker;
-  private BundleContext bundleContext;
-  private Broker.ProviderSession session;
+    @Override
+    public void onSessionInitiated(final Broker.ProviderSession providerSession) {
+        SchemaService schemaService = providerSession.getService(SchemaService.class);
+        ApiDocGenerator.getInstance().setSchemaService(schemaService);
 
-  @Override
-  public void close() throws Exception {
-    stop(bundleContext);
-  }
+        _logger.debug("Restconf API Explorer started");
+    }
 
-  @Override
-  public void onSessionInitiated(Broker.ProviderSession providerSession) {
-    SchemaService schemaService = providerSession.getService(SchemaService.class);
-    ApiDocGenerator.getInstance().setSchemaService(schemaService);
+    @Override
+    public Collection<ProviderFunctionality> getProviderFunctionality() {
+        return Collections.emptySet();
+    }
 
-    _logger.debug("Restconf API Explorer started");
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        bundleContext = context;
+        brokerServiceTracker = new ServiceTracker<>(context, Broker.class, this);
+        brokerServiceTracker.open();
+    }
 
-  }
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        if (brokerServiceTracker != null) {
+            brokerServiceTracker.close();
+        }
 
-  @Override
-  public Collection<ProviderFunctionality> getProviderFunctionality() {
-    return Collections.emptySet();
-  }
+        if (session != null) {
+            session.close();
+        }
+    }
 
-  @Override
-  public void start(BundleContext context) throws Exception {
-    bundleContext = context;
-    brokerServiceTracker = new ServiceTracker(context, Broker.class, this);
-    brokerServiceTracker.open();
-  }
+    @Override
+    public Broker addingService(final ServiceReference<Broker> reference) {
+        Broker broker = bundleContext.getService(reference);
+        session = broker.registerProvider(this, bundleContext);
+        return broker;
+    }
 
-  @Override
-  public void stop(BundleContext context) throws Exception {
-    if (brokerServiceTracker != null)
-      brokerServiceTracker.close();
+    @Override
+    public void modifiedService(final ServiceReference<Broker> reference, final Broker service) {
+        if (session != null) {
+            session.close();
+        }
 
-    if (session != null)
-      session.close();
-  }
+        Broker broker = bundleContext.getService(reference);
+        session = broker.registerProvider(this, bundleContext);
+    }
 
-  @Override
-  public Broker addingService(ServiceReference<Broker> reference) {
-    Broker broker = bundleContext.getService(reference);
-    session = broker.registerProvider(this, bundleContext);
-    return broker;
-  }
-
-  @Override
-  public void modifiedService(ServiceReference<Broker> reference, Broker service) {
-    if (session != null)
-      session.close();
-
-    Broker broker = bundleContext.getService(reference);
-    session = broker.registerProvider(this, bundleContext);
-  }
-
-  @Override
-  public void removedService(ServiceReference<Broker> reference, Broker service) {
-    bundleContext.ungetService(reference);
-  }
+    @Override
+    public void removedService(final ServiceReference<Broker> reference, final Broker service) {
+        bundleContext.ungetService(reference);
+    }
 }
