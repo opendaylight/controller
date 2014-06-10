@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import java.util.EventListener;
 
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 
 /**
@@ -21,7 +20,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
  * failure is visible to client code.
  *
  * This is internal API for MD-SAL implementations, for consumer facing error
- * listeners see {@link TransactionChainListener}.
+ * listeners see {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener}.
  *
  */
 interface DOMDataCommitErrorListener extends EventListener {

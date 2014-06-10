@@ -14,7 +14,6 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -27,12 +26,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * /**
- * 
+ *
+ *
  * Read-Write Transaction, which is composed of several
- * {@link DOMStoreReadTransaction} transactions. Subtransaction is selected by
+ * {@link DOMStoreWriteTransaction} transactions. Subtransaction is selected by
  * {@link LogicalDatastoreType} type parameter in:
- * 
+ *
  * <ul>
  * <li>{@link #put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
  * <li>{@link #delete(LogicalDatastoreType, InstanceIdentifier)}
@@ -41,9 +40,9 @@ import com.google.common.util.concurrent.ListenableFuture;
  * <p>
  * {@link #commit()} will result in invocation of
  * {@link DOMDataCommitImplementation#commit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
- * invocation with all {@link DOMStoreThreePhaseCommitCohort} for underlying
+ * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
  * transactions.
- * 
+ *
  * @param <T>
  *            Subtype of {@link DOMStoreWriteTransaction} which is used as
  *            subtransaction.

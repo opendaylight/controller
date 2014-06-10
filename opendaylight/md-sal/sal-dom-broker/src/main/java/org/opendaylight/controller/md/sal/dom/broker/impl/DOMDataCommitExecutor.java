@@ -18,21 +18,21 @@ import com.google.common.util.concurrent.ListenableFuture;
 /**
  * Executor of Three Phase Commit coordination for
  * {@link DOMDataWriteTransaction} transactions.
- * 
+ *
  * Implementations are responsible for executing implementation of three-phase
  * commit protocol on supplied {@link DOMStoreThreePhaseCommitCohort}s.
- * 
- * 
+ *
+ *
  */
 interface DOMDataCommitExecutor {
 
     /**
      * Submits supplied transaction to be executed in context of provided
      * cohorts.
-     * 
+     *
      * Transaction is used only as a context, cohorts should be associated with
      * this transaction.
-     * 
+     *
      * @param tx
      *            Transaction to be used as context for reporting
      * @param cohort
@@ -43,7 +43,7 @@ interface DOMDataCommitExecutor {
      * @return ListenableFuture which contains RpcResult with
      *         {@link TransactionStatus#COMMITED} if commit coordination on
      *         cohorts finished successfully.
-     * 
+     *
      */
     ListenableFuture<RpcResult<TransactionStatus>> submit(DOMDataWriteTransaction tx,
             Iterable<DOMStoreThreePhaseCommitCohort> cohort, Optional<DOMDataCommitErrorListener> listener);

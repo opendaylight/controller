@@ -12,7 +12,6 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -28,9 +27,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * NormalizedNode implementation of {@link TransactionChain} which is backed
+ * NormalizedNode implementation of {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain} which is backed
  * by several {@link DOMStoreTransactionChain} differentiated by provided
- * {@link LogicalDatastoreType} type.
+ * {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} type.
  *
  */
 public class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransactionFactory<DOMStoreTransactionChain>

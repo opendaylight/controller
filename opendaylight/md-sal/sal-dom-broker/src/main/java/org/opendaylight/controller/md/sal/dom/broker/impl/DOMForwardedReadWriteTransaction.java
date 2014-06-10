@@ -8,9 +8,7 @@
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -19,11 +17,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * 
+ *
  * Read-Write Transaction, which is composed of several
- * {@link DOMStoreReadTransaction} transactions. Subtransaction is selected by
+ * {@link DOMStoreReadWriteTransaction} transactions. Subtransaction is selected by
  * {@link LogicalDatastoreType} type parameter in:
- * 
+ *
  * <ul>
  * <li>{@link #read(LogicalDatastoreType, InstanceIdentifier)}
  * <li>{@link #put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
@@ -32,10 +30,11 @@ import com.google.common.util.concurrent.ListenableFuture;
  * </ul>
  * {@link #commit()} will result in invocation of
  * {@link DOMDataCommitImplementation#commit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
- * invocation with all {@link DOMStoreThreePhaseCommitCohort} for underlying
+ * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
  * transactions.
- * 
+ *
  */
+
 class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction> implements
         DOMDataReadWriteTransaction {
 

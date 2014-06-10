@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * 
+ *
  * Read Only Transaction, which is composed of several
  * {@link DOMStoreReadTransaction} transactions. Subtransaction is selected by
  * {@link LogicalDatastoreType} type parameter in
