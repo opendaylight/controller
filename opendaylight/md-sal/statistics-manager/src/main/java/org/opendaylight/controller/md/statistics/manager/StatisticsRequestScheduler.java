@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Main responsibility of the class is to check the MD-SAL data store read/write
- * transaction accumulation level and send statistics request if number of pending 
+ * transaction accumulation level and send statistics request if number of pending
  * read/write transactions are zero.
  * @author avishnoi@in.ibm.com
  *
@@ -36,15 +36,15 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
     private final Timer timer = new Timer("request-monitor", true);
 
     // We need ordered retrieval, and O(1) contains operation
-    private final Map<AbstractStatsTracker,Integer> requestQueue = 
+    private final Map<AbstractStatsTracker,Integer> requestQueue =
             Collections.synchronizedMap(new LinkedHashMap<AbstractStatsTracker,Integer>());
-    
+
     private Long PendingTransactions;
-    
+
     private long lastRequestTime = System.nanoTime();
-    
+
     private static final long REQUEST_MONITOR_INTERVAL = 1000;
-    
+
     private final TimerTask task = new TimerTask() {
         @Override
         public void run() {
@@ -58,11 +58,11 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
     public StatisticsRequestScheduler(){
         PendingTransactions = (long) 0;
     }
-    
+
     public void addRequestToSchedulerQueue(AbstractStatsTracker statsRequest){
         requestQueue.put(statsRequest, null);
     }
-    
+
     public void removeRequestsFromSchedulerQueue(NodeRef node){
         AbstractStatsTracker stats = null;
         synchronized(requestQueue){
@@ -97,7 +97,7 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
     }
     @Override
     public void onStatusUpdated(DataModificationTransaction transaction, TransactionStatus status) {
-        
+
         AbstractStatsTracker stats = null;
         synchronized(PendingTransactions){
             switch(status){
@@ -119,7 +119,7 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
         }
         sendStatsRequest(stats);
     }
-    
+
     private void sendStatsRequest(AbstractStatsTracker stats){
         if(stats != null){
             try{

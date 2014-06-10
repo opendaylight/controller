@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -24,10 +24,10 @@ public class FRMActivator extends AbstractBindingAwareProvider {
 
     private final static Logger LOG = LoggerFactory.getLogger(FRMActivator.class);
 
-    private static FlowProvider flowProvider = new FlowProvider(); 
+    private static FlowProvider flowProvider = new FlowProvider();
     private static GroupProvider groupProvider = new GroupProvider();
     private static MeterProvider meterProvider = new MeterProvider();
-    
+
     @Override
     public void onSessionInitiated(final ProviderContext session) {
         DataProviderService flowSalService = session.<DataProviderService>getSALService(DataProviderService.class);
@@ -46,7 +46,7 @@ public class FRMActivator extends AbstractBindingAwareProvider {
         FRMActivator.meterProvider.setSalMeterService(rpcMeterSalService);
         FRMActivator.meterProvider.start();
     }
-    
+
     @Override
     protected void stopImpl(final BundleContext context) {
         try {

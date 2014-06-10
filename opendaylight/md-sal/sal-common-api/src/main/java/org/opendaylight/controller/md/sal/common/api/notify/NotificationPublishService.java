@@ -12,6 +12,6 @@ import java.util.concurrent.ExecutorService;
 public interface NotificationPublishService<N> {
 
     void publish(N notification);
-    
+
     void publish(N notification,ExecutorService executor);
 }

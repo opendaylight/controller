@@ -112,7 +112,7 @@ public class RootBindingAwareBroker implements //
         LOG.info("Starting Binding Aware Broker: {}", identifier);
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
-        
+
 
         supportedConsumerServices = ImmutableClassToInstanceMap.<BindingAwareService> builder()
                 .put(NotificationService.class, getRoot()) //
@@ -144,19 +144,19 @@ public class RootBindingAwareBroker implements //
     public void close() throws Exception {
         // FIXME: Close all sessions
     }
-    
+
     @Override
     public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type, T implementation)
             throws IllegalStateException {
         return getRoot().addRoutedRpcImplementation(type, implementation);
     }
-    
+
     @Override
     public <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
             throws IllegalStateException {
         return getRoot().addRpcImplementation(type, implementation);
     }
-    
+
     @Override
     public <T extends RpcService> T getRpcService(Class<T> module) {
         return getRoot().getRpcService(module);
@@ -166,7 +166,7 @@ public class RootBindingAwareBroker implements //
             L arg0) {
         return getRoot().registerRouteChangeListener(arg0);
     }
-    
+
 
     public class RootSalInstance extends
             AbstractBindingSalProviderInstance<DataProviderService, NotificationProviderService, RpcProviderRegistry> {

@@ -23,12 +23,12 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
     private ServiceTracker<BindingAwareBroker, BindingAwareBroker> tracker;
     private BindingAwareBroker broker;
     private ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> customizer = new ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker>() {
-        
+
         @Override
         public BindingAwareBroker addingService(ServiceReference<BindingAwareBroker> reference) {
             broker = context.getService(reference);
             mdActivationPool.execute(new Runnable() {
-                
+
                 @Override
                 public void run() {
                     onBrokerAvailable(broker, context);;
@@ -36,50 +36,50 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
             });
             return broker;
         }
-        
+
         @Override
         public void modifiedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void removedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
             // TODO Auto-generated method stub
-            
+
         }
 
     };
-    
-    
+
+
     @Override
     public final void start(BundleContext context) throws Exception {
         this.context = context;
         startImpl(context);
         tracker = new ServiceTracker<>(context, BindingAwareBroker.class, customizer);
         tracker.open();
-        
+
     }
 
 
-    
+
     @Override
     public final  void stop(BundleContext context) throws Exception {
         tracker.close();
         stopImpl(context);
     }
-    
-    
+
+
     /**
      * Called when this bundle is started (before
      * {@link #onSessionInitiated(ProviderContext)} so the Framework can perform
      * the bundle-specific activities necessary to start this bundle. This
      * method can be used to register services or to allocate any resources that
      * this bundle needs.
-     * 
+     *
      * <p>
      * This method must complete and return to its caller in a timely manner.
-     * 
+     *
      * @param context
      *            The execution context of the bundle being started.
      * @throws Exception
@@ -99,10 +99,10 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      * started. There should be no active threads that were started by this
      * bundle when this bundle returns. A stopped bundle must not call any
      * Framework objects.
-     * 
+     *
      * <p>
      * This method must complete and return to its caller in a timely manner.
-     * 
+     *
      * @param context The execution context of the bundle being stopped.
      * @throws Exception If this method throws an exception, the bundle is still
      *         marked as stopped, and the Framework will remove the bundle's
@@ -112,11 +112,11 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
     protected void stopImpl(BundleContext context) {
         // NOOP
     }
-    
+
 
     protected abstract void onBrokerAvailable(BindingAwareBroker broker, BundleContext context);
-    
+
     protected void onBrokerRemoved(BindingAwareBroker broker, BundleContext context) {
-        
+
     }
 }

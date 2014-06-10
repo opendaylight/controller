@@ -103,7 +103,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
             final OpendaylightGroupStatisticsService groupStatsService,
             final OpendaylightMeterStatisticsService meterStatsService,
             final OpendaylightPortStatisticsService portStatsService,
-            final OpendaylightQueueStatisticsService queueStatsService, 
+            final OpendaylightQueueStatisticsService queueStatsService,
             final StatisticsRequestScheduler srScheduler) {
         this.dps = Preconditions.checkNotNull(dps);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
@@ -274,20 +274,20 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         this.srScheduler.addRequestToSchedulerQueue(flowTableStats);
 
         this.srScheduler.addRequestToSchedulerQueue(flowStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(nodeConnectorStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(groupStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(groupDescStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(meterStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(meterConfigStats);
-        
+
         this.srScheduler.addRequestToSchedulerQueue(queueStats);
     }
-    
+
     public synchronized void start(final Timer timer) {
         flowStats.start(dps);
         groupDescStats.start(dps);
@@ -313,7 +313,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         meterStats.close();
         queueStats.close();
 
-        //Clean up queued statistics request from scheduler queue 
+        //Clean up queued statistics request from scheduler queue
         srScheduler.removeRequestsFromSchedulerQueue(this.getNodeRef());
 
         logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());

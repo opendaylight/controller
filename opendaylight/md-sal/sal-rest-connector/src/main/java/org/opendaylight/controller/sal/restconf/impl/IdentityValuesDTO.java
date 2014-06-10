@@ -20,11 +20,11 @@ public final class IdentityValuesDTO {
         elementData.add(new IdentityValue(namespace, value, prefix));
         this.originValue = originValue;
     }
-    
+
     public IdentityValuesDTO(String originValue) {
         this.originValue = originValue;
     }
-    
+
     public IdentityValuesDTO() {
         originValue = null;
     }
@@ -32,21 +32,21 @@ public final class IdentityValuesDTO {
     public void add(String namespace, String value, String prefix) {
         elementData.add(new IdentityValue(namespace, value, prefix));
     }
-    
+
     public void add(IdentityValue identityValue) {
         elementData.add(identityValue);
     }
-    
+
 
     public List<IdentityValue> getValuesWithNamespaces() {
         return Collections.unmodifiableList(elementData);
     }
-    
+
     @Override
     public String toString() {
         return elementData.toString();
     }
-    
+
     public String getOriginValue() {
         return originValue;
     }
@@ -86,7 +86,7 @@ public final class IdentityValuesDTO {
         public void setPredicates(List<Predicate> predicates) {
             this.predicates = predicates;
         }
-        
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -110,22 +110,22 @@ public final class IdentityValuesDTO {
         }
 
     }
-    
+
     public static final class Predicate {
-        
+
         private final IdentityValue name;
         private final String value;
-        
+
         public Predicate(IdentityValue name, String value) {
             super();
             this.name = name;
             this.value = value;
         }
-        
+
         public IdentityValue getName() {
             return name;
         }
-        
+
         public String getValue() {
             return value;
         }
@@ -141,10 +141,10 @@ public final class IdentityValuesDTO {
             }
             return sb.toString();
         }
-        
+
         public boolean isLeafList() {
             return name == null ? true : false;
         }
-        
+
     }
 }

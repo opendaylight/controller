@@ -22,7 +22,7 @@ public interface RpcRoutingTable<C extends BaseIdentity, S extends RpcService> e
     /**
      * Updates route for particular path to specified instance of
      * {@link RpcService}.
-     * 
+     *
      * @param path
      *            Path for which RpcService routing is to be updated
      * @param service
@@ -33,19 +33,19 @@ public interface RpcRoutingTable<C extends BaseIdentity, S extends RpcService> e
 
     /**
      * Deletes a route for particular path
-     * 
+     *
      * @param path
      *            Path for which
      */
     void removeRoute(InstanceIdentifier<?> path);
 
     /**
-     * 
+     *
      */
     S getRoute(InstanceIdentifier<?> nodeInstance);
 
     /**
-     * 
+     *
      * @return
      */
     Map<InstanceIdentifier<?>, S> getRoutes();

@@ -67,7 +67,7 @@ public class RouterTest {
   @Inject
   @Filter(timeout=60*1000)
   Broker broker;
-  
+
   private ZMQ.Context zmqCtx = ZMQ.context(1);
   //private Server router;
   //private ExampleProvider provider;
@@ -336,7 +336,7 @@ public class RouterTest {
     return msg;
   }
 
-  
+
   private void printState(){
     Bundle[] b = ctx.getBundles();
     _logger.debug("\n\nNumber of bundles [{}]\n\n]", b.length);

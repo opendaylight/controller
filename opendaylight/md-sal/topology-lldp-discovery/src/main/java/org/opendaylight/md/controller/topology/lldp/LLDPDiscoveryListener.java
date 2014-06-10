@@ -24,7 +24,7 @@ class LLDPDiscoveryListener implements PacketProcessingListener {
     LLDPDiscoveryListener(LLDPDiscoveryProvider manager) {
         this.manager = manager;
     }
-    
+
     public void onPacketReceived(PacketReceived lldp) {
         NodeConnectorRef src = LLDPDiscoveryUtils.lldpToNodeConnectorRef(lldp.getPayload());
         if(src != null) {
@@ -32,10 +32,10 @@ class LLDPDiscoveryListener implements PacketProcessingListener {
             ldb.setDestination(lldp.getIngress());
             ldb.setSource(new NodeConnectorRef(src));
             LinkDiscovered ld = ldb.build();
-            
+
             manager.getNotificationService().publish(ld);
             LLDPLinkAger.getInstance().put(ld);
         }
     }
-    
+
 }

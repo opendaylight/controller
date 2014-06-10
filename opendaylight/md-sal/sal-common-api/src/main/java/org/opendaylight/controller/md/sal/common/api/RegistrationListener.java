@@ -14,6 +14,6 @@ import org.opendaylight.yangtools.concepts.Registration;
 public interface RegistrationListener<T extends Registration<?>> extends EventListener {
 
     void onRegister(T registration);
-    
+
     void onUnregister(T registration);
 }

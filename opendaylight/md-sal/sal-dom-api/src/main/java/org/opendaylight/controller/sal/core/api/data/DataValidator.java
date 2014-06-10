@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
  * {@link Provider}-supplied Validator of the data.
- * 
+ *
  * <p>
  * The registration could be done by :
  * <ul>
@@ -27,25 +27,25 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * as arguments to the
  * {@link DataProviderService#addValidator(DataStoreIdentifier, DataValidator)}
  * </ul>
- * 
+ *
  **/
 public interface DataValidator extends Provider.ProviderFunctionality {
 
     /**
      * A set of Data Stores supported by implementation.
-     * 
+     *
      * The set of {@link DataStoreIdentifier}s which identifies target data
      * stores which are supported by this implementation. This set is used, when
      * {@link Provider} is registered to the SAL, to register and expose the
      * validation functionality to affected data stores.
-     * 
+     *
      * @return Set of Data Store identifiers
      */
     Set<DataStoreIdentifier> getSupportedDataStores();
 
     /**
      * Performs validation on supplied data.
-     * 
+     *
      * @param toValidate
      *            Data to validate
      * @return Validation result. The

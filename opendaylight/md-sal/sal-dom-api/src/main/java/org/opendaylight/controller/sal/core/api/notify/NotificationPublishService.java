@@ -13,14 +13,14 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
  * Notification Publishing Service
- * 
+ *
  * The simplified process of the notification publishing is following:
- * 
+ *
  * <ol>
  * <li> {@link Provider} invokes {@link #sendNotification(CompositeNode)}
  * <li> {@link Broker} finds {@link NotificationListener}s which subscribed for
  * the notification type.
- * 
+ *
  * <li>For each subscriber {@link Broker} invokes
  * {@link NotificationListener#onNotification(CompositeNode)}
  * </ol>
@@ -28,11 +28,11 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 public interface NotificationPublishService extends NotificationService {
     /**
      * Publishes a notification.
-     * 
+     *
      * Notification type is determined by the
      * {@link CompositeNode#getNodeType()} of the
      * <code>notification<code> parameter.
-     * 
+     *
      * @param notification
      *            Notification to publish
      */

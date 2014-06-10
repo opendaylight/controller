@@ -80,7 +80,7 @@ public class BindingDomConnectorDeployer {
         connector.startDataForwarding();
     }
 
-    public static void startNotificationForwarding(BindingIndependentConnector connector, 
+    public static void startNotificationForwarding(BindingIndependentConnector connector,
             NotificationProviderService baService, NotificationPublishService domService) {
         if(connector.isNotificationForwarding()) {
             return;

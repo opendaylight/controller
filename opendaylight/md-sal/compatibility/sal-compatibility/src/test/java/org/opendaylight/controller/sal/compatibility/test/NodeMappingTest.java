@@ -45,7 +45,7 @@ public class NodeMappingTest {
                 {(byte) 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff},
                 {(byte) 0x76, (byte) 0x4a, (byte) 0xe9, (byte) 0xac, (byte) 0xe6, (byte) 0x5a}
         };
-        
+
         Assert.assertEquals(expectedMacs.length, nodeIds.length);
 
         for (int i = 0; i < expectedMacs.length; i++) {

@@ -26,7 +26,7 @@ import com.google.common.base.Throwables;
  * Implementation of Write transaction which is backed by
  * {@link DataTreeSnapshot} and executed according to
  * {@link TransactionReadyPrototype}.
- * 
+ *
  */
 class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
 
@@ -37,7 +37,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
 
     /**
      * Creates new write-only transaction.
-     * 
+     *
      * @param identifier
      *            transaction Identifier
      * @param snapshot
@@ -140,19 +140,19 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     /**
      * Prototype implementation of
      * {@link #ready(SnapshotBackedWriteTransaction)}
-     * 
+     *
      * This class is intended to be implemented by Transaction factories
      * responsible for allocation of {@link SnapshotBackedWriteTransaction} and
      * providing underlying logic for applying implementation.
-     * 
+     *
      */
     public static interface TransactionReadyPrototype {
 
         /**
          * Returns a commit coordinator associated with supplied transactions.
-         * 
+         *
          * This call must not fail.
-         * 
+         *
          * @param tx
          *            Transaction on which ready was invoked.
          * @return DOMStoreThreePhaseCommitCohort associated with transaction

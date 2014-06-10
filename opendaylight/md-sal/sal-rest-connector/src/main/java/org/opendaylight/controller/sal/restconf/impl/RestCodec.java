@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RestCodec {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RestCodec.class);
 
     private RestCodec() {
@@ -180,7 +180,7 @@ public class RestCodec {
                 logger.info("Idenetityref will be translated as NULL for data - {}", String.valueOf(valueWithNamespace));
                 return null;
             }
-            
+
             return QName.create(module.getNamespace(), module.getRevision(), valueWithNamespace.getValue());
         }
 
@@ -292,7 +292,7 @@ public class RestCodec {
                     }
                 }
             }
-            
+
             return result.isEmpty() ? null : new InstanceIdentifier(result);
         }
 
@@ -312,7 +312,7 @@ public class RestCodec {
             return null;
         }
     }
-    
+
     private static Module getModuleByNamespace(String namespace, MountInstance mountPoint) {
         URI validNamespace = resolveValidNamespace(namespace, mountPoint);
 
@@ -328,7 +328,7 @@ public class RestCodec {
         }
         return module;
     }
-    
+
     private static URI resolveValidNamespace(String namespace, MountInstance mountPoint) {
         URI validNamespace;
         if (mountPoint != null) {

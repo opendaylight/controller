@@ -66,7 +66,7 @@ public class StatisticsProvider implements AutoCloseable {
     private OpendaylightFlowTableStatisticsService flowTableStatsService;
 
     private OpendaylightQueueStatisticsService queueStatsService;
-    
+
     private final StatisticsRequestScheduler srScheduler;
 
     public StatisticsProvider(final DataProviderService dataService) {
@@ -90,7 +90,7 @@ public class StatisticsProvider implements AutoCloseable {
         flowTableStatsService = rpcRegistry.getRpcService(OpendaylightFlowTableStatisticsService.class);
         queueStatsService = rpcRegistry.getRpcService(OpendaylightQueueStatisticsService.class);
         this.srScheduler.start();
-        
+
         // Start receiving notifications
         this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter);
 

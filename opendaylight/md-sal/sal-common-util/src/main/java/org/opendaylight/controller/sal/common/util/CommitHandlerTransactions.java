@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class CommitHandlerTransactions {
 
     private static class AllwaysSuccessfulTransaction<P extends Path<P>,D> implements DataCommitTransaction<P, D> {
-        
+
         private final  DataModification<P, D> modification;
 
         public AllwaysSuccessfulTransaction(DataModification<P, D> modification) {
@@ -32,13 +32,13 @@ public class CommitHandlerTransactions {
         public RpcResult<Void> finish() throws IllegalStateException {
             return Rpcs.<Void>getRpcResult(true, null, Collections.<RpcError>emptyList());
         }
-        
+
         @Override
         public DataModification<P, D> getModification() {
             return modification;
         }
     }
-    
+
     public static final <P extends Path<P>,D> AllwaysSuccessfulTransaction<P, D> allwaysSuccessfulTransaction(DataModification<P, D> modification)  {
         return new AllwaysSuccessfulTransaction<>(modification);
     }

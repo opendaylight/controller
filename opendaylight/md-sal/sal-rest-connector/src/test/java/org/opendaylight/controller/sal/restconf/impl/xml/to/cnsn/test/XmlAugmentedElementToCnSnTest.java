@@ -24,7 +24,7 @@ public class XmlAugmentedElementToCnSnTest {
         loadAndNormalizeData("/common/augment/xml/dataa.xml", "/common/augment/yang", "main","cont");
         loadAndNormalizeData("/common/augment/xml/datab.xml", "/common/augment/yang", "main","cont");
     }
-    
+
     private void loadAndNormalizeData(String xmlPath, String yangPath, String topLevelElementName, String moduleName) {
         CompositeNode compNode = TestUtils.readInputToCnSn(xmlPath, false,
                 XmlToCompositeNodeProvider.INSTANCE);

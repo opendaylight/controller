@@ -147,7 +147,7 @@ public final class TestUtils {
     }
 
     /**
-     * 
+     *
      * Fill missing data (namespaces) and build correct data type in
      * {@code compositeNode} according to {@code dataSchemaNode}. The method
      * {@link RestconfImpl#createConfigurationData createConfigurationData} is
@@ -165,7 +165,7 @@ public final class TestUtils {
      * Searches module with name {@code searchedModuleName} in {@code modules}.
      * If module name isn't specified and module set has only one element then
      * this element is returned.
-     * 
+     *
      */
     public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
         assertNotNull("Modules can't be null.", modules);

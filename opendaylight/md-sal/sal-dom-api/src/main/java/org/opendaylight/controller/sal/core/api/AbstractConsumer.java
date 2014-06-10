@@ -18,9 +18,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public abstract class AbstractConsumer implements Consumer, BundleActivator,ServiceTrackerCustomizer<Broker, Broker> {
 
-    
-    
-    
+
+
+
     private BundleContext context;
     private ServiceTracker<Broker, Broker> tracker;
     private Broker broker;
@@ -54,7 +54,7 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
         return Collections.emptySet();
     }
 
-    
+
     @Override
     public Broker addingService(ServiceReference<Broker> reference) {
         if(broker == null) {
@@ -62,15 +62,15 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
             broker.registerConsumer(this, context);
             return broker;
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void modifiedService(ServiceReference<Broker> reference, Broker service) {
         // NOOP
     }
-    
+
     @Override
     public void removedService(ServiceReference<Broker> reference, Broker service) {
         stopImpl(context);

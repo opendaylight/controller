@@ -60,8 +60,8 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
         regex.append(".*<data.*");
         regex.append(".*xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"");
         regex.append(".*>");
-        
-        
+
+
         regex.append(".*<contB_m1.*\\/>");
         regex.append(".*xmlns=\"module:one\"");
         regex.append(".*>");
@@ -97,7 +97,7 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
         SimpleNodeWrapper lf1_m1 = new SimpleNodeWrapper(uriModule1, "lf1_m1", "lf1 m1 value");
         cont_m1.addValue(lf1_m1);
         CompositeNodeWrapper contB_m1 = new CompositeNodeWrapper(uriModule1, "contB_m1");
-        
+
         data.addValue(contB_m1);
         data.addValue(cont_m1);
 

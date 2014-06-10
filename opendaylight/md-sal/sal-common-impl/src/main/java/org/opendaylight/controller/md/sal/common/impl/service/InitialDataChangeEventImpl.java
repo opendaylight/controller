@@ -28,24 +28,24 @@ public class InitialDataChangeEventImpl<P extends Path<P>,D> implements DataChan
         updatedConfigurationData = Collections.emptyMap();
         updatedOperationalData = Collections.emptyMap();
     }
-    
+
     public InitialDataChangeEventImpl(D configTree, D operTree, Map<P, D> updatedCfgData, Map<P, D> updatedOperData) {
         updatedConfigurationTree = configTree;
         updatedOperationalTree = operTree;
         updatedConfigurationData = updatedCfgData;
         updatedOperationalData = updatedOperData;
     }
-    
+
     @Override
     public Map<P, D> getCreatedConfigurationData() {
         return Collections.emptyMap();
     }
-    
+
     @Override
     public Map<P, D> getCreatedOperationalData() {
         return Collections.emptyMap();
     }
-    
+
     @Override
     public Map<P, D> getOriginalConfigurationData() {
         return Collections.emptyMap();
@@ -66,7 +66,7 @@ public class InitialDataChangeEventImpl<P extends Path<P>,D> implements DataChan
     public Map<P, D> getUpdatedConfigurationData() {
         return updatedConfigurationData;
     }
-    
+
     @Override
     public D getUpdatedConfigurationSubtree() {
         return updatedConfigurationTree;
@@ -75,21 +75,21 @@ public class InitialDataChangeEventImpl<P extends Path<P>,D> implements DataChan
     public D getUpdatedOperationalSubtree() {
         return updatedOperationalTree;
     }
-    
+
     @Override
     public D getOriginalConfigurationSubtree() {
         return updatedConfigurationTree;
     }
-    
+
     @Override
     public D getOriginalOperationalSubtree() {
         return updatedOperationalTree;
     }
-    
+
     @Override
     public Map<P, D> getUpdatedOperationalData() {
         return updatedOperationalData;
     }
-    
+
 
 }

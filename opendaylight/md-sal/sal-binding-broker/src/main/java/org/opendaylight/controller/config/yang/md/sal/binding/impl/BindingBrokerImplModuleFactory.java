@@ -26,14 +26,14 @@ import org.osgi.framework.BundleContext;
 */
 public class BindingBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModuleFactory {
 
-    
+
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
         BindingBrokerImplModule module = (BindingBrokerImplModule) super.createModule(instanceName, dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);
         return module;
     }
-    
+
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,
             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {

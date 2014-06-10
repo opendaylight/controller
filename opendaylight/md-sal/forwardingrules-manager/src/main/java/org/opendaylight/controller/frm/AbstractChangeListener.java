@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- * 
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * 
+ *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  */
@@ -32,17 +32,17 @@ public abstract class AbstractChangeListener implements DataChangeListener {
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvent) {
         this.transactionId = this.newTransactionIdentifier().toString();
 
-        final Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries = 
+        final Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries =
                 changeEvent.getCreatedConfigurationData().entrySet();
-        final Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> updatedEntries = 
+        final Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> updatedEntries =
                 new HashSet<Entry<InstanceIdentifier<? extends DataObject>, DataObject>>();
 
-        Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> updateConfigEntrySet = 
+        Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> updateConfigEntrySet =
                 changeEvent.getUpdatedConfigurationData().entrySet();
         updatedEntries.addAll(updateConfigEntrySet);
         updatedEntries.removeAll(createdEntries);
 
-        final Set<InstanceIdentifier<? extends DataObject>> removeEntriesInstanceIdentifiers = 
+        final Set<InstanceIdentifier<? extends DataObject>> removeEntriesInstanceIdentifiers =
                 changeEvent.getRemovedConfigurationData();
 
         for (final Entry<InstanceIdentifier<? extends DataObject>, DataObject> createdEntry : createdEntries) {
@@ -52,7 +52,7 @@ public abstract class AbstractChangeListener implements DataChangeListener {
         }
 
         for (final Entry<InstanceIdentifier<?>, DataObject> updatedEntrie : updatedEntries) {
-            Map<InstanceIdentifier<? extends DataObject>, DataObject> origConfigData = 
+            Map<InstanceIdentifier<? extends DataObject>, DataObject> origConfigData =
                     changeEvent.getOriginalConfigurationData();
 
             InstanceIdentifier<? extends Object> u_key = updatedEntrie.getKey();
@@ -62,7 +62,7 @@ public abstract class AbstractChangeListener implements DataChangeListener {
         }
 
         for (final InstanceIdentifier<?> instanceId : removeEntriesInstanceIdentifiers) {
-            Map<InstanceIdentifier<? extends DataObject>, DataObject> origConfigData = 
+            Map<InstanceIdentifier<? extends DataObject>, DataObject> origConfigData =
                     changeEvent.getOriginalConfigurationData();
 
             final DataObject removeValue = origConfigData.get(instanceId);

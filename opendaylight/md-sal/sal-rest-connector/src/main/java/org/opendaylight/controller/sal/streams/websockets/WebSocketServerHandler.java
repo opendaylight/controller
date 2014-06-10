@@ -58,7 +58,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	/**
 	 * Checks if HTTP request method is GET and if is possible to decode HTTP
 	 * result of request.
-	 * 
+	 *
 	 * @param ctx
 	 *            ChannelHandlerContext
 	 * @param req
@@ -107,7 +107,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	/**
 	 * Checks response status, send response and close connection if necessary
-	 * 
+	 *
 	 * @param ctx
 	 *            ChannelHandlerContext
 	 * @param req
@@ -135,7 +135,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	/**
 	 * Handles web socket frame.
-	 * 
+	 *
 	 * @param ctx
 	 *            {@link ChannelHandlerContext}
 	 * @param frame
@@ -174,7 +174,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	/**
 	 * Get web socket location from HTTP request.
-	 * 
+	 *
 	 * @param req
 	 *            HTTP request from which the location will be returned
 	 * @return String representation of web socket location.

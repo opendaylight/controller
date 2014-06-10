@@ -50,12 +50,12 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
  * In-memory DOM Data Store
- * 
+ *
  * Implementation of {@link DOMStore} which uses {@link DataTree} and other
  * classes such as {@link SnapshotBackedWriteTransaction}.
  * {@link SnapshotBackedReadTransaction} and {@link ResolveDataChangeEventsTask}
  * to implement {@link DOMStore} contract.
- * 
+ *
  */
 public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, SchemaContextListener,
         TransactionReadyPrototype {
@@ -108,7 +108,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         /*
          * Make sure commit is not occurring right now. Listener has to be
          * registered and its state capture enqueued at a consistent point.
-         * 
+         *
          * FIXME: improve this to read-write lock, such that multiple listener
          * registrations can occur simultaneously
          */
