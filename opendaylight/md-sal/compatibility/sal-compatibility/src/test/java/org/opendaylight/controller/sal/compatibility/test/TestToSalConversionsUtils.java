@@ -312,7 +312,7 @@ public class TestToSalConversionsUtils {
             //assertEquals("Wrong value for action SetDlSrc for MAC address.", "24:77:03:7C:C5:F1", new String(
             //      ((SetDlSrc) action).getDlAddress()));
         } else if (action instanceof SetDlType) {
-            assertEquals("Wrong value for action SetDlType for.", 513l, ((SetDlType) action).getDlType());
+            assertEquals("Wrong value for action SetDlType for.", 513L, ((SetDlType) action).getDlType());
         } else if (action instanceof SetNextHop) {
             InetAddress inetAddress = ((SetNextHop) action).getAddress();
             checkIpAddresses(inetAddress, "192.168.100.100", "2001:db8:85a3::8a2e:370:7334");
@@ -529,7 +529,7 @@ public class TestToSalConversionsUtils {
 
     private void prepareActionSetDlType(SetDlTypeActionCaseBuilder wrapper) {
         SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
-        setDlTypeActionBuilder.setDlType(new EtherType(513l));
+        setDlTypeActionBuilder.setDlType(new EtherType(513L));
         wrapper.setSetDlTypeAction(setDlTypeActionBuilder.build());
     }
 
@@ -674,7 +674,7 @@ public class TestToSalConversionsUtils {
 
     private EthernetType prepEthType() {
         EthernetTypeBuilder ethTypeBuild = new EthernetTypeBuilder();
-        ethTypeBuild.setType(new EtherType(0xffffl));
+        ethTypeBuild.setType(new EtherType(0xffffL));
         return ethTypeBuild.build();
     }
 
