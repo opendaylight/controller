@@ -7,14 +7,8 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import java.math.BigInteger;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
@@ -98,6 +92,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.hw.path.action._case.HwPathActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.loopback.action._case.LoopbackActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder;
@@ -139,8 +134,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherTyp
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 
-import com.google.common.base.Preconditions;
-import com.google.common.net.InetAddresses;
+import java.math.BigInteger;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public final class MDFlowMapping {
     private MDFlowMapping() {
@@ -264,7 +264,8 @@ public final class MDFlowMapping {
     }
 
     private static PopVlanActionCase _toAction(final PopVlan sourceAction) {
-        return new PopVlanActionCaseBuilder().build();
+        PopVlanActionBuilder popVlanActionBuilder = new PopVlanActionBuilder();
+        return new PopVlanActionCaseBuilder().setPopVlanAction(popVlanActionBuilder.build()).build();
     }
 
     private static PushVlanActionCase _toAction(final PushVlan sourceAction) {
