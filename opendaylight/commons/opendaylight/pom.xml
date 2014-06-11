@@ -102,6 +102,7 @@
     <jsr311.api.version>1.1.1</jsr311.api.version>
     <jsr311.v2.api.version>2.0</jsr311.v2.api.version>
     <junit.version>4.8.1</junit.version>
+    <karaf.branding.version>1.0.0-SNAPSHOT</karaf.branding.version>
     <karaf.version>3.0.1</karaf.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
@@ -888,6 +889,12 @@
         <artifactId>jolokia-bridge</artifactId>
         <version>0.0.2-SNAPSHOT</version>
       </dependency>
+      <!-- Karaf Dependencies -->
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>karaf.branding</artifactId>
+        <version>${karaf.branding.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>logback-config</artifactId>
@@ -1019,14 +1026,12 @@
         <artifactId>osgi-brandfragment.web</artifactId>
         <version>${osgi-brandfragment.web.version}</version>
       </dependency>
-
+      <!-- Southbound bundles -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol-framework</artifactId>
         <version>${protocol-framework.version}</version>
       </dependency>
-
-      <!-- Southbound bundles -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol_plugins.openflow</artifactId>
