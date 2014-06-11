@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.xsql.XSQLAdapter;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.osgi.framework.BundleContext;
 
@@ -28,7 +29,7 @@ public final class DomInmemoryDataBrokerModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModule {
 
     private BundleContext bundleContext;
-
+    
     public DomInmemoryDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -61,7 +62,18 @@ public final class DomInmemoryDataBrokerModule extends
 
         getSchemaServiceDependency().registerSchemaServiceListener(operStore);
         getSchemaServiceDependency().registerSchemaServiceListener(configStore);
-
+        
+        /*
+         * XSQL start
+         */
+        XSQLAdapter xsqlAdapter = XSQLAdapter.getInstance();
+        xsqlAdapter.addDOMStroe(operStore);
+        getSchemaServiceDependency().registerSchemaServiceListener(xsqlAdapter);
+        /**
+         * XSQL End
+         */
+        
+        
         return newDataBroker;
     }
 
