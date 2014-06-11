@@ -1,0 +1,135 @@
+usage: Netconf cli [-h] [--server SERVER] [--port PORT] --username USERNAME --password PASSWORD
+
+Netconf cli
+
+optional arguments:
+  -h, --help             show this help message and exit
+  --server SERVER        Specify address for a netconf server
+  --port PORT            Specify port for a netconf server (default: 830)
+  --username USERNAME    Specify username
+  --password PASSWORD    Specify password
+
+
+------------------------------------------------------------------------
+
+To run the cli execute:
+
+java -jar netconf-cli-0.2.5-SNAPSHOT-executable.jar --username user --password password --server serverIP --port optionalPort
+
+The cli will connect to the remote device automatically.
+The initialization may take a few moments depending on the size of schemas provided by the device.
+To view the progress, one can take a look inside netconfcli.log file (All logs are in this file starting with level TRACE).
+Cli does not print any logging messages to the console, only to the file.
+
+------------------------------------------------------------------------
+
+Correct initialization + connection should display following output:
+
+Initializing remote connection to localhost/127.0.0.1:830 as maros
+Remote connection initialized
+netconf-client(/)>
+
+------------------------------------------------------------------------
+
+At this stage, any supported rpc can be invoked. To see all possible rpcs press TAB (serves as autocomplete). The output should look similar to this:
+
+backup                cancel-commit         cancel-subscription   close                 close-session         commit                copy-config           create-subscription
+delete-backup         delete-config         discard-changes       edit-config           get                   get-config            get-my-session        get-schema
+help                  kill-session          load                  lock                  no-op                 partial-lock          partial-unlock        replay-config
+restart               restore               set-log-level         set-my-session        shutdown              unload                unlock                validate
+
+------------------------------------------------------------------------
+
+Example step-by-step execution of get-config rpc:
+
+1. Type get-config, hit TAB, hit enter
+2. Cli will now walk all the input arguments of get-config rpc and ask for value
+3. Cli asks for filter value
+4. Submit filter (using TAB autocomplete) as a schema path or type "skip" (to not add any filter) and hit enter
+5. Cli asks for config source (e.g. which data-store to query)
+6. Use TAB to view options and submit either running or candidate data-store
+7. Cli will display configuration of the remote device e.g. :
+
+data {
+  a {
+    address {
+      last-name a
+      first-name o
+      street aaaaa
+    }
+    address {
+      last-name a
+      first-name t
+    }
+    address {
+      last-name a
+      first-name y
+    }
+  }
+}
+
+
+------------------------------------------------------------------------
+Sample edit-config on candidate datastore execution for ODL controller, creating new threadfactory-naming instance:
+
+[maros@localhost target]$ java -jar netconf-cli-0.2.5-SNAPSHOT-executable.jar --username admin --password admin --server localhost --port 1830
+netconf()>edit-config(ietf-netconf) 
+Leaf default-operation(enumeration)
+netconf(/default-operation)>merge 
+merge    
+netconf(/default-operation)>merge 
+Config config
+Submit path of the data to edit. Use TAB for autocomplete
+netconf(/edit-content/config)>modules(config)/module(config)/
+Reading collection type argument: module
+Leaf name(string)
+netconf(/edit-content/config/module/[entry]/name)>newThreadFactory
+Add non-key nodes to list module? [Y|N]
+netconf(/edit-content/config/module/[entry])>Y
+Leaf type(identityref)
+netconf(/edit-content/config/module/[entry]/type)>thread
+threadfactory-naming(threadpool-impl)             threadpool-fixed(threadpool-impl-fixed)           threadpool-flexible(threadpool-impl-flexible)     
+threadpool-scheduled(threadpool-impl-scheduled)   
+netconf(/edit-content/config/module/[entry]/type)>threadfactory-naming(threadpool-impl) 
+Select case for choice configuration from [async-eventbus, binding-broker-impl, binding-data-broker, binding-data-compatible-broker, dom-broker-impl, dom-inmemory-data-broker, eventbus, kitchen-service-impl, logback, netconf-client-dispatcher, netty-global-event-executor, netty-hashed-wheel-timer, netty-immediate-event-executor, netty-threadgroup-fixed, never-reconnect-strategy-factory, reconnect-immediately-strategy-factory, remote-zeromq-rpc-server, sal-netconf-connector, shutdown, threadfactory-naming, threadpool-fixed, threadpool-flexible, threadpool-scheduled, timed-reconnect-strategy-factory, toaster-provider-impl]
+netconf(/edit-content/config/module/[entry]/configuration)>threadfactory-naming 
+Leaf name-prefix(string)
+netconf(/edit-content/config/module/[entry]/configuration/name-prefix)>prefix
+Select case for choice state from [async-eventbus, binding-data-broker, binding-notification-broker, binding-rpc-broker, dom-broker-impl, eventbus, hash-map-data-store, kitchen-service-impl, logback, netty-threadgroup-fixed, runtime-generated-mapping, schema-service-singleton, shutdown, toaster-provider-impl]
+netconf(/edit-content/config/module/[entry]/state)>skip 
+Add other entry to List module  [Y|N]?
+netconf(/edit-content/config/module)>N
+Collection type argument: module read finished
+Leaf error-option(enumeration)
+netconf(/error-option)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)error-option
+Select case for choice config-target from [candidate, running]
+netconf(/target/config-target)>candidate 
+Leaf test-option(enumeration)
+netconf(/test-option)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)test-option
+rpc-reply {
+  ok null
+}
+
+netconf()>
+netconf()>
+netconf()>commit(ietf-netconf) 
+Leaf confirm-timeout(uint32)
+netconf(/confirm-timeout)>5000
+Leaf confirmed(empty)
+Add empty type leaf confirmed ?
+netconf(/confirmed)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)confirmed
+Leaf persist(string)
+netconf(/persist)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)persist
+Leaf persist-id(string)
+netconf(/persist-id)>skip 
+Skipping (urn:ietf:params:xml:ns:netconf:base:1.0?revision=2011-06-01)persist-id
+rpc-reply {
+  ok null
+}
+
+netconf()>
+
