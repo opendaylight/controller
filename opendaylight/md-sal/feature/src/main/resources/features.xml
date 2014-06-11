@@ -3,7 +3,7 @@
 <features name="mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-    <feature name='mdsal-all' version='${project.version}'>
+    <feature name='odl-mdsal-all' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-commons</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-restconf</feature>
