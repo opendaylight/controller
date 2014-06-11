@@ -13,6 +13,11 @@
     <maven>3.0</maven>
   </prerequisites>
   <modules>
+    <module>base</module>
+    <module>controller</module>
+    <module>adsal</module>
+    <module>nsf</module>
+    <module>extras</module>
     <module>config</module>
     <module>config-persister</module>
     <module>config-netty</module>

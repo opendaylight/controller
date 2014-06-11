@@ -126,10 +126,6 @@
     <module>opendaylight/commons/filter-valve</module>
 
     <!-- Karaf Distribution -->
-    <module>features/base</module>
-    <module>features/controller</module>
-    <module>features/adsal</module>
-    <module>features/extras</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
