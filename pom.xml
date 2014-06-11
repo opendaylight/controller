@@ -129,6 +129,7 @@
     <module>features/base</module>
     <module>features/controller</module>
     <module>features/adsal</module>
+    <module>features/nsf</module>
     <module>features/extras</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
