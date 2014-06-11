@@ -82,8 +82,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     public void initializeRemoteConnection(final NetconfClientDispatcher dispatch,
-                                           final NetconfReconnectingClientConfiguration config) {
-        dispatch.createReconnectingClient(config);
+                                           final NetconfClientConfiguration config) {
+        if(config instanceof NetconfReconnectingClientConfiguration) {
+            dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+        }
+
+        dispatch.createClient(config);
     }
 
     private void tearDown( String reason ) {
