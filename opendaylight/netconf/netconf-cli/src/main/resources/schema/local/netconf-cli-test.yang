@@ -1,0 +1,124 @@
+module netconf-cli-test {
+
+  namespace "netconf:cli:test";
+  prefix ncli;
+
+  import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+  import netconf-cli-ext { prefix cliext; revision-date 2014-05-26; }
+
+
+    revision 2014-05-22 {
+      description
+       "Initial revision.";
+    }
+
+  extension java-class {
+      description
+          "This could be used to link between rpc yang definition and custom command implementation";
+
+      argument "name";
+  }
+
+  rpc help {
+    input {
+        choice choc {
+            list lst {
+                key "lf1 lf2";
+                leaf lf1 {
+                    type string;
+                }
+                leaf lf2 {
+                    type int32;
+                }
+                leaf lf3 {
+                    mandatory true;
+                    type int32;
+                }
+
+                leaf lf4 {
+                    type int32;
+                }
+            }
+
+            container cont {
+                leaf lf1 {
+                    mandatory true;
+                    type string;
+                }
+                leaf lf2 {
+                    type string;
+                }
+                leaf lf3 {
+                    mandatory true;
+                    type string;
+                }
+                leaf lf4 {
+                    type string;
+                }
+            }
+
+            leaf lf {
+                type union {
+                    type string;
+                    type int32;
+                }
+            }
+            leaf lf1 {
+                type string;
+            }
+        }
+    }
+    output {
+      leaf help {
+        type string;
+      }
+    }
+  }
+
+  rpc close {
+  }
+
+  rpc connect {
+
+      input {
+
+         // TODO yangtools keep input arguments unordered so the ordering in cli is random
+         leaf address-name {
+           type inet:host;
+           default localhost;
+         }
+
+         leaf address-port {
+           type inet:port-number;
+           default 830;
+         }
+
+          leaf user-name {
+           type string;
+         }
+
+        leaf user-password {
+            cliext:argument-handler org.opendaylight.controller.netconf.cli.reader.custom.PasswordReader;
+            type string;
+        }
+
+      }
+
+      output {
+        leaf status {
+            type string;
+        }
+      }
+  }
+
+
+  rpc disconnect {
+
+      output {
+        leaf status {
+            type string;
+        }
+      }
+    }
+
+}
