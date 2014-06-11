@@ -126,6 +126,7 @@
 
     <!-- Karaf Distribution -->
     <module>features/base</module>
+    <module>features/adsal</module>
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
   </modules>
