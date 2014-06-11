@@ -38,15 +38,16 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <!-- scope is compile so all features (there is only one) are installed
-            into startup.properties and the feature repo itself is not installed -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>base-features</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
+      <version>${project.parent.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
       <scope>runtime</scope>
     </dependency>
+    <!-- scope is compile so all features (there is only one) are installed
+            into startup.properties and the feature repo itself is not installed -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-features</artifactId>
@@ -55,23 +56,14 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <!--<dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>base-features</artifactId>
-      <version>${project.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>-->
-    <!-- <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>controller-features</artifactId>
-      <version>${project.version}</version>
+      <artifactId>features-adsal</artifactId>
+      <version>${sal.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-  -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>mdsal-features</artifactId>
