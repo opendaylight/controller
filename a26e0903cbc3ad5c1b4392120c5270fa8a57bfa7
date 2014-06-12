@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_87961a4b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-12T11:57:16Z",
+      "side": 1,
+      "message": "I think that this should be checked like\ndepth \u003e 0 \nbecause according to \nhttp://tools.ietf.org/html/draft-bierman-netconf-restconf-02#section-3.8.1\nquoting\n\"A nest-level consists of\n   the target resource and any child nodes which are contained within\n   the target resource node\"\nI understand it that e. g. for depth\u003d1 output has to contain target node + all childs, for depth\u003d2 output has to contain target node + all childs + all childs of childs.",
+      "revId": "a26e0903cbc3ad5c1b4392120c5270fa8a57bfa7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9cc0c12b",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/modules/nested-module.yang",
         "patchSetId": 3
