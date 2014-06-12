@@ -163,6 +163,7 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
     @Override
     public void onFlowRemoved(final FlowRemoved notification) {
+        // notified upon remove flow rpc successfully invoked
         if (notification == null) {
             return;
         }
@@ -190,7 +191,25 @@ public class FlowProgrammerAdapter implements IPluginInFlowProgrammerService, Sa
 
     @Override
     public void onSwitchFlowRemoved(final SwitchFlowRemoved notification) {
-        // FIXME: unfinished?
+        // notified upon remove flow message from device arrives
+        if (notification == null) {
+            return;
+        }
+
+        final NodeRef node = notification.getNode();
+        if (node == null) {
+            LOG.debug("Notification {} has not node, ignoring it", notification);
+            return;
+        }
+
+        Node adNode;
+        try {
+            adNode = NodeMapping.toADNode(notification.getNode());
+        } catch (ConstructionException e) {
+            LOG.warn("Failed to construct AD node for {}, ignoring notification", node, e);
+            return;
+        }
+        flowProgrammerPublisher.flowRemoved(adNode, ToSalConversionsUtils.toFlow(notification, adNode));
     }
 
     @Override

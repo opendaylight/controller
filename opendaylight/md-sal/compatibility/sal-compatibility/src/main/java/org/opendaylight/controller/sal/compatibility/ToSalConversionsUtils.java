@@ -94,6 +94,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.GenericFlowAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
@@ -125,7 +127,38 @@ public class ToSalConversionsUtils {
 
     public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source, Node node) {
         final Flow target = new Flow();
+        genericFlowToAdFlow(source, target);
+        
+        target.setMatch(toMatch(source.getMatch()));
 
+        List<Action> actions = getAction(source);
+        if (actions != null) {
+            target.setActions(actionFrom(actions, node));
+        }
+
+        return target;
+    }
+    
+    /**
+     * @param source notification, missing instructions
+     * @param node corresponding node where the flow change occured
+     * @return ad-sal node, build from given data
+     */
+    public static Flow toFlow(SwitchFlowRemoved source, Node node) {
+        final Flow target = new Flow();
+        genericFlowToAdFlow(source, target);
+
+        target.setMatch(toMatch(source.getMatch()));
+
+        return target;
+    }
+
+    /**
+     * @param source
+     * @param target
+     */
+    private static void genericFlowToAdFlow(GenericFlowAttributes source,
+            final Flow target) {
         Integer hardTimeout = source.getHardTimeout();
         if (hardTimeout != null) {
             target.setHardTimeout(hardTimeout.shortValue());
@@ -140,18 +173,9 @@ public class ToSalConversionsUtils {
         if (priority != null) {
             target.setPriority(priority.shortValue());
         }
-
-        target.setMatch(toMatch(source.getMatch()));
-
-        List<Action> actions = getAction(source);
-        if (actions != null) {
-            target.setActions(actionFrom(actions, node));
-        }
-
         target.setId(source.getCookie().getValue().longValue());
-        return target;
     }
-
+    
     public static List<Action> getAction(
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
         if (source.getInstructions() != null) {
@@ -356,7 +380,7 @@ public class ToSalConversionsUtils {
         return nodeConnector;
     }
 
-    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match source) {
+    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match source) {
         Match target = new Match();
         if (source != null) {
             fillFrom(target, source.getVlanMatch());
