@@ -15,6 +15,7 @@
   </prerequisites>
 
   <properties>
+    <akka.version>2.3.2</akka.version>
     <aopalliance.version>1.0.0</aopalliance.version>
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <aries.util.version>1.1.0</aries.util.version>
@@ -143,6 +144,7 @@
     <samples.loadbalancer.northbound.version>0.4.2-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.4.2-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.4.2-SNAPSHOT</sanitytest.version>
+    <scala.version>2.11</scala.version>
     <security.version>0.4.2-SNAPSHOT</security.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
@@ -283,6 +285,30 @@
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>${jersey.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-actor_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-cluster_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+        <version>${akka.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe.akka</groupId>
+        <artifactId>akka-remote_${scala.version}</artifactId>
+        <version>${akka.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -1570,6 +1596,12 @@
         <artifactId>chameleon-mbeans</artifactId>
         <version>1.0.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}.1</version>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
@@ -1675,6 +1707,7 @@
         <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
+
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.logback_settings</artifactId>
