@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="controller-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <feature name="odl-all" description="OpenDaylight Controller" version="${project.version}">
+      <feature>odl-sal</feature>
+      <feature>odl-managers</feature>
+      <feature>odl-controller-web</feature>
+   </feature>
+   <feature name="odl-sal" description="Service Abstraction Layer" version="${sal.version}">
+      <feature>base-felix-dm</feature>
+      <bundle start="true" start-level="35">mvn:org.apache.commons/commons-lang3/${commons.lang.version}</bundle>
+      <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
+      <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal/${sal.version}</bundle>
+      <!-- The SAL Implementation doesn't follow API versioning, should be revisited in the bundle -->
+      <bundle>mvn:org.opendaylight.controller/sal.implementation/${sal.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration/${sal.networkconfiguration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration.implementation/${sal.networkconfiguration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.connection/${sal.connection.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal.connection.implementation/${sal.connection.version}</bundle>
+   </feature>
+   <feature name="odl-controller-web" description="Controller Web Interface" version="${project.version}">
+      <feature>odl-managers</feature>
+      <feature>base-tomcat</feature>
+      <bundle>mvn:org.opendaylight.controller/web/${web.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/flows.web/${flows.web.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/devices.web/${devices.web.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/troubleshoot.web/${troubleshoot.web.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/topology.web/${topology.web.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/0.0.2-SNAPSHOT</bundle>
+   </feature>
+   <feature name="odl-hosttracker" description="Controller Service: Host Tracker">
+      <feature>odl-clustering</feature>
+      <feature>odl-managers</feature>
+      <bundle>mvn:org.opendaylight.controller/hosttracker/${hosttracker.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.implementation/${hosttracker.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.shell/${hosttracker.shell.version}</bundle>
+   </feature>
+   <feature name="odl-clustering" description="Controller Service: Clustering">
+      <feature>transaction</feature>
+      <feature>base-felix-dm</feature>
+      <feature>base-eclipselink-persistence</feature>
+      <feature>odl-sal</feature>
+      <bundle>mvn:org.opendaylight.controller/clustering.services/${clustering.services.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.services-implementation/${clustering.services_implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/clustering.stub/${clustering.stub.version}</bundle>
+   </feature>
+   <feature name="odl-legacy-configuration">
+      <feature>odl-sal</feature>
+      <bundle>mvn:org.opendaylight.controller/configuration/${configuration.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/configuration.implementation/${configuration.implementation.version}</bundle>
+   </feature>
+   <feature name="odl-configuration" description="Controller Service: Configuration">
+      <!-- org.opendaylight.controller.config.yangjmxgenerator is missing -->
+      <bundle>mvn:org.opendaylight.controller/config-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-manager/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-netconf-connector/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-directory-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-impl/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${yang-jmx-generator.version}</bundle>
+   </feature>
+   <feature name="odl-managers" description="Big boss">
+      <feature>odl-legacy-configuration</feature>
+      <feature>base-spring-security</feature>
+      <feature>odl-clustering</feature>
+      <bundle>mvn:org.opendaylight.controller/appauth/${appauth.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller.thirdparty/net.sf.jung2/2.0.1</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker/${hosttracker.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.implementation/${hosttracker.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager/${switchmanager.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager.implementation/${switchmanager.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/statisticsmanager/${statisticsmanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/statisticsmanager.implementation/${statisticsmanager.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager/${forwardingrulesmanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation/${forwardingrulesmanager.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager/${containermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/containermanager.implementation/${containermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/topologymanager/${topologymanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwarding.staticrouting</bundle>
+      <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/connectionmanager</bundle>
+      <bundle>mvn:org.opendaylight.controller/connectionmanager.implementation</bundle>
+   </feature>
+   <feature name="odl-controller-services" description="Base Controller Services" version="${project.version}">
+      <feature>transaction</feature>
+      <feature>odl-sal</feature>
+      <feature>odl-clustering</feature>
+      <feature>odl-managers</feature>
+      <feature>odl-legacy-configuration</feature>
+   </feature>
+   <feature name="odl-northbound" description="Controller API" version="${project.version}">
+      <feature>base-jackson</feature>
+      <feature>base-jersey</feature>
+      <feature>odl-sal</feature>
+      <feature>odl-managers</feature>
+      <feature>base-tomcat</feature>
+      <bundle start-level="35">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/bundlescanner/${bundlescanner.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/bundlescanner.implementation/${bundlescanner.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/commons.northbound/${northbound.commons.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/flowprogrammer.northbound/${flowprogrammer.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.northbound/${hosttracker.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/httpservice-bridge/${httpservice-bridge.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/jolokia-bridge/${jolokia-bridge.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/networkconfig.bridgedomain.northbound/${networkconfig.bridgedomain.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/networkconfig.neutron.northbound/${networkconfig.neutron.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/forwarding.staticrouting.northbound/${forwarding.staticrouting.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/statistics.northbound/${statistics.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/subnets.northbound/${subnets.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/switchmanager.northbound/${switchmanager.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/topology.northbound/${topology.northbound.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager.northbound/${usermanager.northbound.version}</bundle>
+   </feature>
+   <feature name="arphandler" description="ARP Handler" version="${project.version}">
+      <feature>odl-managers</feature>
+      <feature>odl-clustering</feature>
+      <feature>odl-hosttracker</feature>
+      <feature>odl-sal</feature>
+   </feature>
+   <feature name="threadpool" description="Threadpool">
+      <bundle>mvn:org.opendaylight.controller/threadpool-config-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/threadpool-config-impl/${config.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.google.code.gson/gson/${gson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.google.guava/guava/${guava.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-api/${config.version}</bundle>
+   </feature>
+   <feature name="netconf">
+      <feature>base-netty</feature>
+      <bundle>mvn:org.opendaylight.controller/netconf-api/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-client/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-impl/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-mapping-api/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-monitoring/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netconf-util/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netty-config-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netty-event-executor-config/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netty-threadgroup-config/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/netty-timer-config/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/networkconfig.bridgedomain.northbound/${networkconfig.bridgedomain.northbound.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.google.code.gson/gson/${gson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:com.google.guava/guava/${guava.version}</bundle>
+   </feature>
+   <feature name="models" description="MD-SAL Models ">
+      <feature>base-yangtools-all</feature>
+      <bundle>mvn:org.opendaylight.controller.model/model-flow-base/1.1-SNAPSHOT</bundle>
+      <bundle>mvn:org.opendaylight.controller.model/model-flow-service/1.1-SNAPSHOT</bundle>
+      <bundle>mvn:org.opendaylight.controller.model/model-flow-statistics/1.1-SNAPSHOT</bundle>
+      <bundle>mvn:org.opendaylight.controller.model/model-topology/1.1-SNAPSHOT</bundle>
+      <bundle>mvn:org.opendaylight.controller.model/model-inventory/1.1-SNAPSHOT</bundle>
+   </feature>
+   <feature name="commons" description="Controller Commons" version="${project.version}">
+      <feature>configuration</feature>
+      <feature>base-netty</feature>
+      <bundle>mvn:org.opendaylight.controller/concepts/${commons.opendaylight.concepts.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/commons.httpclient/${commons.httpclient.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/protocol-framework/${protocol-framework.version}</bundle>
+   </feature>
+   <feature name="configuration" description="Controller Service: Configuration">
+      <!-- org.opendaylight.controller.config.yangjmxgenerator is missing -->
+      <bundle>mvn:org.opendaylight.controller/config-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-manager/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-netconf-connector/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-api/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-directory-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/${config.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/config-persister-impl/${netconf.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${yang-jmx-generator.version}</bundle>
+   </feature>
+   <feature name="odl-hosttracker_new" description="Controller Service: Host Tracker NEW">
+      <feature>md-sal</feature>
+      <feature>odl-clustering</feature>
+      <feature>odl-managers</feature>
+      <bundle>mvn:org.opendaylight.controller/hosttracker_new/${hosttracker_new.api.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker_new.implementation/${hosttracker_new.implementation.version}</bundle>
+   </feature>
+   <feature name="logging" description="Logging">
+      <bundle>mvn:org.opendaylight.controller/logging.bridge/${logging.bridge.version}</bundle>
+   </feature>
+</features>
