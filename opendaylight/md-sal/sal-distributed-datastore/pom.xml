@@ -39,19 +39,36 @@
       <version>2.3.2</version>
     </dependency>
 
+    <!-- SAL Dependencies -->
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-api</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
 
-    <!-- SAL Dependencies -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-api</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-spi</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-api</artifactId>
     </dependency>
 
     <!-- AKKA Dependencies -->
