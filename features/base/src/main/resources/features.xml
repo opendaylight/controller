@@ -115,6 +115,7 @@
       <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.ha/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.tribes/7.0.32.v201211201952</bundle>
+      <bundle start="true" start-level="35">mvn:org.opendaylight.controller.thirdparty/org.apache.catalina.filters.CorsFilter/${corsfilter.version}</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.coyote/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.el/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.jasper/7.0.32.v201211201952</bundle>

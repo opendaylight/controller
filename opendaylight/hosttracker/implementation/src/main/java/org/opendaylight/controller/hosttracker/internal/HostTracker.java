@@ -39,6 +39,7 @@ import org.opendaylight.controller.clustering.services.IClusterContainerServices
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.hosttracker.HostIdFactory;
 import org.opendaylight.controller.hosttracker.IHostId;
+import org.opendaylight.controller.hosttracker.IHostTrackerShell;
 import org.opendaylight.controller.hosttracker.IPHostId;
 import org.opendaylight.controller.hosttracker.IPMacHostId;
 import org.opendaylight.controller.hosttracker.IfHostListener;
@@ -101,7 +102,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAware, IInventoryListener,
-        ITopologyManagerAware, ICacheUpdateAware<IHostId, HostNodeConnector>, CommandProvider {
+        ITopologyManagerAware, ICacheUpdateAware<IHostId, HostNodeConnector>, CommandProvider, IHostTrackerShell {
     static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
     static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
@@ -1617,5 +1618,25 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public List<List<String>> getHostNetworkHierarchy(InetAddress addr) {
         IHostId id = HostIdFactory.create(addr, null);
         return getHostNetworkHierarchy(id);
+    }
+
+    @Override
+    public List<String> dumpPendingArpReqList() {
+        ARPPending arphost;
+        List<String> arpReq = new ArrayList<String>();
+        for (Entry<IHostId, ARPPending> entry : ARPPendingList.entrySet()) {
+            arpReq.add(entry.getValue().getHostId().toString());
+        }
+        return arpReq;
+    }
+
+    @Override
+    public List<String> dumpFailedArpReqList() {
+        ARPPending arphost;
+        List<String> arpReq = new ArrayList<String>();
+        for (Entry<IHostId, ARPPending> entry : failedARPReqList.entrySet()) {
+            arpReq.add(entry.getValue().getHostId().toString());
+        }
+        return arpReq;
     }
 }
