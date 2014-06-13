@@ -107,13 +107,15 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData readConfigurationData(@Encoded @PathParam("identifier") String identifier);
+    public StructuredData readConfigurationData(@Encoded @PathParam("identifier") String identifier,
+                                                @Context UriInfo depth);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public StructuredData readOperationalData(@Encoded @PathParam("identifier") String identifier);
+    public StructuredData readOperationalData(@Encoded @PathParam("identifier") String identifier,
+                                              @Context UriInfo depth);
 
     @PUT
     @Path("/config/{identifier:.+}")

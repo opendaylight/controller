@@ -7,15 +7,19 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,17 +28,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
@@ -45,6 +53,7 @@ import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -52,9 +61,24 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class RestGetOperationTest extends JerseyTest {
+
+    static class NodeData {
+        Object key;
+        Object data; // List for a CompositeNode, value Object for a SimpleNode
+
+        NodeData( final Object key, final Object data ) {
+            this.key = key;
+            this.data = data;
+        }
+    }
 
     private static BrokerFacade brokerFacade;
     private static RestconfImpl restconfImpl;
@@ -69,7 +93,7 @@ public class RestGetOperationTest extends JerseyTest {
     public static void init() throws FileNotFoundException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
-        ControllerContext controllerContext = ControllerContext.getInstance();
+        final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();
@@ -130,9 +154,9 @@ public class RestGetOperationTest extends JerseyTest {
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
@@ -160,29 +184,29 @@ public class RestGetOperationTest extends JerseyTest {
     @Test
     public void getDataWithSlashesBehindMountPoint() throws UnsupportedEncodingException, URISyntaxException,
             ParseException {
-        InstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
+        final InstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         eq(awaitedInstanceIdentifier))).thenReturn(prepareCnDataForMountPointTest());
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/lst1/GigabitEthernet0%2F0%2F0%2F0";
+        final String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/lst1/GigabitEthernet0%2F0%2F0%2F0";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
     private InstanceIdentifier prepareInstanceIdentifierForList() throws URISyntaxException, ParseException {
-        List<PathArgument> parameters = new ArrayList<>();
+        final List<PathArgument> parameters = new ArrayList<>();
 
-        Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
-        URI uri = new URI("test:module");
-        QName qNameCont = QName.create(uri, revision, "cont");
-        QName qNameList = QName.create(uri, revision, "lst1");
-        QName qNameKeyList = QName.create(uri, revision, "lf11");
+        final Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
+        final URI uri = new URI("test:module");
+        final QName qNameCont = QName.create(uri, revision, "cont");
+        final QName qNameList = QName.create(uri, revision, "lst1");
+        final QName qNameKeyList = QName.create(uri, revision, "lf11");
 
         parameters.add(new InstanceIdentifier.NodeIdentifier(qNameCont));
         parameters.add(new InstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
@@ -195,14 +219,14 @@ public class RestGetOperationTest extends JerseyTest {
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
-        String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
+        final String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
@@ -211,7 +235,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getModulesTest() throws UnsupportedEncodingException, FileNotFoundException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = "/modules";
+        final String uri = "/modules";
 
         Response response = target(uri).request("application/yang.api+json").get();
         validateModulesResponseJson(response);
@@ -225,7 +249,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getStreamsTest() throws UnsupportedEncodingException, FileNotFoundException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = "/streams";
+        final String uri = "/streams";
 
         Response response = target(uri).request("application/yang.api+json").get();
         String responseBody = response.readEntity(String.class);
@@ -243,7 +267,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getModuleTest() throws FileNotFoundException, UnsupportedEncodingException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = "/modules/module/module2/2014-01-02";
+        final String uri = "/modules/module/module2/2014-01-02";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -268,7 +292,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getOperationsTest() throws FileNotFoundException, UnsupportedEncodingException {
         ControllerContext.getInstance().setGlobalSchema(schemaContextModules);
 
-        String uri = "/operations";
+        final String uri = "/operations";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -299,17 +323,17 @@ public class RestGetOperationTest extends JerseyTest {
     // /operations/pathToMountPoint/yang-ext:mount
     @Test
     public void getOperationsBehindMountPointTest() throws FileNotFoundException, UnsupportedEncodingException {
-        ControllerContext controllerContext = ControllerContext.getInstance();
+        final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setGlobalSchema(schemaContextModules);
 
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = "/operations/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
+        final String uri = "/operations/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
@@ -329,8 +353,8 @@ public class RestGetOperationTest extends JerseyTest {
 
     }
 
-    private Matcher validateOperationsResponseJson(String searchIn, String rpcName, String moduleName) {
-        StringBuilder regex = new StringBuilder();
+    private Matcher validateOperationsResponseJson(final String searchIn, final String rpcName, final String moduleName) {
+        final StringBuilder regex = new StringBuilder();
         regex.append("^");
 
         regex.append(".*\\{");
@@ -358,13 +382,13 @@ public class RestGetOperationTest extends JerseyTest {
 
         regex.append(".*");
         regex.append("$");
-        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        final Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
         return ptrn.matcher(searchIn);
 
     }
 
-    private Matcher validateOperationsResponseXml(String searchIn, String rpcName, String namespace) {
-        StringBuilder regex = new StringBuilder();
+    private Matcher validateOperationsResponseXml(final String searchIn, final String rpcName, final String namespace) {
+        final StringBuilder regex = new StringBuilder();
 
         regex.append("^");
 
@@ -383,24 +407,24 @@ public class RestGetOperationTest extends JerseyTest {
 
         regex.append(".*");
         regex.append("$");
-        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        final Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
         return ptrn.matcher(searchIn);
     }
 
     // /restconf/modules/pathToMountPoint/yang-ext:mount
     @Test
     public void getModulesBehindMountPoint() throws FileNotFoundException, UnsupportedEncodingException {
-        ControllerContext controllerContext = ControllerContext.getInstance();
+        final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setGlobalSchema(schemaContextModules);
 
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = "/modules/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
+        final String uri = "/modules/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
         Response response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
@@ -432,17 +456,17 @@ public class RestGetOperationTest extends JerseyTest {
     // /restconf/modules/module/pathToMountPoint/yang-ext:mount/moduleName/revision
     @Test
     public void getModuleBehindMountPoint() throws FileNotFoundException, UnsupportedEncodingException {
-        ControllerContext controllerContext = ControllerContext.getInstance();
+        final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setGlobalSchema(schemaContextModules);
 
-        MountInstance mountInstance = mock(MountInstance.class);
+        final MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
-        MountService mockMountService = mock(MountService.class);
+        final MountService mockMountService = mock(MountService.class);
         when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
-        String uri = "/modules/module/ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03";
+        final String uri = "/modules/module/ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03";
 
         Response response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
@@ -467,9 +491,9 @@ public class RestGetOperationTest extends JerseyTest {
 
     }
 
-    private void validateModulesResponseXml(Response response) {
+    private void validateModulesResponseXml(final Response response) {
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
+        final String responseBody = response.readEntity(String.class);
 
         assertTrue("Module1 in xml wasn't found", prepareXmlRegex("module1", "2014-01-01", "module:1", responseBody)
                 .find());
@@ -479,9 +503,9 @@ public class RestGetOperationTest extends JerseyTest {
                 .find());
     }
 
-    private void validateModulesResponseJson(Response response) {
+    private void validateModulesResponseJson(final Response response) {
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
+        final String responseBody = response.readEntity(String.class);
 
         assertTrue("Module1 in json wasn't found", prepareJsonRegex("module1", "2014-01-01", "module:1", responseBody)
                 .find());
@@ -491,8 +515,8 @@ public class RestGetOperationTest extends JerseyTest {
                 .find());
     }
 
-    private Matcher prepareJsonRegex(String module, String revision, String namespace, String searchIn) {
-        StringBuilder regex = new StringBuilder();
+    private Matcher prepareJsonRegex(final String module, final String revision, final String namespace, final String searchIn) {
+        final StringBuilder regex = new StringBuilder();
         regex.append("^");
 
         regex.append(".*\\{");
@@ -512,13 +536,13 @@ public class RestGetOperationTest extends JerseyTest {
 
         regex.append(".*");
         regex.append("$");
-        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        final Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
         return ptrn.matcher(searchIn);
 
     }
 
-    private Matcher prepareXmlRegex(String module, String revision, String namespace, String searchIn) {
-        StringBuilder regex = new StringBuilder();
+    private Matcher prepareXmlRegex(final String module, final String revision, final String namespace, final String searchIn) {
+        final StringBuilder regex = new StringBuilder();
         regex.append("^");
 
         regex.append(".*<module.*");
@@ -541,23 +565,23 @@ public class RestGetOperationTest extends JerseyTest {
         regex.append(".*");
         regex.append("$");
 
-        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
+        final Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
         return ptrn.matcher(searchIn);
     }
 
-    private void prepareMockForModulesTest(ControllerContext mockedControllerContext) throws FileNotFoundException {
-        SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
+    private void prepareMockForModulesTest(final ControllerContext mockedControllerContext) throws FileNotFoundException {
+        final SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
         mockedControllerContext.setGlobalSchema(schemaContext);
         // when(mockedControllerContext.getGlobalSchema()).thenReturn(schemaContext);
     }
 
-    private int get(String uri, String mediaType) {
+    private int get(final String uri, final String mediaType) {
         return target(uri).request(mediaType).get().getStatus();
     }
 
     private CompositeNode prepareCnDataForMountPointTest() throws URISyntaxException {
-        CompositeNodeWrapper cont1 = new CompositeNodeWrapper(new URI("test:module"), "cont1");
-        SimpleNodeWrapper lf11 = new SimpleNodeWrapper(new URI("test:module"), "lf11", "lf11 value");
+        final CompositeNodeWrapper cont1 = new CompositeNodeWrapper(new URI("test:module"), "cont1");
+        final SimpleNodeWrapper lf11 = new SimpleNodeWrapper(new URI("test:module"), "lf11", "lf11 value");
         cont1.addValue(lf11);
         return cont1.unwrap();
     }
@@ -574,7 +598,7 @@ public class RestGetOperationTest extends JerseyTest {
         CompositeNode intface;
         try {
             intface = new CompositeNodeWrapper(new URI("interface"), "interface");
-            List<Node<?>> childs = new ArrayList<>();
+            final List<Node<?>> childs = new ArrayList<>();
 
             childs.add(new SimpleNodeWrapper(new URI("name"), "name", "eth0"));
             childs.add(new SimpleNodeWrapper(new URI("type"), "type", "ethernetCsmacd"));
@@ -582,10 +606,315 @@ public class RestGetOperationTest extends JerseyTest {
             childs.add(new SimpleNodeWrapper(new URI("description"), "description", "some interface"));
             intface.setValue(childs);
             return intface;
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
         }
 
         return null;
     }
 
+    @Test
+    public void getDataWithUriDepthParameterTest() throws UnsupportedEncodingException {
+
+        ControllerContext.getInstance().setGlobalSchema( schemaContextModules );
+
+        final CompositeNode depth1Cont = toCompositeNode(
+            toCompositeNodeData( toNestedQName( "depth1-cont" ),
+                toCompositeNodeData( toNestedQName( "depth2-cont1" ),
+                    toCompositeNodeData( toNestedQName( "depth3-cont1" ),
+                        toCompositeNodeData( toNestedQName( "depth4-cont1" ),
+                            toSimpleNodeData( toNestedQName( "depth5-leaf1" ), "depth5-leaf1-value" )
+                        ),
+                        toSimpleNodeData( toNestedQName( "depth4-leaf1" ), "depth4-leaf1-value" )
+                    ),
+                    toSimpleNodeData( toNestedQName( "depth3-leaf1" ), "depth3-leaf1-value" )
+                ),
+                toCompositeNodeData( toNestedQName( "depth2-cont2" ),
+                    toCompositeNodeData( toNestedQName( "depth3-cont2" ),
+                        toCompositeNodeData( toNestedQName( "depth4-cont2" ),
+                            toSimpleNodeData( toNestedQName( "depth5-leaf2" ), "depth5-leaf2-value" )
+                        ),
+                        toSimpleNodeData( toNestedQName( "depth4-leaf2" ), "depth4-leaf2-value" )
+                    ),
+                    toSimpleNodeData( toNestedQName( "depth3-leaf2" ), "depth3-leaf2-value" )
+                ),
+                toSimpleNodeData( toNestedQName( "depth2-leaf1" ), "depth2-leaf1-value" )
+            ) );
+
+        when( brokerFacade.readConfigurationData( any( InstanceIdentifier.class ) ) )
+            .thenReturn( depth1Cont );
+
+        // Test config with depth 1
+
+        Response response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "1" )
+                                .request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+                expectContainer( "depth1-cont",
+                        expectEmptyContainer( "depth2-cont1" ),
+                        expectEmptyContainer( "depth2-cont2" ),
+                        expectLeaf( "depth2-leaf1", "depth2-leaf1-value" )
+                        ) );
+
+        // Test config with depth 2
+
+        response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "2" )
+                       .request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+                expectContainer( "depth1-cont",
+                        expectContainer( "depth2-cont1",
+                                expectEmptyContainer( "depth3-cont1" ),
+                                expectLeaf( "depth3-leaf1", "depth3-leaf1-value" )
+                                ),
+                                expectContainer( "depth2-cont2",
+                                        expectEmptyContainer( "depth3-cont2" ),
+                                        expectLeaf( "depth3-leaf2", "depth3-leaf2-value" )
+                                        ),
+                                        expectLeaf( "depth2-leaf1", "depth2-leaf1-value" )
+                        ) );
+
+        // Test config with depth 3
+
+        response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "3" )
+                       .request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+                expectContainer( "depth1-cont",
+                        expectContainer( "depth2-cont1",
+                                expectContainer( "depth3-cont1",
+                                        expectEmptyContainer( "depth4-cont1" ),
+                                        expectLeaf( "depth4-leaf1", "depth4-leaf1-value" )
+                                        ),
+                                        expectLeaf( "depth3-leaf1", "depth3-leaf1-value" )
+                                ),
+                                expectContainer( "depth2-cont2",
+                                        expectContainer( "depth3-cont2",
+                                                expectEmptyContainer( "depth4-cont2" ),
+                                                expectLeaf( "depth4-leaf2", "depth4-leaf2-value" )
+                                                ),
+                                                expectLeaf( "depth3-leaf2", "depth3-leaf2-value" )
+                                        ),
+                                        expectLeaf( "depth2-leaf1", "depth2-leaf1-value" )
+                        ) );
+
+        // Test config with depth 4
+
+        response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "4" )
+                      .request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+                expectContainer( "depth1-cont",
+                        expectContainer( "depth2-cont1",
+                                expectContainer( "depth3-cont1",
+                                        expectContainer( "depth4-cont1",
+                                                expectLeaf( "depth5-leaf1", "depth5-leaf1-value" )
+                                                ),
+                                                expectLeaf( "depth4-leaf1", "depth4-leaf1-value" )
+                                        ),
+                                        expectLeaf( "depth3-leaf1", "depth3-leaf1-value" )
+                                ),
+                                expectContainer( "depth2-cont2",
+                                        expectContainer( "depth3-cont2",
+                                                expectContainer( "depth4-cont2",
+                                                        expectLeaf( "depth5-leaf2", "depth5-leaf2-value" )
+                                                        ),
+                                                        expectLeaf( "depth4-leaf2", "depth4-leaf2-value" )
+                                                ),
+                                                expectLeaf( "depth3-leaf2", "depth3-leaf2-value" )
+                                        ),
+                                        expectLeaf( "depth2-leaf1", "depth2-leaf1-value" )
+                        ) );
+
+//        // Test config with depth 5
+//
+//        response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "5" )
+//                       .request( "application/xml" ).get();
+
+
+        // Test config with depth unbounded
+
+        response = target( "/config/nested-module:depth1-cont" ).queryParam( "depth", "unbounded" )
+                       .request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+            expectContainer( "depth1-cont",
+                expectContainer( "depth2-cont1",
+                    expectContainer( "depth3-cont1",
+                        expectContainer( "depth4-cont1",
+                            expectLeaf( "depth5-leaf1", "depth5-leaf1-value" )
+                        ),
+                        expectLeaf( "depth4-leaf1", "depth4-leaf1-value" )
+                    ),
+                    expectLeaf( "depth3-leaf1", "depth3-leaf1-value" )
+                ),
+                expectContainer( "depth2-cont2",
+                    expectContainer( "depth3-cont2",
+                        expectContainer( "depth4-cont2",
+                            expectLeaf( "depth5-leaf2", "depth5-leaf2-value" )
+                        ),
+                        expectLeaf( "depth4-leaf2", "depth4-leaf2-value" )
+                    ),
+                    expectLeaf( "depth3-leaf2", "depth3-leaf2-value" )
+                ),
+                expectLeaf( "depth2-leaf1", "depth2-leaf1-value" )
+            ) );
+
+        // Test operational
+
+        final CompositeNode depth2Cont1 = toCompositeNode(
+            toCompositeNodeData( toNestedQName( "depth2-cont1" ),
+                toCompositeNodeData( toNestedQName( "depth3-cont1" ),
+                    toCompositeNodeData( toNestedQName( "depth4-cont1" ),
+                        toSimpleNodeData( toNestedQName( "depth5-leaf1" ), "depth5-leaf1-value" )
+                    ),
+                    toSimpleNodeData( toNestedQName( "depth4-leaf1" ), "depth4-leaf1-value" )
+                ),
+                toSimpleNodeData( toNestedQName( "depth3-leaf1" ), "depth3-leaf1-value" )
+            ) );
+
+        when( brokerFacade.readOperationalData( any( InstanceIdentifier.class ) ) )
+             .thenReturn( depth2Cont1 );
+
+        response = target( "/operational/nested-module:depth1-cont/depth2-cont1" )
+                       .queryParam( "depth", "2" ).request( "application/xml" ).get();
+
+        verifyXMLResponse( response,
+            expectContainer( "depth2-cont1",
+                expectContainer( "depth3-cont1",
+                    expectEmptyContainer( "depth4-cont1" ),
+                    expectLeaf( "depth4-leaf1", "depth4-leaf1-value" )
+                ),
+                expectLeaf( "depth3-leaf1", "depth3-leaf1-value" )
+            ) );
+    }
+
+    @Test
+    public void getDataWithInvalidDepthParameterTest() {
+
+        ControllerContext.getInstance().setGlobalSchema( schemaContextModules );
+
+        final MultivaluedMap<String,String> paramMap = new MultivaluedHashMap<>();
+        paramMap.putSingle( "depth", "1o" );
+        final UriInfo mockInfo = mock( UriInfo.class );
+        when( mockInfo.getQueryParameters( false ) ).thenAnswer(
+            new Answer<MultivaluedMap<String,String>>() {
+                @Override
+                public MultivaluedMap<String, String> answer( final InvocationOnMock invocation ) {
+                    return paramMap;
+                }
+            } );
+
+        getDataWithInvalidDepthParameterTest( mockInfo );
+
+        paramMap.putSingle( "depth", "0" );
+        getDataWithInvalidDepthParameterTest( mockInfo );
+
+        paramMap.putSingle( "depth", "-1" );
+        getDataWithInvalidDepthParameterTest( mockInfo );
+    }
+
+    private void getDataWithInvalidDepthParameterTest( final UriInfo uriInfo ) {
+        try {
+            restconfImpl.readConfigurationData( "nested-module:depth1-cont", uriInfo );
+            fail( "Expected RestconfDocumentedException" );
+        }
+        catch( final RestconfDocumentedException e ) {
+            assertTrue( "Unexpected error message: " + e.getErrors().get( 0 ).getErrorMessage(),
+                        e.getErrors().get( 0 ).getErrorMessage().contains( "depth" ) );
+        }
+    }
+
+    private void verifyXMLResponse( final Response response, final NodeData nodeData ) {
+
+        final Document doc = TestUtils.loadDocumentFrom( (InputStream) response.getEntity() );
+        assertNotNull( "Could not parse XML document", doc );
+
+        //System.out.println(TestUtils.getDocumentInPrintableForm( doc ));
+
+        verifyContainerElement( doc.getDocumentElement(), nodeData );
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyContainerElement( final Element element, final NodeData nodeData ) {
+
+        assertEquals( "Element local name", nodeData.key, element.getNodeName() );
+
+        final NodeList childNodes = element.getChildNodes();
+        if( nodeData.data == null ) { // empty container
+            assertTrue( "Expected no child elements for \"" + element.getNodeName() + "\"",
+                        childNodes.getLength() == 0 );
+            return;
+        }
+
+        final Map<String,NodeData> expChildMap = Maps.newHashMap();
+        for( final NodeData expChild: (List<NodeData>)nodeData.data ) {
+            expChildMap.put( expChild.key.toString(), expChild );
+        }
+
+        for( int i = 0; i < childNodes.getLength(); i++ ) {
+            final org.w3c.dom.Node actualChild = childNodes.item( i );
+            if( !( actualChild instanceof Element ) ) {
+                continue;
+            }
+
+            final Element actualElement = (Element)actualChild;
+            final NodeData expChild = expChildMap.remove( actualElement.getNodeName() );
+            assertNotNull( "Unexpected child element for parent \"" + element.getNodeName() +
+                           "\": " + actualElement.getNodeName(), expChild );
+
+            if( expChild.data == null || expChild.data instanceof List ) {
+                verifyContainerElement( actualElement, expChild );
+            }
+            else {
+                assertEquals( "Text content for element: " + actualElement.getNodeName(),
+                              expChild.data, actualElement.getTextContent() );
+            }
+        }
+
+        if( !expChildMap.isEmpty() ) {
+            fail( "Missing elements for parent \"" + element.getNodeName() +
+                  "\": " + expChildMap.keySet() );
+        }
+    }
+
+    private NodeData expectContainer( final String name, final NodeData... childData ) {
+        return new NodeData( name, Lists.newArrayList( childData ) );
+    }
+
+    private NodeData expectEmptyContainer( final String name ) {
+        return new NodeData( name, null );
+    }
+
+    private NodeData expectLeaf( final String name, final Object value ) {
+        return new NodeData( name, value );
+    }
+
+    private QName toNestedQName( final String localName ) {
+        return QName.create( "urn:nested:module", "2014-06-3", localName );
+    }
+
+    @SuppressWarnings("unchecked")
+    private CompositeNode toCompositeNode( final NodeData nodeData ) {
+        final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
+        builder.setQName( (QName) nodeData.key );
+
+        for( final NodeData child: (List<NodeData>)nodeData.data ) {
+            if( child.data instanceof List ) {
+                builder.add( toCompositeNode( child ) );
+            }
+            else {
+                builder.addLeaf( (QName) child.key, child.data );
+            }
+        }
+
+        return builder.toInstance();
+    }
+
+    private NodeData toCompositeNodeData( final QName key, final NodeData... childData ) {
+        return new NodeData( key, Lists.newArrayList( childData ) );
+    }
+
+    private NodeData toSimpleNodeData( final QName key, final Object value ) {
+        return new NodeData( key, value );
+    }
 }
