@@ -62,7 +62,9 @@
 
     <!--  Karaf feature -->
     <module>feature</module>
-
+    <!-- datastore tracer -->
+    <module>dstracer-spi</module>
+    <module>dstracer-api</module>
   </modules>
 
   <build>
