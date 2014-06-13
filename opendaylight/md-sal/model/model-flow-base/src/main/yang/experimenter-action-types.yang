@@ -1,0 +1,32 @@
+module experimenter-action-types {
+    namespace "urn:opendaylight:experimenter:action:types";
+    prefix experimenter-action-type;    
+  
+    import opendaylight-action-types {prefix ofaction;revision-date "2013-11-12";}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+     
+    revision "2014-6-13" {
+        description "Initial revision of experimenter action types augments";
+    }
+    
+    grouping example-group {
+    	leaf example-type {
+             type uint16;
+         }
+    }
+    
+    augment "/ofaction:action-types/ofaction:action/ofaction:action" {
+         ext:augment-identifier "experimenter-action-type";
+         case experimenter-action-type {
+	     	choice action-type {
+	     		case example-1-action {
+	     			uses example-group;
+	     		}
+
+	     		case example-2-action {
+                    uses example-group;
+	     		}
+	     	}
+	   	}
+    }    
+}
