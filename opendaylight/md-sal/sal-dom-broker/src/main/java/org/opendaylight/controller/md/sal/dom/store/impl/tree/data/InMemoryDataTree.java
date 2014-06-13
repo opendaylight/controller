@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
@@ -81,7 +81,7 @@ final class InMemoryDataTree implements DataTree {
     }
 
     @Override
-    public void validate(final DataTreeModification modification) throws DataPreconditionFailedException {
+    public void validate(final DataTreeModification modification) throws DataValidationFailedException {
         Preconditions.checkArgument(modification instanceof InMemoryDataTreeModification, "Invalid modification class %s", modification.getClass());
 
         final InMemoryDataTreeModification m = (InMemoryDataTreeModification)modification;

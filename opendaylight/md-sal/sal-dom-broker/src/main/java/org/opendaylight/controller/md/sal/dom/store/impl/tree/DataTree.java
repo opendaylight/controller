@@ -32,7 +32,7 @@ public interface DataTree {
     /**
      * Validate whether a particular modification can be applied to the data tree.
      */
-    void validate(DataTreeModification modification) throws DataPreconditionFailedException;
+    void validate(DataTreeModification modification) throws DataValidationFailedException;
 
     /**
      * Prepare a modification for commit.

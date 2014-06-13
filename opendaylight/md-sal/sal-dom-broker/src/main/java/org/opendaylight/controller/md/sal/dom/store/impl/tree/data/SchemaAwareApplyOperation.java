@@ -11,7 +11,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.List;
 
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataPreconditionFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ConflictingModificationAppliedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.IncorrectDataStructureException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.DataNodeContainerModificationStrategy.ContainerModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.DataNodeContainerModificationStrategy.UnkeyedListItemModificationStrategy;
@@ -82,9 +84,9 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         return null;
     }
 
-    public static boolean checkDataPrecondition(final InstanceIdentifier path, final boolean condition, final String message) throws DataPreconditionFailedException {
+    public static boolean checkConflicting(final InstanceIdentifier path, final boolean condition, final String message) throws ConflictingModificationAppliedException {
         if(!condition) {
-            throw new DataPreconditionFailedException(path, message);
+            throw new ConflictingModificationAppliedException(path, message);
         }
         return condition;
     }
@@ -109,10 +111,10 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
     }
 
-    private static final void checkNotConflicting(final InstanceIdentifier path, final TreeNode original, final TreeNode current) throws DataPreconditionFailedException {
-        checkDataPrecondition(path, original.getVersion().equals(current.getVersion()),
+    private static final void checkNotConflicting(final InstanceIdentifier path, final TreeNode original, final TreeNode current) throws ConflictingModificationAppliedException {
+        checkConflicting(path, original.getVersion().equals(current.getVersion()),
                 "Node was replaced by other transaction.");
-        checkDataPrecondition(path, original.getSubtreeVersion().equals(current.getSubtreeVersion()),
+        checkConflicting(path, original.getSubtreeVersion().equals(current.getSubtreeVersion()),
                 "Node children was modified by other transaction");
     }
 
@@ -130,7 +132,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     }
 
     @Override
-    public final void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+    public final void checkApplicable(final InstanceIdentifier path,final NodeModification modification, final Optional<TreeNode> current) throws DataValidationFailedException {
         switch (modification.getType()) {
         case DELETE:
             checkDeleteApplicable(modification, current);
@@ -151,7 +153,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
     }
 
-    protected void checkMergeApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+    protected void checkMergeApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataValidationFailedException {
         Optional<TreeNode> original = modification.getOriginal();
         if (original.isPresent() && current.isPresent()) {
             /*
@@ -166,12 +168,12 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
         }
     }
 
-    protected void checkWriteApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataPreconditionFailedException {
+    protected void checkWriteApplicable(final InstanceIdentifier path, final NodeModification modification, final Optional<TreeNode> current) throws DataValidationFailedException {
         Optional<TreeNode> original = modification.getOriginal();
         if (original.isPresent() && current.isPresent()) {
             checkNotConflicting(path, original.get(), current.get());
         } else if(original.isPresent()) {
-            throw new DataPreconditionFailedException(path,"Node was deleted by other transaction.");
+            throw new ConflictingModificationAppliedException(path,"Node was deleted by other transaction.");
         }
     }
 
@@ -216,8 +218,18 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     protected abstract TreeNode applySubtreeChange(ModifiedNode modification,
             TreeNode currentMeta, Version version);
 
+    /**
+     *
+     * Checks is supplied {@link NodeModification} is applicable for Subtree Modification.
+     *
+     * @param path Path to current node
+     * @param modification Node modification which should be applied.
+     * @param current Current state of data tree
+     * @throws ConflictingModificationAppliedException If subtree was changed in conflicting way
+     * @throws IncorrectDataStructureException If subtree modification is not applicable (e.g. leaf node).
+     */
     protected abstract void checkSubtreeModificationApplicable(InstanceIdentifier path, final NodeModification modification,
-            final Optional<TreeNode> current) throws DataPreconditionFailedException;
+            final Optional<TreeNode> current) throws DataValidationFailedException;
 
     protected abstract void verifyWrittenStructure(NormalizedNode<?, ?> writtenValue);
 
@@ -262,8 +274,8 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
         @Override
         protected void checkSubtreeModificationApplicable(final InstanceIdentifier path, final NodeModification modification,
-                final Optional<TreeNode> current) throws DataPreconditionFailedException {
-            throw new DataPreconditionFailedException(path, "Subtree modification is not allowed.");
+                final Optional<TreeNode> current) throws IncorrectDataStructureException {
+            throw new IncorrectDataStructureException(path, "Subtree modification is not allowed.");
         }
     }
 }
