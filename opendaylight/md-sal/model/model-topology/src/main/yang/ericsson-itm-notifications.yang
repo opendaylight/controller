@@ -1,0 +1,14 @@
+module ericsson-itm-notifications {
+    namespace "urn:ericsson:itm:notifications";
+    prefix itmNotification;
+
+    revision "2014-04-12" {
+        description "Initial revision of ITM notification service";
+    }
+
+    notification itm-tunnel-computing-in-progress {
+    }
+
+    notification itm-tunnel-computing-complete {
+    }
+}
