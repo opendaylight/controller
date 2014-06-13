@@ -11,30 +11,33 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DOMStoreProxy implements DOMStore {
+/**
+ *
+ */
+public class DistributedDataStore implements DOMStore {
 
     @Override
     public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(InstanceIdentifier path, L listener, AsyncDataBroker.DataChangeScope scope) {
-        throw new UnsupportedOperationException("registerChangeListener");
+        return new ListenerRegistrationProxy();
     }
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        throw new UnsupportedOperationException("createTransactionChain");
+        return new TransactionChainProxy();
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        throw new UnsupportedOperationException("newReadOnlyTransaction");
+        return new TransactionProxy();
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        throw new UnsupportedOperationException("newWriteOnlyTransaction");
+        return new TransactionProxy();
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        throw new UnsupportedOperationException("newReadWriteTransaction");
+        return new TransactionProxy();
     }
 }
