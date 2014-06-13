@@ -10,19 +10,19 @@ package org.opendaylight.controller.md.sal.common.api.data;
 public enum LogicalDatastoreType {
 
     /**
-     * Logical atastore representing operational state of the system
+     * Logical data store representing operational state of the system
      * and it's components
      *
-     * This datastore is used to describe operational state of
+     * This data store is used to describe operational state of
      * the system and it's operation related data.
      *
      */
     OPERATIONAL,
     /**
-     * Logical Datastore representing configuration state of the system
+     * Logical data store representing configuration state of the system
      * and it's components.
      *
-     * This datastore is used to describe intended state of
+     * This data store is used to describe intended state of
      * the system and intended operation mode.
      *
      */
