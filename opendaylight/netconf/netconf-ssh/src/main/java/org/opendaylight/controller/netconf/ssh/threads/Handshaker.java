@@ -100,14 +100,14 @@ public class Handshaker implements Runnable {
     @Override
     public void run() {
         // let ganymed process handshake
-        logger.trace("{} SocketThread is started", session);
+        logger.trace("{} is started", session);
         try {
             // TODO this should be guarded with a timer to prevent resource exhaustion
             ganymedConnection.connect();
         } catch (IOException e) {
-            logger.warn("{} SocketThread error ", session, e);
+            logger.debug("{} connection error", session, e);
         }
-        logger.trace("{} SocketThread is exiting", session);
+        logger.trace("{} is exiting", session);
     }
 }
 
