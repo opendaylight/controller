@@ -1,6 +1,6 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
-import org.opendaylight.controller.cluster.datastore.DOMStoreProxy;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 
 public class DistributedDataStoreProviderModule extends org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedDataStoreProviderModule {
     public DistributedDataStoreProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -18,7 +18,7 @@ public class DistributedDataStoreProviderModule extends org.opendaylight.control
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        new DOMStoreProxy();
+        new DistributedDataStore();
 
         final class AutoCloseableDistributedDataStore implements AutoCloseable {
 
