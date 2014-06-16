@@ -10,28 +10,29 @@ package org.opendaylight.controller.sal.rest.doc.swagger;
 import java.util.List;
 
 /**
- * Implementation of swagger spec
- * (see <a href="https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#522-api-object">
- *   https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#522-api-object</a>)
+ * Implementation of swagger spec (see <a href=
+ * "https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#522-api-object"
+ * > https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#522-api
+ * -object</a>)
  */
 public class Api {
 
-  private String path;
-  private List<Operation> operations;
+    private String path;
+    private List<Operation> operations;
 
-  public String getPath() {
-    return path;
-  }
+    public String getPath() {
+        return path;
+    }
 
-  public void setPath(String path) {
-    this.path = path;
-  }
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-  public List<Operation> getOperations() {
-    return operations;
-  }
+    public List<Operation> getOperations() {
+        return operations;
+    }
 
-  public void setOperations(List<Operation> operations) {
-    this.operations = operations;
-  }
+    public void setOperations(List<Operation> operations) {
+        this.operations = operations;
+    }
 }
