@@ -1,0 +1,29 @@
+package org.opendaylight.controller.mdsal;
+
+option java_package = "org.opendaylight.controller.mdsal";
+option java_outer_classname = "Messages";
+
+message PostBox {
+  required string name = 1;
+  required string id = 2;
+
+  enum FromType {
+    LOCAL = 0;
+    CITY = 1;
+    COUNTRY = 2;
+  }
+
+  message Mail {
+    required string zipcode = 1;
+    optional FromType  type= 2 [default = LOCAL] ;
+
+  }
+
+  repeated Mail mail = 4;
+
+}
+
+message PostOffice {
+    required string version = 1;
+    repeated PostBox box = 2;
+}
