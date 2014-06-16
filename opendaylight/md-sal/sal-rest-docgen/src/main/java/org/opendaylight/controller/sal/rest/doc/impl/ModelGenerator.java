@@ -7,19 +7,52 @@
  */
 package org.opendaylight.controller.sal.rest.doc.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.opendaylight.yangtools.yang.model.api.*;
-import org.opendaylight.yangtools.yang.model.api.type.*;
+import org.opendaylight.controller.sal.rest.doc.model.builder.OperationBuilder;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition.EnumPair;
-import org.opendaylight.yangtools.yang.model.util.*;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LengthConstraint;
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.BooleanType;
+import org.opendaylight.yangtools.yang.model.util.Decimal64;
+import org.opendaylight.yangtools.yang.model.util.EnumerationType;
+import org.opendaylight.yangtools.yang.model.util.ExtendedType;
+import org.opendaylight.yangtools.yang.model.util.Int16;
+import org.opendaylight.yangtools.yang.model.util.Int32;
+import org.opendaylight.yangtools.yang.model.util.Int64;
+import org.opendaylight.yangtools.yang.model.util.Int8;
+import org.opendaylight.yangtools.yang.model.util.StringType;
+import org.opendaylight.yangtools.yang.model.util.Uint16;
+import org.opendaylight.yangtools.yang.model.util.Uint32;
+import org.opendaylight.yangtools.yang.model.util.Uint64;
+import org.opendaylight.yangtools.yang.model.util.Uint8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Generates JSON Schema for data defined in Yang
@@ -81,7 +114,6 @@ public class ModelGenerator {
     JSONObject models = new JSONObject();
     processContainers(module, models);
     processRPCs(module, models);
-
     return models;
   }
 
@@ -93,26 +125,36 @@ public class ModelGenerator {
     Set<DataSchemaNode> childNodes =  module.getChildNodes();
 
     for(DataSchemaNode childNode : childNodes){
-      JSONObject moduleJSON=null;
-      String filename = childNode.getQName().getLocalName();
-			/*
-			 * For every container in the module
-			 */
+      JSONObject configModuleJSON=null;
+      JSONObject operationalModuleJSON=null;
+
+      String childNodeName = childNode.getQName().getLocalName();
+                  /*
+             * For every container in the module
+             */
       if(childNode instanceof ContainerSchemaNode) {
-        moduleJSON = processContainer((ContainerSchemaNode)childNode, moduleName, true, models);
+          configModuleJSON =
+                processContainer((ContainerSchemaNode)childNode, moduleName, true, models, true);
+          operationalModuleJSON =
+                processContainer((ContainerSchemaNode)childNode, moduleName, true, models, false);
       }
 
-      if(moduleJSON!=null) {
-        _logger.debug("Adding model for [{}]", filename);
-        moduleJSON.put("id", filename);
-        models.put(filename, moduleJSON);
+      if( configModuleJSON != null ){
+          _logger.debug("Adding model for [{}]", OperationBuilder.CONFIG + childNodeName);
+          configModuleJSON.put("id", OperationBuilder.CONFIG + childNodeName);
+          models.put(OperationBuilder.CONFIG + childNodeName, configModuleJSON);
+      }
+      if( operationalModuleJSON != null ){
+          _logger.debug("Adding model for [{}]", OperationBuilder.OPERATIONAL + childNodeName);
+          operationalModuleJSON.put("id", OperationBuilder.OPERATIONAL + childNodeName );
+          models.put(OperationBuilder.OPERATIONAL + childNodeName, operationalModuleJSON);
       }
     }
 
   }
 
 
-  /**
+/**
    * Process the RPCs for a Module
    * Spits out a file each of the name <rpcName>-input.json
    * and <rpcName>-output.json for each RPC that contains
@@ -131,7 +173,7 @@ public class ModelGenerator {
       ContainerSchemaNode input = rpc.getInput();
       if(input!=null) {
         JSONObject inputJSON = processContainer(input, moduleName, true, models);
-        String filename = rpc.getQName().getLocalName() + "-input";
+        String filename = "(" + rpc.getQName().getLocalName() + ")input";
         inputJSON.put("id", filename);
         //writeToFile(filename, inputJSON.toString(2), moduleName);
         models.put(filename, inputJSON);
@@ -140,7 +182,7 @@ public class ModelGenerator {
       ContainerSchemaNode output = rpc.getOutput();
       if(output!=null) {
         JSONObject outputJSON = processContainer(output, moduleName, true, models);
-        String filename = rpc.getQName().getLocalName() + "-output";
+        String filename = "(" + rpc.getQName().getLocalName() + ")output";
         outputJSON.put("id", filename);
         models.put(filename, outputJSON);
       }
@@ -153,10 +195,15 @@ public class ModelGenerator {
    *
    * @param container
    * @param moduleName
+ * @param isConfig
    * @throws JSONException
    * @throws IOException
    */
-  private JSONObject processContainer(ContainerSchemaNode container, String moduleName, boolean addSchemaStmt, JSONObject models) throws JSONException, IOException{
+  private JSONObject processContainer(ContainerSchemaNode container, String moduleName, boolean addSchemaStmt, JSONObject models ) throws JSONException, IOException{
+      return processContainer(container, moduleName, addSchemaStmt, models, (Boolean)null);
+  }
+
+  private JSONObject processContainer(ContainerSchemaNode container, String moduleName, boolean addSchemaStmt, JSONObject models, Boolean isConfig) throws JSONException, IOException{
     JSONObject moduleJSON = getSchemaTemplate();
     if(addSchemaStmt) {
       moduleJSON = getSchemaTemplate();
@@ -168,50 +215,58 @@ public class ModelGenerator {
     String containerDescription = container.getDescription();
     moduleJSON.put(DESCRIPTION_KEY, containerDescription);
 
-    Set<DataSchemaNode> containerChildren = ((ContainerSchemaNode)container).getChildNodes();
-    JSONObject properties = processChildren(containerChildren, moduleName, models);
+    Set<DataSchemaNode> containerChildren = container.getChildNodes();
+    JSONObject properties = processChildren(containerChildren, moduleName, models, isConfig);
     moduleJSON.put(PROPERTIES_KEY, properties);
     return moduleJSON;
   }
 
+
+  private JSONObject processChildren(Set<DataSchemaNode> nodes, String moduleName, JSONObject models) throws JSONException, IOException {
+      return processChildren(nodes, moduleName, models, null);
+  }
   /**
    * Processes the nodes
    * @param nodes
    * @param moduleName
+ * @param isConfig
    * @return
    * @throws JSONException
    * @throws IOException
    */
-  private JSONObject processChildren(Set<DataSchemaNode> nodes, String moduleName, JSONObject models) throws JSONException, IOException {
+  private JSONObject processChildren(Set<DataSchemaNode> nodes, String moduleName, JSONObject models, Boolean isConfig) throws JSONException, IOException {
 
     JSONObject properties = new JSONObject();
 
     for(DataSchemaNode node : nodes){
-      String name = node.getQName().getLocalName();
-      JSONObject property = null;
-      if(node instanceof LeafSchemaNode) {
-        property = processLeafNode((LeafSchemaNode)node);
-      } else if (node instanceof ListSchemaNode) {
-        property = processListSchemaNode((ListSchemaNode)node, moduleName, models);
+        if( isConfig == null || node.isConfiguration() == isConfig ){
 
-      } else if (node instanceof LeafListSchemaNode) {
-        property = processLeafListNode((LeafListSchemaNode)node);
+          String name = node.getQName().getLocalName();
+          JSONObject property = null;
+          if(node instanceof LeafSchemaNode) {
+            property = processLeafNode((LeafSchemaNode)node);
+          } else if (node instanceof ListSchemaNode) {
+            property = processListSchemaNode((ListSchemaNode)node, moduleName, models);
 
-      } else if (node instanceof ChoiceNode) {
-        property = processChoiceNode((ChoiceNode)node, moduleName, models);
+          } else if (node instanceof LeafListSchemaNode) {
+            property = processLeafListNode((LeafListSchemaNode)node);
 
-      } else if (node instanceof AnyXmlSchemaNode) {
-        property = processAnyXMLNode((AnyXmlSchemaNode)node);
+          } else if (node instanceof ChoiceNode) {
+            property = processChoiceNode((ChoiceNode)node, moduleName, models);
 
-      } else if (node instanceof ContainerSchemaNode) {
-        property = processContainer((ContainerSchemaNode)node, moduleName, false, models);
+          } else if (node instanceof AnyXmlSchemaNode) {
+            property = processAnyXMLNode((AnyXmlSchemaNode)node);
 
-      } else {
-        throw new IllegalArgumentException("Unknown DataSchemaNode type: " + node.getClass());
-      }
+          } else if (node instanceof ContainerSchemaNode) {
+            property = processContainer((ContainerSchemaNode)node, moduleName, false, models, isConfig);
 
-      property.putOpt(DESCRIPTION_KEY, node.getDescription());
-      properties.put(name, property);
+          } else {
+            throw new IllegalArgumentException("Unknown DataSchemaNode type: " + node.getClass());
+          }
+
+          property.putOpt(DESCRIPTION_KEY, node.getDescription());
+          properties.put(name, property);
+        }
     }
     return properties;
   }
@@ -307,11 +362,11 @@ public class ModelGenerator {
     childSchema.put(TYPE_KEY, OBJECT_TYPE);
     childSchema.put(PROPERTIES_KEY, childSchemaProperties);
 
-		/*
-		 * Due to a limitation of the RAML--->JAX-RS tool, sub-properties
-		 * must be in a separate JSON schema file. Hence, we have to write
-		 * some properties to a new file, while continuing to process the rest.
-		 */
+    /*
+    * Due to a limitation of the RAML--->JAX-RS tool, sub-properties
+    * must be in a separate JSON schema file. Hence, we have to write
+    * some properties to a new file, while continuing to process the rest.
+    */
     //writeToFile(fileName, childSchema.toString(2), moduleName);
     childSchema.put("id", fileName);
     models.put(fileName, childSchema);
