@@ -10,6 +10,10 @@ package org.opendaylight.controller.md.sal.common.impl.util.compat;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -28,12 +31,15 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
@@ -44,11 +50,6 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
@@ -612,6 +613,42 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
+    private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
+
+        protected AnyXmlNormalization( NodeIdentifier identifier ) {
+            super( identifier );
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild( PathArgument child ) throws DataNormalizationException {
+            return null;
+        }
+
+        @Override
+        public DataNormalizationOperation<?> getChild( QName child ) throws DataNormalizationException {
+            return null;
+        }
+
+        @Override
+        public NormalizedNode<?, ?> normalize( Node<?> legacyData ) {
+            NormalizedNodeAttrBuilder<NodeIdentifier, Node<?>, AnyXmlNode> builder =
+                    Builders.anyXmlBuilder().withNodeIdentifier(
+                                                new NodeIdentifier( legacyData.getNodeType() ) );
+            builder.withValue(legacyData);
+            return builder.build();
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
+        }
+
+        @Override
+        public NormalizedNode<?, ?> createDefault( PathArgument currentArg ) {
+            return null;
+        }
+    }
+
     private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
         DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
@@ -712,6 +749,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return new ChoiceNodeNormalization((org.opendaylight.yangtools.yang.model.api.ChoiceNode) potential);
         } else if (potential instanceof LeafListSchemaNode) {
             return fromLeafListSchemaNode((LeafListSchemaNode) potential);
+        } else if (potential instanceof AnyXmlSchemaNode) {
+            return new AnyXmlNormalization( new NodeIdentifier(potential.getQName() ) );
         }
         return null;
     }
