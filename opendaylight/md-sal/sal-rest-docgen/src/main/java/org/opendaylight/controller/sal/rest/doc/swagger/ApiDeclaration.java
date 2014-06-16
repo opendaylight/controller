@@ -7,85 +7,86 @@
  */
 package org.opendaylight.controller.sal.rest.doc.swagger;
 
-import org.json.JSONObject;
-
 import java.util.List;
 
+import org.json.JSONObject;
+
 /**
- * Implementation of swagger spec
- * (see <a href="https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#52-api-declaration">
- *   https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#52-api-declaration</a>)
+ * Implementation of swagger spec (see <a href=
+ * "https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#52-api-declaration"
+ * > https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#52-api-
+ * declaration</a>)
  */
 public class ApiDeclaration {
-  private String apiVersion;
-  private String swaggerVersion;
-  private String basePath;
-  private String resourcePath;
-  private List<String> produces;
-  private List<Api> apis;
-  private JSONObject models;
+    private String apiVersion;
+    private String swaggerVersion;
+    private String basePath;
+    private String resourcePath;
+    private List<String> produces;
+    private List<Api> apis;
+    private JSONObject models;
 
-  public JSONObject getModels() {
-    return models;
-  }
+    public JSONObject getModels() {
+        return models;
+    }
 
-  public void setModels(JSONObject models) {
-    this.models = models;
-  }
+    public void setModels(JSONObject models) {
+        this.models = models;
+    }
 
-  public String getApiVersion() {
-    return apiVersion;
-  }
+    public String getApiVersion() {
+        return apiVersion;
+    }
 
-  public void setApiVersion(String apiVersion) {
-    this.apiVersion = apiVersion;
-  }
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
 
-  public String getSwaggerVersion() {
-    return swaggerVersion;
-  }
+    public String getSwaggerVersion() {
+        return swaggerVersion;
+    }
 
-  public void setSwaggerVersion(String swaggerVersion) {
-    this.swaggerVersion = swaggerVersion;
-  }
+    public void setSwaggerVersion(String swaggerVersion) {
+        this.swaggerVersion = swaggerVersion;
+    }
 
-  public String getBasePath() {
-    return basePath;
-  }
+    public String getBasePath() {
+        return basePath;
+    }
 
-  public void setBasePath(String basePath) {
-    this.basePath = basePath;
-  }
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
+    }
 
-  public String getResourcePath() {
-    return resourcePath;
-  }
+    public String getResourcePath() {
+        return resourcePath;
+    }
 
-  public void setResourcePath(String resourcePath) {
-    this.resourcePath = resourcePath;
-  }
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
 
-  public List<String> getProduces() {
-    return produces;
-  }
+    public List<String> getProduces() {
+        return produces;
+    }
 
-  public void setProduces(List<String> produces) {
-    this.produces = produces;
-  }
+    public void setProduces(List<String> produces) {
+        this.produces = produces;
+    }
 
-  public List<Api> getApis() {
-    return apis;
-  }
+    public List<Api> getApis() {
+        return apis;
+    }
 
-  public void setApis(List<Api> apis) {
-    this.apis = apis;
-  }
+    public void setApis(List<Api> apis) {
+        this.apis = apis;
+    }
 
-  public boolean hasApi(){
-    return (apis != null && !apis.isEmpty());
-  }
+    public boolean hasApi() {
+        return (apis != null && !apis.isEmpty());
+    }
 
-  public boolean hasModel(){
-    return (models != null && models.length() > 0);
-  }
+    public boolean hasModel() {
+        return (models != null && models.length() > 0);
+    }
 }
