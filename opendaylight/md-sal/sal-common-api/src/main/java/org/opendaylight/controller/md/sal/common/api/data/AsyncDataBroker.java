@@ -10,6 +10,18 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ *
+ * Data Broker which provides access to transactional functionality
+ * operating on conceptual data trees and subcription capabilities
+ * for receiving data change events.
+ *
+ * @param <P>
+ *            Type of path (subtree identifier), which represents location in
+ *            tree
+ * @param <D>
+ *            Type of data (payload), which represents data payload
+ */
 public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChangeListener<P, D>> extends //
         AsyncDataTransactionFactory<P, D> {
 
@@ -21,48 +33,65 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      *
      * The terminology for types is reused from LDAP
      *
-     * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/SEARCH_Setting_the_SCOPE_Parameter.shtml
+     * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/
+     *      SEARCH_Setting_the_SCOPE_Parameter.shtml
      */
     public enum DataChangeScope {
 
-       /**
-        * Represents only a direct change of the node, such as replacement of node,
-        * addition or deletion.
-        *
-        */
-       BASE,
-       /**
-        * Represent a change (addition,replacement,deletion)
-        * of the node or one of it's direct childs.
-        *
-        */
-       ONE,
-       /**
-        * Represents a change of the node or any of it's child nodes.
-        *
-        */
-       SUBTREE
+        /**
+         * Represents only a direct change of the node, such as replacement of
+         * node, addition or deletion.
+         *
+         */
+        BASE,
+        /**
+         * Represent a change (addition,replacement,deletion) of the node or one
+         * of it's direct childs.
+         *
+         */
+        ONE,
+        /**
+         * Represents a change of the node or any of it's child nodes.
+         *
+         */
+        SUBTREE
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AsyncReadTransaction<P, D> newReadOnlyTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AsyncReadWriteTransaction<P,D> newReadWriteTransaction();
+    public AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
 
     /**
-     * Registers {@link DataChangeListener} for Data Change callbacks
-     * which will be triggered on which will be triggered on the store
+     * Registers {@link DataChangeListener} for Data Change callbacks which will
+     * be triggered on which will be triggered on the store
      *
-     * @param store Logical store in which listener is registered.
-     * @param path Path (subtree identifier) on which client listener will be invoked.
-     * @param listener Instance of listener which should be invoked on
-     * @param triggeringScope Scope of change which triggers callback.
-     * @return Listener registration of the listener, call {@link ListenerRegistration#close()}
-     *         to stop delivery of change events.
+     *  @param store Logical store in which listener is registered.
+     *
+     * @param path
+     *            Path (subtree identifier) on which client listener will be
+     *            invoked.
+     * @param listener
+     *            Instance of listener which should be invoked on
+     * @param triggeringScope
+     *            Scope of change which triggers callback.
+     * @return Listener registration of the listener, call
+     *         {@link ListenerRegistration#close()} to stop delivery of change
+     *         events.
      */
-    ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener, DataChangeScope triggeringScope);
+    ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener,
+            DataChangeScope triggeringScope);
 }

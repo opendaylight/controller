@@ -11,13 +11,28 @@ import java.util.EventListener;
 
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ * Listener of data change events on particular subtree.
+ *
+ * User-supplied implementations of this listener interface
+ * MUST register via {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener, org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope)}
+ * in order to start receiving data change events, which captures state changes
+ * in subtree.
+ *
+ * @param <P>
+ *            Type of path (subtree identifier), which represents location in
+ *            tree
+ * @param <D>
+ *            Type of data (payload), which represents data payload
+ */
 public interface AsyncDataChangeListener<P extends Path<P>, D> extends EventListener {
     /**
      * Note that this method may be invoked from a shared thread pool, so
      * implementations SHOULD NOT perform CPU-intensive operations and they
      * definitely MUST NOT invoke any potentially blocking operations.
      *
-     * @param change Data Change Event being delivered.
+     * @param change
+     *            Data Change Event being delivered.
      */
     void onDataChanged(AsyncDataChangeEvent<P, D> change);
 }

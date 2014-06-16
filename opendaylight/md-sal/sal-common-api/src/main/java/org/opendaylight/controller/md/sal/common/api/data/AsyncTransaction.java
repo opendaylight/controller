@@ -13,8 +13,6 @@ import org.opendaylight.yangtools.concepts.Path;
 
 /**
  *
- * @author
- *
  * @param <P> Type of path (subtree identifier), which represents location in tree
  * @param <D> Type of data (payload), which represents data payload
  */

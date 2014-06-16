@@ -13,9 +13,11 @@ import org.opendaylight.yangtools.concepts.Path;
  * Transaction enabling client to have combined transaction,
  * which provides read and write capabilities.
  *
+ * Reads returns state as if previous writes to data tree
+ * already happened.
  *
- * @param <P> Path Type
- * @param <D> Data Type
+ * @param <P> Type of path (subtree identifier), which represents location in tree
+ * @param <D> Type of data (payload), which represents data payload
  */
 public interface AsyncReadWriteTransaction<P extends Path<P>, D> extends AsyncReadTransaction<P, D>,
         AsyncWriteTransaction<P, D> {
