@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_53f8d448",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-16T20:22:19Z",
+      "side": 1,
+      "message": "Please move all concrete versions up to variables in the parent pom and add to dependency management section.",
+      "revId": "f271dc36af973f0fc6694b16bb68815526c7f48b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
