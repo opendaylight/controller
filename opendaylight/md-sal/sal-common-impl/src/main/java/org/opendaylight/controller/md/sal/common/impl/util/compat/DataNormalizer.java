@@ -9,11 +9,15 @@ package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -21,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationI
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -30,12 +35,6 @@ import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 
 public class DataNormalizer {
 
@@ -134,6 +133,9 @@ public class DataNormalizer {
         // DataContainerNode<?>,"Node object %s, %s should be of type DataContainerNode",normalizedPath,normalizedData);
         if (normalizedData instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) normalizedData);
+        } else if (normalizedData instanceof AnyXmlNode) {
+            Node<?> value = ((AnyXmlNode) normalizedData).getValue();
+            return value instanceof CompositeNode ? (CompositeNode)value : null;
         }
         return null;
     }
@@ -150,6 +152,8 @@ public class DataNormalizer {
 
         if (node instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) node);
+        } else if (node instanceof AnyXmlNode) {
+            return ((AnyXmlNode) node).getValue();
         }
         return toLegacySimple(node);
 
