@@ -7,17 +7,36 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import java.util.concurrent.Future;
+
 import org.opendaylight.yangtools.concepts.Path;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 
+/**
+ *
+ * Read transaction which provides read-only view of data tree, which could
+ * be consumed by clients.
+ *
+ * View of data tree is stable snapshot of current data tree state captured
+ * when transaction was created and it's state and underlying data tree
+ * is not affected by other concurrently running transactions.
+ *
+ * @param <P>
+ *            Type of path (subtree identifier), which represents location in
+ *            tree
+ * @param <D>
+ *            Type of data (payload), which represents data payload
+ */
 public interface AsyncReadTransaction<P extends Path<P>, D> extends AsyncTransaction<P, D> {
 
     /**
      *
-     * Reads data from provided logical data store located at provided path
+     * Reads data from provided logical data store located at provided path.
      *
+     * If the target is subtree, whole subtree is readed (accessible from
+     * returned data object).
      *
      * @param store
      *            Logical data store from which read should occur.

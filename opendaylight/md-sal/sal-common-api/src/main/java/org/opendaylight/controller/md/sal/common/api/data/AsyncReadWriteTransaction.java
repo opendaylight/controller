@@ -13,9 +13,16 @@ import org.opendaylight.yangtools.concepts.Path;
  * Transaction enabling client to have combined transaction,
  * which provides read and write capabilities.
  *
+ * Initial state of write transaction is stable snapshot of current data tree
+ * state captured when transaction was created and it's state and underlying
+ * data tree are not affected by other concurrently running transactions.
  *
- * @param <P> Path Type
- * @param <D> Data Type
+ * Write transaction is isolated from other concurrent write transactions in a
+ * way, that this transaction does not see any state change introduced by other
+ * concurrent transactions.
+ *
+ * @param <P> Type of path (subtree identifier), which represents location in tree
+ * @param <D> Type of data (payload), which represents data payload
  */
 public interface AsyncReadWriteTransaction<P extends Path<P>, D> extends AsyncReadTransaction<P, D>,
         AsyncWriteTransaction<P, D> {
