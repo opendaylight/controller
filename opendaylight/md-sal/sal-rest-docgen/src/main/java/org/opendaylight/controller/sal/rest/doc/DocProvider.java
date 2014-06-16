@@ -7,11 +7,19 @@
  */
 package org.opendaylight.controller.sal.rest.doc;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionService.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -20,20 +28,19 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-
 
 public class DocProvider implements BundleActivator,
                                     ServiceTrackerCustomizer<Broker, Broker>,
                                     Provider,
                                     AutoCloseable {
 
-  private Logger _logger = LoggerFactory.getLogger(DocProvider.class);
+  private final Logger _logger = LoggerFactory.getLogger(DocProvider.class);
 
   private ServiceTracker<Broker, Broker> brokerServiceTracker;
   private BundleContext bundleContext;
   private Broker.ProviderSession session;
+
+  private final List<AutoCloseable> toClose = new LinkedList<>();
 
   @Override
   public void close() throws Exception {
@@ -45,8 +52,16 @@ public class DocProvider implements BundleActivator,
     SchemaService schemaService = providerSession.getService(SchemaService.class);
     ApiDocGenerator.getInstance().setSchemaService(schemaService);
 
-    _logger.debug("Restconf API Explorer started");
+    MountProvisionService mountService = providerSession.getService( MountProvisionService.class );
+    ListenerRegistration<MountProvisionListener> registration =
+                mountService.registerProvisionListener( MountPointSwagger.getInstance() );
+    MountPointSwagger.getInstance().setGlobalSchema( schemaService );
+    synchronized( toClose ){
+        toClose.add( registration );
+    }
+    MountPointSwagger.getInstance().setMountService( mountService );
 
+    _logger.debug("Restconf API Explorer started");
   }
 
   @Override
@@ -68,6 +83,12 @@ public class DocProvider implements BundleActivator,
 
     if (session != null)
       session.close();
+
+    synchronized( toClose ){
+        for( AutoCloseable close : toClose ){
+            close.close();
+        }
+    }
   }
 
   @Override

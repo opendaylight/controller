@@ -18,6 +18,22 @@
         <url-pattern>/apis/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>JAXRSApiDoc</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.opendaylight.controller.sal.rest.doc.jaxrs.ApiDocApplication</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JAXRSApiDoc</servlet-name>
+        <url-pattern>/apis/*</url-pattern>
+    </servlet-mapping>
+
+
     <!--filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
