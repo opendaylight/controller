@@ -14,14 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Stack;
-
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
@@ -131,17 +130,9 @@ public class XmlReader {
     private boolean isSimpleNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
-            if (eventReader.hasNext()) {
-                final XMLEvent innerEvent;
-                innerEvent = eventReader.peek();
-                if (innerEvent.isCharacters()) {
-                    final Characters chars = innerEvent.asCharacters();
-                    if (!chars.isWhiteSpace()) {
-                        return true;
-                    }
-                } else if (innerEvent.isEndElement()) {
-                    return true;
-                }
+            XMLEvent innerEvent = skipCommentsAndWhitespace();
+            if ( innerEvent != null && (innerEvent.isCharacters() || innerEvent.isEndElement())) {
+                return true;
             }
         }
         return false;
@@ -150,22 +141,34 @@ public class XmlReader {
     private boolean isCompositeNodeEvent(final XMLEvent event) throws XMLStreamException {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
-            if (eventReader.hasNext()) {
-                XMLEvent innerEvent;
-                innerEvent = eventReader.peek();
-                if (innerEvent.isCharacters()) {
-                    Characters chars = innerEvent.asCharacters();
-                    if (chars.isWhiteSpace()) {
-                        eventReader.nextEvent();
-                        innerEvent = eventReader.peek();
-                    }
-                }
+            XMLEvent innerEvent = skipCommentsAndWhitespace();
+            if( innerEvent != null ) {
                 if (innerEvent.isStartElement()) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private XMLEvent skipCommentsAndWhitespace() throws XMLStreamException {
+        while( eventReader.hasNext() ) {
+            XMLEvent event = eventReader.peek();
+            if( event.getEventType() == XMLStreamConstants.COMMENT ) {
+                eventReader.nextEvent();
+                continue;
+            }
+
+            if( event.isCharacters() ) {
+                Characters chars = event.asCharacters();
+                if( chars.isWhiteSpace() ) {
+                    eventReader.nextEvent();
+                    continue;
+                }
+            }
+            return event;
+        }
+        return null;
     }
 
     private CompositeNodeWrapper resolveCompositeNodeFromStartElement(final StartElement startElement) {
