@@ -35,6 +35,12 @@
       <artifactId>akka-remote_${scala.version}</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-testkit_2.11</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+
     <!-- SAL Dependencies -->
 
     <dependency>
@@ -107,12 +113,6 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.11</artifactId>
-      <version>2.3.2</version>
     </dependency>
 
     <dependency>
