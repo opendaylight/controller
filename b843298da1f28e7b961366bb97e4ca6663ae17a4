@@ -70,6 +70,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_73739880",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-16T11:02:36Z",
+      "side": 1,
+      "message": "shouldn\u0027t be this output written like:\n- if child instanceof SimpleNode - write value of node\n- if child instanceof CompositeNode - write value as XML string?",
+      "revId": "b843298da1f28e7b961366bb97e4ca6663ae17a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_20061f87",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonMapper.java",
         "patchSetId": 9
