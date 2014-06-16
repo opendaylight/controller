@@ -10,6 +10,52 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ *
+ * Provides access to a conceptual data tree store.
+ *
+ * <p>
+ * Also provides the ability to subscribe for changes to data under a given
+ * branch of the tree.
+ *
+ * <p>
+ * All operations on data tree are performed via one of the transactions:
+ * <ul>
+ * <li>Read-Only - allocated using {@link #newReadOnlyTransaction()}
+ * <li>Write-Only - allocated using {@link #newWriteOnlyTransaction()}
+ * <li>Read-Write - allocated using {@link #newReadWriteTransaction()}
+ * </ul>
+ *
+ * <p>
+ * These transactions provide a stable isolated view of data tree, which is
+ * guaranteed to be not affected by other concurrent transactions, until
+ * transaction is committed.
+ *
+ * <p>
+ * For a detailed explanation of how transaction are isolated and how transaction-local
+ * changes are committed to global data tree, see
+ * {@link AsyncReadTransaction}, {@link AsyncWriteTransaction},
+ * {@link AsyncReadWriteTransaction} and {@link AsyncWriteTransaction#commit()}.
+ *
+ *
+ * <p>
+ * It is strongly recommended to use the type of transaction, which
+ * provides only the minimal capabilities you need. This allows for
+ * optimizations at the data broker / data store level. For example,
+ * implementations may optimize the transaction for reading if they know ahead
+ * of time that you only need to read data - such as not keeping additional meta-data,
+ * which may be required for write transactions.
+ *
+ * <p>
+ * <b>Implementation Note:</b> This interface is not intended to be implemented
+ * by users of MD-SAL, but only to be consumed by them.
+ *
+ * @param <P>
+ *            Type of path (subtree identifier), which represents location in
+ *            tree
+ * @param <D>
+ *            Type of data (payload), which represents data payload
+ */
 public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChangeListener<P, D>> extends //
         AsyncDataTransactionFactory<P, D> {
 
@@ -17,52 +63,150 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      *
      * Scope of Data Change
      *
+     * <p>
      * Represents scope of data change (addition, replacement, deletion).
      *
-     * The terminology for types is reused from LDAP
+     * The terminology for scope types is reused from LDAP.
      *
-     * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/SEARCH_Setting_the_SCOPE_Parameter.shtml
+     * <h2>Examples</h2>
+     *
+     * Following is an example model with comments describing what notifications
+     * you would receive based on the scope you specify, when you are
+     * registering for changes on container a.
+     *
+     * <pre>
+     * container a              // scope BASE, ONE, SUBTREE
+     *    leaf "foo"            // scope ONE, SUBTREE
+     *    container             // scope ONE, SUBTREE
+     *       leaf  "bar"        // scope SUBTREE
+     *    list list             // scope ONE, SUBTREE
+     *      list [a]            // scope SUBTREE
+     *        id "a"            // scope SUBTREE
+     *      list [b]            // scope SUBTREE
+     *        id "b"            // scope SUBTREE
+     * </pre>
+     *
+     * Following is an example model with comments describing what notifications
+     * you would receive based on the scope you specify, when you are
+     * registering for changes on list list (without specifying concrete item in
+     * the list).
+     *
+     * <pre>
+     *  list list               // scope BASE, ONE, SUBTREE
+     *      list [a]            // scope ONE, SUBTREE
+     *        id "a"            // scope SUBTREE
+     *      list [b]            // scope ONE, SUBTREE
+     *        id "b"            // scope SUBTREE
+     * </pre>
+     *
+     *
+     * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/
+     *      SEARCH_Setting_the_SCOPE_Parameter.shtml
      */
     public enum DataChangeScope {
 
-       /**
-        * Represents only a direct change of the node, such as replacement of node,
-        * addition or deletion.
-        *
-        */
-       BASE,
-       /**
-        * Represent a change (addition,replacement,deletion)
-        * of the node or one of it's direct childs.
-        *
-        */
-       ONE,
-       /**
-        * Represents a change of the node or any of it's child nodes.
-        *
-        */
-       SUBTREE
+        /**
+         * Represents only a direct change of the node, such as replacement of a
+         * node, addition or deletion.
+         *
+         */
+        BASE,
+        /**
+         * Represent a change (addition,replacement,deletion) of the node or one
+         * of its direct children.
+         *
+         * This scope is superset of {@link #BASE}.
+         *
+         */
+        ONE,
+        /**
+         * Represents a change of the node or any of or any of its child nodes,
+         * direct and nested.
+         *
+         * This scope is superset of {@link #ONE} and {@link #BASE}.
+         *
+         */
+        SUBTREE
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AsyncReadTransaction<P, D> newReadOnlyTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AsyncReadWriteTransaction<P,D> newReadWriteTransaction();
+    public AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
 
     /**
-     * Registers {@link DataChangeListener} for Data Change callbacks
-     * which will be triggered on which will be triggered on the store
+     * Registers a {@link AsyncDataChangeListener} to receive
+     * notifications when data changes under a given path in the conceptual data
+     * tree.
+     * <p>
+     * You are able to register for notifications  for any node or subtree
+     * which can be reached via the supplied path.
+     * <p>
+     * If path type <code>P</code> allows it, you may specify paths up to the leaf nodes
+     * then it is possible to listen on leaf nodes.
+     * <p>
+     * You are able to register for data change notifications for a subtree even
+     * if it does not exist. You will receive notification once that node is
+     * created.
+     * <p>
+     * If there is any preexisting data in data tree on path for which you are
+     * registering, you will receive initial data change event, which will
+     * contain all preexisting data, marked as created.
      *
-     * @param store Logical store in which listener is registered.
-     * @param path Path (subtree identifier) on which client listener will be invoked.
-     * @param listener Instance of listener which should be invoked on
-     * @param triggeringScope Scope of change which triggers callback.
-     * @return Listener registration of the listener, call {@link ListenerRegistration#close()}
-     *         to stop delivery of change events.
+     * <p>
+     * You are also able to specify the scope of the changes you want to be
+     * notified.
+     * <p>
+     * Supported scopes are:
+     * <ul>
+     * <li>{@link DataChangeScope#BASE} - notification events will only be
+     * triggered when a node referenced by path is created, removed or replaced.
+     * <li>{@link DataChangeScope#ONE} - notifications events will only be
+     * triggered when a node referenced by path is created, removed or replaced,
+     * or any or any of its immediate children are created, updated or removed.
+     * <li>{@link DataChangeScope#SUBTREE} - notification events will be
+     * triggered when a node referenced by the path is created, removed
+     * or replaced or any of the children in its subtree are created, removed
+     * or replaced.
+     * </ul>
+     * See {@link DataChangeScope} for examples.
+     * <p>
+     * This method returns a {@link ListenerRegistration} object. To
+     * "unregister" your listener for changes call the "close" method on this
+     * returned object.
+     * <p>
+     * You MUST call close when you no longer need to receive notifications
+     * (such as during shutdown or for example if your bundle is shutting down).
+     *
+     * @param store
+     *            Logical Data Store - Logical Datastore you want to listen for
+     *            changes in. For example
+     *            {@link LogicalDatastoreType#OPERATIONAL} or
+     *            {@link LogicalDatastoreType#CONFIGURATION}
+     * @param path
+     *            Path (subtree identifier) on which client listener will be
+     *            invoked.
+     * @param listener
+     *            Instance of listener which should be invoked on
+     * @param triggeringScope
+     *            Scope of change which triggers callback.
+     * @return Listener registration object, which may be used to unregister
+     *         your listener using {@link ListenerRegistration#close()} to stop
+     *         delivery of change events.
      */
-    ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener, DataChangeScope triggeringScope);
+    ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener,
+            DataChangeScope triggeringScope);
 }
