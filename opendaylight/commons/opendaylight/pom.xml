@@ -121,7 +121,7 @@
     <karaf.branding.version>1.0.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
-    <logback.version>1.0.9</logback.version>
+    <logback.version>1.0.13</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
     <!-- Java Versions -->
