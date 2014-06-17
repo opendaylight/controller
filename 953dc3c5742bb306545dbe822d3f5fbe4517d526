@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9e165ff",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "These comments are much clearer. Question - the data change scope of ONE - what is considered a direct child? A child container only? Is the list a child? Or are the nodes in the list also returned? This is the only question I have at this point.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9af2593",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "Usability Comment - I think we have too many methods that may contain changed data here.\n\nWhen I think of an event, I think of a BEFORE state, CURRENT state, and possibly an update type which tells you what type (CREATE, UPDATE, DELETE). But even then, the TYPE can be inferred via the state. That is, no state before, and now there  is a state means CREATE, existing state, new state, update, exiting state, no state, delete. \n\nCan we simplify the methods to get data down to just two - get priorState getNewState? Seems like it would be easier to understand.\n\nWe should capture this usability comment and discuss and if a change is determined worth wild, change in another patch.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_39f2d1d2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "I would add here, \"See registration method for information on the scope of the registration.\"",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_59ed55ee",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "This varies based on how they registered via the LogicalDatastoreType right? Or do we always get everything when notified, the LogicalDatastoreType only controls WHEN you get notified and not what data will be returned?",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f9bb09e3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "Should this read: ...listener registration and was *just created by this transaction*? instead of \"and was currently created\"? The later statement implies we get this when the data already existed, but I don\u0027t think that is the case here based on the start of this whole comment block",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_19bfcdd1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "Missing \"or\" - that is \"Node is considered updated if it contents was replaced OR one of its children was created, removed or updated.\"",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_99919d54",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "Looks like my comments from patch set 1 have not been addressed. If intentionally ignored please provide reasons. If you haven\u0027t gotten to them, then this is a reminder. :)",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_599b1572",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "I am a little confused now based on your comment on the general comments area about always getting update view.\n\nUltimately, I would provide a simple walk through of the expected behavior. i.e. Create transaction. Read value, someone else updates it, read value again... and? what happens",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_39a0919e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "readed should be \"read\"",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f989c926",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "What is the final view of the store then? Seems like we might have a race condition in the transactions based on this comment?",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_198d8d31",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "see patch set 1 comments.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b9834103",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "We need some examples here to clarify this. Confused about how race conditions of two unique transactions, operating on the same data would be resolved.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9864513",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "Usability comment we need to capture - as pert patch set 1 comment, we should return true/false instead of throwing an exception here. Either that or I am missing the case when the status gets to commited.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3977313c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T19:35:34Z",
+      "side": 1,
+      "message": "...as \u0027an\u0027 add / replace ....  missing the letter \u0027n\u0027 in \u0027an\u0027",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
