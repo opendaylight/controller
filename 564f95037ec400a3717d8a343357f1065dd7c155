@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_debaab6d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "I would suggest add slightly simpler terminology to help making it easier for people to get confirmation this is what they are looking for (especially for folks who English is not their primary language). Suggested change:\n\n\u003d\u003d\u003d\n\n\"Provides read/write access to a conceptual data tree store. Also provides the ability to subscribe for changes to data under a given branch of the tree.\n\nAll reads and writes are performed via one of three transactions (Read Only, Read/Write, Write Only). Using the type of transactions which provides the minimal capabilities you need allowing for optimizations at the datastore level. For example, we can optimize the transaction for reading if we know ahead of time that you only need to read data.\"\n\n\u003d\u003d\u003d\n\nIdeally, we should provide examples of how you get access to this service as well (whether FelixDM, or config subsystem), but that can wait until we have finalized our tutorials some more.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9eac2337",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Questions: 1) Am I correct that you will be notified in changes to all grand children as all? Can you register wild cards? Regular expressions in the path? Can you register for just leaf nodes? We need to be explicit with what is allowed.\n\n2) Logical store - are you referring to config vs operational? If so can we state that explicitly in the details? Anything to make it easier to understand by just reading the docs.\n\n3) I would be much clear about the returned registration object and the need to call close on it. I think a simple statement on the @return is OK there, but I would expand the details in the method description.\n\nSuggested:\n\n\"Registers a {@DataChangeListener} to receive notifications when data changes under the given path.\n\u003cbr\u003e\n\u003cadd details about the type of paths, wildcards, etc here\u003e\n\u003cbr\u003e\nThis method returns a ListenerRegistration object. To \"unregister\" your listener for changes call the \"close\" method on this returned object. You should call close when you no longer need to receive notifications (such as during shutdown or for example if your bundle is shutting down).\"",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3e59575a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Suggest that we reword this some:\n\u003d\u003d\u003d\u003d\nRepresents a notification indicating that some data at or under a particular path has changed. The notification contains a capture of the changes in data subtree. This event is triggered by successful application of modifications from a transaction on the global data tree.\n\nUse the {@linkAsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener, org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope)} method to register a listener for data change events. \n\nA listener will only receive notifications for changes to data under the path they register for. [PLEASE CONFIRM:] The entire subtree under the path will be provided via the methods below, even if just a leaf node changes. See methods for further details.[Assuming of course that we add more details to methods below...]\n\u003d\u003d\u003d\n[Not sure what this is saying] \"Data Change event does not contain state of whole data tree, but only state for subtree for which it was generated.\"\n\nWe need some more information to be able to get a quick understanding of how the data is going to be provided via the methods below.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e545b20",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "In general when reading all of these methods I think we could simplify it by adding answers to these question.\n\nWhen should I use this method vs another method? For example, I think this is right:\n\ngetCreatedData(): This method will return a non-empty/non-null map if this change represents data that was just placed into the data store. Use this method when you want to see if a node in the path was created for the first time.\n\netc... these are the types of examples that make it easy for someone to answer the question \"Which method do I want to use?\" etc",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fe320f0f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "This is a good note to have. And while I am not really sure it is necessary here (because it seems obvious to me) we should put a simple statement about what this method does. For example:\n\n/** Called when data changes are successfully committed for a particular path.\n\nNote about non-thread-blocking.....\n*/",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1e36d303",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "These descriptions look pretty good. I find my self asking for the following questions:\n\n1) This is a good place to describe WHY we have three types of transactions - for optimizations of the underlying datastore.\n2) What happens if two transactions modify the same node at the same time? i.e. how does concurrency work when dealing with multiple transactions? Is a transaction only run if its operation is atomic?\n3) Can transactions fail due to concurrency? If so, who is responsible for retry?",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_be3c87e3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "after \"allocated\" if we provide a pointer to the factor or databroker interfaces that might help clarify what we me bean \"allocated\". That said, this is pretty clear.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7e26ffcf",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Does this read read the ENTIRE subtree? Or one level down?",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e2bfb93",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "#1) I think we can expand on this a little by providing an example. If I understand this correctly, this is the order of operations.\n\nInit State: \"A\"\nRead State -\u003e Returns \"A\"\nWrite State -\u003e \"B\"\nRead State -\u003e Returns \"B\"\n\nIs this correct? An example like this is useful to understand order of operations.\n\n#2) What happens if someone else at the same time does something similar, but instead of writing \"B\" writes \"C\"? Who wins?\n\nInit State: \"A\"\nTwo transactions started: T1, T2\nT1: Read -\u003e Returns \"A\"\nT2: Read -\u003e Returns \"A\"\nT1: Write -\u003e \"B\"\nT2: Write -\u003e \"C\"\nT1: Read -\u003e Returns \"B\"\nT2: Read -\u003e Returns \"C\"\n\nIs the above correct? What happens when these transactions \"commit\"? more details are needed around concurrency interactions. (and as a side note we should make sure that we have unit tests that cover these interactions to make sure that behavior is gaurenteed) - hopefully that already exists.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fe19af88",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Some description is needed here, even a \n\n\"Defines a common interface for all types of transactions (RO, RW, WO, etc)\"",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_be132765",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "We need to clarify the above statement about \"Preconditions\". Examples like I provided in the RW transaction would be useful to show how concurrency etc interacts with these transactions.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_de162b55",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "In terms of behavior I would much rather have the cancel method return a boolean (true/false) to indicate success, rather than having it throw an IllegalStateException if the status was already set to committed. It is possible that between the time caller code checks the status and then calls cancel the status has changed.\n\nI realize that we are look at documentation, but I think this is a usability issue that can cause code to take unexpected paths. At least we do document it, so that is a good start.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b90a611f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Here the illegal state exception is a little more appropriate because it seems we can only use a transaction to perform a single write (please confirm). If so we should be sure to call this out in perhaps the factory class that writes these or something. At least a mention of this fact, because that is important to understand.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_391e5164",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "Awesome! I like the example. I would just put a newline before 2) above, so it is clear. I read the 2) to be part of the list at first glance.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_19526d13",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "I hate to say it but this is what we need to describe here. We can\u0027t expect new users to be able to find that documentation by them selves. I don\u0027t even know where to find that based on the above description.\n\nWe don\u0027t have to provide the explicit behaviors here (though I think that would be smart). We at a minimum, need to provide direct pointers so folks can quickly and easily find the references defined above.\n\nRemember our goal is to make this something a person can pick up and understand quickly with little effort.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b9582133",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-17T13:51:24Z",
+      "side": 1,
+      "message": "We don\u0027t pass a param in here, so we should remove this.",
+      "revId": "564f95037ec400a3717d8a343357f1065dd7c155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
