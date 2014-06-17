@@ -9,15 +9,15 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -48,13 +49,8 @@ import org.opendaylight.yangtools.yang.model.api.type.UnsignedIntegerTypeDefinit
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.gson.stream.JsonWriter;
-
 class JsonMapper {
 
-    private final Set<LeafListSchemaNode> foundLeafLists = new HashSet<>();
-    private final Set<ListSchemaNode> foundLists = new HashSet<>();
     private MountInstance mountPoint;
     private final Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
@@ -77,14 +73,13 @@ class JsonMapper {
         }
 
         writer.endObject();
-
-        foundLeafLists.clear();
-        foundLists.clear();
     }
 
     private void writeChildrenOfParent(final JsonWriter writer, final CompositeNode parent, final DataNodeContainer parentSchema)
             throws IOException {
         checkNotNull(parent);
+
+        final Set<QName> foundLists = new HashSet<>();
 
         Set<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ?
                                    Collections.<DataSchemaNode>emptySet() : parentSchema.getChildNodes();
@@ -98,59 +93,88 @@ class JsonMapper {
 
                 logger.debug( "No schema found for data node \"" + child.getNodeType() );
 
-                handleNoSchemaFound( writer, child, parent );
+                if( !foundLists.contains( child.getNodeType() ) ) {
+                    handleNoSchemaFound( writer, child, parent );
+
+                    // Since we don't have a schema, we don't know which nodes are supposed to be
+                    // lists so treat every one as a potential list to avoid outputting duplicates.
+
+                    foundLists.add( child.getNodeType() );
+                }
             }
             else if (childSchema instanceof ContainerSchemaNode) {
                 Preconditions.checkState(child instanceof CompositeNode,
                         "Data representation of Container should be CompositeNode - " + child.getNodeType());
                 writeContainer(writer, (CompositeNode) child, (ContainerSchemaNode) childSchema);
             } else if (childSchema instanceof ListSchemaNode) {
-                if (!foundLists.contains(childSchema)) {
+                if (!foundLists.contains( child.getNodeType() ) ) {
                     Preconditions.checkState(child instanceof CompositeNode,
                             "Data representation of List should be CompositeNode - " + child.getNodeType());
-                    foundLists.add((ListSchemaNode) childSchema);
+                    foundLists.add( child.getNodeType() );
                     writeList(writer, parent, (CompositeNode) child, (ListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafListSchemaNode) {
-                if (!foundLeafLists.contains(childSchema)) {
+                if (!foundLists.contains( child.getNodeType() ) ) {
                     Preconditions.checkState(child instanceof SimpleNode<?>,
                             "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
-                    foundLeafLists.add((LeafListSchemaNode) childSchema);
+                    foundLists.add( child.getNodeType() );
                     writeLeafList(writer, parent, (SimpleNode<?>) child, (LeafListSchemaNode) childSchema);
                 }
             } else if (childSchema instanceof LeafSchemaNode) {
                 Preconditions.checkState(child instanceof SimpleNode<?>,
                         "Data representation of LeafList should be SimpleNode - " + child.getNodeType());
                 writeLeaf(writer, (SimpleNode<?>) child, (LeafSchemaNode) childSchema);
+            } else if (childSchema instanceof AnyXmlSchemaNode) {
+                if( child instanceof CompositeNode ) {
+                    writeContainer(writer, (CompositeNode) child, null);
+                }
+                else {
+                    handleNoSchemaFound( writer, child, parent );
+                }
             } else {
                 throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode, ListSchemaNode, "
                         + "LeafListSchemaNode, or LeafSchemaNode. Other types are not supported yet.");
             }
         }
+    }
 
-        for (Node<?> child : parent.getValue()) {
-            DataSchemaNode childSchema = findFirstSchemaForNode(child, parentSchemaChildNodes);
-            if (childSchema instanceof LeafListSchemaNode) {
-                foundLeafLists.remove(childSchema);
-            } else if (childSchema instanceof ListSchemaNode) {
-                foundLists.remove(childSchema);
-            }
+    private void writeValue( final JsonWriter writer, Object value ) throws IOException {
+        if( value != null ) {
+            writer.value( String.valueOf( value ) );
+        }
+        else {
+            writer.value( "" );
         }
     }
 
     private void handleNoSchemaFound( final JsonWriter writer, final Node<?> node,
                                       final CompositeNode parent ) throws IOException {
         if( node instanceof SimpleNode<?> ) {
-            writeName( node, null, writer );
-            Object value = node.getValue();
-            if( value != null ) {
-                writer.value( String.valueOf( value ) );
+            List<SimpleNode<?>> nodeLeafList = parent.getSimpleNodesByName( node.getNodeType() );
+            if( nodeLeafList.size() == 1 ) {
+                writeName( node, null, writer );
+                writeValue( writer, node.getValue() );
+            }
+            else { // more than 1, write as a json array
+                writeName( node, null, writer );
+                writer.beginArray();
+                for( SimpleNode<?> leafNode: nodeLeafList ) {
+                    writeValue( writer, leafNode.getValue() );
+                }
+
+                writer.endArray();
             }
         } else { // CompositeNode
             Preconditions.checkState( node instanceof CompositeNode,
                     "Data representation of Container should be CompositeNode - " + node.getNodeType() );
 
-            writeContainer( writer, (CompositeNode) node, null );
+            List<CompositeNode> nodeList = parent.getCompositesByName( node.getNodeType() );
+            if( nodeList.size() == 1 ) {
+                writeContainer( writer, (CompositeNode) node, null );
+            }
+            else { // more than 1, write as a json array
+                writeList( writer, parent, (CompositeNode) node, null );
+            }
         }
     }
 

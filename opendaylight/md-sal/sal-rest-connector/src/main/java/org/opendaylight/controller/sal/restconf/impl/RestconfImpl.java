@@ -56,6 +56,7 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -1044,96 +1045,126 @@ public class RestconfImpl implements RestconfService {
             }
         }
 
-        if ((nodeBuilder instanceof CompositeNodeWrapper)) {
-            final List<NodeWrapper<?>> children = ((CompositeNodeWrapper) nodeBuilder).getValues();
-            for (final NodeWrapper<? extends Object> child : children) {
-                final List<DataSchemaNode> potentialSchemaNodes =
-                        this.controllerContext.findInstanceDataChildrenByName(
-                                             ((DataNodeContainer) schema), child.getLocalName());
-
-                if (potentialSchemaNodes.size() > 1 && child.getNamespace() == null) {
-                    StringBuilder builder = new StringBuilder();
-                    for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
-                        builder.append("   ").append(potentialSchemaNode.getQName().getNamespace().toString())
-                               .append("\n");
-                    }
-
-                    throw new RestconfDocumentedException(
-                                 "Node \"" + child.getLocalName() +
-                                 "\" is added as augment from more than one module. " +
-                                 "Therefore node must have namespace (XML format) or module name (JSON format)." +
-                                 "\nThe node is added as augment from modules with namespaces:\n" + builder,
-                                 ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
-                }
-
-                boolean rightNodeSchemaFound = false;
-                for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
-                    if (!rightNodeSchemaFound) {
-                        final QName potentialCurrentAugment =
-                                this.normalizeNodeName(child, potentialSchemaNode, currentAugment, mountPoint);
-                        if (child.getQname() != null ) {
-                            this.normalizeNode(child, potentialSchemaNode, potentialCurrentAugment, mountPoint);
-                            rightNodeSchemaFound = true;
-                        }
-                    }
-                }
-
-                if (!rightNodeSchemaFound) {
-                    throw new RestconfDocumentedException(
-                               "Schema node \"" + child.getLocalName() + "\" was not found in module.",
-                               ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT );
-                }
+        if ( nodeBuilder instanceof CompositeNodeWrapper ) {
+            if( schema instanceof DataNodeContainer ) {
+                normalizeCompositeNode( (CompositeNodeWrapper)nodeBuilder, (DataNodeContainer)schema,
+                                        mountPoint, currentAugment );
             }
-
-            if ((schema instanceof ListSchemaNode)) {
-                final List<QName> listKeys = ((ListSchemaNode) schema).getKeyDefinition();
-                for (final QName listKey : listKeys) {
-                    boolean foundKey = false;
-                    for (final NodeWrapper<? extends Object> child : children) {
-                        if (Objects.equal(child.unwrap().getNodeType().getLocalName(), listKey.getLocalName())) {
-                            foundKey = true;
-                        }
-                    }
-
-                    if (!foundKey) {
-                        throw new RestconfDocumentedException(
-                                       "Missing key in URI \"" + listKey.getLocalName() +
-                                       "\" of list \"" + schema.getQName().getLocalName() + "\"",
-                                       ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
-                    }
-                }
+            else if( schema instanceof AnyXmlSchemaNode ) {
+                normalizeAnyXmlNode( (CompositeNodeWrapper)nodeBuilder, (AnyXmlSchemaNode)schema );
             }
         }
+        else if ( nodeBuilder instanceof SimpleNodeWrapper ) {
+            normalizeSimpleNode( (SimpleNodeWrapper) nodeBuilder, schema, mountPoint );
+        }
+        else if ((nodeBuilder instanceof EmptyNodeWrapper)) {
+            normalizeEmptyNode( (EmptyNodeWrapper) nodeBuilder, schema );
+        }
+    }
+
+    private void normalizeAnyXmlNode( CompositeNodeWrapper compositeNode, AnyXmlSchemaNode schema ) {
+        List<NodeWrapper<?>> children = compositeNode.getValues();
+        for( NodeWrapper<? extends Object> child : children ) {
+            child.setNamespace( schema.getQName().getNamespace() );
+            if( child instanceof CompositeNodeWrapper ) {
+                normalizeAnyXmlNode( (CompositeNodeWrapper)child, schema );
+            }
+        }
+    }
+
+    private void normalizeEmptyNode( EmptyNodeWrapper emptyNodeBuilder, DataSchemaNode schema ) {
+        if ((schema instanceof LeafSchemaNode)) {
+            emptyNodeBuilder.setComposite(false);
+        }
         else {
-            if ((nodeBuilder instanceof SimpleNodeWrapper)) {
-                final SimpleNodeWrapper simpleNode = ((SimpleNodeWrapper) nodeBuilder);
-                final Object value = simpleNode.getValue();
-                Object inputValue = value;
-                TypeDefinition<? extends Object> typeDefinition = this.typeDefinition(schema);
-                if ((typeDefinition instanceof IdentityrefTypeDefinition)) {
-                    if ((value instanceof String)) {
-                        inputValue = new IdentityValuesDTO( nodeBuilder.getNamespace().toString(),
-                                                            (String) value, null, (String) value );
-                    } // else value is already instance of IdentityValuesDTO
+            if ((schema instanceof ContainerSchemaNode)) {
+                // FIXME: Add presence check
+                emptyNodeBuilder.setComposite(true);
+            }
+        }
+    }
+
+    private void normalizeSimpleNode( SimpleNodeWrapper simpleNode, DataSchemaNode schema,
+                                      MountInstance mountPoint ) {
+        final Object value = simpleNode.getValue();
+        Object inputValue = value;
+        TypeDefinition<? extends Object> typeDefinition = this.typeDefinition(schema);
+        if ((typeDefinition instanceof IdentityrefTypeDefinition)) {
+            if ((value instanceof String)) {
+                inputValue = new IdentityValuesDTO( simpleNode.getNamespace().toString(),
+                        (String) value, null, (String) value );
+            } // else value is already instance of IdentityValuesDTO
+        }
+
+        Object outputValue = inputValue;
+
+        if( typeDefinition != null ) {
+            Codec<Object,Object> codec = RestCodec.from(typeDefinition, mountPoint);
+            outputValue = codec == null ? null : codec.deserialize(inputValue);
+        }
+
+        simpleNode.setValue(outputValue);
+    }
+
+    private void normalizeCompositeNode( CompositeNodeWrapper compositeNodeBuilder,
+                                         DataNodeContainer schema, MountInstance mountPoint,
+                                         QName currentAugment ) {
+        final List<NodeWrapper<?>> children = compositeNodeBuilder.getValues();
+        for (final NodeWrapper<? extends Object> child : children) {
+            final List<DataSchemaNode> potentialSchemaNodes =
+                    this.controllerContext.findInstanceDataChildrenByName(
+                                                           schema, child.getLocalName());
+
+            if (potentialSchemaNodes.size() > 1 && child.getNamespace() == null) {
+                StringBuilder builder = new StringBuilder();
+                for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
+                    builder.append("   ").append(potentialSchemaNode.getQName().getNamespace().toString())
+                           .append("\n");
                 }
 
-                Codec<Object,Object> codec = RestCodec.from(typeDefinition, mountPoint);
-                Object outputValue = codec == null ? null : codec.deserialize(inputValue);
-
-                simpleNode.setValue(outputValue);
+                throw new RestconfDocumentedException(
+                             "Node \"" + child.getLocalName() +
+                             "\" is added as augment from more than one module. " +
+                             "Therefore node must have namespace (XML format) or module name (JSON format)." +
+                             "\nThe node is added as augment from modules with namespaces:\n" + builder,
+                             ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
             }
-            else {
-                if ((nodeBuilder instanceof EmptyNodeWrapper)) {
-                    final EmptyNodeWrapper emptyNodeBuilder = ((EmptyNodeWrapper) nodeBuilder);
-                    if ((schema instanceof LeafSchemaNode)) {
-                        emptyNodeBuilder.setComposite(false);
+
+            boolean rightNodeSchemaFound = false;
+            for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
+                if (!rightNodeSchemaFound) {
+                    final QName potentialCurrentAugment =
+                            this.normalizeNodeName(child, potentialSchemaNode, currentAugment, mountPoint);
+                    if (child.getQname() != null ) {
+                        this.normalizeNode(child, potentialSchemaNode, potentialCurrentAugment, mountPoint);
+                        rightNodeSchemaFound = true;
                     }
-                    else {
-                        if ((schema instanceof ContainerSchemaNode)) {
-                            // FIXME: Add presence check
-                            emptyNodeBuilder.setComposite(true);
-                        }
+                }
+            }
+
+            if (!rightNodeSchemaFound) {
+                throw new RestconfDocumentedException(
+                           "Schema node \"" + child.getLocalName() + "\" was not found in module.",
+                           ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT );
+            }
+        }
+
+        if ((schema instanceof ListSchemaNode)) {
+            ListSchemaNode listSchemaNode = (ListSchemaNode)schema;
+            final List<QName> listKeys = listSchemaNode.getKeyDefinition();
+            for (final QName listKey : listKeys) {
+                boolean foundKey = false;
+                for (final NodeWrapper<? extends Object> child : children) {
+                    if (Objects.equal(child.unwrap().getNodeType().getLocalName(), listKey.getLocalName())) {
+                        foundKey = true;
                     }
+                }
+
+                if (!foundKey) {
+                    throw new RestconfDocumentedException(
+                                   "Missing key in URI \"" + listKey.getLocalName() +
+                                   "\" of list \"" + listSchemaNode.getQName().getLocalName() + "\"",
+                                   ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
                 }
             }
         }
@@ -1236,6 +1267,9 @@ public class RestconfImpl implements RestconfService {
         }
         else if (node instanceof LeafSchemaNode) {
             return _typeDefinition((LeafSchemaNode)node);
+        }
+        else if (node instanceof AnyXmlSchemaNode) {
+            return null;
         }
         else {
             throw new IllegalArgumentException("Unhandled parameter types: " +
