@@ -115,7 +115,7 @@
     <leveldb.version>0.7</leveldb.version>
     <leveldbjni.version>1.8</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
-    <logback.version>1.0.9</logback.version>
+    <logback.version>1.0.13</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mimepull.version>1.9.4</mimepull.version>
