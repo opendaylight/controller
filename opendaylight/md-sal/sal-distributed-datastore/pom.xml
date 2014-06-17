@@ -57,6 +57,17 @@
       <artifactId>sal-binding-config</artifactId>
     </dependency>
 
+    <!--
+      Adding a temporary dependency on the sal-broker-impl so that we can use InMemoryDOMDataStore
+
+      InMemoryDOMDataStore needs to be moved into its own module and be wired up using config subsystem before
+      this bundle can use it
+    -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-broker-impl</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
