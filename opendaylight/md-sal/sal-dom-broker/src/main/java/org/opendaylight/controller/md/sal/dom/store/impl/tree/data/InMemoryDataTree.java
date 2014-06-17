@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
@@ -22,8 +21,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Read-only snapshot of the data tree.
@@ -50,7 +49,7 @@ final class InMemoryDataTree implements DataTree {
     public synchronized void setSchemaContext(final SchemaContext newSchemaContext) {
         Preconditions.checkNotNull(newSchemaContext);
 
-        LOG.info("Attepting to install schema context {}", newSchemaContext);
+        LOG.info("Attempting to install schema context {}", newSchemaContext);
 
         /*
          * FIXME: we should walk the schema contexts, both current and new and see
