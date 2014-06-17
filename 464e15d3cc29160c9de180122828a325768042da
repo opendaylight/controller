@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7e27df12",
+        "filename": "opendaylight/md-sal/dstracer-api/src/main/java/org/opendaylight/controller/mdsal/dstracer/api/DataStorePersisterController.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-17T08:27:37Z",
+      "side": 1,
+      "message": "looks like a Registration subclass instead of AutoCloseable. Needs javadocs. Can it ever fail?",
+      "revId": "464e15d3cc29160c9de180122828a325768042da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
