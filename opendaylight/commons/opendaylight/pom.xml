@@ -112,7 +112,7 @@
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
-    <logback.version>1.0.9</logback.version>
+    <logback.version>1.0.13</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
