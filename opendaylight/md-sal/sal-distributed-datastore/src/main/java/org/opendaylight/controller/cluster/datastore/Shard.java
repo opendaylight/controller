@@ -61,7 +61,7 @@ public class Shard extends UntypedProcessor {
 
   private void createTransactionChain() {
     DOMStoreTransactionChain chain = store.createTransactionChain();
-    ActorRef transactionChain = getContext().actorOf(TransactionChain.props(chain));
+    ActorRef transactionChain = getContext().actorOf(ShardTransactionChain.props(chain));
     getSender().tell(new CreateTransactionChainReply(transactionChain.path()), getSelf());
   }
 }

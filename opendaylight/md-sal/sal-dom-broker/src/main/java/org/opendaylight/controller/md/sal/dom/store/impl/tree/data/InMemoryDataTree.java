@@ -7,23 +7,17 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTree;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeCandidate;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataTreeModification;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ModificationType;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.StoreUtils;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.*;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Read-only snapshot of the data tree.
