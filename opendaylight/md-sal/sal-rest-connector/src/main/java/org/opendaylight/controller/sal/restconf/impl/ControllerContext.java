@@ -36,6 +36,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdent
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -804,7 +805,8 @@ public class ControllerContext implements SchemaContextListener {
 
     public boolean isInstantiatedDataSchema( final DataSchemaNode node ) {
         return node instanceof LeafSchemaNode || node instanceof LeafListSchemaNode ||
-                node instanceof ContainerSchemaNode || node instanceof ListSchemaNode;
+               node instanceof ContainerSchemaNode || node instanceof ListSchemaNode ||
+               node instanceof AnyXmlSchemaNode;
     }
 
     private void addKeyValue( final HashMap<QName, Object> map, final DataSchemaNode node,
