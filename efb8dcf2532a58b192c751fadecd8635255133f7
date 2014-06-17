@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bea00744",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-17T11:47:35Z",
+      "side": 1,
+      "message": "I was suggesting something more like:\n\nchoice tunnel-match-fields {\n    leaf tunnel-source { \n       type inet:ip-prefix;\n    }\n\n    leaf tunnel-dst {\n       type inet:ip-prefix;\n    }\n}\n\nSince ip-prefix is a union type (see http://www.netconfcentral.org/modules/ietf-inet-types ) and union types are generated in a way they can have either value ( see https://wiki.opendaylight.org/view/YANG_Tools:YANG_to_Java_Mapping ) you can tell from the leaf itself whether or not its ipv4 or ipv6 (one type will have a value, the other will be null in the getters)... thus you don\u0027t need the case statements...",
+      "parentUuid": "fa82b9bf_2b3a8536",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
