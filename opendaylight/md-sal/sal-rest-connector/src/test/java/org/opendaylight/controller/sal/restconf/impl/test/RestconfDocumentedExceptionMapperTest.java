@@ -9,6 +9,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -18,6 +19,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,7 +48,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Before;
@@ -61,13 +68,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 /**
  * Unit tests for RestconfDocumentedExceptionMapper.
@@ -841,6 +841,14 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
                 errorListEntrySet.iterator().next().getKey() );
         assertTrue( "\"error\" Json element is not an Array", errorListElement.isJsonArray() );
 
+        // As a final check, make sure there aren't multiple "error" array elements. Unfortunately,
+        // the call above to getAsJsonObject().entrySet() will out duplicate "error" elements. So
+        // we'll use regex on the json string to verify this.
+
+        Matcher matcher = Pattern.compile( "\"error\"[ ]*:[ ]*\\[", Pattern.DOTALL ).matcher( bos.toString() );
+        assertTrue( "Expected 1 \"error\" element", matcher.find() );
+        assertFalse( "Found multiple \"error\" elements", matcher.find() );
+
         return errorListElement.getAsJsonArray();
     }
 
@@ -849,7 +857,6 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
             final ErrorInfoVerifier errorInfoVerifier ) {
 
         JsonElement errorInfoElement = null;
-        Map<String, String> actualErrorInfo = null;
         Map<String, String> leafMap = Maps.newHashMap();
         for( Entry<String, JsonElement> entry: errorEntryElement.getAsJsonObject().entrySet() ) {
             String leafName = entry.getKey();
