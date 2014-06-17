@@ -124,6 +124,14 @@ public final class NodeMapping {
         return nodeConnectorId.getValue();
     }
 
+    public static NodeId toAdNodeId(final NodeConnectorId nodeConnectorId) {
+        NodeId nodeId = null;
+        if (nodeConnectorId != null) {
+            nodeId = new NodeId(nodeConnectorId.getValue().replaceFirst(":[0-9]+$", ""));
+        }
+        return nodeId;
+    }
+
     public static NodeConnectorId toControllerNodeConnectorId(final NodeId node) {
         return new NodeConnectorId(node.getValue() + ":" + 4294967293L);
     }
