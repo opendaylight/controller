@@ -30,6 +30,10 @@ module opendaylight-action-types {
         }
     }  
     
+    container action-types {	
+       uses action-list;
+    }
+    
     grouping action-list {
         list action {
             key "order";
