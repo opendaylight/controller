@@ -111,7 +111,12 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
     @Override
     public Node connect (String type, String connectionIdentifier, Map<ConnectionConstants, String> params) {
         IPluginInConnectionService s = pluginService.get(type);
-        if (s != null) return s.connect(connectionIdentifier, params);
+        if (s != null) {
+            Node node = s.connect(connectionIdentifier, params);
+            if (node != null) {
+                return node;
+            }
+        }
         return null;
     }
 
@@ -121,7 +126,9 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
             for (String pluginType : this.pluginService.keySet()) {
                 IPluginInConnectionService s = pluginService.get(pluginType);
                 Node node = s.connect(connectionIdentifier, params);
-                if (node != null) return node;
+                if (node != null) {
+                    return node;
+                }
             }
         }
         return null;
