@@ -121,7 +121,6 @@
       <bundle start="true" start-level="35">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.api/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.util/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">wrap:mvn:virgomirror/org.eclipse.jdt.core.compiler.batch/3.8.0.I20120518-2145</bundle>
    </feature>
    <feature name="base-spring" description="Opendaylight Spring Support" version="${spring.version}">
       <bundle>mvn:org.ow2.asm/asm-all/${asm.version}</bundle>

@@ -7,10 +7,10 @@
     <version>1.4.2-SNAPSHOT</version>
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
-  <artifactId>base-features</artifactId>
+  <artifactId>controller-features</artifactId>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
-  <description>Base Features POM</description>
+  <description>Features POM</description>
   <properties>
     <features.file>features.xml</features.file>
   </properties>
