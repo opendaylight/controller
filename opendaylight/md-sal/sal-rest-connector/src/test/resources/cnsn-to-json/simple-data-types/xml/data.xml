@@ -23,7 +23,6 @@
     <lfenum>enum3</lfenum>
     <lfbits>bit3 bit2</lfbits>
     <lfbinary>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</lfbinary>
-    <lfempty />
     <lfunion1>324</lfunion1>
     <lfunion2>33.3</lfunion2>
     <lfunion3>55</lfunion3>
@@ -38,5 +37,35 @@
     <lfunion12>false</lfunion12>
     <lfunion13>b1</lfunion13>
     <lfunion14>zero</lfunion14>
+    <lfempty />
     <identityref1 xmlns:x="simple:data:types">x:iden</identityref1>
+    <complex-any>
+      <data>
+        <leaf1>leaf1-value</leaf1>
+        <leaf2>leaf2-value</leaf2>
+
+        <leaf-list>leaf-list-value1</leaf-list>
+        <leaf-list>leaf-list-value2</leaf-list>
+
+        <list>
+            <nested-list>
+                <nested-leaf>nested-value1</nested-leaf>
+            </nested-list>
+            <nested-list>
+                <nested-leaf>nested-value2</nested-leaf>
+            </nested-list>
+        </list>
+
+         <list>
+            <nested-list>
+                <nested-leaf>nested-value3</nested-leaf>
+            </nested-list>
+            <nested-list>
+                <nested-leaf>nested-value4</nested-leaf>
+            </nested-list>
+        </list>
+      </data>
+    </complex-any>
+    <simple-any>simple</simple-any>
+    <empty-any></empty-any>
 </cont>
