@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import org.opendaylight.controller.cluster.datastore.messages.CloseListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseListenerRegistrationReply;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -25,7 +27,9 @@ public class ListenerRegistration extends UntypedActor{
 
   @Override
   public void onReceive(Object message) throws Exception {
-    throw new UnsupportedOperationException("onReceive");
+    if(message instanceof CloseListenerRegistration){
+      closeListenerRegistration((CloseListenerRegistration) message);
+    }
   }
 
   public static Props props(final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration){
@@ -36,5 +40,10 @@ public class ListenerRegistration extends UntypedActor{
         return new ListenerRegistration(registration);
       }
     });
+  }
+
+  private void closeListenerRegistration(CloseListenerRegistration message){
+    registration.close();
+    getSender().tell(new CloseListenerRegistrationReply(), getSelf());
   }
 }

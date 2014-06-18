@@ -13,7 +13,7 @@ import akka.testkit.JavaTestKit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class AbstractActorTest {
+public abstract class AbstractActorTest {
   private static ActorSystem system;
 
   @BeforeClass
