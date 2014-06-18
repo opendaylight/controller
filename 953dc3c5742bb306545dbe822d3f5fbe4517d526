@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2b4a74c5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:55:05Z",
+      "side": 1,
+      "message": "Taking this discussion to e-mail so we can move this patch along.",
+      "parentUuid": "fa82b9bf_6ba4fca5",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_39f2d1d2",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 2
@@ -142,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4b4578b1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:55:05Z",
+      "side": 1,
+      "message": "Lets say my data model is this:\n\nContainer A\n    LEAF B\n    Container C\n         Leaf D\n         \nSo if I register for a DataChangeScope of BASE with a path to Container A, and then a change occurs in Leaf D, I won\u0027t be notified.\n\nIf I register for a DataChangeScope of BASE with a path to Container A, and then a change occurs in LEAF B, I would get notified and I would get provided what? Container A and Leaf B only? Or Container A, and Leaf B, and Container C, and Leaf D, even though I registered with a scope of BASE?\n\nDoes that help to clarify my question? We may need to take this to a web-ex / hangout.",
+      "parentUuid": "fa82b9bf_8b9f0050",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f9bb09e3",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 2
@@ -171,6 +207,24 @@
       "side": 1,
       "message": "Data Change and transaction are bit disconnected on purpose - this deals with getting notified on changes - so yes there was transaction which triggered event, but I do not\nsee need to directly tie it to concrete transactions. Wording without transactions\nactualy leaves space for optimizations where multiple transactions could be merged into one change.",
       "parentUuid": "fa82b9bf_f9bb09e3",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b271c13",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:55:05Z",
+      "side": 1,
+      "message": "Patch set 4 change looks good.",
+      "parentUuid": "fa82b9bf_abb1a4e2",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -241,6 +295,24 @@
       "side": 1,
       "message": "2) What happens if two transactions modify the same node at the same time? i.e. how does concurrency work when dealing with multiple transactions?\n\nThey are isolated, this is documented in transaction itselg.\n\n Is a transaction only run if its operation is atomic? \n\nDescribed in transactions. Transaction is executed only if it is commited by client\n(#commit())\n\n3) Can transactions fail due to concurrency? If so, who is responsible for retry?\n\nClient, described in transaction itself in #commit()",
       "parentUuid": "fa82b9bf_99919d54",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8b22a0ff",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:55:05Z",
+      "side": 1,
+      "message": "patch set 4 - contains comments",
+      "parentUuid": "fa82b9bf_6bd2bc01",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
