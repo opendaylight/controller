@@ -49,6 +49,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdent
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -71,6 +72,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -566,7 +568,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData readConfigurationData(final String identifier) {
+    public StructuredData readConfigurationData(final String identifier, UriInfo info) {
         final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
         CompositeNode data = null;
         MountInstance mountPoint = iiWithData.getMountPoint();
@@ -577,11 +579,57 @@ public class RestconfImpl implements RestconfService {
             data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
         }
 
+        data = pruneDataAtDepth( data, parseDepthParameter( info ) );
         return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
     }
 
+    @SuppressWarnings("unchecked")
+    private <T extends Node<?>> T pruneDataAtDepth( T node, Integer depth ) {
+        if( depth == null ) {
+            return node;
+        }
+
+        if( node instanceof CompositeNode ) {
+            ImmutableList.Builder<Node<?>> newChildNodes = ImmutableList.<Node<?>> builder();
+            if( depth > 1 ) {
+                for( Node<?> childNode: ((CompositeNode)node).getValue() ) {
+                    newChildNodes.add( pruneDataAtDepth( childNode, depth - 1 ) );
+                }
+            }
+
+            return (T) ImmutableCompositeNode.create( node.getNodeType(), newChildNodes.build() );
+        }
+        else { // SimpleNode
+            return node;
+        }
+    }
+
+    private Integer parseDepthParameter( UriInfo info ) {
+        String param = info.getQueryParameters( false ).getFirst( "depth" );
+        if( Strings.isNullOrEmpty( param ) || "unbounded".equals( param ) ) {
+            return null;
+        }
+
+        try {
+            Integer depth = Integer.valueOf( param );
+            if( depth < 1 ) {
+                throw new RestconfDocumentedException( new RestconfError(
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE, "Invalid depth parameter: " + depth,
+                        null, "The depth parameter must be an integer > 1 or \"unbounded\"" ) );
+            }
+
+            return depth;
+        }
+        catch( NumberFormatException e ) {
+            throw new RestconfDocumentedException( new RestconfError(
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
+                    "Invalid depth parameter: " + e.getMessage(),
+                    null, "The depth parameter must be an integer > 1 or \"unbounded\"" ) );
+        }
+    }
+
     @Override
-    public StructuredData readOperationalData(final String identifier) {
+    public StructuredData readOperationalData(final String identifier, UriInfo info) {
         final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
         CompositeNode data = null;
         MountInstance mountPoint = iiWithData.getMountPoint();
@@ -592,6 +640,7 @@ public class RestconfImpl implements RestconfService {
             data = broker.readOperationalData(iiWithData.getInstanceIdentifier());
         }
 
+        data = pruneDataAtDepth( data, parseDepthParameter( info ) );
         return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint);
     }
 

@@ -34,6 +34,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -220,7 +221,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
     void stageMockEx( final RestconfDocumentedException ex ) {
         reset( mockRestConf );
-        when( mockRestConf.readOperationalData( any( String.class ) ) ).thenThrow( ex );
+        when( mockRestConf.readOperationalData( any( String.class ), any( UriInfo.class ) ) ).thenThrow( ex );
     }
 
     void testJsonResponse( final RestconfDocumentedException ex, final Status expStatus, final ErrorType expErrorType,
@@ -776,8 +777,8 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         // The StructuredDataToJsonProvider should throw a RestconfDocumentedException with no data
 
-        when( mockRestConf.readOperationalData( any( String.class ) ) )
-        .thenReturn( new StructuredData( null, null, null ) );
+        when( mockRestConf.readOperationalData( any( String.class ), any( UriInfo.class ) ) )
+            .thenReturn( new StructuredData( null, null, null ) );
 
         Response resp = target("/operational/foo").request( MediaType.APPLICATION_JSON ).get();
 
