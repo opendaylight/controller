@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ebea4c0e",
+        "filename": "opendaylight/md-sal/sal-common-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-18T05:23:08Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_febd2f69",
+      "revId": "9971b46f23c419d70b2f761ac7ecb6d7813dd2d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1ec1f3e3",
         "filename": "opendaylight/md-sal/sal-common-impl/src/test/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizerTest.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-17T11:58:40Z",
       "side": 1,
       "message": "Probably should have copyright header (Brocade Communications, Inc) - I had forgotten to do that when I added this file with my patch.",
+      "revId": "9971b46f23c419d70b2f761ac7ecb6d7813dd2d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b8c987f",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/test/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-18T05:23:08Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_1ec1f3e3",
       "revId": "9971b46f23c419d70b2f761ac7ecb6d7813dd2d0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
