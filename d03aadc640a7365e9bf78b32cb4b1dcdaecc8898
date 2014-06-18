@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b1c98c1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "I believe you are listing out which nodes in this model would be returned depending on your selected scope - that is great. I would just add a sentence before to tell the users that is what you are doing.\n\neg: \"Below is an example model with comments describing what notifications you would receive based on the scope you specify\".\n\nSomething simple like that so folks reading it know that is what you are doing.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab8444d4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "minor, I would change \"SHOULD\" to \"MUST\" - we are not going to unregister it, so if they don\u0027t unregister then we have a java memory leak (assuming the JVM doesn\u0027t then shutdown etc).",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb8748d6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "See patch set 2 follow-up comment",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8bd700bf",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Minor re-wording:\n\nThis map contains data tree nodes (and paths to them) which are in the scope of the listener registration and have been created. The data tree nodes contains the whole subtree with their current state.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b55dc4e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Minor re-wording: \n\nThis map contains data tree nodes (and paths to them) which are in the scope of the listener registration and have been updated. The data tree nodes contains the whole subtree with their current state.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ebefac85",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Minor rewording: \n\nThis set contains the paths to the data tree nodes which are in the scope of the listener registration and have been removed.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b733815",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "This map contains the original version of the data tree nodes (and paths to them), which are in the scope of the listener registration.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b039c42",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Continuing conversation on patch set 2, A pointer to the transaction interfaces which describe concurrency would be useful then. Just something like\n\n \"For transaction concurrency information, please see {link here}\"",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b8abcc0",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Wording - change to:\n\nIf the target is a subtree, then the whole subtree is read (and will be accessible from the returned data object).",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0bc1b0e3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "comment should be \"writes C to path\", not B - I believe that is just a typo",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_abb76485",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Ok, I like the example, but getting a little lost. I would suggest renaming the transactions to tx1 and tx2, that way the A and B there don\u0027t get confused with the \u0027A\u0027, \u0027B\u0027, \u0027C\u0027 that we are writing into the store.\n\nThat said, I think this comment is wrong, since above we put \"B\" into the txB via a PUT.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbbae86d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "missing the rest of the sentence.\n\nSubmits transaction to be applied on the logical datastore???",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6bb15c8e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "remove \"any\" above, and the duplicate \"from\" below",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8bace036",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "missing period after \"components\"- \"...components. The ...\"",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb7188e1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Ok, this comment about yang models for mode details about effects confused me. I would remove it as I don\u0027t see a need for it here.\n\nWhat was the goal of adding this? The other option is to provide more detail..",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb4b2c85",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "Minor wording:\n\nAnother transaction finished earlier and modified the same node in non-compatible way. In this case the returned future will fail with\t{@link OptimisticLockFailedException}. It is the responsibility of the caller to create a new transaction and submit the same modification in order to update data tree.\n\nNote - Above you had the text \"non-compatible way.\" What is an example of changing the same node in a compatible way with two transactions? Editing different leaf nodes? An example of this would be useful as it implies there is some intelligence in the transactions that most folks may not expect. Also, if we add an example of that, I would add a note above. For example:\n\n...modified the same node in non-compatible way (see below examples). In this ...",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b5f1c42",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "remove the word \"introduces\"",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8b5aa04e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "remove the word \"we\" from above 2 comments",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb324c0f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-18T13:36:44Z",
+      "side": 1,
+      "message": "please qualify the future in above sentence - eg:\n\nThe future for txB will fail with ....",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
