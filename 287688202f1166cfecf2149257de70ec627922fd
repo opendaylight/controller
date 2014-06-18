@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee325a0f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ListenerRegistration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-18T23:55:18Z",
+      "side": 1,
+      "message": "I know it\u0027s config subsystem related but depending all \"modules\" on yangtools creates a core dependency on yang features.. this is a generic comment that components Id should come from non-yang interface and mapped to InstantanceIdentifier when required. I will submit patches on that as soon as Karaf is out the door.",
+      "revId": "287688202f1166cfecf2149257de70ec627922fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
