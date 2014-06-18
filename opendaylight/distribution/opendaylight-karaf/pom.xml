@@ -38,13 +38,11 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-    <!-- scope is compile so all features (there is only one) are installed
-            into startup.properties and the feature repo itself is not installed -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>base-features</artifactId>
       <version>${project.version}</version>
-      <type>pom</type>
+      <type>kar</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
