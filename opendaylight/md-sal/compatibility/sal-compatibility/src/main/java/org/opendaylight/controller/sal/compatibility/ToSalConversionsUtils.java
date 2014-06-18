@@ -55,6 +55,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
@@ -96,6 +97,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.addr
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv6;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MacAddressFilter;
@@ -114,10 +116,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.net.InetAddresses;
 
 public class ToSalConversionsUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ToSalConversionsUtils.class);
 
     private ToSalConversionsUtils() {
 
@@ -364,9 +370,28 @@ public class ToSalConversionsUtils {
             fillFrom(target, source.getLayer3Match());
             fillFrom(target, source.getLayer4Match());
             fillFrom(target, source.getIpMatch());
+            fillFrom(target, source.getInPort());
         }
 
         return target;
+    }
+
+    /**
+     * @param target
+     * @param inPort
+     */
+    private static void fillFrom(Match target, NodeConnectorId inPort) {
+        if (inPort != null) {
+            String inPortValue = inPort.getValue();
+            if (inPortValue != null) {
+                try {
+                    target.setField(MatchType.IN_PORT, NodeMapping.toADNodeConnector(inPort,
+                            NodeMapping.toAdNodeId(inPort)));
+                } catch (ConstructionException e) {
+                    LOG.warn("nodeConnector construction failed", e);
+                }
+            }
+        }
     }
 
     private static void fillFrom(Match target, VlanMatch vlanMatch) {

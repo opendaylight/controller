@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.core.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 
 /**
@@ -53,6 +54,21 @@ public class NodeMappingTest {
             MacAddress mac = NodeMapping.toADMacAddress(nodeId);
             Assert.assertArrayEquals(expectedMacs[i], mac.getMacAddress());
         }
+    }
+
+    /**
+     * Test method for
+     * {@link org.opendaylight.controller.sal.compatibility.NodeMapping#toAdNodeId(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId)}
+     * .
+     */
+    @Test
+    public void testToAdNodeId() {
+        NodeId observed;
+        observed = NodeMapping.toAdNodeId(null);
+        Assert.assertNull(observed);
+
+        observed = NodeMapping.toAdNodeId(new NodeConnectorId("MD_SAL|openflow:5:2"));
+        Assert.assertEquals("MD_SAL|openflow:5", observed.getValue());
     }
 
 }
