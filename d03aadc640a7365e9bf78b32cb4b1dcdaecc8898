@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ce0d1639",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4b1c98c1",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ab8444d4",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "minor, I would change \"SHOULD\" to \"MUST\" - we are not going to unregister it, so if they don\u0027t unregister then we have a java memory leak (assuming the JVM doesn\u0027t then shutdown etc).",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e140a44",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ab8444d4",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ee381aa2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cb8748d6",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8bd700bf",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "Minor re-wording:\n\nThis map contains data tree nodes (and paths to them) which are in the scope of the listener registration and have been created. The data tree nodes contains the whole subtree with their current state.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e0f0e2e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8bd700bf",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2e1e0264",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6b55dc4e",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ebefac85",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "Minor rewording: \n\nThis set contains the paths to the data tree nodes which are in the scope of the listener registration and have been removed.",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e190678",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ebefac85",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ee27bab4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4b733815",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6b039c42",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "Continuing conversation on patch set 2, A pointer to the transaction interfaces which describe concurrency would be useful then. Just something like\n\n \"For transaction concurrency information, please see {link here}\"",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e3baad1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6b039c42",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4eba660b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6b8abcc0",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0bc1b0e3",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "comment should be \"writes C to path\", not B - I believe that is just a typo",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e35a2d9",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_0bc1b0e3",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8e362ee6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_abb76485",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cbbae86d",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 4
@@ -200,6 +398,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "missing the rest of the sentence.\n\nSubmits transaction to be applied on the logical datastore???",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee4eda6e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cbbae86d",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4e3026e8",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6bb15c8e",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8bace036",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 4
@@ -234,6 +468,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "missing period after \"components\"- \"...components. The ...\"",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e3c5e92",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8bace036",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ae42120e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cb7188e1",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_eb4b2c85",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 4
@@ -268,6 +538,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "Minor wording:\n\nAnother transaction finished earlier and modified the same node in non-compatible way. In this case the returned future will fail with\t{@link OptimisticLockFailedException}. It is the responsibility of the caller to create a new transaction and submit the same modification in order to update data tree.\n\nNote - Above you had the text \"non-compatible way.\" What is an example of changing the same node in a compatible way with two transactions? Editing different leaf nodes? An example of this would be useful as it implies there is some intelligence in the transactions that most folks may not expect. Also, if we add an example of that, I would add a note above. For example:\n\n...modified the same node in non-compatible way (see below examples). In this ...",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ec5ea8c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Editing different leaf nodes? \nYes - if they are editing leaves only, it is compatible, if they are editing different subtrees it is compatible.\nAdded table which shows initial state, tx 1 action, tx 2 action and result",
+      "parentUuid": "fa82b9bf_eb4b2c85",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8ec06e7d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6b5f1c42",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8b5aa04e",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 4
@@ -308,6 +614,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ae6f72c4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8b5aa04e",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_eb324c0f",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 4
@@ -319,6 +643,24 @@
       "writtenOn": "2014-06-18T13:36:44Z",
       "side": 1,
       "message": "please qualify the future in above sentence - eg:\n\nThe future for txB will fail with ....",
+      "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ebfe2fc",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T15:54:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_eb324c0f",
       "revId": "d03aadc640a7365e9bf78b32cb4b1dcdaecc8898",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
