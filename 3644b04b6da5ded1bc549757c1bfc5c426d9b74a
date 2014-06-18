@@ -1,0 +1,905 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4eed86ee",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "need \u003cp\u003e tags to properly break paragraphs",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e0a1ed2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit, but SCOPE is capitalized differently here from everywhere else.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6efacabe",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: it should read \"it does not exist\" not \"it does not exists\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee2d7a47",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"will only be\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ef282d2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "You need \u003cp\u003e tags to get the paragraphs in the documentation.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aede923d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"to learn more\" to \"to lear more\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cee196ff",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"will be provided\" not \"is be provide\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ceb8b6e7",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"which were introduced\" rather than \"which was introduced\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4ec4a65e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"which were\" instead of \"which was\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eea25aad",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"were created\" instead of \"was created\"\n\nReally minor nit: should read \"These data tree nodes\" instead of \"This data tree nodes\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aeac52a1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"contain their\" instead of \"contains their\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0ea69ec1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"were changed\" instead of \"was chagned\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ceaf5693",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"contain the\" instead of \"contains the\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e964a4e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read: \"A Node is considered updated if it contents were replaced or one of its\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ea0429e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"an immutable\" not \"a immutable\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e9b4672",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"used a wildcarded\" instead of \"used wildcarded\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ae83f202",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"can be accessed\" instead of \"could be accessed\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce867613",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"an immutable\" not \"a immutable\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e7dea1b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"can be accessed\" instead of \"could be accessed\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e786e2c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Need \u003cp\u003e tags.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e77e23b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"which capture\" instead of \"which captures\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e72664a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"for the particular\" instead of \"for particular\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee901a45",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"will contain\" instead of \"will contains\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e945e35",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Need \u003cp\u003e tags.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce9d165b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"which introduce\" instead of \"which introduces\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ea40aa6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should read \"These transactions provide\" instead of \"This transactions provides\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e9f0e50",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "read-write not write-only",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2eae0286",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Does this mean, if any of the state in the data tree changes during the transaction it aborts? If so, please say that. If not, what does it mean?",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_eeb7bad6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "There\u0027s no \"view\" here, right? It\u0027s write only.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4ea9067a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Since you can\u0027t read from this transaction, presumably there can\u0027t be any preconditions, right?",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0ebbfec4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Need \u003cp\u003e tags.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ec62e48",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: should be \"its\" not \"it\u0027s\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ec5a23b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "should be \"writes B to PATH\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee057a7a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "needs \u003cp\u003e tags",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e09be94",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "should probably be: \"commiting transaction by calling {@link #commit()}, which seals transaction\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce02f66e",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "broker.newReadWriteTransaction();\n\nnot ...Transactoin()",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ef4ee87",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "toin \u003d\u003e tion",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ef96a7f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "There\u0027s an extra \" at the end of the line.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ef3629f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "toin \u003d\u003e tion",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee2c9a04",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Really minor nit: it\u0027s \u003d\u003e its",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e30de54",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "It\u0027s probably worth noting here (and in AsyncTransaction.close()) that close() is intended for Read transactions only or for Read transactions and ReadWrite transactions that wind up only reading.\n\nI\u0027m actually not sure which is true, but we should tell users clearly.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ae369250",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Should read \"from further changing\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce399642",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Line should end with a comma not a period",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e4586b1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "This sentence doesn\u0027t add any information.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e408aa5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "It might be clearer to say \"Whether or not the commit is successful depends on...\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee133ab6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Are you talking about commit handlers? If so, could we get a link to those?",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e177ea4",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "missing a ] after \"BAR\u003d1\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e272a13",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "I think \"put(TOP/BAR\u003d1)\" should be \"put(TOP/BAR,1)\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e2122fb",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "I think \"merge(TOP/BAR\u003d1)\" should be \"merge(TOP/BAR,1)\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e22aeff",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "missing a ] after \"BAR\u003d1\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce10b6aa",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "I think \"put(TOP/BAR\u003d1)\" should be \"put(TOP/BAR,1)\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ae0d3292",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "I think \"merge(TOP/BAR\u003d1]\" should be \"merge(TOP/BAR,1)\"",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e1ca6c1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-06-18T18:38:27Z",
+      "side": 1,
+      "message": "Need a period at the end of this line.",
+      "revId": "3644b04b6da5ded1bc549757c1bfc5c426d9b74a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
