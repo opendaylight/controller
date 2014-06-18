@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cbebc8ae",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Not sure how to explain this:\nEg. if item represents container - all leafs, containers are considered direct chilren\ncontainer a - scope BASE, ONE, SUBTREE\n   leaf \"foo\" // scope ONE, SUBTREE\n   container // scope ONE, SUBTREE\n      leaf  \"bar\" // scope SUBTREE\n   list // scope ONE, SUBTREE\n     list [a] // scope SUBTREE\n       id \"a\" // scope SUBTREE\n     list [b] // scope SUBTREE\n       id \"b\" // SCOPE SUBTREE\n\nbug if item is list (as a whole)\n\n list // scope BASE, ONE, SUBTREE\n     list [a] // scope ONE, SUBTREE\n       id \"a\" // scope SUBTREE\n     list [b] // scope ONE, SUBTREE\n       id \"b\" // scope SUBTREE",
+      "parentUuid": "fa82b9bf_d9e165ff",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d9af2593",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "Usability Comment - I think we have too many methods that may contain changed data here.\n\nWhen I think of an event, I think of a BEFORE state, CURRENT state, and possibly an update type which tells you what type (CREATE, UPDATE, DELETE). But even then, the TYPE can be inferred via the state. That is, no state before, and now there  is a state means CREATE, existing state, new state, update, exiting state, no state, delete. \n\nCan we simplify the methods to get data down to just two - get priorState getNewState? Seems like it would be easier to understand.\n\nWe should capture this usability comment and discuss and if a change is determined worth wild, change in another patch.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ba4fca5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Yes, you could derive state just by looking on before and after snapshot,\nbut then clients are required to compute change set (which we already have)\nto better understand what was added, removed, changed.\n\nSome of existing clients actually uses this additional information allong with SUBTREE scope to  better understand before and after state to act on the events.",
+      "parentUuid": "fa82b9bf_d9af2593",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6bcb9c53",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_39f2d1d2",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_59ed55ee",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "This varies based on how they registered via the LogicalDatastoreType right? Or do we always get everything when notified, the LogicalDatastoreType only controls WHEN you get notified and not what data will be returned?",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8b9f0050",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "I think name DataChangeScope clearly communicated that it is scope for condition which triggered event, clients always get whole subtree.\nCould you please help me with rewording that it is much clearer to clients.",
+      "parentUuid": "fa82b9bf_59ed55ee",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_abb1a4e2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Data Change and transaction are bit disconnected on purpose - this deals with getting notified on changes - so yes there was transaction which triggered event, but I do not\nsee need to directly tie it to concrete transactions. Wording without transactions\nactualy leaves space for optimizations where multiple transactions could be merged into one change.",
+      "parentUuid": "fa82b9bf_f9bb09e3",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_19bfcdd1",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "Missing \"or\" - that is \"Node is considered updated if it contents was replaced OR one of its children was created, removed or updated.\"",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cbb428d3",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_19bfcdd1",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6bd2bc01",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataTransactionFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "2) What happens if two transactions modify the same node at the same time? i.e. how does concurrency work when dealing with multiple transactions?\n\nThey are isolated, this is documented in transaction itselg.\n\n Is a transaction only run if its operation is atomic? \n\nDescribed in transactions. Transaction is executed only if it is commited by client\n(#commit())\n\n3) Can transactions fail due to concurrency? If so, who is responsible for retry?\n\nClient, described in transaction itself in #commit()",
+      "parentUuid": "fa82b9bf_99919d54",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_599b1572",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "I am a little confused now based on your comment on the general comments area about always getting update view.\n\nUltimately, I would provide a simple walk through of the expected behavior. i.e. Create transaction. Read value, someone else updates it, read value again... and? what happens",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b7ddc1b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Reworded bit, added example",
+      "parentUuid": "fa82b9bf_599b1572",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8b78602c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_39a0919e",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f989c926",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
         "patchSetId": 2
@@ -166,6 +328,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "What is the final view of the store then? Seems like we might have a race condition in the transactions based on this comment?",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb9d085b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f989c926",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2bdcb411",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_198d8d31",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b9834103",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 2
@@ -200,6 +398,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "We need some examples here to clarify this. Confused about how race conditions of two unique transactions, operating on the same data would be resolved.",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2b1b541c",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Introduced example to description of #commit() message, reworded this to explain\nwrites in transaction are only proposal for change and are submitted for application once #commit() is invoked.",
+      "parentUuid": "fa82b9bf_b9834103",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cb2ae82b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "As you pointed out, this should be separate discussion.",
+      "parentUuid": "fa82b9bf_d9864513",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3977313c",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
         "patchSetId": 2
@@ -234,6 +468,24 @@
       "writtenOn": "2014-06-17T19:35:34Z",
       "side": 1,
       "message": "...as \u0027an\u0027 add / replace ....  missing the letter \u0027n\u0027 in \u0027an\u0027",
+      "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab276463",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-18T11:23:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3977313c",
       "revId": "953dc3c5742bb306545dbe822d3f5fbe4517d526",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
