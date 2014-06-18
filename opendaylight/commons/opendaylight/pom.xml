@@ -20,8 +20,8 @@
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
     <aries.util.version>1.1.0</aries.util.version>
-    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
+    <!-- Controller Modules Versions -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
@@ -43,6 +43,7 @@
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang.version>3.1</commons.lang.version>
+    <commons.lang3.version>3.1</commons.lang3.version>
     <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
     <commons.opendaylight.commons.httpclient>0.1.2-SNAPSHOT</commons.opendaylight.commons.httpclient>

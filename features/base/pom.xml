@@ -23,6 +23,24 @@
     </resources>
     <plugins>
       <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${karaf.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>features-create-kar</id>
+            <goals>
+              <goal>features-create-kar</goal>
+            </goals>
+            <configuration>
+              <featuresFile>${project.build.directory}/classes/${features.file}</featuresFile>
+            </configuration>
+          </execution>
+        </executions>
+        <!-- There is no useful configuration for the kar mojo. The features-generate-descriptor mojo configuration may be useful -->
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
