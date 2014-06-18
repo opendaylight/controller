@@ -338,6 +338,17 @@ public final class XmlElement {
         );
     }
 
+    public Optional<String> getOnlyTextContentOptionally() {
+        // only return text content if this node has exactly one Text child node
+        if (element.getChildNodes().getLength() == 1) {
+            Node item = element.getChildNodes().item(0);
+            if (item instanceof Text) {
+                return Optional.of(((Text) item).getWholeText());
+            }
+        }
+        return Optional.absent();
+    }
+
     public String getNamespaceAttribute() throws MissingNameSpaceException {
         String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
         if (attribute == null || attribute.equals("")){

@@ -103,10 +103,7 @@ public class Get extends AbstractConfigNetconfOperation {
         xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-        // Filter option - unsupported
-        if (xml.getChildElements(XmlNetconfConstants.FILTER).size() != 0){
-            throw new UnsupportedOperationException("Unsupported option " + XmlNetconfConstants.FILTER + " for " + XmlNetconfConstants.GET);
-        }
+        // Filter option: ignore for now, TODO only load modules specified by the filter
     }
 
     @Override

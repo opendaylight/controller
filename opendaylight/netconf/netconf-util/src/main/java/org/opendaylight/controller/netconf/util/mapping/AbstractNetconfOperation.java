@@ -47,12 +47,12 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
 
     public static final class OperationNameAndNamespace {
         private final String operationName, namespace;
+        private final XmlElement operationElement;
 
         public OperationNameAndNamespace(Document message) throws NetconfDocumentedException {
             XmlElement requestElement = null;
             requestElement = getRequestElementWithCheck(message);
-
-            XmlElement operationElement = requestElement.getOnlyChildElement();
+            operationElement = requestElement.getOnlyChildElement();
             operationName = operationElement.getName();
             namespace = operationElement.getNamespace();
         }
@@ -63,6 +63,10 @@ public abstract class AbstractNetconfOperation implements NetconfOperation {
 
         public String getNamespace() {
             return namespace;
+        }
+
+        public XmlElement getOperationElement() {
+            return operationElement;
         }
     }
 

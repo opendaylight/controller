@@ -56,4 +56,5 @@ public final class XmlNetconfConstants {
     // TODO where to store namespace of config ?
     public static final String URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG = "urn:opendaylight:params:xml:ns:yang:controller:config";
     public static final String GET = "get";
+    public static final String GET_CONFIG = "get-config";
 }
