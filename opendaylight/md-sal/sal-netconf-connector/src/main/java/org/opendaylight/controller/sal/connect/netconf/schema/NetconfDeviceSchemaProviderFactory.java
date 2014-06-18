@@ -7,24 +7,22 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema;
 
+import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import org.opendaylight.controller.sal.connect.api.SchemaContextProviderFactory;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.opendaylight.yangtools.yang.parser.impl.util.YangSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 public final class NetconfDeviceSchemaProviderFactory implements SchemaContextProviderFactory {
 
@@ -46,7 +44,14 @@ public final class NetconfDeviceSchemaProviderFactory implements SchemaContextPr
         }
 
         logger.debug("{}: Trying to create schema context from {}", id, sourceContext.getValidSources());
-        final List<InputStream> modelsToParse = YangSourceContext.getValidInputStreams(sourceContext);
+
+        final Collection<ByteSource> modelsToParse;
+        try {
+            modelsToParse = sourceContext.getValidByteSources();
+        } catch (IOException e) {
+            logger.error("{}: Cannot get valid sources", id, e);
+            throw new IllegalStateException(id + ": Cannot get valid sources", e);
+        }
 
         Preconditions.checkState(sourceContext.getValidSources().isEmpty() == false,
                 "%s: Unable to create schema context, no sources provided by device", id);
@@ -54,16 +59,16 @@ public final class NetconfDeviceSchemaProviderFactory implements SchemaContextPr
             final SchemaContext schemaContext = tryToParseContext(modelsToParse);
             logger.debug("{}: Schema context successfully created.", id);
             return new NetconfSchemaContextProvider(schemaContext);
-        } catch (final RuntimeException e) {
+        } catch (IOException | YangSyntaxErrorException | RuntimeException e) {
             logger.error("{}: Unable to create schema context, unexpected error", id, e);
             throw new IllegalStateException(id + ": Unable to create schema context", e);
         }
     }
 
-    private static SchemaContext tryToParseContext(final List<InputStream> modelsToParse) {
+    private static SchemaContext tryToParseContext(final Collection<ByteSource> modelsToParse)
+            throws IOException, YangSyntaxErrorException {
         final YangParserImpl parser = new YangParserImpl();
-        final Set<Module> models = parser.parseYangModelsFromStreams(modelsToParse);
-        return parser.resolveSchemaContext(models);
+        return parser.parseSources(modelsToParse);
     }
 
     private static final class NetconfSchemaContextProvider implements SchemaContextProvider {
