@@ -24,7 +24,6 @@
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-maven-slf4j</artifactId>
-      <version>0.8</version>
     </dependency>
 
     <dependency>
@@ -40,7 +39,6 @@
     <dependency>
       <groupId>org.codehaus.gmaven.runtime</groupId>
       <artifactId>gmaven-runtime-2.0</artifactId>
-      <version>1.5</version>
       <exclusions>
         <exclusion>
           <groupId>org.sonatype.gossip</groupId>
@@ -77,14 +75,12 @@
     <dependency>
       <groupId>net.sourceforge.pmd</groupId>
       <artifactId>pmd</artifactId>
-      <version>5.1.0</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.eclipse</groupId>
       <artifactId>jdt</artifactId>
-      <version>3.3.0-v20070607-1300</version>
       <scope>test</scope>
 
       <exclusions>
@@ -98,14 +94,12 @@
     <dependency>
       <groupId>org.eclipse.equinox</groupId>
       <artifactId>app</artifactId>
-      <version>1.0.0-v20070606</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.eclipse.jdt</groupId>
       <artifactId>core</artifactId>
-      <version>3.3.0-v_771</version>
       <scope>test</scope>
 
       <exclusions>

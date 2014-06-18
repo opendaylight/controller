@@ -22,7 +22,6 @@
     <aries.util.version>1.1.0</aries.util.version>
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <!-- Controller Modules Versions -->
-    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
     <bouncycastle.version>1.50</bouncycastle.version>
@@ -30,7 +29,7 @@
     <bundlescanner.api.version>0.4.2-SNAPSHOT</bundlescanner.api.version>
     <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
-    <checkstyle.version>2.10</checkstyle.version>
+    <checkstyle.version>2.12</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
@@ -130,12 +129,14 @@
     <karaf.branding.version>1.0.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <karaf.version>3.0.1</karaf.version>
+    <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <logback.version>1.0.9</logback.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <maven.compile.plugin.version>2.5.1</maven.compile.plugin.version>
     <!-- Java Versions -->
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
     <mockito.version>1.9.5</mockito.version>
     <netconf.version>0.2.5-SNAPSHOT</netconf.version>
@@ -297,6 +298,12 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
+      </dependency>
+      <!-- 3rd party dependencies needed by config-->
+      <dependency>
+        <groupId>com.jcabi</groupId>
+        <artifactId>jcabi-maven-slf4j</artifactId>
+        <version>0.8</version>
       </dependency>
 
       <dependency>
@@ -518,6 +525,11 @@
         <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
+        <groupId>net.sourceforge.pmd</groupId>
+        <artifactId>pmd</artifactId>
+        <version>5.1.0</version>
+      </dependency>
+      <dependency>
         <groupId>orbit</groupId>
         <artifactId>javax.activation</artifactId>
         <version>1.1.0.v201211130549</version>
@@ -651,9 +663,24 @@
         <version>${enunciate.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.codehaus.gmaven.runtime</groupId>
+        <artifactId>gmaven-runtime-2.0</artifactId>
+        <version>1.5</version>
+      </dependency>
+      <dependency>
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
         <version>${jettison.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse</groupId>
+        <artifactId>jdt</artifactId>
+        <version>3.3.0-v20070607-1300</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.equinox</groupId>
+        <artifactId>app</artifactId>
+        <version>1.0.0-v20070606</version>
       </dependency>
 
       <!-- equinox http service bridge -->
@@ -661,6 +688,11 @@
         <groupId>org.eclipse.equinox.http</groupId>
         <artifactId>servlet</artifactId>
         <version>1.0.0-v20070606</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jdt</groupId>
+        <artifactId>core</artifactId>
+        <version>3.3.0-v_771</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
@@ -1950,7 +1982,7 @@
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
+          <version>${lifecycle.mapping.version}</version>
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
