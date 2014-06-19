@@ -13,29 +13,12 @@
         <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
 
-    <properties>
-        <jackson.version>2.3.0</jackson.version>
-        <exam.version>3.0.0</exam.version>
-        <url.version>1.5.0</url.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.7</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>maven-paxexam-plugin</artifactId>
-                <version>1.2.4</version>
                 <executions>
                     <execution>
                         <id>generate-config</id>
@@ -53,7 +36,7 @@
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
+                    <version>${lifecycle.mapping.version}</version>
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
@@ -90,22 +73,18 @@
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>xtend-lib-osgi</artifactId>
-            <version>2.4.3</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.tests</groupId>
             <artifactId>sal-remoterpc-connector-test-provider</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller.tests</groupId>
             <artifactId>sal-remoterpc-connector-test-consumer</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-broker-impl</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
@@ -128,55 +107,45 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
-            <version>1.5.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>equinoxSDK381</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.8.1.v20120830-144521</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.2</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-core-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-remoterpc-connector</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>containermanager</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.osgi</groupId>
@@ -211,29 +180,24 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>antlr4-runtime-osgi-nohead</artifactId>
-            <version>4.0</version>
         </dependency>
 
         <!-- routing table dependencies -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>zeromq-routingtable.implementation</artifactId>
-            <version>0.4.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>clustering.services</artifactId>
-            <version>0.4.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.osgi</groupId>
@@ -244,7 +208,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal.implementation</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -255,7 +218,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>containermanager</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.osgi</groupId>
@@ -270,7 +232,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>containermanager.it.implementation</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -281,7 +242,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>clustering.stub</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -293,7 +253,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.dependencymanager.shell</artifactId>
-            <version>3.0.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.osgi</groupId>
@@ -304,7 +263,6 @@
         <dependency>
             <groupId>eclipselink</groupId>
             <artifactId>javax.resource</artifactId>
-            <version>1.5.0.v200906010428</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -313,12 +271,10 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>ietf-netconf-monitoring</artifactId>
-          <version>0.2.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
@@ -327,38 +283,31 @@
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>yang-ext</artifactId>
-            <version>2013.09.07.3</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>opendaylight-l2-types</artifactId>
-            <version>2013.08.27.3</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-it</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-broker-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-inventory</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
@@ -367,24 +316,20 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-connector-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>clustering.services</artifactId>
-            <version>0.4.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>equinoxSDK381</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.8.1.v20120830-144521</version>
         </dependency>
 
         <dependency>
@@ -408,19 +353,16 @@
         <dependency>
             <groupId>org.zeromq</groupId>
             <artifactId>jeromq</artifactId>
-            <version>0.3.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>xtend-lib-osgi</artifactId>
-            <version>2.4.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -478,23 +420,19 @@
         <dependency>
             <groupId>equinoxSDK381</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.8.1.v20120830-144521</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.2</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -504,13 +442,11 @@
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-manager</artifactId>
-            <version>0.2.3-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -521,13 +457,11 @@
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-management</artifactId>
-            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.thirdparty</groupId>
             <artifactId>antlr4-runtime-osgi-nohead</artifactId>
-            <version>4.0</version>
         </dependency>
     </dependencies>
 </project>

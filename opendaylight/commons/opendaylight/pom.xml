@@ -30,7 +30,7 @@
     <bundlescanner.api.version>0.4.2-SNAPSHOT</bundlescanner.api.version>
     <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
-    <checkstyle.version>2.10</checkstyle.version>
+    <checkstyle.version>2.12</checkstyle.version>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
@@ -49,7 +49,8 @@
     <commons.io.version>2.4</commons.io.version>
     <commons.jasper>7.0.32.v201211201952</commons.jasper>
     <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
-    <commons.lang.version>3.1</commons.lang.version>
+    <commons.lang.version>2.6</commons.lang.version>
+    <commons.lang3.version>3.1</commons.lang3.version>
     <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
     <commons.opendaylight.commons.httpclient>0.1.2-SNAPSHOT</commons.opendaylight.commons.httpclient>
@@ -88,6 +89,7 @@
     <felix.fileinstall.version>3.1.6</felix.fileinstall.version>
     <felix.webconsole.version>4.2.0</felix.webconsole.version>
     <filtervalve.version>1.4.2-SNAPSHOT</filtervalve.version>
+    <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
     <flows.web.version>0.4.2-SNAPSHOT</flows.web.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
@@ -114,6 +116,7 @@
     <java.version.target>1.7</java.version.target>
     <javassist.version>3.17.1-GA</javassist.version>
     <javax.annotation.version>1.2</javax.annotation.version>
+    <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <!-- Third party version -->
     <jersey-servlet.version>1.17</jersey-servlet.version>
     <jersey.version>1.17</jersey.version>
@@ -354,6 +357,11 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${commons.io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${commons.lang.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-net</groupId>
@@ -610,7 +618,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>${commons.lang.version}</version>
+        <version>${commons.lang3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -685,9 +693,19 @@
         <version>${xtend.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+        <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+        <version>2.4</version>
+      </dependency>
+      <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>${javassist.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>jaxrs-api</artifactId>
+        <version>3.0.4.Final</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.spec.javax.transaction</groupId>
@@ -888,6 +906,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>filter-valve</artifactId>
         <version>${filtervalve.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>flow-management-compatibility</artifactId>
+        <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1102,6 +1125,11 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>protocol_plugins.stub</artifactId>
         <version>${protocol_plugins.stub.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>remoterpc-routingtable.implementation</artifactId>
+        <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1431,6 +1459,37 @@
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-topology</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster-consumer</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>sample-toaster-provider</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.tests</groupId>
+        <artifactId>sal-remoterpc-connector-test-consumer</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.tests</groupId>
+        <artifactId>sal-remoterpc-connector-test-provider</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>
         <version>${jersey-servlet.version}</version>
@@ -1600,6 +1659,16 @@
         <version>${yang-ext.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+        <artifactId>antlr4-runtime-osgi-nohead</artifactId>
+        <version>4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+        <artifactId>xtend-lib-osgi</artifactId>
+        <version>${xtend.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.openexi</groupId>
         <artifactId>nagasena</artifactId>
         <version>${exi.nagasena.version}</version>
@@ -1632,6 +1701,11 @@
         <version>1.0.0</version>
       </dependency>
       <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.9.9-RC1</version>
+      </dependency>
+      <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
         <version>${scala.version}.1</version>
@@ -1651,6 +1725,11 @@
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
         <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
