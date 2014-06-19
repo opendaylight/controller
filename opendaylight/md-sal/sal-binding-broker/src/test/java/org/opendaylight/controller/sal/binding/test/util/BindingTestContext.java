@@ -184,7 +184,7 @@ public class BindingTestContext implements AutoCloseable {
         baBrokerImpl.getMountManager().setDataCommitExecutor(executor);
         baBrokerImpl.getMountManager().setNotificationExecutor(executor);
         baBrokerImpl.setRpcBroker(new RpcProviderRegistryImpl("test"));
-        baBrokerImpl.setDataBroker(baData);
+        baBrokerImpl.setLegacyDataBroker(baData);
         baBrokerImpl.setNotificationBroker(baNotifyImpl);
         baBrokerImpl.start();
     }

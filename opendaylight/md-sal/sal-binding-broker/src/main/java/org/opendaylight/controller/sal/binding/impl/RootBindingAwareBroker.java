@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
+import static com.google.common.base.Preconditions.checkState;
+
+import org.opendaylight.controller.md.sal.binding.api.BindingDataBroker;
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.md.sal.binding.util.BindingContextUtils;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -32,13 +34,13 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.collect.ImmutableClassToInstanceMap;
 
 public class RootBindingAwareBroker implements //
         Mutable, //
         Identifiable<String>, //
-        BindingAwareBroker, AutoCloseable,
-        RpcProviderRegistry {
+        BindingAwareBroker, AutoCloseable, RpcProviderRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(RootBindingAwareBroker.class);
 
@@ -50,7 +52,9 @@ public class RootBindingAwareBroker implements //
 
     private NotificationProviderService notificationBroker;
 
-    private DataProviderService dataBroker;
+    private DataProviderService legacyDataBroker;
+
+    private BindingDataBroker dataBroker;
 
     private MountPointManagerImpl mountManager;
 
@@ -58,7 +62,7 @@ public class RootBindingAwareBroker implements //
         return mountManager;
     }
 
-    public void setMountManager(MountPointManagerImpl mountManager) {
+    public void setMountManager(final MountPointManagerImpl mountManager) {
         this.mountManager = mountManager;
     }
 
@@ -66,11 +70,12 @@ public class RootBindingAwareBroker implements //
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedProviderServices;
 
-    public RootBindingAwareBroker(String instanceName) {
+    public RootBindingAwareBroker(final String instanceName) {
         this.identifier = instanceName;
         mountManager = new MountPointManagerImpl();
     }
 
+    @Override
     public String getIdentifier() {
         return identifier;
     }
@@ -80,7 +85,7 @@ public class RootBindingAwareBroker implements //
     }
 
     public DataProviderService getDataBroker() {
-        return this.dataBroker;
+        return this.legacyDataBroker;
     }
 
     public NotificationProviderService getNotificationBroker() {
@@ -95,16 +100,16 @@ public class RootBindingAwareBroker implements //
         return rpcBroker;
     }
 
-    public void setRpcBroker(RpcProviderRegistry rpcBroker) {
+    public void setRpcBroker(final RpcProviderRegistry rpcBroker) {
         this.rpcBroker = rpcBroker;
     }
 
-    public void setNotificationBroker(NotificationProviderService notificationBroker) {
+    public void setNotificationBroker(final NotificationProviderService notificationBroker) {
         this.notificationBroker = notificationBroker;
     }
 
-    public void setDataBroker(DataProviderService dataBroker) {
-        this.dataBroker = dataBroker;
+    public void setLegacyDataBroker(final DataProviderService dataBroker) {
+        this.legacyDataBroker = dataBroker;
     }
 
     public void start() {
@@ -113,29 +118,30 @@ public class RootBindingAwareBroker implements //
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
 
+        ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
 
-        supportedConsumerServices = ImmutableClassToInstanceMap.<BindingAwareService> builder()
-                .put(NotificationService.class, getRoot()) //
-                .put(DataBrokerService.class, getRoot()) //
-                .put(RpcConsumerRegistry.class, getRoot()) //
-                .put(MountService.class, mountManager).build();
-
+        consBuilder.put(NotificationService.class, getRoot());
+        consBuilder.put(DataBrokerService.class, getRoot());
+        consBuilder.put(RpcConsumerRegistry.class, getRoot());
+        if(dataBroker != null) {
+            consBuilder.put(BindingDataBroker.class, dataBroker);
+        }
+        consBuilder.put(MountService.class, mountManager).build();
+        supportedConsumerServices = consBuilder.build();
         supportedProviderServices = ImmutableClassToInstanceMap.<BindingAwareService> builder()
-                .putAll(supportedConsumerServices)
-                .put(NotificationProviderService.class, getRoot()) //
-                .put(DataProviderService.class, getRoot()) //
-                .put(RpcProviderRegistry.class, getRoot()) //
+                .putAll(supportedConsumerServices).put(NotificationProviderService.class, getRoot())
+                .put(DataProviderService.class, getRoot()).put(RpcProviderRegistry.class, getRoot())
                 .put(MountProviderService.class, mountManager).build();
     }
 
     @Override
-    public ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx) {
+    public ConsumerContext registerConsumer(final BindingAwareConsumer consumer, final BundleContext ctx) {
         checkState(supportedConsumerServices != null, "Broker is not initialized.");
         return BindingContextUtils.createConsumerContextAndInitialize(consumer, supportedConsumerServices);
     }
 
     @Override
-    public ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx) {
+    public ProviderContext registerProvider(final BindingAwareProvider provider, final BundleContext ctx) {
         checkState(supportedProviderServices != null, "Broker is not initialized.");
         return BindingContextUtils.createProviderContextAndInitialize(provider, supportedProviderServices);
     }
@@ -146,34 +152,38 @@ public class RootBindingAwareBroker implements //
     }
 
     @Override
-    public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type, T implementation)
-            throws IllegalStateException {
+    public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(final Class<T> type,
+            final T implementation) throws IllegalStateException {
         return getRoot().addRoutedRpcImplementation(type, implementation);
     }
 
     @Override
-    public <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
+    public <T extends RpcService> RpcRegistration<T> addRpcImplementation(final Class<T> type, final T implementation)
             throws IllegalStateException {
         return getRoot().addRpcImplementation(type, implementation);
     }
 
     @Override
-    public <T extends RpcService> T getRpcService(Class<T> module) {
+    public <T extends RpcService> T getRpcService(final Class<T> module) {
         return getRoot().getRpcService(module);
     }
+
     @Override
     public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            L arg0) {
+            final L arg0) {
         return getRoot().registerRouteChangeListener(arg0);
     }
-
 
     public class RootSalInstance extends
             AbstractBindingSalProviderInstance<DataProviderService, NotificationProviderService, RpcProviderRegistry> {
 
-        public RootSalInstance(RpcProviderRegistry rpcRegistry, NotificationProviderService notificationBroker,
-                DataProviderService dataBroker) {
+        public RootSalInstance(final RpcProviderRegistry rpcRegistry,
+                final NotificationProviderService notificationBroker, final DataProviderService dataBroker) {
             super(rpcRegistry, notificationBroker, dataBroker);
         }
+    }
+
+    public void setDataBroker(final BindingDataBroker asyncDataBroker) {
+        dataBroker = asyncDataBroker;
     }
 }

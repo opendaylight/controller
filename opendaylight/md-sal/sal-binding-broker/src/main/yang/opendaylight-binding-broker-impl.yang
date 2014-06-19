@@ -42,6 +42,12 @@ module opendaylight-sal-binding-broker-impl {
         config:provided-service sal:binding-data-consumer-broker;
         config:java-name-prefix ForwardedCompatibleDataBrokerImpl;
     }
+    
+    identity binding-forwarded-data-broker {
+        base config:module-type;
+        config:provided-service sal:binding-async-data-broker;
+        config:java-name-prefix BindingAsyncDataBrokerImpl;
+    }
 
     identity binding-rpc-broker {
         base config:module-type;
@@ -60,6 +66,26 @@ module opendaylight-sal-binding-broker-impl {
         base config:module-type;
         config:provided-service binding-dom-mapping-service;
         config:java-name-prefix RuntimeMapping;
+    }
+
+    grouping dom-forwarding-component {
+        container dom-async-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+        container binding-mapping-service {
+            uses config:service-ref {
+                refine type {
+                    mandatory true;
+                    config:required-identity binding-dom-mapping-service;
+                }
+            }
+        }
     }
 
     augment "/config:modules/config:module/config:configuration" {
@@ -123,22 +149,15 @@ module opendaylight-sal-binding-broker-impl {
         case binding-data-compatible-broker {
             when "/config:modules/config:module/config:type = 'binding-data-compatible-broker'";
 
-            container dom-async-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity dom:dom-broker-osgi-registry;
-                    }
-                }
-            }
-
-            container binding-mapping-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity binding-dom-mapping-service;
-                    }
-                }
+            uses dom-forwarding-component;
+        }
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-forwarded-data-broker {
+            when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
+            container binding-forwarded-data-broker {
+                uses dom-forwarding-component;
             }
         }
     }
