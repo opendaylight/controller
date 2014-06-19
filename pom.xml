@@ -167,6 +167,7 @@
       </activation>
       <modules>
         <module>opendaylight/northbound/java-client</module>
+        <module>opendaylight/northbound/swagger-ui</module>
       </modules>
     </profile>
   </profiles>
