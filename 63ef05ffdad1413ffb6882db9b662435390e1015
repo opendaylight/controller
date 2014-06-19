@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e1002b03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-19T00:26:10Z",
+      "side": 1,
+      "message": "How do I do that? :)",
+      "parentUuid": "fa82b9bf_8e5aae4e",
+      "revId": "63ef05ffdad1413ffb6882db9b662435390e1015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6e5f2a42",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-18T23:49:37Z",
       "side": 1,
       "message": "Small improvement ? No hardcoded version...",
+      "revId": "63ef05ffdad1413ffb6882db9b662435390e1015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_01042f13",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-19T00:26:10Z",
+      "side": 1,
+      "message": "This is fixed in a subsequent commit. Is that ok with you?",
+      "parentUuid": "fa82b9bf_6e5f2a42",
       "revId": "63ef05ffdad1413ffb6882db9b662435390e1015",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
