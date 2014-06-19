@@ -21,37 +21,30 @@
     <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>remoterpc-routingtable.implementation</artifactId>
-        <version>0.4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
     </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal.implementation</artifactId>
-          <version>0.4.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>containermanager</artifactId>
-          <version>0.5.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>containermanager.it.implementation</artifactId>
-          <version>0.5.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>clustering.stub</artifactId>
-          <version>0.4.0-SNAPSHOT</version>
       </dependency>
         <dependency>
       <groupId>junit</groupId>
@@ -60,11 +53,6 @@
     <dependency>
        <groupId>org.ops4j.pax.exam</groupId>
        <artifactId>pax-exam-container-native</artifactId>
-       <scope>test</scope>
-     </dependency>
-     <dependency>
-       <groupId>org.ops4j.pax.exam</groupId>
-       <artifactId>pax-exam-junit4</artifactId>
        <scope>test</scope>
      </dependency>
      <dependency>
@@ -104,7 +92,6 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal</artifactId>
-          <version>0.5.1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
@@ -117,12 +104,10 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-connector-api</artifactId>
-          <version>1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common-util</artifactId>
-          <version>1.0-SNAPSHOT</version>
       </dependency>
 
       <dependency>
@@ -132,22 +117,10 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-common-api</artifactId>
-          <version>1.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-common-util</artifactId>
-          <version>1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-broker-impl</artifactId>
-          <version>1.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-binding-broker-impl</artifactId>
-          <version>1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.exam</groupId>
@@ -171,44 +144,36 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-manager</artifactId>
-          <version>0.2.3-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>equinoxSDK381</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-          <version>3.8.1.v20120830-144521</version>
           <scope>test</scope>
       </dependency>
       <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>log4j-over-slf4j</artifactId>
-          <version>1.7.2</version>
       </dependency>
       <dependency>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-core</artifactId>
-          <version>1.0.9</version>
       </dependency>
       <dependency>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
-          <version>1.0.9</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.yangtools.thirdparty</groupId>
           <artifactId>antlr4-runtime-osgi-nohead</artifactId>
-          <version>4.0</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.yangtools.thirdparty</groupId>
           <artifactId>xtend-lib-osgi</artifactId>
-          <version>2.4.3</version>
       </dependency>
 
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>clustering.services</artifactId>
-          <version>0.4.1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>junit</groupId>
@@ -219,22 +184,16 @@
       <dependency>
           <groupId>equinoxSDK381</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-          <version>3.8.1.v20120830-144521</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.exam</groupId>
           <artifactId>pax-exam-junit4</artifactId>
-          <version>3.0.0</version>
-      </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam-junit4</artifactId>
-          <version>3.0.0</version>
+          <version>${exam.version}</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.exam</groupId>
           <artifactId>pax-exam</artifactId>
-          <version>3.0.0</version>
+          <version>${exam.version}</version>
       </dependency>
   </dependencies>
   <properties>

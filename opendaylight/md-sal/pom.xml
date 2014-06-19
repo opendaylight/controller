@@ -88,7 +88,7 @@
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
+          <version>${lifecycle.mapping.version}</version>
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
@@ -163,7 +163,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>${findbugs.maven.plugin.version}</version>
         <configuration>
           <effort>Max</effort>
           <threshold>Low</threshold>
@@ -173,7 +173,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
-        <version>2.0-beta-2</version>
+        <version>${jdepend.maven.plugin.version}</version>
       </plugin>
     </plugins>
   </reporting>
