@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4e175ff",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-19T11:43:22Z",
+      "side": 1,
+      "message": "This bulleted list was added twice",
+      "revId": "ba0ab46887c62b2339823cc03c24ba3b17060383",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24f2a1d2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-19T11:43:22Z",
+      "side": 1,
+      "message": "was {@DataChangeListener} intended to be a link?",
+      "revId": "ba0ab46887c62b2339823cc03c24ba3b17060383",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_04bf5dd1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadWriteTransaction.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-19T11:43:22Z",
+      "side": 1,
+      "message": "I think this is wrong, or I am missing something. tx2 was set to B above, so we would not see the optional containing A. We would see the optional container B, since it is isolated from tx1 (which was set to C)",
+      "revId": "ba0ab46887c62b2339823cc03c24ba3b17060383",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
