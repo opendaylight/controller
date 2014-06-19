@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e2b4694",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-19T00:06:45Z",
+      "side": 1,
+      "message": "?? What is this actor doing? Place holder for extended versions?",
+      "revId": "d3d2323ad9ad332d71dc6b956e4a3d3daa525902",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee19fa88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-19T00:06:45Z",
+      "side": 1,
+      "message": "Looks like it only tests that actor is created and sends it a CreateTransactionChain message? am I missing a test case?",
+      "revId": "d3d2323ad9ad332d71dc6b956e4a3d3daa525902",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
