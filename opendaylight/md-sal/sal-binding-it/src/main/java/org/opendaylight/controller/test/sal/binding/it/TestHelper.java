@@ -119,7 +119,7 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
 
-
+                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), // /
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 

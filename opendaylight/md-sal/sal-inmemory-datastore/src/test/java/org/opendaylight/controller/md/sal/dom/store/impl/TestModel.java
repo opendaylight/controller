@@ -20,7 +20,7 @@ import java.util.Set;
 public class TestModel {
 
     public static final QName TEST_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13",
-            "test");
+        "test");
     public static final QName OUTER_LIST_QNAME = QName.create(TEST_QNAME, "outer-list");
     public static final QName INNER_LIST_QNAME = QName.create(TEST_QNAME, "inner-list");
     public static final QName OUTER_CHOICE_QNAME = QName.create(TEST_QNAME, "outer-choice");
@@ -31,8 +31,8 @@ public class TestModel {
 
     public static final InstanceIdentifier TEST_PATH = InstanceIdentifier.of(TEST_QNAME);
     public static final InstanceIdentifier OUTER_LIST_PATH = InstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
-    public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
-    public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
+    public static final QName TWO_QNAME = QName.create(TEST_QNAME, "two");
+    public static final QName THREE_QNAME = QName.create(TEST_QNAME, "three");
 
 
     public static final InputStream getDatastoreTestInputStream() {
