@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fa3bf499",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-20T14:21:55Z",
+      "side": 1,
+      "message": "Can you explain why you removed the specific error information here?",
+      "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9a42e80e",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-20T14:21:55Z",
+      "side": 1,
+      "message": "Can you explain why you removed the specific error information here?",
+      "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
