@@ -31,14 +31,14 @@ public final class BindingBrokerImplModule extends
 
     private BundleContext bundleContext;
 
-    public BindingBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public BindingBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            BindingBrokerImplModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final BindingBrokerImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -63,23 +63,24 @@ public final class BindingBrokerImplModule extends
     private RootBindingAwareBroker createStandaloneBroker() {
         RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
 
-        broker.setDataBroker(getDataBrokerDependency());
+        broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
+        // FIXME: Also set Async Data Broker
         return broker;
     }
 
     private RootBindingAwareBroker createForwardedBroker() {
         DomForwardedBindingBrokerImpl broker = new DomForwardedBindingBrokerImpl(getIdentifier().getInstanceName());
 
-        broker.setDataBroker(getDataBrokerDependency());
+        broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
 
         broker.getMountManager().setDataCommitExecutor(SingletonHolder.getDefaultCommitExecutor());
         broker.getMountManager().setNotificationExecutor(SingletonHolder.getDefaultNotificationExecutor());
 
-
+        // FIXME: Also set Async Data Broker
         DomForwardingUtils.reuseForwardingFrom(broker, broker.getDataBroker());
         broker.startForwarding();
         return broker;
@@ -89,7 +90,7 @@ public final class BindingBrokerImplModule extends
         return bundleContext;
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 }
