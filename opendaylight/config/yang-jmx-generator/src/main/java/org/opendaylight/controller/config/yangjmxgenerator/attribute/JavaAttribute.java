@@ -185,7 +185,9 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
             OpenType<?> innerCompositeType;
 
             if(isDerivedType(innerTypeBaseType, innerType)) {
-                innerCompositeType = getCompositeType(innerTypeBaseType, baseInnerTypeDefinition);
+                innerCompositeType = baseInnerTypeDefinition instanceof UnionTypeDefinition ?
+                        getCompositeTypeForUnion(baseInnerTypeDefinition) :
+                        getCompositeType(innerTypeBaseType, baseInnerTypeDefinition);
             } else {
                 innerCompositeType = SimpleTypeResolver.getSimpleType(innerType);
             }
