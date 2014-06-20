@@ -16,6 +16,24 @@
       "revId": "287688202f1166cfecf2149257de70ec627922fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5fb1b28d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ListenerRegistration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-20T12:18:03Z",
+      "side": 1,
+      "message": "I believe this is not config-subsystem related, but InstanceIdentifier is transfer object,\nwhich holds path to data nodes (and is one of data structures used and stored by this data store).",
+      "parentUuid": "fa82b9bf_ee325a0f",
+      "revId": "287688202f1166cfecf2149257de70ec627922fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
