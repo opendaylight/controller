@@ -20,8 +20,8 @@
     <appauth.version>0.4.2-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.0.1-SNAPSHOT</archetype-app-northbound>
     <aries.util.version>1.1.0</aries.util.version>
-    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <!-- Controller Modules Versions -->
+    <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <asm.version>4.1</asm.version>
     <!-- Plugin Versions -->
