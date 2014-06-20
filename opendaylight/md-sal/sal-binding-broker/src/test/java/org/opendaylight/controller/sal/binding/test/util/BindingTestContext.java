@@ -48,7 +48,6 @@ import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
 import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -57,7 +56,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -70,7 +68,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-public class BindingTestContext implements AutoCloseable, SchemaContextProvider {
+public class BindingTestContext implements AutoCloseable {
 
     public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
             .builder().toInstance();
@@ -101,22 +99,19 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
 
     private MountPointManagerImpl biMountImpl;
 
-    private SchemaContext schemaContext;
+
 
     private ImmutableMap<LogicalDatastoreType, DOMStore> newDatastores;
 
     private BackwardsCompatibleDataBroker biCompatibleBroker;
 
-    private final List<SchemaContextListener> schemaListeners = new ArrayList<>();
-
     private DataProviderService baData;
 
     private DOMDataBroker newDOMDataBroker;
 
-    @Override
-    public SchemaContext getSchemaContext() {
-        return schemaContext;
-    }
+    private final MockSchemaService mockSchemaService = new MockSchemaService();
+
+
 
     public DOMDataBroker getDomAsyncDataBroker() {
         return newDOMDataBroker;
@@ -128,6 +123,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
         this.startWithSchema = startWithSchema;
     }
 
+    @Deprecated
     public void startDomDataStore() {
         checkState(dataStore == null, "DataStore already started.");
         checkState(biDataImpl != null, "Dom Data Broker not present");
@@ -140,7 +136,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
         } else {
             dataStore = schemaAwareDataStore;
         }
-
+        mockSchemaService.registerSchemaServiceListener(schemaAwareDataStore);
         biDataImpl.registerConfigurationReader(TREE_ROOT, dataStore);
         biDataImpl.registerOperationalReader(TREE_ROOT, dataStore);
         biDataImpl.registerCommitHandler(TREE_ROOT, dataStore);
@@ -166,9 +162,9 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
 
         biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker);
 
-        schemaListeners.add(configStore);
-        schemaListeners.add(operStore);
-        schemaListeners.add(biCompatibleBroker);
+        mockSchemaService.registerSchemaServiceListener(configStore);
+        mockSchemaService.registerSchemaServiceListener(operStore);
+        mockSchemaService.registerSchemaServiceListener(biCompatibleBroker);
         biDataLegacyBroker = biCompatibleBroker;
     }
 
@@ -268,20 +264,11 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     public void startBindingToDomMappingService() {
         checkState(classPool != null, "ClassPool needs to be present");
         mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
+        mockSchemaService.registerSchemaServiceListener(mappingServiceImpl);
     }
 
     public void updateYangSchema(final String[] files) {
-        schemaContext = getContext(files);
-
-        if (schemaAwareDataStore != null) {
-            schemaAwareDataStore.onGlobalContextUpdated(schemaContext);
-        }
-        if (mappingServiceImpl != null) {
-            mappingServiceImpl.onGlobalContextUpdated(schemaContext);
-        }
-        for(SchemaContextListener listener : schemaListeners) {
-            listener.onGlobalContextUpdated(schemaContext);
-        }
+        mockSchemaService.changeSchema(getContext(files));
     }
 
     public static String[] getAllYangFilesOnClasspath() {
@@ -340,8 +327,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     }
 
     public void startNewBindingDataBroker() {
-        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, mappingServiceImpl, executor);
-        schemaListeners.add(forwarded);
+        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, mappingServiceImpl,mockSchemaService, executor);
         baData = forwarded;
     }
 
@@ -353,7 +339,7 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     private void startDomBroker() {
         checkState(executor != null);
         biBrokerImpl = new BrokerImpl();
-        biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", this));
+        biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", mockSchemaService));
 
     }
 
@@ -429,4 +415,6 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     public MountProvisionService getDomMountProviderService() {
         return biMountImpl;
     }
+
+
 }
