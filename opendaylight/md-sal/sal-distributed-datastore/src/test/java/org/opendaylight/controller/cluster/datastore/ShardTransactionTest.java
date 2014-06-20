@@ -18,12 +18,18 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
+import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ShardTransactionTest extends AbstractActorTest {
   private static ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
@@ -69,6 +75,31 @@ public class ShardTransactionTest extends AbstractActorTest {
     }};
   }
 
+  private void assertModification(final ActorRef subject, final Class<? extends Modification> modificationType){
+    new JavaTestKit(getSystem()) {{
+      new Within(duration("1 seconds")) {
+        protected void run() {
+          subject.tell(new ShardTransaction.GetCompositedModification(), getRef());
+
+          final CompositeModification compositeModification = new ExpectMsg<CompositeModification>("match hint") {
+            // do not put code outside this method, will run afterwards
+            protected CompositeModification match(Object in) {
+              if (in instanceof ShardTransaction.GetCompositeModificationReply) {
+                return ((ShardTransaction.GetCompositeModificationReply) in).getModification();
+              } else {
+                throw noMatch();
+              }
+            }
+          }.get(); // this extracts the received message
+
+          assertTrue(compositeModification.getModifications().size() == 1);
+          assertEquals(modificationType, compositeModification.getModifications().get(0).getClass());
+
+        }
+      };
+    }};
+  }
+
   @Test
   public void testOnReceiveWriteData() throws Exception {
     new JavaTestKit(getSystem()) {{
@@ -93,6 +124,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
           assertEquals("match", out);
 
+          assertModification(subject, WriteModification.class);
           expectNoMsg();
         }
 
@@ -124,6 +156,8 @@ public class ShardTransactionTest extends AbstractActorTest {
           }.get(); // this extracts the received message
 
           assertEquals("match", out);
+
+          assertModification(subject, MergeModification.class);
 
           expectNoMsg();
         }
@@ -157,6 +191,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
           assertEquals("match", out);
 
+          assertModification(subject, DeleteModification.class);
           expectNoMsg();
         }
 
