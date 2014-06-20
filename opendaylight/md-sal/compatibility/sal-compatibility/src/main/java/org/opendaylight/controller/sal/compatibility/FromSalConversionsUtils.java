@@ -205,6 +205,7 @@ public class FromSalConversionsUtils {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
             vlanIDBuilder.setVlanId(new VlanId((NetUtils
                     .getUnsignedShort((short) vlan.getValue()))));
+            vlanIDBuilder.setVlanIdPresent(true);
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
 
