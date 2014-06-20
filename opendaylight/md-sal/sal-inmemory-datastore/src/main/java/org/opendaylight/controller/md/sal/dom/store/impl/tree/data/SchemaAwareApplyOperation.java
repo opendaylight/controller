@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import java.util.List;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ConflictingModificationAppliedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.IncorrectDataStructureException;
@@ -21,6 +19,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNod
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.OrderedLeafSetModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.OrderedMapModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.UnorderedLeafSetModificationStrategy;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.NormalizedNodeContainerModificationStrategy.UnorderedMapModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ValueNodeModificationStrategy.LeafModificationStrategy;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.spi.TreeNodeFactory;
@@ -43,8 +42,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.List;
 
 abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
     private static final Logger LOG = LoggerFactory.getLogger(SchemaAwareApplyOperation.class);
@@ -100,7 +98,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
             return new OrderedMapModificationStrategy(schemaNode);
         }
 
-        return new NormalizedNodeContainerModificationStrategy.UnorderedMapModificationStrategy(schemaNode);
+        return new UnorderedMapModificationStrategy(schemaNode);
     }
 
     private static SchemaAwareApplyOperation fromLeafListSchemaNode(final LeafListSchemaNode schemaNode) {
@@ -120,7 +118,7 @@ abstract class SchemaAwareApplyOperation implements ModificationApplyOperation {
 
     protected final ModificationApplyOperation resolveChildOperation(final PathArgument child) {
         Optional<ModificationApplyOperation> potential = getChild(child);
-        checkArgument(potential.isPresent(), "Operation for child %s is not defined.", child);
+        Preconditions.checkArgument(potential.isPresent(), "Operation for child %s is not defined.", child);
         return potential.get();
     }
 

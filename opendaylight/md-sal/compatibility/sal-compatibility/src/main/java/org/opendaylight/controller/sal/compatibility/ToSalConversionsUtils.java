@@ -128,13 +128,11 @@ public class ToSalConversionsUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ToSalConversionsUtils.class);
 
     private ToSalConversionsUtils() {
-
     }
 
     public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source, Node node) {
         final Flow target = new Flow();
         genericFlowToAdFlow(source, target);
-        
         target.setMatch(toMatch(source.getMatch()));
 
         List<Action> actions = getAction(source);
@@ -144,7 +142,6 @@ public class ToSalConversionsUtils {
 
         return target;
     }
-    
     /**
      * @param source notification, missing instructions
      * @param node corresponding node where the flow change occured
@@ -181,9 +178,7 @@ public class ToSalConversionsUtils {
         }
         target.setId(source.getCookie().getValue().longValue());
     }
-    
-    public static List<Action> getAction(
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
+    public static List<Action> getAction(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
         if (source.getInstructions() != null) {
             for (Instruction instruction : source.getInstructions().getInstruction()) {
                 if (instruction.getInstruction() instanceof ApplyActionsCase) {

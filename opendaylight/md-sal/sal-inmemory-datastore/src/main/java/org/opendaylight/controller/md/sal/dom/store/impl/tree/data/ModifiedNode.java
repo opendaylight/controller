@@ -111,14 +111,14 @@ final class ModifiedNode implements StoreTreeNode<ModifiedNode>, Identifiable<Pa
 
     /**
      *
-     * Returns child modification if child was modified, creates {@link ModifiedNode}
+     * Returns child modification if child was modified, creates {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ModifiedNode}
      * for child otherwise.
      *
      * If this node's {@link ModificationType} is {@link ModificationType#UNMODIFIED}
      * changes modification type to {@link ModificationType#SUBTREE_MODIFIED}
      *
      * @param child
-     * @return {@link ModifiedNode} for specified child, with {@link #getOriginal()}
+     * @return {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.data.ModifiedNode} for specified child, with {@link #getOriginal()}
      *         containing child metadata if child was present in original data.
      */
     public ModifiedNode modifyChild(final PathArgument child) {

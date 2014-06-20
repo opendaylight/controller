@@ -7,19 +7,17 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import java.util.Hashtable;
-import java.util.concurrent.Executors;
-
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.osgi.framework.BundleContext;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.osgi.framework.BundleContext;
+
+import java.util.Hashtable;
+import java.util.concurrent.Executors;
 
 /**
 *
@@ -49,18 +47,16 @@ public final class DomInmemoryDataBrokerModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);
+        DOMStore operStore =  (DOMStore)getOperationalDataStoreDependency();
+        DOMStore configStore =(DOMStore)getConfigDataStoreDependency();
         ImmutableMap<LogicalDatastoreType, DOMStore> datastores = ImmutableMap
-                .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)
-                .put(LogicalDatastoreType.CONFIGURATION, configStore).build();
+                .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, getOperationalDataStoreDependency())
+                .put(LogicalDatastoreType.CONFIGURATION, getConfigDataStoreDependency()).build();
 
         DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
 
         getBundleContext().registerService(DOMDataBroker.class, newDataBroker, new Hashtable<String, String>());
 
-        getSchemaServiceDependency().registerSchemaServiceListener(operStore);
-        getSchemaServiceDependency().registerSchemaServiceListener(configStore);
 
         return newDataBroker;
     }
