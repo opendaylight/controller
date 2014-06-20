@@ -9,4 +9,39 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 public class PrimaryFound {
+  private final String primaryPath;
+
+  public PrimaryFound(String primaryPath) {
+    this.primaryPath = primaryPath;
+  }
+
+  public String getPrimaryPath() {
+    return primaryPath;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    PrimaryFound that = (PrimaryFound) o;
+
+    if (!primaryPath.equals(that.primaryPath)) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return primaryPath.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "PrimaryFound{" +
+            "primaryPath='" + primaryPath + '\'' +
+            '}';
+  }
+
+
 }

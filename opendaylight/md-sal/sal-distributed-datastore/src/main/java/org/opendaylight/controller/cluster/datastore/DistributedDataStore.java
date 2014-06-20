@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -23,29 +25,34 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  */
 public class DistributedDataStore implements DOMStore {
+  private final ActorRef shardManager;
 
-    @Override
-    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(InstanceIdentifier path, L listener, AsyncDataBroker.DataChangeScope scope) {
-        return new ListenerRegistrationProxy();
-    }
+  public DistributedDataStore(ActorSystem actorSystem, String type) {
+    shardManager = actorSystem.actorOf(ShardManager.props(type));
+  }
 
-    @Override
-    public DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy();
-    }
+  @Override
+  public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(InstanceIdentifier path, L listener, AsyncDataBroker.DataChangeScope scope) {
+    return new ListenerRegistrationProxy();
+  }
 
-    @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy();
-    }
+  @Override
+  public DOMStoreTransactionChain createTransactionChain() {
+    return new TransactionChainProxy();
+  }
 
-    @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new TransactionProxy();
-    }
+  @Override
+  public DOMStoreReadTransaction newReadOnlyTransaction() {
+    return new TransactionProxy();
+  }
 
-    @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new TransactionProxy();
-    }
+  @Override
+  public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+    return new TransactionProxy();
+  }
+
+  @Override
+  public DOMStoreReadWriteTransaction newReadWriteTransaction() {
+    return new TransactionProxy();
+  }
 }
