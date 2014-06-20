@@ -9,6 +9,7 @@ module odl-sal-netconf-connector-cfg {
     import opendaylight-md-sal-dom {prefix dom;}
     import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
     import odl-netconf-cfg { prefix cfg-net; revision-date 2014-04-08; }
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
 
     description
         "Service definition for Binding Aware MD-SAL.";
@@ -38,11 +39,11 @@ module odl-sal-netconf-connector-cfg {
             when "/config:modules/config:module/config:type = 'sal-netconf-connector'";
 
             leaf address {
-                type string;
+                type inet:host;
             }
 
             leaf port {
-                type uint32;
+                type inet:port-number;
             }
 
             leaf tcp-only {
@@ -69,33 +70,8 @@ module odl-sal-netconf-connector-cfg {
             container binding-registry {
                 uses config:service-ref {
                     refine type {
-                        // FIXME BUG-944 make mandatory (remove backwards compatibility)
-                        mandatory false;
+                        mandatory true;
                         config:required-identity md-sal-binding:binding-broker-osgi-registry;
-                    }
-                }
-            }
-
-            // FIXME BUG-944 remove backwards compatibility
-            // Deprecated, replaced by client dispatcher.
-            // This dependency will be removed in near future and all configurations of netconf-connector need to be changed to use dispatcher dependency.
-            container boss-thread-group {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity netty:netty-threadgroup;
-                    }
-                }
-            }
-
-            // FIXME BUG-944 remove backwards compatibility
-            // Deprecated, replaced by client dispatcher.
-            // This dependency will be removed in near future and all configurations of netconf-connector need to be changed to use dispatcher dependency.
-            container worker-thread-group {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity netty:netty-threadgroup;
                     }
                 }
             }
@@ -103,6 +79,7 @@ module odl-sal-netconf-connector-cfg {
             container event-executor {
                 uses config:service-ref {
                     refine type {
+                        mandatory true;
                         config:required-identity netty:netty-event-executor;
                     }
                 }
@@ -111,8 +88,7 @@ module odl-sal-netconf-connector-cfg {
             container processing-executor {
                 uses config:service-ref {
                     refine type {
-                        // FIXME BUG-944 make mandatory (remove backwards compatibility)
-                        mandatory false;
+                        mandatory true;
                         config:required-identity th:threadpool;
                     }
                 }
@@ -120,7 +96,6 @@ module odl-sal-netconf-connector-cfg {
                 description "Makes up for flaws in netty threading design";
             }
 
-            // Replaces thread group dependencies
             container client-dispatcher {
                 uses config:service-ref {
                     refine type {
