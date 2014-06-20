@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import java.util.Hashtable;
-import java.util.concurrent.Executors;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
@@ -17,9 +17,8 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.osgi.framework.BundleContext;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.Hashtable;
+import java.util.concurrent.Executors;
 
 /**
 *
@@ -49,8 +48,22 @@ public final class DomInmemoryDataBrokerModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);
+        //Initializing Operational DOM DataStore defaulting to InMemoryDOMDataStore if one is not configured
+        DOMStore operStore =  getOperationalDataStoreDependency();
+        if(operStore == null){
+           //we will default to InMemoryDOMDataStore creation
+          operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
+          //here we will register the SchemaContext listener
+          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)operStore);
+        }
+
+        DOMStore configStore = getConfigDataStoreDependency();
+        if(configStore == null){
+           //we will default to InMemoryDOMDataStore creation
+           configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);
+          //here we will register the SchemaContext listener
+          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)configStore);
+        }
         ImmutableMap<LogicalDatastoreType, DOMStore> datastores = ImmutableMap
                 .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore).build();
@@ -59,8 +72,6 @@ public final class DomInmemoryDataBrokerModule extends
 
         getBundleContext().registerService(DOMDataBroker.class, newDataBroker, new Hashtable<String, String>());
 
-        getSchemaServiceDependency().registerSchemaServiceListener(operStore);
-        getSchemaServiceDependency().registerSchemaServiceListener(configStore);
 
         return newDataBroker;
     }
