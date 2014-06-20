@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_1a0498be",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-20T14:57:40Z",
+      "side": 1,
+      "message": "Can you clarify this comment further? Or better yet, fix it so it does the proper thing. Ideally,The toaster code is intended to be a learning example and should illustrate the right way to do things and thus I think, ideally,  should be void of FIXME comments (they don\u0027t look good).",
+      "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fa3bf499",
         "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
         "patchSetId": 1
@@ -19,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fa09b4dd",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-20T14:57:40Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9a42e80e",
         "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
         "patchSetId": 1
@@ -30,6 +64,23 @@
       "writtenOn": "2014-06-20T14:21:55Z",
       "side": 1,
       "message": "Can you explain why you removed the specific error information here?",
+      "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9a10a802",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-20T14:57:40Z",
+      "side": 1,
+      "message": "Ditto",
       "revId": "0fda47ceb8226d40768585136c5870028bd0b46b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
