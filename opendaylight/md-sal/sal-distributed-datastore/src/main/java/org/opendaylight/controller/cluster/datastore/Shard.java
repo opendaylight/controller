@@ -9,8 +9,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import akka.japi.Creator;
 import akka.persistence.UntypedProcessor;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -28,26 +30,43 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import java.util.concurrent.Executors;
 
 /**
- * A Shard represents a portion of the logical data tree
- * <p/>
+ * A Shard represents a portion of the logical data tree <br/>
+ * <p>
  * Our Shard uses InMemoryDataStore as it's internal representation and delegates all requests it
- *
+ * </p>
  */
 public class Shard extends UntypedProcessor {
 
-  ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+  public static final String DEFAULT_NAME = "default";
 
-  private final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor);
+  private final ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
-  LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+  private final InMemoryDOMDataStore store;
+
+  private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+  private Shard(String name){
+    store = new InMemoryDOMDataStore(name, storeExecutor);
+  }
+
+  public static Props props(final String name) {
+    return Props.create(new Creator<Shard>() {
+
+      @Override
+      public Shard create() throws Exception {
+        return new Shard(name);
+      }
+
+    });
+  }
 
   @Override
   public void onReceive(Object message) throws Exception {
     if (message instanceof CreateTransactionChain) {
       createTransactionChain();
-    } else if(message instanceof RegisterChangeListener){
+    } else if (message instanceof RegisterChangeListener) {
       registerChangeListener((RegisterChangeListener) message);
-    } else if(message instanceof UpdateSchemaContext){
+    } else if (message instanceof UpdateSchemaContext) {
       updateSchemaContext((UpdateSchemaContext) message);
     }
   }
