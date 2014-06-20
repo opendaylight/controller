@@ -25,7 +25,7 @@ import com.google.common.base.Throwables;
 /**
  * Implementation of Write transaction which is backed by
  * {@link DataTreeSnapshot} and executed according to
- * {@link TransactionReadyPrototype}.
+ * {@link org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype}.
  *
  */
 class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction implements DOMStoreWriteTransaction {
@@ -139,10 +139,10 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
 
     /**
      * Prototype implementation of
-     * {@link #ready(SnapshotBackedWriteTransaction)}
+     * {@link #ready(org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction)}
      *
      * This class is intended to be implemented by Transaction factories
-     * responsible for allocation of {@link SnapshotBackedWriteTransaction} and
+     * responsible for allocation of {@link org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction} and
      * providing underlying logic for applying implementation.
      *
      */

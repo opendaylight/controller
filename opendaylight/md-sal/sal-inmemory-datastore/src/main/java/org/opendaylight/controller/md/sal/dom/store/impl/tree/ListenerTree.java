@@ -173,7 +173,7 @@ public final class ListenerTree {
     /**
      * This is a single node within the listener tree. Note that the data returned from
      * and instance of this class is guaranteed to have any relevance or consistency
-     * only as long as the {@link Walker} instance through which it is reached remains
+     * only as long as the {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker} instance through which it is reached remains
      * unclosed.
      */
     public static final class Node implements StoreTreeNode<Node>, Identifiable<PathArgument> {

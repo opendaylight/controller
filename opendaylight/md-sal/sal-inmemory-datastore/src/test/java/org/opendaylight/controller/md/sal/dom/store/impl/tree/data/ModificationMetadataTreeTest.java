@@ -7,23 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.ID_QNAME;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.INNER_LIST_QNAME;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.NAME_QNAME;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.OUTER_LIST_PATH;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.OUTER_LIST_QNAME;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.TEST_PATH;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.TEST_QNAME;
-import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.VALUE_QNAME;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
-
+import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
@@ -36,12 +20,36 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifie
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+
+
+
+
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.OUTER_LIST_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.ID_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.INNER_LIST_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.NAME_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.TEST_PATH;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.TEST_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.VALUE_QNAME;
+import static org.opendaylight.controller.md.sal.dom.store.impl.TestModel.OUTER_LIST_PATH;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Optional;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
+
+
+
+
 
 /**
  *
