@@ -1,0 +1,22 @@
+module opendaylight-config-dom-datastore {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store";
+    prefix "config-dom-store-spi";
+
+	import config { prefix config; revision-date 2013-04-05; }
+
+	 description
+            "DOM Service Provider Interface definition for MD-SAL config store";
+
+     revision "2014-06-17" {
+             description
+                 "Initial revision";
+         }
+
+     identity config-dom-datastore {
+             base "config:service-type";
+             config:java-class  "org.opendaylight.controller.sal.core.spi.data.DOMStore";
+
+     }
+
+}
