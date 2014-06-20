@@ -8,6 +8,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import scala.concurrent.duration.Duration;
 
@@ -26,17 +27,13 @@ public class ShardManagerTest {
     }
 
     @Test
-    public void testOnReceiveFindPrimary() throws Exception {
+    public void testOnReceiveFindPrimaryForNonExistentShard() throws Exception {
 
         new JavaTestKit(system) {{
-            final Props props = Props.create(ShardManager.class);
-            final TestActorRef<ShardManager> subject = TestActorRef.create(system, props, "test");
+            final Props props = ShardManager.props("config");
+            final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
 
-            // can also use JavaTestKit “from the outside”
-            final JavaTestKit probe = new JavaTestKit(system);
-
-            // the run() method needs to finish within 3 seconds
-            new Within(duration("3 seconds")) {
+            new Within(duration("1 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindPrimary("inventory"), getRef());
@@ -49,4 +46,25 @@ public class ShardManagerTest {
             };
         }};
     }
+
+  @Test
+  public void testOnReceiveFindPrimaryForExistentShard() throws Exception {
+
+    new JavaTestKit(system) {{
+      final Props props = ShardManager.props("config");
+      final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
+
+      // the run() method needs to finish within 3 seconds
+      new Within(duration("1 seconds")) {
+        protected void run() {
+
+          subject.tell(new FindPrimary(Shard.DEFAULT_NAME), getRef());
+
+          expectMsgClass(PrimaryFound.class);
+
+          expectNoMsg();
+        }
+      };
+    }};
+  }
 }

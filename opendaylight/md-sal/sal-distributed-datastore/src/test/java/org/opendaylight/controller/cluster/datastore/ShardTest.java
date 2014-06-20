@@ -22,7 +22,7 @@ public class ShardTest extends AbstractActorTest{
   @Test
   public void testOnReceiveCreateTransactionChain() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = Props.create(Shard.class);
+      final Props props = Shard.props("config");
       final ActorRef subject = getSystem().actorOf(props, "testCreateTransactionChain");
 
       new Within(duration("1 seconds")) {
@@ -55,7 +55,7 @@ public class ShardTest extends AbstractActorTest{
   @Test
   public void testOnReceiveRegisterListener() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = Props.create(Shard.class);
+      final Props props = Shard.props("config");
       final ActorRef subject = getSystem().actorOf(props, "testRegisterChangeListener");
 
       new Within(duration("1 seconds")) {

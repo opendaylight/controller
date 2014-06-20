@@ -12,13 +12,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DistributedDataStoreTest {
+public class DistributedDataStoreTest extends AbstractActorTest{
 
     private DistributedDataStore distributedDataStore;
 
     @org.junit.Before
     public void setUp() throws Exception {
-        distributedDataStore = new DistributedDataStore();
+        distributedDataStore = new DistributedDataStore(getSystem(), "config");
     }
 
     @org.junit.After
