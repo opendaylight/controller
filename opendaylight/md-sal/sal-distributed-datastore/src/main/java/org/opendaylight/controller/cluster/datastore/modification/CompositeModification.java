@@ -8,9 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,17 +17,6 @@ import java.util.List;
  * is being replayed a DOMStoreWriteTransaction could be created and a CompositeModification could be applied to it.
  * </p>
  */
-public class CompositeModification implements Modification {
-  private final List<Modification> modifications = new ArrayList<>();
-
-  @Override
-  public void apply(DOMStoreWriteTransaction transaction) {
-    for(Modification modification : modifications){
-      modification.apply(transaction);
-    }
-  }
-
-  public void addModification(Modification modification){
-    modifications.add(modification);
-  }
+public interface CompositeModification extends Modification {
+  List<Modification> getModifications();
 }
