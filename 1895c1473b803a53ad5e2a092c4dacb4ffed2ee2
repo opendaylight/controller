@@ -16,6 +16,24 @@
       "revId": "1895c1473b803a53ad5e2a092c4dacb4ffed2ee2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ba86cc11",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/odl-datastore-test.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-20T17:01:40Z",
+      "side": 1,
+      "message": "Tony, I\u0027m not sure at this time how this test model will evolve and in general I feel test code (and this model) belongs in the module where it is consumed because then it gives the module writer complete freedom to change things without worrying about unintentionally breaking other peoples tests.",
+      "parentUuid": "fa82b9bf_df64e223",
+      "revId": "1895c1473b803a53ad5e2a092c4dacb4ffed2ee2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
