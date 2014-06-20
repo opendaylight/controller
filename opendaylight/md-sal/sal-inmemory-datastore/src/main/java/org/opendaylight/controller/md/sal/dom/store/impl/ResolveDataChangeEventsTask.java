@@ -94,7 +94,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      *
      * Dispatch between merge variant and reuse variant of notification task is
      * done in
-     * {@link #addNotificationTask(com.google.common.collect.ImmutableList.Builder, Node, Collection)}
+     * {@link #addNotificationTask(com.google.common.collect.ImmutableList.Builder, Node, java.util.Collection)}
      *
      * @return Collection of notification tasks.
      */
@@ -114,7 +114,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * {@link #addNotificationTaskByScope(com.google.common.collect.ImmutableList.Builder, Node, DOMImmutableDataChangeEvent)}
      * . Otherwise events are merged by scope and distributed between listeners
      * to particular scope. See
-     * {@link #addNotificationTasksAndMergeEvents(com.google.common.collect.ImmutableList.Builder, Node, Collection)}
+     * {@link #addNotificationTasksAndMergeEvents(com.google.common.collect.ImmutableList.Builder, Node, java.util.Collection)}
      * .
      *
      * @param taskListBuilder
