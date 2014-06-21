@@ -1,0 +1,58 @@
+module xsql-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:xsql:impl";
+    prefix "xsql-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+ 	import opendaylight-md-sal-dom {prefix sal;}
+ 	import opendaylight-md-sal-common {prefix common;}
+    
+    description
+        "xsql";
+
+    revision "2014-01-31" {
+        description
+            "Initial revision.";
+    }
+
+    identity xsql {
+        base "config:service-type";
+        config:java-class "org.opendaylight.xsql.XSQL";
+    }
+ 
+    identity xsql-impl {
+            base config:module-type;
+            config:provided-service xsql;
+            config:java-name-prefix XSQL;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.  
+    augment "/config:modules/config:module/config:configuration" {
+        case xsql-impl {
+            when "/config:modules/config:module/config:type = 'xsql-impl'";
+            
+            container async-data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:dom-async-data-broker;
+                    }
+                }
+            
+            }            
+            
+            container schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
+                }
+            
+            }
+                    
+        }
+    }
+}

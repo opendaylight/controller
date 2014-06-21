@@ -1,0 +1,25 @@
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:xsql="urn:opendaylight:params:xml:ns:yang:controller:config:xsql:impl">
+                        xsql:xsql-impl
+                    </type>
+                    <name>xsql-impl</name>
+                    <async-data-broker>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
+                        <name>inmemory-data-broker</name>
+                    </async-data-broker>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                </module>
+            </modules>
+        </data>
+    </configuration>
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:config:xsql:impl?module=xsql-impl&amp;revision=2014-01-31</capability>
+    </required-capabilities>
+</snapshot>
