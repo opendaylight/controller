@@ -39,7 +39,7 @@ public abstract class AbstractTest {
 
     @Inject
     @Filter(timeout=120*1000)
-    BindingAwareBroker broker;
+    protected BindingAwareBroker broker;
 
     @Inject
     BundleContext bundleContext;
