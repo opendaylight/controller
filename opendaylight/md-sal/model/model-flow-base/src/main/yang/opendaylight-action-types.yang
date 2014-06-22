@@ -341,7 +341,10 @@ module opendaylight-action-types {
             case sw-path-action-case {            
                 container sw-path-action {
                 }  
-             }  
+             } 
+
+             case experimenter-action-case {
+             }
          }
      }
 }
