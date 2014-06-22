@@ -6,9 +6,9 @@
     <artifactId>sal-parent</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
-  <artifactId>xsql</artifactId>
+  <artifactId>sal-dom-xsql</artifactId>
   <packaging>bundle</packaging>
-  <name>xsql</name>
+  <name>sal-dom-xsql</name>
   <description>XSQL language</description>
 
   <dependencies>
@@ -57,6 +57,36 @@
         <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <failsOnError>false</failsOnError>
+          <failOnViolation>false</failOnViolation>
+          <configLocation>controller/checkstyle.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <sourceDirectory>${project.basedir}</sourceDirectory>
+          <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
+          <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/,**\/xtend-gen\/</excludes>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
         <dependencies>
@@ -96,7 +126,7 @@
   </build>
   <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:XSQL</url>
   <scm>
-  	<url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:XSQL</url>
-  	<developerConnection>Sharon Aicler</developerConnection>
+    <developerConnection>Sharon Aicler</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:XSQL</url>
   </scm>
 </project>
