@@ -24,6 +24,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
@@ -55,10 +56,10 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
         this.normalizer = normalizer;
     }
 
-    public static BackwardsCompatibleTransaction<?> readOnlyTransaction(final DOMDataReadTransaction readTx,
+    public static BackwardsCompatibleTransaction<?> readOnlyTransaction(final DOMDataReadOnlyTransaction readTx,
             final DataNormalizer normalizer) {
 
-        return new BackwardsCompatibleTransaction<DOMDataReadTransaction>(readTx, normalizer) {
+        return new BackwardsCompatibleTransaction<DOMDataReadOnlyTransaction>(readTx, normalizer) {
 
             @Override
             public TransactionStatus getStatus() {

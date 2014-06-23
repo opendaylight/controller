@@ -142,20 +142,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
     public void delete(LogicalDatastoreType store, P path);
 
     /**
-     *
-     * Closes transaction and resources allocated to the transaction.
-     *
-     * This call does not change Transaction status. Client SHOULD explicitly
-     * {@link #commit()} or {@link #cancel()} transaction.
-     *
-     * @throws IllegalStateException
-     *             if the transaction has not been updated by invoking
-     *             {@link #commit()} or {@link #cancel()}.
-     */
-    @Override
-    public void close();
-
-    /**
      * Submits transaction to be applied to update logical data tree.
      * <p>
      * This call logically seals the transaction, which prevents the client from

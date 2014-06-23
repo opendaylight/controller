@@ -14,7 +14,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  *
- * Provides a stateful read-only view of the data tree.
+ * Provides a stateful read view of the data tree.
  *
  * <p>
  * View of the data tree is a stable point-in-time snapshot of the current data tree state when

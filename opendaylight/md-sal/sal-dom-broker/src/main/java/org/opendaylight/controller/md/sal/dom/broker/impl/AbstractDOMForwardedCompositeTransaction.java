@@ -75,8 +75,7 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
         return identifier;
     }
 
-    @Override
-    public void close() {
+    protected void closeSubtransactions() {
         /*
          *  We share one exception for all failures, which are added
          *  as supressedExceptions to it.

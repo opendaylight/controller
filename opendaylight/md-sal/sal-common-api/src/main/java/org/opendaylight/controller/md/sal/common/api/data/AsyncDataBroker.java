@@ -133,7 +133,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * {@inheritDoc}
      */
     @Override
-    public AsyncReadTransaction<P, D> newReadOnlyTransaction();
+    public AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
     /**
      * {@inheritDoc}

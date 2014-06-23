@@ -4,7 +4,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -19,7 +19,7 @@ public class DOMDataBrokerProxy extends AbstractBrokerServiceProxy<DOMDataBroker
     }
 
     @Override
-    public DOMDataReadTransaction newReadOnlyTransaction() {
+    public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         return getDelegate().newReadOnlyTransaction();
     }
 
