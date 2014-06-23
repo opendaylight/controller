@@ -16,6 +16,24 @@
       "revId": "8ed8fa9905f7187797c771bef12c14596a3e2da7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f5cea22d",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-06-23T17:54:51Z",
+      "side": 1,
+      "message": "Based on our discussion , i think it was decided that the portnumber will stay as a union and we would create a separate refactoring task to change it to NodeConnectorId/URI.\nSince a port number can be an int or a string, it made sense to be represented as a union rather than a free-formed string. For a developer the union(int, string) represents more strongly-typed design and becomes self-explanatory about the type of data this model contains.",
+      "parentUuid": "fa82b9bf_92b40c83",
+      "revId": "8ed8fa9905f7187797c771bef12c14596a3e2da7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
