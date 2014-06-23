@@ -8,17 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
+public class CanCommitTransactionReply {
+  private final Boolean canCommit;
 
-public class ReadyTransactionReply {
-  private final ActorPath cohortPath;
-
-  public ReadyTransactionReply(ActorPath cohortPath) {
-
-    this.cohortPath = cohortPath;
+  public CanCommitTransactionReply(Boolean canCommit) {
+    this.canCommit = canCommit;
   }
 
-  public ActorPath getCohortPath() {
-    return cohortPath;
+  public Boolean getCanCommit() {
+    return canCommit;
   }
 }
