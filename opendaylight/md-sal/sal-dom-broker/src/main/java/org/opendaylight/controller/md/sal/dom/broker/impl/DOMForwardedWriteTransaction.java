@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -51,12 +49,10 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
 
     @GuardedBy("this")
-    private DOMDataCommitImplementation commitImpl;
+    private volatile DOMDataCommitImplementation commitImpl;
 
     @GuardedBy("this")
-    private boolean canceled;
-    @GuardedBy("this")
-    private ListenableFuture<RpcResult<TransactionStatus>> commitFuture;
+    private volatile State state;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
             final ImmutableMap<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
@@ -84,13 +80,10 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     @Override
     public synchronized void cancel() {
-        checkState(!canceled, "Transaction was canceled.");
-        if (commitFuture != null) {
-            // FIXME: Implement cancelation of commit future
-            // when Broker impl will support cancelation.
-            throw new UnsupportedOperationException("Not implemented yet.");
-        }
-        canceled = true;
+        checkNotReady();
+        // FIXME: Implement cancelation of commit future
+        // when Broker impl will support cancelation.
+        updateState(State.CANCELED);
         commitImpl = null;
 
     }
@@ -98,27 +91,27 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     @Override
     public synchronized ListenableFuture<RpcResult<TransactionStatus>> commit() {
         checkNotReady();
-
+        updateState(State.COMMITED);
         ImmutableList.Builder<DOMStoreThreePhaseCommitCohort> cohortsBuilder = ImmutableList.builder();
         for (DOMStoreWriteTransaction subTx : getSubtransactions()) {
             cohortsBuilder.add(subTx.ready());
         }
         ImmutableList<DOMStoreThreePhaseCommitCohort> cohorts = cohortsBuilder.build();
-        commitFuture = commitImpl.commit(this, cohorts);
-        return commitFuture;
+        return commitImpl.commit(this, cohorts);
     }
 
     private void checkNotReady() {
-        checkNotCanceled();
-        checkNotCommited();
+        Preconditions.checkState(state == State.NOT_READY, "Transaction was canceled.");
     }
 
-    private void checkNotCanceled() {
-        Preconditions.checkState(!canceled, "Transaction was canceled.");
+    private void updateState(final State newState) {
+        state = newState;
     }
 
-    private void checkNotCommited() {
-        checkState(commitFuture == null, "Transaction was already commited.");
+    private static enum State {
+        NOT_READY,
+        CANCELED,
+        COMMITED
     }
 
 }
