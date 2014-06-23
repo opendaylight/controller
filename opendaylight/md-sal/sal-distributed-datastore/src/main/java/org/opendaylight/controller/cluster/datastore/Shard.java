@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
  * A Shard represents a portion of the logical data tree
  * <p/>
  * Our Shard uses InMemoryDataStore as it's internal representation and delegates all requests it
+ *
  */
 public class Shard extends UntypedProcessor {
 
@@ -47,15 +48,18 @@ public class Shard extends UntypedProcessor {
     } else if(message instanceof RegisterChangeListener){
       registerChangeListener((RegisterChangeListener) message);
     } else if(message instanceof UpdateSchemaContext){
-      store.onGlobalContextUpdated(((UpdateSchemaContext) message).getSchemaContext());
+      updateSchemaContext((UpdateSchemaContext) message);
     }
+  }
+
+  private void updateSchemaContext(UpdateSchemaContext message) {
+    store.onGlobalContextUpdated(message.getSchemaContext());
   }
 
   private void registerChangeListener(RegisterChangeListener registerChangeListener) {
     org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration =
             store.registerChangeListener(registerChangeListener.getPath(), registerChangeListener.getListener(), registerChangeListener.getScope());
-    // TODO: Construct a ListenerRegistration actor with the actual registration returned when registering a listener with the datastore
-    ActorRef listenerRegistration = getContext().actorOf(ListenerRegistration.props(null));
+    ActorRef listenerRegistration = getContext().actorOf(ListenerRegistration.props(registration));
     getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
   }
 
