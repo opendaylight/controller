@@ -9,8 +9,8 @@ module opendaylight-inventory {
     revision "2013-08-19" {
         description "Initial revision of Inventory model";
     }
-    
-    
+
+
     typedef support-type {
         type enumeration {
             enum native;
@@ -21,43 +21,79 @@ module opendaylight-inventory {
 
     typedef node-id {
         type inet:uri;
+        description "Identifier for a particular node. For example:
+
+                        myprotocol:<unique_node_id>
+
+                        myprotocol:12
+
+                    It is a good practice to always lead with a scoping identifier.
+                    In the example above the scoping was 'myprotocol'. In your app you
+                    could use 'myapp' etc.";
     }
 
     typedef node-connector-id {
         type inet:uri;
+        description "Identifier for a particular node-connector. For example:
+
+                        myprotocol:<unique_node_connector_id>
+                        myprotocol:3
+
+                    It is a good practice to always lead with a scoping identifier.
+                    In the example above the scoping was 'myprotocol'. In your app you
+                    could use 'myapp' etc.";
+
     }
 
     typedef node-ref {
         type instance-identifier;
+        description "A reference to that points to a node in the data tree.";
     }
 
     typedef node-connector-ref {
         type instance-identifier;
+        description "A reference to that points to a node connector in the data tree.";
     }
 
     identity node-context {
-        description "Identity used to mark node context";
+        description "A context is a classifier which allows an RPC to provide a service on behalf of a particular element in the data tree.
+                     A node-context is a context about node.";
     }
 
     identity node-connector-context {
-        description "Identity used to mark node connector context";
+        description "A context is a classifier which allows an RPC to provide a service on behalf of a particular element in the data tree.
+                     A node-connector-context is a context about node connector.";
     }
 
+    //We are defining a base identity here because there are limitations with yang enums. Yang doesn't allow you to extend enumeratations.
+    //Therefore by defining a base identity we allow other yang files to extend this identity to define additional "enumerations". By
+    //using node-type as their base they are able to pass their object to fields that accept "node-types" while uniquely describing their
+    //type of node, such as "router-node" or "switch-node" etc.
+    //See https://wiki.opendaylight.org/view/YANG_Tools:YANG_to_Java_Mapping#Identity for more information.
     identity node-type {
-        description "Base identity for node types";
+        description "A base identity definition which represents a generic node type and can extended in other yang files.";
     }
 
     identity node-connector-type {
-        description "Base identity for node connectors type";
+        description "A base identity definition which represents a generic node connector type and can extended in other yang files.";
     }
 
     grouping node {
+
+        description "Describes the contents of a generic node -
+                     essentially an ID and a list of node-connectors.
+                     Acts as an augmentation point where other yang files
+                      can add additional information.";
+
         leaf id {
             type node-id;
+            description "The unique identifier for the node.";
         }
 
         list "node-connector" {
             key "id";
+
+            description "A lit of node connectors that belong this node.";
             ext:context-instance "node-connector-context";
 
             uses node-connector;
@@ -65,55 +101,93 @@ module opendaylight-inventory {
     }
 
     grouping node-connector {
+
+        description "Decribes a generic node connector which consists of an ID.
+                     Acts as an augmentation point where other yang files can
+                      add additional information.";
+
         leaf id {
             type node-connector-id;
+            description "The unique identifier for the node-connector.";
         }
     }
 
     grouping node-context-ref {
-        description 
-        "Helper grouping which contains a reference to node context.";
+        description
+        "A helper grouping which contains a reference to node context. This allows RPCs in other yang files to refine their input to a particular node instance.";
+
         leaf node {
             ext:context-reference "node-context";
             type node-ref;
+            description "A pointer to a particular node";
         }
     }
 
     /** Base structure **/
     container nodes {
+
+        description "The root list of all nodes.";
+
         list node {
             key "id";
             ext:context-instance "node-context";
-
-            uses node;
+            description "A list of nodes (as defined by the 'grouping node').";
+            uses node; //this refers to the 'grouping node' defined above.
         }
     }
 
+    //The following notifications should really be replaced by direct writes to the data tree with data change listeners listening to those changes.
+    //Notifications should be reserved for one time events which do not require persistence to the data tree.
     notification node-updated {
+
+        description "A notification sent by someone who realized there was a modification to a node, but did not modify the data tree.
+                    Describes that something on the node has been updated (including addition of a new node), but is for
+                    whatever reason is not modifying the data tree.";
+
         leaf node-ref {
             ext:context-reference "node-context";
+            description "A reference to the node which changed.";
+
             type node-ref;
         }
         uses node;
     }
 
     notification node-connector-updated {
+
+        description "A notification sent by someone who realized there was a modification to a node-connector, but did not modify the data tree.
+                    Describes that something on the node-connector has been updated (including addition of a new node-connector), but is for
+                    whatever reason is not modifying the data tree.";
+
         leaf node-connector-ref {
             ext:context-reference "node-connector-context";
             type node-connector-ref;
+            description "A reference to the node-connector which changed.";
         }
         uses node-connector;
     }
 
     notification node-removed {
+
+        description "A notification sent by someone who realized there was a node was removed, but did not modify the data tree.
+                    Describes that a node has been removed but is for
+                    whatever reason is not modifying the data tree.";
+
         leaf node-ref {
+            description "A reference to the node that was removed.";
             ext:context-reference "node-context";
             type node-ref;
         }
     }
 
     notification node-connector-removed {
+
+        description "A notification sent by someone who realized there was a node-connector was removed, but did not modify the data tree.
+                    Describes that a node-connector has been removed but is for
+                    whatever reason is not modifying the data tree.";
+
         leaf node-connector-ref {
+            description "A reference to the node-connector that was removed.";
             ext:context-reference "node-connector-context";
             type node-connector-ref;
         }
