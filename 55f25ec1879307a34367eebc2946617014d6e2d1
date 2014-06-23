@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b8e011fb",
+        "filename": "opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/util/it/AbstractLazyNotificationTransformerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T21:07:40Z",
+      "side": 1,
+      "message": "CountDownLatch is a java construct located here:\n\nhttp://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CountDownLatch.html\n\nBasically:\n\nfinal CountDownLatch cdl \u003d new CountDownLatch( 1 );\n\nnew Thread( new Runnable(){ public void run(){ cdl.countDown(); } } ).start();\n\ncdl.await(); //this call will block until the count down latch reaches 0. In our case as soon as the thread above executes the call \"countDown\". This is a great way for code to block until you reach certain logical points in the process.",
+      "parentUuid": "fa82b9bf_d83955a5",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_95071618",
         "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
         "patchSetId": 2
@@ -136,6 +154,24 @@
       "side": 1,
       "message": "Good catch... do you think synchronizing the method would be appropriate?",
       "parentUuid": "fa82b9bf_720b882a",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78e60917",
+        "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T21:07:40Z",
+      "side": 1,
+      "message": "That looks to be the safest thing here. Though personally I am not a fan of synchronizing the methods but instead putting an implicit synchronize block around an object. I do this because when you lock on \"This\" you run the risk (how ever remote) that someone else outside of your class could lock on you. On the otherhand, if you lock on an internal object, you are guaranteed that no one else will lock on you.\n\nUltimately you want to do what is the most performant, whether you synchronize on an object or use volatile. Remember you need to synchronize on writes AND reads if the variable can be accessed by multiple threads - the reason you synchronize on the read is you have to ensure that the values are visible to the thread reading them.\n\nI actually am going to post some of these details on the mailing lists tomorrow...\n\nSo in short, yes, I think synchronzing on close is OK(but you have to synchronze on the writes and reads as well), but you may want to consider a more targeted synchronizing to ensure that reading remains performant.",
+      "parentUuid": "fa82b9bf_983f4d87",
       "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
