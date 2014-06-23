@@ -18,8 +18,12 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionC
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.concurrent.Executors;
 
@@ -42,12 +46,14 @@ public class Shard extends UntypedProcessor {
       createTransactionChain();
     } else if(message instanceof RegisterChangeListener){
       registerChangeListener((RegisterChangeListener) message);
+    } else if(message instanceof UpdateSchemaContext){
+      store.onGlobalContextUpdated(((UpdateSchemaContext) message).getSchemaContext());
     }
   }
 
   private void registerChangeListener(RegisterChangeListener registerChangeListener) {
-//    org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration =
-//            store.registerChangeListener(registerChangeListener.getPath(), registerChangeListener.getListener(), registerChangeListener.getScope());
+    org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration =
+            store.registerChangeListener(registerChangeListener.getPath(), registerChangeListener.getListener(), registerChangeListener.getScope());
     // TODO: Construct a ListenerRegistration actor with the actual registration returned when registering a listener with the datastore
     ActorRef listenerRegistration = getContext().actorOf(ListenerRegistration.props(null));
     getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
