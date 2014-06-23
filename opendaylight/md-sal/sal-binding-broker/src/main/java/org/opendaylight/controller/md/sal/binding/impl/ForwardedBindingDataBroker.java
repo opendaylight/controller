@@ -8,10 +8,12 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 
+import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
@@ -46,5 +48,10 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
     @Override
     public WriteTransaction newWriteOnlyTransaction() {
         return new BindingDataWriteTransactionImpl<>(getDelegate().newWriteOnlyTransaction(),getCodec());
+    }
+
+    @Override
+    public BindingTransactionChain createTransactionChain(final TransactionChainListener listener) {
+        return new BindingTranslatedTransactionChain(getDelegate(), getCodec(), listener);
     }
 }
