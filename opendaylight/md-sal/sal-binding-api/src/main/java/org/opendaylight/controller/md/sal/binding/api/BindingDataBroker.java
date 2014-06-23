@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public interface BindingDataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, BindingDataChangeListener>, BindingService {
     @Override
-    BindingDataReadTransaction newReadOnlyTransaction();
+    BindingDataReadOnlyTransaction newReadOnlyTransaction();
 
     @Override
     BindingDataReadWriteTransaction newReadWriteTransaction();
