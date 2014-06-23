@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f26a38ed",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T13:34:56Z",
+      "side": 1,
+      "message": "Likely this change was automatic with the pom sorter, but I think we keep seeing changes like this because the arphandler.version is defined twice. :) \n\nCan we clean up this pom here and remove the duplicate version? Or we should undo this change and make another commit that does that.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_75129258",
+        "filename": "opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/util/it/AbstractLazyNotificationTransformerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T13:34:56Z",
+      "side": 1,
+      "message": "Relying on a sleep to get around timing issues can be problematic. It would be better to use a CountDownLatch and get explicit notification when you are ready to continue. This will lead to a faster test as well.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_95071618",
+        "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T13:34:56Z",
+      "side": 1,
+      "message": "Since there are missing comments on the interfaces I am not following the full picture. But is it possible that there are two types of notifications we are listening for? If so we will loose registrations with this \"newing\" of a map here.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_720b882a",
+        "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T13:34:56Z",
+      "side": 1,
+      "message": "Have you thought about concurrency concerns here? I imagine that close() is likely called from a separate thread then the code which sets the listeners etc. I want to ensure we have paid attention to and thought about the concurrency cases.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
