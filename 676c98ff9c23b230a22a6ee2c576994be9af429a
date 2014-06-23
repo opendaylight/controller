@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b244b01b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_35c08d29",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d5de0111",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "perhaps be specific about children at any level, eg \"or any of its child nodes, direct and nested.\"",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_524d243d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d5de0111",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_724aa827",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f5e1c5d0",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_95e879b5",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "slightly incorrect grammar.  How about \"for any node or subtree which can be reached via the supplied path.\".",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f26558b5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_95e879b5",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_92564ccd",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Properties of binding specification -  (DOM InstanceIdentifier allows to reference leafs, Binding Instance Identitief does not.",
+      "parentUuid": "fa82b9bf_b5eb3daf",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_55d2f100",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "\"when a node\" ...",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b25b50f5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_55d2f100",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_72714875",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataBroker.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_75cdb55c",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_35d72def",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 8
@@ -149,6 +275,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "\"into the conceptual\"",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_126a3c81",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_35d72def",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_326740b9",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d505a17a",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f508e592",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 8
@@ -183,6 +345,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "\"which were updated\"\" ...",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d207f4c8",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f508e592",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -206,6 +386,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f20c78ef",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_95ff1967",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b5025d6d",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
         "patchSetId": 8
@@ -217,6 +415,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "How about:\n\n\"Returns an immutable map of updated or removed paths and their original states prior to this change. \"",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_920decea",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeEvent.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_b5025d6d",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -240,6 +456,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b2127007",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncDataChangeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_55f9917e",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_15c5493b",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
         "patchSetId": 8
@@ -251,6 +485,24 @@
       "writtenOn": "2014-06-21T18:31:17Z",
       "side": 1,
       "message": "According to the ListenableFuture docs, it is recommended to use Futures#addCallback as it provides direct access to the Future result. Perhaps the comments above should stress this usage over ListenableFuture#addListener or not mention ListenableFuture#addListener at all. I think a lot of users may not be familiar with guava\u0027s ListenableFuture. I wasn\u0027t and may have tended to use ListenableFuture#addListener directly.without carefully reading the ListenableFuture javadocs. I think a full example using Futures#addCallback would be beneficial so first-time users don\u0027t have to read thru the ListenableFuture javadoc.",
+      "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_52fbe4c0",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/AsyncReadTransaction.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-23T07:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_15c5493b",
       "revId": "676c98ff9c23b230a22a6ee2c576994be9af429a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
