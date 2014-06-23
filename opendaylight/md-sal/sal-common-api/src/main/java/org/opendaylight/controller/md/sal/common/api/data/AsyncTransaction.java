@@ -29,15 +29,10 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D> Type of data (payload), which represents data payload
  */
 public interface AsyncTransaction<P extends Path<P>,D> extends //
-    Identifiable<Object>,
-    AutoCloseable {
+    Identifiable<Object> {
 
     @Override
     public Object getIdentifier();
 
-    /**
-     * Closes transaction and releases all resources associated with it.
-     */
-    @Override
-    public void close();
+
 }

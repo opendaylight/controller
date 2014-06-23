@@ -72,7 +72,7 @@ public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
      *
      * @return new read-only transaction
      */
-    AsyncReadTransaction<P, D> newReadOnlyTransaction();
+    AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
     /**
      * Allocates new read-write transaction which provides a mutable view of the data
