@@ -94,9 +94,9 @@ module opendaylight-port-types {
     }
     
     grouping queues {
-    	list queue {
+    	list queue-entry {
     		key "queue-id";
-    		uses queue-types:queue-packet;
+    		uses queue-types:queue;
     	}
     }
     
