@@ -16,8 +16,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * WriteModification stores all the parameters required to write data to the specified path
  */
 public class WriteModification extends AbstractModification {
-  private final NormalizedNode data;
 
+  private final NormalizedNode data;
 
   public WriteModification(InstanceIdentifier path, NormalizedNode data) {
     super(path);
@@ -28,4 +28,5 @@ public class WriteModification extends AbstractModification {
   public void apply(DOMStoreWriteTransaction transaction) {
     transaction.write(path, data);
   }
+
 }

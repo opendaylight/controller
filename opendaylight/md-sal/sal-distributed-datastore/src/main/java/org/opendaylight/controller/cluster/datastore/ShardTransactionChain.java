@@ -34,7 +34,7 @@ public class ShardTransactionChain extends UntypedActor{
   public void onReceive(Object message) throws Exception {
     if(message instanceof CreateTransaction){
       DOMStoreReadWriteTransaction transaction = chain.newReadWriteTransaction();
-      ActorRef transactionActor = getContext().actorOf(ShardTransaction.props(transaction));
+      ActorRef transactionActor = getContext().actorOf(ShardTransaction.props(transaction, getContext().parent()));
       getSender().tell(new CreateTransactionReply(transactionActor.path()), getSelf());
     } else if (message instanceof CloseTransactionChain){
       chain.close();

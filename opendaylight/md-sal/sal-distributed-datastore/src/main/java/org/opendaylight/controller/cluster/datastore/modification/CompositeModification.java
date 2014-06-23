@@ -18,5 +18,9 @@ import java.util.List;
  * </p>
  */
 public interface CompositeModification extends Modification {
-  List<Modification> getModifications();
+    /**
+     * Get a list of Modifications contained by this Composite
+     * @return
+     */
+    List<Modification> getModifications();
 }
