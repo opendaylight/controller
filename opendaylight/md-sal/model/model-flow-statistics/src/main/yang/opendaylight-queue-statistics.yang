@@ -18,7 +18,7 @@ module opendaylight-queue-statistics {
     }
     
     //Augment queue statistics data to the flow-capable-node-connector
-    augment "/inv:nodes/inv:node/inv:node-connector/flow-node:queue" {
+    augment "/inv:nodes/inv:node/inv:node-connector/flow-node:queue-entry" {
         ext:augment-identifier "flow-capable-node-connector-queue-statistics-data";
         uses flow-capable-node-connector-queue-statistics;
     }

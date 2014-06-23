@@ -4,25 +4,33 @@ module sal-queue {
 
     import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
     import opendaylight-queue-types {prefix queue-type; revision-date "2013-09-25";}
+    import flow-capable-transaction {prefix tr;}
 
     revision "2013-11-07" {
         description "Initial revision of queue service";
     }        
-    
-    grouping node-queue {
-        uses "inv:node-context-ref";
-        
-        uses queue-type:queue-packet;
+
+    rpc get-queue-config {
+        description "Get queues configured for a given node and port. For all ports, send ANY";
+        input {
+            uses tr:transaction-metadata;
+            uses "inv:node-context-ref";
+            leaf node-connector-id {
+                type inv:node-connector-id;
+            }
+        }
+        output {
+            uses tr:transaction-aware;
+            uses queue-type:node-queue-config;
+        }
     }
 
-     
-    rpc get-queue {
-        output {
-            uses queue-type:queue-packet;
-        }
-    }  
-    
-    notification queue-get-config-reply {
-        uses node-queue;
+    notification queue-config-update {
+        description "queue config update sent by switch";
+        uses inv:node;
+        uses queue-type:node-queue-config;
+        uses tr:multipart-transaction-aware;
     }
+
+
 }
