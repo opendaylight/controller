@@ -8,17 +8,5 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
-
-public class ReadyTransactionReply {
-  private final ActorPath cohortPath;
-
-  public ReadyTransactionReply(ActorPath cohortPath) {
-
-    this.cohortPath = cohortPath;
-  }
-
-  public ActorPath getCohortPath() {
-    return cohortPath;
-  }
+public class AbortTransactionReply {
 }

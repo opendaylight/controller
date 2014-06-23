@@ -43,7 +43,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveReadData() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
       new Within(duration("1 seconds")) {
@@ -103,7 +104,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveWriteData() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testWriteData");
 
       new Within(duration("1 seconds")) {
@@ -136,7 +138,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveMergeData() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testMergeData");
 
       new Within(duration("1 seconds")) {
@@ -170,7 +173,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveDeleteData() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testDeleteData");
 
       new Within(duration("1 seconds")) {
@@ -204,7 +208,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveReadyTransaction() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testReadyTransaction");
 
       new Within(duration("1 seconds")) {
@@ -237,7 +242,8 @@ public class ShardTransactionTest extends AbstractActorTest {
   @Test
   public void testOnReceiveCloseTransaction() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransaction.props(store.newReadWriteTransaction());
+      final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+      final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard);
       final ActorRef subject = getSystem().actorOf(props, "testCloseTransaction");
 
       new Within(duration("1 seconds")) {
