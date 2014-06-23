@@ -20,10 +20,10 @@ import static org.junit.Assert.assertTrue;
 
 public class ShardTest extends AbstractActorTest{
   @Test
-  public void testOnReceiveCreateTransaction() throws Exception {
+  public void testOnReceiveCreateTransactionChain() throws Exception {
     new JavaTestKit(getSystem()) {{
       final Props props = Props.create(Shard.class);
-      final ActorRef subject = getSystem().actorOf(props, "testCreateTransaction");
+      final ActorRef subject = getSystem().actorOf(props, "testCreateTransactionChain");
 
       new Within(duration("1 seconds")) {
         protected void run() {
@@ -42,7 +42,7 @@ public class ShardTest extends AbstractActorTest{
             }
           }.get(); // this extracts the received message
 
-          assertTrue(out.matches("akka:\\/\\/test\\/user\\/testCreateTransaction\\/\\$.*"));
+          assertTrue(out.matches("akka:\\/\\/test\\/user\\/testCreateTransactionChain\\/\\$.*"));
           // Will wait for the rest of the 3 seconds
           expectNoMsg();
         }
