@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_750b722a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMForwardedCompositeTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-23T18:54:54Z",
+      "side": 1,
+      "message": "I am not familiar with the transaction chaning, but is it possible that someone would still need public access to close the sub transactions?",
+      "revId": "ebee8de682dc5515b8dc65e0ffb27da2307b589d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
