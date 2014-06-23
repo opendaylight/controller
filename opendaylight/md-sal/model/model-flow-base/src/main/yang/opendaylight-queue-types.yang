@@ -3,76 +3,50 @@ module opendaylight-queue-types {
     prefix queue-types;
 
     import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import opendaylight-inventory {prefix inv; revision-date "2013-08-19";}
     
     revision "2013-09-25" {
         description "Initial revision of Queue Inventory model";
     }
     
     typedef queue-id {
-            type yang:counter32;
-            description "id for the specific queue.";  
-        }
+        type yang:counter32;
+        description "id for the specific queue.";
+    }
     
-    typedef queue-properties {
+    typedef queue-properties-enum {
         type enumeration {
             enum min_rate;
             enum max_rate;
         }
     }
-   
-    
-    grouping common-queue {
 
-        leaf property {
-            type uint16;
-            description "One of OFPQT_.";  
+    grouping node-queue-config {
+        list queues {
+            key "queue-id";
+            leaf queue-id {
+                type queue-id;
+                description "id for the specific queue.";
+            }
+            uses queue;
         }
-           
     }
-    
-     
-    grouping queue-prop-min-rate	{
-		
-		uses common-queue;
-		
-        leaf rate {
-            type uint16;
-            description "OFPQT_MIN, len: 16";  
-        }
-           
-    }
-      
-    grouping queue-prop-max-rate	{
-		
-		uses common-queue;
-		
-        leaf rate {
-            type uint16;
-            description "OFPQT_MAX, len: 16";  
-        }
-           
-    }
-     grouping queue-packet	{
-		
-		
+
+    grouping queue {
         leaf queue-id {
             type queue-id;
-            description "id for the specific queue.";  
         }
-        
         leaf port {
-            type uint32;
-            description "Port this queue is attached to.";  
+            type inv:node-connector-id;
         }
-        uses common-queue;
-    }
-    
-   grouping queue-config-request 
-   {
-           leaf port {
-            type uint32;
-            description "Port to be queried.";  
+        list queue-properties {
+            key "property-name";
+            leaf property-name {
+                type queue-properties-enum;
+            }
+            leaf property-value {
+                type uint32;
+            }
         }
-        
     }
 }

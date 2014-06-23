@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.queue.rev130925.QueueId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
@@ -32,6 +30,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map.Entry;
+
 final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndStatisticsMap, QueueStatsEntry> {
     private static final Logger logger = LoggerFactory.getLogger(QueueStatsTracker.class);
     private final OpendaylightQueueStatisticsService queueStatsService;
@@ -46,7 +46,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
         InstanceIdentifier<?> queueRef
                             = getNodeIdentifierBuilder().child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
                                                 .augmentation(FlowCapableNodeConnector.class)
-                                                .child(Queue.class, new QueueKey(item.getQueueId()))
+                                                .child(QueueEntry.class, new QueueEntryKey(item.getQueueId()))
                                                 .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).build();
         trans.removeOperationalData(queueRef);
     }
@@ -64,14 +64,14 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
 
         queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
 
-        InstanceIdentifier<Queue> queueRef = getNodeIdentifierBuilder().child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
+        InstanceIdentifier<QueueEntry> queueRef = getNodeIdentifierBuilder().child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
                                     .augmentation(FlowCapableNodeConnector.class)
-                                    .child(Queue.class, new QueueKey(item.getQueueId())).toInstance();
+                                    .child(QueueEntry.class, new QueueEntryKey(item.getQueueId())).toInstance();
 
-        QueueBuilder queueBuilder = new QueueBuilder();
+        QueueEntryBuilder queueBuilder = new QueueEntryBuilder();
         FlowCapableNodeConnectorQueueStatisticsData qsd = queueStatisticsDataBuilder.build();
         queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, qsd);
-        queueBuilder.setKey(new QueueKey(item.getQueueId()));
+        queueBuilder.setKey(new QueueEntryKey(item.getQueueId()));
 
         logger.debug("Augmenting queue statistics {} of queue {} to port {}",
                                     qsd,
@@ -107,8 +107,8 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     @Override
     public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
-            if (Queue.class.equals(e.getKey().getTargetType())) {
-                final Queue queue = (Queue) e.getValue();
+            if (QueueEntry.class.equals(e.getKey().getTargetType())) {
+                final QueueEntry queue = (QueueEntry) e.getValue();
                 final NodeConnectorKey key = e.getKey().firstKeyOf(NodeConnector.class, NodeConnectorKey.class);
                 logger.debug("Key {} triggered request for connector {} queue {}", key.getId(), queue.getQueueId());
                 request(key.getId(), queue.getQueueId());
@@ -119,9 +119,9 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
 
         final DataModificationTransaction trans = startTransaction();
         for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
-            if (Queue.class.equals(key.getTargetType())) {
+            if (QueueEntry.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
-                final InstanceIdentifier<Queue> queue = (InstanceIdentifier<Queue>)key;
+                final InstanceIdentifier<QueueEntry> queue = (InstanceIdentifier<QueueEntry>)key;
                 final InstanceIdentifier<?> del = queue
                         .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
                 logger.debug("Key {} triggered remove of augmentation {}", key, del);
@@ -135,7 +135,7 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     @Override
     protected InstanceIdentifier<?> listenPath() {
         return getNodeIdentifierBuilder().child(NodeConnector.class)
-                .augmentation(FlowCapableNodeConnector.class).child(Queue.class).build();
+                .augmentation(FlowCapableNodeConnector.class).child(QueueEntry.class).build();
     }
 
     @Override
