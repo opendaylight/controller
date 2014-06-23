@@ -17,11 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -85,7 +83,7 @@ public class RestDeleteOperationTest extends JerseyTest {
 
     private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName).build();
-        return DummyFuture.builder().rpcResult(rpcResult).build();
+        return new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
     }
 
 }
