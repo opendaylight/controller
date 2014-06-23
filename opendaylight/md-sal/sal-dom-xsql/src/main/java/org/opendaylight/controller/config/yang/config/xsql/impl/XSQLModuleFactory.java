@@ -8,6 +8,8 @@
 * Do not modify this file unless it is present under src/main directory
 */
 package org.opendaylight.controller.config.yang.config.xsql.impl;
-public class XSQLModuleFactory extends org.opendaylight.controller.config.yang.config.xsql.impl.AbstractXSQLModuleFactory {
+
+public class XSQLModuleFactory extends
+    org.opendaylight.controller.config.yang.config.xsql.impl.AbstractXSQLModuleFactory {
 
 }
