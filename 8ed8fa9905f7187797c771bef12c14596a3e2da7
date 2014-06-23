@@ -34,6 +34,24 @@
       "revId": "8ed8fa9905f7187797c771bef12c14596a3e2da7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7853696b",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-port-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-06-23T23:49:56Z",
+      "side": 1,
+      "message": "Ed, In case you are expecting the port-number to be a string and not an union(int, string), let me know and i can evaluate the changes.",
+      "parentUuid": "fa82b9bf_f5cea22d",
+      "revId": "8ed8fa9905f7187797c771bef12c14596a3e2da7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
