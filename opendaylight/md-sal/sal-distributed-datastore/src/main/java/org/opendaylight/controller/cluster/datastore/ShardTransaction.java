@@ -65,23 +65,26 @@ import java.util.concurrent.ExecutionException;
  */
 public class ShardTransaction extends UntypedActor {
 
+  private final ActorRef shardActor;
+
   private final DOMStoreReadWriteTransaction transaction;
 
   private final MutableCompositeModification modification = new MutableCompositeModification();
 
   private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-  public ShardTransaction(DOMStoreReadWriteTransaction transaction) {
+  public ShardTransaction(DOMStoreReadWriteTransaction transaction, ActorRef shardActor) {
     this.transaction = transaction;
+    this.shardActor = shardActor;
   }
 
 
-  public static Props props(final DOMStoreReadWriteTransaction transaction){
+  public static Props props(final DOMStoreReadWriteTransaction transaction, final ActorRef shardActor){
     return Props.create(new Creator<ShardTransaction>(){
 
       @Override
       public ShardTransaction create() throws Exception {
-        return new ShardTransaction(transaction);
+        return new ShardTransaction(transaction, shardActor);
       }
     });
   }
@@ -151,7 +154,7 @@ public class ShardTransaction extends UntypedActor {
 
   private void readyTransaction(ReadyTransaction message){
     DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
-    ActorRef cohortActor = getContext().actorOf(ThreePhaseCommitCohort.props(cohort));
+    ActorRef cohortActor = getContext().actorOf(ThreePhaseCommitCohort.props(cohort, shardActor, modification));
     getSender().tell(new ReadyTransactionReply(cohortActor.path()), getSelf());
 
   }
