@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_38b96115",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-23T20:30:47Z",
+      "side": 1,
+      "message": "Yes, this is the auto-behavior... removing the dup would be goodness.",
+      "parentUuid": "fa82b9bf_f26a38ed",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_75129258",
         "filename": "opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/util/it/AbstractLazyNotificationTransformerTest.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-23T13:34:56Z",
       "side": 1,
       "message": "Relying on a sleep to get around timing issues can be problematic. It would be better to use a CountDownLatch and get explicit notification when you are ready to continue. This will lead to a faster test as well.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d83955a5",
+        "filename": "opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/util/it/AbstractLazyNotificationTransformerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-23T20:30:47Z",
+      "side": 1,
+      "message": "Tell me more about CountDownLatch... I just copied this from the existing MD-SAL integration tests.  Happy to do better.",
+      "parentUuid": "fa82b9bf_75129258",
       "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f83e998b",
+        "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-23T20:30:47Z",
+      "side": 1,
+      "message": "There is an implicit expectation here that we are doing the listener registrations *once* (thus the check to make sure we don\u0027t have any listener registrations in \n\nif ((getListenerRegistrations() \u003d\u003d null || getListenerRegistrations().isEmpty())\n\nSo... basically, if we haven\u0027t registered listeners, we register all of them.  If we have, we don\u0027t reregister.",
+      "parentUuid": "fa82b9bf_95071618",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_720b882a",
         "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-23T13:34:56Z",
       "side": 1,
       "message": "Have you thought about concurrency concerns here? I imagine that close() is likely called from a separate thread then the code which sets the listeners etc. I want to ensure we have paid attention to and thought about the concurrency cases.",
+      "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_983f4d87",
+        "filename": "opendaylight/md-sal/sal-binding-util/src/main/java/org/opendaylight/controller/md/sal/binding/util/AbstractLazyNotificationTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-06-23T20:30:47Z",
+      "side": 1,
+      "message": "Good catch... do you think synchronizing the method would be appropriate?",
+      "parentUuid": "fa82b9bf_720b882a",
       "revId": "55f25ec1879307a34367eebc2946617014d6e2d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
