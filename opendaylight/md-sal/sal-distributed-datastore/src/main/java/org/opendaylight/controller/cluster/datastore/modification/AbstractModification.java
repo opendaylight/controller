@@ -8,15 +8,22 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+
+import java.io.Serializable;
 
 /**
  * Base class to be used for all simple modifications that can be applied to a DOMStoreTransaction
  */
-public abstract class AbstractModification implements Modification {
-  protected final InstanceIdentifier path;
+public abstract class AbstractModification implements Modification,
+    Serializable {
 
-  protected AbstractModification(InstanceIdentifier path) {
-    this.path = path;
-  }
+    private static final long serialVersionUID = 1638042650152084457L;
+
+    protected final InstanceIdentifier path;
+
+    protected AbstractModification(InstanceIdentifier path) {
+        this.path = path;
+    }
 }

@@ -10,26 +10,40 @@ package org.opendaylight.controller.cluster.datastore.modification;
 
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MutableCompositeModification implements CompositeModification {
-  private final List<Modification> modifications = new ArrayList<>();
+/**
+ * MutableCompositeModification is just a mutable version of a
+ * CompositeModification {@link org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification#addModification(Modification)}
+ */
+public class MutableCompositeModification
+    implements CompositeModification, Serializable {
 
-  @Override
-  public void apply(DOMStoreWriteTransaction transaction) {
-    for(Modification modification : modifications){
-      modification.apply(transaction);
+    private static final long serialVersionUID = 1163377899140186790L;
+
+    private final List<Modification> modifications = new ArrayList<>();
+
+    @Override
+    public void apply(DOMStoreWriteTransaction transaction) {
+        for (Modification modification : modifications) {
+            modification.apply(transaction);
+        }
     }
-  }
 
-  public void addModification(Modification modification){
-    modifications.add(modification);
-  }
+    /**
+     * Add a new Modification to the list of Modifications represented by this
+     * composite
+     *
+     * @param modification
+     */
+    public void addModification(Modification modification) {
+        modifications.add(modification);
+    }
 
-  public List<Modification> getModifications(){
-    return Collections.unmodifiableList(modifications);
-  }
-
+    public List<Modification> getModifications() {
+        return Collections.unmodifiableList(modifications);
+    }
 }
