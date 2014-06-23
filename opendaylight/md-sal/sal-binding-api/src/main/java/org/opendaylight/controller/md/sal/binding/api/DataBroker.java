@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainFactory;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -19,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * <p>
  * For more information on usage, please see the documentation in {@link AsyncDataBroker}.
  */
-public interface DataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService {
+public interface DataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService, TransactionChainFactory<InstanceIdentifier<?>, DataObject> {
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
 
