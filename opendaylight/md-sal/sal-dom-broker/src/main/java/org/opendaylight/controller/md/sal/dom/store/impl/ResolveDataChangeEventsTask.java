@@ -290,9 +290,8 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) afterData;
             return resolveNodeContainerReplaced(path, listeners, beforeCont, afterCont);
         } else if (!beforeData.equals(afterData)) {
-            // Node is either of Leaf type (does not contain child nodes)
-            // or we do not have listeners, so normal equals method is
-            // sufficient for determining change.
+            // Node is Leaf type (does not contain child nodes)
+            // so normal equals method is sufficient for determining change.
             LOG.trace("Resolving leaf replace event for {} , before {}, after {}",path,beforeData,afterData);
             DOMImmutableDataChangeEvent event = builder(DataChangeScope.BASE).setBefore(beforeData).setAfter(afterData)
                     .addUpdated(path, beforeData, afterData).build();
@@ -421,9 +420,6 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                 eventBuilder.merge(resolveSameEventRecursivelly(path.node(childId), childListeners, child, eventFactory));
             }
             propagateEvent = eventBuilder.build();
-        } else {
-            // We do not dispatch leaf events since Binding Aware components do not support them.
-            propagateEvent = builder(DataChangeScope.BASE).build();
         }
         if (!listeners.isEmpty()) {
             addPartialTask(listeners, propagateEvent);
