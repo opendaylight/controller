@@ -29,7 +29,7 @@ public interface DOMDataBroker extends
      * {@inheritDoc}
      */
     @Override
-    DOMDataReadTransaction newReadOnlyTransaction();
+    DOMDataReadOnlyTransaction newReadOnlyTransaction();
 
     /**
      * {@inheritDoc}

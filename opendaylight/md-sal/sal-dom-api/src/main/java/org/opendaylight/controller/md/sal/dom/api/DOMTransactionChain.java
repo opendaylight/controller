@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public interface DOMTransactionChain extends TransactionChain<InstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override
-    DOMDataReadTransaction newReadOnlyTransaction();
+    DOMDataReadOnlyTransaction newReadOnlyTransaction();
 
     @Override
     DOMDataReadWriteTransaction newReadWriteTransaction();
