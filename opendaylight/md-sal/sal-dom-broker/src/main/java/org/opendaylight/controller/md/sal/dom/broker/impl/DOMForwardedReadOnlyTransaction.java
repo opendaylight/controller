@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -26,7 +26,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  */
 class DOMForwardedReadOnlyTransaction extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, DOMStoreReadTransaction> implements
-        DOMDataReadTransaction {
+        DOMDataReadOnlyTransaction {
 
     protected DOMForwardedReadOnlyTransaction(final Object identifier,
             final ImmutableMap<LogicalDatastoreType, DOMStoreReadTransaction> backingTxs) {
@@ -37,6 +37,11 @@ class DOMForwardedReadOnlyTransaction extends
     public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store,
             final InstanceIdentifier path) {
         return getSubtransaction(store).read(path);
+    }
+
+    @Override
+    public void close() {
+        closeSubtransactions();
     }
 
 }

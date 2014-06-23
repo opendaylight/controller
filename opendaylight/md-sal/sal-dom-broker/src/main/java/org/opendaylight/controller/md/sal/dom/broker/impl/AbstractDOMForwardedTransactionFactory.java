@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -66,7 +66,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * Subtransaction for reading is selected by supplied
      * {@link LogicalDatastoreType} as parameter for
-     * {@link DOMDataReadTransaction#read(LogicalDatastoreType,org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)}
+     * {@link DOMDataReadOnlyTransaction#read(LogicalDatastoreType,org.opendaylight.yangtools.yang.data.api.InstanceIdentifier)}
      * .
      *
      * Id of returned transaction is retrieved via
@@ -74,7 +74,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      *
      * @return New composite read-only transaction.
      */
-    public DOMDataReadTransaction newReadOnlyTransaction() {
+    public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         checkNotClosed();
         ImmutableMap.Builder<LogicalDatastoreType, DOMStoreReadTransaction> builder = ImmutableMap.builder();
         for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {

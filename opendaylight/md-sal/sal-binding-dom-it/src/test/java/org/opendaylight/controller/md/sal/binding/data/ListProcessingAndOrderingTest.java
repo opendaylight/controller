@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
@@ -139,7 +139,7 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
     private NormalizedNode<?, ?> resolveDataAsserted(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath) {
 
-        try (DOMDataReadTransaction readTx = testContext.getDomAsyncDataBroker().newReadOnlyTransaction()){
+        try (DOMDataReadOnlyTransaction readTx = testContext.getDomAsyncDataBroker().newReadOnlyTransaction()){
             ListenableFuture<Optional<NormalizedNode<?, ?>>> data = readTx.read(LogicalDatastoreType.OPERATIONAL, domPath);
             Optional<NormalizedNode<?, ?>> potential = data.get();
             assertTrue(potential.isPresent());
