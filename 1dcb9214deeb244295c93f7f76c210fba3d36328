@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e68db86",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-action-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 397
+      },
+      "writtenOn": "2014-06-23T15:35:10Z",
+      "side": 1,
+      "message": "So earlier in one of the meeting we had discussion with Tony and Ed and we had discussed and agreed upon not having experimenter action in the yang model.\n\nThis would have allowed the the Vendors to augment the action types directly and add the experimenter action as per there needs.\n\nBut as discussed in yesterdays call I agree with Anil that we can augment the experimenter case directly instead.\n\nSo in this gerrit please remove the container and its child since Vendors can augment the experimenter action case directly.\n\nAugment the experimenter case outside this yang model and you can have the container in that yang model.",
+      "revId": "1dcb9214deeb244295c93f7f76c210fba3d36328",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
