@@ -49,7 +49,7 @@ public class JDBCResultSet implements Serializable,ResultSet,ResultSetMetaData{
 	public int numberOfTasks = 0;
 	private Map<String,Map<XSQLColumn,List<XSQLCriteria>>> criteria = new ConcurrentHashMap<String, Map<XSQLColumn,List<XSQLCriteria>>>();	
 	private Exception err = null;
-	private List<Record> EMPTY_RECORD = new LinkedList<Record>();
+	private List<Record> EMPTY_RESULT = new LinkedList<Record>();
 	
 	public JDBCResultSet(String _sql){
 		synchronized(JDBCResultSet.class){
@@ -313,6 +313,7 @@ public class JDBCResultSet implements Serializable,ResultSet,ResultSetMetaData{
 					if(value!=null){
 						try{
 							String sValue = value.toString();
+							c.setCharWidth(sValue.length());
 							rec.data.put(columnName, sValue);							
 						}catch(Exception err){}
 					}
@@ -369,80 +370,48 @@ public class JDBCResultSet implements Serializable,ResultSet,ResultSetMetaData{
 		
 		List<Record> result = new LinkedList<Record>();
 		String nodeID = XSQLODLUtils.getNodeIdentiofier(element);
-		if(root && node.getODLNodeName().equals(nodeID)){
+		if(node.getODLNodeName().equals(nodeID)){
 			Record rec = new Record();
 			rec.element = element;
-			XSQLBluePrintNode bpn = this.tablesInQueryMap.get(nodeID);			
+			XSQLBluePrintNode bpn = this.tablesInQueryMap.get(nodeID);
+			boolean isObjectFitCriteria = true;
 			if(this.criteria.containsKey(nodeID) || bpn!=null){
 				Map allKeyValues = collectColumnValues(element, bpn);
 				if(!(isObjectFitCriteria(allKeyValues, bpn.getTableName())==1)){
-					return EMPTY_RECORD;
+					return EMPTY_RESULT;
 				}
 				addToData(rec,bpn,allKeyValues);				
 			}
-			addRecord(rec.data);
+			if(root)
+				addRecord(rec.data);
+			else
+				result.add(rec);
 			return result;
 		}
 		
 		XSQLBluePrintNode parent = node.getParent();
-										
-		if(parent.getODLNodeName().equals(nodeID)){
-			
-			Record neRec = new Record();
-			neRec.element = element;
-			XSQLBluePrintNode bpn = this.tablesInQueryMap.get(nodeID);			
-			if(bpn!=null){
-				Map allKeyValues = collectColumnValues(element, bpn);
-				if(!(isObjectFitCriteria(allKeyValues, bpn.getTableName())==1)){
-					return EMPTY_RECORD;
-				}
-				addToData(neRec,bpn,allKeyValues);
-			}
-
-			List<Object> data = getChildren(neRec.element,tableName);
-			if(data!=null){ 
-				for(Object d:data){						
+		List<Record> subRecords = addRecords(element,parent,false,tableName);
+		for(Record subRec:subRecords){
+			List<Object> subO = getChildren(subRec.element,tableName);
+			if(subO!=null){
+				for(Object subData:subO){
 					Record rec = new Record();
-					rec.data.putAll(neRec.data);
-					rec.element = d;
+					rec.element = subData;
+					rec.data.putAll(subRec.data);
+								
 					String recID = XSQLODLUtils.getNodeIdentiofier(rec.element);
-					bpn = this.tablesInQueryMap.get(recID);
+					XSQLBluePrintNode bpn = this.tablesInQueryMap.get(recID);
+					boolean isObjectInCriteria = true;
 					if(bpn!=null){
 						Map allKeyValues = collectColumnValues(rec.element, bpn);
-						if(isObjectFitCriteria(allKeyValues, bpn.getTableName())==1){
-							addToData(rec,bpn,allKeyValues);							
-						}						
+						if((isObjectFitCriteria(allKeyValues, bpn.getTableName())==1)){
+							addToData(rec,bpn,allKeyValues);
+						}else
+							isObjectInCriteria = false;
 					}
-					if(root){
-						addRecord(rec.data);
-					}else{
-						result.add(rec);
-					}										
-					
-				}
-			}					
-		}else{
-			List<Record> subRecords = addRecords(element,parent,false,tableName);
-			for(Record subRec:subRecords){
-				List<Object> subO = getChildren(subRec.element,tableName);
-				if(subO!=null){
-					for(Object subData:subO){
-						Record rec = new Record();
-						rec.element = subData;
-						rec.data.putAll(subRec.data);
-									
-						String recID = XSQLODLUtils.getNodeIdentiofier(rec.element);
-						XSQLBluePrintNode bpn = this.tablesInQueryMap.get(recID);
-						boolean fitCriteria = false;
-						if(bpn!=null){
-							Map allKeyValues = collectColumnValues(rec.element, bpn);
-							if((isObjectFitCriteria(allKeyValues, bpn.getTableName())==1)){
-								addToData(rec,bpn,allKeyValues);
-								fitCriteria = true;
-							}							
-						}
-								
-						if(root && fitCriteria){
+							
+					if(isObjectInCriteria){
+						if(root){
 							addRecord(rec.data);
 						}else{
 							result.add(rec);

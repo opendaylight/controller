@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class XSQLColumn implements Serializable,Comparable{
 	private String name = null;
 	private String tableName = null; 
+	private int charWidth = -1;
 	private transient Object bluePrintNode = null; 
 	
 	public XSQLColumn(String _name,String _tableName, Object _bluePrintNode){
@@ -21,6 +22,15 @@ public class XSQLColumn implements Serializable,Comparable{
 		return tableName;
 	}
 
+	public void setCharWidth(int i){
+		if(this.charWidth<i)
+			this.charWidth = i;
+	}
+	
+	public int getCharWidth(){
+		return this.charWidth;
+	}
+	
 	@Override
 	public int hashCode(){
 		return this.name.hashCode()+this.tableName.hashCode();

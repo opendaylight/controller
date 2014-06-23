@@ -516,37 +516,91 @@ public class XSQLAdapter extends Thread implements SchemaContextListener{
 			jdbcServer.execute(rs, this);
 			boolean isFirst = true;
 			int loc = rs.getFields().size()-1;
+			int totalWidth = 0;
 			for(XSQLColumn c:rs.getFields()){
 				if(isFirst){
 					isFirst = false;
-					out.print("\"");
+					if(toCsv)
+						out.print("\"");
 				}
-				
+
+				if(!toCsv){
+					out.print("|");
+				}
+								
 				out.print(c.getName());				
 				
+				if(!toCsv){
+					int cw = c.getCharWidth();
+					int cnw = c.getName().length();
+					if(cnw>cw)
+						c.setCharWidth(cnw);
+					int gap = cw-cnw;
+					for(int i=0;i<gap;i++){
+						out.print(" ");
+					}
+				}
+				
+				totalWidth+=c.getCharWidth()+1;
+				
 				if(loc>0){
-					out.print("\",\"");
+					if(toCsv){
+						out.print("\",\"");
+					}
 				}						
 				loc--;
 			}	
-			out.println("\"");
+			
+			if(toCsv){
+				out.println("\"");
+			}else{
+				totalWidth++;
+				out.println("|");
+				for(int i=0;i<totalWidth;i++){
+					out.print("-");
+				}
+				out.println();
+			}
+			
 			while(rs.next()){
 				isFirst = true;
 				loc = rs.getFields().size()-1;
 				for(XSQLColumn c:rs.getFields()){
 					if(isFirst){
 						isFirst = false;
-						out.print("\"");
+						if(toCsv)
+							out.print("\"");
+					}
+
+					
+					if(!toCsv){
+						out.print("|");
+					}
+										
+					String sValue = (String)rs.getObject(c.toString());
+					if(sValue==null)
+						sValue = "";
+					out.print(sValue);
+
+					int cw = c.getCharWidth();
+					int vw = sValue.length();
+					int gap = cw-vw;
+					for(int i=0;i<gap;i++){
+						out.print(" ");
 					}
 					
-					out.print(rs.getObject(c.toString()));
-
+					
 					if(loc>0){
-						out.print("\",\"");
+						if(toCsv)
+							out.print("\",\"");
 					}
 					loc--;
 				}
-				out.println("\"");
+				if(toCsv){
+					out.println("\"");
+				}else{
+					out.println("|");
+				}
 				count++;
 			}
 			out.println("Total Number Of Records="+count);

@@ -22,7 +22,7 @@ public class XSQLModule extends org.opendaylight.controller.config.yang.config.x
         XSQLAdapter xsqlAdapter = XSQLAdapter.getInstance();
         getSchemaServiceDependency().registerSchemaServiceListener(xsqlAdapter);
         xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency());
-    	return new XSQLImpl();
+        return new XSQLImpl();
     }
 
 }

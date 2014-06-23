@@ -559,7 +559,6 @@ public class JDBCConnection extends Thread implements Connection{
 	public int getNetworkTimeout() throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
-	}		
-	
+	}			
 }
 
