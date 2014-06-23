@@ -19,7 +19,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ietf-netconf-monitoring-extension</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
