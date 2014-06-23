@@ -295,11 +295,11 @@ public class XSQLCriteria implements Serializable{
 			   leftValue.toString().toLowerCase().equals(col.toString().toLowerCase()) ||		
 				col.getName().toLowerCase().indexOf(leftValue.toString().toLowerCase())!=-1)
 					result.append("? ").append(operators[operation]).append(" ").append(rightValue);
-			else
+			/*else
 			if(rightValue.toString().toLowerCase().equals(col.getName().toLowerCase()) ||
 			   rightValue.toString().toLowerCase().equals(col.toString().toLowerCase()) ||					
 				col.getName().toLowerCase().indexOf(rightValue.toString().toLowerCase())!=-1)				
-					result.append(leftValue.toString()).append(operators[operation]).append(" ?");			
+					result.append(leftValue.toString()).append(operators[operation]).append(" ?");*/			
 			return result.toString();
 		}else
 		if(left!=null && right!=null){
