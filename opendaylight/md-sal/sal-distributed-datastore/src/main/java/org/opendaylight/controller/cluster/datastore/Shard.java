@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -46,89 +47,112 @@ import java.util.concurrent.Executors;
  */
 public class Shard extends UntypedProcessor {
 
-  public static final String DEFAULT_NAME = "default";
+    public static final String DEFAULT_NAME = "default";
 
-  private final ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+    private final ListeningExecutorService storeExecutor =
+        MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
-  private final InMemoryDOMDataStore store;
+    private final InMemoryDOMDataStore store;
 
-  private final Map<Modification, DOMStoreThreePhaseCommitCohort> modificationToCohort = new HashMap<>();
+    private final Map<Modification, DOMStoreThreePhaseCommitCohort>
+        modificationToCohort = new HashMap<>();
 
-  private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    private final LoggingAdapter log =
+        Logging.getLogger(getContext().system(), this);
 
-  private Shard(String name){
-    store = new InMemoryDOMDataStore(name, storeExecutor);
-  }
-
-  public static Props props(final String name) {
-    return Props.create(new Creator<Shard>() {
-
-      @Override
-      public Shard create() throws Exception {
-        return new Shard(name);
-      }
-
-    });
-  }
-
-  @Override
-  public void onReceive(Object message) throws Exception {
-    if (message instanceof CreateTransactionChain) {
-      createTransactionChain();
-    } else if (message instanceof RegisterChangeListener) {
-      registerChangeListener((RegisterChangeListener) message);
-    } else if (message instanceof UpdateSchemaContext) {
-      updateSchemaContext((UpdateSchemaContext) message);
-    } else if (message instanceof ForwardedCommitTransaction ) {
-      handleForwardedCommit((ForwardedCommitTransaction) message);
-    } else if (message instanceof Persistent){
-      commit((Persistent) message);
+    private Shard(String name) {
+        store = new InMemoryDOMDataStore(name, storeExecutor);
     }
-  }
 
-  private void commit(Persistent message) {
-    Modification modification = (Modification) message.payload();
-    DOMStoreThreePhaseCommitCohort cohort = modificationToCohort.remove(modification);
-    if(cohort == null){
-      log.error("Could not find cohort for modification : " + modification);
-      return;
+    public static Props props(final String name) {
+        return Props.create(new Creator<Shard>() {
+
+            @Override
+            public Shard create() throws Exception {
+                return new Shard(name);
+            }
+
+        });
     }
-    final ListenableFuture<Void> future = cohort.commit();
-    final ActorRef sender = getSender();
-    final ActorRef self = getSelf();
-    future.addListener(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          future.get();
-          sender.tell(new CommitTransactionReply(), self);
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e, "An exception happened when committing");
+
+    @Override
+    public void onReceive(Object message) throws Exception {
+        if (message instanceof CreateTransactionChain) {
+            createTransactionChain();
+        } else if (message instanceof RegisterChangeListener) {
+            registerChangeListener((RegisterChangeListener) message);
+        } else if (message instanceof UpdateSchemaContext) {
+            updateSchemaContext((UpdateSchemaContext) message);
+        } else if (message instanceof ForwardedCommitTransaction) {
+            handleForwardedCommit((ForwardedCommitTransaction) message);
+        } else if (message instanceof Persistent) {
+            commit((Persistent) message);
         }
-      }
-    }, getContext().dispatcher());
-  }
+    }
 
-  private void handleForwardedCommit(ForwardedCommitTransaction message) {
-    log.info("received forwarded transaction");
-    modificationToCohort.put(message.getModification(), message.getCohort());
-    getSelf().forward(Persistent.create(message.getModification()), getContext());
-  }
+    private void commit(Persistent message) {
+        Modification modification = (Modification) message.payload();
+        DOMStoreThreePhaseCommitCohort cohort =
+            modificationToCohort.remove(modification);
+        if (cohort == null) {
+            log.error(
+                "Could not find cohort for modification : " + modification);
+            return;
+        }
+        final ListenableFuture<Void> future = cohort.commit();
+        final ActorRef sender = getSender();
+        final ActorRef self = getSelf();
+        future.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.get();
+                    sender.tell(new CommitTransactionReply(), self);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e, "An exception happened when committing");
+                }
+            }
+        }, getContext().dispatcher());
+    }
 
-  private void updateSchemaContext(UpdateSchemaContext message) {
-    store.onGlobalContextUpdated(message.getSchemaContext());
-  }
+    private void handleForwardedCommit(ForwardedCommitTransaction message) {
+        log.info("received forwarded transaction");
+        modificationToCohort
+            .put(message.getModification(), message.getCohort());
+        getSelf().forward(Persistent.create(message.getModification()),
+            getContext());
+    }
 
-  private void registerChangeListener(RegisterChangeListener registerChangeListener) {
-    org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration =
-            store.registerChangeListener(registerChangeListener.getPath(), registerChangeListener.getListener(), registerChangeListener.getScope());
-    ActorRef listenerRegistration = getContext().actorOf(ListenerRegistration.props(registration));
-    getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
-  }
+    private void updateSchemaContext(UpdateSchemaContext message) {
+        store.onGlobalContextUpdated(message.getSchemaContext());
+    }
 
-  private void createTransactionChain() {
-    DOMStoreTransactionChain chain = store.createTransactionChain();
-    ActorRef transactionChain = getContext().actorOf(ShardTransactionChain.props(chain));
-    getSender().tell(new CreateTransactionChainReply(transactionChain.path()), getSelf());
-  }
+    private void registerChangeListener(
+        RegisterChangeListener registerChangeListener) {
+
+        ActorSelection listenerRegistrationActor = getContext()
+            .system().actorSelection(registerChangeListener.getDataChangeListenerPath());
+
+        AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>
+            listener = new ListenerProxy(listenerRegistrationActor);
+
+        org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
+            registration =
+            store.registerChangeListener(registerChangeListener.getPath(),
+                listener, registerChangeListener.getScope());
+        ActorRef listenerRegistration =
+            getContext().actorOf(ListenerRegistration.props(registration));
+        getSender()
+            .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
+                getSelf());
+    }
+
+    private void createTransactionChain() {
+        DOMStoreTransactionChain chain = store.createTransactionChain();
+        ActorRef transactionChain =
+            getContext().actorOf(ShardTransactionChain.props(chain));
+        getSender()
+            .tell(new CreateTransactionChainReply(transactionChain.path()),
+                getSelf());
+    }
 }
