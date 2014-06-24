@@ -109,6 +109,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c6d412bf",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-06-24T18:31:01Z",
+      "side": 1,
+      "message": "One thing that I can make work is just to create the new \"choice\" which will put it into a separate parent from Layer3Match collection. I just want to stay in the patterns set forth by the plugin team. I still need to get past that review when this is finished. If its something that hasn\u0027t been done before in the model and the plugin type checking then we will probably get a wtf :). On PTO today but will monitor email and what not if you want to see the following model and I will rearrange the ofplugin pieces to reflect it. Thanks.\n\n        choice tunnel-match-fields {\n            leaf tunnel-source {\n               uses tunnel-match-fields;\n            }\n            leaf tunnel-dst {\n               uses tunnel-match-fields;\n            }\n        }\n\n\n    grouping \"tunnel-match-fields\" {\n        leaf tunnel-ipv4-source {\n            description \"IPv4 source tunnel endpoint address.\";\n            type inet:ip-prefix;\n        }\n        leaf tunnel-ipv4-destination {\n            description \"IPv4 destination tunnel endpoint address.\";\n            type inet:ip-prefix;\n        }\n  }",
+      "parentUuid": "fa82b9bf_bb29eb38",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
