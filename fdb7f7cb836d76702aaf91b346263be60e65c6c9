@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fbd77349",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T07:12:01Z",
+      "side": 1,
+      "message": "would suggest structuring it like myprotocol:{node-id}:{connector-id}\n or even myprotocol:{node-id}/{connector-id}\n\nFuture Proofing: \nConsider using RFC6570 for format of URI templates.\nhttp://tools.ietf.org/html/rfc6570 (with custom extension we later could make components parseable and be able to validate them)",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9bc8a7a9",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T07:12:01Z",
+      "side": 1,
+      "message": "Also add that this could point only to instance of node... so it always point /nodes/node.\n\nUnfortunately YANG does not have statement which limits scope of instance-identifier to particular subtree. That is why this is type capture and not using instance-identifier directly.",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bbcd6bb9",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T07:12:01Z",
+      "side": 1,
+      "message": "Same as previous, but this one is /nodes/node[id\u003d{node-id}]/node-connector[id\u003d{node-connector-id}]",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
