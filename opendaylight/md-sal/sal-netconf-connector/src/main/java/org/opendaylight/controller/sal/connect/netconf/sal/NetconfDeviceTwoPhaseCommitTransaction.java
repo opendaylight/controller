@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connect.netconf.sal;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CONFIG_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DEFAULT_OPERATION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_EDIT_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_ERROR_OPTION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_OPERATION_QNAME;
@@ -17,13 +18,16 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_TARGET_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.ROLLBACK_ON_ERROR_OPTION;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.RpcErrors;
@@ -39,15 +43,12 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 /**
  *  Remote transaction that delegates data change to remote device using netconf messages.
@@ -87,17 +88,18 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
     }
 
     private void sendMerge(final InstanceIdentifier key, final CompositeNode value) throws InterruptedException, ExecutionException {
-        sendEditRpc(createEditConfigStructure(key, Optional.<String>absent(), Optional.of(value)));
+        sendEditRpc(createEditConfigStructure(key, Optional.<String>absent(), Optional.of(value)), Optional.<String>absent());
     }
 
     private void sendDelete(final InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
-        sendEditRpc(createEditConfigStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode>absent()));
+        // FIXME use org.opendaylight.yangtools.yang.data.api.ModifyAction instead of strings
+        // TODO add string lowercase value to ModifyAction enum entries
+        sendEditRpc(createEditConfigStructure(toDelete, Optional.of("delete"), Optional.<CompositeNode>absent()), Optional.of("none"));
     }
 
-    private void sendEditRpc(final CompositeNode editStructure) throws InterruptedException, ExecutionException {
-        final ImmutableCompositeNode editConfigRequest = createEditConfigRequest(editStructure);
+    private void sendEditRpc(final CompositeNode editStructure, final Optional<String> defaultOperation) throws InterruptedException, ExecutionException {
+        final ImmutableCompositeNode editConfigRequest = createEditConfigRequest(editStructure, defaultOperation);
         final RpcResult<CompositeNode> rpcResult = rpc.invokeRpc(NETCONF_EDIT_CONFIG_QNAME, editConfigRequest).get();
-        // TODO 874 add default operation when sending delete
 
         // Check result
         if(rpcResult.isSuccessful() == false) {
@@ -106,16 +108,26 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         }
     }
 
-    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure) {
+    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure, Optional<String> defaultOperation) {
         final CompositeNodeBuilder<ImmutableCompositeNode> ret = ImmutableCompositeNode.builder();
 
+        // Target
         final Node<?> targetWrapperNode = ImmutableCompositeNode.create(NETCONF_TARGET_QNAME, ImmutableList.<Node<?>>of(targetNode));
         ret.add(targetWrapperNode);
 
+        // Default operation
+        if(defaultOperation.isPresent()) {
+            SimpleNode<String> defOp = NodeFactory.createImmutableSimpleNode(NETCONF_DEFAULT_OPERATION_QNAME, null, defaultOperation.get());
+            ret.add(defOp);
+        }
+
+        // Error option
         if(rollbackSupported) {
             ret.addLeaf(NETCONF_ERROR_OPTION_QNAME, ROLLBACK_ON_ERROR_OPTION);
         }
+
         ret.setQName(NETCONF_EDIT_CONFIG_QNAME);
+        // Edit content
         ret.add(editStructure);
         return ret.toInstance();
     }

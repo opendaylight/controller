@@ -70,6 +70,8 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                     final DataNodeContainer schemaForEdit = NetconfMessageTransformUtil.createSchemaForEdit(schemaContext.get());
                     w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForEdit, codecProvider);
                 } else {
+                    // FIXME get and get-config needs schema as well to transform filter using schema context
+                    // e.g. Identityref nodes in filter fail to serialize properly to xml without schema
                     w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), codecProvider);
                 }
             } else {

@@ -48,16 +48,14 @@ public class NetconfMessageTransformUtil {
     private NetconfMessageTransformUtil() {
     }
 
-    public static final QName IETF_NETCONF_MONITORING = QName.create(
-            "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring", "2010-10-04", "ietf-netconf-monitoring");
+    public static final QName IETF_NETCONF_MONITORING = QName.create("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring", "2010-10-04", "ietf-netconf-monitoring");
     public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
     public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
     public static QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
     public static QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
     public static QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
     public static QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
-    static List<Node<?>> RUNNING = Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(NETCONF_RUNNING_QNAME,
-            null, null));
+    static List<Node<?>> RUNNING = Collections.<Node<?>> singletonList(new SimpleNodeTOImpl<>(NETCONF_RUNNING_QNAME, null, null));
     public static QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
     public static CompositeNode CONFIG_SOURCE_RUNNING = new CompositeNodeTOImpl(NETCONF_SOURCE_QNAME, null, RUNNING);
     public static QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
@@ -65,6 +63,7 @@ public class NetconfMessageTransformUtil {
     public static QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
     public static QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
     public static QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
+    public static QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
     public static QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
     public static QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
     public static QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
