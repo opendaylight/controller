@@ -11,13 +11,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.google.gson.stream.MalformedJsonException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
@@ -172,7 +173,7 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/empty-data1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
-            reason = e.getErrors().get( 0 ).getErrorMessage();
+            reason = e.getCause().getMessage();
         }
 
         assertTrue(reason.contains("Expected value at line"));
@@ -394,10 +395,12 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/unsupported-json-format.json", true,
                     JsonToCompositeNodeProvider.INSTANCE);
+            fail("RestconfDocumentedException should be raised here.");
         } catch (RestconfDocumentedException e) {
-            exceptionMessage = e.getErrors().get( 0 ).getErrorMessage();
+            exceptionMessage = e.getCause().getMessage();
+            assertEquals(MalformedJsonException.class, e.getCause().getClass());
+            assertTrue(exceptionMessage.contains("Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1"));
         }
-        assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }
 
 }
