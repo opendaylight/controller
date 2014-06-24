@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7b1fe308",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/test/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T07:36:37Z",
+      "side": 1,
+      "message": "Please remove this trailing whitespace.",
+      "revId": "29e25c39881f0f33e42dc485b8b236376a032be9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
