@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorPath;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
@@ -17,6 +18,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * The ListenerRegistrationProxy talks to a remote ListenerRegistration actor.
  */
 public class ListenerRegistrationProxy implements ListenerRegistration {
+    private final ActorPath listenerRegistrationPath;
+
+    public ListenerRegistrationProxy(ActorPath listenerRegistrationPath) {
+
+        this.listenerRegistrationPath = listenerRegistrationPath;
+    }
+
     @Override
     public Object getInstance() {
         throw new UnsupportedOperationException("getInstance");
