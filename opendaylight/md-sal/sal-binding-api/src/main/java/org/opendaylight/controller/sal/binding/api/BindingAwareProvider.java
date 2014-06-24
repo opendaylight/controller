@@ -15,37 +15,108 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
  *
- * Defines the component of controller and supplies additional metadata. A
- * component of the controller or application supplies a concrete implementation
- * of this interface.
+ * A developer implemented component that gets registered with the Broker.
  *
- * <p>
- * A user-implemented component (application) which facilitates the SAL and SAL
- * services to access infrastructure services and to provide functionality to
- * {@link Consumer}s and other providers.
+ * Semantically, a provider may:
  *
+ * <ol>
+ *   <li> Emit Notifications</li>
+ *   <li> Provide the implementation of RPCs </li>
+ *   <li> Write to the operational data tree </li>
+ * </ol>
+ *
+ * If a class is not doing at least one of those three, consider using
+ * a BindingAwareConsumer instead:
+ * @see org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
+ *
+ *In addition, a BindingAwareProvider can in pursuit of its goals:
+ *
+ * <ol>
+ *   <li>Subscribe for Notifications </li>
+ *   <li>Invoke RPCs</li>
+ *   <li>Read from either the operational or config data tree</li>
+ *   <li>Write to the config data tree</li>
+ * </ol>
+ * (All of the above are things a Consumer can also do).
+ *
+ * Examples:
+ *
+ * To get a NotificationService:
+ *
+ * {code
+ * public void onSessionInitiated(ProviderContext session) {
+ *      NotificationProviderService notificationService = session.<NotificationProviderService> getSALService(NotificationProviderService.class);
+ * }
+ * For more information on sending notifications via the NotificationProviderService
+ * @see org.opendaylight.controller.sal.binding.api.NotificationProviderService
+ *
+ * To register an RPC implementation:
+ *
+ * {code
+ * public void onSessionInitiated(ProviderContext session) {
+ *    RpcRegistration<MyService> registration = session.addRpcImplementation(MyService.class, myImplementationInstance);
+ * }
+ *
+ * Where MyService.class is a Service interface generated from a yang model with RPCs modeled in it and myImplementationInstance
+ * is an instance of a class that implements MyService.
+ *
+ * To register a Routed RPC Implementation:
+ * {code
+ * public void onSessionInitiated(ProviderContext session) {
+ *   RoutedRpcRegistration<SalFlowService> flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class, salFlowServiceImplementationInstance);
+     flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
+ * }
+ * }
+ *
+ * Where SalFlowService.class is a Service interface generated from a yang model with RPCs modeled in it and salFlowServiceImplementationInstance is an instance
+ * of a class that implements SalFlowService.
+ * The line:
+ * {code
+ * flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
+ * }
+ * Is indicating that the RPC implementation is registered to handle RPC invocations that have their NodeContext pointing to the node with instance id nodeInstanceId.
+ * This bears a bit of further explanation.  RoutedRPCs can be 'routed' to an implementation based upon 'context'.  'context' is a pointer (instanceId) to some place
+ * in the data tree.  In this example, the 'context' is a pointer to a Node.  In this way, a provider can register its ability to provide a service for a particular
+ * Node, but not *all* Nodes.  The Broker routes the RPC by 'context' to the correct implementation, without the caller having to do extra work.  Because of this when
+ * a RoutedRPC is registered, it needs to also be able to indicate for which 'contexts' it is providing an implementation.
+ *
+ * To get a DataBroker to allow access to the data tree:
+ *
+ * {code
+ * public void onSessionInitiated(final ProviderContext session) {
+ *      BindingDataBroker databroker = session.<BindingDataBroker>getSALService(BindingDataBroker.class);
+ * }
+ * }
+ * @see org.opendaylight.controller.md.sal.common.api.data.BindingDataBroker
+ * for more info on using the DataBroker.
  *
  */
 public interface BindingAwareProvider {
 
     /**
-     * Returns a set of provided implementations of YANG modules and their rpcs.
+     * @deprecated
      *
-     *
-     * @return Set of provided implementation of YANG modules and their Rpcs
+     * Recommend:
+     * {code
+     * public Collection<? extends RpcService> getImplementations() {
+     *   return Collections.emptySet();
+     * }
+     * }
      */
+    @Deprecated
     Collection<? extends RpcService> getImplementations();
 
     /**
-     * Gets a set of implementations of provider functionality to be registered
-     * into system during the provider registration to the SAL.
+     * @deprecated
+     * Recommend:
+     * {code
+     * public Collection<? extends ProviderFunctionality> getFunctionality() {
+     *   return Collections.emptySet();
+     * }
+     * }
      *
-     * <p>
-     * This method is invoked by {@link Broker#registerProvider(Provider)} to
-     * learn the initial provided functionality
-     *
-     * @return Set of provider's functionality.
      */
+    @Deprecated
     Collection<? extends ProviderFunctionality> getFunctionality();
 
     /**
@@ -58,12 +129,33 @@ public interface BindingAwareProvider {
      *
      *
      */
+    @Deprecated
     public interface ProviderFunctionality {
 
     }
-
+    /**
+     * Callback signaling initialization of the consumer session to the SAL.
+     *
+     * The consumer MUST use the session for all communication with SAL or
+     * retrieving SAL infrastructure services.
+     *
+     * This method is invoked by
+     * {@link BindingAwareBroker#registerProvider(BindingAwareProvider)}
+     *
+     * @param session Unique session between consumer and SAL.
+     */
     void onSessionInitiated(ProviderContext session);
 
+    /*
+     * @deprecated
+     * Recommend:
+     * {code
+     * public final void onSessionInitialized(ConsumerContext session) {
+     *   // NOOP - as method is deprecated
+     * }
+     * }
+     */
+    @Deprecated
     void onSessionInitialized(ConsumerContext session);
 
 }
