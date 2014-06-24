@@ -85,6 +85,7 @@ public class RestconfImpl implements RestconfService {
     private final static String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
     private final static String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
+    static final  String DELETING_TARGET_MISSING_TAG = "deleting-target-missing";
 
     private BrokerFacade broker;
 
@@ -827,6 +828,10 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException( "Error creating data", e );
         }
 
+        Collection<RpcError> errors = status.getErrors();
+        if (errors != null && !errors.isEmpty() && errors.iterator().next().getTag().equals(DELETING_TARGET_MISSING_TAG)) {
+            return Response.status(Status.NO_CONTENT).build();
+        }
         if( status.getResult() == TransactionStatus.COMMITED )
             return Response.status(Status.OK).build();
 
