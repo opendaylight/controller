@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket;
 /**
  * Exception class which provides notification about exceptional situations at the virtual socket layer.
  */
+// FIXME: Switch to checked exception, create a runtime exception to workaround Socket API
 public class VirtualSocketException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 }
