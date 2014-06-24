@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_db4cefa0",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T12:43:26Z",
+      "side": 1,
+      "message": "What we do today for openflow is myprotocol:\u003cnode-id\u003e:\u003cconnector-id\u003e but in talking with Ed we felt this was unnecessarily redundant because you always access a node connector in the context of a node already. for example:\n\nopenflow:12/openflow:12:3\n\nIn this case the thought was that the second \":12\" was not necessary.",
+      "parentUuid": "fa82b9bf_fbd77349",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9bc8a7a9",
         "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fb51b336",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T12:43:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9bc8a7a9",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bbcd6bb9",
         "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-24T07:12:01Z",
       "side": 1,
       "message": "Same as previous, but this one is /nodes/node[id\u003d{node-id}]/node-connector[id\u003d{node-connector-id}]",
+      "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9b42e766",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T12:43:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bbcd6bb9",
       "revId": "fdb7f7cb836d76702aaf91b346263be60e65c6c9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
