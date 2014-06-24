@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bb29eb38",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-06-24T07:36:00Z",
+      "side": 1,
+      "message": "I gave it a shot and see why the other data structures that are similar in nature (ARP, IPv4 match etc) don\u0027t refer to a type in the choice/case. It seems the parent object (TunnelIpv4MatchEntry) isn\u0027t created. Too many data types to try and convey in the review ( https://www.dropbox.com/s/o2vsgzbhgrwvfwr/Screenshot%202014-06-24%2003.25.18.png )\n\nA couple of other messages and details.\nhttps://www.dropbox.com/s/5t482bf9e7q7a8v/Screenshot%202014-06-24%2003.22.56.png\n\nhttps://www.dropbox.com/s/zg1eqfo2gt4mmjd/Screenshot%202014-06-24%2003.23.20.png\n\nIf ok, I would ask if we could merge it for now and as soon as the extensibility is worked out we will pull it out ASAP into a separate project from controller (I am making an assumption thats doable to have an external model) as we are with ofjava/ofplugin. Changing and debugging these are pretty time intensive. Each change in the model like this requires a good deal of type checking that is easily a 3-4 hour adventure and time is scarce as we know. Here is the problematic type conversion MatchConvertorImpl.class \nhttps://gist.github.com/522aa95e493b6c5a0618\n\nand the Model w/ the review recommendations and the grouping commented out since it was no longer being referenced by the \"choice\":\nhttps://gist.github.com/90785e6b15b758d0da98\n\nThanks,\n-Brent",
+      "parentUuid": "fa82b9bf_bea00744",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
