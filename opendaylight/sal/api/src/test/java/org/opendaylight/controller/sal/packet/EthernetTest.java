@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,9 +9,14 @@
 
 package org.opendaylight.controller.sal.packet;
 
+import java.util.Arrays;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 
 public class EthernetTest {
 
@@ -92,6 +97,24 @@ public class EthernetTest {
         byte[] etherType = eth.hdrFieldsMap.get("EtherType");
         Assert.assertTrue(etherType[0] == 8);
         Assert.assertTrue(etherType[1] == 6);
+
+    }
+
+    @Test
+    public void testGetMatch() throws Exception {
+        Ethernet eth = new Ethernet();
+        byte smac[] = { (byte) 0xf0, (byte) 0xde, (byte) 0xf1, (byte) 0x71, (byte) 0x72, (byte) 0x8d };
+        byte dmac[] = { (byte) 0xde, (byte) 0x28, (byte) 0xdb, (byte) 0xb3, (byte) 0x7c, (byte) 0xf8 };
+        short ethType = EtherTypes.IPv4.shortValue();
+        eth.setDestinationMACAddress(dmac);
+        eth.setSourceMACAddress(smac);
+        eth.setEtherType(ethType);
+
+        Match match = eth.getMatch();
+
+        Assert.assertTrue(Arrays.equals(smac, (byte[]) match.getField(MatchType.DL_SRC).getValue()));
+        Assert.assertTrue(Arrays.equals(dmac, (byte[]) match.getField(MatchType.DL_DST).getValue()));
+        Assert.assertEquals(ethType, (short) match.getField(MatchType.DL_TYPE).getValue());
 
     }
 

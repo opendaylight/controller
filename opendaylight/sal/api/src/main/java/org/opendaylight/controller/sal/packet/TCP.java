@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 
 /**
  * Class that represents the TCP segment objects
@@ -238,4 +240,9 @@ public class TCP extends Packet {
         return (BitBufferHelper.getShort(fieldValues.get(CHECKSUM)));
     }
 
+    @Override
+    public void populateMatch(Match match) {
+        match.setField(MatchType.TP_SRC, this.getSourcePort());
+        match.setField(MatchType.TP_DST, this.getDestinationPort());
+    }
 }
