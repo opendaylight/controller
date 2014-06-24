@@ -57,11 +57,14 @@
     <!-- Clustering -->
     <module>remoterpc-routingtable/implementation</module>
     <module>sal-remoterpc-connector/implementation</module>
+
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
 
-    <!--  Karaf feature -->
-    <module>feature</module>
+    <!--InMemory DOM DataStore-->
+    <module>sal-inmemory-datastore</module>
+    <!--sal-protocolbuffer-encoding-->
+    <module>sal-protocolbuffer-encoding</module>
 
   </modules>
 
