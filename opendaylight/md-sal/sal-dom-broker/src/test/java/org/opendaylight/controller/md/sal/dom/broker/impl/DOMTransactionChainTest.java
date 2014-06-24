@@ -105,27 +105,28 @@ public class DOMTransactionChainTest {
         DOMDataReadWriteTransaction thirdDeleteTx = allocateAndDelete(txChain);
 
         /**
-         * third transaction is sealed.
-         */
-        ListenableFuture<RpcResult<TransactionStatus>> thirdDeleteTxFuture = thirdDeleteTx.commit();
-
-        /**
          * We commit first transaction
          *
          */
         assertCommitSuccessful(firstWriteTxFuture);
 
-        // Alocates store transaction
+        /**
+         *
+         * Allocates transaction from data store.
+         *
+         */
         DOMDataReadTransaction storeReadTx = domBroker.newReadOnlyTransaction();
+
         /**
          * We verify transaction is commited to store, container should exists
          * in datastore.
          */
         assertTestContainerExists(storeReadTx);
+
         /**
-         * We commit third transaction
-         *
+         * third transaction is sealed and commited
          */
+        ListenableFuture<RpcResult<TransactionStatus>> thirdDeleteTxFuture = thirdDeleteTx.commit();
         assertCommitSuccessful(thirdDeleteTxFuture);
 
         /**
