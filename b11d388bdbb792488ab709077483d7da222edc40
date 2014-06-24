@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b463b50",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T06:46:15Z",
+      "side": 1,
+      "message": "Please replace tabs for spaces, remove tabs / spaces on empty lines, remove trailing whitespaces.",
+      "revId": "b11d388bdbb792488ab709077483d7da222edc40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
