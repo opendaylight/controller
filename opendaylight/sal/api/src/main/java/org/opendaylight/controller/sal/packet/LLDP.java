@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 
@@ -257,5 +259,10 @@ public class LLDP extends Packet {
         len += LLDP.emptyTLV.getTLVSize();
 
         return len / NetUtils.NumBitsInAByte;
+    }
+
+    @Override
+    public void populateMatch(Match match) {
+        // no LLDP specific fields in Match
     }
 }

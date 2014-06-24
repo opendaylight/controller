@@ -12,6 +12,8 @@ package org.opendaylight.controller.sal.packet;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 
 public class TCPTest {
 
@@ -112,5 +114,19 @@ public class TCPTest {
         tcp.hdrFieldsMap.put("Checksum", udpChecksum);
         short checksum = tcp.getChecksum();
         Assert.assertTrue(checksum == 200);
+    }
+
+    @Test
+    public void testGetMatch() throws Exception {
+        TCP tcp = new TCP();
+        short sport = (short) 52012;
+        short dport = (short) 40345;
+        tcp.setSourcePort(sport);
+        tcp.setDestinationPort(dport);
+
+        Match match = tcp.getMatch();
+
+        Assert.assertEquals(sport, (short) match.getField(MatchType.TP_SRC).getValue());
+        Assert.assertEquals(dport, (short) match.getField(MatchType.TP_DST).getValue());
     }
 }

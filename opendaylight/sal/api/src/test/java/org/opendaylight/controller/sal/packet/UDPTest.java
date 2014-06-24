@@ -12,6 +12,8 @@ package org.opendaylight.controller.sal.packet;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 
 public class UDPTest {
 
@@ -92,6 +94,21 @@ public class UDPTest {
         byte[] checksum = udp.hdrFieldsMap.get("Checksum");
         Assert.assertTrue(checksum[0] == 0);
         Assert.assertTrue(checksum[1] == -56);
+
+    }
+
+    @Test
+    public void testGetMatch() throws Exception {
+        UDP udp = new UDP();
+        short sport = (short) 33000;
+        short dport = (short) 843;
+        udp.setSourcePort(sport);
+        udp.setDestinationPort(dport);
+
+        Match match = udp.getMatch();
+
+        Assert.assertEquals(sport, (short) match.getField(MatchType.TP_SRC).getValue());
+        Assert.assertEquals(dport, (short) match.getField(MatchType.TP_DST).getValue());
 
     }
 

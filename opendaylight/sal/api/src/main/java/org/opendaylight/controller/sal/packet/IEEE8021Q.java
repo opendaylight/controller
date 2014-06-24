@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 
 /**
  * Class that represents the IEEE 802.1Q objects
@@ -148,4 +150,10 @@ public class IEEE8021Q extends Packet {
         return this;
     }
 
+    @Override
+    public void populateMatch(Match match) {
+        match.setField(MatchType.DL_VLAN, this.getVid());
+        match.setField(MatchType.DL_VLAN_PR, this.getPcp());
+        match.setField(MatchType.DL_TYPE, this.getEtherType());
+    }
 }

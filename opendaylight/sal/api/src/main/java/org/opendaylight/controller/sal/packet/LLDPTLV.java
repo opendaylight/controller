@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 
@@ -151,18 +152,23 @@ public class LLDPTLV extends Packet {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         LLDPTLV other = (LLDPTLV) obj;
         if (fieldValues == null) {
-            if (other.fieldValues != null)
+            if (other.fieldValues != null) {
                 return false;
-        } else if (!fieldValues.equals(other.fieldValues))
+            }
+        } else if (!fieldValues.equals(other.fieldValues)) {
             return false;
+        }
         return true;
     }
 
@@ -330,5 +336,10 @@ public class LLDPTLV extends Packet {
         }
 
         return customString;
+    }
+
+    @Override
+    public void populateMatch(Match match) {
+        // no LLDPTLV specific fields in Match
     }
 }

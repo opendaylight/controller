@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
@@ -233,5 +234,10 @@ public class ICMP extends Packet {
      */
     public short getChecksum() {
         return (BitBufferHelper.getShort(fieldValues.get(CHECKSUM)));
+    }
+
+    @Override
+    public void populateMatch(Match match) {
+        // no ICMP specific fields in Match
     }
 }
