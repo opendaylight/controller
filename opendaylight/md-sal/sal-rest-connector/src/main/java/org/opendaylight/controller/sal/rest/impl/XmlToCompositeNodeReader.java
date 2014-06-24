@@ -28,19 +28,19 @@ import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.data.api.Node;
 
-public class XmlReader {
+public class XmlToCompositeNodeReader {
 
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     private XMLEventReader eventReader;
 
-    public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException,
-                                                                      UnsupportedFormatException,
-                                                                      IOException {
-        //Get an XML stream which can be marked, and reset, so we can check and see if there is
-        //any content being provided.
+    public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException,
+            IOException {
+        // Get an XML stream which can be marked, and reset, so we can check and
+        // see if there is
+        // any content being provided.
         entityStream = getMarkableStream(entityStream);
 
-        if( isInputStreamEmpty( entityStream ) ) {
+        if (isInputStreamEmpty(entityStream)) {
             return null;
         }
 
@@ -103,24 +103,24 @@ public class XmlReader {
     }
 
     /**
-     * If the input stream is not markable, then it wraps the input stream with a buffered stream,
-     * which is mark able. That way we can check if the stream is empty safely.
+     * If the input stream is not markable, then it wraps the input stream with
+     * a buffered stream, which is mark able. That way we can check if the
+     * stream is empty safely.
+     *
      * @param entityStream
      * @return
      */
     private InputStream getMarkableStream(InputStream entityStream) {
-        if( !entityStream.markSupported() )
-        {
-            entityStream = new BufferedInputStream( entityStream );
+        if (!entityStream.markSupported()) {
+            entityStream = new BufferedInputStream(entityStream);
         }
         return entityStream;
     }
 
-    private boolean isInputStreamEmpty(InputStream entityStream)
-            throws IOException {
+    private boolean isInputStreamEmpty(InputStream entityStream) throws IOException {
         boolean isEmpty = false;
-        entityStream.mark( 1 );
-        if( entityStream.read() == -1 ){
+        entityStream.mark(1);
+        if (entityStream.read() == -1) {
             isEmpty = true;
         }
         entityStream.reset();
@@ -131,7 +131,7 @@ public class XmlReader {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
             XMLEvent innerEvent = skipCommentsAndWhitespace();
-            if ( innerEvent != null && (innerEvent.isCharacters() || innerEvent.isEndElement())) {
+            if (innerEvent != null && (innerEvent.isCharacters() || innerEvent.isEndElement())) {
                 return true;
             }
         }
@@ -142,7 +142,7 @@ public class XmlReader {
         checkArgument(event != null, "XML Event cannot be NULL!");
         if (event.isStartElement()) {
             XMLEvent innerEvent = skipCommentsAndWhitespace();
-            if( innerEvent != null ) {
+            if (innerEvent != null) {
                 if (innerEvent.isStartElement()) {
                     return true;
                 }
@@ -152,16 +152,16 @@ public class XmlReader {
     }
 
     private XMLEvent skipCommentsAndWhitespace() throws XMLStreamException {
-        while( eventReader.hasNext() ) {
+        while (eventReader.hasNext()) {
             XMLEvent event = eventReader.peek();
-            if( event.getEventType() == XMLStreamConstants.COMMENT ) {
+            if (event.getEventType() == XMLStreamConstants.COMMENT) {
                 eventReader.nextEvent();
                 continue;
             }
 
-            if( event.isCharacters() ) {
+            if (event.isCharacters()) {
                 Characters chars = event.asCharacters();
-                if( chars.isWhiteSpace() ) {
+                if (chars.isWhiteSpace()) {
                     eventReader.nextEvent();
                     continue;
                 }
@@ -235,7 +235,8 @@ public class XmlReader {
     private Object resolveValueOfElement(String value, StartElement startElement) {
         // it could be instance-identifier Built-In Type
         if (value.startsWith("/")) {
-            IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(startElement));
+            IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(
+                    startElement));
             if (iiValue != null) {
                 return iiValue;
             }
@@ -245,7 +246,7 @@ public class XmlReader {
         if (namespaceAndValue.length == 2) {
             String namespace = startElement.getNamespaceContext().getNamespaceURI(namespaceAndValue[0]);
             if (namespace != null && !namespace.isEmpty()) {
-                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0],value);
+                return new IdentityValuesDTO(namespace, namespaceAndValue[1], namespaceAndValue[0], value);
             }
         }
         // it is not "prefix:value" but just "value"

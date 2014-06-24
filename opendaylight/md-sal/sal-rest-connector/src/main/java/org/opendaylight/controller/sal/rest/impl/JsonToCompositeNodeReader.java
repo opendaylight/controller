@@ -7,33 +7,34 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.stream.JsonReader;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.controller.sal.rest.gson.JsonParser;
 import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-
-class JsonReader {
+class JsonToCompositeNodeReader {
 
     public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
 
-        JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
-        if( rootElement.isJsonNull() )
-        {
-            //no content, so return null to indicate no input
+        JsonElement rootElement = parser.parse(new JsonReader(
+                                                    new InputStreamReader(entityStream)));
+        if (rootElement.isJsonNull()) {
+            // no content, so return null to indicate no input
             return null;
         }
 
@@ -77,7 +78,8 @@ class JsonReader {
 
     private void addChildToParent(String childName, JsonElement childType, CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName));
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
+                    getLocalNameFor(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
@@ -128,7 +130,7 @@ class JsonReader {
         // it could be identityref Built-In Type
         URI namespace = getNamespaceFor(value);
         if (namespace != null) {
-            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null,value);
+            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null, value);
         }
         // it is not "prefix:value" but just "value"
         return value;

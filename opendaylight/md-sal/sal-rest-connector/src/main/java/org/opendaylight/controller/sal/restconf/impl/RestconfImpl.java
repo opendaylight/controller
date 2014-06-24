@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import javax.ws.rs.core.Response;
@@ -665,8 +666,9 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException( "Error updating data", e );
         }
 
-        if( status.getResult() == TransactionStatus.COMMITED )
+        if( status.getResult() == TransactionStatus.COMMITED ) {
             return Response.status(Status.OK).build();
+        }
 
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -746,8 +748,9 @@ public class RestconfImpl implements RestconfService {
             return Response.status(Status.ACCEPTED).build();
         }
 
-        if( status.getResult() == TransactionStatus.COMMITED )
+        if( status.getResult() == TransactionStatus.COMMITED ) {
             return Response.status(Status.NO_CONTENT).build();
+        }
 
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -803,8 +806,9 @@ public class RestconfImpl implements RestconfService {
             return Response.status(Status.ACCEPTED).build();
         }
 
-        if( status.getResult() == TransactionStatus.COMMITED )
+        if( status.getResult() == TransactionStatus.COMMITED ) {
             return Response.status(Status.NO_CONTENT).build();
+        }
 
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -828,8 +832,9 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException( "Error creating data", e );
         }
 
-        if( status.getResult() == TransactionStatus.COMMITED )
+        if( status.getResult() == TransactionStatus.COMMITED ) {
             return Response.status(Status.OK).build();
+        }
 
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -1110,6 +1115,7 @@ public class RestconfImpl implements RestconfService {
                                          DataNodeContainer schema, MountInstance mountPoint,
                                          QName currentAugment ) {
         final List<NodeWrapper<?>> children = compositeNodeBuilder.getValues();
+        checkNodeMultiplicityAccordingToSchema(schema,children);
         for (final NodeWrapper<? extends Object> child : children) {
             final List<DataSchemaNode> potentialSchemaNodes =
                     this.controllerContext.findInstanceDataChildrenByName(
@@ -1165,6 +1171,29 @@ public class RestconfImpl implements RestconfService {
                                    "Missing key in URI \"" + listKey.getLocalName() +
                                    "\" of list \"" + listSchemaNode.getQName().getLocalName() + "\"",
                                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
+                }
+            }
+        }
+    }
+
+    private void checkNodeMultiplicityAccordingToSchema(final DataNodeContainer dataNodeContainer,
+            final List<NodeWrapper<?>> nodes) {
+        Map<String, Integer> equalNodeNamesToCounts = new HashMap<String, Integer>();
+        for (NodeWrapper<?> child : nodes) {
+            Integer count = equalNodeNamesToCounts.get(child.getLocalName());
+            equalNodeNamesToCounts.put(child.getLocalName(), count == null ? 1 : ++count);
+        }
+
+        for (DataSchemaNode childSchemaNode : dataNodeContainer.getChildNodes()) {
+            if (childSchemaNode instanceof ContainerSchemaNode || childSchemaNode instanceof LeafSchemaNode) {
+                String localName = childSchemaNode.getQName().getLocalName();
+                Integer count = equalNodeNamesToCounts.get(localName);
+                if (count != null && count > 1) {
+                    throw new RestconfDocumentedException(
+                            "Multiple input data elements were specified for '"
+                            + childSchemaNode.getQName().getLocalName()
+                            + "'. The data for this element type can only be specified once.",
+                            ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT);
                 }
             }
         }
