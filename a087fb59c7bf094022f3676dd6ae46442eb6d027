@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_86cdaa87",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareConsumer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T16:02:27Z",
+      "side": 1,
+      "message": "\u003cNotificationProviderService\u003e is unnecessary.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c6b732f4",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareConsumer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T16:02:27Z",
+      "side": 1,
+      "message": "second spelling of \u003cMyService\u003e is unnecessary..",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_26c61e69",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareConsumer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T16:02:27Z",
+      "side": 1,
+      "message": "\u003cBindingDataBroker\u003e is unnecessary.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_06c2fa58",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T16:02:27Z",
+      "side": 1,
+      "message": "use \u003cp\u003e to start new paragraph.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_46c32257",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-24T16:02:27Z",
+      "side": 1,
+      "message": "\u003cNotificationProviderService\u003e is unnecessary.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
