@@ -20,7 +20,6 @@
                 </capability>
                 <capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2010-09-24
                 </capability>
-                <capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
                 <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2010-09-24
                 </capability>
                 <capability>
