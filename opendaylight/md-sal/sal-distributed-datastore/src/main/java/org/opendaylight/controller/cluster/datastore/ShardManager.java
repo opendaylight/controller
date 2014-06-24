@@ -19,6 +19,7 @@ import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +93,9 @@ public class ShardManager extends UntypedActor {
       } else {
         getSender().tell(new PrimaryNotFound(shardName), getSelf());
       }
+    } else if(message instanceof UpdateSchemaContext){
+        // FIXME : Notify all local shards of a context change
+        getContext().system().actorSelection(defaultShardPath).forward(message, getContext());
     }
   }
 
