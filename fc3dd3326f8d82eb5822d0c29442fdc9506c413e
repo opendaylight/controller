@@ -16,6 +16,24 @@
       "revId": "fc3dd3326f8d82eb5822d0c29442fdc9506c413e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3ba87b76",
+        "filename": "opendaylight/netconf/netconf-ssh/src/main/java/org/opendaylight/controller/netconf/ssh/threads/Handshaker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-06-24T08:59:07Z",
+      "side": 1,
+      "message": "This error occurs when TCP connection is established but the client does not comply with ssh protocol, e.g. using nmap, telnet.. There is no way in ganymed to distinguish port scanners from malformed ssh clients (see bug report).",
+      "parentUuid": "fa82b9bf_3b507bd3",
+      "revId": "fc3dd3326f8d82eb5822d0c29442fdc9506c413e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
