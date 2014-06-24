@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9810ad5a",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/AbstractChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "inconsistent use of spaces",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b815714a",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/AbstractChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "abstract methods should be documented as it they were in an interface: add javadoc",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_580ea53c",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FRMActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "use of spaces before/after parentheses is discouraged",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_38016106",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowCookieManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "invert the condition, make the \u0027else\u0027 branch the short one",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fb06931c",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowCookieManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "Collections.singletonList()",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9b074718",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "can the provider be null? if not then Preconditions.checkNotNull()",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7b128358",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "skip builder() -- use InstanceIdentifier.child(), which is much more efficient for this case.\n\napplies to other instances, too",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1b1b3774",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "JLS order is \"static final\", sonar warning",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b187b74",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "can these be null?",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_db286f88",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "drop \u003cSalFlowService\u003e, it is overly verbose",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5b3c5fc8",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "Unused declared Exception -- just don\u0027t",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9b1e675e",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "Move catch into the if block to make it clear",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bb232ba6",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "Use do not use RuntimeException, but rather IllegalStateException.",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7b3923d6",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/flow/FlowChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-24T06:16:03Z",
+      "side": 1,
+      "message": "can this be null?",
+      "revId": "2bf8d51cae883ef9fe82ae6162db95633b8be7d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
