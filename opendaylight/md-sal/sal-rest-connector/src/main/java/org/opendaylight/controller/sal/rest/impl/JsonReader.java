@@ -7,30 +7,28 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Map.Entry;
 import java.util.Set;
-
+import org.opendaylight.controller.sal.rest.gson.JsonParser;
 import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-
 class JsonReader {
 
     public CompositeNodeWrapper read(InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
 
-        JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
+        JsonElement rootElement = parser.parse(new com.google.gson.stream.JsonReader(new InputStreamReader(entityStream)));
         if( rootElement.isJsonNull() )
         {
             //no content, so return null to indicate no input

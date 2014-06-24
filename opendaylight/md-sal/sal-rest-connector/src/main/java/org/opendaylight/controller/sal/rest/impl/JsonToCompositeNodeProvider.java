@@ -11,14 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -34,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
-    private final static Logger LOG = LoggerFactory.getLogger( JsonToCompositeNodeProvider.class );
+    private final static Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeProvider.class);
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -49,10 +47,9 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
         try {
             return jsonReader.read(entityStream);
         } catch (Exception e) {
-            LOG.debug( "Error parsing json input", e );
-            throw new RestconfDocumentedException(
-                            "Error parsing input: " + e.getMessage(),
-                            ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE );
+            LOG.debug("Error parsing json input", e);
+            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE);
         }
     }
 
