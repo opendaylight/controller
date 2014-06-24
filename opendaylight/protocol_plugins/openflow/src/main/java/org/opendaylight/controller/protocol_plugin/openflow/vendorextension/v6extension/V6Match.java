@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -68,6 +68,16 @@ public class V6Match extends OFMatch implements Cloneable {
     protected short pad_size = 0;
 
     private static int IPV6_EXT_MIN_HDR_LEN = 36;
+
+    /**
+     * CFI bit in VLAN TCI field.
+     */
+    private static final int  VLAN_TCI_CFI = 1 << 12;
+
+    /**
+     * Value of OFP_VLAN_NONE defined by OpenFlow 1.0.
+     */
+    private static final short  OFP_VLAN_NONE = (short) 0xffff;
 
     private enum MatchFieldState {
         MATCH_ABSENT, MATCH_FIELD_ONLY, MATCH_FIELD_WITH_MASK
@@ -334,11 +344,15 @@ public class V6Match extends OFMatch implements Cloneable {
     private byte[] getVlanTCI(short dataLayerVirtualLanID,
             byte dataLayerVirtualLanPriorityCodePoint) {
         ByteBuffer vlan_tci = ByteBuffer.allocate(2);
-        int cfi = 1 << 12; // the cfi bit is in position 12
-        int pcp = dataLayerVirtualLanPriorityCodePoint << 13; // the pcp fields
-                                                              // have to move by
-                                                              // 13
-        int vlan_tci_int = pcp + cfi + dataLayerVirtualLanID;
+        int vlan_tci_int;
+        if (dataLayerVirtualLanID == OFP_VLAN_NONE) {
+            // Match only packets without VLAN tag.
+            vlan_tci_int = 0;
+        } else {
+             // the pcp fields have to move by 13
+            int pcp = dataLayerVirtualLanPriorityCodePoint << 13;
+            vlan_tci_int = pcp + VLAN_TCI_CFI + dataLayerVirtualLanID;
+        }
         vlan_tci.put((byte) (vlan_tci_int >> 8)); // bits 8 to 15
         vlan_tci.put((byte) vlan_tci_int); // bits 0 to 7
         return vlan_tci.array();
@@ -542,7 +556,12 @@ public class V6Match extends OFMatch implements Cloneable {
                 ethTypeState = MatchFieldState.MATCH_FIELD_ONLY;
                 match_len += 6;
             } else if (values[0].equals(STR_DL_VLAN)) {
-                this.dataLayerVirtualLan = U16.t(Integer.valueOf(values[1]));
+                short vlan = U16.t(Integer.valueOf(values[1]));
+                if (this.dlVlanPCPState != MatchFieldState.MATCH_ABSENT &&
+                    vlan == OFP_VLAN_NONE) {
+                    throw new IllegalArgumentException("DL_VLAN_PCP is set.");
+                }
+                this.dataLayerVirtualLan = vlan;
                 this.dlVlanIDState = MatchFieldState.MATCH_FIELD_ONLY;
                 // the variable dlVlanIDState is not really used as a flag
                 // for serializing and deserializing. Rather it is used as a
@@ -552,6 +571,9 @@ public class V6Match extends OFMatch implements Cloneable {
                 if (this.dlVlanPCPState != MatchFieldState.MATCH_ABSENT) {
                     this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
                     match_len -= 2;
+                } else if (this.dataLayerVirtualLan == OFP_VLAN_NONE) {
+                    this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+                    match_len += 6;
                 } else {
                     this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                     this.dataLayerVirtualLanTCIMask = 0x1fff;
@@ -559,6 +581,11 @@ public class V6Match extends OFMatch implements Cloneable {
                 }
                 this.wildcards &= ~OFPFW_DL_VLAN;
             } else if (values[0].equals(STR_DL_VLAN_PCP)) {
+                if (this.dlVlanIDState != MatchFieldState.MATCH_ABSENT &&
+                    this.dataLayerVirtualLan == OFP_VLAN_NONE) {
+                    throw new IllegalArgumentException
+                        ("OFP_VLAN_NONE is specified to DL_VLAN.");
+                }
                 this.dataLayerVirtualLanPriorityCodePoint = U8.t(Short
                         .valueOf(values[1]));
                 this.dlVlanPCPState = MatchFieldState.MATCH_FIELD_ONLY;
@@ -858,12 +885,20 @@ public class V6Match extends OFMatch implements Cloneable {
                 // get the vlan pcp
                 byte firstByte = data.get();
                 byte secondByte = data.get();
-                super.setDataLayerVirtualLanPriorityCodePoint(getVlanPCP(firstByte));
-                super.setDataLayerVirtualLan(getVlanID(firstByte, secondByte));
+                if (firstByte == 0 && secondByte == 0) {
+                    // Match only packets without VLAN tag.
+                    setDataLayerVirtualLan(OFP_VLAN_NONE);
+                } else if (((firstByte << 8) & VLAN_TCI_CFI) == 0) {
+                    // Ignore invalid TCI field.
+                    return;
+                } else {
+                    super.setDataLayerVirtualLanPriorityCodePoint(getVlanPCP(firstByte));
+                    super.setDataLayerVirtualLan(getVlanID(firstByte, secondByte));
+                    this.wildcards ^= (1 << 20);
+                }
                 this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.match_len += 6;
                 this.wildcards ^= (1 << 1); // Sync with 0F 1.0 Match
-                this.wildcards ^= (1 << 20);
             }
         }
     }
@@ -1241,7 +1276,6 @@ public class V6Match extends OFMatch implements Cloneable {
      *
      * @return
      */
-
     public Inet6Address getNetworkDest() {
         return this.nwDst;
     }
@@ -1251,7 +1285,6 @@ public class V6Match extends OFMatch implements Cloneable {
      *
      * @return
      */
-
     public Inet6Address getNetworkSrc() {
         return this.nwSrc;
     }
@@ -1316,7 +1349,19 @@ public class V6Match extends OFMatch implements Cloneable {
         }
     }
 
+    /**
+     * Set a value to VLAN ID match field.
+     *
+     * @param vlan  A value to match for VLAN ID.
+     * @param mask  A bitmask for VLAN ID.
+     */
     public void setDataLayerVirtualLan(short vlan, short mask) {
+        if (vlan == OFP_VLAN_NONE
+                && this.dlVlanIDState != MatchFieldState.MATCH_ABSENT) {
+            throw new IllegalStateException
+                ("DL_VLAN_PCP is set.");
+        }
+
         // mask is ignored as the code sets the appropriate mask
         super.dataLayerVirtualLan = vlan;
         this.dlVlanIDState = MatchFieldState.MATCH_FIELD_ONLY;
@@ -1327,6 +1372,9 @@ public class V6Match extends OFMatch implements Cloneable {
         if (this.dlVlanPCPState != MatchFieldState.MATCH_ABSENT) {
             this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
             match_len -= 2;
+        } else if (this.dataLayerVirtualLan == OFP_VLAN_NONE) {
+            this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+            match_len += 6;
         } else {
             this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
             this.dataLayerVirtualLanTCIMask = 0x1fff;
@@ -1334,7 +1382,19 @@ public class V6Match extends OFMatch implements Cloneable {
         }
     }
 
+    /**
+     * Set a value to VLAN PCP match field.
+     *
+     * @param pcp  A value to match for VLAN PCP.
+     * @param mask  A bitmask for VLAN PCP.
+     */
     public void setDataLayerVirtualLanPriorityCodePoint(byte pcp, byte mask) {
+        if (this.dlVlanIDState != MatchFieldState.MATCH_ABSENT
+                && this.dataLayerVirtualLan == OFP_VLAN_NONE) {
+            throw new IllegalStateException
+                ("OFP_VLAN_NONE is specified to DL_VLAN.");
+        }
+
         // mask is ignored as the code sets the appropriate mask
         super.dataLayerVirtualLanPriorityCodePoint = pcp;
         this.dlVlanPCPState = MatchFieldState.MATCH_FIELD_ONLY;
