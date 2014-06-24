@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import javax.ws.rs.core.Response;
@@ -1046,6 +1047,7 @@ public class RestconfImpl implements RestconfService {
 
         if ((nodeBuilder instanceof CompositeNodeWrapper)) {
             final List<NodeWrapper<?>> children = ((CompositeNodeWrapper) nodeBuilder).getValues();
+            checkNodeMultiplicityAccordingToSchema(schema,children);
             for (final NodeWrapper<? extends Object> child : children) {
                 final List<DataSchemaNode> potentialSchemaNodes =
                         this.controllerContext.findInstanceDataChildrenByName(
@@ -1134,6 +1136,32 @@ public class RestconfImpl implements RestconfService {
                             emptyNodeBuilder.setComposite(true);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void checkNodeMultiplicityAccordingToSchema(final DataSchemaNode parentSchema, final List<NodeWrapper<?>> nodes) {
+        if (!(parentSchema instanceof DataNodeContainer)) {
+            throw new RestconfDocumentedException(
+                    "Schema for container node "+parentSchema.getQName().getLocalName()+" has to be of type DataNodeContainer.",
+                    ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT );
+        }
+        Map<String, Integer> equalNodeNamesToCounts = new HashMap<String,Integer>();
+        for (NodeWrapper<?> child : nodes) {
+            Integer count = equalNodeNamesToCounts.get(child.getLocalName());
+            equalNodeNamesToCounts.put(child.getLocalName(), count == null ? 1 : ++count);
+        }
+
+        for (DataSchemaNode childSchemaNode : ((DataNodeContainer)parentSchema).getChildNodes()) {
+            if (childSchemaNode instanceof ContainerSchemaNode ) {
+                String localName = childSchemaNode.getQName().getLocalName();
+                Integer count = equalNodeNamesToCounts.get(localName);
+                if (count != null && count>1) {
+                    throw new RestconfDocumentedException(
+                            "Data for container "+childSchemaNode.getQName().getLocalName() +
+                            " are presented more then once (like list).",
+                            ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT );
                 }
             }
         }
