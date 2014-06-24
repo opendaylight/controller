@@ -7,19 +7,20 @@
  */
 
 package org.opendaylight.controller.sal.restconf.impl.test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Futures;
 import java.util.Map;
 import java.util.concurrent.Future;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -42,9 +43,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 
 /**
  * Unit tests for BrokerFacade.
@@ -275,6 +274,8 @@ public class BrokerFacadeTest {
         Future<RpcResult<TransactionStatus>> expFuture =  Futures.immediateFuture( null );
 
         when( dataBroker.beginTransaction() ).thenReturn( mockTransaction );
+        when(mockTransaction.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(
+                ImmutableCompositeNode.builder().toInstance());
         mockTransaction.removeConfigurationData( instanceID );
         when( mockTransaction.commit() ).thenReturn( expFuture );
 
@@ -294,6 +295,8 @@ public class BrokerFacadeTest {
         Future<RpcResult<TransactionStatus>> expFuture =  Futures.immediateFuture( null );
 
         when( mockMountInstance.beginTransaction() ).thenReturn( mockTransaction );
+        when(mockTransaction.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(
+                ImmutableCompositeNode.builder().toInstance());
         mockTransaction.removeConfigurationData( instanceID );
         when( mockTransaction.commit() ).thenReturn( expFuture );
 
