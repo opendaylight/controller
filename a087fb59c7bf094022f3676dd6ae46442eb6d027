@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2647febd",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareConsumer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T18:01:13Z",
+      "side": 1,
+      "message": "May be worth adding a little more insight into what an invokable RPC is. Someone who is new to ODL may not appreciate the difference between an Invokable RPC, registering an RPC, and a routed RPC (in fact I can\u0027t say that I have a clear idea, though I do have a guess)",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c6b732f4",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareConsumer.java",
         "patchSetId": 1
@@ -81,6 +98,57 @@
       "writtenOn": "2014-06-24T16:02:27Z",
       "side": 1,
       "message": "\u003cNotificationProviderService\u003e is unnecessary.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e614b6a1",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T18:01:13Z",
+      "side": 1,
+      "message": "An example might help clarify this.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_464482b6",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T18:01:13Z",
+      "side": 1,
+      "message": "Should not need the binding data broker \u003c\u003e here.",
+      "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_061afacb",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/BindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-24T18:01:13Z",
+      "side": 1,
+      "message": "Can you add a quick \"why\". I like that you provide the recommended values.\n\nI feel like I had to implement these myself sometimes - can you check and see that we have defaulted these in the abstract base implementations so folks shouldn\u0027t have to worry about them?",
       "revId": "a087fb59c7bf094022f3676dd6ae46442eb6d027",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
