@@ -935,12 +935,6 @@
           <artifactId>protocol-framework</artifactId>
         </dependency>
 
-        <!-- clustering -->
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>remoterpc-routingtable.implementation</artifactId>
-          <version>${mdsal.version}</version>
-        </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-api</artifactId>
@@ -1001,10 +995,6 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-remote</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-remoterpc-connector</artifactId>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>

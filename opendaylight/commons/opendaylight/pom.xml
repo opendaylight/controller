@@ -1171,11 +1171,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>remoterpc-routingtable.implementation</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>routing.dijkstra_implementation</artifactId>
         <version>${routing.dijkstra_implementation.version}</version>
       </dependency>
@@ -1259,11 +1254,6 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-remote</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-remoterpc-connector</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
@@ -1520,16 +1510,6 @@
       <dependency>
         <groupId>org.opendaylight.controller.samples</groupId>
         <artifactId>sample-toaster-provider</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.tests</groupId>
-        <artifactId>sal-remoterpc-connector-test-consumer</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.tests</groupId>
-        <artifactId>sal-remoterpc-connector-test-provider</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>

@@ -54,9 +54,6 @@
     <!-- Compability Packages -->
     <module>compatibility</module>
 
-    <!-- Clustering -->
-    <module>remoterpc-routingtable/implementation</module>
-    <module>sal-remoterpc-connector/implementation</module>
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
 
