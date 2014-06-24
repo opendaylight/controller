@@ -404,14 +404,14 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                         out.print("|");
                     }
 
-                    String sValue = (String) rs.getObject(c.toString());
+                    Object sValue = rs.getObject(c.toString());
                     if (sValue == null) {
                         sValue = "";
                     }
                     out.print(sValue);
 
                     int cw = c.getCharWidth();
-                    int vw = sValue.length();
+                    int vw = sValue.toString().length();
                     int gap = cw - vw;
                     for (int i = 0; i < gap; i++) {
                         out.print(" ");

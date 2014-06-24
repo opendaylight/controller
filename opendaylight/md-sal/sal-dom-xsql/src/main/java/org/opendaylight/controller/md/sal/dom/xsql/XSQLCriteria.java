@@ -35,10 +35,10 @@ public class XSQLCriteria implements Serializable {
     private Object rightValue = null;
     private String criteria = null;
 
-    private static final Map<Class, Map<String, Method>> methodCache =
-        new ConcurrentHashMap<Class, Map<String, Method>>();
+    private static final Map<Class<?>, Map<String, Method>> methodCache =
+        new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 
-    public XSQLCriteria(String data, int parentOperation) {
+    public XSQLCriteria(final String data, final int parentOperation) {
         criteria = data;
         parse(data, parentOperation);
     }
@@ -104,8 +104,7 @@ public class XSQLCriteria implements Serializable {
             data = data.substring(1, data.length() - 1);
         }
 
-        if (parentOperation == OP_CODE_LIKE && data.startsWith("%") && data
-            .endsWith("%")
+        if (parentOperation == OP_CODE_LIKE && data.startsWith("%") && data.endsWith("%")
             && data.substring(1, data.length() - 1).indexOf("%") == -1) {
             data = data.substring(1, data.length() - 1);
         }
@@ -326,14 +325,15 @@ public class XSQLCriteria implements Serializable {
         }
 
         if (leftValue != null && rightValue != null) {
-            if (leftValue.toString().toLowerCase()
-                .equals(col.getName().toLowerCase()) ||
-                leftValue.toString().toLowerCase()
-                    .equals(col.toString().toLowerCase()) ||
-                col.getName().toLowerCase()
-                    .indexOf(leftValue.toString().toLowerCase()) != -1) {
-                result.append("? ").append(operators[operation]).append(" ")
-                    .append(rightValue);
+            if (leftValue.toString().toLowerCase().equals(col.getName().toLowerCase()) ||
+                leftValue.toString().toLowerCase().equals(col.toString().toLowerCase()) /*||
+                /*col.getName().toLowerCase().indexOf(leftValue.toString().toLowerCase()) != -1*/) {
+                result.append("? ").append(operators[operation]).append(" ").append(rightValue);
+            }else
+            if (rightValue.toString().toLowerCase().equals(col.getName().toLowerCase()) ||
+                    rightValue.toString().toLowerCase().equals(col.toString().toLowerCase()) /*||
+                    col.getName().toLowerCase().indexOf(rightValue.toString().toLowerCase()) != -1*/) {
+                    result.append("? ").append(operators[operation]).append(" ").append(leftValue);
             }
             return result.toString();
         } else if (left != null && right != null) {

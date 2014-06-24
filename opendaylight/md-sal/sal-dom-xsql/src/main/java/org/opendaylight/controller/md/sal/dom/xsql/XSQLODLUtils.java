@@ -16,6 +16,10 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.Status;
+import org.opendaylight.yangtools.yang.model.util.Uint16;
+import org.opendaylight.yangtools.yang.model.util.Uint32;
+import org.opendaylight.yangtools.yang.model.util.Uint64;
+import org.opendaylight.yangtools.yang.model.util.Uint8;
 
 public class XSQLODLUtils {
 
@@ -217,6 +221,20 @@ public class XSQLODLUtils {
             return nodeName.substring(index + 1);
         }
         return "NULL";
+    }
+
+    public static Class getTypeForODLColumn(Object odlNode){
+        Object type = get(odlNode,"type");
+        if(type instanceof Uint32 || type instanceof Uint64){
+            return long.class;
+        }else
+        if(type instanceof Uint16){
+            return int.class;
+        }else
+        if(type instanceof Uint8){
+            return byte.class;
+        }
+        return String.class;
     }
 
 }

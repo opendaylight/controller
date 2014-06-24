@@ -131,8 +131,7 @@ public class XSQLBluePrintNode implements Serializable {
     }
 
     public void addColumn(Object node, String tableName) {
-        XSQLColumn c = new XSQLColumn(XSQLODLUtils.getNodeNameFromDSN(node),
-            getTableName(), this);
+        XSQLColumn c = new XSQLColumn(node,getTableName(), this);
         this.columns.add(c);
     }
 

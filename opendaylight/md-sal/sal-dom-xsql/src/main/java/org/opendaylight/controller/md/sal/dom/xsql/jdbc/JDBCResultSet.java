@@ -194,8 +194,7 @@ public class JDBCResultSet
                 if (c.getTableName()
                     .equals(element.getClass().getSimpleName())) {
                     try {
-                        Method m =
-                            element.getClass().getMethod(c.getName(), null);
+                        Method m = element.getClass().getMethod(c.getName(), null);
                         Object value = m.invoke(element, null);
                         rec.put(c.getName(), value);
                     } catch (Exception err) {
@@ -313,9 +312,9 @@ public class JDBCResultSet
                     Object value = fullRecord.get(columnName);
                     if (value != null) {
                         try {
-                            String sValue = value.toString();
-                            c.setCharWidth(sValue.length());
-                            rec.data.put(columnName, sValue);
+                            Object rsValue = c.getResultSetValue(value);
+                            c.setCharWidth(rsValue.toString().length());
+                            rec.data.put(columnName, rsValue);
                         } catch (Exception err) {
                         }
                     }
@@ -383,8 +382,7 @@ public class JDBCResultSet
             XSQLBluePrintNode bpn = this.tablesInQueryMap.get(nodeID);
             if (this.criteria.containsKey(nodeID) || bpn != null) {
                 Map<?, ?> allKeyValues = collectColumnValues(element, bpn);
-                if (!(isObjectFitCriteria(allKeyValues, bpn.getTableName())
-                    == 1)) {
+                if (!(isObjectFitCriteria(allKeyValues, bpn.getTableName()) == 1)) {
                     return EMPTY_RESULT;
                 }
                 addToData(rec, bpn, allKeyValues);
