@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e6bcb6de",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-24T15:59:23Z",
+      "side": 1,
+      "message": "Slightly incorrect grammar. How about: \n\n\"Multiple input data elements were specified for container \u003cfoo\u003e.  The data for a container can only be specified once.\"",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e676f6a3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-24T15:59:23Z",
+      "side": 1,
+      "message": "The test class name must end in Test so it will be run from mvn command line.\n\nAlso please ass comments/javadocs to explain what specific case this test is for (either in the class or test method below).",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_26493e60",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-24T15:59:23Z",
+      "side": 1,
+      "message": "Rather than checking the message text, which could be changed in source, I would suggest just checking for the appropriate error tag (BAD_ELEMENT).",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
