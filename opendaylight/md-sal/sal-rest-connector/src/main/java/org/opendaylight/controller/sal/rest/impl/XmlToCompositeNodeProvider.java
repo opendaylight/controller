@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +18,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import javax.xml.stream.XMLStreamException;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -35,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
-    private final static Logger LOG = LoggerFactory.getLogger( XmlToCompositeNodeProvider.class );
+    private final static Logger LOG = LoggerFactory.getLogger(XmlToCompositeNodeProvider.class);
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -46,14 +44,13 @@ public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNod
     public CompositeNode readFrom(Class<CompositeNode> type, Type genericType, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
-        XmlReader xmlReader = new XmlReader();
+        XmlToCompositeNodeReader xmlReader = new XmlToCompositeNodeReader();
         try {
             return xmlReader.read(entityStream);
         } catch (XMLStreamException | UnsupportedFormatException e) {
-            LOG.debug( "Error parsing json input", e );
-            throw new RestconfDocumentedException(
-                            "Error parsing input: " + e.getMessage(),
-                            ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE );
+            LOG.debug("Error parsing json input", e);
+            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE);
         }
     }
 
