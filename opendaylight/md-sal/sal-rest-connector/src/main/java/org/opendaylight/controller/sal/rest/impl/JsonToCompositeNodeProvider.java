@@ -7,18 +7,24 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.gson.stream.JsonToken;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -34,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
-    private final static Logger LOG = LoggerFactory.getLogger( JsonToCompositeNodeProvider.class );
+    private final static Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeProvider.class);
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -45,15 +51,90 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
     public CompositeNode readFrom(Class<CompositeNode> type, Type genericType, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
-        JsonReader jsonReader = new JsonReader();
+        String jsonData = loadInputStream(entityStream);
+
+        checkJsonDuplicates(jsonData);
+
+        InputStream inputStream = new ByteArrayInputStream(jsonData.getBytes(StandardCharsets.UTF_8));
+        JsonReader customJsonReader = new JsonReader();
         try {
-            return jsonReader.read(entityStream);
+            return customJsonReader.read(inputStream);
         } catch (Exception e) {
-            LOG.debug( "Error parsing json input", e );
-            throw new RestconfDocumentedException(
-                            "Error parsing input: " + e.getMessage(),
-                            ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE );
+            LOG.debug("Error parsing json input", e);
+            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE);
         }
     }
 
+    private void checkJsonDuplicates(String jsonData) {
+        InputStream inputStream = new ByteArrayInputStream(jsonData.getBytes(StandardCharsets.UTF_8));
+        com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(
+                inputStream));
+        checkJsonDuplicatesInObject(jsonReader, JsonToken.END_OBJECT);
+    }
+
+    private String loadInputStream(InputStream inputStream) throws IOException {
+        InputStreamReader isr = new InputStreamReader(inputStream);
+        BufferedReader bufReader = new BufferedReader(isr);
+
+        String line = null;
+        StringBuilder result = new StringBuilder();
+        while ((line = bufReader.readLine()) != null) {
+            result.append(line);
+        }
+        bufReader.close();
+        return result.toString();
+    }
+
+    private static void checkJsonDuplicatesInObject(final com.google.gson.stream.JsonReader reader,
+            final JsonToken endToken) throws RestconfDocumentedException {
+        final Set<String> set = new HashSet<>();
+        String fieldName;
+        JsonToken token =null;
+
+        try {
+            while (!(token = reader.peek()).equals(JsonToken.END_DOCUMENT)) {
+                switch (token) {
+                case NAME:
+                    fieldName = reader.nextName();
+                    if (!set.add(fieldName))
+                        throw new RestconfDocumentedException("Duplicate key name " + fieldName + " in json input",
+                                ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
+                    break;
+                case BEGIN_ARRAY:
+                case BEGIN_OBJECT:
+                    if (token.equals(JsonToken.BEGIN_OBJECT)) {
+                        reader.beginObject();
+                    } else {
+                        reader.beginArray();
+                    }
+                    checkJsonDuplicatesInObject(reader, token.equals(JsonToken.BEGIN_OBJECT) ? JsonToken.END_OBJECT
+                            : JsonToken.END_ARRAY);
+                    break;
+                case END_ARRAY:
+                case END_OBJECT:
+                    if (token.equals(JsonToken.END_ARRAY)) {
+                        reader.endArray();
+                    } else {
+                        reader.endObject();
+                    }
+                    break;
+                case NULL:
+                    reader.nextNull();
+                    break;
+                case BOOLEAN:
+                    reader.nextBoolean();
+                    break;
+                default:
+                    reader.nextString();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            if (e instanceof EOFException && token == null) {
+                return;
+            }
+            throw new RestconfDocumentedException("IO operation with json data wasn't successful.", e);
+        }
+    }
 }

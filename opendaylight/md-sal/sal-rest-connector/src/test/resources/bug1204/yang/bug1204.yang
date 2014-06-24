@@ -1,0 +1,17 @@
+module bug-1204 {
+  namespace "bug:1204";
+
+  prefix "bug1204";
+  revision 2014-06-26 {
+  }
+
+  container cont {
+    container cont1 {
+        list lst11 {
+            leaf lf111 {
+                type string;
+            }
+        }
+    }
+  }
+}
