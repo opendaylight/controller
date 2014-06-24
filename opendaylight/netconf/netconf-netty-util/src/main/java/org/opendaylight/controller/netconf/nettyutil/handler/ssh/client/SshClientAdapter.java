@@ -12,7 +12,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +19,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket.VirtualSocketException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -27,6 +28,8 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket.V
  * pipeline.
  */
 public class SshClientAdapter implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(SshClientAdapter.class);
+
     private static final int BUFFER_SIZE = 1024;
 
     private final SshClient sshClient;
@@ -49,8 +52,15 @@ public class SshClientAdapter implements Runnable {
     }
 
     public void run() {
+        SshSession session;
         try {
-            SshSession session = sshClient.openSession();
+            session = sshClient.openSession();
+        } catch (IOException e) {
+            logger.error("Cannot establish session", e);
+            sshClient.close();
+            return;
+        }
+        try {
             invoker.invoke(session);
             InputStream stdOut = session.getStdout();
             session.getStderr();
@@ -82,7 +92,7 @@ public class SshClientAdapter implements Runnable {
             // Netty closed connection prematurely.
             // Just pass and move on.
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            logger.error("Unexpected exception", e);
         } finally {
             sshClient.close();
 
