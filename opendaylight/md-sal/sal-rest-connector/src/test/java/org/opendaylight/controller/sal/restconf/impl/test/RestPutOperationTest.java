@@ -102,7 +102,7 @@ public class RestPutOperationTest extends JerseyTest {
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
 
-        assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
+        assertEquals(500, put(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class RestPutOperationTest extends JerseyTest {
         String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
         Response resp = target(uri).request(MediaType.APPLICATION_JSON).put(
                 Entity.entity("", MediaType.APPLICATION_JSON));
-        assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
+        assertEquals(500, put(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test

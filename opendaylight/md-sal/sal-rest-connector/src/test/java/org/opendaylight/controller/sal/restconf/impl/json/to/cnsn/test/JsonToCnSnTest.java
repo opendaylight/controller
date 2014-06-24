@@ -9,20 +9,22 @@ package org.opendaylight.controller.sal.restconf.impl.json.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -172,19 +174,25 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/empty-data1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
-            reason = e.getErrors().get( 0 ).getErrorMessage();
+            reason = e.getErrors().get(0).getErrorMessage();
         }
 
         assertTrue(reason.contains("Expected value at line"));
 
     }
 
-    @Test
+    @Test(expected=RestconfDocumentedException.class)
     public void testJsonBlankInput() throws Exception{
         InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
-        CompositeNode compositeNode =
-                JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
-        assertNull( compositeNode );
+        try {
+            JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+        } catch (RestconfDocumentedException e) {
+            assertEquals(1,e.getErrors().size());
+            RestconfError error = e.getErrors().get(0);
+            assertEquals(ErrorType.APPLICATION,error.getErrorType());
+            assertEquals(ErrorTag.OPERATION_FAILED,error.getErrorTag());
+            throw e;
+        }
     }
 
     /**
@@ -394,10 +402,11 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/unsupported-json-format.json", true,
                     JsonToCompositeNodeProvider.INSTANCE);
+            fail("RestconfDocumentedException should be raised here.");
         } catch (RestconfDocumentedException e) {
-            exceptionMessage = e.getErrors().get( 0 ).getErrorMessage();
+            exceptionMessage = e.getErrors().get(0).getErrorMessage();
+            assertTrue(exceptionMessage.contains("Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1"));
         }
-        assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }
 
 }
