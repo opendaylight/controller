@@ -8,32 +8,34 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import akka.actor.ActorPath;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class RegisterChangeListener {
-  private final InstanceIdentifier path;
-  private final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener;
-  private final AsyncDataBroker.DataChangeScope scope;
+    private final InstanceIdentifier path;
+    private final ActorPath dataChangeListenerPath;
+    private final AsyncDataBroker.DataChangeScope scope;
 
 
-  public RegisterChangeListener(InstanceIdentifier path, AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener, AsyncDataBroker.DataChangeScope scope) {
-    this.path = path;
-    this.listener = listener;
-    this.scope = scope;
-  }
+    public RegisterChangeListener(InstanceIdentifier path,
+        ActorPath dataChangeListenerPath,
+        AsyncDataBroker.DataChangeScope scope) {
+        this.path = path;
+        this.dataChangeListenerPath = dataChangeListenerPath;
+        this.scope = scope;
+    }
 
-  public InstanceIdentifier getPath() {
-    return path;
-  }
+    public InstanceIdentifier getPath() {
+        return path;
+    }
 
-  public AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> getListener() {
-    return listener;
-  }
 
-  public AsyncDataBroker.DataChangeScope getScope() {
-    return scope;
-  }
+    public AsyncDataBroker.DataChangeScope getScope() {
+        return scope;
+    }
+
+    public ActorPath getDataChangeListenerPath() {
+        return dataChangeListenerPath;
+    }
 }
