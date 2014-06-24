@@ -48,7 +48,7 @@ public final class NetconfDeviceCommitHandler implements DataCommitHandler<Insta
             Thread.currentThread().interrupt();
             throw new RuntimeException(id + ": Interrupted while waiting for response", e);
         } catch (final ExecutionException e) {
-            logger.warn("%s: Error executing pre commit operation on remote device", id, e);
+            logger.warn("{}: Error executing pre commit operation on remote device", id, e);
             return new FailingTransaction(twoPhaseCommit, e);
         }
 
