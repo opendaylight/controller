@@ -141,7 +141,8 @@ public class Shard extends UntypedProcessor {
             store.registerChangeListener(registerChangeListener.getPath(),
                 listener, registerChangeListener.getScope());
         ActorRef listenerRegistration =
-            getContext().actorOf(ListenerRegistration.props(registration));
+            getContext().actorOf(
+                DataChangeListenerRegistration.props(registration));
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
                 getSelf());
