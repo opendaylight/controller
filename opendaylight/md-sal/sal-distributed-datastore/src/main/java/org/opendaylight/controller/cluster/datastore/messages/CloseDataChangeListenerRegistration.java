@@ -8,5 +8,5 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CloseListenerRegistration {
+public class CloseDataChangeListenerRegistration {
 }
