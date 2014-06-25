@@ -28,7 +28,10 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * {@link DataProviderService#addValidator(DataStoreIdentifier, DataValidator)}
  * </ul>
  *
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.common.api.data.AsyncConfigurationCommitHandler}
+ *
  **/
+@Deprecated
 public interface DataValidator extends Provider.ProviderFunctionality {
 
     /**

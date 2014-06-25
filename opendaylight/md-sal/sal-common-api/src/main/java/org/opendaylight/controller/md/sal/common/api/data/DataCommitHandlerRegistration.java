@@ -7,9 +7,20 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.concepts.Registration;
 
+/**
+ *
+ *
+ * @deprecated THis was intended as Registration object, normal use of {@link ObjectRegistration}
+ * is suffiecient, since {@link #getPath()} was implementation leak.
+ *
+ * @param <P>
+ * @param <D>
+ */
+@Deprecated
 public interface DataCommitHandlerRegistration<P extends Path<P>,D> extends Registration<DataCommitHandler<P, D>>{
 
     P getPath();
