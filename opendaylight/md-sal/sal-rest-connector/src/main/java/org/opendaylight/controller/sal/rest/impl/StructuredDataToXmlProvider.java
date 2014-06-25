@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -25,7 +24,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -48,7 +46,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return type.equals( StructuredData.class );
+        return type.equals(StructuredData.class);
     }
 
     @Override
@@ -72,14 +70,17 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             Transformer transformer = tf.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            if (t.isWhiteCharsIncluded()) {
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            } else {
+                transformer.setOutputProperty(OutputKeys.INDENT, "no");
+            }
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.transform(new DOMSource(domTree), new StreamResult(entityStream));
         } catch (TransformerException e) {
             logger.error("Error during translation of Document to OutputStream", e);
-            throw new RestconfDocumentedException( e.getMessage(), ErrorType.TRANSPORT,
-                                                   ErrorTag.OPERATION_FAILED );
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }
     }
 
