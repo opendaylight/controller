@@ -18,12 +18,10 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.concurrent.Future;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -88,7 +86,7 @@ public class RestPutOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
                 JsonToCompositeNodeProvider.INSTANCE);
-        resourceConfig.registerClasses( RestconfDocumentedExceptionMapper.class );
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
 
@@ -104,14 +102,15 @@ public class RestPutOperationTest extends JerseyTest {
         mockCommitConfigurationDataPutMethod(TransactionStatus.FAILED);
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
 
-        assertEquals( 400, put(uri, MediaType.APPLICATION_JSON, "" ));
+        assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test
     public void putConfigStatusCodesEmptyBody() throws UnsupportedEncodingException {
         String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
-        Response resp = target(uri).request( MediaType.APPLICATION_JSON).put(Entity.entity( "", MediaType.APPLICATION_JSON));
-        assertEquals( 400, put(uri, MediaType.APPLICATION_JSON, "" ));
+        Response resp = target(uri).request(MediaType.APPLICATION_JSON).put(
+                Entity.entity("", MediaType.APPLICATION_JSON));
+        assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test
@@ -120,7 +119,8 @@ public class RestPutOperationTest extends JerseyTest {
 
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
+                rpcResult).build();
         when(
                 brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
@@ -143,7 +143,8 @@ public class RestPutOperationTest extends JerseyTest {
     public void putDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
+                rpcResult).build();
         when(
                 brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
                         any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
@@ -166,7 +167,8 @@ public class RestPutOperationTest extends JerseyTest {
     private void mockCommitConfigurationDataPutMethod(TransactionStatus statusName) {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
                 .build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = DummyFuture.builder().rpcResult(rpcResult).build();
+        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
+                rpcResult).build();
         when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
     }
