@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeTable;
+import org.opendaylight.controller.sal.core.NodeTable.NodeTableIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -489,7 +490,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
                 }
 
                 try {
-                    final Node adNode = new Node(NodeMapping.MD_SAL_TYPE, NodeMapping.toADNodeId(node.getId()));
+                    final Node adNode = NodeMapping.toADNode(node.getId());
                     props.put(adNode, perNodePropMap);
                 } catch (ConstructionException e) {
                     LOG.warn("Failed to construct node for {}, skipping it", node, e);
@@ -572,7 +573,7 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
         it.setLookupCount(tableStats.getPacketsLookedUp().getValue().longValue());
         it.setMatchedCount(tableStats.getPacketsMatched().getValue().longValue());
         it.setName(tableId.toString());
-        it.setNodeTable(new NodeTable(NodeMapping.MD_SAL_TYPE, tableId, node));
+        it.setNodeTable(new NodeTable(NodeTableIDType.OPENFLOW, tableId.byteValue(), node));
         return it;
     }
 

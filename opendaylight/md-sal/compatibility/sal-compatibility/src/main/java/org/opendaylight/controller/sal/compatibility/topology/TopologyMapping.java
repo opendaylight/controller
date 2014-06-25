@@ -18,7 +18,9 @@ import org.opendaylight.controller.sal.compatibility.NodeMapping;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
@@ -93,20 +95,20 @@ public final class TopologyMapping {
     }
 
     public static String toADNodeId(final NodeId nodeId) {
-        return nodeId.getValue();
+        return nodeId.getValue().replaceFirst("^.*:", "");
     }
 
     public static NodeConnector toADNodeConnector(final TpId source, final NodeId nodeId) throws ConstructionException {
         checkNotNull(source);
-        return new NodeConnector(NodeMapping.MD_SAL_TYPE, toADNodeConnectorId(source), toADNode(nodeId));
+        return new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf(toADNodeConnectorId(source)), toADNode(nodeId));
     }
 
     public static String toADNodeConnectorId(final TpId nodeConnectorId) {
-        return nodeConnectorId.getValue();
+        return nodeConnectorId.getValue().replaceFirst("^.*:", "");
     }
 
     public static Node toADNode(final NodeId nodeId) throws ConstructionException {
         checkNotNull(nodeId);
-        return new Node(NodeMapping.MD_SAL_TYPE, toADNodeId(nodeId));
+        return new Node(NodeIDType.OPENFLOW, Long.valueOf(toADNodeId(nodeId)));
     }
 }

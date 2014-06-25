@@ -357,7 +357,7 @@ public final class MDFlowMapping {
     }
 
     public static Uri toUri(final NodeConnector connector) {
-        return new NodeConnectorId(((String) connector.getID()));
+        return new NodeConnectorId(NodeMapping.OPENFLOW_ID_PREFIX + connector.getNode().getID() + ":" + (connector.getID()));
     }
 
     public static MacAddress toMacAddress(final byte[] bytes) {
