@@ -11,7 +11,36 @@ import java.util.concurrent.ExecutorService;
 
 public interface NotificationPublishService<N> {
 
+
+    /**
+     * Publishes a notification, listener callbacks are done via default executor.
+     *
+     * <p>
+     * Published notification which will be delivered using default executor
+     *
+     * <b>Note:</b> This call is blocking when default executor is saturated,
+     * and notification queue for this executor is full.
+     *
+     * <p>
+     * FIXME:API Usability: Should this return ListenableFuture, which will complete once
+     * all listeners received their callbacks?
+     *
+     * @param notification Notification to be published.
+     *
+     */
     void publish(N notification);
 
+    /**
+     * Publishes a notification, listener callbacks are done via provided executor.
+     *
+     * <p>
+     * FIXME:API Usability: Should this return ListenableFuture, which will complete once
+     * all listeners received their callbacks?
+     *
+     * @param notification Notification to be published
+     * @param executor Executor which will be used to deliver callbacks for listener
+     *   inside same JVM
+     *
+     */
     void publish(N notification,ExecutorService executor);
 }

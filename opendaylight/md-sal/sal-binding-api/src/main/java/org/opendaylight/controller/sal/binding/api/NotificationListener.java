@@ -12,6 +12,8 @@ import java.util.EventListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 /**
+ * Generic listener for YANG modelled notifications.
+ *
  * Interface implemented by objects interested in some sort of Notification. This
  * class acts as a base interface for specific listeners which usually are a type
  * capture of this interface.
