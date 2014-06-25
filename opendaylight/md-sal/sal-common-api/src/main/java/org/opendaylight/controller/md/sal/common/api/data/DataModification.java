@@ -12,7 +12,11 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
+/**
+ *
+ * @deprecated Replaced by {@link AsyncWriteTransaction}
+ */
+@Deprecated
 public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D> {
     /**
      * Returns transaction identifier
