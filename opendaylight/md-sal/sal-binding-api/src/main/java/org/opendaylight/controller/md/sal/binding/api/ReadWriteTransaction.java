@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataWriteTransaction extends AsyncWriteTransaction<InstanceIdentifier<?>, DataObject> {
-    @Override
-    void put(LogicalDatastoreType store, InstanceIdentifier<?> path, DataObject data);
+/**
+ * Logical capture of a combination of both {@link ReadTransaction} and
+ * {@link WriteTransaction}.
+ */
+public interface ReadWriteTransaction extends ReadTransaction, WriteTransaction, AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
 
-    @Override
-    void delete(LogicalDatastoreType store, InstanceIdentifier<?> path);
 }
