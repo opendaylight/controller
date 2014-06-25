@@ -9,20 +9,24 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class ListenerProxy implements AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>{
-    private final ActorSelection listenerRegistrationActor;
+/**
+ * DataChangeListenerProxy represents a single remote DataChangeListener
+ */
+public class DataChangeListenerProxy implements AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>{
+    private final ActorSelection dataChangeListenerActor;
 
-    public ListenerProxy(ActorSelection listenerRegistrationActor) {
-        this.listenerRegistrationActor = listenerRegistrationActor;
+    public DataChangeListenerProxy(ActorSelection dataChangeListenerActor) {
+        this.dataChangeListenerActor = dataChangeListenerActor;
     }
 
     @Override public void onDataChanged(
         AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
-        throw new UnsupportedOperationException("onDataChanged");
+        dataChangeListenerActor.tell(new DataChanged(change), null);
     }
 }
