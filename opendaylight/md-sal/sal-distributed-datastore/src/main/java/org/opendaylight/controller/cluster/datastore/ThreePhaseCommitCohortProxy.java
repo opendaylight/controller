@@ -12,6 +12,7 @@ import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -109,16 +110,23 @@ public class ThreePhaseCommitCohortProxy implements
                 for(ActorPath actorPath : cohortPaths){
                     ActorSelection cohort = actorContext.actorSelection(actorPath);
 
-                    Object response = actorContext.executeRemoteOperation(cohort,
-                        message,
-                        ActorContext.ASK_DURATION);
+                    try {
+                        Object response =
+                            actorContext.executeRemoteOperation(cohort,
+                                message,
+                                ActorContext.ASK_DURATION);
 
-                    if(response != null && !response.getClass().equals(expectedResponseClass)){
-                        throw new RuntimeException(
-                            String.format(
-                                "did not get the expected response \n\t\t expected : %s \n\t\t actual   : %s",
-                                expectedResponseClass.toString(),
-                                response.getClass().toString()));
+                        if (response != null && !response.getClass()
+                            .equals(expectedResponseClass)) {
+                            throw new RuntimeException(
+                                String.format(
+                                    "did not get the expected response \n\t\t expected : %s \n\t\t actual   : %s",
+                                    expectedResponseClass.toString(),
+                                    response.getClass().toString())
+                            );
+                        }
+                    } catch(TimeoutException e){
+                        LOG.error(String.format("A timeout occurred when processing operation : %s", message));
                     }
                 }
                 return null;
