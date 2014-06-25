@@ -1,0 +1,39 @@
+package org.opendaylight.controller.mdsal;
+
+option java_package = "org.opendaylight.controller.cluster.datastore.transaction";
+option java_outer_classname = "ShardTransactionMessages";
+
+message CloseTransaction{
+}
+
+message CloseTransactionReply{
+
+}
+
+message CreateTransaction{
+
+}
+
+message CreateTransactionReply{
+required string transactionPath = 1;
+
+}
+
+message ReadyTransaction{
+
+}
+
+message ReadyTransactionReply{
+required string actorPath = 1;
+}
+
+message DeleteData {
+required string instanceIdentifierPath = 1;
+}
+
+message DeleteDataReply{
+
+}
+message ReadData {
+required string intanceIdentifier=1;
+}
