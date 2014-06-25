@@ -74,6 +74,21 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBu
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 
 public class RestconfImpl implements RestconfService {
+    private enum UriParameters {
+        PRETTY_PRINT( "prettyPrint"),
+        DEPTH( "depth");
+
+        private String uriParameterName;
+        UriParameters(String uriParameterName) {
+            this.uriParameterName = uriParameterName;
+        }
+
+        @Override
+        public String toString() {
+            return uriParameterName;
+        }
+    }
+
     private final static RestconfImpl INSTANCE = new RestconfImpl();
 
     private static final int CHAR_NOT_FOUND = -1;
@@ -578,7 +593,8 @@ public class RestconfImpl implements RestconfService {
         }
 
         data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
+        boolean prettyPrintMode = parsePrettyPrintParameter( info );
+        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint(),prettyPrintMode);
     }
 
     @SuppressWarnings("unchecked")
@@ -603,7 +619,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Integer parseDepthParameter( UriInfo info ) {
-        String param = info.getQueryParameters( false ).getFirst( "depth" );
+        String param = info.getQueryParameters( false ).getFirst( UriParameters.DEPTH.toString() );
         if( Strings.isNullOrEmpty( param ) || "unbounded".equals( param ) ) {
             return null;
         }
@@ -639,7 +655,16 @@ public class RestconfImpl implements RestconfService {
         }
 
         data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint);
+        boolean prettyPrintMode = parsePrettyPrintParameter( info );
+        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint,prettyPrintMode);
+    }
+
+    private boolean parsePrettyPrintParameter(UriInfo info) {
+        String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
+        if (param != null && param.equals(Boolean.TRUE.toString())) {
+            return true;
+        }
+        return false;
     }
 
     @Override
