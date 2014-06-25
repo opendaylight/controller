@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public interface BindingDataReadTransaction extends AsyncReadTransaction<InstanceIdentifier<?>, DataObject> {
+public interface DataReadTransaction extends AsyncReadTransaction<InstanceIdentifier<?>, DataObject> {
     @Override
     ListenableFuture<Optional<DataObject>> read(LogicalDatastoreType store, InstanceIdentifier<?> path);
 }

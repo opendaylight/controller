@@ -12,7 +12,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListene
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataChangeListener extends AsyncDataChangeListener<InstanceIdentifier<?>, DataObject> {
+public interface DataChangeListener extends AsyncDataChangeListener<InstanceIdentifier<?>, DataObject> {
     @Override
     void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change);
 }
