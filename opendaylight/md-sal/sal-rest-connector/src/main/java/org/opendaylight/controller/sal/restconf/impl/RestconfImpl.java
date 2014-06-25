@@ -74,6 +74,21 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBu
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 
 public class RestconfImpl implements RestconfService {
+    private enum UriParameters {
+        PRETTY_PRINT( "prettyPrint"),
+        DEPTH( "depth");
+
+        private String uriParameterName;
+        UriParameters(String uriParameterName) {
+            this.uriParameterName = uriParameterName;
+        }
+
+        @Override
+        public String toString() {
+            return uriParameterName;
+        }
+    }
+
     private final static RestconfImpl INSTANCE = new RestconfImpl();
 
     private static final int CHAR_NOT_FOUND = -1;
@@ -106,7 +121,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getModules() {
+    public StructuredData getModules(final UriInfo uriInfo) {
         final Module restconfModule = this.getRestconfModule();
 
         final List<Node<?>> modulesAsData = new ArrayList<Node<?>>();
@@ -123,11 +138,11 @@ public class RestconfImpl implements RestconfService {
                                    restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
         QName qName = modulesSchemaNode.getQName();
         final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, null);
+        return new StructuredData(modulesNode, modulesSchemaNode, null,parsePrettyPrintParameter( uriInfo ));
     }
 
     @Override
-    public StructuredData getAvailableStreams() {
+    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
         Set<String> availableStreams = Notificator.getStreamNames();
 
         final List<Node<?>> streamsAsData = new ArrayList<Node<?>>();
@@ -142,11 +157,11 @@ public class RestconfImpl implements RestconfService {
                                      restconfModule, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
         QName qName = streamsSchemaNode.getQName();
         final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
-        return new StructuredData(streamsNode, streamsSchemaNode, null);
+        return new StructuredData(streamsNode, streamsSchemaNode, null,parsePrettyPrintParameter( uriInfo ));
     }
 
     @Override
-    public StructuredData getModules(final String identifier) {
+    public StructuredData getModules(final String identifier,final UriInfo uriInfo) {
         Set<Module> modules = null;
         MountInstance mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
@@ -174,11 +189,11 @@ public class RestconfImpl implements RestconfService {
                                   restconfModule, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
         QName qName = modulesSchemaNode.getQName();
         final CompositeNode modulesNode = NodeFactory.createImmutableCompositeNode(qName, null, modulesAsData);
-        return new StructuredData(modulesNode, modulesSchemaNode, mountPoint);
+        return new StructuredData(modulesNode, modulesSchemaNode, mountPoint,parsePrettyPrintParameter( uriInfo ));
     }
 
     @Override
-    public StructuredData getModule(final String identifier) {
+    public StructuredData getModule(final String identifier,final UriInfo uriInfo) {
         final QName moduleNameAndRevision = this.getModuleNameAndRevision(identifier);
         Module module = null;
         MountInstance mountPoint = null;
@@ -203,17 +218,17 @@ public class RestconfImpl implements RestconfService {
         final DataSchemaNode moduleSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
                                           restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
         final CompositeNode moduleNode = this.toModuleCompositeNode(module, moduleSchemaNode);
-        return new StructuredData(moduleNode, moduleSchemaNode, mountPoint);
+        return new StructuredData(moduleNode, moduleSchemaNode, mountPoint,parsePrettyPrintParameter( uriInfo ));
     }
 
     @Override
-    public StructuredData getOperations() {
+    public StructuredData getOperations(final UriInfo uriInfo) {
         Set<Module> allModules = this.controllerContext.getAllModules();
-        return this.operationsFromModulesToStructuredData(allModules, null);
+        return this.operationsFromModulesToStructuredData(allModules, null,parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
-    public StructuredData getOperations(final String identifier) {
+    public StructuredData getOperations(final String identifier,final UriInfo uriInfo) {
         Set<Module> modules = null;
         MountInstance mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
@@ -228,11 +243,11 @@ public class RestconfImpl implements RestconfService {
                     ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
 
-        return this.operationsFromModulesToStructuredData(modules, mountPoint);
+        return this.operationsFromModulesToStructuredData(modules, mountPoint,parsePrettyPrintParameter(uriInfo));
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
-                                                                 final MountInstance mountPoint) {
+                                                                 final MountInstance mountPoint,boolean prettyPrint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
         final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
@@ -265,7 +280,7 @@ public class RestconfImpl implements RestconfService {
         final CompositeNode operationsNode =
                                   NodeFactory.createImmutableCompositeNode(qName, null, operationsAsData);
         ContainerSchemaNode schemaNode = fakeOperationsSchemaNode.build();
-        return new StructuredData(operationsNode, schemaNode, mountPoint);
+        return new StructuredData(operationsNode, schemaNode, mountPoint,prettyPrint);
     }
 
     private Module getRestconfModule() {
@@ -385,7 +400,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final CompositeNode payload) {
+    public StructuredData invokeRpc(final String identifier, final CompositeNode payload,final UriInfo uriInfo) {
         final RpcExecutor rpc = this.resolveIdentifierInInvokeRpc(identifier);
         QName rpcName = rpc.getRpcDefinition().getQName();
         URI rpcNamespace = rpcName.getNamespace();
@@ -396,7 +411,7 @@ public class RestconfImpl implements RestconfService {
 
         validateInput( rpc.getRpcDefinition().getInput(), payload );
 
-        return callRpc(rpc, payload);
+        return callRpc(rpc, payload,parsePrettyPrintParameter(uriInfo));
     }
 
     private void validateInput(DataSchemaNode inputSchema, CompositeNode payload) {
@@ -463,12 +478,12 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData invokeRpc(final String identifier, final String noPayload) {
+    public StructuredData invokeRpc(final String identifier, final String noPayload, final UriInfo uriInfo) {
         if (StringUtils.isNotBlank(noPayload)) {
             throw new RestconfDocumentedException(
                     "Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
         }
-        return invokeRpc( identifier, (CompositeNode)null );
+        return invokeRpc( identifier, (CompositeNode)null,uriInfo);
     }
 
     private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
@@ -512,7 +527,7 @@ public class RestconfImpl implements RestconfService {
 
     }
 
-    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload) {
+    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload,boolean prettyPrint) {
         if (rpcExecutor == null) {
             throw new RestconfDocumentedException(
                     "RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT );
@@ -543,7 +558,7 @@ public class RestconfImpl implements RestconfService {
             return null; //no output, nothing to send back.
         }
 
-        return new StructuredData(rpcResult.getResult(), rpc.getOutput(), null);
+        return new StructuredData(rpcResult.getResult(), rpc.getOutput(), null,prettyPrint);
     }
 
     private void checkRpcSuccessAndThrowException(RpcResult<CompositeNode> rpcResult) {
@@ -566,7 +581,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData readConfigurationData(final String identifier, UriInfo info) {
+    public StructuredData readConfigurationData(final String identifier, UriInfo uriInfo) {
         final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
         CompositeNode data = null;
         MountInstance mountPoint = iiWithData.getMountPoint();
@@ -577,8 +592,9 @@ public class RestconfImpl implements RestconfService {
             data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
         }
 
-        data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
+        data = pruneDataAtDepth( data, parseDepthParameter( uriInfo ) );
+        boolean prettyPrintMode = parsePrettyPrintParameter( uriInfo );
+        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint(),prettyPrintMode);
     }
 
     @SuppressWarnings("unchecked")
@@ -603,7 +619,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Integer parseDepthParameter( UriInfo info ) {
-        String param = info.getQueryParameters( false ).getFirst( "depth" );
+        String param = info.getQueryParameters( false ).getFirst( UriParameters.DEPTH.toString() );
         if( Strings.isNullOrEmpty( param ) || "unbounded".equals( param ) ) {
             return null;
         }
@@ -639,7 +655,13 @@ public class RestconfImpl implements RestconfService {
         }
 
         data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint);
+        boolean prettyPrintMode = parsePrettyPrintParameter( info );
+        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint,prettyPrintMode);
+    }
+
+    private boolean parsePrettyPrintParameter(UriInfo info) {
+        String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
+        return Boolean.parseBoolean(param);
     }
 
     @Override

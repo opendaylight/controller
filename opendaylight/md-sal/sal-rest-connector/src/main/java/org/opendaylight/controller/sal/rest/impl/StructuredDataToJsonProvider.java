@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -20,15 +20,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-
-import com.google.gson.stream.JsonWriter;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
@@ -38,7 +35,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return type.equals( StructuredData.class );
+        return type.equals(StructuredData.class);
     }
 
     @Override
@@ -56,7 +53,12 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
         }
 
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, "UTF-8"));
-        writer.setIndent("    ");
+
+        if (t.isPrettyPrintMode()) {
+            writer.setIndent("    ");
+        } else {
+            writer.setIndent("");
+        }
         JsonMapper jsonMapper = new JsonMapper();
         jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema(), t.getMountPoint());
         writer.flush();
