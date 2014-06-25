@@ -56,15 +56,17 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener {
         InstanceIdentifier path, L listener,
         AsyncDataBroker.DataChangeScope scope) {
 
-        ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(DataChangeListener.props());
+        ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(
+            DataChangeListener.props());
 
         Object result = actorContext.executeShardOperation(Shard.DEFAULT_NAME,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
                 AsyncDataBroker.DataChangeScope.BASE),
-            ActorContext.ASK_DURATION);
+            ActorContext.ASK_DURATION
+        );
 
         RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
-        return new ListenerRegistrationProxy(reply.getListenerRegistrationPath());
+        return new DataChangeListenerRegistrationProxy(actorContext.actorSelection(reply.getListenerRegistrationPath()), listener);
     }
 
 
@@ -90,6 +92,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener {
     }
 
     @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
-        actorContext.getShardManager().tell(new UpdateSchemaContext(schemaContext), null);
+        actorContext.getShardManager().tell(
+            new UpdateSchemaContext(schemaContext), null);
     }
 }
