@@ -13,17 +13,17 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, BindingDataChangeListener>, BindingService {
+public interface DataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService {
     @Override
-    BindingDataReadTransaction newReadOnlyTransaction();
+    DataReadTransaction newReadOnlyTransaction();
 
     @Override
-    BindingDataReadWriteTransaction newReadWriteTransaction();
+    DataReadWriteTransaction newReadWriteTransaction();
 
     @Override
-    BindingDataWriteTransaction newWriteOnlyTransaction();
+    DataWriteTransaction newWriteOnlyTransaction();
 
     @Override
-    ListenerRegistration<BindingDataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
-            InstanceIdentifier<?> path, BindingDataChangeListener listener, DataChangeScope triggeringScope);
+    ListenerRegistration<DataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
+            InstanceIdentifier<?> path, DataChangeListener listener, DataChangeScope triggeringScope);
 }

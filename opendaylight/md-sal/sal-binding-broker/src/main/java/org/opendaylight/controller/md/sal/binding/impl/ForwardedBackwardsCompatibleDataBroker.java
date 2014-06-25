@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -113,11 +113,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             final InstanceIdentifier<? extends DataObject> path, final DataChangeListener listener) {
 
 
-        BindingDataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
-        BindingDataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
+        DataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
+        DataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
 
-        ListenerRegistration<BindingDataChangeListener> cfgReg = registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
-        ListenerRegistration<BindingDataChangeListener> operReg = registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<DataChangeListener> cfgReg = registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<DataChangeListener> operReg = registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
 
         return new LegacyListenerRegistration(listener,cfgReg,operReg);
     }
@@ -387,12 +387,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     private static final class LegacyListenerRegistration implements ListenerRegistration<DataChangeListener> {
 
         private final DataChangeListener instance;
-        private final ListenerRegistration<BindingDataChangeListener> cfgReg;
-        private final ListenerRegistration<BindingDataChangeListener> operReg;
+        private final ListenerRegistration<DataChangeListener> cfgReg;
+        private final ListenerRegistration<DataChangeListener> operReg;
 
         public LegacyListenerRegistration(final DataChangeListener listener,
-                final ListenerRegistration<BindingDataChangeListener> cfgReg,
-                final ListenerRegistration<BindingDataChangeListener> operReg) {
+                final ListenerRegistration<DataChangeListener> cfgReg,
+                final ListenerRegistration<DataChangeListener> operReg) {
             this.instance = listener;
             this.cfgReg = cfgReg;
             this.operReg = operReg;
@@ -411,7 +411,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
     }
 
-    private static class BackwardsCompatibleOperationalDataChangeInvoker implements BindingDataChangeListener, Delegator<DataChangeListener> {
+    private static class BackwardsCompatibleOperationalDataChangeInvoker implements DataChangeListener, Delegator<DataChangeListener> {
 
         private final org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<?,?> delegate;
 
@@ -436,7 +436,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
 
     }
 
-    private static class BackwardsCompatibleConfigurationDataChangeInvoker implements BindingDataChangeListener, Delegator<DataChangeListener> {
+    private static class BackwardsCompatibleConfigurationDataChangeInvoker implements DataChangeListener, Delegator<DataChangeListener> {
         private final org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<?,?> delegate;
 
         public BackwardsCompatibleConfigurationDataChangeInvoker(final DataChangeListener listener) {
