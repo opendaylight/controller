@@ -7,15 +7,20 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
-
-public interface BindingDataReadTransaction extends AsyncReadTransaction<InstanceIdentifier<?>, DataObject> {
+/**
+ * A transaction that provides mutation capabilities on a data tree.
+ * <p>
+ * For more information on usage and examples, please see the documentation in {@link AsyncWriteTransaction}.
+ */
+public interface WriteTransaction extends AsyncWriteTransaction<InstanceIdentifier<?>, DataObject> {
     @Override
-    ListenableFuture<Optional<DataObject>> read(LogicalDatastoreType store, InstanceIdentifier<?> path);
+    void put(LogicalDatastoreType store, InstanceIdentifier<?> path, DataObject data);
+
+    @Override
+    void delete(LogicalDatastoreType store, InstanceIdentifier<?> path);
 }

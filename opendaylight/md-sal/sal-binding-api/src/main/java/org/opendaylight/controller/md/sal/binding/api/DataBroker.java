@@ -13,17 +13,23 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, BindingDataChangeListener>, BindingService {
+/**
+ * Provides access to a conceptual data tree store and also provides the ability to
+ * subscribe for changes to data under a given branch of the tree.
+ * <p>
+ * For more information on usage, please see the documentation in {@link AsyncDataBroker}.
+ */
+public interface DataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService {
     @Override
-    BindingDataReadOnlyTransaction newReadOnlyTransaction();
+    ReadOnlyTransaction newReadOnlyTransaction();
 
     @Override
-    BindingDataReadWriteTransaction newReadWriteTransaction();
+    ReadWriteTransaction newReadWriteTransaction();
 
     @Override
-    BindingDataWriteTransaction newWriteOnlyTransaction();
+    WriteTransaction newWriteOnlyTransaction();
 
     @Override
-    ListenerRegistration<BindingDataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
-            InstanceIdentifier<?> path, BindingDataChangeListener listener, DataChangeScope triggeringScope);
+    ListenerRegistration<DataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
+            InstanceIdentifier<?> path, DataChangeListener listener, DataChangeScope triggeringScope);
 }

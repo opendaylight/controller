@@ -25,8 +25,8 @@ import com.google.common.util.concurrent.ListenableFuture;
  * <b>Implementation Note:</b> This interface is not intended to be implemented
  * by users of MD-SAL, but only to be consumed by them.
  *
- * <h2>Transaction isolation example</h2> Lest assume initial state of data tree
- * for <code>PATH</code> is <code>A</code>.
+ * <h2>Transaction isolation example</h2>
+ * Lets assume initial state of data tree for <code>PATH</code> is <code>A</code>.
  *
  * <pre>
  * txRead = broker.newReadOnlyTransaction();   // read Transaction is snapshot of data
