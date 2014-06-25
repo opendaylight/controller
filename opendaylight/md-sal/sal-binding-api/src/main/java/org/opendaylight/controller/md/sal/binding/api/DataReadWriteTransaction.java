@@ -12,9 +12,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * Logical capture of a combination of both {@link BindingDataReadTransaction} and
- * {@link BindingDataWriteTransaction}.
+ * Logical capture of a combination of both {@link DataReadTransaction} and
+ * {@link DataWriteTransaction}.
  */
-public interface BindingDataReadWriteTransaction extends BindingDataReadTransaction, BindingDataWriteTransaction, AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
+public interface DataReadWriteTransaction extends DataReadTransaction, DataWriteTransaction, AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
 
 }
