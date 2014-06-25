@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.md.sal.binding.util.BindingContextUtils;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -54,7 +54,7 @@ public class RootBindingAwareBroker implements //
 
     private DataProviderService legacyDataBroker;
 
-    private BindingDataBroker dataBroker;
+    private DataBroker dataBroker;
 
     private MountPointManagerImpl mountManager;
 
@@ -124,7 +124,7 @@ public class RootBindingAwareBroker implements //
         consBuilder.put(DataBrokerService.class, getRoot());
         consBuilder.put(RpcConsumerRegistry.class, getRoot());
         if(dataBroker != null) {
-            consBuilder.put(BindingDataBroker.class, dataBroker);
+            consBuilder.put(DataBroker.class, dataBroker);
         }
         consBuilder.put(MountService.class, mountManager).build();
         supportedConsumerServices = consBuilder.build();
@@ -183,7 +183,7 @@ public class RootBindingAwareBroker implements //
         }
     }
 
-    public void setDataBroker(final BindingDataBroker asyncDataBroker) {
+    public void setDataBroker(final DataBroker asyncDataBroker) {
         dataBroker = asyncDataBroker;
     }
 }
