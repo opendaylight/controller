@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_595d4414",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-25T21:15:00Z",
+      "side": 1,
+      "message": "Not clear why Stashing is required.\n\nAccording to the docs.\n\nBy default, a persistent actor is automatically recovered on start and on restart by replaying journaled messages. New messages sent to a persistent actor during recovery do not interfere with replayed messages. New messages will only be received by a persistent actor after recovery completes.",
+      "parentUuid": "fa82b9bf_c7eaccab",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b9a330ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/BasicIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-25T21:15:00Z",
+      "side": 1,
+      "message": "We do need to create such utilities.",
+      "parentUuid": "fa82b9bf_a7330861",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9a874dd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/application.conf",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-25T21:15:00Z",
+      "side": 1,
+      "message": "question or statement?",
+      "parentUuid": "fa82b9bf_c7016c6b",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
