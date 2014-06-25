@@ -19,6 +19,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,7 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,14 +61,11 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
 public class InvokeRpcMethodTest {
 
     private RestconfImpl restconfImpl = null;
     private static ControllerContext controllerContext = null;
+    private static UriInfo uriInfo;
 
 
     @BeforeClass
@@ -77,7 +79,10 @@ public class InvokeRpcMethodTest {
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = spy( ControllerContext.getInstance() );
         controllerContext.setSchemas(schemaContext);
-
+        uriInfo = mock(UriInfo.class);
+        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+        map.put("prettyPrint", Collections.singletonList("true"));
+        when(uriInfo.getQueryParameters(any(Boolean.class))).thenReturn(map);
     }
 
     @Before
@@ -114,7 +119,7 @@ public class InvokeRpcMethodTest {
             .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture(
                                                Rpcs.<CompositeNode>getRpcResult( true ) ) );
 
-        StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", payload);
+        StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", payload,uriInfo);
         assertTrue(structData == null);
 
     }
@@ -143,7 +148,7 @@ public class InvokeRpcMethodTest {
         restconfImpl.setBroker(brokerFacade);
 
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", "");
+            restconfImpl.invokeRpc("toaster:cancel-toast", "",uriInfo);
             fail("Expected an exception to be thrown.");
         }
         catch (RestconfDocumentedException e) {
@@ -196,7 +201,7 @@ public class InvokeRpcMethodTest {
         restconfImpl.setBroker(brokerFacade);
 
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", "");
+            restconfImpl.invokeRpc("toaster:cancel-toast", "",uriInfo);
             fail("Expected an exception to be thrown.");
         }
         catch (RestconfDocumentedException e) {
@@ -220,7 +225,7 @@ public class InvokeRpcMethodTest {
         restconfImpl.setBroker(brokerFacade);
 
         StructuredData output = restconfImpl.invokeRpc("toaster:cancel-toast",
-                "");
+                "",uriInfo);
         assertEquals(null, output);
         //additional validation in the fact that the restconfImpl does not throw an exception.
     }
@@ -228,7 +233,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcMethodExpectingNoPayloadButProvidePayload() {
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", " a payload ");
+            restconfImpl.invokeRpc("toaster:cancel-toast", " a payload ",uriInfo);
             fail("Expected an exception");
         } catch (RestconfDocumentedException e) {
             verifyRestconfDocumentedException( e, 0, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
@@ -239,7 +244,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcMethodWithBadMethodName() {
         try {
-            restconfImpl.invokeRpc("toaster:bad-method", "");
+            restconfImpl.invokeRpc("toaster:bad-method", "",uriInfo);
             fail("Expected an exception");
         }
         catch (RestconfDocumentedException e) {
@@ -263,7 +268,7 @@ public class InvokeRpcMethodTest {
         restconfImpl.setBroker(brokerFacade);
 
         StructuredData output = restconfImpl.invokeRpc("toaster:make-toast",
-                payload);
+                payload,uriInfo);
         assertEquals(null, output);
         //additional validation in the fact that the restconfImpl does not throw an exception.
     }
@@ -271,7 +276,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testThrowExceptionWhenSlashInModuleName() {
         try {
-            restconfImpl.invokeRpc("toaster/slash", "");
+            restconfImpl.invokeRpc("toaster/slash", "",uriInfo);
             fail("Expected an exception.");
         }
         catch (RestconfDocumentedException e) {
@@ -294,7 +299,7 @@ public class InvokeRpcMethodTest {
 
         restconfImpl.setBroker(brokerFacade);
 
-        StructuredData output = restconfImpl.invokeRpc("toaster:testOutput", "");
+        StructuredData output = restconfImpl.invokeRpc("toaster:testOutput", "",uriInfo);
         assertNotNull( output );
         assertSame( compositeNode, output.getData() );
         assertNotNull( output.getSchema() );
@@ -330,7 +335,7 @@ public class InvokeRpcMethodTest {
         restconfImpl.setControllerContext( mockedContext );
         StructuredData output = restconfImpl.invokeRpc(
                 "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/toaster:cancel-toast",
-                "");
+                "",uriInfo);
         assertEquals(null, output);
 
         //additional validation in the fact that the restconfImpl does not throw an exception.
