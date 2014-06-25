@@ -7,6 +7,9 @@ module distributed-datastore-provider {
 
     import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-md-sal-dom {prefix sal;}
 
     description
         "This module contains the base YANG definitions for
@@ -18,17 +21,32 @@ module distributed-datastore-provider {
     }
 
     // This is the definition of the service implementation as a module identity.
-    identity distributed-datastore-provider {
+    identity distributed-config-datastore-provider {
             base config:module-type;
-
+            config:provided-service config-dom-store-spi:config-dom-datastore;
             // Specifies the prefix for generated java classes.
-            config:java-name-prefix DistributedDataStoreProvider;
+            config:java-name-prefix DistributedConfigDataStoreProvider;
     }
+
+     // This is the definition of the service implementation as a module identity.
+     identity distributed-operational-datastore-provider {
+                base config:module-type;
+                config:provided-service operational-dom-store-spi:operational-dom-datastore;
+                // Specifies the prefix for generated java classes.
+                config:java-name-prefix DistributedOperationalDataStoreProvider;
+     }
 
     // Augments the 'configuration' choice node under modules/module.
     augment "/config:modules/config:module/config:configuration" {
-        case distributed-datastore-provider {
-            when "/config:modules/config:module/config:type = 'distributed-datastore-provider'";
+        case distributed-config-datastore-provider {
+            when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
         }
     }
+
+    // Augments the 'configuration' choice node under modules/module.
+        augment "/config:modules/config:module/config:configuration" {
+            case distributed-operational-datastore-provider {
+                when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
+            }
+        }
 }
