@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_018184c3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-25T05:53:41Z",
+      "side": 1,
+      "message": "Sorry, I don\u0027t understand your comment. Can you give me an example. Thanks.",
+      "parentUuid": "fa82b9bf_e6bcb6de",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e676f6a3",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8125940a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-25T05:53:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e676f6a3",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_26493e60",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-24T15:59:23Z",
       "side": 1,
       "message": "Rather than checking the message text, which could be changed in source, I would suggest just checking for the appropriate error tag (BAD_ELEMENT).",
+      "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e17b40f3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNames.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-25T05:53:41Z",
+      "side": 1,
+      "message": "Yes, you are right but I thought that exception with error tag set to BAD_ELEMENT could be set in other places (e.g. in RestconfImpl.checkNodeMultiplicityAccordingToSchema it is set at two places).\nAnyway I did the change.",
+      "parentUuid": "fa82b9bf_26493e60",
       "revId": "63b15f0ed636ce8059b4154dabd2d535274c9b40",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
