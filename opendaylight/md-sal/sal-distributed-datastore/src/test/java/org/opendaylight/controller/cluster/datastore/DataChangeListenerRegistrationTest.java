@@ -6,8 +6,8 @@ import akka.testkit.JavaTestKit;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.messages.CloseListenerRegistration;
-import org.opendaylight.controller.cluster.datastore.messages.CloseListenerRegistrationReply;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistrationReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import static org.junit.Assert.assertEquals;
 
-public class ListenerRegistrationTest extends AbstractActorTest {
+public class DataChangeListenerRegistrationTest extends AbstractActorTest {
   private static ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
 
   private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor);
@@ -31,18 +31,20 @@ public class ListenerRegistrationTest extends AbstractActorTest {
   @Test
   public void testOnReceiveCloseListenerRegistration() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ListenerRegistration.props(store.registerChangeListener(TestModel.TEST_PATH, noOpDataChangeListener(), AsyncDataBroker.DataChangeScope.BASE));
+      final Props props = DataChangeListenerRegistration.props(store
+          .registerChangeListener(TestModel.TEST_PATH, noOpDataChangeListener(),
+              AsyncDataBroker.DataChangeScope.BASE));
       final ActorRef subject = getSystem().actorOf(props, "testCloseListenerRegistration");
 
       new Within(duration("1 seconds")) {
         protected void run() {
 
-          subject.tell(new CloseListenerRegistration(), getRef());
+          subject.tell(new CloseDataChangeListenerRegistration(), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
-              if (in instanceof CloseListenerRegistrationReply) {
+              if (in instanceof CloseDataChangeListenerRegistrationReply) {
                 return "match";
               } else {
                 throw noMatch();
