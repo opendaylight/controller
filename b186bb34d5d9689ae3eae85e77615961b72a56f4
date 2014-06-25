@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ecb817ca",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-25T13:07:16Z",
+      "side": 1,
+      "message": "This should be true",
+      "revId": "b186bb34d5d9689ae3eae85e77615961b72a56f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
