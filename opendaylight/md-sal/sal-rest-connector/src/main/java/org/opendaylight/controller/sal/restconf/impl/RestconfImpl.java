@@ -74,6 +74,21 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBu
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 
 public class RestconfImpl implements RestconfService {
+    private enum UriParameters {
+        INCLUDE_WHITE_CHARS( "includeWhiteChars"),
+        DEPTH( "depth");
+
+        private String uriParameterName;
+        UriParameters(String uriParameterName) {
+            this.uriParameterName = uriParameterName;
+        }
+
+        @Override
+        public String toString() {
+            return uriParameterName;
+        }
+    }
+
     private final static RestconfImpl INSTANCE = new RestconfImpl();
 
     private static final int CHAR_NOT_FOUND = -1;
@@ -578,7 +593,8 @@ public class RestconfImpl implements RestconfService {
         }
 
         data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
+        boolean includeWhiteSpaces = parseIncludeWhiteSpaces( info );
+        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint(),includeWhiteSpaces);
     }
 
     @SuppressWarnings("unchecked")
@@ -603,7 +619,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private Integer parseDepthParameter( UriInfo info ) {
-        String param = info.getQueryParameters( false ).getFirst( "depth" );
+        String param = info.getQueryParameters( false ).getFirst( UriParameters.DEPTH.toString() );
         if( Strings.isNullOrEmpty( param ) || "unbounded".equals( param ) ) {
             return null;
         }
@@ -639,7 +655,16 @@ public class RestconfImpl implements RestconfService {
         }
 
         data = pruneDataAtDepth( data, parseDepthParameter( info ) );
-        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint);
+        boolean includeWhiteSpaces = parseIncludeWhiteSpaces( info );
+        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint,includeWhiteSpaces);
+    }
+
+    private boolean parseIncludeWhiteSpaces(UriInfo info) {
+        String param = info.getQueryParameters(false).getFirst(UriParameters.INCLUDE_WHITE_CHARS.toString());
+        if (param != null && param.equals(Boolean.FALSE.toString())) {
+            return false;
+        }
+        return true;
     }
 
     @Override
