@@ -10,7 +10,12 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import java.util.EventListener;
 
 import org.opendaylight.yangtools.concepts.Path;
-
+/**
+ *
+ *
+ * @deprecated Replaced by {@link AsyncDataChangeEvent}
+ */
+@Deprecated
 public interface DataChangeListener<P extends Path<P>, D> extends EventListener {
     /**
      * Note that this method may be invoked from a shared thread pool, so
