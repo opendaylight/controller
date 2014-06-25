@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataBroker;
-import org.opendaylight.controller.md.sal.binding.api.BindingDataReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.BindingDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.BindingDataWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -40,24 +40,24 @@ import com.google.common.util.concurrent.ListenableFuture;
  * NormalizedNode once the MappingService is updated
  *
  */
-public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker implements BindingDataBroker {
+public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker implements DataBroker {
 
     public ForwardedBindingDataBroker(final DOMDataBroker domDataBroker, final BindingIndependentMappingService mappingService, final SchemaService schemaService) {
         super(domDataBroker, mappingService,schemaService);
     }
 
     @Override
-    public BindingDataReadTransaction newReadOnlyTransaction() {
+    public ReadTransaction newReadOnlyTransaction() {
         return new BindingDataReadTransactionImpl(getDelegate().newReadOnlyTransaction(),getCodec());
     }
 
     @Override
-    public BindingDataReadWriteTransaction newReadWriteTransaction() {
+    public ReadWriteTransaction newReadWriteTransaction() {
         return new BindingDataReadWriteTransactionImpl(getDelegate().newReadWriteTransaction(),getCodec());
     }
 
     @Override
-    public BindingDataWriteTransaction newWriteOnlyTransaction() {
+    public WriteTransaction newWriteOnlyTransaction() {
         return new BindingDataWriteTransactionImpl<DOMDataWriteTransaction>(getDelegate().newWriteOnlyTransaction(),getCodec());
     }
 
@@ -81,7 +81,7 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
     }
 
     private class BindingDataReadTransactionImpl extends AbstractBindingTransaction<DOMDataReadTransaction> implements
-            BindingDataReadTransaction {
+            ReadTransaction {
 
         protected BindingDataReadTransactionImpl(final DOMDataReadTransaction delegate,
                 final BindingToNormalizedNodeCodec codec) {
@@ -96,7 +96,7 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
     }
 
     private class BindingDataWriteTransactionImpl<T extends DOMDataWriteTransaction> extends
-            AbstractBindingTransaction<T> implements BindingDataWriteTransaction {
+            AbstractBindingTransaction<T> implements WriteTransaction {
 
         protected BindingDataWriteTransactionImpl(final T delegate, final BindingToNormalizedNodeCodec codec) {
             super(delegate, codec);
@@ -130,7 +130,7 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
     }
 
     private class BindingDataReadWriteTransactionImpl extends
-            BindingDataWriteTransactionImpl<DOMDataReadWriteTransaction> implements BindingDataReadWriteTransaction {
+            BindingDataWriteTransactionImpl<DOMDataReadWriteTransaction> implements ReadWriteTransaction {
 
         protected BindingDataReadWriteTransactionImpl(final DOMDataReadWriteTransaction delegate,
                 final BindingToNormalizedNodeCodec codec) {
