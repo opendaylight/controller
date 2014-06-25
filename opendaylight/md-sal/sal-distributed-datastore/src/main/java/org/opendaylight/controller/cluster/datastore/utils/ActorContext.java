@@ -13,6 +13,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.util.Timeout;
+import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.slf4j.Logger;
@@ -81,7 +83,7 @@ public class ActorContext {
 
             return actorSystem.actorSelection(found.getPrimaryPath());
         }
-        throw new RuntimeException("primary was not found");
+        throw new PrimaryNotFoundException();
     }
 
     /**
@@ -99,7 +101,7 @@ public class ActorContext {
         try {
             return Await.result(future, AWAIT_DURATION);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TimeoutException(e);
         }
     }
 
@@ -118,7 +120,7 @@ public class ActorContext {
         try {
             return Await.result(future, AWAIT_DURATION);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TimeoutException(e);
         }
     }
 
@@ -131,7 +133,8 @@ public class ActorContext {
      * @param shardName
      * @param message
      * @param duration
-     * @throws java.lang.RuntimeException when a primary is not found or if the message to the remote shard fails or times out
+     * @throws org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException if the message to the remote shard times out
+     * @throws org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException if the primary shard is not found
      *
      * @return
      */

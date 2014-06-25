@@ -142,7 +142,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             }
         }
 
-        return new ThreePhaseCommitCohortProxy(cohortPaths);
+        return new ThreePhaseCommitCohortProxy(actorContext, cohortPaths);
     }
 
     @Override
