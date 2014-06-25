@@ -10,16 +10,31 @@ package org.opendaylight.controller.sal.binding.api;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
- * Base interface defining contract for retrieving MD-SAL
- * version of RpcServices
+ * RPC broker, which provides access to RPC invocation services.
+ *
+ * Base interface defining contract for retrieving MD-SAL version of RpcServices.
  *
  */
 public interface RpcConsumerRegistry extends BindingAwareService {
     /**
-     * Returns a session specific instance (implementation) of requested
-     * YANG module implementation / service provided by consumer.
+     * Returns a instance (implementation) of requested YANG module
+     * implementation / service provided by consumer.
      *
-     * @return Session specific implementation of service
+     * Returns implementation of requested RPC service, returned instance is
+     * never an actual implementation of RPC service, but public proxy with
+     * following behaviour of invocation of rpc methods:
+     *
+     * <ul>
+     * <li>If implementation is registered to MD-SAL - all invocations are
+     * forwarded to registered implementation of particular RPC.</li>
+     * <li>If no implementation is available - invocation on any rpc method throws {@link IllegalStateException}.</li>
+     * <li>If arguments are incorrect - throws {@link IllegalArgumentException}.
+     * </ul>
+     *
+     * Returned public proxy is updated in background by RPC broker to
+     * point to latest registered implementations.
+     *
+     * @return Public proxy for requested RPC service
      */
     <T extends RpcService> T getRpcService(Class<T> module);
 }
