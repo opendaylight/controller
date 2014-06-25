@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e7dfd00b",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "Provides access to registered Remote Procedure Call (RPC) services. RPCs are registered by \u003cprovide link\u003e and generally are defined inside of yang models (? Question someone create and register non-auto-generated RPC calls?).",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_07e514dc",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "Also, it seems a little silly as well, but I would actually talk a little bit about how RPC definitions on yang methods are exposed as method calls via the RpcService interface, and talk a little bit about WHY we do it this way (because it makes java developer\u0027s lives easier or something like that).",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_47d6bcf2",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "Routed Service is still not clear to me how this is used or what it provides you. Based on the name I think that we can have different implementations of this RPC tied to different nodes in the tree? If that is the case we need to make that clear here, and in the add method below so we can understand how to choose between the two different types of registration methods.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_87d044f7",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "RpcResult is NOT a simple class. We need to make sure that is well documented as well and we should provide pointers to that class for examples on how to use it, along with the helper classes that exist to make its use easier.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_27d93822",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "Concurrent programming, especially use of the Google Guava UI needs to be demo\u0027d here, or we need to link to sites that provide best practices. Coming in cold to this heavy use of futures can seem overwhelming, unless you are aware of the helper classes that exist to make your life easier.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e706f085",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/routing/RouteChangePublisher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T18:36:46Z",
+      "side": 1,
+      "message": "We need to describe what it does...",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
