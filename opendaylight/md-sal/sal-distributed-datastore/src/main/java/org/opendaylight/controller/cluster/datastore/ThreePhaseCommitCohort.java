@@ -28,101 +28,109 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 
 import java.util.concurrent.ExecutionException;
 
-public class ThreePhaseCommitCohort extends UntypedActor{
-  private final DOMStoreThreePhaseCommitCohort cohort;
-  private final ActorRef shardActor;
-  private final CompositeModification modification;
+public class ThreePhaseCommitCohort extends UntypedActor {
+    private final DOMStoreThreePhaseCommitCohort cohort;
+    private final ActorRef shardActor;
+    private final CompositeModification modification;
 
-  public ThreePhaseCommitCohort(DOMStoreThreePhaseCommitCohort cohort, ActorRef shardActor, CompositeModification modification) {
-    this.cohort = cohort;
-    this.shardActor = shardActor;
-    this.modification = modification;
-  }
+    public ThreePhaseCommitCohort(DOMStoreThreePhaseCommitCohort cohort,
+        ActorRef shardActor, CompositeModification modification) {
 
-  private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
-  public static Props props(final DOMStoreThreePhaseCommitCohort cohort, final ActorRef shardActor, final CompositeModification modification) {
-    return Props.create(new Creator<ThreePhaseCommitCohort>(){
-      @Override
-      public ThreePhaseCommitCohort create() throws Exception {
-        return new ThreePhaseCommitCohort(cohort, shardActor, modification);
-      }
-    });
-  }
-
-  @Override
-  public void onReceive(Object message) throws Exception {
-    if(message instanceof CanCommitTransaction){
-      canCommit((CanCommitTransaction) message);
-    } else if(message instanceof PreCommitTransaction) {
-      preCommit((PreCommitTransaction) message);
-    } else if(message instanceof CommitTransaction){
-      commit((CommitTransaction) message);
-    } else if (message instanceof AbortTransaction){
-      abort((AbortTransaction) message);
+        this.cohort = cohort;
+        this.shardActor = shardActor;
+        this.modification = modification;
     }
-  }
 
-  private void abort(AbortTransaction message) {
-    final ListenableFuture<Void> future = cohort.abort();
-    final ActorRef sender = getSender();
-    final ActorRef self = getSelf();
+    private final LoggingAdapter log =
+        Logging.getLogger(getContext().system(), this);
 
-    future.addListener(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          future.get();
-          sender.tell(new AbortTransactionReply(), self);
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e, "An exception happened when aborting");
+    public static Props props(final DOMStoreThreePhaseCommitCohort cohort,
+        final ActorRef shardActor, final CompositeModification modification) {
+        return Props.create(new Creator<ThreePhaseCommitCohort>() {
+            @Override
+            public ThreePhaseCommitCohort create() throws Exception {
+                return new ThreePhaseCommitCohort(cohort, shardActor,
+                    modification);
+            }
+        });
+    }
+
+    @Override
+    public void onReceive(Object message) throws Exception {
+        log.debug("Received message {}", message);
+
+        if (message instanceof CanCommitTransaction) {
+            canCommit((CanCommitTransaction) message);
+        } else if (message instanceof PreCommitTransaction) {
+            preCommit((PreCommitTransaction) message);
+        } else if (message instanceof CommitTransaction) {
+            commit((CommitTransaction) message);
+        } else if (message instanceof AbortTransaction) {
+            abort((AbortTransaction) message);
         }
-      }
-    }, getContext().dispatcher());
-  }
+    }
 
-  private void commit(CommitTransaction message) {
-    // Forward the commit to the shard
-    log.info("Commit transaction now + " + shardActor);
-    shardActor.forward(new ForwardedCommitTransaction(cohort, modification), getContext());
+    private void abort(AbortTransaction message) {
+        final ListenableFuture<Void> future = cohort.abort();
+        final ActorRef sender = getSender();
+        final ActorRef self = getSelf();
 
-  }
+        future.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.get();
+                    sender.tell(new AbortTransactionReply(), self);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e, "An exception happened when aborting");
+                }
+            }
+        }, getContext().dispatcher());
+    }
 
-  private void preCommit(PreCommitTransaction message) {
-    final ListenableFuture<Void> future = cohort.preCommit();
-    final ActorRef sender = getSender();
-    final ActorRef self = getSelf();
+    private void commit(CommitTransaction message) {
+        // Forward the commit to the shard
+        log.debug("Forward commit transaction to Shard {} ", shardActor);
+        shardActor.forward(new ForwardedCommitTransaction(cohort, modification),
+            getContext());
 
-    future.addListener(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          future.get();
-          sender.tell(new PreCommitTransactionReply(), self);
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e, "An exception happened when preCommitting");
-        }
-      }
-    }, getContext().dispatcher());
+    }
 
-  }
+    private void preCommit(PreCommitTransaction message) {
+        final ListenableFuture<Void> future = cohort.preCommit();
+        final ActorRef sender = getSender();
+        final ActorRef self = getSelf();
 
-  private void canCommit(CanCommitTransaction message) {
-    final ListenableFuture<Boolean> future = cohort.canCommit();
-    final ActorRef sender = getSender();
-    final ActorRef self = getSelf();
+        future.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.get();
+                    sender.tell(new PreCommitTransactionReply(), self);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e, "An exception happened when preCommitting");
+                }
+            }
+        }, getContext().dispatcher());
 
-    future.addListener(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          Boolean canCommit = future.get();
-          sender.tell(new CanCommitTransactionReply(canCommit), self);
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e, "An exception happened when aborting");
-        }
-      }
-    }, getContext().dispatcher());
+    }
 
-  }
+    private void canCommit(CanCommitTransaction message) {
+        final ListenableFuture<Boolean> future = cohort.canCommit();
+        final ActorRef sender = getSender();
+        final ActorRef self = getSelf();
+
+        future.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Boolean canCommit = future.get();
+                    sender.tell(new CanCommitTransactionReply(canCommit), self);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e, "An exception happened when aborting");
+                }
+            }
+        }, getContext().dispatcher());
+
+    }
 }
