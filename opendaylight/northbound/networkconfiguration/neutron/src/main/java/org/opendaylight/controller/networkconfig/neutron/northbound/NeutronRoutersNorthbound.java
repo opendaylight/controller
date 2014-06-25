@@ -43,7 +43,6 @@ import org.opendaylight.controller.northbound.commons.exception.ResourceNotFound
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
-
 /**
  * Neutron Northbound REST APIs.<br>
  * This class provides REST APIs for managing neutron routers
@@ -70,122 +69,105 @@ public class NeutronRoutersNorthbound {
     }
 
     /**
-     * Returns a list of all Routers */
+     * Returns a list of all Routers
+     */
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouters.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
+    // @TypeHint(OpenStackRouters.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"), @ResponseCode(code = 401, condition = "Unauthorized"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response listRouters(
             // return fields
             @QueryParam("fields") List<String> fields,
-            // note: openstack isn't clear about filtering on lists, so we aren't handling them
-            @QueryParam("id") String queryID,
-            @QueryParam("name") String queryName,
-            @QueryParam("admin_state_up") String queryAdminStateUp,
-            @QueryParam("status") String queryStatus,
-            @QueryParam("tenant_id") String queryTenantID,
+            // note: openstack isn't clear about filtering on lists, so we
+            // aren't handling them
+            @QueryParam("id") String queryID, @QueryParam("name") String queryName, @QueryParam("admin_state_up") String queryAdminStateUp,
+            @QueryParam("status") String queryStatus, @QueryParam("tenant_id") String queryTenantID,
             @QueryParam("external_gateway_info") String queryExternalGatewayInfo,
             // pagination
-            @QueryParam("limit") String limit,
-            @QueryParam("marker") String marker,
-            @QueryParam("page_reverse") String pageReverse
-            // sorting not supported
-            ) {
+            @QueryParam("limit") String limit, @QueryParam("marker") String marker, @QueryParam("page_reverse") String pageReverse
+    // sorting not supported
+    ) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         List<NeutronRouter> allRouters = routerInterface.getAllRouters();
         List<NeutronRouter> ans = new ArrayList<NeutronRouter>();
         Iterator<NeutronRouter> i = allRouters.iterator();
         while (i.hasNext()) {
             NeutronRouter oSS = i.next();
-            if ((queryID == null || queryID.equals(oSS.getID())) &&
-                    (queryName == null || queryName.equals(oSS.getName())) &&
-                    (queryAdminStateUp == null || queryAdminStateUp.equals(oSS.getAdminStateUp())) &&
-                    (queryStatus == null || queryStatus.equals(oSS.getStatus())) &&
-                    (queryExternalGatewayInfo == null || queryExternalGatewayInfo.equals(oSS.getExternalGatewayInfo())) &&
-                    (queryTenantID == null || queryTenantID.equals(oSS.getTenantID()))) {
+            if ((queryID == null || queryID.equals(oSS.getID())) && (queryName == null || queryName.equals(oSS.getName()))
+                    && (queryAdminStateUp == null || queryAdminStateUp.equals(oSS.getAdminStateUp()))
+                    && (queryStatus == null || queryStatus.equals(oSS.getStatus()))
+                    && (queryExternalGatewayInfo == null || queryExternalGatewayInfo.equals(oSS.getExternalGatewayInfo()))
+                    && (queryTenantID == null || queryTenantID.equals(oSS.getTenantID()))) {
                 if (fields.size() > 0)
-                    ans.add(extractFields(oSS,fields));
+                    ans.add(extractFields(oSS, fields));
                 else
                     ans.add(oSS);
             }
         }
-        //TODO: apply pagination to results
-        return Response.status(200).entity(
-                new NeutronRouterRequest(ans)).build();
+        // TODO: apply pagination to results
+        return Response.status(200).entity(new NeutronRouterRequest(ans)).build();
     }
 
     /**
-     * Returns a specific Router */
+     * Returns a specific Router
+     */
 
     @Path("{routerUUID}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouters.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 403, condition = "Forbidden"),
-            @ResponseCode(code = 404, condition = "Not Found"),
+    // @TypeHint(OpenStackRouters.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"), @ResponseCode(code = 401, condition = "Unauthorized"),
+            @ResponseCode(code = 403, condition = "Forbidden"), @ResponseCode(code = 404, condition = "Not Found"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response showRouter(
-            @PathParam("routerUUID") String routerUUID,
-            // return fields
+    public Response showRouter(@PathParam("routerUUID") String routerUUID,
+    // return fields
             @QueryParam("fields") List<String> fields) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (!routerInterface.routerExists(routerUUID)) {
             throw new ResourceNotFoundException("Router UUID not found");
         }
         if (fields.size() > 0) {
             NeutronRouter ans = routerInterface.getRouter(routerUUID);
-            return Response.status(200).entity(
-                    new NeutronRouterRequest(extractFields(ans, fields))).build();
+            return Response.status(200).entity(new NeutronRouterRequest(extractFields(ans, fields))).build();
         } else
-            return Response.status(200).entity(
-                    new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
+            return Response.status(200).entity(new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
     }
 
     /**
-     * Creates new Routers */
+     * Creates new Routers
+     */
 
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouters.class)
-    @StatusCodes({
-            @ResponseCode(code = 201, condition = "Created"),
-            @ResponseCode(code = 400, condition = "Bad Request"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 501, condition = "Not Implemented") })
+    // @TypeHint(OpenStackRouters.class)
+    @StatusCodes({ @ResponseCode(code = 201, condition = "Created"), @ResponseCode(code = 400, condition = "Bad Request"),
+            @ResponseCode(code = 401, condition = "Unauthorized"), @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response createRouters(final NeutronRouterRequest input) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
         if (networkInterface == null) {
-            throw new ServiceUnavailableException("Network CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Network CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (input.isSingleton()) {
             NeutronRouter singleton = input.getSingleton();
 
             /*
-             * verify that the router doesn't already exist (issue: is deeper inspection necessary?)
-             * if there is external gateway information provided, verify that the specified network
-             * exists and has been designated as "router:external"
+             * verify that the router doesn't already exist (issue: is deeper
+             * inspection necessary?) if there is external gateway information
+             * provided, verify that the specified network exists and has been
+             * designated as "router:external"
              */
             if (routerInterface.routerExists(singleton.getID()))
                 throw new BadRequestException("router UUID already exists");
@@ -228,32 +210,25 @@ public class NeutronRoutersNorthbound {
     }
 
     /**
-     * Updates a Router */
+     * Updates a Router
+     */
 
     @Path("{routerUUID}")
     @PUT
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouters.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 400, condition = "Bad Request"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 404, condition = "Not Found"),
+    // @TypeHint(OpenStackRouters.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"), @ResponseCode(code = 400, condition = "Bad Request"),
+            @ResponseCode(code = 401, condition = "Unauthorized"), @ResponseCode(code = 404, condition = "Not Found"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response updateRouter(
-            @PathParam("routerUUID") String routerUUID,
-            NeutronRouterRequest input
-            ) {
+    public Response updateRouter(@PathParam("routerUUID") String routerUUID, NeutronRouterRequest input) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
         if (networkInterface == null) {
-            throw new ServiceUnavailableException("Network CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Network CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         /*
@@ -269,8 +244,7 @@ public class NeutronRoutersNorthbound {
         /*
          * attribute changes blocked by Neutron
          */
-        if (singleton.getID() != null || singleton.getTenantID() != null ||
-                singleton.getStatus() != null)
+        if (singleton.getID() != null || singleton.getTenantID() != null || singleton.getStatus() != null)
             throw new BadRequestException("Request attribute change not allowed");
 
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
@@ -283,8 +257,8 @@ public class NeutronRoutersNorthbound {
             }
         }
         /*
-         * if the external gateway info is being changed, verify that the new network
-         * exists and has been designated as an external network
+         * if the external gateway info is being changed, verify that the new
+         * network exists and has been designated as an external network
          */
         if (singleton.getExternalGatewayInfo() != null) {
             String externNetworkPtr = singleton.getExternalGatewayInfo().getNetworkID();
@@ -306,28 +280,23 @@ public class NeutronRoutersNorthbound {
                 service.neutronRouterUpdated(updatedRouter);
             }
         }
-        return Response.status(200).entity(
-                new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
+        return Response.status(200).entity(new NeutronRouterRequest(routerInterface.getRouter(routerUUID))).build();
 
     }
 
     /**
-     * Deletes a Router */
+     * Deletes a Router
+     */
 
     @Path("{routerUUID}")
     @DELETE
-    @StatusCodes({
-            @ResponseCode(code = 204, condition = "No Content"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 404, condition = "Not Found"),
-            @ResponseCode(code = 409, condition = "Conflict"),
+    @StatusCodes({ @ResponseCode(code = 204, condition = "No Content"), @ResponseCode(code = 401, condition = "Unauthorized"),
+            @ResponseCode(code = 404, condition = "Not Found"), @ResponseCode(code = 409, condition = "Conflict"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response deleteRouter(
-            @PathParam("routerUUID") String routerUUID) {
+    public Response deleteRouter(@PathParam("routerUUID") String routerUUID) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         /*
@@ -358,49 +327,41 @@ public class NeutronRoutersNorthbound {
     }
 
     /**
-     * Adds an interface to a router */
+     * Adds an interface to a router
+     */
 
     @Path("{routerUUID}/add_router_interface")
     @PUT
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouterInterfaces.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 400, condition = "Bad Request"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 404, condition = "Not Found"),
-            @ResponseCode(code = 409, condition = "Conflict"),
-            @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response addRouterInterface(
-            @PathParam("routerUUID") String routerUUID,
-            NeutronRouter_Interface input
-            ) {
+    // @TypeHint(OpenStackRouterInterfaces.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"), @ResponseCode(code = 400, condition = "Bad Request"),
+            @ResponseCode(code = 401, condition = "Unauthorized"), @ResponseCode(code = 404, condition = "Not Found"),
+            @ResponseCode(code = 409, condition = "Conflict"), @ResponseCode(code = 501, condition = "Not Implemented") })
+    public Response addRouterInterface(@PathParam("routerUUID") String routerUUID, NeutronRouter_Interface input) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
-            throw new ServiceUnavailableException("Port CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Port CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
-            throw new ServiceUnavailableException("Subnet CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Subnet CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         /*
-         *  While the Neutron specification says that the router has to exist and the input can only specify either a subnet id
-         *  or a port id, but not both, this code assumes that the plugin has filled everything in for us and so both must be present
+         * While the Neutron specification says that the router has to exist and
+         * the input can only specify either a subnet id or a port id, but not
+         * both, this code assumes that the plugin has filled everything in for
+         * us and so both must be present
          */
         if (!routerInterface.routerExists(routerUUID))
             throw new BadRequestException("Router UUID doesn't exist");
         NeutronRouter target = routerInterface.getRouter(routerUUID);
-        if (input.getSubnetUUID() == null ||
-                    input.getPortUUID() == null)
+        if (input.getSubnetUUID() == null || input.getPortUUID() == null)
             throw new BadRequestException("Must specify at subnet id, port id or both");
 
         // check that the port is part of the subnet
@@ -415,18 +376,19 @@ public class NeutronRoutersNorthbound {
 
         if (targetPort.getFixedIPs().size() != 1)
             throw new BadRequestException("Port id must have a single fixedIP address");
-        if (targetPort.getDeviceID() != null ||
-                targetPort.getDeviceOwner() != null)
+        if (targetPort.getDeviceID() != null || targetPort.getDeviceOwner() != null)
             throw new ResourceConflictException("Target Port already allocated");
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
-                service.canAttachInterface(target, input);
+                int status = service.canAttachInterface(target, input);
+                if (status < 200 || status > 299)
+                    return Response.status(status).build();
             }
         }
 
-        //mark the port device id and device owner fields
+        // mark the port device id and device owner fields
         targetPort.setDeviceOwner("network:router_interface");
         targetPort.setDeviceID(routerUUID);
 
@@ -442,38 +404,29 @@ public class NeutronRoutersNorthbound {
     }
 
     /**
-     * Removes an interface to a router */
+     * Removes an interface to a router
+     */
 
     @Path("{routerUUID}/remove_router_interface")
     @PUT
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
-    //@TypeHint(OpenStackRouterInterfaces.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 400, condition = "Bad Request"),
-            @ResponseCode(code = 401, condition = "Unauthorized"),
-            @ResponseCode(code = 404, condition = "Not Found"),
-            @ResponseCode(code = 409, condition = "Conflict"),
-            @ResponseCode(code = 501, condition = "Not Implemented") })
-    public Response removeRouterInterface(
-            @PathParam("routerUUID") String routerUUID,
-            NeutronRouter_Interface input
-            ) {
+    // @TypeHint(OpenStackRouterInterfaces.class)
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"), @ResponseCode(code = 400, condition = "Bad Request"),
+            @ResponseCode(code = 401, condition = "Unauthorized"), @ResponseCode(code = 404, condition = "Not Found"),
+            @ResponseCode(code = 409, condition = "Conflict"), @ResponseCode(code = 501, condition = "Not Implemented") })
+    public Response removeRouterInterface(@PathParam("routerUUID") String routerUUID, NeutronRouter_Interface input) {
         INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
-            throw new ServiceUnavailableException("Router CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Router CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
-            throw new ServiceUnavailableException("Port CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Port CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
         INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
-            throw new ServiceUnavailableException("Subnet CRUD Interface "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Subnet CRUD Interface " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         // verify the router exists
@@ -482,11 +435,11 @@ public class NeutronRoutersNorthbound {
         NeutronRouter target = routerInterface.getRouter(routerUUID);
 
         /*
-         * remove by subnet id.  Collect information about the impacted router for the response and
-         * remove the port corresponding to the gateway IP address of the subnet
+         * remove by subnet id. Collect information about the impacted router
+         * for the response and remove the port corresponding to the gateway IP
+         * address of the subnet
          */
-        if (input.getPortUUID() == null &&
-                input.getSubnetUUID() != null) {
+        if (input.getPortUUID() == null && input.getSubnetUUID() != null) {
             NeutronPort port = portInterface.getGatewayPort(input.getSubnetUUID());
             if (port == null)
                 throw new ResourceNotFoundException("Port UUID not found");
@@ -498,7 +451,9 @@ public class NeutronRoutersNorthbound {
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
-                    service.canDetachInterface(target, input);
+                    int status = service.canDetachInterface(target, input);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
                 }
             }
 
@@ -517,11 +472,10 @@ public class NeutronRoutersNorthbound {
         }
 
         /*
-         * remove by port id. collect information about the impacted router for the response
-         * remove the interface and reset the port ownership
+         * remove by port id. collect information about the impacted router for
+         * the response remove the interface and reset the port ownership
          */
-        if (input.getPortUUID() != null &&
-                input.getSubnetUUID() == null) {
+        if (input.getPortUUID() != null && input.getSubnetUUID() == null) {
             NeutronRouter_Interface targetInterface = target.getInterfaces().get(input.getPortUUID());
             input.setSubnetUUID(targetInterface.getSubnetUUID());
             input.setID(target.getID());
@@ -539,12 +493,12 @@ public class NeutronRoutersNorthbound {
         }
 
         /*
-         * remove by both port and subnet ID.  Verify that the first fixed IP of the port is a valid
-         * IP address for the subnet, and then remove the interface, collecting information about the
-         * impacted router for the response and reset port ownership
+         * remove by both port and subnet ID. Verify that the first fixed IP of
+         * the port is a valid IP address for the subnet, and then remove the
+         * interface, collecting information about the impacted router for the
+         * response and reset port ownership
          */
-        if (input.getPortUUID() != null &&
-                input.getSubnetUUID() != null) {
+        if (input.getPortUUID() != null && input.getSubnetUUID() != null) {
             NeutronPort port = portInterface.getPort(input.getPortUUID());
             if (port == null) {
                 throw new ResourceNotFoundException("Port UUID not found");
