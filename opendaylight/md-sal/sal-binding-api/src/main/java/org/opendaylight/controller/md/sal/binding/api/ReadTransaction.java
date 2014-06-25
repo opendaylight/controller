@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataChangeListener extends AsyncDataChangeListener<InstanceIdentifier<?>, DataObject> {
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+
+public interface ReadTransaction extends AsyncReadTransaction<InstanceIdentifier<?>, DataObject> {
     @Override
-    void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change);
+    ListenableFuture<Optional<DataObject>> read(LogicalDatastoreType store, InstanceIdentifier<?> path);
 }

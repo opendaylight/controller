@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataReadOnlyTransaction extends BindingDataReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>, DataObject> {
-
+public interface DataChangeListener extends AsyncDataChangeListener<InstanceIdentifier<?>, DataObject> {
+    @Override
+    void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change);
 }
