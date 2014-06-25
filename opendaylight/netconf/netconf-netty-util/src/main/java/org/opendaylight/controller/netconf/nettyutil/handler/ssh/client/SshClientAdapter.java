@@ -52,15 +52,8 @@ public class SshClientAdapter implements Runnable {
     }
 
     public void run() {
-        SshSession session;
         try {
-            session = sshClient.openSession();
-        } catch (IOException e) {
-            logger.error("Cannot establish session", e);
-            sshClient.close();
-            return;
-        }
-        try {
+            SshSession session = sshClient.openSession();
             invoker.invoke(session);
             InputStream stdOut = session.getStdout();
             session.getStderr();
@@ -90,6 +83,8 @@ public class SshClientAdapter implements Runnable {
 
         } catch (VirtualSocketException e) {
             // Netty closed connection prematurely.
+            // Or maybe tried to open ganymed connection without having initialized session
+            // (ctx.channel().remoteAddress() is null)
             // Just pass and move on.
         } catch (Exception e) {
             logger.error("Unexpected exception", e);
@@ -117,6 +112,7 @@ public class SshClientAdapter implements Runnable {
 
     private void writeImpl(ByteBuf message) throws IOException {
         message.getBytes(0, stdIn, message.readableBytes());
+        message.release();
         stdIn.flush();
     }
 
