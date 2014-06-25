@@ -17,7 +17,9 @@ import org.opendaylight.yangtools.concepts.Path;
  *
  * @param <P> Path Type
  * @param <D> Data Type
+ * @deprecated Replaced by Data Store SPI contract.
  */
+@Deprecated
 public interface DataReader<P extends Path<P> ,D> {
 
     /**

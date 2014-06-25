@@ -79,7 +79,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  *
  * @param <P> Class representing a path
  * @param <D> Superclass from which all data objects are derived from.
+ * @deprecated Replaced by {@link AsyncConfigurationCommitHandler}
  */
+@Deprecated
 public interface DataCommitHandler<P extends Path<P>, D> {
 
 

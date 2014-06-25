@@ -15,9 +15,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Utility interface which does type capture for BindingAware DataReader.
  *
- * @author
+ *
+ * @deprecated Removed, replaced by DataStore SPI Contract.
  *
  */
+@Deprecated
 public interface RuntimeDataProvider extends ProviderFunctionality,DataReader<InstanceIdentifier<? extends DataObject>, DataObject> {
 
 

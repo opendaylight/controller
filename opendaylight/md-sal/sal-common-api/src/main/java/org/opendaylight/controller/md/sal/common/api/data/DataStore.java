@@ -9,6 +9,11 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.opendaylight.yangtools.concepts.Path;
 
+/**
+ *
+ * @deprecated Replaced by Data Store SPI Contract.
+ */
+@Deprecated
 public interface DataStore<P extends Path<P>, D> extends //
         DataReader<P, D>, //
         DataModificationTransactionFactory<P, D> {
