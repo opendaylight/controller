@@ -9,13 +9,11 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Charsets;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -23,7 +21,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -39,7 +36,7 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
 
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
-        return type.equals( StructuredData.class );
+        return type.equals(StructuredData.class);
     }
 
     @Override
@@ -57,10 +54,14 @@ public enum StructuredDataToJsonProvider implements MessageBodyWriter<Structured
         }
 
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
-        writer.setIndent("    ");
+
+        if (t.isPrettyPrintMode()) {
+            writer.setIndent("    ");
+        } else {
+            writer.setIndent("");
+        }
         JsonMapper jsonMapper = new JsonMapper(t.getMountPoint());
         jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema());
         writer.flush();
     }
-
 }

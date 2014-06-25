@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -16,6 +17,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -29,14 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -67,9 +68,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -613,6 +611,39 @@ public class RestGetOperationTest extends JerseyTest {
         }
 
         return null;
+    }
+
+    /**
+     * If includeWhiteChars URI parameter is set to false then no white
+     * characters can be included in returned output
+     * @throws UnsupportedEncodingException
+     */
+    @Test
+    public void getDataWithUriIncludeWhiteCharsParameterTest() throws UnsupportedEncodingException {
+        getDataWithUriIncludeWhiteCharsParameter("config");
+        getDataWithUriIncludeWhiteCharsParameter("operational");
+    }
+
+
+    private void getDataWithUriIncludeWhiteCharsParameter(String target) throws UnsupportedEncodingException {
+        mockReadConfigurationDataMethod();
+        String uri = "/"+target+"/ietf-interfaces:interfaces/interface/eth0";
+        Response response = target(uri).queryParam("prettyPrint", "false").request("application/xml").get();
+        String xmlData = response.readEntity(String.class);
+
+        Pattern pattern = Pattern.compile(".*(>\\s+|\\s+<).*", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(xmlData);
+        // XML element can't surrounded with white character (e.g ">    " or
+        // "    <")
+        assertFalse(matcher.matches());
+
+        response = target(uri).queryParam("prettyPrint", "false").request("application/json").get();
+        String jsonData = response.readEntity(String.class);
+        pattern = Pattern.compile(".*(\\}\\s+|\\s+\\{|\\]\\s+|\\s+\\[|\\s+:|:\\s+).*", Pattern.DOTALL);
+        matcher = pattern.matcher(jsonData);
+        // JSON element can't surrounded with white character (e.g "} ", " {",
+        // "] ", " [", " :" or ": ")
+        assertFalse(matcher.matches());
     }
 
     @Test
