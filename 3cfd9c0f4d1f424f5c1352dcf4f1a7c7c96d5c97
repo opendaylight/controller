@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_477c7cb5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/NotificationListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "I would reword the class comments here to talk a little bit more about this generic listener, and provide pointers to the details defined in the provider service.",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e765901e",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/NotificationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "Can you register for a notification sent in the context of just a single model? Is that what you are applying by the line above? It is worth to clarify that.",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c7708cde",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/NotificationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "Need clarification here. THe listener just needs to extend/implement the NotificationListener interface right? Are there other specific requirements?",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_677980c7",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/NotificationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "Probably worth stating here that you can specify Notification.class to receive all notifications in the system?",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_277ff8ac",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/notify/NotificationPublishService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "A quick introduction would be good. i.e. \"Defines a service which is used to publish notifications for consumption by listeners.\"",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_877604d6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/notify/NotificationPublishService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-25T19:44:45Z",
+      "side": 1,
+      "message": "Is this call ever blocking?",
+      "revId": "3cfd9c0f4d1f424f5c1352dcf4f1a7c7c96d5c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
