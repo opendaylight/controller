@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0c90db48",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/StructuredDataToJsonProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-25T13:03:21Z",
+      "side": 1,
+      "message": "you are right.",
+      "parentUuid": "fa82b9bf_2c183f1d",
+      "revId": "0d70ed58beb6ea1468849ab9c742eec110ea0126",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4c1583e3",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/StructuredDataToXmlProvider.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-25T12:19:36Z",
       "side": 1,
       "message": "The if block to test for iswhitecharsincluded here differs from the one for JSON.",
+      "revId": "0d70ed58beb6ea1468849ab9c742eec110ea0126",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c7b8b27",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/StructuredDataToXmlProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-25T13:03:21Z",
+      "side": 1,
+      "message": "ok, I added also else branch. Now it looks similarly.",
+      "parentUuid": "fa82b9bf_4c1583e3",
       "revId": "0d70ed58beb6ea1468849ab9c742eec110ea0126",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
