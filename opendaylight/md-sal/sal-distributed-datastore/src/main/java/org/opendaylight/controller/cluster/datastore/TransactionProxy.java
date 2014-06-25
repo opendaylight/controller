@@ -8,35 +8,46 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
+import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
+import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TransactionProxy acts as a proxy for one or more transactions that were created on a remote shard
- *
+ * <p>
  * Creating a transaction on the consumer side will create one instance of a transaction proxy. If during
  * the transaction reads and writes are done on data that belongs to different shards then a separate transaction will
  * be created on each of those shards by the TransactionProxy
- *
+ *</p>
+ * <p>
  * The TransactionProxy does not make any guarantees about atomicity or order in which the transactions on the various
  * shards will be executed.
- *
+ * </p>
  */
 public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
@@ -46,14 +57,18 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         READ_WRITE
     }
 
+    private static final AtomicLong counter = new AtomicLong();
+
     private final TransactionType readOnly;
     private final ActorContext actorContext;
     private final Map<String, ActorSelection> remoteTransactionPaths = new HashMap<>();
+    private final String identifier;
 
     public TransactionProxy(
         ActorContext actorContext,
         TransactionType readOnly) {
 
+        this.identifier = "transaction-" + counter.getAndIncrement();
         this.readOnly = readOnly;
         this.actorContext = actorContext;
 
@@ -95,32 +110,51 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-        throw new UnsupportedOperationException("write");
+        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
+        remoteTransaction.tell(new WriteData(path, data), null);
     }
 
     @Override
     public void merge(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-        throw new UnsupportedOperationException("merge");
+        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
+        remoteTransaction.tell(new MergeData(path, data), null);
     }
 
     @Override
     public void delete(InstanceIdentifier path) {
-        throw new UnsupportedOperationException("delete");
+        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
+        remoteTransaction.tell(new DeleteData(path), null);
     }
 
     @Override
     public DOMStoreThreePhaseCommitCohort ready() {
-        throw new UnsupportedOperationException("ready");
+        List<ActorPath> cohortPaths = new ArrayList<>();
+
+        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
+            Object result = actorContext.executeRemoteOperation(remoteTransaction,
+                new ReadyTransaction(),
+                ActorContext.ASK_DURATION
+            );
+
+            if(result instanceof ReadyTransactionReply){
+                ReadyTransactionReply reply = (ReadyTransactionReply) result;
+                cohortPaths.add(reply.getCohortPath());
+            }
+        }
+
+        return new ThreePhaseCommitCohortProxy(cohortPaths);
     }
 
     @Override
     public Object getIdentifier() {
-        throw new UnsupportedOperationException("getIdentifier");
+        return this.identifier;
     }
 
     @Override
     public void close() {
-        throw new UnsupportedOperationException("close");
+        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
+            remoteTransaction.tell(new CloseTransaction(), null);
+        }
     }
 
     private ActorSelection remoteTransactionFromIdentifier(InstanceIdentifier path){
