@@ -12,6 +12,7 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
+import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -30,11 +31,14 @@ import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 public class BasicIntegrationTest extends AbstractActorTest {
 
     @Test
-    public void integrationTest() {
+    public void integrationTest() throws Exception{
         // This test will
         // - create a Shard
         // - initiate a transaction
@@ -57,7 +61,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     shard.tell(new CreateTransactionChain(), getRef());
 
                     final ActorSelection transactionChain =
-                        new ExpectMsg<ActorSelection>("match hint") {
+                        new ExpectMsg<ActorSelection>("CreateTransactionChainReply") {
                             protected ActorSelection match(Object in) {
                                 if (in instanceof CreateTransactionChainReply) {
                                     ActorPath transactionChainPath =
@@ -76,7 +80,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transactionChain.tell(new CreateTransaction(), getRef());
 
                     final ActorSelection transaction =
-                        new ExpectMsg<ActorSelection>("match hint") {
+                        new ExpectMsg<ActorSelection>("CreateTransactionReply") {
                             protected ActorSelection match(Object in) {
                                 if (in instanceof CreateTransactionReply) {
                                     ActorPath transactionPath =
@@ -92,11 +96,14 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(transaction);
 
+                    // Add a watch on the transaction actor so that we are notified when it dies
+                    final ActorRef transactionActorRef = watchActor(transaction);
+
                     transaction.tell(new WriteData(TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
                         getRef());
 
-                    Boolean writeDone = new ExpectMsg<Boolean>("match hint") {
+                    Boolean writeDone = new ExpectMsg<Boolean>("WriteDataReply") {
                         protected Boolean match(Object in) {
                             if (in instanceof WriteDataReply) {
                                 return true;
@@ -111,7 +118,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transaction.tell(new ReadyTransaction(), getRef());
 
                     final ActorSelection cohort =
-                        new ExpectMsg<ActorSelection>("match hint") {
+                        new ExpectMsg<ActorSelection>("ReadyTransactionReply") {
                             protected ActorSelection match(Object in) {
                                 if (in instanceof ReadyTransactionReply) {
                                     ActorPath cohortPath =
@@ -127,10 +134,13 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(cohort);
 
+                    // Add a watch on the transaction actor so that we are notified when it dies
+                    final ActorRef cohorActorRef = watchActor(cohort);
+
                     cohort.tell(new PreCommitTransaction(), getRef());
 
                     Boolean preCommitDone =
-                        new ExpectMsg<Boolean>("match hint") {
+                        new ExpectMsg<Boolean>("PreCommitTransactionReply") {
                             protected Boolean match(Object in) {
                                 if (in instanceof PreCommitTransactionReply) {
                                     return true;
@@ -144,8 +154,35 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     cohort.tell(new CommitTransaction(), getRef());
 
+                    final Boolean terminatedCohort =
+                        new ExpectMsg<Boolean>("Terminated Cohort") {
+                            protected Boolean match(Object in) {
+                                if (in instanceof Terminated) {
+                                    return cohorActorRef.equals(((Terminated) in).actor());
+                                } else {
+                                    throw noMatch();
+                                }
+                            }
+                        }.get(); // this extracts the received message
+
+                    Assert.assertTrue(terminatedCohort);
+
+
+                    final Boolean terminatedTransaction =
+                        new ExpectMsg<Boolean>("Terminated Transaction") {
+                            protected Boolean match(Object in) {
+                                if (in instanceof Terminated) {
+                                    return transactionActorRef.equals(((Terminated) in).actor());
+                                } else {
+                                    throw noMatch();
+                                }
+                            }
+                        }.get(); // this extracts the received message
+
+                    Assert.assertTrue(terminatedTransaction);
+
                     final Boolean commitDone =
-                        new ExpectMsg<Boolean>("match hint") {
+                        new ExpectMsg<Boolean>("CommitTransactionReply") {
                             protected Boolean match(Object in) {
                                 if (in instanceof CommitTransactionReply) {
                                     return true;
@@ -161,7 +198,25 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
 
             };
-        }};
+        }
+
+            private ActorRef watchActor(ActorSelection actor) {
+                Future<ActorRef> future = actor
+                    .resolveOne(FiniteDuration.apply(100, "milliseconds"));
+
+                try {
+                    ActorRef actorRef = Await.result(future,
+                        FiniteDuration.apply(100, "milliseconds"));
+
+                    watch(actorRef);
+
+                    return actorRef;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        };
 
 
     }
