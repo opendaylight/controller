@@ -33,6 +33,24 @@
       "revId": "4ec65b77c857ecc832d6b626a83f49cd033b4ee0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8f67fae8",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/Packet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-06-26T21:13:54Z",
+      "side": 1,
+      "message": "I made abstract for forcing newly coming packet classes to implement this.That way getMatch() would work for sure.\n\nBut I am ok to change it as you suggested.",
+      "parentUuid": "fa82b9bf_0f7c4a82",
+      "revId": "4ec65b77c857ecc832d6b626a83f49cd033b4ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
