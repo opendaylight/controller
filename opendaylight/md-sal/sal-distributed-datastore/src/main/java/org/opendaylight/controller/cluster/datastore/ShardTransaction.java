@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -67,6 +69,11 @@ public class ShardTransaction extends UntypedActor {
 
     private final ActorRef shardActor;
 
+    // FIXME : see below
+    // If transactionChain is not null then this transaction is part of a
+    // transactionChain. Not really clear as to what that buys us
+    private final DOMStoreTransactionChain transactionChain;
+
     private final DOMStoreReadWriteTransaction transaction;
 
     private final MutableCompositeModification modification =
@@ -77,9 +84,16 @@ public class ShardTransaction extends UntypedActor {
 
     public ShardTransaction(DOMStoreReadWriteTransaction transaction,
         ActorRef shardActor) {
+        this(null, transaction, shardActor);
+    }
+
+    public ShardTransaction(DOMStoreTransactionChain transactionChain, DOMStoreReadWriteTransaction transaction,
+        ActorRef shardActor) {
+        this.transactionChain = transactionChain;
         this.transaction = transaction;
         this.shardActor = shardActor;
     }
+
 
 
     public static Props props(final DOMStoreReadWriteTransaction transaction,
@@ -92,6 +106,18 @@ public class ShardTransaction extends UntypedActor {
             }
         });
     }
+
+    public static Props props(final DOMStoreTransactionChain transactionChain, final DOMStoreReadWriteTransaction transaction,
+        final ActorRef shardActor) {
+        return Props.create(new Creator<ShardTransaction>() {
+
+            @Override
+            public ShardTransaction create() throws Exception {
+                return new ShardTransaction(transactionChain, transaction, shardActor);
+            }
+        });
+    }
+
 
     @Override
     public void onReceive(Object message) throws Exception {
@@ -131,7 +157,7 @@ public class ShardTransaction extends UntypedActor {
                     if (optional.isPresent()) {
                         sender.tell(new ReadDataReply(optional.get()), self);
                     } else {
-                        //TODO : Need to decide what to do here
+                        sender.tell(new ReadDataReply(null), self);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e,
@@ -176,6 +202,7 @@ public class ShardTransaction extends UntypedActor {
     private void closeTransaction(CloseTransaction message) {
         transaction.close();
         getSender().tell(new CloseTransactionReply(), getSelf());
+        getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
 
