@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
@@ -115,13 +116,13 @@ public class NodeMappingTest {
         ncId = buildNodeConnectorId("1", "42");
         Assert.assertEquals(NodeConnectorIDType.OPENFLOW, NodeMapping.toNodeConnectorType(ncId, nodeId ));
 
-        ncId = buildNodeConnectorId("1", "4294967293");
+        ncId = buildNodeConnectorId("1", OutputPortValues.CONTROLLER.toString());
         Assert.assertEquals(NodeConnectorIDType.CONTROLLER, NodeMapping.toNodeConnectorType(ncId, nodeId ));
 
-        ncId = buildNodeConnectorId("1", "4294967290");
+        ncId = buildNodeConnectorId("1", OutputPortValues.NORMAL.toString());
         Assert.assertEquals(NodeConnectorIDType.HWPATH, NodeMapping.toNodeConnectorType(ncId, nodeId ));
 
-        ncId = buildNodeConnectorId("1", "4294967294");
+        ncId = buildNodeConnectorId("1", OutputPortValues.LOCAL.toString());
         Assert.assertEquals(NodeConnectorIDType.SWSTACK, NodeMapping.toNodeConnectorType(ncId, nodeId ));
     }
 
