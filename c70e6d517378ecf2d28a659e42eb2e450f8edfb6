@@ -36,6 +36,74 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_997bcc27",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "This statement is a little confusing to me. It seems like some of  the wording can be merged into the next statement.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f991b847",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "Suggested changes:\n\n\"Returns an implementation instance of an RPC service interface. The returned instance is not an actual implementation of the RPC service interface, but  a proxy implementation of the interface that forwards to an actual implementation, if any.\n\nThe following describes the behavior of the proxy when invoking RPC methods: \n\n\u003cul\u003e\t\n   \u003cli\u003eIf an actual implementation is registered with the MD-SAL, all RPC   \n         invocations are  forwarded to the actual implementation.\u003c/li\u003e\n   \u003cli\u003eIf no actual  implementation is registered,  all RPC invocations will fail by   \n         throwing an {@link IllegalStateException}.\u003c/li\u003e\n   \u003cli\u003ePrior to invoking the actual implementation, the arguments to the RPC \n         method are validated. If any argument is invalid, an  {@link IllegalArgumentException} is thrown.\n\u003c/ul\u003e\n\nThe returned proxy is automatically updated with the most recent registered implementation. \n\n@return a proxy for the requested RPC service. This method never returns null.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b997b039",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "Please document the \"module\" class param. Is \"module\" the correct param name? I assume you pass a yang-generated interface, like ToasterService.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1997bc3c",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "Please document the \"module\" class param. Is \"module\" the correct param name? I assume you pass a yang-generated interface, like ToasterService.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_47d6bcf2",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
         "patchSetId": 1
@@ -81,6 +149,159 @@
       "writtenOn": "2014-06-25T18:36:46Z",
       "side": 1,
       "message": "Concurrent programming, especially use of the Google Guava UI needs to be demo\u0027d here, or we need to link to sites that provide best practices. Coming in cold to this heavy use of futures can seem overwhelming, unless you are aware of the helper classes that exist to make your life easier.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d99cf45f",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "What does \"global\" mean here? When would an impl not be global?",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_79a5a8a0",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "Suggested change:\n\n\"Registers an implementation of the provided RPC service interface. All methods of the interface are required to be implemented\"\n\nQuestion: I assume multiple impls are not allowed? What if another impl is already registered?",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_99a2ec97",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "@param serviceInterface the RPC service interface",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_39aba076",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "\"the implementation of the RPC service interface\"",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_59a8e476",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "@return an RpcRegistration instance that should be used to unregister the RPC implementation when no longer needed by calling {@link RpcRegistration#close()}",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_19bedcb4",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "\"if the provided RPC service interface is a routed RPC type \"\n\nQuestion: how would one know it\u0027s routed?",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b9aed07f",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "The last part \"on annotated...\" is not clear to me. Maybe an example would help?",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d9b394e7",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "@param serviceInterface the RPC service interface generated from a YANG definition.",
+      "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_79ccc86a",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-26T04:07:10Z",
+      "side": 1,
+      "message": "@return an  RoutedRpcRegistration instance which can be used to register new paths with the RPC implementation via invoking  {@link RoutedRpcRegistration#registerPath(....).  {@link RoutedRpcRegistration#close()} should be called to unregister the implemenetation and all paths when no longer needed.",
       "revId": "c70e6d517378ecf2d28a659e42eb2e450f8edfb6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
