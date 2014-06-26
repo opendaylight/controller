@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7c74b667",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/BrokerFacadeTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 248
+      },
+      "writtenOn": "2014-06-26T13:36:56Z",
+      "side": 0,
+      "message": "Are the tests below exercising the case where readConfigurationdata returns NULL? I could not follow completely but that was not clear to me",
+      "revId": "2a35e5ab8c3300757a425841d017097c1fa31e68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
