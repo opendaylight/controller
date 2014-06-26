@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.FloodAll;
@@ -47,6 +49,7 @@ import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
@@ -180,6 +183,17 @@ public class TestToSalConversionsUtils {
         checkSalMatch(salFlow.getMatch(), MtchType.udp);
 
         checkSalFlow(salFlow);
+    }
+
+    /**
+     * test of {@link ToSalConversionsUtils#fromNodeConnectorRef(Uri, Node)}
+     * @throws ConstructionException
+     */
+    @Test
+    public void testFromNodeConnectorRef() throws ConstructionException {
+        Node node = new Node(NodeIDType.OPENFLOW, 42L);
+        NodeConnector nodeConnector = ToSalConversionsUtils.fromNodeConnectorRef(new Uri("1"), node);
+        Assert.assertEquals("OF|1@OF|00:00:00:00:00:00:00:2a", nodeConnector.toString());
     }
 
     private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) {

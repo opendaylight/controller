@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Name;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.PeerBandwidth;
 import org.opendaylight.controller.sal.core.Property;
@@ -61,7 +62,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 public final class NodeMapping {
-    public final static String MD_SAL_TYPE = "MD_SAL";
+
+    /** openflow id prefix */
+    public static final String OPENFLOW_ID_PREFIX = "openflow:";
+
+    public final static String MD_SAL_TYPE = "MD_SAL_DEPRECATED";
 
     private final static Class<Node> NODE_CLASS = Node.class;
 
@@ -77,8 +82,19 @@ public final class NodeMapping {
     }
 
     public static org.opendaylight.controller.sal.core.Node toADNode(final NodeId id) throws ConstructionException {
-        String aDNodeId = NodeMapping.toADNodeId(id);
-        return new org.opendaylight.controller.sal.core.Node(NodeMapping.MD_SAL_TYPE, aDNodeId);
+        Long aDNodeId = openflowFullNodeIdToLong(NodeMapping.toADNodeId(id));
+        return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+    }
+
+    /**
+     * @param adNodeId
+     * @return
+     */
+    private static Long openflowFullNodeIdToLong(String adNodeId) {
+        if (adNodeId == null) {
+            return null;
+        }
+        return Long.valueOf(adNodeId.replaceFirst("^.*:", ""));
     }
 
     public static NodeId toNodeId(final InstanceIdentifier<?> id) {
@@ -88,6 +104,9 @@ public final class NodeMapping {
     }
 
     public static String toADNodeId(final NodeId nodeId) {
+        if (nodeId == null) {
+            return null;
+        }
         return nodeId.getValue();
     }
 
@@ -112,7 +131,7 @@ public final class NodeMapping {
         } else if (ncId.equals(toControllerNodeConnectorId(nodeId))) {
             return NodeConnectorIDType.CONTROLLER;
         }
-        return MD_SAL_TYPE;
+        return NodeConnectorIDType.OPENFLOW;
     }
 
     public static Object toADNodeConnectorId(final NodeConnectorId nodeConnectorId, final NodeId nodeId) {
@@ -121,7 +140,8 @@ public final class NodeMapping {
                 nodeConnectorId.equals(toControllerNodeConnectorId(nodeId))) {
             return org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID;
         }
-        return nodeConnectorId.getValue();
+
+        return (short) Long.valueOf(nodeConnectorId.getValue().replaceFirst("^.*:", "")).longValue();
     }
 
     public static NodeId toAdNodeId(final NodeConnectorId nodeConnectorId) {
@@ -145,9 +165,9 @@ public final class NodeMapping {
     }
 
     public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
-        Preconditions.checkArgument(MD_SAL_TYPE.equals(node.getType()));
-        final String nodeId = Arguments.<String>checkInstanceOf(node.getID(), String.class);
-        final NodeKey nodeKey = new NodeKey(new NodeId(nodeId));
+        Preconditions.checkArgument(NodeIDType.OPENFLOW.equals(node.getType()));
+        final Long nodeId = Arguments.<Long>checkInstanceOf(node.getID(), Long.class);
+        final NodeKey nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX+nodeId));
         final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
@@ -170,7 +190,8 @@ public final class NodeMapping {
                 nodeConnectorId = toControllerNodeConnectorId(nodeId);
             }
         } else {
-            nodeConnectorId = new NodeConnectorId(Arguments.<String>checkInstanceOf(nodeConnector.getID(), String.class));
+            nodeConnectorId = new NodeConnectorId(OPENFLOW_ID_PREFIX
+                    + Arguments.<Short>checkInstanceOf(nodeConnector.getID(), Short.class));
         }
         final NodeConnectorKey connectorKey = new NodeConnectorKey(nodeConnectorId);
         final InstanceIdentifier<NodeConnector> path = nodePath.child(NODECONNECTOR_CLASS, connectorKey);
@@ -342,7 +363,7 @@ public final class NodeMapping {
     }
 
     public static MacAddress toADMacAddress(final NodeId id) {
-        final String nodeId = id.getValue().replaceAll("openflow:", "");
+        final String nodeId = id.getValue().replaceAll(OPENFLOW_ID_PREFIX, "");
         BigInteger nodeIdRaw = new BigInteger(nodeId);
         long lNodeId = nodeIdRaw.longValue();
         byte[] bytesFromDpid = ToSalConversionsUtils.bytesFromDpid(lNodeId);

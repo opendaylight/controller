@@ -83,6 +83,7 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
 
     @Override
     protected void init() {
+        // TODO: deprecated, should be removed soon
         NodeIDType.registerIDType(NodeMapping.MD_SAL_TYPE, String.class);
         NodeConnectorIDType.registerIDType(NodeMapping.MD_SAL_TYPE, String.class, NodeMapping.MD_SAL_TYPE);
     }
@@ -232,8 +233,8 @@ public class ComponentActivator extends ComponentActivatorAbstractBase {
 
     private Dictionary<String,Object> properties() {
         final Hashtable<String,Object> props = new Hashtable<String, Object>();
-        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), NodeMapping.MD_SAL_TYPE);
-        props.put("protocolName", NodeMapping.MD_SAL_TYPE);
+        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), NodeIDType.OPENFLOW);
+        props.put("protocolName", NodeIDType.OPENFLOW);
         return props;
     }
 }

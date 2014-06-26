@@ -53,6 +53,7 @@ import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -376,10 +377,16 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    private static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
+    /**
+     * @param openflow nodeConnector uri
+     * @param node
+     * @return assembled nodeConnector
+     */
+    public static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
         NodeConnector nodeConnector = null;
         try {
-            nodeConnector = new NodeConnector(NodeMapping.MD_SAL_TYPE,node.getNodeIDString()+":"+uri.getValue(),node);
+            nodeConnector = new NodeConnector(NodeConnectorIDType.OPENFLOW,
+                    Short.valueOf(uri.getValue()), node);
         } catch (ConstructionException e) {
             e.printStackTrace();
         }
