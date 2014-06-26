@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_af6c3ed1",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/ARP.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-06-26T20:30:25Z",
+      "side": 1,
+      "message": "This method can be removed if the Packet class doesn\u0027t define this method as abstract",
+      "revId": "4ec65b77c857ecc832d6b626a83f49cd033b4ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0f7c4a82",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/Packet.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-06-26T20:30:25Z",
+      "side": 1,
+      "message": "Rather than making it abstract i would make it a normal method, that normally will populate nothing. This way if there are folks that has extended Packet class will not be impacted by this change and this will be incrementally working. This way you can avoid to implement the method in the classes that don\u0027t have any implementation. Hopefully make sense.",
+      "revId": "4ec65b77c857ecc832d6b626a83f49cd033b4ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
