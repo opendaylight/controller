@@ -32,6 +32,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
 import io.netty.handler.stream.ChunkedStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -119,14 +120,14 @@ public class Handshaker implements Runnable {
 class SSHClientHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(SSHClientHandler.class);
     private final AutoCloseable remoteConnection;
-    private final OutputStream remoteOutputStream;
+    private final BufferedOutputStream remoteOutputStream;
     private final String session;
     private ChannelHandlerContext channelHandlerContext;
 
     public SSHClientHandler(AutoCloseable remoteConnection, OutputStream remoteOutputStream,
                             String session) {
         this.remoteConnection = remoteConnection;
-        this.remoteOutputStream = remoteOutputStream;
+        this.remoteOutputStream = new BufferedOutputStream(remoteOutputStream);
         this.session = session;
     }
 
@@ -137,7 +138,7 @@ class SSHClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
         ByteBuf bb = (ByteBuf) msg;
         // we can block the server here so that slow client does not cause memory pressure
         try {
