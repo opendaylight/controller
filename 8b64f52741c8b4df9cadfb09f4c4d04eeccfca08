@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9cdc1a75",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7cdfd669",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1c8a4a6a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc7f0265",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7c9836c0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9c95fa88",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dcf622f9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bcf1de02",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Because we are changing the default behavior, we need to accept the prettyPrint param here as well.",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9c397ad9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-26T13:37:43Z",
+      "side": 1,
+      "message": "Boolean.parseBoolean( s ) does the exact same thing. Returns true if and only if the s is not null and name.equalsIgnoreCase( \"true\" ). Makes logic a little more resilient by avoiding case sensitivity issues (that said, this doesn\u0027t have to block).",
+      "revId": "8b64f52741c8b4df9cadfb09f4c4d04eeccfca08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
