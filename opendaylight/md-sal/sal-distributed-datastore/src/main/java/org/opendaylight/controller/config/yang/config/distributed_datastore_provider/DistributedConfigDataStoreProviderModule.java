@@ -25,6 +25,7 @@ public class DistributedConfigDataStoreProviderModule extends org.opendaylight.c
 
 
       final DistributedDataStore configDatastore = new DistributedDataStore(actorSystem, "config");
+      getSchemaServiceDependency().registerSchemaServiceListener(configDatastore);
 
       final class AutoCloseableDistributedDataStore implements AutoCloseable {
 
