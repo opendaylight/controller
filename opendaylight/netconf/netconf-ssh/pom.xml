@@ -49,6 +49,16 @@
       <artifactId>mockito-configuration</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-netty-util</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-client</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

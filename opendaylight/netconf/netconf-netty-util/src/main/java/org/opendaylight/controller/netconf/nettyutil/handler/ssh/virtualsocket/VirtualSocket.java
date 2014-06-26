@@ -25,32 +25,33 @@ import java.nio.channels.SocketChannel;
  * use OIO application in asynchronous environment and NIO EventLoop. Using VirtualSocket OIO applications
  * are able to use full potential of NIO environment.
  */
+//TODO: refactor - socket should be created when connection is established
 public class VirtualSocket extends Socket implements ChannelHandler {
     private static final String INPUT_STREAM = "inputStream";
     private static final String OUTPUT_STREAM = "outputStream";
 
-    private final ChannelInputStream chis = new ChannelInputStream();
-    private final ChannelOutputStream chos = new ChannelOutputStream();
+    private final ChannelInputStream chais = new ChannelInputStream();
+    private final ChannelOutputStream chaos = new ChannelOutputStream();
     private ChannelHandlerContext ctx;
 
 
     public InputStream getInputStream() {
-        return this.chis;
+        return this.chais;
     }
 
     public OutputStream getOutputStream() {
-        return this.chos;
+        return this.chaos;
     }
 
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.ctx = ctx;
 
         if (ctx.channel().pipeline().get(OUTPUT_STREAM) == null) {
-            ctx.channel().pipeline().addFirst(OUTPUT_STREAM, chos);
+            ctx.channel().pipeline().addFirst(OUTPUT_STREAM, chaos);
         }
 
         if (ctx.channel().pipeline().get(INPUT_STREAM) == null) {
-            ctx.channel().pipeline().addFirst(INPUT_STREAM, chis);
+            ctx.channel().pipeline().addFirst(INPUT_STREAM, chais);
         }
     }
 
@@ -69,7 +70,6 @@ public class VirtualSocket extends Socket implements ChannelHandler {
         ctx.fireExceptionCaught(throwable);
     }
 
-    public VirtualSocket() {super();}
 
     @Override
     public void connect(SocketAddress endpoint) throws IOException {}
@@ -83,12 +83,7 @@ public class VirtualSocket extends Socket implements ChannelHandler {
     @Override
     public InetAddress getInetAddress() {
         InetSocketAddress isa = getInetSocketAddress();
-
-        if (isa == null) {
-            throw new VirtualSocketException();
-        }
-
-        return getInetSocketAddress().getAddress();
+        return isa.getAddress();
     }
 
     @Override
@@ -187,7 +182,7 @@ public class VirtualSocket extends Socket implements ChannelHandler {
 
     @Override
     public String toString() {
-        return "Virtual socket InetAdress["+getInetAddress()+"], Port["+getPort()+"]";
+        return "VirtualSocket{" + getInetAddress() + ":" + getPort() + "}";
     }
 
     @Override

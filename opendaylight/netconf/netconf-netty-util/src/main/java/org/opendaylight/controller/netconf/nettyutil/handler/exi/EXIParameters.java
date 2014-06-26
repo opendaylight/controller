@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 
-import org.opendaylight.controller.netconf.api.NetconfMessage;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;
-
-import com.google.common.base.Preconditions;
 
 public final class EXIParameters {
     private static final String EXI_PARAMETER_ALIGNMENT = "alignment";
@@ -29,20 +27,12 @@ public final class EXIParameters {
     private static final String EXI_FIDELITY_PIS = "pis";
     private static final String EXI_FIDELITY_PREFIXES = "prefixes";
 
-    private static final String EXI_PARAMETER_SCHEMA = "schema";
-    private static final String EXI_PARAMETER_SCHEMA_NONE = "none";
-    private static final String EXI_PARAMETER_SCHEMA_BUILT_IN = "builtin";
-    private static final String EXI_PARAMETER_SCHEMA_BASE_1_1 = "base:1.1";
-
     private final EXIOptions options;
 
     private EXIParameters(final EXIOptions options) {
         this.options = Preconditions.checkNotNull(options);
     }
 
-    public static EXIParameters fromNetconfMessage(final NetconfMessage root) throws EXIOptionsException {
-        return fromXmlElement(XmlElement.fromDomDocument(root.getDocument()));
-    }
 
     public static EXIParameters fromXmlElement(final XmlElement root) throws EXIOptionsException {
         final EXIOptions options =  new EXIOptions();
@@ -77,30 +67,6 @@ public final class EXIParameters {
                 options.setPreserveNS(true);
             }
         }
-
-        if (root.getElementsByTagName(EXI_PARAMETER_SCHEMA).getLength() > 0) {
-/*
-                        GrammarFactory grammarFactory = GrammarFactory.newInstance();
-                        if (operationElement
-                                .getElementsByTagName(EXI_PARAMETER_SCHEMA_NONE)
-                                .getLength() > 0) {
-                            this.grammars = grammarFactory.createSchemaLessGrammars();
-                        }
-
-                        if (operationElement.getElementsByTagName(
-                                EXI_PARAMETER_SCHEMA_BUILT_IN).getLength() > 0) {
-                            this.grammars = grammarFactory.createXSDTypesOnlyGrammars();
-                        }
-
-                        if (operationElement.getElementsByTagName(
-                                EXI_PARAMETER_SCHEMA_BASE_1_1).getLength() > 0) {
-                            this.grammars = grammarFactory
-                                    .createGrammars(NETCONF_XSD_LOCATION);
-                        }
-*/
-
-        }
-
         return new EXIParameters(options);
     }
 
