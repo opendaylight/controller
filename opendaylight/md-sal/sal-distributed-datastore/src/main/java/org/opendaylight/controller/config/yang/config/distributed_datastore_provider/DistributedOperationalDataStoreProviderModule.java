@@ -23,6 +23,7 @@ public class DistributedOperationalDataStoreProviderModule extends org.opendayli
     final ActorSystem actorSystem = ActorSystem.create("opendaylight-cluster", ConfigFactory
         .load().getConfig("ODLCluster"));
     final DistributedDataStore operationalStore = new DistributedDataStore(actorSystem, "operational");
+    getSchemaServiceDependency().registerSchemaServiceListener(operationalStore);
 
     final class AutoCloseableDistributedDataStore implements AutoCloseable {
 
