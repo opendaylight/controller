@@ -16,6 +16,24 @@
       "revId": "b186bb34d5d9689ae3eae85e77615961b72a56f4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_591b04ca",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-06-26T08:10:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ecb817ca",
+      "revId": "b186bb34d5d9689ae3eae85e77615961b72a56f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
