@@ -8,8 +8,13 @@
 
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import java.io.IOException;
@@ -18,7 +23,6 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.opendaylight.controller.netconf.nettyutil.handler.ssh.virtualsocket.VirtualSocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Worker thread class. Handles all downstream and upstream events in SSH Netty
  * pipeline.
  */
-public class SshClientAdapter implements Runnable {
+class SshClientAdapter implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(SshClientAdapter.class);
 
     private static final int BUFFER_SIZE = 1024;
@@ -51,6 +55,7 @@ public class SshClientAdapter implements Runnable {
         this.invoker = invoker;
     }
 
+    // TODO: refactor
     public void run() {
         try {
             SshSession session = sshClient.openSession();
@@ -80,12 +85,6 @@ public class SshClientAdapter implements Runnable {
                 byteBuf.writeBytes(tranBuff);
                 ctx.fireChannelRead(byteBuf);
             }
-
-        } catch (VirtualSocketException e) {
-            // Netty closed connection prematurely.
-            // Or maybe tried to open ganymed connection without having initialized session
-            // (ctx.channel().remoteAddress() is null)
-            // Just pass and move on.
         } catch (Exception e) {
             logger.error("Unexpected exception", e);
         } finally {
@@ -123,12 +122,23 @@ public class SshClientAdapter implements Runnable {
         }
     }
 
-    public void start(ChannelHandlerContext ctx) {
-        if (this.ctx != null) {
-            // context is already associated.
-            return;
+    public Thread start(ChannelHandlerContext ctx, ChannelFuture channelFuture) {
+        checkArgument(channelFuture.isSuccess());
+        checkNotNull(ctx.channel().remoteAddress());
+        synchronized (this) {
+            checkState(this.ctx == null);
+            this.ctx = ctx;
         }
-        this.ctx = ctx;
-        new Thread(this).start();
+        String threadName = toString();
+        Thread thread = new Thread(this, threadName);
+        thread.start();
+        return thread;
+    }
+
+    @Override
+    public String toString() {
+        return "SshClientAdapter{" +
+                "sshClient=" + sshClient +
+                '}';
     }
 }

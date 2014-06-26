@@ -11,9 +11,8 @@ import io.netty.channel.Channel;
 import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
-import org.opendaylight.controller.netconf.nettyutil.handler.ssh.SshHandler;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
-import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.Invoker;
+import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.SshHandler;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 final class SshClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
@@ -33,8 +32,7 @@ final class SshClientChannelInitializer extends AbstractChannelInitializer<Netco
     @Override
     public void initialize(final Channel ch, final Promise<NetconfClientSession> promise) {
         try {
-            final Invoker invoker = Invoker.subsystem("netconf");
-            ch.pipeline().addFirst(new SshHandler(authenticationHandler, invoker));
+            ch.pipeline().addFirst(SshHandler.createForNetconfSubsystem(authenticationHandler));
             super.initialize(ch,promise);
         } catch (final IOException e) {
             throw new RuntimeException(e);
