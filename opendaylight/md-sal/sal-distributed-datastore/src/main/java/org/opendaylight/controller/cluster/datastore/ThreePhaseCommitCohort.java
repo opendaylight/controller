@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
@@ -93,6 +94,8 @@ public class ThreePhaseCommitCohort extends UntypedActor {
         log.debug("Forward commit transaction to Shard {} ", shardActor);
         shardActor.forward(new ForwardedCommitTransaction(cohort, modification),
             getContext());
+
+        getContext().parent().tell(PoisonPill.getInstance(), getSelf());
 
     }
 
