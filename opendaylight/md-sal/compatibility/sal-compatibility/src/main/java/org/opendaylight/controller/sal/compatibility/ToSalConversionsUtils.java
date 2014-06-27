@@ -53,7 +53,6 @@ import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -209,7 +208,8 @@ public class ToSalConversionsUtils {
                 Uri nodeConnector = ((OutputActionCase) sourceAction).getOutputAction().getOutputNodeConnector();
                 if (nodeConnector != null) {
                     //for (Uri uri : nodeConnectors) {
-                        targetAction.add(new Output(fromNodeConnectorRef(nodeConnector, node)));
+                    Uri fullNodeConnector = new Uri(node.getType()+":"+node.getID()+":"+nodeConnector.getValue());
+                        targetAction.add(new Output(fromNodeConnectorRef(fullNodeConnector, node)));
                     //}
                 }
             } else if (sourceAction instanceof PopMplsActionCase) {
@@ -385,10 +385,11 @@ public class ToSalConversionsUtils {
     public static NodeConnector fromNodeConnectorRef(Uri uri, Node node) {
         NodeConnector nodeConnector = null;
         try {
-            nodeConnector = new NodeConnector(NodeConnectorIDType.OPENFLOW,
-                    Short.valueOf(uri.getValue()), node);
+            NodeConnectorId nodeConnectorId = new NodeConnectorId(uri.getValue());
+            nodeConnector = NodeMapping.toADNodeConnector(nodeConnectorId, node);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            LOG.warn("nodeConnector creation failed at node: {} with nodeConnectorUri: {}",
+                    node, uri.getValue());
         }
         return nodeConnector;
     }
