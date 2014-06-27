@@ -17,6 +17,8 @@ import java.util.List;
 
 public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
+    private ActorRef dataChangeListenerActor = getSystem().actorOf(Props.create(DoNothingActor.class));
+
     private static class MockDataChangeListener implements
         AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
 
@@ -36,7 +38,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
         DataChangeListenerRegistrationProxy proxy =
             new DataChangeListenerRegistrationProxy(
                 getSystem().actorSelection(actorRef.path()),
-                listener);
+                listener, dataChangeListenerActor);
 
         Assert.assertEquals(listener, proxy.getInstance());
 
@@ -50,7 +52,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
         DataChangeListenerRegistrationProxy proxy =
             new DataChangeListenerRegistrationProxy(
                 getSystem().actorSelection(actorRef.path()),
-                new MockDataChangeListener());
+                new MockDataChangeListener(), dataChangeListenerActor);
 
         proxy.close();
 

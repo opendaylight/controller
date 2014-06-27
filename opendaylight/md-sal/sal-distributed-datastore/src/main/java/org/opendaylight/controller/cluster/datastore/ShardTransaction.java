@@ -190,7 +190,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void readyTransaction(ReadyTransaction message) {
         DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
         ActorRef cohortActor = getContext().actorOf(
-            ThreePhaseCommitCohort.props(cohort, shardActor, modification));
+            ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
         getSender()
             .tell(new ReadyTransactionReply(cohortActor.path()), getSelf());
 

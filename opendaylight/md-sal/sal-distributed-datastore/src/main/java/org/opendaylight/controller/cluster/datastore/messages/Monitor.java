@@ -8,15 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CreateTransaction {
-    private final String transactionId;
+import akka.actor.ActorRef;
 
-    public CreateTransaction(String transactionId){
+public class Monitor {
+    private final ActorRef actorRef;
 
-        this.transactionId = transactionId;
+    public Monitor(ActorRef actorRef){
+
+        this.actorRef = actorRef;
     }
 
-    public String getTransactionId() {
-        return transactionId;
+    public ActorRef getActorRef() {
+        return actorRef;
     }
 }
