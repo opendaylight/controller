@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d20cc93d",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-27T14:28:25Z",
+      "side": 1,
+      "message": "As discussed with Tom, we are still blocking a Thread  here. Not sure if there is a way to return a plain Future and NOT block a thread.",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_321bb574",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-27T14:28:25Z",
+      "side": 1,
+      "message": "The example provided is a good generic example. What may help is a more concrete example usage (real life situation where you want to use this). The latter example may be better as a demo application on the wiki etc, but I think we need something. Otherwise I find my self asking \"Great, we can do this routed RPC stuff, but why would I want to? What is the use case?\".",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b207c517",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-27T14:28:25Z",
+      "side": 1,
+      "message": "Can we add a pointer to RpcResult helper classes (for building them), or better yet, enhance the RpcResult class documentation since it is closely tied to implementing proper Provider implementations?",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1207911a",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/routing/RouteChangePublisher.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-27T14:28:25Z",
+      "side": 1,
+      "message": "A description (which can be small) is needed.",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
