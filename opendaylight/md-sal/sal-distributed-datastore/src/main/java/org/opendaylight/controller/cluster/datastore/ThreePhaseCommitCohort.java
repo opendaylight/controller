@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
@@ -29,7 +28,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 
 import java.util.concurrent.ExecutionException;
 
-public class ThreePhaseCommitCohort extends UntypedActor {
+public class ThreePhaseCommitCohort extends AbstractUntypedActor {
     private final DOMStoreThreePhaseCommitCohort cohort;
     private final ActorRef shardActor;
     private final CompositeModification modification;
@@ -58,9 +57,7 @@ public class ThreePhaseCommitCohort extends UntypedActor {
 
 
     @Override
-    public void onReceive(Object message) throws Exception {
-        log.debug("Received message {}", message);
-
+    public void handleReceive(Object message) throws Exception {
         if (message instanceof CanCommitTransaction) {
             canCommit((CanCommitTransaction) message);
         } else if (message instanceof PreCommitTransaction) {

@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistrationReply;
@@ -17,7 +16,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListene
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DataChangeListenerRegistration extends UntypedActor{
+public class DataChangeListenerRegistration extends AbstractUntypedActor{
 
   private final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration;
 
@@ -27,7 +26,7 @@ public class DataChangeListenerRegistration extends UntypedActor{
   }
 
   @Override
-  public void onReceive(Object message) throws Exception {
+  public void handleReceive(Object message) throws Exception {
     if(message instanceof CloseDataChangeListenerRegistration){
       closeListenerRegistration((CloseDataChangeListenerRegistration) message);
     }

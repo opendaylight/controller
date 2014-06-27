@@ -12,7 +12,6 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
@@ -48,7 +47,7 @@ import java.util.Map;
  * <li> When a local shard replica comes alive
  * </p>
  */
-public class ShardManager extends UntypedActor {
+public class ShardManager extends AbstractUntypedActor {
 
   // Stores a mapping between a shard name and the address of the current primary
   private final Map<String, Address> shardNameToPrimaryAddress = new HashMap<>();
@@ -84,7 +83,7 @@ public class ShardManager extends UntypedActor {
   }
 
   @Override
-  public void onReceive(Object message) throws Exception {
+  public void handleReceive(Object message) throws Exception {
     if (message instanceof FindPrimary) {
       FindPrimary msg = ((FindPrimary) message);
       String shardName = msg.getShardName();

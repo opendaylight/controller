@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
@@ -22,7 +21,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 /**
  * The ShardTransactionChain Actor represents a remote TransactionChain
  */
-public class ShardTransactionChain extends UntypedActor{
+public class ShardTransactionChain extends AbstractUntypedActor{
 
   private final DOMStoreTransactionChain chain;
 
@@ -31,7 +30,7 @@ public class ShardTransactionChain extends UntypedActor{
   }
 
   @Override
-  public void onReceive(Object message) throws Exception {
+  public void handleReceive(Object message) throws Exception {
     if(message instanceof CreateTransaction){
       DOMStoreReadWriteTransaction transaction = chain.newReadWriteTransaction();
       ActorRef transactionActor = getContext().actorOf(ShardTransaction.props(chain, transaction, getContext().parent()));
