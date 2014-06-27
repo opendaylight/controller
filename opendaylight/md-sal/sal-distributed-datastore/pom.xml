@@ -136,6 +136,7 @@
       <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -150,6 +151,21 @@
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package></Export-package>
             <Private-Package></Private-Package>
+            <Import-Package>!*snappy;!org.jboss.*;*</Import-Package>
+            <Embed-Dependency>
+                !sal*;
+                !*config-api*;
+                !*testkit*;
+                akka*;
+                *leveldb*;
+                *config*;
+                *hawt*;
+                *protobuf*;
+                *netty*;
+                *uncommons*;
+                *scala*;
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
       </plugin>
