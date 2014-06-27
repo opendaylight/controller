@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
@@ -65,7 +64,7 @@ import java.util.concurrent.ExecutionException;
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.CloseTransaction}
  * </p>
  */
-public class ShardTransaction extends UntypedActor {
+public class ShardTransaction extends AbstractUntypedActor {
 
     private final ActorRef shardActor;
 
@@ -120,9 +119,7 @@ public class ShardTransaction extends UntypedActor {
 
 
     @Override
-    public void onReceive(Object message) throws Exception {
-        log.debug("Received message {}", message);
-
+    public void handleReceive(Object message) throws Exception {
         if (message instanceof ReadData) {
             readData((ReadData) message);
         } else if (message instanceof WriteData) {
