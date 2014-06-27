@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -25,13 +27,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class DataChangeListenerRegistrationProxy implements ListenerRegistration {
     private final ActorSelection listenerRegistrationActor;
     private final AsyncDataChangeListener listener;
+    private final ActorRef dataChangeListenerActor;
 
     public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
     DataChangeListenerRegistrationProxy(
         ActorSelection listenerRegistrationActor,
-        L listener) {
+        L listener, ActorRef dataChangeListenerActor) {
         this.listenerRegistrationActor = listenerRegistrationActor;
         this.listener = listener;
+        this.dataChangeListenerActor = dataChangeListenerActor;
     }
 
     @Override
@@ -42,5 +46,6 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     @Override
     public void close() {
         listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration(), null);
+        dataChangeListenerActor.tell(PoisonPill.getInstance(), null);
     }
 }

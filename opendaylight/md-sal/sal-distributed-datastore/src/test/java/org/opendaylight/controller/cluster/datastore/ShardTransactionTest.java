@@ -355,6 +355,4 @@ public class ShardTransactionTest extends AbstractActorTest {
         }};
 
     }
-
-
 }

@@ -21,33 +21,42 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 /**
  * The ShardTransactionChain Actor represents a remote TransactionChain
  */
-public class ShardTransactionChain extends AbstractUntypedActor{
+public class ShardTransactionChain extends AbstractUntypedActor {
 
-  private final DOMStoreTransactionChain chain;
+    private final DOMStoreTransactionChain chain;
 
-  public ShardTransactionChain(DOMStoreTransactionChain chain) {
-    this.chain = chain;
-  }
-
-  @Override
-  public void handleReceive(Object message) throws Exception {
-    if(message instanceof CreateTransaction){
-      DOMStoreReadWriteTransaction transaction = chain.newReadWriteTransaction();
-      ActorRef transactionActor = getContext().actorOf(ShardTransaction.props(chain, transaction, getContext().parent()));
-      getSender().tell(new CreateTransactionReply(transactionActor.path()), getSelf());
-    } else if (message instanceof CloseTransactionChain){
-      chain.close();
-      getSender().tell(new CloseTransactionChainReply(), getSelf());
+    public ShardTransactionChain(DOMStoreTransactionChain chain) {
+        this.chain = chain;
     }
-  }
 
-  public static Props props(final DOMStoreTransactionChain chain){
-    return Props.create(new Creator<ShardTransactionChain>(){
+    @Override
+    public void handleReceive(Object message) throws Exception {
+        if (message instanceof CreateTransaction) {
+            CreateTransaction createTransaction = (CreateTransaction) message;
+            createTransaction(createTransaction);
+        } else if (message instanceof CloseTransactionChain) {
+            chain.close();
+            getSender().tell(new CloseTransactionChainReply(), getSelf());
+        }
+    }
 
-      @Override
-      public ShardTransactionChain create() throws Exception {
-        return new ShardTransactionChain(chain);
-      }
-    });
-  }
+    private void createTransaction(CreateTransaction createTransaction) {
+        DOMStoreReadWriteTransaction transaction =
+            chain.newReadWriteTransaction();
+        ActorRef transactionActor = getContext().actorOf(ShardTransaction
+            .props(chain, transaction, getContext().parent()), "shard-" + createTransaction.getTransactionId());
+        getSender()
+            .tell(new CreateTransactionReply(transactionActor.path(), createTransaction.getTransactionId()),
+                getSelf());
+    }
+
+    public static Props props(final DOMStoreTransactionChain chain) {
+        return Props.create(new Creator<ShardTransactionChain>() {
+
+            @Override
+            public ShardTransactionChain create() throws Exception {
+                return new ShardTransactionChain(chain);
+            }
+        });
+    }
 }
