@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncReadOnlyTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataWriteTransaction extends AsyncWriteTransaction<InstanceIdentifier<?>, DataObject> {
-    @Override
-    void put(LogicalDatastoreType store, InstanceIdentifier<?> path, DataObject data);
+/**
+ * A transaction that provides a stateful read-only view of the data tree.
+ * <p>
+ * For more information on usage and examples, please see the documentation in
+ *  {@link org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction}.
+ */
+public interface ReadOnlyTransaction extends ReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>, DataObject> {
 
-    @Override
-    void delete(LogicalDatastoreType store, InstanceIdentifier<?> path);
 }

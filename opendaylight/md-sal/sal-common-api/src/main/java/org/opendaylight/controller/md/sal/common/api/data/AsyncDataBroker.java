@@ -12,14 +12,11 @@ import org.opendaylight.yangtools.concepts.Path;
 
 /**
  *
- * Provides access to a conceptual data tree store.
+ * Base interface that provides access to a conceptual data tree store and also provides the ability to
+ * subscribe for changes to data under a given branch of the tree.
  *
  * <p>
- * Also provides the ability to subscribe for changes to data under a given
- * branch of the tree.
- *
- * <p>
- * All operations on data tree are performed via one of the transactions:
+ * All operations on the data tree are performed via one of the transactions:
  * <ul>
  * <li>Read-Only - allocated using {@link #newReadOnlyTransaction()}
  * <li>Write-Only - allocated using {@link #newWriteOnlyTransaction()}

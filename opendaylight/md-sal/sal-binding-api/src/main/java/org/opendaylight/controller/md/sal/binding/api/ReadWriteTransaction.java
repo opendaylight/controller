@@ -7,10 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface BindingDataReadOnlyTransaction extends BindingDataReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>, DataObject> {
+/**
+ * A transaction that enables combined read/write capabilities.
+ * <p>
+ * For more information on usage and examples, please see the documentation in {@link AsyncReadWriteTransaction}.
+ */
+public interface ReadWriteTransaction extends ReadTransaction, WriteTransaction, AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
 
 }

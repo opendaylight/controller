@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingDataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -83,8 +83,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         codec.onGlobalContextUpdated(ctx);
     }
 
-    public ListenerRegistration<BindingDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path, final BindingDataChangeListener listener,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path, final DataChangeListener listener,
             final DataChangeScope triggeringScope) {
         DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
@@ -143,13 +143,13 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
-        private final BindingDataChangeListener bindingDataChangeListener;
+        private final DataChangeListener bindingDataChangeListener;
         private final LogicalDatastoreType store;
         private final InstanceIdentifier<?> path;
         private final DataChangeScope triggeringScope;
 
         public TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-                final BindingDataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
+                final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
             this.store = store;
             this.path = path;
             this.bindingDataChangeListener = bindingDataChangeListener;
@@ -250,10 +250,10 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
     }
 
-    private static class ListenerRegistrationImpl extends AbstractListenerRegistration<BindingDataChangeListener> {
+    private static class ListenerRegistrationImpl extends AbstractListenerRegistration<DataChangeListener> {
         private final ListenerRegistration<DOMDataChangeListener> registration;
 
-        public ListenerRegistrationImpl(final BindingDataChangeListener listener,
+        public ListenerRegistrationImpl(final DataChangeListener listener,
                 final ListenerRegistration<DOMDataChangeListener> registration) {
             super(listener);
             this.registration = registration;

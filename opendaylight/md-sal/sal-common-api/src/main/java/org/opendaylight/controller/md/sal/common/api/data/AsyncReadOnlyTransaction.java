@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.concepts.Path;
 public interface AsyncReadOnlyTransaction<P extends Path<P>, D> extends AsyncReadTransaction<P, D>, AutoCloseable {
 
     /**
-     * Closes transaction and releases all resources associated with it.
+     * Closes this transaction and releases all resources associated with it.
      *
      */
     @Override

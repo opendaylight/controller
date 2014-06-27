@@ -124,6 +124,8 @@ import org.opendaylight.yangtools.concepts.Path;
  * or other functions from {@link com.google.common.util.concurrent.Futures} to
  * register more specific listeners.
  *
+ * @see AsyncReadTransaction
+ * @see AsyncWriteTransaction
  *
  * @param <P>
  *            Type of path (subtree identifier), which represents location in
