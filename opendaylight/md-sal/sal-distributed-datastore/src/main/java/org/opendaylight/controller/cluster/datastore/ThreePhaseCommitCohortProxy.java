@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
@@ -43,13 +42,19 @@ public class ThreePhaseCommitCohortProxy implements
 
     private final ActorContext actorContext;
     private final List<ActorPath> cohortPaths;
-    //FIXME : Use a thread pool here
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor;
+    private final String transactionId;
 
 
-    public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<ActorPath> cohortPaths) {
+    public ThreePhaseCommitCohortProxy(ActorContext actorContext,
+        List<ActorPath> cohortPaths,
+        String transactionId,
+        ExecutorService executor) {
+
         this.actorContext = actorContext;
         this.cohortPaths = cohortPaths;
+        this.transactionId = transactionId;
+        this.executor = executor;
     }
 
     @Override public ListenableFuture<Boolean> canCommit() {
@@ -86,7 +91,7 @@ public class ThreePhaseCommitCohortProxy implements
         ListenableFutureTask<Boolean>
             future = ListenableFutureTask.create(call);
 
-        executorService.submit(future);
+        executor.submit(future);
 
         return future;
     }
@@ -136,7 +141,7 @@ public class ThreePhaseCommitCohortProxy implements
         ListenableFutureTask<Void>
             future = ListenableFutureTask.create(call);
 
-        executorService.submit(future);
+        executor.submit(future);
 
         return future;
 

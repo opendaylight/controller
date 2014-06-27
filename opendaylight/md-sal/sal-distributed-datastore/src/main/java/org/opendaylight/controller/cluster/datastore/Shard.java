@@ -105,19 +105,19 @@ public class Shard extends UntypedProcessor {
         } else if (message instanceof Persistent) {
             commit((Modification) ((Persistent) message).payload());
         } else if (message instanceof CreateTransaction) {
-            createTransaction();
+            createTransaction((CreateTransaction) message);
         } else if(message instanceof NonPersistent){
             commit((Modification) ((NonPersistent) message).payload());
         }
     }
 
-    private void createTransaction() {
+    private void createTransaction(CreateTransaction createTransaction) {
         DOMStoreReadWriteTransaction transaction =
             store.newReadWriteTransaction();
         ActorRef transactionActor = getContext().actorOf(
-            ShardTransaction.props(transaction, getSelf()));
+            ShardTransaction.props(transaction, getSelf()), "shard-" + createTransaction.getTransactionId());
         getSender()
-            .tell(new CreateTransactionReply(transactionActor.path()),
+            .tell(new CreateTransactionReply(transactionActor.path(), createTransaction.getTransactionId()),
                 getSelf());
     }
 
@@ -139,6 +139,7 @@ public class Shard extends UntypedProcessor {
                     future.get();
                     sender.tell(new CommitTransactionReply(), self);
                 } catch (InterruptedException | ExecutionException e) {
+                    // FIXME : Handle this properly
                     log.error(e, "An exception happened when committing");
                 }
             }
@@ -146,7 +147,6 @@ public class Shard extends UntypedProcessor {
     }
 
     private void handleForwardedCommit(ForwardedCommitTransaction message) {
-        log.info("received forwarded transaction");
         modificationToCohort
             .put(message.getModification(), message.getCohort());
         if(persistent) {
