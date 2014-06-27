@@ -23,8 +23,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TransactionProxyTest extends AbstractActorTest {
+
+    private ExecutorService transactionExecutor =
+        Executors.newSingleThreadExecutor();
 
     @Test
     public void testRead() throws Exception {
@@ -32,12 +37,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
@@ -63,12 +68,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
@@ -94,12 +99,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
         transactionProxy.write(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
@@ -126,12 +131,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
         transactionProxy.merge(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
@@ -158,12 +163,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
         transactionProxy.delete(TestModel.TEST_PATH);
 
@@ -189,12 +194,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef doNothingActorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(doNothingActorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(doNothingActorRef));
         actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(doNothingActorRef.path()));
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
@@ -213,12 +218,11 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef doNothingActorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(
-            new CreateTransactionReply(doNothingActorRef.path()));
+        actorContext.setExecuteShardOperationResponse( createTransactionReply(doNothingActorRef) );
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
         Assert.assertNotNull(transactionProxy.getIdentifier());
     }
@@ -229,12 +233,12 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
 
         transactionProxy.close();
 
@@ -252,5 +256,9 @@ public class TransactionProxyTest extends AbstractActorTest {
         Assert.assertEquals(1, listMessages.size());
 
         Assert.assertTrue(listMessages.get(0) instanceof CloseTransaction);
+    }
+
+    private CreateTransactionReply createTransactionReply(ActorRef actorRef){
+        return new CreateTransactionReply(actorRef.path(), "txn-1");
     }
 }

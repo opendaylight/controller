@@ -39,7 +39,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         // Make CreateTransactionReply as the default response. Will need to be
         // tuned if a specific test requires some other response
         mockActorContext.setExecuteShardOperationResponse(
-            new CreateTransactionReply(doNothingActorRef.path()));
+            new CreateTransactionReply(doNothingActorRef.path(), "txn-1 "));
     }
 
     @org.junit.After

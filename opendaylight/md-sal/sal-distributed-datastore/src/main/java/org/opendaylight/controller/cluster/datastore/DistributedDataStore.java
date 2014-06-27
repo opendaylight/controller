@@ -29,6 +29,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  *
  */
@@ -41,8 +44,20 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private final String type;
     private final ActorContext actorContext;
 
+
+    /**
+     * Executor used to run FutureTask's
+     *
+     * This is typically used when we need to make a request to an actor and
+     * wait for it's response and the consumer needs to be provided a Future.
+     *
+     * FIXME : Make the thread pool configurable
+     */
+    private final ExecutorService executor =
+        Executors.newFixedThreadPool(10);
+
     public DistributedDataStore(ActorSystem actorSystem, String type) {
-        this(new ActorContext(actorSystem, actorSystem.actorOf(ShardManager.props(type))), type);
+        this(new ActorContext(actorSystem, actorSystem.actorOf(ShardManager.props(type), "shardmanager-" + type)), type);
     }
 
     public DistributedDataStore(ActorContext actorContext, String type) {
@@ -66,29 +81,32 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         );
 
         RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
-        return new DataChangeListenerRegistrationProxy(actorContext.actorSelection(reply.getListenerRegistrationPath()), listener);
+        return new DataChangeListenerRegistrationProxy(actorContext.actorSelection(reply.getListenerRegistrationPath()), listener, dataChangeListenerActor);
     }
 
 
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(actorContext);
+        return new TransactionChainProxy(actorContext, executor);
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_ONLY);
+        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_ONLY,
+            executor);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY);
+        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY,
+            executor);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE);
+        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE,
+            executor);
     }
 
     @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
