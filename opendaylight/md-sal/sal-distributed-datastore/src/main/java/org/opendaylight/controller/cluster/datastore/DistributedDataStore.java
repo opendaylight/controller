@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class DistributedDataStore implements DOMStore, SchemaContextListener {
+public class DistributedDataStore implements DOMStore, SchemaContextListener, AutoCloseable {
 
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
@@ -94,5 +94,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener {
     @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
         actorContext.getShardManager().tell(
             new UpdateSchemaContext(schemaContext), null);
+    }
+
+    @Override public void close() throws Exception {
+        actorContext.shutdown();
+
     }
 }
