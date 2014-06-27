@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_32abb576",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-27T19:08:38Z",
+      "side": 1,
+      "message": "Jan - which RFC?",
+      "parentUuid": "fa82b9bf_3218951d",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d20cc93d",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
         "patchSetId": 5
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d2b369e7",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-27T19:08:38Z",
+      "side": 1,
+      "message": "This is mentioned earlier \"If no actual implementation is registered, all invocations will fail by throwing {@link IllegalStateException}.\". So you will always get a proxy back but it may not be backed by a real impl yet - you won\u0027t know until you actually invoke an RPC method. I\u0027m not sure if the proxy will wait with timeout for a backing impl when a method is invoked. That would be nice - Spring and Blueprint do this for their proxies.",
+      "parentUuid": "fa82b9bf_f2d54d1c",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_72e93de5",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
         "patchSetId": 5
@@ -64,6 +100,24 @@
       "writtenOn": "2014-06-27T18:49:50Z",
       "side": 1,
       "message": "Please give reference to the rgc and section (preferably as a weblink, you can reference the yang html version of the RFC)",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_92c9615b",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-27T19:08:38Z",
+      "side": 1,
+      "message": "Can you provide the link so I can add it?",
+      "parentUuid": "fa82b9bf_72e93de5",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -115,6 +169,24 @@
       "writtenOn": "2014-06-27T14:28:25Z",
       "side": 1,
       "message": "A description (which can be small) is needed.",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2df8d0b",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/routing/RouteChangePublisher.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-06-27T19:08:38Z",
+      "side": 1,
+      "message": "I didn\u0027t take a stab at this one b/c I don\u0027t know what it\u0027s for. I\u0027ll defer to Tony.",
+      "parentUuid": "fa82b9bf_1207911a",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
