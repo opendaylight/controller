@@ -50,13 +50,31 @@ import com.google.common.util.concurrent.ListenableFuture;
 class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
 
+    /**
+     *  Implementation of real commit.
+     *
+     *  Transaction can not be commited if commitImpl is null,
+     *  so this seting this property to null is also used to
+     *  prevent write to
+     *  already commited / canceled transaction {@link #checkNotCanceled()
+     *
+     *
+     */
     @GuardedBy("this")
-    private DOMDataCommitImplementation commitImpl;
+    private volatile DOMDataCommitImplementation commitImpl;
 
+    /**
+     *
+     * Future task of transaction commit.
+     *
+     * This value is initially null, and is once updated if transaction
+     * is commited {@link #commit()}.
+     * If this future exists, transaction MUST not be commited again
+     * and all modifications should fail. See {@link #checkNotCommited()}.
+     *
+     */
     @GuardedBy("this")
-    private boolean canceled;
-    @GuardedBy("this")
-    private ListenableFuture<RpcResult<TransactionStatus>> commitFuture;
+    private volatile ListenableFuture<RpcResult<TransactionStatus>> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
             final ImmutableMap<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
@@ -83,15 +101,19 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @Override
-    public synchronized void cancel() {
-        checkState(!canceled, "Transaction was canceled.");
-        if (commitFuture != null) {
-            // FIXME: Implement cancelation of commit future
-            // when Broker impl will support cancelation.
-            throw new UnsupportedOperationException("Not implemented yet.");
+    public synchronized boolean cancel() {
+        // Transaction is already canceled, we are safe to return true
+        final boolean cancelationResult;
+        if (commitImpl == null && commitFuture != null) {
+            // Transaction is submitted, we try to cancel future.
+            cancelationResult = commitFuture.cancel(false);
+        } else if(commitImpl == null) {
+            return true;
+        } else {
+            cancelationResult = true;
+            commitImpl = null;
         }
-        canceled = true;
-        commitImpl = null;
+        return cancelationResult;
 
     }
 
@@ -105,20 +127,26 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         }
         ImmutableList<DOMStoreThreePhaseCommitCohort> cohorts = cohortsBuilder.build();
         commitFuture = commitImpl.commit(this, cohorts);
+
+        /*
+         *We remove reference to Commit Implementation in order
+         *to prevent memory leak
+         */
+        commitImpl = null;
         return commitFuture;
     }
 
     private void checkNotReady() {
-        checkNotCanceled();
         checkNotCommited();
+        checkNotCanceled();
     }
 
     private void checkNotCanceled() {
-        Preconditions.checkState(!canceled, "Transaction was canceled.");
+        Preconditions.checkState(commitImpl != null, "Transaction was canceled.");
     }
 
     private void checkNotCommited() {
-        checkState(commitFuture == null, "Transaction was already commited.");
+        checkState(commitFuture == null, "Transaction was already submited.");
     }
 
 }

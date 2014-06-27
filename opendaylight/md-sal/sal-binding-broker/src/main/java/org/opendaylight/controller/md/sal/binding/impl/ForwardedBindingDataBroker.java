@@ -8,14 +8,14 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import org.opendaylight.controller.md.sal.binding.api.BindingDataBroker;
-import org.opendaylight.controller.md.sal.binding.api.BindingDataReadTransaction;
+import org.opendaylight.controller.md.sal.binding.api.BindingDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.BindingDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.BindingDataWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -47,7 +47,7 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
     }
 
     @Override
-    public BindingDataReadTransaction newReadOnlyTransaction() {
+    public BindingDataReadOnlyTransaction newReadOnlyTransaction() {
         return new BindingDataReadTransactionImpl(getDelegate().newReadOnlyTransaction(),getCodec());
     }
 
@@ -73,17 +73,12 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
             return getDelegate().getIdentifier();
         }
 
-        @Override
-        public void close() {
-            getDelegate().close();
-        }
-
     }
 
-    private class BindingDataReadTransactionImpl extends AbstractBindingTransaction<DOMDataReadTransaction> implements
-            BindingDataReadTransaction {
+    private class BindingDataReadTransactionImpl extends AbstractBindingTransaction<DOMDataReadOnlyTransaction> implements
+            BindingDataReadOnlyTransaction {
 
-        protected BindingDataReadTransactionImpl(final DOMDataReadTransaction delegate,
+        protected BindingDataReadTransactionImpl(final DOMDataReadOnlyTransaction delegate,
                 final BindingToNormalizedNodeCodec codec) {
             super(delegate, codec);
         }
@@ -92,6 +87,11 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
         public ListenableFuture<Optional<DataObject>> read(final LogicalDatastoreType store,
                 final InstanceIdentifier<?> path) {
             return doRead(getDelegate(), store, path);
+        }
+
+        @Override
+        public void close() {
+            getDelegate().close();
         }
     }
 
@@ -104,8 +104,8 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
         }
 
         @Override
-        public void cancel() {
-            doCancel(getDelegate());
+        public boolean cancel() {
+            return doCancel(getDelegate());
         }
 
         @Override

@@ -180,8 +180,8 @@ public class AbstractForwardedTransaction<T extends AsyncTransaction<org.openday
         return writeTransaction.commit();
     }
 
-    protected void doCancel(final DOMDataWriteTransaction writeTransaction) {
-        writeTransaction.cancel();
+    protected boolean doCancel(final DOMDataWriteTransaction writeTransaction) {
+        return writeTransaction.cancel();
     }
 
     protected ListenableFuture<Optional<DataObject>> doRead(final DOMDataReadTransaction readTransaction,

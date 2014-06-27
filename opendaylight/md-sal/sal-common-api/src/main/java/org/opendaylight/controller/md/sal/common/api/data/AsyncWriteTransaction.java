@@ -53,13 +53,19 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * {@link TransactionStatus#NEW} or {@link TransactionStatus#SUBMITED}
      *
      * Invoking cancel() on {@link TransactionStatus#FAILED} or
-     * {@link TransactionStatus#CANCELED} will have no effect.
+     * {@link TransactionStatus#CANCELED} will have no effect, and transaction
+     * is considered cancelled.
      *
-     * @throws IllegalStateException
-     *             If transaction status is {@link TransactionStatus#COMMITED}
+     * Invoking cancel() on finished transaction  (future returned by {@link #commit()}
+     * already completed with {@link TransactionStatus#COMMITED}) will always
+     * fail (return false).
+     *
+     * @return <tt>false</tt> if the task could not be cancelled,
+     * typically because it has already completed normally;
+     * <tt>true</tt> otherwise
      *
      */
-    public void cancel();
+    public boolean cancel();
 
     /**
      * Store a piece of data at specified path. This acts as an add / replace
@@ -140,20 +146,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *             if the transaction is no longer {@link TransactionStatus#NEW}
      */
     public void delete(LogicalDatastoreType store, P path);
-
-    /**
-     *
-     * Closes transaction and resources allocated to the transaction.
-     *
-     * This call does not change Transaction status. Client SHOULD explicitly
-     * {@link #commit()} or {@link #cancel()} transaction.
-     *
-     * @throws IllegalStateException
-     *             if the transaction has not been updated by invoking
-     *             {@link #commit()} or {@link #cancel()}.
-     */
-    @Override
-    public void close();
 
     /**
      * Submits transaction to be applied to update logical data tree.
