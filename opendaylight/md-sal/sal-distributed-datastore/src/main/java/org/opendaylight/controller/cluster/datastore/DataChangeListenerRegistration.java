@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
@@ -16,34 +17,40 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListene
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DataChangeListenerRegistration extends AbstractUntypedActor{
+public class DataChangeListenerRegistration extends AbstractUntypedActor {
 
-  private final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration;
+    private final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
+        registration;
 
-  public DataChangeListenerRegistration(
-      org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration) {
-    this.registration = registration;
-  }
-
-  @Override
-  public void handleReceive(Object message) throws Exception {
-    if(message instanceof CloseDataChangeListenerRegistration){
-      closeListenerRegistration((CloseDataChangeListenerRegistration) message);
+    public DataChangeListenerRegistration(
+        org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration) {
+        this.registration = registration;
     }
-  }
 
-  public static Props props(final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration){
-    return Props.create(new Creator<DataChangeListenerRegistration>(){
+    @Override
+    public void handleReceive(Object message) throws Exception {
+        if (message instanceof CloseDataChangeListenerRegistration) {
+            closeListenerRegistration(
+                (CloseDataChangeListenerRegistration) message);
+        }
+    }
 
-      @Override
-      public DataChangeListenerRegistration create() throws Exception {
-        return new DataChangeListenerRegistration(registration);
-      }
-    });
-  }
+    public static Props props(
+        final org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> registration) {
+        return Props.create(new Creator<DataChangeListenerRegistration>() {
 
-  private void closeListenerRegistration(CloseDataChangeListenerRegistration message){
-    registration.close();
-    getSender().tell(new CloseDataChangeListenerRegistrationReply(), getSelf());
-  }
+            @Override
+            public DataChangeListenerRegistration create() throws Exception {
+                return new DataChangeListenerRegistration(registration);
+            }
+        });
+    }
+
+    private void closeListenerRegistration(
+        CloseDataChangeListenerRegistration message) {
+        registration.close();
+        getSender()
+            .tell(new CloseDataChangeListenerRegistrationReply(), getSelf());
+        getSelf().tell(PoisonPill.getInstance(), getSelf());
+    }
 }

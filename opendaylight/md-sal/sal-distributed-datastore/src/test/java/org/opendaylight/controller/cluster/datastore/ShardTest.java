@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListene
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ShardTest extends AbstractActorTest {
@@ -47,9 +48,10 @@ public class ShardTest extends AbstractActorTest {
                         }
                     }.get(); // this extracts the received message
 
-                    assertTrue(out.matches(
-                        "akka:\\/\\/test\\/user\\/testCreateTransactionChain\\/\\$.*"));
-                    // Will wait for the rest of the 3 seconds
+                    assertEquals("Unexpected transaction path " + out,
+                        "akka://test/user/testCreateTransactionChain/$a",
+                        out);
+
                     expectNoMsg();
                 }
 
@@ -115,7 +117,7 @@ public class ShardTest extends AbstractActorTest {
                         new UpdateSchemaContext(TestModel.createTestContext()),
                         getRef());
 
-                    subject.tell(new CreateTransaction(),
+                    subject.tell(new CreateTransaction("txn-1"),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
@@ -132,9 +134,9 @@ public class ShardTest extends AbstractActorTest {
                         }
                     }.get(); // this extracts the received message
 
-                    assertTrue(out.matches(
-                        "akka:\\/\\/test\\/user\\/testCreateTransaction\\/\\$.*"));
-                    // Will wait for the rest of the 3 seconds
+                    assertEquals("Unexpected transaction path " + out,
+                        "akka://test/user/testCreateTransaction/shard-txn-1",
+                        out);
                     expectNoMsg();
                 }
 

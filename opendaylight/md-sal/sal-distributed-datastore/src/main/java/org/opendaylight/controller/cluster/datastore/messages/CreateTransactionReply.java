@@ -11,13 +11,20 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import akka.actor.ActorPath;
 
 public class CreateTransactionReply {
-  private final ActorPath transactionPath;
+    private final ActorPath transactionPath;
+    private final String transactionId;
 
-  public CreateTransactionReply(ActorPath transactionPath) {
-    this.transactionPath = transactionPath;
-  }
+    public CreateTransactionReply(ActorPath transactionPath,
+        String transactionId) {
+        this.transactionPath = transactionPath;
+        this.transactionId = transactionId;
+    }
 
-  public ActorPath getTransactionPath() {
-    return transactionPath;
-  }
+    public ActorPath getTransactionPath() {
+        return transactionPath;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
 }

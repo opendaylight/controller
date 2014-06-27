@@ -68,7 +68,7 @@ public class ShardManager extends AbstractUntypedActor {
    *             configuration or operational
    */
   private ShardManager(String type){
-    ActorRef actor = getContext().actorOf(Shard.props(Shard.DEFAULT_NAME + "-" + type));
+    ActorRef actor = getContext().actorOf(Shard.props("shard-" + Shard.DEFAULT_NAME + "-" + type), "shard-" + Shard.DEFAULT_NAME + "-" + type);
     defaultShardPath = actor.path();
   }
 

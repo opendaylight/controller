@@ -14,7 +14,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ShardTransactionChainTest extends AbstractActorTest {
 
@@ -34,7 +33,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
       new Within(duration("1 seconds")) {
         protected void run() {
 
-          subject.tell(new CreateTransaction(), getRef());
+          subject.tell(new CreateTransaction("txn-1"), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
@@ -47,8 +46,11 @@ public class ShardTransactionChainTest extends AbstractActorTest {
             }
           }.get(); // this extracts the received message
 
-          assertTrue(out.matches("akka:\\/\\/test\\/user\\/testCreateTransaction\\/\\$.*"));
-          // Will wait for the rest of the 3 seconds
+            assertEquals("Unexpected transaction path " + out,
+                "akka://test/user/testCreateTransaction/shard-txn-1",
+                out);
+
+            // Will wait for the rest of the 3 seconds
           expectNoMsg();
         }
 
