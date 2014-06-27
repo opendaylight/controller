@@ -29,7 +29,7 @@ public class XSQLProvider implements AutoCloseable {
                 final DataModificationTransaction t = dps.beginTransaction();
                 t.removeOperationalData(ID);
                 t.putOperationalData(ID,xsql);
-
+                
                 try {
                     t.commit().get();
                 } catch (InterruptedException | ExecutionException e) {
