@@ -1,15 +1,20 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
-import akka.actor.ActorSystem;
-import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
 
-public class DistributedOperationalDataStoreProviderModule extends org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
-    public DistributedOperationalDataStoreProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+public class DistributedOperationalDataStoreProviderModule extends
+    org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
+    public DistributedOperationalDataStoreProviderModule(
+        org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+        org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DistributedOperationalDataStoreProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public DistributedOperationalDataStoreProviderModule(
+        org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+        org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+        org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule oldModule,
+        java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -18,22 +23,10 @@ public class DistributedOperationalDataStoreProviderModule extends org.opendayli
         // add custom validation form module attributes here.
     }
 
-  @Override
-  public java.lang.AutoCloseable createInstance() {
-    final ActorSystem actorSystem = ActorSystem.create("opendaylight-cluster", ConfigFactory
-        .load().getConfig("ODLCluster"));
-    final DistributedDataStore operationalStore = new DistributedDataStore(actorSystem, "operational");
-    getSchemaServiceDependency().registerSchemaServiceListener(operationalStore);
-
-    final class AutoCloseableDistributedDataStore implements AutoCloseable {
-
-      @Override
-      public void close() throws Exception {
-        actorSystem.shutdown();
-      }
+    @Override
+    public java.lang.AutoCloseable createInstance() {
+        return DistributedDataStoreFactory
+            .createInstance("operational", getSchemaServiceDependency());
     }
-
-    return new AutoCloseableDistributedDataStore();
-  }
 
 }
