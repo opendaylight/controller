@@ -86,6 +86,10 @@
     <appender-ref ref="opendaylight.log"/>
   </logger>
 
+  <!-- BGPCEP plugin -->
+  <logger name="org.opendaylight.protocol" level="INFO"/>
+  <logger name="org.opendaylight.bgpcep" level="INFO"/>
+
   <!-- To debug MD-SAL schema loading issues, uncomment this -->
   <!--logger name="org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver" level="DEBUG"/>
   <logger name="org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl" level="TRACE"/-->
