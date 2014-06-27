@@ -58,6 +58,37 @@ public class TransactionProxyTest extends AbstractActorTest {
     }
 
     @Test
+    public void testReadWhenANullIsReturned() throws Exception {
+        final Props props = Props.create(DoNothingActor.class);
+        final ActorRef actorRef = getSystem().actorOf(props);
+
+        final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteShardOperationResponse(new CreateTransactionReply(actorRef.path()));
+        actorContext.setExecuteRemoteOperationResponse("message");
+
+        TransactionProxy transactionProxy =
+            new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY);
+
+
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+            transactionProxy.read(TestModel.TEST_PATH);
+
+        Optional<NormalizedNode<?, ?>> normalizedNodeOptional = read.get();
+
+        Assert.assertFalse(normalizedNodeOptional.isPresent());
+
+        actorContext.setExecuteRemoteOperationResponse(new ReadDataReply(
+            null));
+
+        read = transactionProxy.read(TestModel.TEST_PATH);
+
+        normalizedNodeOptional = read.get();
+
+        Assert.assertFalse(normalizedNodeOptional.isPresent());
+    }
+
+    @Test
     public void testWrite() throws Exception {
         final Props props = Props.create(MessageCollectorActor.class);
         final ActorRef actorRef = getSystem().actorOf(props);
