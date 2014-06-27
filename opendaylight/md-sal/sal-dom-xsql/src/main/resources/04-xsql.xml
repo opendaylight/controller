@@ -7,7 +7,7 @@
                         XSQL:XSQL
                     </type>
                     <name>XSQL</name>
-		    <data-broker>
+                    <data-broker>
                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-data-broker</type>
                        <name>binding-data-broker</name>
                     </data-broker>
