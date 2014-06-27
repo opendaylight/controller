@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Function;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Collections2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -16,11 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-
 import javax.annotation.concurrent.Immutable;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -40,11 +44,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Collections2;
 
 @Immutable
 public class ConfigPusher {
@@ -84,7 +83,11 @@ public class ConfigPusher {
         ConflictingVersionException lastException;
         Stopwatch stopwatch = new Stopwatch().start();
         do {
-            try (NetconfOperationService operationService = getOperationServiceWithRetries(configSnapshotHolder.getCapabilities(), configSnapshotHolder.toString())) {
+            String idForReporting = configSnapshotHolder.toString();
+            SortedSet<String> expectedCapabilities = checkNotNull(configSnapshotHolder.getCapabilities(),
+                    "Expected capabilities must not be null - %s, check %s", idForReporting,
+                    configSnapshotHolder.getClass().getName());
+            try (NetconfOperationService operationService = getOperationServiceWithRetries(expectedCapabilities, idForReporting)) {
                 return pushConfig(configSnapshotHolder, operationService);
             } catch (ConflictingVersionException e) {
                 lastException = e;
@@ -252,7 +255,7 @@ public class ConfigPusher {
     private static NetconfMessage createEditConfigMessage(Element dataElement) throws NetconfDocumentedException {
         String editConfigResourcePath = "/netconfOp/editConfig.xml";
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcePath)) {
-            Preconditions.checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);
+            checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);
 
             Document doc = XmlUtil.readXmlToDocument(stream);
 
@@ -274,7 +277,7 @@ public class ConfigPusher {
     private static NetconfMessage getCommitMessage() {
         String resource = "/netconfOp/commit.xml";
         try (InputStream stream = ConfigPusher.class.getResourceAsStream(resource)) {
-            Preconditions.checkNotNull(stream, "Unable to load resource " + resource);
+            checkNotNull(stream, "Unable to load resource " + resource);
             return new NetconfMessage(XmlUtil.readXmlToDocument(stream));
         } catch (SAXException | IOException e) {
             // error reading the xml file bundled into the jar

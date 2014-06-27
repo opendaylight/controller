@@ -12,13 +12,14 @@ import java.util.SortedSet;
 public interface ConfigSnapshotHolder {
 
     /**
-     * Get part of get-config document that contains just
+     * Get XML node that should be pushed to netconf's edit-config
      */
     String getConfigSnapshot();
 
 
     /**
      * Get only required capabilities referenced by the snapshot.
+     * If no value is specified, return empty set instead of null
      */
     SortedSet<String> getCapabilities();
 
