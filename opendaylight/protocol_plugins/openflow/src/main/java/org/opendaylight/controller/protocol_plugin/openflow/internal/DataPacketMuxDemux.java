@@ -212,17 +212,8 @@ public class DataPacketMuxDemux implements IContainerListener,
                     }
                 }
 
-                // Now dispatch the packet toward SAL for default container
-                IPluginOutDataPacketService defaultOutService = this.pluginOutDataPacketServices
-                        .get(GlobalConstants.DEFAULT.toString());
-                if (defaultOutService != null) {
-                    defaultOutService.receiveDataPacket(dataPacket);
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Dispatched to apps a frame of size: {} on " + "container: {}: {}",
-                                new Object[] { ofPacket.getPacketData().length, GlobalConstants.DEFAULT.toString(),
-                                        HexEncode.bytesToHexString(dataPacket.getPacketData()) });
-                    }
-                }
+                boolean dispatched_to_container = false;
+
                 // Now check the mapping between nodeConnector and
                 // Container and later on optimally filter based on
                 // flowSpec
@@ -254,7 +245,22 @@ public class DataPacketMuxDemux implements IContainerListener,
                                                         HexEncode.bytesToHexString(dataPacket.getPacketData()) });
                                     }
                                 }
+                                dispatched_to_container = true;
                             }
+                        }
+                    }
+                }
+                if (!dispatched_to_container) {
+                    // Now dispatch the packet toward SAL for default container
+                    IPluginOutDataPacketService defaultOutService = this.pluginOutDataPacketServices
+                        .get(GlobalConstants.DEFAULT.toString());
+                    if (defaultOutService != null) {
+                        defaultOutService.receiveDataPacket(dataPacket);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Dispatched to apps a frame of size: {} on " + "container: {}: {}",
+                                         new Object[] { ofPacket.getPacketData().length,
+                                                        GlobalConstants.DEFAULT.toString(),
+                                                        HexEncode.bytesToHexString(dataPacket.getPacketData()) });
                         }
                     }
                 }

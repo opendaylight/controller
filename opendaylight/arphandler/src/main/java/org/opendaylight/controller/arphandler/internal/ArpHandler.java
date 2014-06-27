@@ -51,6 +51,7 @@ import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IPv4;
+import org.opendaylight.controller.sal.packet.IEEE8021Q;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
@@ -654,6 +655,10 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         if (formattedPak instanceof Ethernet) {
             Object nextPak = formattedPak.getPayload();
+            if (nextPak instanceof IEEE8021Q) {
+                log.trace("Moved after the dot1Q header");
+                nextPak = ((IEEE8021Q) nextPak).getPayload();
+            }
             if (nextPak instanceof IPv4) {
                 log.trace("Handle IP packet: {}", formattedPak);
                 handlePuntedIPPacket((IPv4) nextPak, inPkt.getIncomingNodeConnector());
