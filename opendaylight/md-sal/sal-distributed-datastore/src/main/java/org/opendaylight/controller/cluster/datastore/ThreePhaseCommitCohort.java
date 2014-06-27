@@ -56,6 +56,7 @@ public class ThreePhaseCommitCohort extends UntypedActor {
         });
     }
 
+
     @Override
     public void onReceive(Object message) throws Exception {
         log.debug("Received message {}", message);

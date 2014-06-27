@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionC
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.NonPersistent;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -63,8 +64,16 @@ public class Shard extends UntypedProcessor {
     private final LoggingAdapter log =
         Logging.getLogger(getContext().system(), this);
 
+    // By default persistent will be true and can be turned off using the system
+    // property persistent
+    private final boolean persistent;
+
     private Shard(String name) {
-        log.info("Creating shard : {}", name );
+
+        String setting = System.getProperty("shard.persistent");
+        this.persistent = !"false".equals(setting);
+
+        log.info("Creating shard : {} persistent : {}", name , persistent);
 
         store = new InMemoryDOMDataStore(name, storeExecutor);
     }
@@ -80,6 +89,7 @@ public class Shard extends UntypedProcessor {
         });
     }
 
+
     @Override
     public void onReceive(Object message) throws Exception {
         log.debug("Received message {}", message);
@@ -93,9 +103,11 @@ public class Shard extends UntypedProcessor {
         } else if (message instanceof ForwardedCommitTransaction) {
             handleForwardedCommit((ForwardedCommitTransaction) message);
         } else if (message instanceof Persistent) {
-            commit((Persistent) message);
+            commit((Modification) ((Persistent) message).payload());
         } else if (message instanceof CreateTransaction) {
             createTransaction();
+        } else if(message instanceof NonPersistent){
+            commit((Modification) ((NonPersistent) message).payload());
         }
     }
 
@@ -109,8 +121,7 @@ public class Shard extends UntypedProcessor {
                 getSelf());
     }
 
-    private void commit(Persistent message) {
-        Modification modification = (Modification) message.payload();
+    private void commit(Modification modification) {
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(modification);
         if (cohort == null) {
@@ -138,8 +149,13 @@ public class Shard extends UntypedProcessor {
         log.info("received forwarded transaction");
         modificationToCohort
             .put(message.getModification(), message.getCohort());
-        getSelf().forward(Persistent.create(message.getModification()),
-            getContext());
+        if(persistent) {
+            getSelf().forward(Persistent.create(message.getModification()),
+                getContext());
+        } else {
+            getSelf().forward(NonPersistent.create(message.getModification()),
+                getContext());
+        }
     }
 
     private void updateSchemaContext(UpdateSchemaContext message) {
