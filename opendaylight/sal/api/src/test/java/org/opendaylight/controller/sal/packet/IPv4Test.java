@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,8 @@ import java.util.Arrays;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
@@ -451,5 +453,32 @@ public class IPv4Test {
         ICMP decIcmp = (ICMP) decIp.getPayload();
         Assert.assertFalse(decIcmp.isCorrupted());
         Assert.assertTrue(Arrays.equals(icmpRawPayload, decIcmp.getRawPayload()));
+    }
+
+    @Test
+    public void testGetMatch() throws Exception {
+        IPv4 ip = new IPv4();
+        InetAddress sourceAddress = InetAddress.getByName("172.168.190.15");
+        InetAddress destintationAddress = InetAddress.getByName("23.128.0.11");
+        byte protocol = IPProtocols.TCP.byteValue();
+        byte tos = 7;
+        ip.setVersion((byte) 4);
+        ip.setIdentification((short) 5);
+        ip.setDiffServ(tos);
+        ip.setECN((byte) 0);
+        ip.setTotalLength((short) 84);
+        ip.setFlags((byte) 2);
+        ip.setFragmentOffset((short) 0);
+        ip.setTtl((byte) 64);
+        ip.setProtocol(protocol);
+        ip.setDestinationAddress(destintationAddress);
+        ip.setSourceAddress(sourceAddress);
+
+        Match match = ip.getMatch();
+
+        Assert.assertEquals(sourceAddress, match.getField(MatchType.NW_SRC).getValue());
+        Assert.assertEquals(destintationAddress, match.getField(MatchType.NW_DST).getValue());
+        Assert.assertEquals(protocol, (byte) match.getField(MatchType.NW_PROTO).getValue());
+        Assert.assertEquals(tos, (byte) match.getField(MatchType.NW_TOS).getValue());
     }
 }

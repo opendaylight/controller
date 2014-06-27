@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.slf4j.Logger;
@@ -364,4 +365,31 @@ public abstract class Packet {
         return true;
     }
 
+    /**
+     * Adds to the passed Match this packet's header fields
+     *
+     * @param match
+     *            The Match object to populate
+     */
+    public void populateMatch(Match match) {
+        // To be overridden by derived packet classes which have well known
+        // header fields so that Packet.getMatch would return desired result
+    }
+
+    /**
+     * Returns the Match object containing this packet and its payload
+     * encapsulated packets' header fields
+     *
+     * @return The Match containing the header fields of this packet and of its
+     *         payload encapsulated packets
+     */
+    public Match getMatch() {
+        Match match = new Match();
+        Packet packet = this;
+        while (packet != null) {
+            packet.populateMatch(match);
+            packet = packet.getPayload();
+        }
+        return match;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,7 +9,11 @@
 package org.opendaylight.controller.sal.packet;
 
 import junit.framework.Assert;
+
 import org.junit.Test;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.NetUtils;
 
 public class IEEE8021QTest {
@@ -211,5 +215,22 @@ public class IEEE8021QTest {
         Assert.assertTrue(data[43] == (byte) 0x09);
         Assert.assertTrue(data[44] == (byte) 0x09);
         Assert.assertTrue(data[45] == (byte) 0xFE);
+    }
+
+    @Test
+    public void testGetMatchFullPacket() throws Exception {
+        IEEE8021Q dot1q = new IEEE8021Q();
+        byte priority = 4;
+        short vlanId = 59;
+        short ethType = EtherTypes.IPv4.shortValue();
+        dot1q.setPcp(priority);
+        dot1q.setVid(vlanId);
+        dot1q.setEtherType(ethType);
+
+        Match match = dot1q.getMatch();
+
+        Assert.assertEquals(priority, (byte) match.getField(MatchType.DL_VLAN_PR).getValue());
+        Assert.assertEquals(vlanId, (short) match.getField(MatchType.DL_VLAN).getValue());
+        Assert.assertEquals(ethType, (short) match.getField(MatchType.DL_TYPE).getValue());
     }
 }

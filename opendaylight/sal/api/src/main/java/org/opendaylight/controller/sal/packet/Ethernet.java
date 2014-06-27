@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.NetUtils;
 
@@ -139,4 +141,10 @@ public class Ethernet extends Packet {
         return this;
     }
 
+    @Override
+    public void populateMatch(Match match) {
+        match.setField(MatchType.DL_SRC, this.getSourceMACAddress());
+        match.setField(MatchType.DL_DST, this.getDestinationMACAddress());
+        match.setField(MatchType.DL_TYPE, this.getEtherType());
+    }
 }
