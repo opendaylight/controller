@@ -91,6 +91,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                         ActorContext.ASK_DURATION);
                 if(response instanceof ReadDataReply){
                     ReadDataReply reply = (ReadDataReply) response;
+                    if(reply.getNormalizedNode() == null){
+                        return Optional.absent();
+                    }
                     //FIXME : A cast should not be required here ???
                     return (Optional<NormalizedNode<?, ?>>) Optional.of(reply.getNormalizedNode());
                 }
