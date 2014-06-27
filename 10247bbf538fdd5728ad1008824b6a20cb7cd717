@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_3218951d",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 27
+      },
+      "writtenOn": "2014-06-27T18:49:50Z",
+      "side": 1,
+      "message": "Please give reference to the RFC and relevant section",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d20cc93d",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
         "patchSetId": 5
@@ -13,6 +30,40 @@
       "writtenOn": "2014-06-27T14:28:25Z",
       "side": 1,
       "message": "As discussed with Tom, we are still blocking a Thread  here. Not sure if there is a way to return a plain Future and NOT block a thread.",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2d54d1c",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 27
+      },
+      "writtenOn": "2014-06-27T18:49:50Z",
+      "side": 1,
+      "message": "So what does it return if the requested service does not exist?",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_72e93de5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 27
+      },
+      "writtenOn": "2014-06-27T18:49:50Z",
+      "side": 1,
+      "message": "Please give reference to the rgc and section (preferably as a weblink, you can reference the yang html version of the RFC)",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
