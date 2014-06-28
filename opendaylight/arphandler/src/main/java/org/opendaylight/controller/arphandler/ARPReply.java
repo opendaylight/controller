@@ -23,14 +23,17 @@ public class ARPReply extends ARPEvent {
     private final byte[] tMac;
     private final byte[] sMac;
     private final InetAddress sIP;
+    private final short vlan;
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
+        result = prime * result + ((port == null) ? 0 : port.hashCode());
         result = prime * result + ((sIP == null) ? 0 : sIP.hashCode());
         result = prime * result + Arrays.hashCode(sMac);
         result = prime * result + Arrays.hashCode(tMac);
+        result = prime * result + vlan;
         return result;
     }
 
@@ -39,13 +42,20 @@ public class ARPReply extends ARPEvent {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!super.equals(obj)) {
             return false;
         }
         if (!(obj instanceof ARPReply)) {
             return false;
         }
         ARPReply other = (ARPReply) obj;
+        if (port == null) {
+            if (other.port != null) {
+                return false;
+            }
+        } else if (!port.equals(other.port)) {
+            return false;
+        }
         if (sIP == null) {
             if (other.sIP != null) {
                 return false;
@@ -59,23 +69,28 @@ public class ARPReply extends ARPEvent {
         if (!Arrays.equals(tMac, other.tMac)) {
             return false;
         }
+        if (vlan != other.vlan) {
+            return false;
+        }
         return true;
     }
 
-    public ARPReply(NodeConnector port, InetAddress sIP, byte[] sMAC, InetAddress tIP, byte[] tMAC) {
+    public ARPReply(NodeConnector port, InetAddress sIP, byte[] sMAC, InetAddress tIP, byte[] tMAC, short vlan) {
         super(tIP);
         this.tMac = tMAC;
         this.sIP = sIP;
         this.sMac = sMAC;
         this.port = port;
+        this.vlan = vlan;
     }
 
-    public ARPReply(InetAddress tIP, byte[] tMAC) {
+    public ARPReply(InetAddress tIP, byte[] tMAC, short vlan) {
         super(tIP);
         this.tMac = tMAC;
         this.sIP = null;
         this.sMac = null;
         this.port = null;
+        this.vlan = vlan;
     }
 
     public byte[] getTargetMac() {
@@ -92,6 +107,10 @@ public class ARPReply extends ARPEvent {
 
     public NodeConnector getPort() {
         return port;
+    }
+
+    public short getVlan() {
+        return vlan;
     }
 
     /*
@@ -121,6 +140,10 @@ public class ARPReply extends ARPEvent {
         if (sIP != null) {
             builder.append("sIP=")
                     .append(sIP);
+        }
+        if (vlan != 0) {
+            builder.append(", vlan=")
+            .append(vlan);
         }
         builder.append("]");
         return builder.toString();
