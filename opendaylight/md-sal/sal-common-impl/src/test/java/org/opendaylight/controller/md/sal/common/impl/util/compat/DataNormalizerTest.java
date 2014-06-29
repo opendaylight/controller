@@ -391,12 +391,22 @@ public class DataNormalizerTest {
             @Override
             public int compare(LegacyNodeData arg1, LegacyNodeData arg2) {
                 String str1 = arg1.nodeKey.getLocalName();
-                if (!(arg1.nodeData instanceof List))
+                if (!(arg1.nodeData instanceof List)){
                     str1 += arg1.nodeData; // add simple node value
+                } else {
+                    str1 += "-" + ((List)arg1.nodeData).size(); //TODO: this should be changed
+                    // should actually figure out if the two lists are equal, but
+                    // for now, we'll just assume equal length is equal
+                }
 
                 String str2 = arg2.nodeKey.getLocalName();
-                if (!(arg2.nodeData instanceof List))
+                if (!(arg2.nodeData instanceof List)){
                     str2 += arg2.nodeData; // add simple node value
+                } else {
+                    str2 += "-" + ((List)arg2.nodeData).size(); //TODO: this should be changed
+                    // should actually figure out if the two lists are equal, but
+                    // for now, we'll just assume equal length is equal
+                }
 
                 return str1.compareTo(str2);
             }
@@ -418,12 +428,32 @@ public class DataNormalizerTest {
             @Override
             public int compare(Node<?> n1, Node<?> n2) {
                 String str1 = n1.getKey().getLocalName();
-                if (n1 instanceof SimpleNode)
-                    str1 += ((SimpleNode<?>) n1).getValue();
+                if (n1 instanceof CompositeNode) {
+                    int i = 0;
+                    for(Node<?> n : ((CompositeNode)n1).getValue()){
+                        i++;
+                    }
+                    str1 += "-" + i;
+                } else if(n1 instanceof SimpleNode){
+                    str1 += ((SimpleNode<?>) n1).getValue(); //TODO: fix this
+                    // this assumes that all Nodes are either SimpleNodes or
+                    // ContainerNodes and that all container nodes of the same
+                    // size are equal, which is wrong.
+                }
 
                 String str2 = n2.getKey().getLocalName();
-                if (n2 instanceof SimpleNode)
-                    str2 += ((SimpleNode<?>) n2).getValue();
+                if (n2 instanceof CompositeNode) {
+                    int i = 0;
+                    for(Node<?> n : ((CompositeNode)n2).getValue()){
+                        i++;
+                    }
+                    str2 += "-" + i;
+                }else if (n2 instanceof SimpleNode) {
+                    str2 += ((SimpleNode<?>) n2).getValue(); //TODO: fix this
+                    // this assumes that all Nodes are either SimpleNodes or
+                    // ContainerNodes and that all container nodes of the same
+                    // size are equal, which is wrong.
+                }
 
                 return str1.compareTo(str2);
             }
