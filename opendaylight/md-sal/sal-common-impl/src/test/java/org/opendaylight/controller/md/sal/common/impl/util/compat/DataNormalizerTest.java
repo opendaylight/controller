@@ -391,12 +391,22 @@ public class DataNormalizerTest {
             @Override
             public int compare(LegacyNodeData arg1, LegacyNodeData arg2) {
                 String str1 = arg1.nodeKey.getLocalName();
-                if (!(arg1.nodeData instanceof List))
+                if (!(arg1.nodeData instanceof List)){
                     str1 += arg1.nodeData; // add simple node value
+                } else {
+                    str1 += "-" + ((List)arg1.nodeData).size(); //TODO: this should be changed
+                    // should actually figure out if the two lists are equal, but
+                    // for now, we'll just assume equal length is equal
+                }
 
                 String str2 = arg2.nodeKey.getLocalName();
-                if (!(arg2.nodeData instanceof List))
+                if (!(arg2.nodeData instanceof List)){
                     str2 += arg2.nodeData; // add simple node value
+                } else {
+                    str2 += "-" + ((List)arg2.nodeData).size(); //TODO: this should be changed
+                    // should actually figure out if the two lists are equal, but
+                    // for now, we'll just assume equal length is equal
+                }
 
                 return str1.compareTo(str2);
             }
