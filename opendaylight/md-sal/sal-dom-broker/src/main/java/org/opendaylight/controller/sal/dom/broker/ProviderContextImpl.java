@@ -18,14 +18,13 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.osgi.framework.BundleContext;
 
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
     private final Set<RpcRegistrationWrapper> registrations = new HashSet<>();
     private final Provider provider;
 
-    public ProviderContextImpl(final Provider provider, final BundleContext ctx) {
-        super(null, ctx);
+    public ProviderContextImpl(final Provider provider, final BrokerImpl broker) {
+        super(null, broker);
         this.provider = provider;
     }
 
