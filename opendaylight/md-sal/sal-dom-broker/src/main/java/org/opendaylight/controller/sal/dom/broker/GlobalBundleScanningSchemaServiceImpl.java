@@ -96,7 +96,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     @Override
-    public ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener listener) {
+    public synchronized ListenerRegistration<SchemaServiceListener> registerSchemaServiceListener(final SchemaServiceListener listener) {
         Optional<SchemaContext> potentialCtx = contextResolver.getSchemaContext();
         if(potentialCtx.isPresent()) {
             listener.onGlobalContextUpdated(potentialCtx.get());
@@ -116,7 +116,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
 
-    private void updateContext(final SchemaContext snapshot) {
+    private synchronized void updateContext(final SchemaContext snapshot) {
         Object[] services = listenerTracker.getServices();
         for (ListenerRegistration<SchemaServiceListener> listener : listeners) {
             try {
@@ -194,7 +194,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     @Override
-    public SchemaServiceListener addingService(final ServiceReference<SchemaServiceListener> reference) {
+    public synchronized SchemaServiceListener addingService(final ServiceReference<SchemaServiceListener> reference) {
 
         SchemaServiceListener listener = context.getService(reference);
         SchemaContext _ctxContext = getGlobalContext();
