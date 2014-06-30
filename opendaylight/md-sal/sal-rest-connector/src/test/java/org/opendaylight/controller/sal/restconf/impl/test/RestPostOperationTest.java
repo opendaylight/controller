@@ -9,12 +9,16 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -37,8 +40,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
@@ -48,14 +51,16 @@ import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -77,7 +82,7 @@ public class RestPostOperationTest extends JerseyTest {
     private static SchemaContext schemaContextTestModule;
     private static SchemaContext schemaContext;
 
-    private static MountService mountService;
+    private static DOMMountPointService mountService;
 
     @BeforeClass
     public static void init() throws URISyntaxException, IOException {
@@ -124,10 +129,9 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         List<RpcError> rpcErrors = new ArrayList<>();
-        rpcErrors.add( RpcResultBuilder.newError( ErrorType.RPC, "tag1", "message1",
-                                                  "applicationTag1", "info1", null ) );
-        rpcErrors.add( RpcResultBuilder.newWarning( ErrorType.PROTOCOL, "tag2", "message2",
-                                                    "applicationTag2", "info2", null ) );
+        rpcErrors.add(RpcResultBuilder.newError(ErrorType.RPC, "tag1", "message1", "applicationTag1", "info1", null));
+        rpcErrors.add(RpcResultBuilder.newWarning(ErrorType.PROTOCOL, "tag2", "message2", "applicationTag2", "info2",
+                null));
         mockInvokeRpc(null, false, rpcErrors);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
@@ -138,28 +142,25 @@ public class RestPostOperationTest extends JerseyTest {
     @Test
     public void postConfigOnlyStatusCodes() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextYangsIetf);
-        mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = "/config";
+        mockCommitConfigurationDataPostMethod(true);
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
 
-        mockCommitConfigurationDataPostMethod(null);
-        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
-
-        mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
+        mockCommitConfigurationDataPostMethod(false);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataAbsolutePath));
+
+        assertEquals(400, post(uri, MediaType.APPLICATION_XML, ""));
     }
 
     @Test
     public void postConfigStatusCodes() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextYangsIetf);
-        mockCommitConfigurationDataPostMethod(TransactionStatus.COMMITED);
         String uri = "/config/ietf-interfaces:interfaces";
+
+        mockCommitConfigurationDataPostMethod(true);
         assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
 
-        mockCommitConfigurationDataPostMethod(null);
-        assertEquals(202, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
-
-        mockCommitConfigurationDataPostMethod(TransactionStatus.FAILED);
+        mockCommitConfigurationDataPostMethod(false);
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataInterfaceAbsolutePath));
 
         assertEquals(400, post(uri, MediaType.APPLICATION_JSON, ""));
@@ -168,18 +169,14 @@ public class RestPostOperationTest extends JerseyTest {
     @Test
     public void postDataViaUrlMountPoint() throws UnsupportedEncodingException {
         controllerContext.setSchemas(schemaContextYangsIetf);
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
-                TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
-                rpcResult).build();
         when(
-                brokerFacade.commitConfigurationDataPostBehindMountPoint(any(MountInstance.class),
-                        any(YangInstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
+                brokerFacade.commitConfigurationDataPost(any(DOMMountPoint.class), any(YangInstanceIdentifier.class),
+                        any(NormalizedNode.class))).thenReturn(mock(CheckedFuture.class));
 
-        MountInstance mountInstance = mock(MountInstance.class);
+        DOMMountPoint mountInstance = mock(DOMMountPoint.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
-        MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
+        DOMMountPointService mockMountService = mock(DOMMountPointService.class);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
@@ -207,18 +204,13 @@ public class RestPostOperationTest extends JerseyTest {
         mockInvokeRpc(result, sucessful, Collections.<RpcError> emptyList());
     }
 
-    private void mockCommitConfigurationDataPostMethod(TransactionStatus statusName) {
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
-                .build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = null;
-        if (statusName != null) {
-            dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
+    private void mockCommitConfigurationDataPostMethod(final boolean succesfulComit) {
+        if (succesfulComit) {
+            doReturn(mock(CheckedFuture.class)).when(brokerFacade).commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class));
         } else {
-            dummyFuture = new DummyFuture.Builder<TransactionStatus>().build();
+            doThrow(RestconfDocumentedException.class).when(brokerFacade).commitConfigurationDataPost(
+                    any(YangInstanceIdentifier.class), any(NormalizedNode.class));
         }
-
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
-                .thenReturn(dummyFuture);
     }
 
     @Test
@@ -226,14 +218,12 @@ public class RestPostOperationTest extends JerseyTest {
         initMocking();
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
-        Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
-                rpcResult).build();
 
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
-                .thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
+                .thenReturn(mock(CheckedFuture.class));
 
         ArgumentCaptor<YangInstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(YangInstanceIdentifier.class);
-        ArgumentCaptor<CompositeNode> compNodeCaptor = ArgumentCaptor.forClass(CompositeNode.class);
+        ArgumentCaptor<NormalizedNode> compNodeCaptor = ArgumentCaptor.forClass(NormalizedNode.class);
 
         String URI_1 = "/config";
         assertEquals(204, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
@@ -253,20 +243,20 @@ public class RestPostOperationTest extends JerseyTest {
     public void createConfigurationDataNullTest() throws UnsupportedEncodingException {
         initMocking();
 
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(null);
 
         String URI_1 = "/config";
-        assertEquals(202, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
+        assertEquals(204, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
 
         String URI_2 = "/config/test-interface:interfaces";
-        assertEquals(202, post(URI_2, Draft02.MediaTypes.DATA + XML, xmlBlockData));
+        assertEquals(204, post(URI_2, Draft02.MediaTypes.DATA + XML, xmlBlockData));
     }
 
     private static void initMocking() {
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
-        mountService = mock(MountService.class);
+        mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();

@@ -22,14 +22,14 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
         MediaType.APPLICATION_JSON })
-public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
+public enum JsonToCompositeNodeProvider implements MessageBodyReader<Node<?>> {
     INSTANCE;
 
     private final static Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeProvider.class);
@@ -41,7 +41,7 @@ public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNo
     }
 
     @Override
-    public CompositeNode readFrom(final Class<CompositeNode> type, final Type genericType,
+    public Node<?> readFrom(final Class<Node<?>> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
             final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
             WebApplicationException {

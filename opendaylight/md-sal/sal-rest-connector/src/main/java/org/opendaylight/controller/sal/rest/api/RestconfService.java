@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -30,15 +31,18 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * <ul>
  * <li><b>/restconf</b> - {@link #getRoot()}
  * <ul>
- * <li><b>/config</b> - {@link #readConfigurationData(String)} {@link #updateConfigurationData(String, CompositeNode)}
- * {@link #createConfigurationData(CompositeNode)} {@link #createConfigurationData(String, CompositeNode)}
+ *      <li><b>/config</b> - {@link #readConfigurationData(String)}
+ *                              {@link #updateConfigurationData(String, CompositeNode)}
+ *                              {@link #createConfigurationData(CompositeNode)}
+ *                              {@link #createConfigurationData(String, CompositeNode)}
  * {@link #deleteConfigurationData(String)}
  * <li><b>/operational</b> - {@link #readOperationalData(String)}
  * <li>/modules - {@link #getModules()}
  * <ul>
  * <li>/module
  * </ul>
- * <li><b>/operations</b> - {@link #invokeRpc(String, CompositeNode)} {@link #invokeRpc(String, CompositeNode)}
+ *      <li><b>/operations</b> - {@link #invokeRpc(String, CompositeNode)}
+ *                               {@link #invokeRpc(String, CompositeNode)}
  * <li>/version (field)
  * </ul>
  * </ul>
@@ -119,19 +123,19 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, CompositeNode payload);
+    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, CompositeNode payload);
+    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
 
     @POST
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(CompositeNode payload);
+    public Response createConfigurationData(Node<?> payload);
 
     @DELETE
     @Path("/config/{identifier:.+}")

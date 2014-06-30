@@ -32,15 +32,16 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
      */
     @Test
     public void jsonIdentityrefToCompositeNode() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/leafref/json/data.json", false,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/leafref/json/data.json", false,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
-        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        assertNotNull(node);
+        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
 
-        assertEquals("cont", compositeNode.getNodeType().getLocalName());
+        assertEquals("cont", node.getNodeType().getLocalName());
 
         SimpleNode<?> lf2 = null;
-        for (Node<?> childNode : compositeNode.getValue()) {
+        assertTrue(node instanceof CompositeNode);
+        for (Node<?> childNode : ((CompositeNode) node).getValue()) {
             if (childNode instanceof SimpleNode) {
                 if (childNode.getNodeType().getLocalName().equals("lf2")) {
                     lf2 = (SimpleNode<?>) childNode;
