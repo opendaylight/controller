@@ -28,3 +28,5 @@
 protoc --proto_path=src/main/resources --java_out=src/main/java src/main/resources/*.proto
 
 echo "Done generating Java source files."
+
+find src/main/java -type f -name '*.java' -exec sed --in-place 's/[[:space:]]\+$//' {} \+

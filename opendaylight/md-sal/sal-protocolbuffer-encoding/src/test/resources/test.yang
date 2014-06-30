@@ -1,0 +1,225 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:test";
+    prefix "test";
+
+    organization "Cisco Systems, Inc.";
+
+    revision "2014-3-13" {
+        description
+            "Initial revision";
+    }
+
+    grouping listGroup {
+        list list {
+            key "uint32InList";
+
+            leaf uint32InList {
+                type uint32;
+            }
+
+            container containerInList{
+                leaf uint32 {
+                    type uint32;
+                }
+                leaf uint16 {
+                    type uint16;
+                }
+            }
+        }
+     }
+
+     grouping innerContainerGrouping {
+        container innerContainer {
+            leaf uint16 {
+                type uint16;
+            }
+
+            container innerInnerContainer {
+
+                leaf uint16 {
+                    type uint16;
+                }
+
+                leaf uint32 {
+                    type uint32;
+                }
+            }
+        }
+     }
+
+    container container {
+        leaf uint32 {
+            type uint32;
+        }
+
+        leaf decimal64 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+
+        leaf boolean {
+            type boolean;
+        }
+
+        leaf binary {
+            type binary;
+        }
+
+        leaf string {
+            type string;
+        }
+
+        uses listGroup {
+            augment "list/" {
+                leaf stringAugmentedToList{
+                    type string;
+                }
+
+                choice choiceInList {
+                    case caseInList1 {
+                        leaf stringAugmentedToListInCase1 {
+                            type string;
+                        }
+                    }
+                    case caseInList2 {
+                        leaf stringAugmentedToListInCase2 {
+                            type string;
+                        }
+                    }
+                }
+            }
+        }
+
+        list directList {
+            leaf stringInDirectList {
+                type string;
+            }
+        }
+
+        uses innerContainerGrouping;
+
+        choice choice{}
+        choice choice2{}
+
+        leaf-list leafList {
+            type string;
+        }
+
+        leaf identityRef {
+            type identityref {
+                base test-identity;
+            }
+        }
+
+        /* TODO test modification with empty type
+        leaf empty {
+             type empty;
+         }
+         */
+    }
+
+    augment "/container/" {
+        leaf augmentUint32 {
+            type uint32;
+        }
+    }
+
+    augment "/container/directList/" {
+        leaf augmentedString {
+            type uint32;
+        }
+    }
+
+    augment "/container/choice/" {
+        case test-identity-augment {
+            when "/container/identityRef = 'test-identity'";
+            leaf augmentString1 {
+                type string;
+            }
+
+            leaf augmentInt1 {
+                type uint32;
+            }
+        }
+        case test-identity-augment2 {
+            when "/container/identityRef = 'test-identity2'";
+            leaf augmentString2 {
+                type string;
+            }
+
+            leaf augmentInt2 {
+                type uint32;
+            }
+        }
+    }
+
+    augment "/container/choice/test-identity-augment/" {
+
+        choice augmentedChoiceInCase {
+
+            case augmentedCaseInAugmentedChoice {
+                leaf stringInAugmentedCaseInAugmentedChoice {
+                    type string;
+                }
+            }
+
+            case augmentedCaseInAugmentedChoice2 {
+                leaf stringInAugmentedCaseInAugmentedChoice2 {
+                    type string;
+                }
+            }
+        }
+    }
+
+    augment "/container/choice/test-identity-augment/augmentedChoiceInCase/" {
+        case augmentedCaseInAugmentedChoiceFromAugment {
+            leaf stringInAugmentedCaseInAugmentedChoiceFromAugment {
+                type string;
+            }
+        }
+    }
+
+    augment "/container/choice2/" {
+        case test-identity-augment {
+            when "/container/identityRef = 'test-identity'";
+            container augmentContainer {
+                leaf augmentStringInaugmentContainer {
+                    type string;
+                }
+            }
+        }
+        case test-identity-augment2 {
+            when "/container/identityRef = 'test-identity2'";
+            list augmentedList {
+                leaf augmentStringInaugmentList {
+                    type string;
+                }
+            }
+        }
+    }
+
+
+    augment "/container/choice2/test-identity-augment2/augmentedList/" {
+
+        container augmentedContainerInAugmentedListInAugmentedCase {
+            leaf-list leafInAugmentedContainerInAugmentedListInAugmentedCase {
+                type uint32;
+            }
+        }
+
+        list augmentedListInAugmentedListInAugmentedCase {
+            leaf-list leafInAugmentedListInAugmentedListInAugmentedCase {
+                    type uint32;
+                }
+        }
+    }
+
+    identity test-identity {}
+    identity test-identity2 {
+        base test-identity;
+    }
+
+}

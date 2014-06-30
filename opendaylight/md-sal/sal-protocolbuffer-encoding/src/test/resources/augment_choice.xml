@@ -1,0 +1,15 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test">
+
+    <c2Leaf>2</c2Leaf>
+    <c2DeepChoiceCase1Leaf2>2</c2DeepChoiceCase1Leaf2>
+    <!--<c2DeepChoiceCase1Leaf1>2</c2DeepChoiceCase1Leaf1>-->
+
+    <c3Leaf>3</c3Leaf>
+
+    <augLeaf>augment</augLeaf>
+
+    <c1Leaf>1</c1Leaf>
+    <c1Leaf_AnotherAugment>1</c1Leaf_AnotherAugment>
+    <deepLeafc1>1</deepLeafc1>
+    <!--<deepLeafc2>1</deepLeafc2>-->
+</container>
