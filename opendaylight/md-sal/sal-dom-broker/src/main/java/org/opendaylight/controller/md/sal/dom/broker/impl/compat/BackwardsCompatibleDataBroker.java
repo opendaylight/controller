@@ -1,5 +1,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.compat;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
@@ -11,6 +13,7 @@ import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.data.DataValidator;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -18,19 +21,18 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 
-public class BackwardsCompatibleDataBroker implements DataProviderService, SchemaContextListener {
+@ThreadSafe
+public class BackwardsCompatibleDataBroker implements DataProviderService {
 
     private final DOMDataBroker backingBroker;
-    private DataNormalizer normalizer;
+    private volatile DataNormalizer normalizer;
+    private final ListenerRegistration<SchemaServiceListener> schemaReg;
 
-    public BackwardsCompatibleDataBroker(final DOMDataBroker newBiDataImpl) {
+    public BackwardsCompatibleDataBroker(final DOMDataBroker newBiDataImpl, final SchemaService schemaService) {
         backingBroker = newBiDataImpl;
-    }
-
-    @Override
-    public void onGlobalContextUpdated(final SchemaContext ctx) {
-        normalizer = new DataNormalizer(ctx);
+        schemaReg = schemaService.registerSchemaServiceListener(new SchemaListener());
     }
 
     @Override
@@ -147,5 +149,14 @@ public class BackwardsCompatibleDataBroker implements DataProviderService, Schem
         public DataChangeListener getInstance() {
             return listener;
         }
+    }
+
+    private class SchemaListener implements SchemaContextListener {
+
+        @Override
+        public void onGlobalContextUpdated(final SchemaContext ctx) {
+            normalizer = new DataNormalizer(ctx);
+        }
+
     }
 }
