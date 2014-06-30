@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import java.util.TreeSet;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -22,7 +23,7 @@ public class ConfigSnapshot {
     public static final String SNAPSHOT_ROOT_ELEMENT_NAME = "snapshot";
 
     private String configSnapshot;
-    private SortedSet<String> capabilities;
+    private SortedSet<String> capabilities = new TreeSet<>();
 
     ConfigSnapshot(String configXml, SortedSet<String> capabilities) {
         this.configSnapshot = configXml;
