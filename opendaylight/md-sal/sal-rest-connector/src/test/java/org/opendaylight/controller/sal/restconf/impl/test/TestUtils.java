@@ -25,8 +25,12 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,15 +51,32 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
+import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +87,7 @@ public final class TestUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
-    private final static YangModelParser parser = new YangParserImpl();
+    private final static YangContextParser parser = new YangParserImpl();
 
     private static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
@@ -151,12 +172,12 @@ public final class TestUtils {
      * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
      * because it contains calling of method {code normalizeNode}
      */
-    public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules, String schemaNodePath) {
+    public static void normalizeCompositeNode(Node<?> node, Set<Module> modules, String schemaNodePath) {
         RestconfImpl restconf = RestconfImpl.getInstance();
         ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
 
         prepareMocksForRestconf(modules, restconf);
-        restconf.updateConfigurationData(schemaNodePath, compositeNode);
+        restconf.updateConfigurationData(schemaNodePath, node);
     }
 
     /**
@@ -229,7 +250,7 @@ public final class TestUtils {
 
         controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
 
-        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(
                         new DummyFuture.Builder().rpcResult(
                                 new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
@@ -239,23 +260,23 @@ public final class TestUtils {
         restconf.setBroker(mockedBrokerFacade);
     }
 
-    public static CompositeNode readInputToCnSn(String path, boolean dummyNamespaces,
-            MessageBodyReader<CompositeNode> reader) throws WebApplicationException {
+    public static Node<?> readInputToCnSn(String path, boolean dummyNamespaces,
+            MessageBodyReader<Node<?>> reader) throws WebApplicationException {
 
         InputStream inputStream = TestUtils.class.getResourceAsStream(path);
         try {
-            CompositeNode compositeNode = reader.readFrom(null, null, null, null, null, inputStream);
-            assertTrue(compositeNode instanceof CompositeNodeWrapper);
+            final Node<?> node = reader.readFrom(null, null, null, null, null, inputStream);
+            assertTrue(node instanceof CompositeNodeWrapper);
             if (dummyNamespaces) {
                 try {
-                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) compositeNode);
-                    return ((CompositeNodeWrapper) compositeNode).unwrap();
+                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) node);
+                    return ((CompositeNodeWrapper) node).unwrap();
                 } catch (URISyntaxException e) {
                     LOG.error(e.getMessage());
                     assertTrue(e.getMessage(), false);
                 }
             }
-            return compositeNode;
+            return node;
         } catch (IOException e) {
             LOG.error(e.getMessage());
             assertTrue(e.getMessage(), false);
@@ -263,21 +284,22 @@ public final class TestUtils {
         return null;
     }
 
-    public static CompositeNode readInputToCnSn(String path, MessageBodyReader<CompositeNode> reader) {
+    public static Node<?> readInputToCnSn(String path, MessageBodyReader<Node<?>> reader) {
         return readInputToCnSn(path, false, reader);
     }
 
-    public static String writeCompNodeWithSchemaContextToOutput(CompositeNode compositeNode, Set<Module> modules,
+    public static String writeCompNodeWithSchemaContextToOutput(Node<?> node, Set<Module> modules,
             DataSchemaNode dataSchemaNode, MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
             WebApplicationException {
 
         assertNotNull(dataSchemaNode);
-        assertNotNull("Composite node can't be null", compositeNode);
+        assertNotNull("Composite node can't be null", node);
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null,
+        assertTrue(node instanceof CompositeNode);
+        messageBodyWriter.writeTo(new StructuredData((CompositeNode)node, dataSchemaNode, null), null, null, null, null,
                 null, byteArrayOS);
 
         return byteArrayOS.toString();
@@ -311,5 +333,89 @@ public final class TestUtils {
         Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
         Matcher matcher = pattern.matcher(jsonOutput);
         return matcher.matches();
+    }
+
+    public static NormalizedNode compositeNodeToDatastoreNormalizedNode(final CompositeNode compositeNode,
+            final DataSchemaNode schema) {
+        List<Node<?>> lst = new ArrayList<Node<?>>();
+        lst.add(compositeNode);
+        if (schema instanceof ContainerSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
+                    .parse(lst, (ContainerSchemaNode) schema);
+        } else if (schema instanceof ListSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getMapNodeParser()
+                    .parse(lst, (ListSchemaNode) schema);
+        }
+
+        LOG.error("Top level isn't of type container, list, leaf schema node but " + schema.getClass().getSimpleName());
+
+        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "It wasn't possible to translate specified data to datastore readable form."));
+    }
+
+    public static InstanceIdentifier.NodeIdentifier getNodeIdentifier(String localName, String namespace,
+            String revision) throws ParseException {
+        return new InstanceIdentifier.NodeIdentifier(QName.create(namespace, revision, localName));
+    }
+
+    public static InstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
+            String namespace, String revision, Map<String, Object> keys) throws ParseException {
+        Map<QName, Object> predicate = new HashMap<>();
+        for (String key : keys.keySet()) {
+            predicate.put(QName.create(namespace, revision, key), keys.get(key));
+        }
+
+        return new InstanceIdentifier.NodeIdentifierWithPredicates(
+
+        QName.create(namespace, revision, localName), predicate);
+    }
+
+    public static InstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
+            String namespace, String revision, String... keysAndValues) throws ParseException {
+        java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
+        if (keysAndValues.length % 2 != 0) {
+            new IllegalArgumentException("number of keys argument have to be divisible by 2 (map)");
+        }
+        Map<QName, Object> predicate = new HashMap<>();
+
+        int i = 0;
+        while (i < keysAndValues.length) {
+            predicate.put(QName.create(namespace, revision, keysAndValues[i++]), keysAndValues[i++]);
+        }
+
+        return new InstanceIdentifier.NodeIdentifierWithPredicates(QName.create(namespace, revision, localName),
+                predicate);
+    }
+
+    static NormalizedNode prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
+        String ietfInterfacesDate = "2013-07-04";
+        CollectionNodeBuilder<MapEntryNode, MapNode> intface = ImmutableMapNodeBuilder.create();
+        String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+        intface.withNodeIdentifier(getNodeIdentifier("interface", namespace, ietfInterfacesDate));
+        DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder
+                .create();
+
+        Map<String, Object> predicates = new HashMap<>();
+        predicates.put("name", "eth0");
+
+        mapEntryNode.withNodeIdentifier(getNodeIdentifierPredicate("interface", namespace, ietfInterfacesDate,
+                predicates));
+        mapEntryNode
+                .withChild(new ImmutableLeafNodeBuilder<String>()
+                        .withNodeIdentifier(getNodeIdentifier("name", namespace, ietfInterfacesDate)).withValue("eth0")
+                        .build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<String>()
+                .withNodeIdentifier(getNodeIdentifier("type", namespace, ietfInterfacesDate))
+                .withValue("ethernetCsmacd").build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<Boolean>()
+                .withNodeIdentifier(getNodeIdentifier("enabled", namespace, ietfInterfacesDate))
+                .withValue(Boolean.FALSE).build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<String>()
+                .withNodeIdentifier(getNodeIdentifier("description", namespace, ietfInterfacesDate))
+                .withValue("some interface").build());
+
+        intface.withChild(mapEntryNode.build());
+
+        return intface.build();
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -39,6 +40,10 @@
       <artifactId>sal-remote</artifactId>
     </dependency>
     <dependency>
+      <artifactId>commons-lang</artifactId>
+      <groupId>commons-lang</groupId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
     </dependency>
@@ -72,6 +77,11 @@
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-maven-plugin</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
@@ -89,6 +99,25 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-composite-node</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-inmemory-datastore</artifactId>
+      <version>1.1-SNAPSHOT</version>
+      <type>bundle</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-broker-impl</artifactId>
+      <version>1.1-SNAPSHOT</version>
+      <type>bundle</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -102,13 +131,46 @@
             <Bundle-Name>MD SAL Restconf Connector</Bundle-Name>
             <Private-Package>org.opendaylight.controller.sal.rest.*,
               org.opendaylight.controller.sal.restconf.rpc.*,
-              org.opendaylight.controller.sal.restconf.impl,</Private-Package>
+              org.opendaylight.controller.sal.restconf.impl,
+            </Private-Package>
             <Import-Package>*,
-            com.sun.jersey.spi.container.servlet</Import-Package>
+              com.sun.jersey.spi.container.servlet</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.impl.RestconfProvider</Bundle-Activator>
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-sources</goal>
+            </goals>
+            <configuration>
+              <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+              <codeGenerators>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                  <outputBaseDir>target/generated-sources/sal</outputBaseDir>
+                </generator>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
+                  <outputBaseDir>target/site/restconf</outputBaseDir>
+                </generator>
+              </codeGenerators>
+              <inspectDependencies>true</inspectDependencies>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>maven-sal-api-gen-plugin</artifactId>
+            <version>0.6.2-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

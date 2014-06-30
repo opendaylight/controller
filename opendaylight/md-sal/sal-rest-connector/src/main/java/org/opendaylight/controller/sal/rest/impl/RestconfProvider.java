@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
@@ -38,9 +39,11 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
     @Override
     public void onSessionInitiated(ProviderSession session) {
         DataBrokerService dataService = session.getService(DataBrokerService.class);
+        final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
 
         BrokerFacade.getInstance().setContext(session);
         BrokerFacade.getInstance().setDataService(dataService);
+        BrokerFacade.getInstance().setDomDataBroker( domDataBroker);
 
         SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
