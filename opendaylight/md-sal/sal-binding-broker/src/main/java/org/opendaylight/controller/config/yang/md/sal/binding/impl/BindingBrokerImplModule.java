@@ -21,15 +21,12 @@ import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.forward.DomForwardingUtils;
-import org.osgi.framework.BundleContext;
 
 /**
 *
 */
 public final class BindingBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule {
-
-    private BundleContext bundleContext;
 
     public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -66,7 +63,7 @@ public final class BindingBrokerImplModule extends
         broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
-        // FIXME: Also set Async Data Broker
+        broker.setDataBroker(getRootDataBrokerDependency());
         return broker;
     }
 
@@ -80,17 +77,9 @@ public final class BindingBrokerImplModule extends
         broker.getMountManager().setDataCommitExecutor(SingletonHolder.getDefaultCommitExecutor());
         broker.getMountManager().setNotificationExecutor(SingletonHolder.getDefaultNotificationExecutor());
 
-        // FIXME: Also set Async Data Broker
+        broker.setDataBroker(getRootDataBrokerDependency());
         DomForwardingUtils.reuseForwardingFrom(broker, broker.getDataBroker());
         broker.startForwarding();
         return broker;
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 }
