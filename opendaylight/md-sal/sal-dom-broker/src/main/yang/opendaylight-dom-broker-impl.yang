@@ -55,7 +55,7 @@ module opendaylight-sal-dom-broker-impl {
                     }
                 }
             }
-            
+
             container async-data-broker {
                 uses config:service-ref {
                     refine type {
@@ -63,7 +63,15 @@ module opendaylight-sal-dom-broker-impl {
                         config:required-identity sal:dom-async-data-broker;
                     }
                 }
-            
+            }
+
+            container root-schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
+                }
             }
         }
     }

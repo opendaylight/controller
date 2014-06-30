@@ -20,8 +20,6 @@ import org.opendaylight.controller.sal.dom.broker.osgi.ProxyFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
@@ -30,16 +28,15 @@ class ConsumerContextImpl implements ConsumerSession {
 
     private final ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap
             .create();
-    private final BundleContext context;
     private final Consumer consumer;
 
     private BrokerImpl broker = null;
     @GuardedBy("this")
     private boolean closed = false;
 
-    public ConsumerContextImpl(final Consumer consumer, final BundleContext ctx) {
-        this.consumer = consumer;
-        this.context = ctx;
+    public ConsumerContextImpl(final Consumer provider, final BrokerImpl brokerImpl) {
+        broker = brokerImpl;
+        consumer = provider;
     }
 
     @Override
@@ -54,17 +51,16 @@ class ConsumerContextImpl implements ConsumerSession {
         if (localProxy != null) {
             return localProxy;
         }
-        final ServiceReference<T> serviceRef = context
-                .getServiceReference(service);
-        if (serviceRef == null) {
+        final T serviceImpl = broker.getGlobalService(service);
+        if(serviceImpl != null ) {
+            final T ret = ProxyFactory.createProxy(null, serviceImpl);
+            if (ret != null) {
+                instantiatedServices.putInstance(service, ret);
+            }
+            return ret;
+        } else {
             return null;
         }
-        final T serviceImpl = context.getService(serviceRef);
-        final T ret = ProxyFactory.createProxy(serviceRef, serviceImpl);
-        if (ret != null) {
-            instantiatedServices.putInstance(service, ret);
-        }
-        return ret;
     }
 
     @Override

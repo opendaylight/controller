@@ -23,7 +23,7 @@ public class SchemaServiceActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) {
-        schemaService = new GlobalBundleScanningSchemaServiceImpl(context);
+        schemaService = GlobalBundleScanningSchemaServiceImpl.createInstance(context);
         schemaService.start();
         schemaServiceReg = context.registerService(SchemaService.class, schemaService, new Hashtable<String,String>());
     }
