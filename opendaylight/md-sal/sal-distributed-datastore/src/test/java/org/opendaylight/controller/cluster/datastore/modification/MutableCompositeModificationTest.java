@@ -8,12 +8,12 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
-public class CompositeModificationTest extends AbstractModificationTest {
+public class MutableCompositeModificationTest extends AbstractModificationTest {
 
   @Test
   public void testApply() throws Exception {
 
-    CompositeModification compositeModification = new CompositeModification();
+    MutableCompositeModification compositeModification = new MutableCompositeModification();
     compositeModification.addModification(new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
 
     DOMStoreReadWriteTransaction transaction = store.newReadWriteTransaction();
