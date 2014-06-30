@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_886a90b1",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/notify/NotificationPublishService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-06-30T09:09:42Z",
+      "side": 1,
+      "message": "This won\u0027t scale in a distributed scenario, as that would require explicit ack message from all listeners.\n\nWhat would be the use case for such a future?",
+      "revId": "1370e14ef57ac2308a9138f7dadc1087c501d3f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
