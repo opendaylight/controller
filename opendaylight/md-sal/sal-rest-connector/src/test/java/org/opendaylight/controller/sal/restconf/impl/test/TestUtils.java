@@ -13,6 +13,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Preconditions;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,10 +25,13 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -40,18 +44,34 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.json.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
@@ -60,8 +80,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Preconditions;
 
 public final class TestUtils {
 
@@ -232,7 +250,7 @@ public final class TestUtils {
 
         controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
 
-        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(
                         new DummyFuture.Builder().rpcResult(
                                 new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
@@ -280,8 +298,8 @@ public final class TestUtils {
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null, null,
-                byteArrayOS);
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null,
+                null, byteArrayOS);
 
         return byteArrayOS.toString();
     }
@@ -298,5 +316,89 @@ public final class TestUtils {
         bufReader.close();
         return result.toString();
 
+    }
+
+    public static NormalizedNode compositeNodeToDatastoreNormalizedNode(final CompositeNode compositeNode,
+            final DataSchemaNode schema) {
+        List<Node<?>> lst = new ArrayList<Node<?>>();
+        lst.add(compositeNode);
+        if (schema instanceof ContainerSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
+                    .parse(lst, (ContainerSchemaNode) schema);
+        } else if (schema instanceof ListSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getMapNodeParser()
+                    .parse(lst, (ListSchemaNode) schema);
+        }
+
+        LOG.error("Top level isn't of type container, list, leaf schema node but " + schema.getClass().getSimpleName());
+
+        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "It wasn't possible to translate specified data to datastore readable form."));
+    }
+
+    public static InstanceIdentifier.NodeIdentifier getNodeIdentifier(String localName, String namespace,
+            String revision) throws ParseException {
+        return new InstanceIdentifier.NodeIdentifier(QName.create(namespace, revision, localName));
+    }
+
+    public static InstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
+            String namespace, String revision, Map<String, Object> keys) throws ParseException {
+        Map<QName, Object> predicate = new HashMap<>();
+        for (String key : keys.keySet()) {
+            predicate.put(QName.create(namespace, revision, key), keys.get(key));
+        }
+
+        return new InstanceIdentifier.NodeIdentifierWithPredicates(
+
+        QName.create(namespace, revision, localName), predicate);
+    }
+
+    public static InstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
+            String namespace, String revision, String... keysAndValues) throws ParseException {
+        java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
+        if (keysAndValues.length % 2 != 0) {
+            new IllegalArgumentException("number of keys argument have to be divisible by 2 (map)");
+        }
+        Map<QName, Object> predicate = new HashMap<>();
+
+        int i = 0;
+        while (i < keysAndValues.length) {
+            predicate.put(QName.create(namespace, revision, keysAndValues[i++]), keysAndValues[i++]);
+        }
+
+        return new InstanceIdentifier.NodeIdentifierWithPredicates(QName.create(namespace, revision, localName),
+                predicate);
+    }
+
+    static NormalizedNode prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
+        String ietfInterfacesDate = "2013-07-04";
+        CollectionNodeBuilder<MapEntryNode, MapNode> intface = ImmutableMapNodeBuilder.create();
+        String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+        intface.withNodeIdentifier(getNodeIdentifier("interface", namespace, ietfInterfacesDate));
+        DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder
+                .create();
+
+        Map<String, Object> predicates = new HashMap<>();
+        predicates.put("name", "eth0");
+
+        mapEntryNode.withNodeIdentifier(getNodeIdentifierPredicate("interface", namespace, ietfInterfacesDate,
+                predicates));
+        mapEntryNode
+                .withChild(new ImmutableLeafNodeBuilder<String>()
+                        .withNodeIdentifier(getNodeIdentifier("name", namespace, ietfInterfacesDate)).withValue("eth0")
+                        .build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<String>()
+                .withNodeIdentifier(getNodeIdentifier("type", namespace, ietfInterfacesDate))
+                .withValue("ethernetCsmacd").build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<Boolean>()
+                .withNodeIdentifier(getNodeIdentifier("enabled", namespace, ietfInterfacesDate))
+                .withValue(Boolean.FALSE).build());
+        mapEntryNode.withChild(new ImmutableLeafNodeBuilder<String>()
+                .withNodeIdentifier(getNodeIdentifier("description", namespace, ietfInterfacesDate))
+                .withValue("some interface").build());
+
+        intface.withChild(mapEntryNode.build());
+
+        return intface.build();
     }
 }

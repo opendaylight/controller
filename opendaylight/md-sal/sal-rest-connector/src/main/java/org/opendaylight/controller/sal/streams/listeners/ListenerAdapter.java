@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.sal.streams.listeners;
 
+import com.google.common.base.Preconditions;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.internal.ConcurrentSet;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -23,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
-
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,9 +36,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.sal.rest.impl.XmlMapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -46,6 +47,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,25 +55,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * {@link ListenerAdapter} is responsible to track events, which occurred by
  * changing data in data source.
  */
-public class ListenerAdapter implements DataChangeListener {
+public class ListenerAdapter implements DOMDataChangeListener {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ListenerAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListenerAdapter.class);
     private final XmlMapper xmlMapper = new XmlMapper();
-    private final SimpleDateFormat rfc3339 = new SimpleDateFormat(
-            "yyyy-MM-dd'T'hh:mm:ssZ");
+    private final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
 
     private final InstanceIdentifier path;
-    private ListenerRegistration<DataChangeListener> registration;
+    private ListenerRegistration<DOMDataChangeListener> registration;
     private final String streamName;
     private Set<Channel> subscribers = new ConcurrentSet<>();
     private final EventBus eventBus;
@@ -88,8 +83,7 @@ public class ListenerAdapter implements DataChangeListener {
      */
     ListenerAdapter(InstanceIdentifier path, String streamName) {
         Preconditions.checkNotNull(path);
-        Preconditions
-                .checkArgument(streamName != null && !streamName.isEmpty());
+        Preconditions.checkArgument(streamName != null && !streamName.isEmpty());
         this.path = path;
         this.streamName = streamName;
         eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
@@ -98,14 +92,11 @@ public class ListenerAdapter implements DataChangeListener {
     }
 
     @Override
-    public void onDataChanged(
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
-        if (!change.getCreatedConfigurationData().isEmpty()
-                || !change.getCreatedOperationalData().isEmpty()
-                || !change.getUpdatedConfigurationData().isEmpty()
-                || !change.getUpdatedOperationalData().isEmpty()
-                || !change.getRemovedConfigurationData().isEmpty()
-                || !change.getRemovedOperationalData().isEmpty()) {
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+        // TODO Auto-generated method stub
+
+        if (!change.getCreatedData().isEmpty() || !change.getUpdatedData().isEmpty()
+                || !change.getRemovedPaths().isEmpty()) {
             String xml = prepareXmlFrom(change);
             Event event = new Event(EventType.NOTIFY);
             event.setData(xml);
@@ -126,18 +117,14 @@ public class ListenerAdapter implements DataChangeListener {
                 }
             } else if (event.getType() == EventType.DEREGISTER) {
                 subscribers.remove(event.getSubscriber());
-                Notificator
-                        .removeListenerIfNoSubscriberExists(ListenerAdapter.this);
+                Notificator.removeListenerIfNoSubscriberExists(ListenerAdapter.this);
             } else if (event.getType() == EventType.NOTIFY) {
                 for (Channel subscriber : subscribers) {
                     if (subscriber.isActive()) {
-                        logger.debug("Data are sent to subscriber {}:",
-                                subscriber.remoteAddress());
-                        subscriber.writeAndFlush(new TextWebSocketFrame(event
-                                .getData()));
+                        logger.debug("Data are sent to subscriber {}:", subscriber.remoteAddress());
+                        subscriber.writeAndFlush(new TextWebSocketFrame(event.getData()));
                     } else {
-                        logger.debug(
-                                "Subscriber {} is removed - channel is not active yet.",
+                        logger.debug("Subscriber {} is removed - channel is not active yet.",
                                 subscriber.remoteAddress());
                         subscribers.remove(subscriber);
                     }
@@ -227,11 +214,9 @@ public class ListenerAdapter implements DataChangeListener {
      *            DataChangeEvent
      * @return Data in printable form.
      */
-    private String prepareXmlFrom(
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
+    private String prepareXmlFrom(AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
         Document doc = createDocument();
-        Element notificationElement = doc.createElementNS(
-                "urn:ietf:params:xml:ns:netconf:notification:1.0",
+        Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
                 "notification");
         doc.appendChild(notificationElement);
 
@@ -240,25 +225,20 @@ public class ListenerAdapter implements DataChangeListener {
         notificationElement.appendChild(eventTimeElement);
 
         Element dataChangedNotificationEventElement = doc.createElementNS(
-                "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote",
-                "data-changed-notification");
-        addValuesToDataChangedNotificationEventElement(doc,
-                dataChangedNotificationEventElement, change);
+                "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "data-changed-notification");
+        addValuesToDataChangedNotificationEventElement(doc, dataChangedNotificationEventElement, change);
         notificationElement.appendChild(dataChangedNotificationEventElement);
 
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
-            transformer
-                    .setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(
-                    "{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.transform(new DOMSource(doc), new StreamResult(
-                    new OutputStreamWriter(out, "UTF-8")));
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out, "UTF-8")));
             byte[] charData = out.toByteArray();
             return new String(charData, "UTF-8");
         } catch (TransformerException | UnsupportedEncodingException e) {
@@ -281,7 +261,6 @@ public class ListenerAdapter implements DataChangeListener {
 
     /**
      * Creates {@link Document} document.
-     *
      * @return {@link Document} document.
      */
     private Document createDocument() {
@@ -308,29 +287,14 @@ public class ListenerAdapter implements DataChangeListener {
      */
     private void addValuesToDataChangedNotificationEventElement(Document doc,
             Element dataChangedNotificationEventElement,
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
-        addValuesFromDataToElement(doc, change.getCreatedConfigurationData(),
-                dataChangedNotificationEventElement, Store.CONFIG,
+            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+        addValuesFromDataToElement(doc, change.getCreatedData().keySet(), dataChangedNotificationEventElement,
                 Operation.CREATED);
-        addValuesFromDataToElement(doc, change.getCreatedOperationalData(),
-                dataChangedNotificationEventElement, Store.OPERATION,
-                Operation.CREATED);
-        if (change.getCreatedConfigurationData().isEmpty()) {
-            addValuesFromDataToElement(doc,
-                    change.getUpdatedConfigurationData(),
-                    dataChangedNotificationEventElement, Store.CONFIG,
+        if (change.getCreatedData().isEmpty()) {
+            addValuesFromDataToElement(doc, change.getUpdatedData().keySet(), dataChangedNotificationEventElement,
                     Operation.UPDATED);
         }
-        if (change.getCreatedOperationalData().isEmpty()) {
-            addValuesFromDataToElement(doc, change.getUpdatedOperationalData(),
-                    dataChangedNotificationEventElement, Store.OPERATION,
-                    Operation.UPDATED);
-        }
-        addValuesFromDataToElement(doc, change.getRemovedConfigurationData(),
-                dataChangedNotificationEventElement, Store.CONFIG,
-                Operation.DELETED);
-        addValuesFromDataToElement(doc, change.getRemovedOperationalData(),
-                dataChangedNotificationEventElement, Store.OPERATION,
+        addValuesFromDataToElement(doc, change.getRemovedPaths(), dataChangedNotificationEventElement,
                 Operation.DELETED);
     }
 
@@ -348,15 +312,13 @@ public class ListenerAdapter implements DataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc,
-            Set<InstanceIdentifier> data, Element element, Store store,
+    private void addValuesFromDataToElement(Document doc, Set<InstanceIdentifier> data, Element element,
             Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
         for (InstanceIdentifier path : data) {
-            Node node = createDataChangeEventElement(doc, path, null, store,
-                    operation);
+            Node node = createDataChangeEventElement(doc, path, null, operation);
             element.appendChild(node);
         }
     }
@@ -375,15 +337,13 @@ public class ListenerAdapter implements DataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc,
-            Map<InstanceIdentifier, CompositeNode> data, Element element,
-            Store store, Operation operation) {
+    private void addValuesFromDataToElement(Document doc, Map<InstanceIdentifier, CompositeNode> data, Element element,
+            Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
         for (Entry<InstanceIdentifier, CompositeNode> entry : data.entrySet()) {
-            Node node = createDataChangeEventElement(doc, entry.getKey(),
-                    entry.getValue(), store, operation);
+            Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), operation);
             element.appendChild(node);
         }
     }
@@ -403,8 +363,7 @@ public class ListenerAdapter implements DataChangeListener {
      *            {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
-    private Node createDataChangeEventElement(Document doc,
-            InstanceIdentifier path, CompositeNode data, Store store,
+    private Node createDataChangeEventElement(Document doc, InstanceIdentifier path, CompositeNode data,
             Operation operation) {
         Element dataChangeEventElement = doc.createElement("data-change-event");
 
@@ -412,9 +371,9 @@ public class ListenerAdapter implements DataChangeListener {
         addPathAsValueToElement(path, pathElement);
         dataChangeEventElement.appendChild(pathElement);
 
-        Element storeElement = doc.createElement("store");
-        storeElement.setTextContent(store.value);
-        dataChangeEventElement.appendChild(storeElement);
+        // Element storeElement = doc.createElement("store");
+        // storeElement.setTextContent(store.value);
+        // dataChangeEventElement.appendChild(storeElement);
 
         Element operationElement = doc.createElement("operation");
         operationElement.setTextContent(operation.value);
@@ -441,8 +400,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @return Data in XML format.
      */
     private Node translateToXml(InstanceIdentifier path, CompositeNode data) {
-        DataNodeContainer schemaNode = ControllerContext.getInstance()
-                .getDataNodeContainerFor(path);
+        DataNodeContainer schemaNode = ControllerContext.getInstance().getDataNodeContainerFor(path);
         if (schemaNode == null) {
             logger.info(
                     "Path '{}' contains node with unsupported type (supported type is Container or List) or some node was not found.",
@@ -453,9 +411,7 @@ public class ListenerAdapter implements DataChangeListener {
             Document xml = xmlMapper.write(data, schemaNode);
             return xml.getFirstChild();
         } catch (UnsupportedDataTypeException e) {
-            logger.error(
-                    "Error occured during translation of notification to XML.",
-                    e);
+            logger.error("Error occured during translation of notification to XML.", e);
             return null;
         }
     }
@@ -468,25 +424,20 @@ public class ListenerAdapter implements DataChangeListener {
      * @param element
      *            {@link Element}
      */
-    private void addPathAsValueToElement(InstanceIdentifier path,
-            Element element) {
+    private void addPathAsValueToElement(InstanceIdentifier path, Element element) {
         // Map< key = namespace, value = prefix>
         Map<String, String> prefixes = new HashMap<>();
         InstanceIdentifier instanceIdentifier = path;
         StringBuilder textContent = new StringBuilder();
         for (PathArgument pathArgument : instanceIdentifier.getPath()) {
             textContent.append("/");
-            writeIdentifierWithNamespacePrefix(element, textContent,
-                    pathArgument.getNodeType(), prefixes);
+            writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
             if (pathArgument instanceof NodeIdentifierWithPredicates) {
-                Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument)
-                        .getKeyValues();
+                Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
                 for (QName keyValue : predicates.keySet()) {
-                    String predicateValue = String.valueOf(predicates
-                            .get(keyValue));
+                    String predicateValue = String.valueOf(predicates.get(keyValue));
                     textContent.append("[");
-                    writeIdentifierWithNamespacePrefix(element, textContent,
-                            keyValue, prefixes);
+                    writeIdentifierWithNamespacePrefix(element, textContent, keyValue, prefixes);
                     textContent.append("='");
                     textContent.append(predicateValue);
                     textContent.append("'");
@@ -514,14 +465,13 @@ public class ListenerAdapter implements DataChangeListener {
      * @param prefixes
      *            Map of namespaces and prefixes.
      */
-    private static void writeIdentifierWithNamespacePrefix(Element element,
-            StringBuilder textContent, QName qName, Map<String, String> prefixes) {
+    private static void writeIdentifierWithNamespacePrefix(Element element, StringBuilder textContent, QName qName,
+            Map<String, String> prefixes) {
         String namespace = qName.getNamespace().toString();
         String prefix = prefixes.get(namespace);
         if (prefix == null) {
             prefix = qName.getPrefix();
-            if (prefix == null || prefix.isEmpty()
-                    || prefixes.containsValue(prefix)) {
+            if (prefix == null || prefix.isEmpty() || prefixes.containsValue(prefix)) {
                 prefix = generateNewPrefix(prefixes.values());
             }
         }
@@ -570,8 +520,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @param registration
      *            ListenerRegistration<DataChangeListener>
      */
-    public void setRegistration(
-            ListenerRegistration<DataChangeListener> registration) {
+    public void setRegistration(ListenerRegistration<DOMDataChangeListener> registration) {
         this.registration = registration;
     }
 

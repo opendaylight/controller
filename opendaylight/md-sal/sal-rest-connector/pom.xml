@@ -90,6 +90,11 @@
       <artifactId>sal-common-util</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-json</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

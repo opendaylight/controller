@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -16,6 +16,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -29,14 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -51,25 +51,33 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -87,13 +95,13 @@ public class RestGetOperationTest extends JerseyTest {
     private static RestconfImpl restconfImpl;
     private static SchemaContext schemaContextYangsIetf;
     private static SchemaContext schemaContextTestModule;
-    private static CompositeNode answerFromGet;
+    private static NormalizedNode answerFromGet;
 
     private static SchemaContext schemaContextModules;
     private static SchemaContext schemaContextBehindMountPoint;
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
+    public static void init() throws FileNotFoundException,ParseException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         ControllerContext controllerContext = ControllerContext.getInstance();
@@ -102,7 +110,7 @@ public class RestGetOperationTest extends JerseyTest {
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
-        answerFromGet = prepareCompositeNodeWithIetfInterfacesInterfacesData();
+        answerFromGet = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
 
         schemaContextModules = TestUtils.loadSchemaContext("/modules");
         schemaContextBehindMountPoint = TestUtils.loadSchemaContext("/modules/modules-behind-mount-point");
@@ -153,9 +161,9 @@ public class RestGetOperationTest extends JerseyTest {
      * MountPoint test. URI represents mount point.
      */
     @Test
-    public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException {
+    public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException,ParseException {
         when(
-                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
+                brokerFacade.readConfigurationData(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
@@ -189,8 +197,8 @@ public class RestGetOperationTest extends JerseyTest {
             ParseException {
         InstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
         when(
-                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
-                        eq(awaitedInstanceIdentifier))).thenReturn(prepareCnDataForMountPointTest());
+                brokerFacade.readConfigurationData(any(MountInstance.class),
+                        eq(awaitedInstanceIdentifier))).thenReturn(prepareCnDataForSlashesBehindMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
         MountService mockMountService = mock(MountService.class);
@@ -212,15 +220,16 @@ public class RestGetOperationTest extends JerseyTest {
         QName qNameKeyList = QName.create(uri, revision, "lf11");
 
         parameters.add(new InstanceIdentifier.NodeIdentifier(qNameCont));
+        parameters.add(new InstanceIdentifier.NodeIdentifier(qNameList));
         parameters.add(new InstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
                 "GigabitEthernet0/0/0/0"));
         return new InstanceIdentifier(parameters);
     }
 
     @Test
-    public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
+    public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException, ParseException {
         when(
-                brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
+                brokerFacade.readConfigurationData(any(MountInstance.class),
                         any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
@@ -582,11 +591,15 @@ public class RestGetOperationTest extends JerseyTest {
         return target(uri).request(mediaType).get().getStatus();
     }
 
-    private CompositeNode prepareCnDataForMountPointTest() throws URISyntaxException {
-        CompositeNodeWrapper cont1 = new CompositeNodeWrapper(new URI("test:module"), "cont1");
-        SimpleNodeWrapper lf11 = new SimpleNodeWrapper(new URI("test:module"), "lf11", "lf11 value");
-        cont1.addValue(lf11);
-        return cont1.unwrap();
+    private NormalizedNode prepareCnDataForMountPointTest() throws URISyntaxException, ParseException {
+        String testModuleDate = "2014-01-09";
+        DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> cont1 = ImmutableContainerNodeBuilder.create();
+        cont1.withNodeIdentifier(TestUtils.getNodeIdentifier("cont1", "test:module", testModuleDate));
+        cont1.withChild(new ImmutableLeafNodeBuilder<String>()
+                .withNodeIdentifier(TestUtils.getNodeIdentifier("lf11", "test:module", testModuleDate))
+                .withValue("lf11 value").build());
+        return (NormalizedNode) cont1.build();
+
     }
 
     private void mockReadOperationalDataMethod() {
@@ -597,22 +610,20 @@ public class RestGetOperationTest extends JerseyTest {
         when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(answerFromGet);
     }
 
-    private static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
-        CompositeNode intface;
-        try {
-            intface = new CompositeNodeWrapper(new URI("interface"), "interface");
-            List<Node<?>> childs = new ArrayList<>();
+    private NormalizedNode prepareCnDataForSlashesBehindMountPointTest() throws ParseException {
+        CollectionNodeBuilder<MapEntryNode, MapNode> lst1 = ImmutableMapNodeBuilder.create();
+        lst1.withNodeIdentifier(TestUtils.getNodeIdentifier("lst1", "test:module", "2014-01-09"));
+        lst1.withChild(ImmutableMapEntryNodeBuilder
+                .create()
+                .withNodeIdentifier(
+                        TestUtils.getNodeIdentifierPredicate("lst1", "test:module", "2014-01-09", "lf11",
+                                "GigabitEthernet0/0/0/0"))
+                .withChild(
+                        ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(TestUtils.getNodeIdentifier("lf11", "test:module", "2014-01-09"))
+                                .withValue("GigabitEthernet0/0/0/0").build()).build());
 
-            childs.add(new SimpleNodeWrapper(new URI("name"), "name", "eth0"));
-            childs.add(new SimpleNodeWrapper(new URI("type"), "type", "ethernetCsmacd"));
-            childs.add(new SimpleNodeWrapper(new URI("enabled"), "enabled", Boolean.FALSE));
-            childs.add(new SimpleNodeWrapper(new URI("description"), "description", "some interface"));
-            intface.setValue(childs);
-            return intface;
-        } catch (URISyntaxException e) {
-        }
-
-        return null;
+        return lst1.build();
     }
 
     @Test
@@ -643,8 +654,14 @@ public class RestGetOperationTest extends JerseyTest {
                 toSimpleNodeData( toNestedQName( "depth2-leaf1" ), "depth2-leaf1-value" )
             ) );
 
+        Module module = TestUtils.findModule(schemaContextModules.getModules(), "urn:nested:module");
+        assertNotNull(module);
+
+        DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode("depth1-cont", module);
+        assertNotNull(dataSchemaNode);
+
         when( brokerFacade.readConfigurationData( any( InstanceIdentifier.class ) ) )
-            .thenReturn( depth1Cont );
+            .thenReturn( TestUtils.compositeNodeToDatastoreNormalizedNode(depth1Cont, dataSchemaNode));
 
         // Test config with depth 1
 
@@ -780,8 +797,18 @@ public class RestGetOperationTest extends JerseyTest {
                 toSimpleNodeData( toNestedQName( "depth3-leaf1" ), "depth3-leaf1-value" )
             ) );
 
+        assertTrue(dataSchemaNode instanceof DataNodeContainer);
+        DataSchemaNode depth2cont1Schema = null;
+        for (DataSchemaNode childNode : ((DataNodeContainer) dataSchemaNode).getChildNodes()) {
+            if (childNode.getQName().getLocalName().equals("depth2-cont1")) {
+                depth2cont1Schema = childNode;
+                break;
+            }
+        }
+        assertNotNull(depth2Cont1);
+
         when( brokerFacade.readOperationalData( any( InstanceIdentifier.class ) ) )
-             .thenReturn( depth2Cont1 );
+             .thenReturn( TestUtils.compositeNodeToDatastoreNormalizedNode(depth2Cont1, depth2cont1Schema) );
 
         response = target( "/operational/nested-module:depth1-cont/depth2-cont1" )
                        .queryParam( "depth", "3" ).request( "application/xml" ).get();
@@ -925,4 +952,5 @@ public class RestGetOperationTest extends JerseyTest {
     private NodeData toSimpleNodeData( QName key, Object value ) {
         return new NodeData( key, value );
     }
+
 }
