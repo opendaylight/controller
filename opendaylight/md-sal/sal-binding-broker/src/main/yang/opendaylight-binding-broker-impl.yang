@@ -105,7 +105,7 @@ module opendaylight-sal-binding-broker-impl {
             container data-broker {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity sal:binding-data-broker;
                     }
                 }
@@ -116,6 +116,15 @@ module opendaylight-sal-binding-broker-impl {
                     refine type {
                         mandatory true;
                         config:required-identity sal:binding-notification-service;
+                    }
+                }
+            }
+
+            container root-data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:binding-async-data-broker;
                     }
                 }
             }
