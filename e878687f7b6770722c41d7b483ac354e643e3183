@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8dddc2e2",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "I would suggest to rename this grouping. It\u0027s very similar to its openflow structure name in spec. We can use more generalized name like \"node-queue-config-data\" or something similar.",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_adda06e6",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "List must have its key element, so please define key for this \u0027queues\u0027 list.",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4de33aa4",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "Please define key element for the list (queue-properties).",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_edd48ebe",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "All rpc should contain node context reference, so that rpc call can be routed to the concerned end device. Add \n\nuses inv:node-context-ref;\n\nin input {} parameters. You can refer rpc models in other yang files (e.g model-flow-service or model-flow-statistics)",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2df6f663",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "Its recommended to make rpc and notification both transaction aware. Simple use case is that it will help application to match the response they receive with the response they sent. Add following linke to rpc output and in notification \nuses tr:transaction-aware;\n\ntr is import of flow-capable-transaction",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0df1b26a",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-06-30T06:21:25Z",
+      "side": 1,
+      "message": "User can send two type of queue-config request to the switch. 1) Request to fetch configuration of all the queue\u0027s attached to specific port of the node (as defined above). 2) Request to fetch configuration of all the queue\u0027s attached to all the ports of the node by specifying OFPP_ANY as a port. So i would suggest to define rpc for case 2) as well and rename these rpc\u0027s appropriately.\n\n\"notification\" is required to receive the queue-config reply from openflowplugin, so please define the notification model. You can refer notification yang models from model-flow-service or model-flow-statistics.",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
