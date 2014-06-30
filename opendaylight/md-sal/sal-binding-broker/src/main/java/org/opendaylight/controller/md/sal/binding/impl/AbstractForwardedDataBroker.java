@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 
 public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker,
         SchemaContextListener, AutoCloseable {
@@ -97,8 +100,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     protected Map<InstanceIdentifier<?>, DataObject> toBinding(
             final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
-        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized
-                .entrySet()) {
+
+        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : sortedEntries(normalized)) {
             try {
                 Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(
                         entry);
@@ -111,6 +114,21 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
             }
         }
         return newMap;
+    }
+
+    private static <T> Iterable<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier,T>> sortedEntries(final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> map) {
+        ArrayList<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T>> entries = new ArrayList<>(map.entrySet());
+        Collections.sort(entries, new Comparator<Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T>>() {
+
+            @Override
+            public int compare(final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> left,
+                    final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, T> right) {
+                int leftSize = Iterables.size(left.getKey().getPathArguments());
+                int rightSize = Iterables.size(right.getKey().getPathArguments());
+                return Integer.compare(leftSize, rightSize);
+            }
+        });
+        return entries;
     }
 
     protected Set<InstanceIdentifier<?>> toBinding(
