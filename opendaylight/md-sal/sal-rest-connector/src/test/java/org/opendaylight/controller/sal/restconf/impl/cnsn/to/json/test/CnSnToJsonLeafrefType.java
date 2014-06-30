@@ -13,16 +13,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 /**
  *
@@ -98,9 +96,9 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
 
     private String toJson(String xmlDataPath) {
         try {
-            CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlDataPath, XmlToCompositeNodeProvider.INSTANCE);
-            TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
-            return TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+            Node<?> node = TestUtils.readInputToCnSn(xmlDataPath, XmlToCompositeNodeProvider.INSTANCE);
+            TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
+            return TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }
