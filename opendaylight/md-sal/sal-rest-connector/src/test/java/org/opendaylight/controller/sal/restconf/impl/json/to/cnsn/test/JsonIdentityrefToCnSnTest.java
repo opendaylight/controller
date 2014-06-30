@@ -31,15 +31,16 @@ public class JsonIdentityrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
     @Test
     public void jsonIdentityrefToCompositeNode() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/identityref/json/data.json", false,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/identityref/json/data.json", false,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertNotNull(node);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
 
-        assertEquals("cont", compositeNode.getNodeType().getLocalName());
+        assertEquals("cont", node.getNodeType().getLocalName());
 
-        List<Node<?>> childs = compositeNode.getValue();
+        assert(node instanceof CompositeNode);
+        List<Node<?>> childs = ((CompositeNode)node).getValue();
         assertEquals(1, childs.size());
         Node<?> nd = childs.iterator().next();
         assertTrue(nd instanceof CompositeNode);

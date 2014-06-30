@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
@@ -37,32 +38,44 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
 
     @Test
     public void loadXmlToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/instanceidentifier/xml/xmldata.xml",
+        Node<?> node = TestUtils.readInputToCnSn("/instanceidentifier/xml/xmldata.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyListPredicate(cnSn);
     }
 
     @Test
     public void loadXmlLeafListToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/instanceidentifier/xml/xmldata_leaf_list.xml",
+        Node<?> node = TestUtils.readInputToCnSn("/instanceidentifier/xml/xmldata_leaf_list.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyLeafListPredicate(cnSn);
     }
 
     @Test
     public void loadJsonToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/instanceidentifier/json/jsondata.json",
+        Node<?> node = TestUtils.readInputToCnSn("/instanceidentifier/json/jsondata.json",
                 JsonToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyListPredicate(cnSn);
     }
 
     @Test
     public void loadJsonLeafListToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/instanceidentifier/json/jsondata_leaf_list.json",
+        Node<?> node = TestUtils.readInputToCnSn("/instanceidentifier/json/jsondata_leaf_list.json",
                 JsonToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
+
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyLeafListPredicate(cnSn);
     }
