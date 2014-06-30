@@ -1214,6 +1214,10 @@
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-parser-impl</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-composite-node</artifactId>
+        </dependency>
         <!-- yang model dependencies -->
         <dependency>
           <groupId>org.opendaylight.yangtools.model</groupId>

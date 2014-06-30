@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -17,7 +18,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -31,11 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.ws.rs.core.Response.Status;
-
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -91,13 +89,13 @@ public class ControllerContext implements SchemaContextListener {
             new AtomicReference<>(Collections.<QName, RpcDefinition>emptyMap());
 
     private volatile SchemaContext globalSchema;
-    private volatile MountService mountService;
+    private volatile DOMMountPointService mountService;
 
     public void setGlobalSchema(final SchemaContext globalSchema) {
         this.globalSchema = globalSchema;
     }
 
-    public void setMountService(final MountService mountService) {
+    public void setMountService(final DOMMountPointService mountService) {
         this.mountService = mountService;
     }
 
@@ -207,7 +205,7 @@ public class ControllerContext implements SchemaContextListener {
         return this.getLatestModule(globalSchema, moduleName);
     }
 
-    public Module findModuleByName(final MountInstance mountPoint, final String moduleName) {
+    public Module findModuleByName(final DOMMountPoint mountPoint, final String moduleName) {
         Preconditions.checkArgument(moduleName != null && mountPoint != null);
 
         final SchemaContext mountPointSchema = mountPoint.getSchemaContext();
@@ -222,7 +220,7 @@ public class ControllerContext implements SchemaContextListener {
         return moduleSchemas == null ? null : this.filterLatestModule(moduleSchemas);
     }
 
-    public Module findModuleByNamespace(final MountInstance mountPoint, final URI namespace) {
+    public Module findModuleByNamespace(final DOMMountPoint mountPoint, final URI namespace) {
         Preconditions.checkArgument(namespace != null && mountPoint != null);
 
         final SchemaContext mountPointSchema = mountPoint.getSchemaContext();
@@ -237,7 +235,7 @@ public class ControllerContext implements SchemaContextListener {
         return globalSchema.findModuleByName(module.getLocalName(), module.getRevision());
     }
 
-    public Module findModuleByNameAndRevision(final MountInstance mountPoint, final QName module) {
+    public Module findModuleByNameAndRevision(final DOMMountPoint mountPoint, final QName module) {
         this.checkPreconditions();
         Preconditions.checkArgument(module != null && module.getLocalName() != null && module.getRevision() != null
                 && mountPoint != null);
@@ -306,7 +304,7 @@ public class ControllerContext implements SchemaContextListener {
         return moduleName;
     }
 
-    public String findModuleNameByNamespace(final MountInstance mountPoint, final URI namespace) {
+    public String findModuleNameByNamespace(final DOMMountPoint mountPoint, final URI namespace) {
         final Module module = this.findModuleByNamespace(mountPoint, namespace);
         return module == null ? null : module.getName();
     }
@@ -324,12 +322,12 @@ public class ControllerContext implements SchemaContextListener {
         return namespace;
     }
 
-    public URI findNamespaceByModuleName(final MountInstance mountPoint, final String moduleName) {
+    public URI findNamespaceByModuleName(final DOMMountPoint mountPoint, final String moduleName) {
         final Module module = this.findModuleByName(mountPoint, moduleName);
         return module == null ? null : module.getNamespace();
     }
 
-    public Set<Module> getAllModules(final MountInstance mountPoint) {
+    public Set<Module> getAllModules(final DOMMountPoint mountPoint) {
         this.checkPreconditions();
 
         SchemaContext schemaContext = mountPoint == null ? null : mountPoint.getSchemaContext();
@@ -363,7 +361,7 @@ public class ControllerContext implements SchemaContextListener {
         return builder.toString();
     }
 
-    public CharSequence toRestconfIdentifier(final MountInstance mountPoint, final QName qname) {
+    public CharSequence toRestconfIdentifier(final DOMMountPoint mountPoint, final QName qname) {
         if (mountPoint == null) {
             return null;
         }
@@ -525,7 +523,7 @@ public class ControllerContext implements SchemaContextListener {
     }
 
     private InstanceIdWithSchemaNode collectPathArguments(final InstanceIdentifierBuilder builder,
-            final List<String> strings, final DataNodeContainer parentNode, final MountInstance mountPoint,
+            final List<String> strings, final DataNodeContainer parentNode, final DOMMountPoint mountPoint,
             final boolean returnJustMountPoint) {
         Preconditions.<List<String>> checkNotNull(strings);
 
@@ -557,12 +555,13 @@ public class ControllerContext implements SchemaContextListener {
                 }
 
                 final YangInstanceIdentifier partialPath = builder.toInstance();
-                final MountInstance mount = mountService.getMountPoint(partialPath);
-                if (mount == null) {
+                final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(partialPath);
+                if (!mountOpt.isPresent()) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
                     throw new RestconfDocumentedException("Mount point does not exist.", ErrorType.PROTOCOL,
                             ErrorTag.UNKNOWN_ELEMENT);
                 }
+                DOMMountPoint mount = mountOpt.get();
 
                 final SchemaContext mountPointSchema = mount.getSchemaContext();
                 if (mountPointSchema == null) {
@@ -764,7 +763,7 @@ public class ControllerContext implements SchemaContextListener {
     }
 
     private void addKeyValue(final HashMap<QName, Object> map, final DataSchemaNode node, final String uriValue,
-            final MountInstance mountPoint) {
+            final DOMMountPoint mountPoint) {
         Preconditions.<String> checkNotNull(uriValue);
         Preconditions.checkArgument((node instanceof LeafSchemaNode));
 

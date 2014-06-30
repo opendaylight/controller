@@ -12,28 +12,34 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import java.util.Map;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.Future;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
@@ -44,7 +50,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
 /**
  * Unit tests for BrokerFacade.
@@ -54,73 +62,83 @@ import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 public class BrokerFacadeTest {
 
     @Mock
-    DataBrokerService dataBroker;
-
-    @Mock
-    DataModificationTransaction mockTransaction;
+    DOMDataBroker domDataBroker;
 
     @Mock
     ConsumerSession mockConsumerSession;
 
     @Mock
-    MountInstance mockMountInstance;
+    DOMMountPoint mockMountInstance;
 
     BrokerFacade brokerFacade = BrokerFacade.getInstance();
 
-    CompositeNode dataNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml",
-            XmlToCompositeNodeProvider.INSTANCE);
+    CompositeNode dataNode;
+
+    NormalizedNode<?, ?> dummyNode = createDummyNode("dummy:namespace", "2014-07-01", "dummy local name");
+    ListenableFuture<Optional<NormalizedNode<?, ?>>> dummyNodeInFuture = wrapDummyNode(dummyNode);
 
     QName qname = QName.create("node");
 
     YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).toInstance();
 
+    @Mock
+    DOMDataReadOnlyTransaction rTransaction;
+
+    @Mock
+    DOMDataWriteTransaction wTransaction;
+
+    @Mock
+    DOMDataReadWriteTransaction rwTransaction;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        brokerFacade.setDataService(dataBroker);
+        // TODO it is started before every test method
+        brokerFacade.setDomDataBroker(domDataBroker);
         brokerFacade.setContext(mockConsumerSession);
+        when(domDataBroker.newReadOnlyTransaction()).thenReturn(rTransaction);
+        when(domDataBroker.newWriteOnlyTransaction()).thenReturn(wTransaction);
+        when(domDataBroker.newReadWriteTransaction()).thenReturn(rwTransaction);
+
+        dataNode = TestUtils.prepareCompositeNodeWithIetfInterfacesInterfacesData();
+
+    }
+
+    private ListenableFuture<Optional<NormalizedNode<?, ?>>> wrapDummyNode(NormalizedNode<?, ?> dummyNode) {
+        return Futures.<Optional<NormalizedNode<?, ?>>> immediateFuture(Optional.<NormalizedNode<?, ?>> of(dummyNode));
+    }
+
+    /**
+     * Value of this node shouldn't be important for testing purposes
+     */
+    private NormalizedNode<?, ?> createDummyNode(String namespace, String date, String localName) {
+        return Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(QName.create(namespace, date, localName))).build();
     }
 
     @Test
     public void testReadConfigurationData() {
-        when(dataBroker.readConfigurationData(instanceID)).thenReturn(dataNode);
+        when(rTransaction.read(any(LogicalDatastoreType.class), any(YangInstanceIdentifier.class))).thenReturn(
+                dummyNodeInFuture);
 
-        CompositeNode actualNode = brokerFacade.readConfigurationData(instanceID);
+        NormalizedNode<?, ?> actualNode = brokerFacade.readConfigurationData(instanceID);
 
-        assertSame("readConfigurationData", dataNode, actualNode);
-    }
-
-    @Test
-    public void testReadConfigurationDataBehindMountPoint() {
-        when(mockMountInstance.readConfigurationData(instanceID)).thenReturn(dataNode);
-
-        CompositeNode actualNode = brokerFacade.readConfigurationDataBehindMountPoint(mockMountInstance, instanceID);
-
-        assertSame("readConfigurationDataBehindMountPoint", dataNode, actualNode);
+        assertSame("readConfigurationData", dummyNode, actualNode);
     }
 
     @Test
     public void testReadOperationalData() {
-        when(dataBroker.readOperationalData(instanceID)).thenReturn(dataNode);
+        when(rTransaction.read(any(LogicalDatastoreType.class), any(YangInstanceIdentifier.class))).thenReturn(
+                dummyNodeInFuture);
 
-        CompositeNode actualNode = brokerFacade.readOperationalData(instanceID);
+        NormalizedNode<?, ?> actualNode = brokerFacade.readOperationalData(instanceID);
 
-        assertSame("readOperationalData", dataNode, actualNode);
-    }
-
-    @Test
-    public void testReadOperationalDataBehindMountPoint() {
-        when(mockMountInstance.readOperationalData(instanceID)).thenReturn(dataNode);
-
-        CompositeNode actualNode = brokerFacade.readOperationalDataBehindMountPoint(mockMountInstance, instanceID);
-
-        assertSame("readOperationalDataBehindMountPoint", dataNode, actualNode);
+        assertSame("readOperationalData", dummyNode, actualNode);
     }
 
     @Test(expected = RestconfDocumentedException.class)
     public void testReadOperationalDataWithNoDataBroker() {
-        brokerFacade.setDataService(null);
+        brokerFacade.setDomDataBroker(null);
 
         brokerFacade.readOperationalData(instanceID);
     }
@@ -148,109 +166,46 @@ public class BrokerFacadeTest {
 
     @Test
     public void testCommitConfigurationDataPut() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
+        CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
-        when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.commit()).thenReturn(expFuture);
+        when(wTransaction.submit()).thenReturn(expFuture);
 
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataPut(instanceID,
-                dataNode);
+        Future<Void> actualFuture = brokerFacade.commitConfigurationDataPut(instanceID, dummyNode);
 
-        assertSame("invokeRpc", expFuture, actualFuture);
+        assertSame("commitConfigurationDataPut", expFuture, actualFuture);
 
-        InOrder inOrder = inOrder(dataBroker, mockTransaction);
-        inOrder.verify(dataBroker).beginTransaction();
-        inOrder.verify(mockTransaction).putConfigurationData(instanceID, dataNode);
-        inOrder.verify(mockTransaction).commit();
-    }
-
-    @Test
-    public void testCommitConfigurationDataPutBehindMountPoint() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
-
-        when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.commit()).thenReturn(expFuture);
-
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataPutBehindMountPoint(
-                mockMountInstance, instanceID, dataNode);
-
-        assertSame("invokeRpc", expFuture, actualFuture);
-
-        InOrder inOrder = inOrder(mockMountInstance, mockTransaction);
-        inOrder.verify(mockMountInstance).beginTransaction();
-        inOrder.verify(mockTransaction).putConfigurationData(instanceID, dataNode);
-        inOrder.verify(mockTransaction).commit();
+        InOrder inOrder = inOrder(domDataBroker, wTransaction);
+        inOrder.verify(domDataBroker).newWriteOnlyTransaction();
+        inOrder.verify(wTransaction).put(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
+        inOrder.verify(wTransaction).submit();
     }
 
     @Test
     public void testCommitConfigurationDataPost() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
+        CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
-        Map<YangInstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<YangInstanceIdentifier, CompositeNode>()
-                .put(instanceID, dataNode).build();
+        NormalizedNode<?, ?> dummyNode2 = createDummyNode("dummy:namespace2", "2014-07-01", "dummy local name2");
+        when(rwTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
+                wrapDummyNode(dummyNode2));
+        when(rwTransaction.submit()).thenReturn(expFuture);
 
-        when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.getCreatedConfigurationData()).thenReturn(nodeMap);
-        when(mockTransaction.commit()).thenReturn(expFuture);
+        CheckedFuture<Void, TransactionCommitFailedException> actualFuture = brokerFacade.commitConfigurationDataPost(
+                instanceID, dummyNode);
 
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataPost(instanceID,
-                dataNode);
+        assertSame("commitConfigurationDataPost", expFuture, actualFuture);
 
-        assertSame("commitConfigurationDataPut", expFuture, actualFuture);
-
-        InOrder inOrder = inOrder(dataBroker, mockTransaction);
-        inOrder.verify(dataBroker).beginTransaction();
-        inOrder.verify(mockTransaction).putConfigurationData(instanceID, dataNode);
-        inOrder.verify(mockTransaction).commit();
+        InOrder inOrder = inOrder(domDataBroker, rwTransaction);
+        inOrder.verify(domDataBroker).newReadWriteTransaction();
+        inOrder.verify(rwTransaction).merge(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
+        inOrder.verify(rwTransaction).submit();
     }
 
     @Test(expected = RestconfDocumentedException.class)
     public void testCommitConfigurationDataPostAlreadyExists() {
-        when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.readConfigurationData(instanceID)).thenReturn(dataNode);
+        when(rwTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
+                dummyNodeInFuture);
         try {
-            brokerFacade.commitConfigurationDataPost(instanceID, dataNode);
-        } catch (RestconfDocumentedException e) {
-            assertEquals("getErrorTag", RestconfError.ErrorTag.DATA_EXISTS, e.getErrors().get(0).getErrorTag());
-            throw e;
-        }
-    }
-
-    @Test
-    public void testCommitConfigurationDataPostBehindMountPoint() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
-
-        Map<YangInstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<YangInstanceIdentifier, CompositeNode>()
-                .put(instanceID, dataNode).build();
-
-        when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.getCreatedConfigurationData()).thenReturn(nodeMap);
-        when(mockTransaction.commit()).thenReturn(expFuture);
-
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataPostBehindMountPoint(
-                mockMountInstance, instanceID, dataNode);
-
-        assertSame("commitConfigurationDataPostBehindMountPoint", expFuture, actualFuture);
-
-        InOrder inOrder = inOrder(mockMountInstance, mockTransaction);
-        inOrder.verify(mockMountInstance).beginTransaction();
-        inOrder.verify(mockTransaction).putConfigurationData(instanceID, dataNode);
-        inOrder.verify(mockTransaction).commit();
-    }
-
-    @Test(expected = RestconfDocumentedException.class)
-    public void testCommitConfigurationDataPostBehindMountPointAlreadyExists() {
-
-        when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
-        mockTransaction.putConfigurationData(instanceID, dataNode);
-        when(mockTransaction.readConfigurationData(instanceID)).thenReturn(dataNode);
-        try {
-            brokerFacade.commitConfigurationDataPostBehindMountPoint(mockMountInstance, instanceID, dataNode);
+            brokerFacade.commitConfigurationDataPost(instanceID, dummyNode);
         } catch (RestconfDocumentedException e) {
             assertEquals("getErrorTag", RestconfError.ErrorTag.DATA_EXISTS, e.getErrors().get(0).getErrorTag());
             throw e;
@@ -259,43 +214,19 @@ public class BrokerFacadeTest {
 
     @Test
     public void testCommitConfigurationDataDelete() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
+        CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
-        when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
-        when(mockTransaction.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
-                ImmutableCompositeNode.builder().toInstance());
-        mockTransaction.removeConfigurationData(instanceID);
-        when(mockTransaction.commit()).thenReturn(expFuture);
+        when(wTransaction.submit()).thenReturn(expFuture);
 
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataDelete(instanceID);
+        CheckedFuture<Void, TransactionCommitFailedException> actualFuture = brokerFacade
+                .commitConfigurationDataDelete(instanceID);
 
         assertSame("commitConfigurationDataDelete", expFuture, actualFuture);
 
-        InOrder inOrder = inOrder(dataBroker, mockTransaction);
-        inOrder.verify(dataBroker).beginTransaction();
-        inOrder.verify(mockTransaction).removeConfigurationData(instanceID);
-        inOrder.verify(mockTransaction).commit();
-    }
-
-    @Test
-    public void testCommitConfigurationDataDeleteBehindMountPoint() {
-        Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
-
-        when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
-        when(mockTransaction.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
-                ImmutableCompositeNode.builder().toInstance());
-        mockTransaction.removeConfigurationData(instanceID);
-        when(mockTransaction.commit()).thenReturn(expFuture);
-
-        Future<RpcResult<TransactionStatus>> actualFuture = brokerFacade.commitConfigurationDataDeleteBehindMountPoint(
-                mockMountInstance, instanceID);
-
-        assertSame("commitConfigurationDataDeleteBehindMountPoint", expFuture, actualFuture);
-
-        InOrder inOrder = inOrder(mockMountInstance, mockTransaction);
-        inOrder.verify(mockMountInstance).beginTransaction();
-        inOrder.verify(mockTransaction).removeConfigurationData(instanceID);
-        inOrder.verify(mockTransaction).commit();
+        InOrder inOrder = inOrder(domDataBroker, wTransaction);
+        inOrder.verify(domDataBroker).newWriteOnlyTransaction();
+        inOrder.verify(wTransaction).delete(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class));
+        inOrder.verify(wTransaction).submit();
     }
 
     @SuppressWarnings("unchecked")
@@ -303,16 +234,23 @@ public class BrokerFacadeTest {
     public void testRegisterToListenDataChanges() {
         ListenerAdapter listener = Notificator.createListener(instanceID, "stream");
 
-        ListenerRegistration<DataChangeListener> mockRegistration = mock(ListenerRegistration.class);
-        when(dataBroker.registerDataChangeListener(instanceID, listener)).thenReturn(mockRegistration);
+        ListenerRegistration<DOMDataChangeListener> mockRegistration = mock(ListenerRegistration.class);
 
-        brokerFacade.registerToListenDataChanges(listener);
+        when(
+                domDataBroker.registerDataChangeListener(any(LogicalDatastoreType.class), eq(instanceID), eq(listener),
+                        eq(DataChangeScope.BASE))).thenReturn(mockRegistration);
 
-        verify(dataBroker).registerDataChangeListener(instanceID, listener);
+        brokerFacade.registerToListenDataChanges(LogicalDatastoreType.CONFIGURATION, DataChangeScope.BASE, listener);
+
+        verify(domDataBroker).registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, instanceID, listener,
+                DataChangeScope.BASE);
 
         assertEquals("isListening", true, listener.isListening());
 
-        brokerFacade.registerToListenDataChanges(listener);
-        verifyNoMoreInteractions(dataBroker);
+        brokerFacade.registerToListenDataChanges(LogicalDatastoreType.CONFIGURATION, DataChangeScope.BASE, listener);
+        verifyNoMoreInteractions(domDataBroker);
+
+        String escapeXml = StringEscapeUtils.escapeXml("data might contain & or ! or % or ' ");
+        System.out.println(escapeXml);
     }
 }
