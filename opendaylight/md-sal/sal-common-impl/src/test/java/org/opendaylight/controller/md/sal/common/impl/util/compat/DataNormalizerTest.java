@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -390,15 +391,44 @@ public class DataNormalizerTest {
         Collections.sort(unorderdChildData, new Comparator<LegacyNodeData>() {
             @Override
             public int compare(LegacyNodeData arg1, LegacyNodeData arg2) {
-                String str1 = arg1.nodeKey.getLocalName();
-                if (!(arg1.nodeData instanceof List))
-                    str1 += arg1.nodeData; // add simple node value
+                if (!(arg1.nodeData instanceof List) && !(arg2.nodeData instanceof List)) {
+                    // if neither is a list, just compare them
+                    String str1 = arg1.nodeKey.getLocalName() + arg1.nodeData;
+                    String str2 = arg2.nodeKey.getLocalName() + arg2.nodeData;
+                    return str1.compareTo(str2);
+                } else if (arg1.nodeData instanceof List && arg2.nodeData instanceof List) {
+                    // if both are lists, first check their local name
+                    String str1 = arg1.nodeKey.getLocalName();
+                    String str2 = arg2.nodeKey.getLocalName();
+                    if (!str1.equals(str2)) {
+                        return str1.compareTo(str2);
+                    } else {
+                        // if local names are the same, then look at the list contents
+                        List<LegacyNodeData> l1 = (List<LegacyNodeData>) arg1.nodeData;
+                        List<LegacyNodeData> l2 = (List<LegacyNodeData>) arg2.nodeData;
 
-                String str2 = arg2.nodeKey.getLocalName();
-                if (!(arg2.nodeData instanceof List))
-                    str2 += arg2.nodeData; // add simple node value
+                        if (l1.size() != l2.size()) {
+                            // if the sizes are different, use that
+                            return l2.size() - l1.size();
+                        } else {
+                            // lastly sort and recursively check the list contents
+                            Collections.sort(l1, this);
+                            Collections.sort(l2, this);
 
-                return str1.compareTo(str2);
+                            for (int i = 0 ; i < l1.size() ; i++) {
+                                int diff = this.compare(l1.get(i), l2.get(i));
+                                if (diff != 0) {
+                                    return diff;
+                                }
+                            }
+                            return 0;
+                        }
+                    }
+                } else if( arg1.nodeData instanceof List ) {
+                    return -1;
+                } else{
+                    return 1;
+                }
             }
         });
 
@@ -417,15 +447,49 @@ public class DataNormalizerTest {
         Collections.sort(unorderedChildNodes, new Comparator<Node<?>>() {
             @Override
             public int compare(Node<?> n1, Node<?> n2) {
-                String str1 = n1.getKey().getLocalName();
-                if (n1 instanceof SimpleNode)
-                    str1 += ((SimpleNode<?>) n1).getValue();
+                if (n1 instanceof SimpleNode && n2 instanceof SimpleNode) {
+                    // if they're SimpleNodes just compare their strings
+                    String str1 = n1.getKey().getLocalName() + ((SimpleNode<?>)n1).getValue();
+                    String str2 = n2.getKey().getLocalName() + ((SimpleNode<?>)n2).getValue();
+                    return str1.compareTo(str2);
+                } else if (n1 instanceof CompositeNode && n2 instanceof CompositeNode) {
+                    // if they're CompositeNodes, things are more interesting
+                    String str1 = n1.getKey().getLocalName();
+                    String str2 = n2.getKey().getLocalName();
+                    if (!str1.equals(str2)) {
+                        // if their local names differ, return that difference
+                        return str1.compareTo(str2);
+                    } else {
+                        // otherwise, we need to look at their contents
+                        ArrayList<Node<?>> l1 = new ArrayList<Node<?>>( ((CompositeNode)n1).getValue() );
+                        ArrayList<Node<?>> l2 = new ArrayList<Node<?>>( ((CompositeNode)n2).getValue() );
 
-                String str2 = n2.getKey().getLocalName();
-                if (n2 instanceof SimpleNode)
-                    str2 += ((SimpleNode<?>) n2).getValue();
+                        if (l1.size() != l2.size()) {
+                            // if they have different numbers of things in them return that
+                            return l2.size() - l1.size();
+                        } else {
+                            // otherwise, compare the individual elements, first sort them
+                            Collections.sort(l1, this);
+                            Collections.sort(l2, this);
 
-                return str1.compareTo(str2);
+                            // then compare them individually
+                            for(int i = 0 ; i < l2.size() ; i++) {
+                                int diff = this.compare(l1.get(i), l2.get(i));
+                                if(diff != 0){
+                                    return diff;
+                                }
+                            }
+                            return 0;
+                        }
+                    }
+                } else if (n1 instanceof CompositeNode && n2 instanceof SimpleNode) {
+                    return -1;
+                } else if (n2 instanceof CompositeNode && n1 instanceof SimpleNode) {
+                    return 1;
+                } else {
+                    assertTrue("Expected either SimpleNodes CompositeNodes", false);
+                    return 0;
+                }
             }
         });
 
