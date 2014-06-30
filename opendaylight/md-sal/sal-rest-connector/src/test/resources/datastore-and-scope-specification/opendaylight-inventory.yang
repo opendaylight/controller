@@ -1,0 +1,19 @@
+module opendaylight-inventory {
+    namespace "urn:opendaylight:inventory";
+    prefix inv;
+
+    revision "2013-08-19" {
+        description "Initial revision of Inventory model";
+    }
+    
+    
+    container nodes {
+        list node {
+            key "id";
+            leaf id {
+                type string;
+            }
+        }
+    }
+
+}

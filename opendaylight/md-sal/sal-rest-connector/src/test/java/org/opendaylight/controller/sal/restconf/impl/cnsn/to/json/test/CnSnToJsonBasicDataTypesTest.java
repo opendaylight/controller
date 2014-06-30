@@ -13,10 +13,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Maps;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -25,11 +27,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-
-import com.google.common.collect.Maps;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -193,12 +191,12 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
     @Test
     public void simpleYangDataTest() throws Exception {
 
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
+        Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
+        TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
 
-        String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+        String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
 
         assertNotNull(jsonOutput);
@@ -307,11 +305,11 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
     public void testBadData() throws Exception {
 
         try {
-            CompositeNode compositeNode = TestUtils.readInputToCnSn(
+            Node<?> node = TestUtils.readInputToCnSn(
                                                "/cnsn-to-json/simple-data-types/xml/bad-data.xml",
                                                XmlToCompositeNodeProvider.INSTANCE);
 
-            TestUtils.normalizeCompositeNode(compositeNode, modules, "simple-data-types:cont");
+            TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
             fail( "Expected RestconfDocumentedException" );
         }
         catch( RestconfDocumentedException e ) {
