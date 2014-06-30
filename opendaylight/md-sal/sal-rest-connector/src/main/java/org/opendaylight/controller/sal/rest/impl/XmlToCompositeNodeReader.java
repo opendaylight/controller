@@ -33,10 +33,11 @@ public class XmlToCompositeNodeReader {
     private final static XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     private XMLEventReader eventReader;
 
-    public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException,
-            IOException {
-        // Get an XML stream which can be marked, and reset, so we can check and
-        // see if there is any content being provided.
+    public NodeWrapper<?> read(InputStream entityStream) throws XMLStreamException,
+                                                                      UnsupportedFormatException,
+                                                                      IOException {
+        //Get an XML stream which can be marked, and reset, so we can check and see if there is
+        //any content being provided.
         entityStream = getMarkableStream(entityStream);
 
         if (isInputStreamEmpty(entityStream)) {
@@ -52,12 +53,8 @@ public class XmlToCompositeNodeReader {
             }
         }
 
-        if (eventReader.hasNext() && !isCompositeNodeEvent(eventReader.peek())) {
-            throw new UnsupportedFormatException("Root element of XML has to be composite element.");
-        }
-
         final Stack<NodeWrapper<?>> processingQueue = new Stack<>();
-        CompositeNodeWrapper root = null;
+        NodeWrapper<?> root = null;
         NodeWrapper<?> element = null;
         while (eventReader.hasNext()) {
             final XMLEvent event = eventReader.nextEvent();
@@ -70,17 +67,15 @@ public class XmlToCompositeNodeReader {
                 }
                 NodeWrapper<?> newNode = null;
                 if (isCompositeNodeEvent(event)) {
+                    newNode = resolveCompositeNodeFromStartElement(startElement);
                     if (root == null) {
-                        root = resolveCompositeNodeFromStartElement(startElement);
-                        newNode = root;
-                    } else {
-                        newNode = resolveCompositeNodeFromStartElement(startElement);
+                        root = newNode;
                     }
                 } else if (isSimpleNodeEvent(event)) {
-                    if (root == null) {
-                        throw new UnsupportedFormatException("Root element of XML has to be composite element.");
-                    }
                     newNode = resolveSimpleNodeFromStartElement(startElement);
+                    if (root == null) {
+                        root = newNode;
+                    }
                 }
 
                 if (newNode != null) {

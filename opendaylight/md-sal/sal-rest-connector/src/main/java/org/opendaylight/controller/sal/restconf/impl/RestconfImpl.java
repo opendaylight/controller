@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,8 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
@@ -47,6 +50,7 @@ import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -57,6 +61,12 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.serializer.CnSnFromNormalizedNodeSerializerFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
@@ -76,6 +86,8 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestconfImpl implements RestconfService {
     private enum UriParameters {
@@ -109,6 +121,30 @@ public class RestconfImpl implements RestconfService {
     private BrokerFacade broker;
 
     private ControllerContext controllerContext;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RestconfImpl.class);
+
+    private static final DataChangeScope DEFAULT_SCOPE = DataChangeScope.BASE;
+
+    private static final LogicalDatastoreType DEFAULT_DATASTORE = LogicalDatastoreType.CONFIGURATION;
+
+    private static final URI NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT = URI.create("urn:sal:restconf:event:subscription");
+
+    private static final Date EVENT_SUBSCRIPTION_AUGMENT_REVISION;
+
+    private static final String DATASTORE_PARAM_NAME = "datastore";
+
+    private static final String SCOPE_PARAM_NAME = "scope";
+
+    static {
+        try {
+            EVENT_SUBSCRIPTION_AUGMENT_REVISION = new SimpleDateFormat("yyyy-MM-dd").parse("2014-07-08");
+        } catch (ParseException e) {
+            throw new RestconfDocumentedException(
+                    "It wasn't possible to convert revision date of sal-remote-augment to date", ErrorType.APPLICATION,
+                    ErrorTag.OPERATION_FAILED);
+        }
+    }
 
     public void setBroker(final BrokerFacade broker) {
         this.broker = broker;
@@ -405,7 +441,7 @@ public class RestconfImpl implements RestconfService {
         return callRpc(rpc, payload, parsePrettyPrintParameter(uriInfo));
     }
 
-    private void validateInput(final DataSchemaNode inputSchema, final CompositeNode payload) {
+    private void validateInput(final DataSchemaNode inputSchema, final Node<?> payload) {
         if (inputSchema != null && payload == null) {
             // expected a non null payload
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
@@ -416,6 +452,7 @@ public class RestconfImpl implements RestconfService {
         // else
         // {
         // TODO: Validate "mandatory" and "config" values here??? Or should those be
+        // those be
         // validate in a more central location inside MD-SAL core.
         // }
     }
@@ -436,7 +473,15 @@ public class RestconfImpl implements RestconfService {
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
             String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
-            streamName = Notificator.createStreamNameFromUri(fullRestconfIdentifier);
+
+            LogicalDatastoreType datastore = DEFAULT_DATASTORE;
+            datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class, DATASTORE_PARAM_NAME);
+
+            DataChangeScope scope = DEFAULT_SCOPE;
+            scope = parseEnumTypeParameter(value, DataChangeScope.class, SCOPE_PARAM_NAME);
+
+            streamName = Notificator.createStreamNameFromUri(fullRestconfIdentifier + "/datastore=" + datastore
+                    + "/scope=" + scope);
         }
 
         if (Strings.isNullOrEmpty(streamName)) {
@@ -453,7 +498,7 @@ public class RestconfImpl implements RestconfService {
         final MutableCompositeNode responseData = NodeFactory.createMutableCompositeNode(rpc.getOutput().getQName(),
                 null, output, null, null);
 
-        if (!Notificator.existListenerFor(pathIdentifier)) {
+        if (!Notificator.existListenerFor(streamName)) {
             Notificator.createListener(pathIdentifier, streamName);
         }
 
@@ -582,18 +627,20 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData readConfigurationData(final String identifier, final UriInfo uriInfo) {
-        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
-        CompositeNode data = null;
+        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(
+                this.controllerContext.toInstanceIdentifier(identifier), true);
         MountInstance mountPoint = iiWithData.getMountPoint();
+        NormalizedNode<?, ?> data = null;
         if (mountPoint != null) {
-            data = broker.readConfigurationDataBehindMountPoint(mountPoint, iiWithData.getInstanceIdentifier());
+            data = broker.readConfigurationData(mountPoint, iiWithData.getInstanceIdentifier());
         } else {
             data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
         }
+        CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
 
-        data = pruneDataAtDepth(data, parseDepthParameter(uriInfo));
+        compositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(uriInfo));
         boolean prettyPrintMode = parsePrettyPrintParameter(uriInfo);
-        return new StructuredData(data, iiWithData.getSchemaNode(), iiWithData.getMountPoint(), prettyPrintMode);
+        return new StructuredData(compositeNode, iiWithData.getSchemaNode(), iiWithData.getMountPoint(), prettyPrintMode);
     }
 
     @SuppressWarnings("unchecked")
@@ -640,18 +687,21 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData readOperationalData(final String identifier, final UriInfo info) {
-        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
-        CompositeNode data = null;
+        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(
+                this.controllerContext.toInstanceIdentifier(identifier), true);
+        NormalizedNode<?, ?> data = null;
+
         MountInstance mountPoint = iiWithData.getMountPoint();
         if (mountPoint != null) {
-            data = broker.readOperationalDataBehindMountPoint(mountPoint, iiWithData.getInstanceIdentifier());
+            data = broker.readOperationalData(mountPoint, iiWithData.getInstanceIdentifier());
         } else {
             data = broker.readOperationalData(iiWithData.getInstanceIdentifier());
         }
 
-        data = pruneDataAtDepth(data, parseDepthParameter(info));
-        boolean prettyPrintMode = parsePrettyPrintParameter(info);
-        return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
+        final CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
+        final CompositeNode prunedCompositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(info));
+        final boolean prettyPrintMode = parsePrettyPrintParameter(info);
+        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint,prettyPrintMode);
     }
 
     private boolean parsePrettyPrintParameter(UriInfo info) {
@@ -660,22 +710,26 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response updateConfigurationData(final String identifier, final CompositeNode payload) {
-        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+    public Response updateConfigurationData(final String identifier, final Node<?> payload) {
+        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.controllerContext
+                .toInstanceIdentifier(identifier));
 
         validateInput(iiWithData.getSchemaNode(), payload);
 
         MountInstance mountPoint = iiWithData.getMountPoint();
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
-        validateListKeysEqualityInPayloadAndUri(iiWithData, payload);
+        validateListKeysEqualityInPayloadAndUri(iiWithData, value);
         RpcResult<TransactionStatus> status = null;
+        final NormalizedNode<?, ?> datastoreNormalizedNode = compositeNodeToDatastoreNormalizedNode(value,
+                iiWithData.getSchemaNode());
 
         try {
             if (mountPoint != null) {
-                status = broker.commitConfigurationDataPutBehindMountPoint(mountPoint,
-                        iiWithData.getInstanceIdentifier(), value).get();
+                status = broker.commitConfigurationDataPut(mountPoint, iiWithData.getInstanceIdentifier(),
+                        datastoreNormalizedNode).get();
             } else {
-                status = broker.commitConfigurationDataPut(iiWithData.getInstanceIdentifier(), value).get();
+                status = broker.commitConfigurationDataPut(iiWithData.getInstanceIdentifier(), datastoreNormalizedNode)
+                        .get();
             }
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error updating data", e);
@@ -734,7 +788,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final String identifier, final CompositeNode payload) {
+    public Response createConfigurationData(final String identifier, final Node<?> payload) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -766,7 +820,7 @@ public class RestconfImpl implements RestconfService {
                     .toInstanceIdentifier(identifier);
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             MountInstance mountPoint = incompleteInstIdWithData.getMountPoint();
-            final Module module = this.findModule(mountPoint, payload);
+            final Module module = findModule(mountPoint, payload);
             if (module == null) {
                 throw new RestconfDocumentedException("Module was not found for \"" + payloadNS + "\"",
                         ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
@@ -777,19 +831,22 @@ public class RestconfImpl implements RestconfService {
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
 
-            iiWithData = this.addLastIdentifierFromData(incompleteInstIdWithData, value, schemaNode);
+            iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.addLastIdentifierFromData(
+                    incompleteInstIdWithData, value, schemaNode));
         }
 
         RpcResult<TransactionStatus> status = null;
+        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value,
+                iiWithData.getSchemaNode());
         MountInstance mountPoint = iiWithData.getMountPoint();
         try {
             if (mountPoint != null) {
-                Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPostBehindMountPoint(
-                        mountPoint, iiWithData.getInstanceIdentifier(), value);
+                Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPost(mountPoint,
+                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
                 status = future == null ? null : future.get();
             } else {
                 Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPost(
-                        iiWithData.getInstanceIdentifier(), value);
+                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
                 status = future == null ? null : future.get();
             }
         } catch (Exception e) {
@@ -808,7 +865,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public Response createConfigurationData(final CompositeNode payload) {
+    public Response createConfigurationData(final Node<?> payload) {
         if (payload == null) {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
@@ -833,16 +890,17 @@ public class RestconfImpl implements RestconfService {
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
         final InstanceIdWithSchemaNode iiWithData = this.addLastIdentifierFromData(null, value, schemaNode);
         RpcResult<TransactionStatus> status = null;
+        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value, schemaNode);
         MountInstance mountPoint = iiWithData.getMountPoint();
 
         try {
             if (mountPoint != null) {
-                Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPostBehindMountPoint(
-                        mountPoint, iiWithData.getInstanceIdentifier(), value);
+                Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPost(mountPoint,
+                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
                 status = future == null ? null : future.get();
             } else {
                 Future<RpcResult<TransactionStatus>> future = broker.commitConfigurationDataPost(
-                        iiWithData.getInstanceIdentifier(), value);
+                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
                 status = future == null ? null : future.get();
             }
         } catch (Exception e) {
@@ -862,14 +920,14 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.controllerContext
+                .toInstanceIdentifier(identifier));
         RpcResult<TransactionStatus> status = null;
         MountInstance mountPoint = iiWithData.getMountPoint();
 
         try {
             if (mountPoint != null) {
-                status = broker.commitConfigurationDataDeleteBehindMountPoint(mountPoint,
-                        iiWithData.getInstanceIdentifier()).get();
+                status = broker.commitConfigurationDataDelete(mountPoint, iiWithData.getInstanceIdentifier()).get();
             } else {
                 status = broker.commitConfigurationDataDelete(iiWithData.getInstanceIdentifier()).get();
             }
@@ -884,6 +942,18 @@ public class RestconfImpl implements RestconfService {
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * Subscribes to some path in schema context (stream) to listen on changes
+     * on this stream.
+     *
+     * Additional parameters for subscribing to stream are loaded via rpc input
+     * parameters:
+     * <ul>
+     * <li>datastore</li> - default CONFIGURATION (other values of
+     * {@link LogicalDatastoreType} enum type)
+     * <li>scope</li> - default BASE (other values of {@link DataChangeScope})
+     * </ul>
+     */
     @Override
     public Response subscribeToStream(final String identifier, final UriInfo uriInfo) {
         final String streamName = Notificator.createStreamNameFromUri(identifier);
@@ -896,7 +966,20 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Stream was not found.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
         }
 
-        broker.registerToListenDataChanges(listener);
+        Map<String, String> paramToValues = resolveValuesFromUri(identifier);
+        LogicalDatastoreType datastore = parserURIEnumParameter(LogicalDatastoreType.class,
+                paramToValues.get(DATASTORE_PARAM_NAME));
+        if (datastore == null) {
+            throw new RestconfDocumentedException("Stream name doesn't contains datastore value (pattern /datastore=)",
+                    ErrorType.APPLICATION, ErrorTag.MISSING_ATTRIBUTE);
+        }
+        DataChangeScope scope = parserURIEnumParameter(DataChangeScope.class, paramToValues.get(SCOPE_PARAM_NAME));
+        if (scope == null) {
+            throw new RestconfDocumentedException("Stream name doesn't contains datastore value (pattern /scope=)",
+                    ErrorType.APPLICATION, ErrorTag.MISSING_ATTRIBUTE);
+        }
+
+        broker.registerToListenDataChanges(datastore, scope, listener);
 
         final UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
         UriBuilder port = uriBuilder.port(WebSocketServer.getInstance().getPort());
@@ -905,9 +988,71 @@ public class RestconfImpl implements RestconfService {
         return Response.status(Status.OK).location(uriToWebsocketServer).build();
     }
 
-    private Module findModule(final MountInstance mountPoint, final CompositeNode data) {
-        if (data instanceof CompositeNodeWrapper) {
-            return findModule(mountPoint, (CompositeNodeWrapper) data);
+    /**
+     * Load parameter for subscribing to stream from input composite node
+     *
+     * @param compNode
+     *            contains value
+     * @return enum object if its string value is equal to {@code paramName}. In
+     *         other cases null.
+     */
+    private <T> T parseEnumTypeParameter(final CompositeNode compNode, final Class<T> classDescriptor,
+            final String paramName) {
+        QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
+                EVENT_SUBSCRIPTION_AUGMENT_REVISION);
+        SimpleNode<?> simpleNode = compNode.getFirstSimpleByName(QName.create(salRemoteAugment, paramName));
+        if (simpleNode == null) {
+            return null;
+        }
+        Object rawValue = simpleNode.getValue();
+        if (!(rawValue instanceof String)) {
+            return null;
+        }
+
+        return resolveAsEnum(classDescriptor, (String) rawValue);
+    }
+
+    /**
+     * Checks whether {@code value} is one of the string representation of
+     * enumeration {@code classDescriptor}
+     *
+     * @return enum object if string value of {@code classDescriptor}
+     *         enumeration is equal to {@code value}. Other cases null.
+     */
+    private <T> T parserURIEnumParameter(final Class<T> classDescriptor, final String value) {
+        if (Strings.isNullOrEmpty(value)) {
+            return null;
+        }
+        return resolveAsEnum(classDescriptor, value);
+    }
+
+    private <T> T resolveAsEnum(Class<T> classDescriptor, String value) {
+        T[] enumConstants = classDescriptor.getEnumConstants();
+        if (enumConstants != null) {
+            for (T enm : classDescriptor.getEnumConstants()) {
+                if (((Enum<?>) enm).name().equals(value)) {
+                    return enm;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Map<String, String> resolveValuesFromUri(String uri) {
+        Map<String, String> result = new HashMap<>();
+        String[] tokens = uri.split("/");
+        for (int i = 1; i < tokens.length; i++) {
+            String[] parameterTokens = tokens[i].split("=");
+            if (parameterTokens.length == 2) {
+                result.put(parameterTokens[0], parameterTokens[1]);
+            }
+        }
+        return result;
+    }
+
+    private Module findModule(final MountInstance mountPoint, final Node<?> data) {
+        if (data instanceof NodeWrapper) {
+            return findModule(mountPoint, (NodeWrapper<?>) data);
         } else if (data != null) {
             URI namespace = data.getNodeType().getNamespace();
             if (mountPoint != null) {
@@ -921,7 +1066,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private Module findModule(final MountInstance mountPoint, final CompositeNodeWrapper data) {
+    private Module findModule(final MountInstance mountPoint, final NodeWrapper<?> data) {
         URI namespace = data.getNamespace();
         Preconditions.<URI> checkNotNull(namespace);
 
@@ -956,12 +1101,7 @@ public class RestconfImpl implements RestconfService {
             iiBuilder = InstanceIdentifier.builder(iiOriginal);
         }
 
-        if ((schemaOfData instanceof ListSchemaNode)) {
-            HashMap<QName, Object> keys = this.resolveKeysFromData(((ListSchemaNode) schemaOfData), data);
-            iiBuilder.nodeWithKey(schemaOfData.getQName(), keys);
-        } else {
-            iiBuilder.node(schemaOfData.getQName());
-        }
+        iiBuilder.node(schemaOfData.getQName());
 
         InstanceIdentifier instance = iiBuilder.toInstance();
         MountInstance mountPoint = null;
@@ -1004,7 +1144,7 @@ public class RestconfImpl implements RestconfService {
         return identifier.endsWith(ControllerContext.MOUNT) || identifier.endsWith(ControllerContext.MOUNT + "/");
     }
 
-    private boolean representsMountPointRootData(final CompositeNode data) {
+    private boolean representsMountPointRootData(final Node<?> data) {
         URI namespace = this.namespace(data);
         return (SchemaContext.NAME.getNamespace().equals(namespace) /*
                                                                      * || MOUNT_POINT_MODULE_NAME .equals( namespace .
@@ -1022,8 +1162,7 @@ public class RestconfImpl implements RestconfService {
         return identifier + "/" + ControllerContext.MOUNT;
     }
 
-    private CompositeNode normalizeNode(final CompositeNode node, final DataSchemaNode schema,
-            final MountInstance mountPoint) {
+    private CompositeNode normalizeNode(final Node<?> node, final DataSchemaNode schema, final MountInstance mountPoint) {
         if (schema == null) {
             QName nodeType = node == null ? null : node.getNodeType();
             String localName = nodeType == null ? null : nodeType.getLocalName();
@@ -1037,20 +1176,28 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        if ((node instanceof CompositeNodeWrapper)) {
-            boolean isChangeAllowed = ((CompositeNodeWrapper) node).isChangeAllowed();
+        if ((node instanceof NodeWrapper<?>)) {
+            NodeWrapper<?> nodeWrap = (NodeWrapper<?>) node;
+            boolean isChangeAllowed = ((NodeWrapper<?>) node).isChangeAllowed();
             if (isChangeAllowed) {
+                nodeWrap = topLevelElementAsCompositeNodeWrapper((NodeWrapper<?>) node, schema);
                 try {
-                    this.normalizeNode(((CompositeNodeWrapper) node), schema, null, mountPoint);
+                    this.normalizeNode(nodeWrap, schema, null, mountPoint);
                 } catch (IllegalArgumentException e) {
                     throw new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
                 }
+                if (nodeWrap instanceof CompositeNodeWrapper) {
+                    return ((CompositeNodeWrapper) nodeWrap).unwrap();
+                }
             }
-
-            return ((CompositeNodeWrapper) node).unwrap();
         }
 
-        return node;
+        if (node instanceof CompositeNode) {
+            return (CompositeNode) node;
+        }
+
+        throw new RestconfDocumentedException("Top level element is not interpreted as composite node.",
+                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE);
     }
 
     private void normalizeNode(final NodeWrapper<? extends Object> nodeBuilder, final DataSchemaNode schema,
@@ -1248,9 +1395,9 @@ public class RestconfImpl implements RestconfService {
         return currentAugment;
     }
 
-    private URI namespace(final CompositeNode data) {
-        if (data instanceof CompositeNodeWrapper) {
-            return ((CompositeNodeWrapper) data).getNamespace();
+    private URI namespace(final Node<?> data) {
+        if (data instanceof NodeWrapper) {
+            return ((NodeWrapper<?>) data).getNamespace();
         } else if (data != null) {
             return data.getNodeType().getNamespace();
         } else {
@@ -1258,9 +1405,9 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private String localName(final CompositeNode data) {
-        if (data instanceof CompositeNodeWrapper) {
-            return ((CompositeNodeWrapper) data).getLocalName();
+    private String localName(final Node<?> data) {
+        if (data instanceof NodeWrapper) {
+            return ((NodeWrapper<?>) data).getLocalName();
         } else if (data != null) {
             return data.getNodeType().getLocalName();
         } else {
@@ -1268,9 +1415,9 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private String getName(final CompositeNode data) {
-        if (data instanceof CompositeNodeWrapper) {
-            return ((CompositeNodeWrapper) data).getLocalName();
+    private String getName(final Node<?> data) {
+        if (data instanceof NodeWrapper) {
+            return ((NodeWrapper<?>) data).getLocalName();
         } else if (data != null) {
             return data.getNodeType().getLocalName();
         } else {
@@ -1306,5 +1453,100 @@ public class RestconfImpl implements RestconfService {
         } else {
             throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(node).toString());
         }
+    }
+
+    private CompositeNode datastoreNormalizedNodeToCompositeNode(NormalizedNode<?, ?> dataNode, DataSchemaNode schema) {
+        Iterable<Node<?>> nodes = null;
+        if (dataNode == null) {
+            throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
+                    "No data was found."));
+        }
+        if (schema instanceof ContainerSchemaNode && dataNode instanceof ContainerNode) {
+            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getContainerNodeSerializer()
+                    .serialize((ContainerSchemaNode) schema, (ContainerNode) dataNode);
+        } else if (schema instanceof ListSchemaNode && dataNode instanceof MapNode) {
+            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getMapNodeSerializer()
+                    .serialize((ListSchemaNode) schema, (MapNode) dataNode);
+        } else if (schema instanceof ListSchemaNode && dataNode instanceof MapEntryNode) {
+            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getMapEntryNodeSerializer()
+                    .serialize((ListSchemaNode) schema, (MapEntryNode) dataNode);
+        }
+        if (nodes != null) {
+            if (nodes.iterator().hasNext()) {
+                Node<?> nodeOldStruct = nodes.iterator().next();
+                return (CompositeNode) nodeOldStruct;
+            } else {
+                LOG.error("The node " + dataNode.getNodeType() + " couldn't be transformed to compositenode.");
+            }
+        } else {
+            LOG.error("Top level node isn't of type Container or List schema node but "
+                    + schema.getClass().getSimpleName());
+        }
+
+        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "It wasn't possible to correctly interpret data."));
+    }
+
+    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(CompositeNode compNode, DataSchemaNode schema) {
+        List<Node<?>> lst = new ArrayList<Node<?>>();
+        lst.add(compNode);
+        if (schema instanceof ContainerSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
+                    .parse(lst, (ContainerSchemaNode) schema);
+        } else if (schema instanceof ListSchemaNode) {
+            return CnSnToNormalizedNodeParserFactory.getInstance().getMapNodeParser()
+                    .parse(lst, (ListSchemaNode) schema);
+        }
+
+        LOG.error("Top level isn't of type container, list, leaf schema node but " + schema.getClass().getSimpleName());
+
+        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "It wasn't possible to translate specified data to datastore readable form."));
+    }
+
+    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(InstanceIdWithSchemaNode iiWithSchemaNode) {
+        return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
+    }
+
+    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
+            InstanceIdWithSchemaNode iiWithSchemaNode, boolean unwrapLastListNode) {
+        return new InstanceIdWithSchemaNode(instanceIdentifierToReadableFormForNormalizeNode(
+                iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
+                iiWithSchemaNode.getMountPoint());
+    }
+
+    private InstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(InstanceIdentifier instIdentifier,
+            boolean unwrapLastListNode) {
+        Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
+        final List<PathArgument> result = new ArrayList<PathArgument>();
+        final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
+        while (iter.hasNext()) {
+            final PathArgument pathArgument = iter.next();
+            if (pathArgument instanceof NodeIdentifierWithPredicates && (iter.hasNext() || unwrapLastListNode)) {
+                result.add(new InstanceIdentifier.NodeIdentifier(pathArgument.getNodeType()));
+            }
+            result.add(pathArgument);
+        }
+        return InstanceIdentifier.create(result);
+    }
+
+    private CompositeNodeWrapper topLevelElementAsCompositeNodeWrapper(final NodeWrapper<?> node,
+            final DataSchemaNode schemaNode) {
+        if (node instanceof CompositeNodeWrapper) {
+            return (CompositeNodeWrapper) node;
+        } else if (node instanceof SimpleNodeWrapper && isDataContainerNode(schemaNode)) {
+            final SimpleNodeWrapper simpleNodeWrapper = (SimpleNodeWrapper) node;
+            return new CompositeNodeWrapper(namespace(simpleNodeWrapper), localName(simpleNodeWrapper));
+        }
+
+        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+                "Top level element has to be composite node or has to represent data container node."));
+    }
+
+    private boolean isDataContainerNode(final DataSchemaNode schemaNode) {
+        if (schemaNode instanceof ContainerSchemaNode || schemaNode instanceof ListSchemaNode) {
+            return true;
+        }
+        return false;
     }
 }
