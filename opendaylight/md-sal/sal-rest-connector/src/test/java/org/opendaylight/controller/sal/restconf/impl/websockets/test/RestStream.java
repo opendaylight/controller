@@ -32,6 +32,9 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class RestStream extends JerseyTest {
 
@@ -68,17 +71,20 @@ public class RestStream extends JerseyTest {
     public void testCallRpcCallGet() throws UnsupportedEncodingException, InterruptedException {
         String uri = "/operations/sal-remote:create-data-change-event-subscription";
         Response responseWithStreamName = post(uri, MediaType.APPLICATION_XML, getRpcInput());
-        String xmlResponse = responseWithStreamName.readEntity(String.class);
+        Document xmlResponse = responseWithStreamName.readEntity(Document.class);
         assertNotNull(xmlResponse);
-        assertTrue(xmlResponse
-                .contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
+        Element outputElement = xmlResponse.getDocumentElement();
+        assertEquals("output",outputElement.getLocalName());
 
-        uri = "/streams/stream/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0";
+        Node streamNameElement = outputElement.getFirstChild();
+        assertEquals("stream-name",streamNameElement.getLocalName());
+        assertEquals("ietf-interfaces:interfaces/ietf-interfaces:interface/eth0/datastore=CONFIGURATION/scope=BASE",streamNameElement.getTextContent());
+
+        uri = "/streams/stream/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0/datastore=CONFIGURATION/scope=BASE";
         Response responseWithRedirectionUri = get(uri, MediaType.APPLICATION_XML);
         final URI websocketServerUri = responseWithRedirectionUri.getLocation();
         assertNotNull(websocketServerUri);
-        assertEquals(websocketServerUri.toString(),
-                "http://localhost:8181/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0");
+        assertTrue(websocketServerUri.toString().matches(".*http://localhost:[\\d]+/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0.*"));
     }
 
     private Response post(String uri, String mediaType, String data) {

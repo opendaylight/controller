@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 
 public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
@@ -67,12 +68,12 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
      */
     @Test
     public void xmlAndYangTypesWithJsonReaderTest() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-yang-types/xml/data.xml",
+        Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-yang-types/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
         String jsonOutput = null;
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }
