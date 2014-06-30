@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
@@ -15,10 +15,10 @@ public class InstanceIdWithSchemaNode {
 
     private final YangInstanceIdentifier instanceIdentifier;
     private final DataSchemaNode schemaNode;
-    private final MountInstance mountPoint;
+    private final DOMMountPoint mountPoint;
 
     public InstanceIdWithSchemaNode(YangInstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode,
-            MountInstance mountPoint) {
+            DOMMountPoint mountPoint) {
         this.instanceIdentifier = instanceIdentifier;
         this.schemaNode = schemaNode;
         this.mountPoint = mountPoint;
@@ -32,7 +32,7 @@ public class InstanceIdWithSchemaNode {
         return schemaNode;
     }
 
-    public MountInstance getMountPoint() {
+    public DOMMountPoint getMountPoint() {
         return mountPoint;
     }
 

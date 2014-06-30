@@ -23,25 +23,25 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.OPERATION + RestconfService.XML,
         MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
+public enum XmlToCompositeNodeProvider implements MessageBodyReader<Node<?>> {
     INSTANCE;
-
     private final static Logger LOG = LoggerFactory.getLogger(XmlToCompositeNodeProvider.class);
 
     @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType) {
         return true;
     }
 
     @Override
-    public CompositeNode readFrom(Class<CompositeNode> type, Type genericType, Annotation[] annotations,
+    public Node<?> readFrom(final Class<Node<?>> type, final Type genericType, final Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
         XmlToCompositeNodeReader xmlReader = new XmlToCompositeNodeReader();

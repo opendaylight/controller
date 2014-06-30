@@ -33,8 +33,11 @@ public class XmlLeafrefToCnSnTest {
      */
     @Test
     public void testXmlDataContainer() {
-        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/data-container.xml", false,
+        Node<?> node = TestUtils.readInputToCnSn("/xml-to-cnsn/data-container.xml", false,
                 XmlToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compNode = (CompositeNode)node;
+
         assertNotNull(compNode);
         Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-container-yang");
 
@@ -76,9 +79,11 @@ public class XmlLeafrefToCnSnTest {
 
     @Test
     public void testXmlDataList() {
-        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/data-list.xml", false,
+        Node<?> node = TestUtils.readInputToCnSn("/xml-to-cnsn/data-list.xml", false,
                 XmlToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compNode = (CompositeNode)node;
+
 
         Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-list-yang");
         assertNotNull(modules);
@@ -93,22 +98,22 @@ public class XmlLeafrefToCnSnTest {
         CompositeNode lst1_1 = null;
         CompositeNode lst1_2 = null;
         int loopCount = 0;
-        for (Node<?> node : compNode.getValue()) {
-            if (node.getNodeType().getLocalName().equals("lf1")) {
-                assertEquals(nameSpaceList, node.getNodeType().getNamespace().toString());
-                assertTrue(node instanceof SimpleNode<?>);
-                assertEquals("lf1", node.getValue());
+        for (Node<?> nd : compNode.getValue()) {
+            if (nd.getNodeType().getLocalName().equals("lf1")) {
+                assertEquals(nameSpaceList, nd.getNodeType().getNamespace().toString());
+                assertTrue(nd instanceof SimpleNode<?>);
+                assertEquals("lf1", nd.getValue());
             } else {
-                assertTrue(node instanceof CompositeNode);
+                assertTrue(nd instanceof CompositeNode);
                 switch (loopCount++) {
                 case 0:
-                    lst1_1 = (CompositeNode) node;
+                    lst1_1 = (CompositeNode) nd;
                     break;
                 case 1:
-                    lst1_2 = (CompositeNode) node;
+                    lst1_2 = (CompositeNode) nd;
                     break;
                 }
-                assertEquals(nameSpaceCont, node.getNodeType().getNamespace().toString());
+                assertEquals(nameSpaceCont, nd.getNodeType().getNamespace().toString());
             }
         }
         // lst1_1
@@ -118,15 +123,15 @@ public class XmlLeafrefToCnSnTest {
         // lst1_2
         SimpleNode<?> lflst11 = null;
         CompositeNode cont11 = null;
-        for (Node<?> node : lst1_2.getValue()) {
-            String nodeName = node.getNodeType().getLocalName();
+        for (Node<?> nd : lst1_2.getValue()) {
+            String nodeName = nd.getNodeType().getLocalName();
             if (nodeName.equals("lflst11")) {
-                assertTrue(node instanceof SimpleNode<?>);
-                lflst11 = (SimpleNode<?>) node;
+                assertTrue(nd instanceof SimpleNode<?>);
+                lflst11 = (SimpleNode<?>) nd;
 
             } else if (nodeName.equals("cont11")) {
-                assertTrue(node instanceof CompositeNode);
-                cont11 = (CompositeNode) node;
+                assertTrue(nd instanceof CompositeNode);
+                cont11 = (CompositeNode) nd;
             }
             assertEquals(nameSpaceCont, compNode.getNodeType().getNamespace().toString());
         }
@@ -144,32 +149,35 @@ public class XmlLeafrefToCnSnTest {
 
     @Test
     public void testXmlEmptyData() {
-        CompositeNode compNode = TestUtils.readInputToCnSn("/xml-to-cnsn/empty-data.xml", true,
+        Node<?> node = TestUtils.readInputToCnSn("/xml-to-cnsn/empty-data.xml", true,
                 XmlToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compNode = (CompositeNode)node;
+
         assertEquals("cont", compNode.getNodeType().getLocalName());
         SimpleNode<?> lf1 = null;
         SimpleNode<?> lflst1_1 = null;
         SimpleNode<?> lflst1_2 = null;
         CompositeNode lst1 = null;
         int lflst1Count = 0;
-        for (Node<?> node : compNode.getValue()) {
-            if (node.getNodeType().getLocalName().equals("lf1")) {
-                assertTrue(node instanceof SimpleNode<?>);
-                lf1 = (SimpleNode<?>) node;
-            } else if (node.getNodeType().getLocalName().equals("lflst1")) {
-                assertTrue(node instanceof SimpleNode<?>);
+        for (Node<?> nd : compNode.getValue()) {
+            if (nd.getNodeType().getLocalName().equals("lf1")) {
+                assertTrue(nd instanceof SimpleNode<?>);
+                lf1 = (SimpleNode<?>) nd;
+            } else if (nd.getNodeType().getLocalName().equals("lflst1")) {
+                assertTrue(nd instanceof SimpleNode<?>);
 
                 switch (lflst1Count++) {
                 case 0:
-                    lflst1_1 = (SimpleNode<?>) node;
+                    lflst1_1 = (SimpleNode<?>) nd;
                     break;
                 case 1:
-                    lflst1_2 = (SimpleNode<?>) node;
+                    lflst1_2 = (SimpleNode<?>) nd;
                     break;
                 }
-            } else if (node.getNodeType().getLocalName().equals("lst1")) {
-                assertTrue(node instanceof CompositeNode);
-                lst1 = (CompositeNode) node;
+            } else if (nd.getNodeType().getLocalName().equals("lst1")) {
+                assertTrue(nd instanceof CompositeNode);
+                lst1 = (CompositeNode) nd;
             }
         }
 
@@ -317,8 +325,10 @@ public class XmlLeafrefToCnSnTest {
 
     private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName,
             final String schemaName, final int moduleCount, final String resultLocalName, final String resultNamespace) {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        Node<?> node = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
+
 
         Set<Module> modules = TestUtils.loadModulesFrom(yangPath);
         assertEquals(moduleCount, modules.size());

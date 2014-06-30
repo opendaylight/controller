@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -52,19 +53,21 @@ public class JsonToCnSnTest {
      */
     @Test
     public void multipleItemsInLeafList() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-leaflist-items.json", true,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-leaflist-items.json", true,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertNotNull(node);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
         assertEquals(3, compositeNode.getValue().size());
 
         boolean lflst1_1 = false;
         boolean lflst1_2 = false;
         boolean lflst1_3 = false;
 
-        for (Node<?> node : compositeNode.getValue()) {
-            assertEquals("lflst1", node.getNodeType().getLocalName());
-            assertTrue(node instanceof SimpleNode<?>);
-            SimpleNode<?> simpleNode = (SimpleNode<?>) node;
+        for (Node<?> nd : compositeNode.getValue()) {
+            assertEquals("lflst1", nd.getNodeType().getLocalName());
+            assertTrue(nd instanceof SimpleNode<?>);
+            SimpleNode<?> simpleNode = (SimpleNode<?>) nd;
             if (simpleNode.getValue().equals("45")) {
                 lflst1_1 = true;
             } else if (simpleNode.getValue().equals("55")) {
@@ -86,8 +89,11 @@ public class JsonToCnSnTest {
      */
     @Test
     public void multipleItemsInListTest() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-items-in-list.json", true,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/multiple-items-in-list.json", true,
                 JsonToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
 
         assertNotNull(compositeNode);
         assertEquals("lst", compositeNode.getNodeType().getLocalName());
@@ -97,9 +103,10 @@ public class JsonToCnSnTest {
 
     @Test
     public void nullArrayToSimpleNodeWithNullValueTest() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/array-with-null.json", true,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/array-with-null.json", true,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
         assertNotNull(compositeNode.getValue());
@@ -163,10 +170,10 @@ public class JsonToCnSnTest {
      */
     @Test
     public void emptyDataReadTest() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/empty-data.json", true,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/empty-data.json", true,
                 JsonToCompositeNodeProvider.INSTANCE);
-
-        assertNotNull(compositeNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
         assertTrue(compositeNode instanceof CompositeNode);
@@ -189,9 +196,9 @@ public class JsonToCnSnTest {
     @Test
     public void testJsonBlankInput() throws Exception {
         InputStream inputStream = new ByteArrayInputStream("".getBytes());
-        CompositeNode compositeNode = JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null,
-                inputStream);
-        assertNull(compositeNode);
+        Node<?> node =
+                JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+        assertNull( node );
     }
 
     /**
@@ -202,9 +209,10 @@ public class JsonToCnSnTest {
     @Test
     public void notSupplyNamespaceIfAlreadySupplied() {
 
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/simple-list.json", false,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/simple-list.json", false,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
 
         // supplement namespaces according to first data schema -
         // "simple:data:types1"
@@ -223,15 +231,21 @@ public class JsonToCnSnTest {
         assertEquals("lst", compNode.getNodeType().getLocalName());
         verifyCompositeNode(compNode, "simple:list:yang1");
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
+        try {
+            TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
+            fail("Conversion to normalized node shouldn't be successfull because of different namespaces");
+        } catch (IllegalStateException e) {
+        }
+//        veryfing has still meaning. despite exception, first phase where normalization of NodeWrappers is called passed successfuly.
         verifyCompositeNode(compNode, "simple:list:yang1");
     }
 
     @Test
     public void jsonIdentityrefToCompositeNode() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/json-to-cnsn/identityref/json/data.json", false,
+        Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/identityref/json/data.json", false,
                 JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
 
         Set<Module> modules = TestUtils.loadModulesFrom("/json-to-cnsn/identityref");
         assertEquals(2, modules.size());
@@ -298,8 +312,9 @@ public class JsonToCnSnTest {
 
     private CompositeNode loadAndNormalizeData(final String jsonPath, final String yangPath,
             final String topLevelElementName, final String moduleName) {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        Node<?> node = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
 
         Set<Module> modules = null;
         modules = TestUtils.loadModulesFrom(yangPath);

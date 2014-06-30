@@ -15,16 +15,16 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -54,12 +54,12 @@ public class RestconfImplTest {
     }
 
     @Test
-    public void testExample() throws FileNotFoundException {
-        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml",
-                XmlToCompositeNodeProvider.INSTANCE);
+    public void testExample() throws FileNotFoundException, ParseException {
+        NormalizedNode normalizedNodeData = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(loadedCompositeNode);
-        assertEquals(loadedCompositeNode, brokerFacade.readOperationalData(null));
+        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(normalizedNodeData);
+        assertEquals(normalizedNodeData,
+                brokerFacade.readOperationalData(null));
     }
 
 }
