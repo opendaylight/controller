@@ -9,29 +9,7 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.osgi.framework.BundleContext;
 
 public class BindingAsyncDataBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModuleFactory {
 
-
-
-
-    @Override
-    public BindingAsyncDataBrokerImplModule instantiateModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final BindingAsyncDataBrokerImplModule oldModule,
-            final AutoCloseable oldInstance, final BundleContext bundleContext) {
-        BindingAsyncDataBrokerImplModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule, oldInstance, bundleContext);
-        module.setBundleContext(bundleContext);
-        return module;
-    }
-
-    @Override
-    public BindingAsyncDataBrokerImplModule instantiateModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
-        // TODO Auto-generated method stub
-        BindingAsyncDataBrokerImplModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
-        module.setBundleContext(bundleContext);
-        return module;
-    }
 }

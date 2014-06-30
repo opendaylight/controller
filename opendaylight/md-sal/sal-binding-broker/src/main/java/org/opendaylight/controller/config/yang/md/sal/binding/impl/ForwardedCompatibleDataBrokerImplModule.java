@@ -19,7 +19,6 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-import org.osgi.framework.BundleContext;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 
@@ -29,8 +28,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 public final class ForwardedCompatibleDataBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractForwardedCompatibleDataBrokerImplModule
         implements Provider {
-
-    private BundleContext bundleContext;
 
     public ForwardedCompatibleDataBrokerImplModule(
             final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
@@ -57,7 +54,7 @@ public final class ForwardedCompatibleDataBrokerImplModule extends
         BindingIndependentMappingService mappingService = getBindingMappingServiceDependency();
 
         Broker domBroker = getDomAsyncBrokerDependency();
-        ProviderSession session = domBroker.registerProvider(this, getBundleContext());
+        ProviderSession session = domBroker.registerProvider(this, null);
         DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
         SchemaService schemaService = session.getService(SchemaService.class);
         ForwardedBackwardsCompatibleDataBroker dataBroker = new ForwardedBackwardsCompatibleDataBroker(domDataBroker,
@@ -66,14 +63,6 @@ public final class ForwardedCompatibleDataBrokerImplModule extends
         dataBroker.setConnector(BindingDomConnectorDeployer.createConnector(getBindingMappingServiceDependency()));
         dataBroker.setDomProviderContext(session);
         return dataBroker;
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(final BundleContext bundleContext2) {
-        this.bundleContext = bundleContext2;
     }
 
     @Override
