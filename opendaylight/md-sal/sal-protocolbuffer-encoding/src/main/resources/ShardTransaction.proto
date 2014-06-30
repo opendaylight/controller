@@ -1,5 +1,7 @@
 package org.opendaylight.controller.mdsal;
 
+import "SimpleNormalizedNode.proto";
+
 option java_package = "org.opendaylight.controller.cluster.datastore.transaction";
 option java_outer_classname = "ShardTransactionMessages";
 
@@ -28,12 +30,26 @@ required string actorPath = 1;
 }
 
 message DeleteData {
-required string instanceIdentifierPath = 1;
+repeated string instanceIdentifierPathArguments = 1;
 }
 
 message DeleteDataReply{
 
 }
 message ReadData {
-required string intanceIdentifier=1;
+required string instanceIdentifierPathArguments=1;
+}
+
+message ReadDataReply{
+  required NormalizedNodeXml normalizedNode=1;
+}
+
+message WriteData {
+ repeated string instanceIdentifierPathArguments = 1;
+required NormalizedNodeXml normalizedNode =2;
+
+}
+
+message WriteDataReply{
+
 }

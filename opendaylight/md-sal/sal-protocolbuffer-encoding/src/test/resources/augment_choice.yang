@@ -1,0 +1,109 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:test";
+    prefix "test";
+
+    organization "Cisco Systems, Inc.";
+
+    revision "2014-3-13" {
+        description
+            "Initial revision";
+    }
+
+
+    container container {
+        choice ch2{}
+        choice ch3{
+            case c3 {
+                leaf c3Leaf {
+                    type string;
+                }
+            }
+        }
+    }
+
+    augment "/container/" {
+        leaf augLeaf {
+            type string;
+        }
+    }
+
+    augment "/container/" {
+        choice ch{}
+    }
+
+    augment "/container/ch/" {
+        case c1 {
+            leaf c1Leaf {
+                type string;
+            }
+        }
+
+        leaf c12 {
+            type string;
+        }
+    }
+    augment "/container/ch/c1/" {
+        leaf c1Leaf_AnotherAugment {
+            type string;
+        }
+
+        choice deepChoice{}
+    }
+
+    augment "/container/ch3/" {
+        case c32 {
+            leaf c32Leaf {
+                type string;
+            }
+        }
+
+        leaf c34LeafS {
+            type string;
+        }
+    }
+
+
+    augment "/container/ch/c1/deepChoice/" {
+        case deepCase1 {
+            leaf deepLeafc1 {
+                type string;
+            }
+        }
+        case deepCase2 {
+            leaf deepLeafc2 {
+                type string;
+            }
+        }
+    }
+
+    augment "/container/ch2/" {
+        case c2 {
+            leaf c2Leaf {
+                type string;
+            }
+
+            choice c2DeepChoice {
+                case c2DeepChoiceCase1 {
+                    leaf c2DeepChoiceCase1Leaf1 {
+                        type string;
+                    }
+                }
+                case c2DeepChoiceCase2 {
+                    leaf c2DeepChoiceCase1Leaf2 {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/container/ch2/" {
+        leaf c22Leaf {
+            type string;
+        }
+    }
+
+
+}

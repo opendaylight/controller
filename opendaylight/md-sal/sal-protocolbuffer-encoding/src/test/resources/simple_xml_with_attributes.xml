@@ -1,0 +1,12 @@
+<container xmlns="urn:opendaylight:params:xml:ns:yang:controller:test" name="test" xmlns:foo="http://www.foo.com/"
+           foo:baz="baz">
+
+    <list list="on list entry">
+        <uint32InList name="test" foo:baz="baz">3</uint32InList>
+    </list>
+
+    <boolean xmlns:leaf="test:namespace:in:leaf" leaf:a="b">false</boolean>
+
+    <leafList foo:b="b">a</leafList>
+
+</container>
