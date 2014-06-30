@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e8479c75",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-06-30T12:54:26Z",
+      "side": 1,
+      "message": "This is the last place where we missed passing in the parameter to prettyPrint the format.",
+      "revId": "f46c601e74e6add6f1a5799876cd24f362a5d0db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
