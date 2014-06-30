@@ -66,6 +66,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 public class BindingTestContext implements AutoCloseable {
@@ -160,11 +161,10 @@ public class BindingTestContext implements AutoCloseable {
 
         newDOMDataBroker = new DOMDataBrokerImpl(newDatastores, executor);
 
-        biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker);
+        biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker,mockSchemaService);
 
         mockSchemaService.registerSchemaServiceListener(configStore);
         mockSchemaService.registerSchemaServiceListener(operStore);
-        mockSchemaService.registerSchemaServiceListener(biCompatibleBroker);
         biDataLegacyBroker = biCompatibleBroker;
     }
 
@@ -338,8 +338,10 @@ public class BindingTestContext implements AutoCloseable {
 
     private void startDomBroker() {
         checkState(executor != null);
-        biBrokerImpl = new BrokerImpl();
-        biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", mockSchemaService));
+
+        SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", mockSchemaService);
+        ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
+        biBrokerImpl = new BrokerImpl(router,services);
 
     }
 
