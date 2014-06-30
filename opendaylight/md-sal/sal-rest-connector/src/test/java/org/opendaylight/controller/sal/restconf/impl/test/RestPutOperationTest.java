@@ -38,8 +38,8 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestPutOperationTest extends JerseyTest {
@@ -122,8 +122,8 @@ public class RestPutOperationTest extends JerseyTest {
         Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
                 rpcResult).build();
         when(
-                brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
-                        any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
+                brokerFacade.commitConfigurationDataPut(any(MountInstance.class),
+                        any(InstanceIdentifier.class), any(NormalizedNode.class))).thenReturn(dummyFuture);
 
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
@@ -146,8 +146,8 @@ public class RestPutOperationTest extends JerseyTest {
         Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
                 rpcResult).build();
         when(
-                brokerFacade.commitConfigurationDataPutBehindMountPoint(any(MountInstance.class),
-                        any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
+                brokerFacade.commitConfigurationDataPut(any(MountInstance.class),
+                        any(InstanceIdentifier.class), any(NormalizedNode.class))).thenReturn(dummyFuture);
 
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
@@ -169,7 +169,7 @@ public class RestPutOperationTest extends JerseyTest {
                 .build();
         Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
                 rpcResult).build();
-        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(dummyFuture);
     }
 

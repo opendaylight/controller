@@ -10,20 +10,20 @@ package org.opendaylight.controller.sal.rest.api;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.Encoded;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 /**
  *   The URI hierarchy for the RESTCONF resources consists of an entry
@@ -121,19 +121,19 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, CompositeNode payload);
+    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, CompositeNode payload);
+    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
 
     @POST
     @Path("/config")
     @Consumes({Draft02.MediaTypes.DATA+JSON,Draft02.MediaTypes.DATA+XML,
                MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    public Response createConfigurationData(CompositeNode payload);
+    public Response createConfigurationData(Node<?> payload);
 
     @DELETE
     @Path("/config/{identifier:.+}")
@@ -141,7 +141,15 @@ public interface RestconfService {
 
     @GET
     @Path("/streams/stream/{identifier:.+}")
-    public Response subscribeToStream(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    public Response subscribeToStreamDefault(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+
+    @GET
+    @Path("/streams/stream/config/{identifier:.+}")
+    public Response subscribeToStreamConfig(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+
+    @GET
+    @Path("/streams/stream/operational/{identifier:.+}")
+    public Response subscribeToStreamOperational(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/streams")
