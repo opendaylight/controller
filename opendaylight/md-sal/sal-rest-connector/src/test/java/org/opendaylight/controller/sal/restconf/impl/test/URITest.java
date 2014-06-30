@@ -14,6 +14,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import java.io.FileNotFoundException;
 import java.util.Set;
@@ -21,8 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
@@ -153,7 +154,7 @@ public class URITest {
     }
 
     public void initMountService(final boolean withSchema) {
-        MountService mountService = mock(MountService.class);
+        DOMMountPointService mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         RestconfImpl restconfImpl = RestconfImpl.getInstance();
@@ -162,12 +163,12 @@ public class URITest {
 
         Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
         SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
-        MountInstance mountInstance = mock(MountInstance.class);
+        DOMMountPoint mountInstance = mock(DOMMountPoint.class);
         if (withSchema) {
             when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
         } else {
             when(mountInstance.getSchemaContext()).thenReturn(null);
         }
-        when(mountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
     }
 }

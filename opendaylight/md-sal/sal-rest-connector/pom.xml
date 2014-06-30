@@ -105,6 +105,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-spi</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-composite-node</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>
