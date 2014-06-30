@@ -17,7 +17,8 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.valid.DataValidationException;
 
 public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -31,7 +32,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
      * return error because nodes has to be from one case below concrete choice.
      *
      */
-    @Test
+    @Test(expected=DataValidationException.class)
     public void nodeSchemasOnVariousChoiceCasePathTest() {
         testWrapper("/cnsn-to-json/choice/xml/data_various_path_err.xml", "choice-case-test:cont");
     }
@@ -42,7 +43,7 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
      * choice.
      *
      */
-    @Test
+    @Test(expected=DataValidationException.class)
     public void nodeSchemasOnVariousChoiceCasePathAndMultipleChoicesTest() {
         testWrapper("/cnsn-to-json/choice/xml/data_more_choices_same_level_various_paths_err.xml",
                 "choice-case-test:cont");
@@ -116,10 +117,10 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     private void testWrapper(String xmlPath, String pathToSchemaNode) {
-        CompositeNode compNode = TestUtils.readInputToCnSn(xmlPath, XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(compNode, modules, pathToSchemaNode);
+        Node<?> node = TestUtils.readInputToCnSn(xmlPath, XmlToCompositeNodeProvider.INSTANCE);
+        TestUtils.normalizeCompositeNode(node, modules, pathToSchemaNode);
         try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(compNode, modules, dataSchemaNode,
+            TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
