@@ -39,7 +39,7 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
 
         assertNotNull(dataSchemaNode);
-        TestUtils.normalizeCompositeNode(compositeNode, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext, schemaNodePath);
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 

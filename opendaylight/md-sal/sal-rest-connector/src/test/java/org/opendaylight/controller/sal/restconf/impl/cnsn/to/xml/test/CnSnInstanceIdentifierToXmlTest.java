@@ -38,7 +38,7 @@ public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoad
     @Test
     public void snAsYangInstanceIdentifier() throws WebApplicationException, IOException, URISyntaxException {
         CompositeNode cnSnData = prepareCnStructForYangData();
-        String xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSnData, modules, dataSchemaNode,
+        String xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSnData, schemaContext, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         assertNotNull(xmlOutput);
     }

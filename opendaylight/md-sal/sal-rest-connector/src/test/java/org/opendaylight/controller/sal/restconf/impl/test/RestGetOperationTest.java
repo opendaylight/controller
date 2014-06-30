@@ -109,6 +109,8 @@ public class RestGetOperationTest extends JerseyTest {
     public static void init() throws FileNotFoundException, ParseException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
+        assertNotNull(schemaContextYangsIetf);
+        assertNotNull(schemaContextTestModule);
         ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);
         brokerFacade = mock(BrokerFacade.class);
@@ -119,6 +121,8 @@ public class RestGetOperationTest extends JerseyTest {
 
         schemaContextModules = TestUtils.loadSchemaContext("/modules");
         schemaContextBehindMountPoint = TestUtils.loadSchemaContext("/modules/modules-behind-mount-point");
+        assertNotNull(schemaContextModules);
+        assertNotNull(schemaContextBehindMountPoint);
     }
 
     @Override
@@ -625,14 +629,6 @@ public class RestGetOperationTest extends JerseyTest {
         Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
         return ptrn.matcher(searchIn);
 
-    }
-
-
-    private void prepareMockForModulesTest(final ControllerContext mockedControllerContext)
-            throws FileNotFoundException {
-        SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
-        mockedControllerContext.setGlobalSchema(schemaContext);
-        // when(mockedControllerContext.getGlobalSchema()).thenReturn(schemaContext);
     }
 
     private int get(final String uri, final String mediaType) {

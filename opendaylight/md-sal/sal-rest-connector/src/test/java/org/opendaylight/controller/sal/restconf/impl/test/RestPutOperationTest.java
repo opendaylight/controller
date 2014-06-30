@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -60,6 +61,9 @@ public class RestPutOperationTest extends JerseyTest {
     public static void init() throws IOException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
+        assertNotNull(schemaContextYangsIetf);
+        assertNotNull(schemaContextTestModule);
+
         ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);
         brokerFacade = mock(BrokerFacade.class);

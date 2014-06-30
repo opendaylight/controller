@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -31,6 +32,7 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
     @BeforeClass
     public static void init() throws FileNotFoundException {
         SchemaContext schemaContextTestModule = TestUtils.loadSchemaContext("/common/augment/yang");
+        assertNotNull(schemaContextTestModule);
         controllerContext.setSchemas(schemaContextTestModule);
     }
 

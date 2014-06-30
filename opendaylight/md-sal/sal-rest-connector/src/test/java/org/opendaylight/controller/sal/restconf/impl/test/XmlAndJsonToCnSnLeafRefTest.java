@@ -35,7 +35,7 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
 
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyContPredicate(cnSn, "/ns:cont/ns:lf1", "/cont/lf1", "/ns:cont/ns:lf1", "../lf1");
     }
 
@@ -46,7 +46,7 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
 
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyContPredicate(cnSn, "/leafref-module:cont/leafref-module:lf1", "/leafref-module:cont/leafref-module:lf1",
                 "/referenced-module:cont/referenced-module:lf1", "/leafref-module:cont/leafref-module:lf1");
     }

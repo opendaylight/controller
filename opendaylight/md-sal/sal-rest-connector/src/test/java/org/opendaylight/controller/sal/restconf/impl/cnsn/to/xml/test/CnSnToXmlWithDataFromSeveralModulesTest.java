@@ -23,7 +23,6 @@ import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -34,8 +33,7 @@ public class CnSnToXmlWithDataFromSeveralModulesTest extends YangAndXmlAndDataSc
 
     @Test
     public void dataFromSeveralModulesToXmlTest() throws WebApplicationException, IOException, URISyntaxException {
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(modules);
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCnSn(), modules, schemaContext,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCnSn(), schemaContext, schemaContext,
                 StructuredDataToXmlProvider.INSTANCE);
 
         // String output =

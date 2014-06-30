@@ -35,7 +35,7 @@ public class JsonIdentityrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
                 JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(node);
 
-        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
 
         assertEquals("cont", node.getNodeType().getLocalName());
 

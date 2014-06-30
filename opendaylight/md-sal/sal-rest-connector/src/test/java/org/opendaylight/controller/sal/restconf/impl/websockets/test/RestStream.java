@@ -45,6 +45,7 @@ public class RestStream extends JerseyTest {
     @BeforeClass
     public static void init() throws FileNotFoundException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
+        assertNotNull(schemaContextYangsIetf);
         ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);
         brokerFacade = mock(BrokerFacade.class);

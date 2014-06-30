@@ -8,11 +8,12 @@
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.xml.test;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Collections;
 import javax.ws.rs.WebApplicationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.DummyType;
@@ -24,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.slf4j.Logger;
@@ -33,13 +35,14 @@ public class CnSnToXmlNotExistingLeafTypeTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CnSnToXmlNotExistingLeafTypeTest.class);
 
-    @Ignore
     @Test
     public void incorrectTopLevelElementTest() {
 
         boolean nullPointerExceptionRaised = false;
         try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(), Collections.<Module> emptySet(),
+            SchemaContext mockedSchemaContext = mock(SchemaContext.class);
+            doReturn(Collections.<Module> emptySet()).when(mockedSchemaContext).getModules();
+            TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(), mockedSchemaContext,
                     prepareDataSchemaNode(), StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             LOG.error("WebApplicationException or IOException was raised");

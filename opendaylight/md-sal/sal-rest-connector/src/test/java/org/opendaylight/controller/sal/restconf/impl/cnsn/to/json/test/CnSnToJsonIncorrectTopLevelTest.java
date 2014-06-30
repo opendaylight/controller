@@ -149,11 +149,11 @@ public class CnSnToJsonIncorrectTopLevelTest extends YangAndXmlAndDataSchemaLoad
         DataSchemaNode incorrectDataSchema = null;
         incorrectDataSchema = new IncorrectDataSchema();
 
-        TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
+        TestUtils.normalizeCompositeNode(node, schemaContext, "simple-data-types:cont");
 
         boolean exceptionRaised = false;
         try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, incorrectDataSchema,
+            TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, incorrectDataSchema,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (UnsupportedDataTypeException e) {
             exceptionRaised = true;

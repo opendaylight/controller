@@ -35,11 +35,11 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
     public void augmentedElementsToJson() {
         Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/augmentation/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
 
         String jsonOutput = null;
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

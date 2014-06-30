@@ -9,6 +9,8 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.sal.restconf.impl.test.TestUtils.containsStringData;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
@@ -46,8 +49,11 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
     @Test
     public void incorrectTopLevelElementTest() throws WebApplicationException, IOException {
         String jsonOutput = null;
+        SchemaContext mockedSchemaContext = mock(SchemaContext.class);
+        doReturn(Collections.<Module> emptySet()).when(mockedSchemaContext).getModules();
+
         jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                Collections.<Module> emptySet(), prepareDataSchemaNode(), StructuredDataToJsonProvider.INSTANCE);
+                mockedSchemaContext, prepareDataSchemaNode(), StructuredDataToJsonProvider.INSTANCE);
         assertNotNull(jsonOutput);
 
         // pattern for e.g. > "lf1" : "" < or >"lf1":""<

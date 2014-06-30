@@ -28,25 +28,25 @@ public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
     @Test(expected = RestconfDocumentedException.class)
     public void namespaceNotNullAndInvalidNamespaceAndNoModuleNameTest() {
 
-        TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), schemaContext, schemaNodePath);
     }
 
     @Test
     public void namespaceNullTest() {
 
-        TestUtils.normalizeCompositeNode(prepareCnSn(null), modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(prepareCnSn(null), schemaContext, schemaNodePath);
     }
 
     @Test
     public void namespaceValidNamespaceTest() {
 
-        TestUtils.normalizeCompositeNode(prepareCnSn("normalize:node:module"), modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(prepareCnSn("normalize:node:module"), schemaContext, schemaNodePath);
     }
 
     @Test
     public void namespaceValidModuleNameTest() {
 
-        TestUtils.normalizeCompositeNode(prepareCnSn("normalize-node-module"), modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(prepareCnSn("normalize-node-module"), schemaContext, schemaNodePath);
     }
 
     private CompositeNode prepareCnSn(final String namespace) {

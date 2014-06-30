@@ -52,10 +52,10 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
     @Test
     public void compositeNodeAndYangWithJsonReaderEmptyDataTest() {
         CompositeNode compositeNode = prepareCompositeNodeWithEmpties();
-        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
         String jsonOutput = null;
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, schemaContext, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }
@@ -70,10 +70,10 @@ public class CnSnJsonBasicYangTypesTest extends YangAndXmlAndDataSchemaLoader {
     public void xmlAndYangTypesWithJsonReaderTest() {
         Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-yang-types/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
         String jsonOutput = null;
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

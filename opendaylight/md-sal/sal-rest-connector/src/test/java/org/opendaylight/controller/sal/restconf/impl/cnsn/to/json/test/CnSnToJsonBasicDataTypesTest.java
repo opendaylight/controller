@@ -192,9 +192,9 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
         Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
 
-        TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
+        TestUtils.normalizeCompositeNode(node, schemaContext, "simple-data-types:cont");
 
-        String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
+        String jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
 
         assertNotNull(jsonOutput);
@@ -306,7 +306,7 @@ public class CnSnToJsonBasicDataTypesTest extends YangAndXmlAndDataSchemaLoader 
             Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/bad-data.xml",
                     XmlToCompositeNodeProvider.INSTANCE);
 
-            TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
+            TestUtils.normalizeCompositeNode(node, schemaContext, "simple-data-types:cont");
             fail("Expected RestconfDocumentedException");
         } catch (RestconfDocumentedException e) {
             assertEquals("getErrorTag", ErrorTag.INVALID_VALUE, e.getErrors().get(0).getErrorTag());

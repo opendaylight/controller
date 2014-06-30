@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.Set;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -32,7 +31,6 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestDeleteOperationTest extends JerseyTest {
@@ -43,9 +41,8 @@ public class RestDeleteOperationTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
-        assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/test-config-data/yang1");
+        assertNotNull(schemaContext);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
         brokerFacade = mock(BrokerFacade.class);

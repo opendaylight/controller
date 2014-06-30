@@ -32,12 +32,12 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
@@ -52,7 +52,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     @Test
     public void saveCnSnToXmlTest() throws WebApplicationException, IOException, URISyntaxException, XMLStreamException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifier());
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, schemaContext, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         validateXmlOutput(output);
 
@@ -62,7 +62,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     public void saveCnSnWithLeafListInstIdentifierToXmlTest() throws WebApplicationException, IOException,
             URISyntaxException, XMLStreamException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, schemaContext, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         validateXmlOutputWithLeafList(output);
     }
@@ -70,7 +70,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     @Test
     public void saveCnSnToJsonTest() throws WebApplicationException, IOException, URISyntaxException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifier());
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, schemaContext, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
         boolean strInOutput = false;
         strInOutput = containsStringData(
@@ -93,7 +93,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
     public void saveCnSnWithLeafListInstIdentifierToJsonTest() throws WebApplicationException, IOException,
             URISyntaxException {
         CompositeNode cnSn = prepareCnSn(createInstanceIdentifierWithLeafList());
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, modules, dataSchemaNode,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSn, schemaContext, dataSchemaNode,
                 StructuredDataToJsonProvider.INSTANCE);
         boolean strInOutput = false;
         strInOutput = containsStringData(

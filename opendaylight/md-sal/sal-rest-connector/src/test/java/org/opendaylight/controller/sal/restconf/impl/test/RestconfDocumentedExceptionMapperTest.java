@@ -65,6 +65,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -173,7 +174,9 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws Exception {
-        ControllerContext.getInstance().setGlobalSchema(TestUtils.loadSchemaContext("/modules"));
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
+        assertNotNull(schemaContext);
+        ControllerContext.getInstance().setGlobalSchema(schemaContext);
 
         NamespaceContext nsContext = new NamespaceContext() {
             @Override

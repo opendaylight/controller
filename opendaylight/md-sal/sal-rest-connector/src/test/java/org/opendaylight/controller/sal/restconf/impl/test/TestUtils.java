@@ -18,17 +18,17 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,11 +78,14 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
+import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+//import java.sql.Date;
 
 public final class TestUtils {
 
@@ -90,12 +93,32 @@ public final class TestUtils {
 
     private final static YangContextParser parser = new YangParserImpl();
 
-    private static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
+    public static SchemaContext loadSchemaContext(String yangPath) {
+        final Collection<File> yangFilesInDirectory = yangFilesInDirectory(yangPath);
+        try {
+            return parser.parseFiles(yangFilesInDirectory);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static SchemaContext loadSchemaContext(final String yangPath, final SchemaContext schemaContext) {
+        final Collection<File> yangFilesInDirectory = yangFilesInDirectory(yangPath);
+        try {
+            return parser.parseFiles(yangFilesInDirectory, schemaContext);
+        } catch (IOException | YangSyntaxErrorException e) {
+            return null;
+        }
+    }
+
+    private static Collection<File> yangFilesInDirectory(String yangPath) {
+        String resourceDirectory = TestUtils.class.getResource(yangPath).getPath();
         final File testDir = new File(resourceDirectory);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<File>();
         if (fileList == null) {
-            throw new FileNotFoundException(resourceDirectory);
+            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
+            return null;
         }
         for (int i = 0; i < fileList.length; i++) {
             String fileName = fileList[i];
@@ -103,25 +126,7 @@ public final class TestUtils {
                 testFiles.add(new File(testDir, fileName));
             }
         }
-        return parser.parseYangModels(testFiles);
-    }
-
-    public static Set<Module> loadModulesFrom(String yangPath) {
-        try {
-            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (FileNotFoundException e) {
-            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
-        }
-
-        return null;
-    }
-
-    public static SchemaContext loadSchemaContext(Set<Module> modules) {
-        return parser.resolveSchemaContext(modules);
-    }
-
-    public static SchemaContext loadSchemaContext(String resourceDirectory) throws FileNotFoundException {
-        return parser.resolveSchemaContext(loadModulesFrom(resourceDirectory));
+        return testFiles;
     }
 
     public static Module findModule(Set<Module> modules, String moduleName) {
@@ -173,11 +178,11 @@ public final class TestUtils {
      * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
      * because it contains calling of method {code normalizeNode}
      */
-    public static void normalizeCompositeNode(Node<?> node, Set<Module> modules, String schemaNodePath) {
+    public static void normalizeCompositeNode(Node<?> node, SchemaContext schemaContext, String schemaNodePath) {
         RestconfImpl restconf = RestconfImpl.getInstance();
-        ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
+        ControllerContext.getInstance().setSchemas(schemaContext);
 
-        prepareMocksForRestconf(modules, restconf);
+        prepareMocksForRestconf(schemaContext, restconf);
         restconf.updateConfigurationData(schemaNodePath, node);
     }
 
@@ -220,7 +225,11 @@ public final class TestUtils {
             URI u = new URI(uri);
             Date dt = null;
             if (date != null) {
-                dt = Date.valueOf(date);
+                try {
+                    dt = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+                } catch (ParseException e) {
+                    return null;
+                }
             }
             return new QName(u, dt, prefix, name);
         } catch (URISyntaxException e) {
@@ -245,21 +254,22 @@ public final class TestUtils {
         }
     }
 
-    private static void prepareMocksForRestconf(Set<Module> modules, RestconfImpl restconf) {
+    private static void prepareMocksForRestconf(SchemaContext schemaContext, RestconfImpl restconf) {
         ControllerContext controllerContext = ControllerContext.getInstance();
         BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
 
-        controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
+        controllerContext.setSchemas(schemaContext);
 
-        when(mockedBrokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
-                .thenReturn(mock(CheckedFuture.class));
+        when(
+                mockedBrokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class),
+                        any(NormalizedNode.class))).thenReturn(mock(CheckedFuture.class));
 
         restconf.setControllerContext(controllerContext);
         restconf.setBroker(mockedBrokerFacade);
     }
 
-    public static Node<?> readInputToCnSn(String path, boolean dummyNamespaces,
-            MessageBodyReader<Node<?>> reader) throws WebApplicationException {
+    public static Node<?> readInputToCnSn(String path, boolean dummyNamespaces, MessageBodyReader<Node<?>> reader)
+            throws WebApplicationException {
 
         InputStream inputStream = TestUtils.class.getResourceAsStream(path);
         try {
@@ -282,22 +292,11 @@ public final class TestUtils {
         return null;
     }
 
-//    public static Node<?> readInputToCnSnNew(String path, MessageBodyReader<Node<?>> reader) throws WebApplicationException {
-//        InputStream inputStream = TestUtils.class.getResourceAsStream(path);
-//        try {
-//            return reader.readFrom(null, null, null, null, null, inputStream);
-//        } catch (IOException e) {
-//            LOG.error(e.getMessage());
-//            assertTrue(e.getMessage(), false);
-//        }
-//        return null;
-//    }
-
     public static Node<?> readInputToCnSn(String path, MessageBodyReader<Node<?>> reader) {
         return readInputToCnSn(path, false, reader);
     }
 
-    public static String writeCompNodeWithSchemaContextToOutput(Node<?> node, Set<Module> modules,
+    public static String writeCompNodeWithSchemaContextToOutput(Node<?> node, SchemaContext schemaContext,
             DataSchemaNode dataSchemaNode, MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
             WebApplicationException {
 
@@ -305,11 +304,11 @@ public final class TestUtils {
         assertNotNull("Composite node can't be null", node);
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
 
-        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
+        ControllerContext.getInstance().setSchemas(schemaContext);
 
         assertTrue(node instanceof CompositeNode);
-        messageBodyWriter.writeTo(new StructuredData((CompositeNode)node, dataSchemaNode, null), null, null, null, null,
-                null, byteArrayOS);
+        messageBodyWriter.writeTo(new StructuredData((CompositeNode) node, dataSchemaNode, null), null, null, null,
+                null, null, byteArrayOS);
 
         return byteArrayOS.toString();
     }
@@ -381,7 +380,6 @@ public final class TestUtils {
 
     public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(String localName,
             String namespace, String revision, String... keysAndValues) throws ParseException {
-        java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
         if (keysAndValues.length % 2 != 0) {
             new IllegalArgumentException("number of keys argument have to be divisible by 2 (map)");
         }
@@ -410,7 +408,8 @@ public final class TestUtils {
         CollectionNodeBuilder<MapEntryNode, MapNode> intface = ImmutableMapNodeBuilder.create();
         String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
         intface.withNodeIdentifier(getNodeIdentifier("interface", namespace, ietfInterfacesDate));
-        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder.create();
+        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder
+                .create();
 
         Map<String, Object> predicates = new HashMap<>();
         predicates.put("name", "eth0");

@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class URIParametersParsing {
 
@@ -42,7 +43,9 @@ public class URIParametersParsing {
         restconf = RestconfImpl.getInstance();
         mockedBrokerFacade = mock(BrokerFacade.class);
         ControllerContext controllerContext = ControllerContext.getInstance();
-        controllerContext.setSchemas(TestUtils.loadSchemaContext("/datastore-and-scope-specification"));
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/datastore-and-scope-specification");
+        assertNotNull(schemaContext);
+        controllerContext.setSchemas(schemaContext);
         restconf.setControllerContext(controllerContext);
         restconf.setBroker(mockedBrokerFacade);
     }

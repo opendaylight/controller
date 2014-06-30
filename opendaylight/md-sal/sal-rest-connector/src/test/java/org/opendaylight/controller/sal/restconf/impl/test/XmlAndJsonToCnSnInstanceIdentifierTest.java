@@ -22,12 +22,12 @@ import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -43,7 +43,7 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyListPredicate(cnSn);
     }
 
@@ -54,7 +54,7 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyLeafListPredicate(cnSn);
     }
 
@@ -65,7 +65,7 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyListPredicate(cnSn);
     }
 
@@ -76,7 +76,7 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
 
-        TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, schemaNodePath);
         verifyLeafListPredicate(cnSn);
     }
 

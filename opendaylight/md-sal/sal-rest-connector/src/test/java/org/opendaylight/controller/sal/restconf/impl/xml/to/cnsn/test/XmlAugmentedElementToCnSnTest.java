@@ -10,13 +10,12 @@ package org.opendaylight.controller.sal.restconf.impl.xml.to.cnsn.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class XmlAugmentedElementToCnSnTest {
 
@@ -32,10 +31,10 @@ public class XmlAugmentedElementToCnSnTest {
         assertTrue(node instanceof CompositeNode);
         CompositeNode cnSn = (CompositeNode)node;
 
-        Set<Module> modules = TestUtils.loadModulesFrom(yangPath);
 
-        assertNotNull(modules);
-        TestUtils.normalizeCompositeNode(cnSn, modules, topLevelElementName + ":" + moduleName);
+        SchemaContext schemaContext = TestUtils.loadSchemaContext(yangPath);
+        assertNotNull(schemaContext);
+        TestUtils.normalizeCompositeNode(cnSn, schemaContext, topLevelElementName + ":" + moduleName);
     }
 
 }

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.input.to.cnsn.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -54,6 +55,7 @@ public class RestPutListDataTest {
     public void initialize() throws FileNotFoundException {
         ControllerContext controllerContext = ControllerContext.getInstance();
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
+        assertNotNull(schemaContextTestModule);
         controllerContext.setSchemas(schemaContextTestModule);
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();

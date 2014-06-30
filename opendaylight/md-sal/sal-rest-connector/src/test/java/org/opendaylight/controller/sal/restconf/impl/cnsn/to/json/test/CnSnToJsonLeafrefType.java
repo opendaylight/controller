@@ -96,8 +96,8 @@ public class CnSnToJsonLeafrefType extends YangAndXmlAndDataSchemaLoader {
     private String toJson(String xmlDataPath) {
         try {
             Node<?> node = TestUtils.readInputToCnSn(xmlDataPath, XmlToCompositeNodeProvider.INSTANCE);
-            TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
-            return TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
+            TestUtils.normalizeCompositeNode(node, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
+            return TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

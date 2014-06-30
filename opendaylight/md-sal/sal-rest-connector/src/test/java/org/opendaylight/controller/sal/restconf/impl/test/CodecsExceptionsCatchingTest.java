@@ -1,5 +1,6 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -30,6 +31,7 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         restConf = RestconfImpl.getInstance();
         controllerContext = ControllerContext.getInstance();
         SchemaContext schemaContext = TestUtils.loadSchemaContext("/decoding-exception/yang");
+        assertNotNull(schemaContext);
         controllerContext.setGlobalSchema(schemaContext);
         restConf.setControllerContext(controllerContext);
     }

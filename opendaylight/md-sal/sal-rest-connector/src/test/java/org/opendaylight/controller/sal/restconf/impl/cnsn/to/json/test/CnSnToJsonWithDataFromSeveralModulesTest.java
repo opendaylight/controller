@@ -23,7 +23,6 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -34,8 +33,7 @@ public class CnSnToJsonWithDataFromSeveralModulesTest extends YangAndXmlAndDataS
 
     @Test
     public void dataFromSeveralModulesToJsonTest() throws WebApplicationException, IOException, URISyntaxException {
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(modules);
-        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCnSn(), modules, schemaContext,
+        String output = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCnSn(), schemaContext, schemaContext,
                 StructuredDataToJsonProvider.INSTANCE);
 
         // String output =

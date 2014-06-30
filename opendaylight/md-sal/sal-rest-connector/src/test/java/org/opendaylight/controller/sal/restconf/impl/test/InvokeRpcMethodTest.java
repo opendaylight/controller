@@ -22,14 +22,12 @@ import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
@@ -56,7 +54,6 @@ import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableSimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -67,13 +64,13 @@ public class InvokeRpcMethodTest {
     private static UriInfo uriInfo;
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
-        Set<Module> allModules = new HashSet<Module>(TestUtils.loadModulesFrom("/full-versions/yangs"));
-        allModules.addAll(TestUtils.loadModulesFrom("/invoke-rpc"));
-        assertNotNull(allModules);
-        Module module = TestUtils.resolveModule("invoke-rpc-module", allModules);
-        assertNotNull(module);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+    public static void init() throws IOException {
+        SchemaContext schemaContextFulVersions = TestUtils.loadSchemaContext("/full-versions/yangs");
+        assertNotNull(schemaContextFulVersions);
+
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/invoke-rpc",schemaContextFulVersions);
+        assertNotNull(schemaContext);
+
         controllerContext = spy(ControllerContext.getInstance());
         controllerContext.setSchemas(schemaContext);
         uriInfo = mock(UriInfo.class);
@@ -322,7 +319,8 @@ public class InvokeRpcMethodTest {
         RpcProvisionRegistry mockedRpcProvisionRegistry = mock(RpcProvisionRegistry.class);
         when(mockedRpcProvisionRegistry.invokeRpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
         when(mockMountPoint.getService(eq(RpcProvisionRegistry.class))).thenReturn(Optional.of(mockedRpcProvisionRegistry));
-        when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/invoke-rpc");
+        when(mockMountPoint.getSchemaContext()).thenReturn(schemaContext);
 
         InstanceIdWithSchemaNode mockedInstanceId = mock(InstanceIdWithSchemaNode.class);
         when(mockedInstanceId.getMountPoint()).thenReturn(mockMountPoint);

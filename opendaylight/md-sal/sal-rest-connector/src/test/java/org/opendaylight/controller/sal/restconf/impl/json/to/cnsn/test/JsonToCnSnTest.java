@@ -15,7 +15,6 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Ignore;
@@ -29,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,14 +216,12 @@ public class JsonToCnSnTest {
 
         // supplement namespaces according to first data schema -
         // "simple:data:types1"
-        Set<Module> modules1 = new HashSet<>();
-        Set<Module> modules2 = new HashSet<>();
-        modules1 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/1");
-        modules2 = TestUtils.loadModulesFrom("/json-to-cnsn/simple-list-yang/2");
-        assertNotNull(modules1);
-        assertNotNull(modules2);
+        SchemaContext schemaContext1  = TestUtils.loadSchemaContext("/json-to-cnsn/simple-list-yang/1");
+        SchemaContext schemaContext2  = TestUtils.loadSchemaContext("/json-to-cnsn/simple-list-yang/2");
+        assertNotNull(schemaContext1);
+        assertNotNull(schemaContext2);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules1, "simple-list-yang1:lst");
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext1, "simple-list-yang1:lst");
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();
@@ -232,7 +230,7 @@ public class JsonToCnSnTest {
         verifyCompositeNode(compNode, "simple:list:yang1");
 
         try {
-            TestUtils.normalizeCompositeNode(compositeNode, modules2, "simple-list-yang2:lst");
+            TestUtils.normalizeCompositeNode(compositeNode, schemaContext2, "simple-list-yang2:lst");
             fail("Conversion to normalized node shouldn't be successfull because of different namespaces");
         } catch (IllegalStateException e) {
         }
@@ -247,10 +245,12 @@ public class JsonToCnSnTest {
         assertTrue(node instanceof CompositeNode);
         CompositeNode compositeNode = (CompositeNode)node;
 
-        Set<Module> modules = TestUtils.loadModulesFrom("/json-to-cnsn/identityref");
+        final SchemaContext schemaContext = TestUtils.loadSchemaContext("/json-to-cnsn/identityref");
+        assertNotNull(schemaContext);
+        final Set<Module> modules = schemaContext.getModules();
         assertEquals(2, modules.size());
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, "identityref-module:cont");
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext, "identityref-module:cont");
 
         assertEquals("cont", compositeNode.getNodeType().getLocalName());
 
@@ -316,11 +316,10 @@ public class JsonToCnSnTest {
         assertTrue(node instanceof CompositeNode);
         CompositeNode compositeNode = (CompositeNode)node;
 
-        Set<Module> modules = null;
-        modules = TestUtils.loadModulesFrom(yangPath);
-        assertNotNull(modules);
+        SchemaContext schemaContext = TestUtils.loadSchemaContext(yangPath);
+        assertNotNull(schemaContext);
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, moduleName + ":" + topLevelElementName);
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext, moduleName + ":" + topLevelElementName);
 
         assertTrue(compositeNode instanceof CompositeNodeWrapper);
         CompositeNode compNode = ((CompositeNodeWrapper) compositeNode).unwrap();

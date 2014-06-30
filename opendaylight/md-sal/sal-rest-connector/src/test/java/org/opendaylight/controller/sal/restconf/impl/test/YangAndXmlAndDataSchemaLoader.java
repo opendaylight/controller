@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class YangAndXmlAndDataSchemaLoader {
 
@@ -21,13 +22,16 @@ public abstract class YangAndXmlAndDataSchemaLoader {
     protected static String searchedModuleName;
     protected static String searchedDataSchemaName;
     protected static String schemaNodePath;
+    protected static SchemaContext schemaContext;
 
     protected static void dataLoad(String yangPath) {
         dataLoad(yangPath, 1, null, null);
     }
 
     protected static void dataLoad(String yangPath, int modulesNumber, String moduleName, String dataSchemaName) {
-        modules = TestUtils.loadModulesFrom(yangPath);
+        schemaContext = TestUtils.loadSchemaContext(yangPath);
+        assertNotNull(schemaContext);
+        modules = schemaContext.getModules();
         assertEquals(modulesNumber, modules.size());
         Module module = TestUtils.resolveModule(moduleName, modules);
         searchedModuleName = module == null ? "" : module.getName();

@@ -38,7 +38,7 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         String json = null;
         try {
             QName valueAsQname = TestUtils.buildQName("name_test", "identityref:module", "2013-12-2");
-            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(valueAsQname), modules,
+            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(valueAsQname), schemaContext,
                     dataSchemaNode, StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here
@@ -57,7 +57,7 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
         String json = null;
         try {
             String value = "not q name value";
-            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(value), modules,
+            json = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(value), schemaContext,
                     dataSchemaNode, StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here

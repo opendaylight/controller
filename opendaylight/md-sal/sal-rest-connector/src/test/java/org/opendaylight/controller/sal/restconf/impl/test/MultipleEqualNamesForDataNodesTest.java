@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.ext.MessageBodyReader;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
@@ -22,7 +21,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * If more then one data element with equal name exists where container or leaf schema node should be present the
@@ -62,11 +61,10 @@ public class MultipleEqualNamesForDataNodesTest {
             Node<?> node = TestUtils.readInputToCnSn(path, false, messageBodyReader);
             assertNotNull(node);
 
-            Set<Module> modules = null;
-            modules = TestUtils.loadModulesFrom("/equal-data-node-names/yang");
-            assertNotNull(modules);
+            SchemaContext schemaContext = TestUtils.loadSchemaContext("/equal-data-node-names/yang");
+            assertNotNull(schemaContext);
 
-            TestUtils.normalizeCompositeNode(node, modules, "equal-data-node-names" + ":" + "cont");
+            TestUtils.normalizeCompositeNode(node, schemaContext, "equal-data-node-names" + ":" + "cont");
             fail("Exception RestconfDocumentedException should be raised");
         } catch (RestconfDocumentedException e) {
             List<RestconfError> errors = e.getErrors();

@@ -35,7 +35,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
         Node<?> node = TestUtils.readInputToCnSn("/json-to-cnsn/leafref/json/data.json", false,
                 JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(node);
-        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, schemaContext, searchedModuleName + ":" + searchedDataSchemaName);
 
         assertEquals("cont", node.getNodeType().getLocalName());
 

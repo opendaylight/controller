@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.text.ParseException;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -39,9 +37,8 @@ public class RestconfImplTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
-        assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/full-versions/yangs");
+        assertNotNull(schemaContext);
         controllerContext = spy(ControllerContext.getInstance());
         controllerContext.setSchemas(schemaContext);
 

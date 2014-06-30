@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +40,10 @@ public class XmlLeafrefToCnSnTest {
         CompositeNode compNode = (CompositeNode)node;
 
         assertNotNull(compNode);
-        Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-container-yang");
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/xml-to-cnsn/data-container-yang");
 
-        assertNotNull(modules);
-        TestUtils.normalizeCompositeNode(compNode, modules, "data-container-yang:cont");
+        assertNotNull(schemaContext);
+        TestUtils.normalizeCompositeNode(compNode, schemaContext, "data-container-yang:cont");
 
         String nameSpace = "data:container:yang";
         assertEquals(nameSpace, compNode.getNodeType().getNamespace().toString());
@@ -85,10 +86,11 @@ public class XmlLeafrefToCnSnTest {
         CompositeNode compNode = (CompositeNode)node;
 
 
-        Set<Module> modules = TestUtils.loadModulesFrom("/xml-to-cnsn/data-list-yang");
-        assertNotNull(modules);
 
-        TestUtils.normalizeCompositeNode(compNode, modules, "data-container-yang:cont");
+        SchemaContext schemaContext = TestUtils.loadSchemaContext("/xml-to-cnsn/data-list-yang");
+        assertNotNull(schemaContext);
+
+        TestUtils.normalizeCompositeNode(compNode, schemaContext, "data-container-yang:cont");
 
         String nameSpaceList = "data:list:yang";
         String nameSpaceCont = "data:container:yang";
@@ -330,10 +332,13 @@ public class XmlLeafrefToCnSnTest {
         CompositeNode compositeNode = (CompositeNode)node;
 
 
-        Set<Module> modules = TestUtils.loadModulesFrom(yangPath);
+
+        SchemaContext schemaContext = TestUtils.loadSchemaContext(yangPath);
+        assertNotNull(schemaContext);
+        Set<Module> modules = schemaContext.getModules();
         assertEquals(moduleCount, modules.size());
 
-        TestUtils.normalizeCompositeNode(compositeNode, modules, moduleName + ":" + schemaName);
+        TestUtils.normalizeCompositeNode(compositeNode, schemaContext, moduleName + ":" + schemaName);
 
         SimpleNode<?> lf11 = getLf11(compositeNode);
         assertTrue(lf11.getValue() instanceof QName);

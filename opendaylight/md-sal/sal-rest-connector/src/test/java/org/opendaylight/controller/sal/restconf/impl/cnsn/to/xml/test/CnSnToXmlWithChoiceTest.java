@@ -39,7 +39,7 @@ public class CnSnToXmlWithChoiceTest extends YangAndXmlAndDataSchemaLoader {
         String xmlOutput = "";
         try {
             xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(
-                    prepareCnStructForYangData("lf1", "String data1"), modules, dataSchemaNode,
+                    prepareCnStructForYangData("lf1", "String data1"), schemaContext, dataSchemaNode,
                     StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }
@@ -48,7 +48,7 @@ public class CnSnToXmlWithChoiceTest extends YangAndXmlAndDataSchemaLoader {
 
         try {
             xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(
-                    prepareCnStructForYangData("lf2", "String data2"), modules, dataSchemaNode,
+                    prepareCnStructForYangData("lf2", "String data2"), schemaContext, dataSchemaNode,
                     StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

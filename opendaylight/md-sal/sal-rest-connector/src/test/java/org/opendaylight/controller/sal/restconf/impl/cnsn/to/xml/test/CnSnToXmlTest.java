@@ -248,7 +248,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
             throws TransformerFactoryConfigurationError {
         String xmlString = "";
         try {
-            xmlString = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+            xmlString = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, schemaContext, dataSchemaNode,
                     StructuredDataToXmlProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

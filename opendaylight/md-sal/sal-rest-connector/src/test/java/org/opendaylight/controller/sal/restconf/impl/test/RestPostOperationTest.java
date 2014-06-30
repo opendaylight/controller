@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -30,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -61,7 +61,6 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestPostOperationTest extends JerseyTest {
@@ -88,14 +87,17 @@ public class RestPostOperationTest extends JerseyTest {
     public static void init() throws URISyntaxException, IOException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
+        assertNotNull(schemaContextYangsIetf);
+        assertNotNull(schemaContextTestModule);
         controllerContext = ControllerContext.getInstance();
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
 
-        Set<Module> modules = TestUtils.loadModulesFrom("/test-config-data/yang1");
-        schemaContext = TestUtils.loadSchemaContext(modules);
+
+        schemaContext = TestUtils.loadSchemaContext("/test-config-data/yang1");
+        assertNotNull(schemaContext);
 
         loadData();
     }

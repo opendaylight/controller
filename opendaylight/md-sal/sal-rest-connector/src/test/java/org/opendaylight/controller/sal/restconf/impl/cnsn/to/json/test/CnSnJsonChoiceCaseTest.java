@@ -118,9 +118,9 @@ public class CnSnJsonChoiceCaseTest extends YangAndXmlAndDataSchemaLoader {
 
     private void testWrapper(String xmlPath, String pathToSchemaNode) {
         Node<?> node = TestUtils.readInputToCnSn(xmlPath, XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(node, modules, pathToSchemaNode);
+        TestUtils.normalizeCompositeNode(node, schemaContext, pathToSchemaNode);
         try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
+            TestUtils.writeCompNodeWithSchemaContextToOutput(node, schemaContext, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
             // shouldn't end here

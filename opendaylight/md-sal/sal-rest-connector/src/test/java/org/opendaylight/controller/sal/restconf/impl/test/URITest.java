@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import java.io.FileNotFoundException;
-import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +30,6 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class URITest {
@@ -43,9 +41,8 @@ public class URITest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
-        assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        SchemaContext schemaContext  = TestUtils.loadSchemaContext("/full-versions/yangs");
+        assertNotNull(schemaContext);
         controllerContext.setSchemas(schemaContext);
     }
 
@@ -161,8 +158,8 @@ public class URITest {
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
 
-        Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
-        SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
+        SchemaContext schemaContext2 = TestUtils.loadSchemaContext("/test-config-data/yang2");
+        assertNotNull(schemaContext2);
         DOMMountPoint mountInstance = mock(DOMMountPoint.class);
         if (withSchema) {
             when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
