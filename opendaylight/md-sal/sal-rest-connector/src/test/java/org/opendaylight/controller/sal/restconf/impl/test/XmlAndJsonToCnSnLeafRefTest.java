@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -29,15 +30,22 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
 
     @Test
     public void loadXmlToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/leafref/xml/xmldata.xml", XmlToCompositeNodeProvider.INSTANCE);
+        Node<?> node = TestUtils.readInputToCnSn("/leafref/xml/xmldata.xml", XmlToCompositeNodeProvider.INSTANCE);
+
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
+
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyContPredicate(cnSn, "/ns:cont/ns:lf1", "/cont/lf1", "/ns:cont/ns:lf1", "../lf1");
     }
 
     @Test
     public void loadJsonToCnSn() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSn = TestUtils.readInputToCnSn("/leafref/json/jsondata.json",
+        Node<?> node = TestUtils.readInputToCnSn("/leafref/json/jsondata.json",
                 JsonToCompositeNodeProvider.INSTANCE);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode cnSn = (CompositeNode)node;
+
         TestUtils.normalizeCompositeNode(cnSn, modules, schemaNodePath);
         verifyContPredicate(cnSn, "/leafref-module:cont/leafref-module:lf1", "/leafref-module:cont/leafref-module:lf1",
                 "/referenced-module:cont/referenced-module:lf1", "/leafref-module:cont/leafref-module:lf1");

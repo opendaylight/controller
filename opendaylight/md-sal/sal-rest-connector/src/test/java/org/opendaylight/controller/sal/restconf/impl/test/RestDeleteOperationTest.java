@@ -10,13 +10,14 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
-import java.util.concurrent.Future;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -24,13 +25,12 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -70,21 +70,14 @@ public class RestDeleteOperationTest extends JerseyTest {
     @Test
     public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
         String uri = "/config/test-interface:interfaces";
-        Future<RpcResult<TransactionStatus>> dummyFuture = createFuture(TransactionStatus.COMMITED);
-        when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(
+                mock(CheckedFuture.class));
         Response response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(200, response.getStatus());
 
-        dummyFuture = createFuture(TransactionStatus.FAILED);
-        when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(dummyFuture);
+        doThrow(RestconfDocumentedException.class).when(brokerFacade).commitConfigurationDataDelete(
+                any(YangInstanceIdentifier.class));
         response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(500, response.getStatus());
     }
-
-    private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
-                .build();
-        return new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
-    }
-
 }

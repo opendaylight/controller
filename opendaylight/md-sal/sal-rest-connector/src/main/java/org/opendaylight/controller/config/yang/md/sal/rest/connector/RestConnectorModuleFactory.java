@@ -9,7 +9,8 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.rest.connector;
 
-
+/*
 public class RestConnectorModuleFactory extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModuleFactory {
 
 }
+*/

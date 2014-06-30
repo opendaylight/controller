@@ -13,12 +13,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
@@ -28,13 +28,10 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.test.DummyFuture;
-import org.opendaylight.controller.sal.restconf.impl.test.DummyFuture.Builder;
-import org.opendaylight.controller.sal.restconf.impl.test.DummyRpcResult;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -62,11 +59,8 @@ public class RestPutListDataTest {
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
-        Builder<TransactionStatus> futureBuilder = new DummyFuture.Builder<TransactionStatus>();
-        futureBuilder.rpcResult(new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
-                .build());
-        when(brokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
-                .thenReturn(futureBuilder.build());
+        when(brokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
+                .thenReturn(mock(CheckedFuture.class));
     }
 
     /**

@@ -19,7 +19,7 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 
 public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -33,13 +33,13 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
      */
     @Test
     public void augmentedElementsToJson() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/augmentation/xml/data.xml",
+        Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/augmentation/xml/data.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
-        TestUtils.normalizeCompositeNode(compositeNode, modules, searchedModuleName + ":" + searchedDataSchemaName);
+        TestUtils.normalizeCompositeNode(node, modules, searchedModuleName + ":" + searchedDataSchemaName);
 
         String jsonOutput = null;
         try {
-            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(compositeNode, modules, dataSchemaNode,
+            jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, dataSchemaNode,
                     StructuredDataToJsonProvider.INSTANCE);
         } catch (WebApplicationException | IOException e) {
         }

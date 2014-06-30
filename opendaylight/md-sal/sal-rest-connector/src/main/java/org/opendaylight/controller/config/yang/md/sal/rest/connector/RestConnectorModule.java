@@ -1,7 +1,6 @@
 package org.opendaylight.controller.config.yang.md.sal.rest.connector;
 
-import org.opendaylight.controller.sal.rest.impl.RestconfProviderImpl;
-
+/*
 public class RestConnectorModule extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModule {
 
     public RestConnectorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -28,3 +27,4 @@ public class RestConnectorModule extends org.opendaylight.controller.config.yang
         return instance;
     }
 }
+*/
