@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -33,9 +32,12 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
 
     @Test
     public void testXmlLeafrefToCnSn() {
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/xml-to-cnsn/leafref/xml/data.xml", false,
+        Node<?> node = TestUtils.readInputToCnSn("/xml-to-cnsn/leafref/xml/data.xml", false,
                 XmlToCompositeNodeProvider.INSTANCE);
-        assertNotNull(compositeNode);
+        assertTrue(node instanceof CompositeNode);
+        CompositeNode compositeNode = (CompositeNode)node;
+
+
         assertNotNull(dataSchemaNode);
         TestUtils.normalizeCompositeNode(compositeNode, modules, schemaNodePath);
 
@@ -59,10 +61,10 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
     @Test
     public void testXmlBlankInput() throws Exception{
         InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
-        CompositeNode compositeNode =
+        Node<?> node =
                 XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
 
-        assertNull( compositeNode );
+        assertNull( node );
     }
 
     @Test
@@ -73,10 +75,10 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
                 return false;
             }
         };
-        CompositeNode compositeNode =
+        Node<?> node =
                 XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
 
-        assertNull( compositeNode );
+        assertNull( node );
     }
 
 }
