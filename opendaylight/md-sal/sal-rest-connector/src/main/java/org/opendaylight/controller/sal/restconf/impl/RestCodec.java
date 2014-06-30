@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate;
@@ -47,7 +47,7 @@ public class RestCodec {
     }
 
     public static final Codec<Object, Object> from(final TypeDefinition<?> typeDefinition,
-            final MountInstance mountPoint) {
+            final DOMMountPoint mountPoint) {
         return new ObjectCodec(typeDefinition, mountPoint);
     }
 
@@ -62,7 +62,7 @@ public class RestCodec {
 
         private final TypeDefinition<?> type;
 
-        private ObjectCodec(final TypeDefinition<?> typeDefinition, final MountInstance mountPoint) {
+        private ObjectCodec(final TypeDefinition<?> typeDefinition, final DOMMountPoint mountPoint) {
             type = RestUtil.resolveBaseTypeFrom(typeDefinition);
             if (type instanceof IdentityrefTypeDefinition) {
                 identityrefCodec = new IdentityrefCodecImpl(mountPoint);
@@ -158,9 +158,9 @@ public class RestCodec {
 
         private final Logger logger = LoggerFactory.getLogger(IdentityrefCodecImpl.class);
 
-        private final MountInstance mountPoint;
+        private final DOMMountPoint mountPoint;
 
-        public IdentityrefCodecImpl(final MountInstance mountPoint) {
+        public IdentityrefCodecImpl(final DOMMountPoint mountPoint) {
             this.mountPoint = mountPoint;
         }
 
@@ -200,9 +200,9 @@ public class RestCodec {
 
     public static class InstanceIdentifierCodecImpl implements InstanceIdentifierCodec<IdentityValuesDTO> {
         private final Logger logger = LoggerFactory.getLogger(InstanceIdentifierCodecImpl.class);
-        private final MountInstance mountPoint;
+        private final DOMMountPoint mountPoint;
 
-        public InstanceIdentifierCodecImpl(final MountInstance mountPoint) {
+        public InstanceIdentifierCodecImpl(final DOMMountPoint mountPoint) {
             this.mountPoint = mountPoint;
         }
 
@@ -318,7 +318,7 @@ public class RestCodec {
         }
     }
 
-    private static Module getModuleByNamespace(final String namespace, final MountInstance mountPoint) {
+    private static Module getModuleByNamespace(final String namespace, final DOMMountPoint mountPoint) {
         URI validNamespace = resolveValidNamespace(namespace, mountPoint);
 
         Module module = null;
@@ -334,7 +334,7 @@ public class RestCodec {
         return module;
     }
 
-    private static URI resolveValidNamespace(final String namespace, final MountInstance mountPoint) {
+    private static URI resolveValidNamespace(final String namespace, final DOMMountPoint mountPoint) {
         URI validNamespace;
         if (mountPoint != null) {
             validNamespace = ControllerContext.getInstance().findNamespaceByModuleName(mountPoint, namespace);

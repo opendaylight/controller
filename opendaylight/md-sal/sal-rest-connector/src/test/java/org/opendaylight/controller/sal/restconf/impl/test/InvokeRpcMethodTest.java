@@ -36,7 +36,8 @@ import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
@@ -317,9 +318,10 @@ public class InvokeRpcMethodTest {
         RpcDefinition mockRpc = mock(RpcDefinition.class);
         when(mockRpc.getQName()).thenReturn(cancelToastQName);
 
-        MountInstance mockMountPoint = mock(MountInstance.class);
-        when(mockMountPoint.rpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
-
+        DOMMountPoint mockMountPoint = mock(DOMMountPoint.class);
+        RpcProvisionRegistry mockedRpcProvisionRegistry = mock(RpcProvisionRegistry.class);
+        when(mockedRpcProvisionRegistry.invokeRpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
+        when(mockMountPoint.getService(eq(RpcProvisionRegistry.class))).thenReturn(Optional.of(mockedRpcProvisionRegistry));
         when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
 
         InstanceIdWithSchemaNode mockedInstanceId = mock(InstanceIdWithSchemaNode.class);

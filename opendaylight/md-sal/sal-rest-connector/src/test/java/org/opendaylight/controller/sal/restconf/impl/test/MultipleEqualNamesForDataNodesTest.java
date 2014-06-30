@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
@@ -57,16 +57,16 @@ public class MultipleEqualNamesForDataNodesTest {
     }
 
     private void multipleEqualNameDataNodeTest(String path, ErrorType errorType, ErrorTag errorTag,
-            MessageBodyReader<CompositeNode> messageBodyReader) {
+            MessageBodyReader<Node<?>> messageBodyReader) {
         try {
-            CompositeNode compositeNode = TestUtils.readInputToCnSn(path, false, messageBodyReader);
-            assertNotNull(compositeNode);
+            Node<?> node = TestUtils.readInputToCnSn(path, false, messageBodyReader);
+            assertNotNull(node);
 
             Set<Module> modules = null;
             modules = TestUtils.loadModulesFrom("/equal-data-node-names/yang");
             assertNotNull(modules);
 
-            TestUtils.normalizeCompositeNode(compositeNode, modules, "equal-data-node-names" + ":" + "cont");
+            TestUtils.normalizeCompositeNode(node, modules, "equal-data-node-names" + ":" + "cont");
             fail("Exception RestconfDocumentedException should be raised");
         } catch (RestconfDocumentedException e) {
             List<RestconfError> errors = e.getErrors();

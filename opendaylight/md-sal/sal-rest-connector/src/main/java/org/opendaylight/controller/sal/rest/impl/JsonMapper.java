@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.activation.UnsupportedDataTypeException;
-import org.opendaylight.controller.sal.core.api.mount.MountInstance;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
@@ -52,9 +52,9 @@ import org.slf4j.LoggerFactory;
 
 class JsonMapper {
     private static final Logger LOG = LoggerFactory.getLogger(JsonMapper.class);
-    private final MountInstance mountPoint;
+    private final DOMMountPoint mountPoint;
 
-    public JsonMapper(final MountInstance mountPoint) {
+    public JsonMapper(final DOMMountPoint mountPoint) {
         this.mountPoint = mountPoint;
     }
 
