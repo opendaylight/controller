@@ -17,12 +17,12 @@ public abstract class AbstractActorTest {
   private static ActorSystem system;
 
   @BeforeClass
-  public static void setUp(){
+  public static void setUpClass(){
     system = ActorSystem.create("test");
   }
 
   @AfterClass
-  public static void tearDown(){
+  public static void tearDownClass(){
     JavaTestKit.shutdownActorSystem(system);
     system = null;
   }
