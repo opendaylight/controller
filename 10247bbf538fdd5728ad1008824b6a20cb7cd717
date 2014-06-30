@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e3a81ddd",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-30T14:06:46Z",
+      "side": 1,
+      "message": "Jan not sure if referencing RFC6020 will help here, or am I mistaken?",
+      "parentUuid": "fa82b9bf_32abb576",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d20cc93d",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
         "patchSetId": 5
@@ -83,6 +101,24 @@
       "side": 1,
       "message": "This is mentioned earlier \"If no actual implementation is registered, all invocations will fail by throwing {@link IllegalStateException}.\". So you will always get a proxy back but it may not be backed by a real impl yet - you won\u0027t know until you actually invoke an RPC method. I\u0027m not sure if the proxy will wait with timeout for a backing impl when a method is invoked. That would be nice - Spring and Blueprint do this for their proxies.",
       "parentUuid": "fa82b9bf_f2d54d1c",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_039e61b9",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcConsumerRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-30T14:06:46Z",
+      "side": 1,
+      "message": "Currently no timeout for proxies is supported, if we do want to have that, we need an update to documentation and document it.",
+      "parentUuid": "fa82b9bf_d2b369e7",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -141,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e371fda8",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-30T14:06:46Z",
+      "side": 1,
+      "message": "Should be concrete use-cases part of this document? I would suggest adding it later maybe, but still not convinced that concrete examples should be here.",
+      "parentUuid": "fa82b9bf_321bb574",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b207c517",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
         "patchSetId": 5
@@ -152,6 +206,24 @@
       "writtenOn": "2014-06-27T14:28:25Z",
       "side": 1,
       "message": "Can we add a pointer to RpcResult helper classes (for building them), or better yet, enhance the RpcResult class documentation since it is closely tied to implementing proper Provider implementations?",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_836a71b1",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/RpcProviderRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-30T14:06:46Z",
+      "side": 1,
+      "message": "Will enhance RpcResult documentation in follow-up commits to YANGTools.",
+      "parentUuid": "fa82b9bf_b207c517",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -187,6 +259,24 @@
       "side": 1,
       "message": "I didn\u0027t take a stab at this one b/c I don\u0027t know what it\u0027s for. I\u0027ll defer to Tony.",
       "parentUuid": "fa82b9bf_1207911a",
+      "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e37fbd64",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/routing/RouteChangePublisher.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-30T14:06:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f2df8d0b",
       "revId": "10247bbf538fdd5728ad1008824b6a20cb7cd717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
