@@ -186,7 +186,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     private class ForwardedBackwardsCompatibleTransacion extends
-            AbstractForwardedTransaction<DOMDataReadWriteTransaction> implements DataModificationTransaction {
+            AbstractReadWriteTransaction implements DataModificationTransaction {
 
         private final ListenerRegistry<DataTransactionListener> listeners = ListenerRegistry.create();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> updated = new HashMap<>();
@@ -214,9 +214,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
             boolean previouslyRemoved = posponedRemovedOperational.remove(path);
             if(previouslyRemoved) {
-                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+                doPutWithEnsureParents(LogicalDatastoreType.OPERATIONAL, path, data);
             } else {
-                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.OPERATIONAL, path, data);
+                doMergeWithEnsureParents(LogicalDatastoreType.OPERATIONAL, path, data);
             }
         }
 
@@ -232,9 +232,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             }
             updated.put(path, data);
             if(previouslyRemoved) {
-                doPutWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+                doPutWithEnsureParents(LogicalDatastoreType.CONFIGURATION, path, data);
             } else {
-                doMergeWithEnsureParents(getDelegate(), LogicalDatastoreType.CONFIGURATION, path, data);
+                doMergeWithEnsureParents(LogicalDatastoreType.CONFIGURATION, path, data);
             }
         }
 
@@ -308,11 +308,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             }
         }
 
-        @Override
-        public Object getIdentifier() {
-            return getDelegate().getIdentifier();
-        }
-
         private void changeStatus(final TransactionStatus status) {
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
@@ -330,11 +325,11 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         public ListenableFuture<RpcResult<TransactionStatus>> commit() {
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
-                doDelete(getDelegate(), LogicalDatastoreType.CONFIGURATION, path);
+                doDelete(LogicalDatastoreType.CONFIGURATION, path);
             }
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
-                doDelete(getDelegate(), LogicalDatastoreType.OPERATIONAL, path);
+                doDelete(LogicalDatastoreType.OPERATIONAL, path);
             }
 
             changeStatus(TransactionStatus.SUBMITED);
