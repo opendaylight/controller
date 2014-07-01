@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_00a974de",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomBrokerImplModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "what happens here if DOMDataBroker is requested?",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_60b7203b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/BackwardsCompatibleDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "is this class threadsafe/should it be? Please add documentation",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c0ae2ce6",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/compat/BackwardsCompatibleDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "this escapes constructor",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_80b4a435",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/BrokerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "If this method can return null please indicate it in javadoc, I would prefer failing instead.\nGetting services using single method instead of having getter for each might prove hard to do any kind of refactoring (removing a service) IMO.",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_408a1c6b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "final",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a098c8c0",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "not sure about all these nulls, would at least add TODO for refactoring",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c095cc87",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/GlobalBundleScanningSchemaServiceImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:12:16Z",
+      "side": 1,
+      "message": "missing check for getting null",
+      "revId": "e55a40e57fc1eb9fbb1bcbd2a1862b6fd3de3963",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
