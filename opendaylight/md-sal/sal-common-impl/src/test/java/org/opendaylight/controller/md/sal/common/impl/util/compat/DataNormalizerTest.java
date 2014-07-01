@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -149,10 +150,10 @@ public class DataNormalizerTest {
     private void verifyNormalizedInstanceIdentifier(final InstanceIdentifier actual, final Object... expPath) {
 
         assertNotNull("Actual InstanceIdentifier is null", actual);
-        assertEquals("InstanceIdentifier path length", expPath.length, actual.getPath().size());
+        assertEquals("InstanceIdentifier path length", expPath.length, Iterables.size(actual.getPathArguments()));
 
         for (int i = 0; i < expPath.length; i++) {
-            PathArgument actualArg = actual.getPath().get(i);
+            PathArgument actualArg = Iterables.get(actual.getPathArguments(), i);
             if (expPath[i] instanceof Object[]) { // NodeIdentifierWithPredicates
                 Object[] exp = (Object[]) expPath[i];
                 assertEquals("Actual path arg " + (i + 1) + " class", NodeIdentifierWithPredicates.class,

@@ -21,13 +21,16 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.RpcErrors;
@@ -108,7 +111,7 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         }
     }
 
-    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure, Optional<String> defaultOperation) {
+    private ImmutableCompositeNode createEditConfigRequest(final CompositeNode editStructure, final Optional<String> defaultOperation) {
         final CompositeNodeBuilder<ImmutableCompositeNode> ret = ImmutableCompositeNode.builder();
 
         // Target
@@ -133,8 +136,8 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
     }
 
     private CompositeNode createEditConfigStructure(final InstanceIdentifier dataPath, final Optional<String> operation,
-                                                    final Optional<CompositeNode> lastChildOverride) {
-        Preconditions.checkArgument(dataPath.getPath().isEmpty() == false, "Instance identifier with empty path %s", dataPath);
+            final Optional<CompositeNode> lastChildOverride) {
+        Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
 
         List<PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
 

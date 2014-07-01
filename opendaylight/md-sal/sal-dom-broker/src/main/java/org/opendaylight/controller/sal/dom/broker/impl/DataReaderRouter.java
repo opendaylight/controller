@@ -9,6 +9,8 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.Iterables;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +34,6 @@ import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterables;
-
 public class DataReaderRouter extends
 AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory
@@ -46,7 +46,7 @@ AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
     @Override
     protected CompositeNodeTOImpl merge(final InstanceIdentifier path,
             final Iterable<CompositeNode> data) {
-        PathArgument pathArgument = Iterables.getLast(path.getPath(), null);
+        PathArgument pathArgument = Iterables.getLast(path.getPathArguments(), null);
         boolean empty = true;
         QName name = (pathArgument == null ? null : pathArgument.getNodeType());
         final ArrayList<Node<?>> nodes = new ArrayList<Node<?>>();
