@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fec99626",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/NotificationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T08:58:39Z",
+      "side": 1,
+      "message": "extra line inside the comment, missing a line before the comment",
+      "revId": "e3bbf8a75734668c3e71608605ee6a66d48a8553",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e49a2b5",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/notify/NotificationPublishService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T08:58:39Z",
+      "side": 1,
+      "message": "Which flavor of publish() is preferred, when and why?\n\nIf we cannot answer that now, can we drop a FIXME and create a design bug to decide what the interaction model here is?",
+      "revId": "e3bbf8a75734668c3e71608605ee6a66d48a8553",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
