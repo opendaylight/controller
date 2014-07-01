@@ -47,7 +47,7 @@ public class RestCodec {
     private RestCodec() {
     }
 
-    public static final Codec<Object, Object> from(TypeDefinition<?> typeDefinition, MountInstance mountPoint) {
+    public static final Codec<Object, Object> from(final TypeDefinition<?> typeDefinition, final MountInstance mountPoint) {
         return new ObjectCodec(typeDefinition, mountPoint);
     }
 
@@ -62,7 +62,7 @@ public class RestCodec {
 
         private final TypeDefinition<?> type;
 
-        private ObjectCodec(TypeDefinition<?> typeDefinition, MountInstance mountPoint) {
+        private ObjectCodec(final TypeDefinition<?> typeDefinition, final MountInstance mountPoint) {
             type = RestUtil.resolveBaseTypeFrom(typeDefinition);
             if (type instanceof IdentityrefTypeDefinition) {
                 identityrefCodec = new IdentityrefCodecImpl(mountPoint);
@@ -78,7 +78,7 @@ public class RestCodec {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Object deserialize(Object input) {
+        public Object deserialize(final Object input) {
             try {
                 if (type instanceof IdentityrefTypeDefinition) {
                     if (input instanceof IdentityValuesDTO) {
@@ -116,7 +116,7 @@ public class RestCodec {
                     }
                 }
             } catch (ClassCastException e) { // TODO remove this catch when
-                                             // everyone use codecs
+                // everyone use codecs
                 logger.error(
                         "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
                         e);
@@ -126,7 +126,7 @@ public class RestCodec {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Object serialize(Object input) {
+        public Object serialize(final Object input) {
             try {
                 if (type instanceof IdentityrefTypeDefinition) {
                     return identityrefCodec.serialize(input);
@@ -146,7 +146,7 @@ public class RestCodec {
                     }
                 }
             } catch (ClassCastException e) { // TODO remove this catch when
-                                             // everyone use codecs
+                // everyone use codecs
                 logger.error(
                         "ClassCastException was thrown when codec is invoked with parameter " + String.valueOf(input),
                         e);
@@ -162,17 +162,17 @@ public class RestCodec {
 
         private final MountInstance mountPoint;
 
-        public IdentityrefCodecImpl(MountInstance mountPoint) {
+        public IdentityrefCodecImpl(final MountInstance mountPoint) {
             this.mountPoint = mountPoint;
         }
 
         @Override
-        public IdentityValuesDTO serialize(QName data) {
+        public IdentityValuesDTO serialize(final QName data) {
             return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix(),null);
         }
 
         @Override
-        public QName deserialize(IdentityValuesDTO data) {
+        public QName deserialize(final IdentityValuesDTO data) {
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
             if (module == null) {
@@ -189,12 +189,12 @@ public class RestCodec {
     public static class LeafrefCodecImpl implements LeafrefCodec<String> {
 
         @Override
-        public String serialize(Object data) {
+        public String serialize(final Object data) {
             return String.valueOf(data);
         }
 
         @Override
-        public Object deserialize(String data) {
+        public Object deserialize(final String data) {
             return data;
         }
 
@@ -204,15 +204,14 @@ public class RestCodec {
         private final Logger logger = LoggerFactory.getLogger(InstanceIdentifierCodecImpl.class);
         private final MountInstance mountPoint;
 
-        public InstanceIdentifierCodecImpl(MountInstance mountPoint) {
+        public InstanceIdentifierCodecImpl(final MountInstance mountPoint) {
             this.mountPoint = mountPoint;
         }
 
         @Override
-        public IdentityValuesDTO serialize(InstanceIdentifier data) {
-            List<PathArgument> pathArguments = data.getPath();
+        public IdentityValuesDTO serialize(final InstanceIdentifier data) {
             IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO();
-            for (PathArgument pathArgument : pathArguments) {
+            for (PathArgument pathArgument : data.getPathArguments()) {
                 IdentityValue identityValue = qNameToIdentityValue(pathArgument.getNodeType());
                 if (pathArgument instanceof NodeIdentifierWithPredicates && identityValue != null) {
                     List<Predicate> predicates = keyValuesToPredicateList(((NodeIdentifierWithPredicates) pathArgument)
@@ -230,7 +229,7 @@ public class RestCodec {
         }
 
         @Override
-        public InstanceIdentifier deserialize(IdentityValuesDTO data) {
+        public InstanceIdentifier deserialize(final IdentityValuesDTO data) {
             List<PathArgument> result = new ArrayList<PathArgument>();
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
@@ -293,10 +292,10 @@ public class RestCodec {
                 }
             }
 
-            return result.isEmpty() ? null : new InstanceIdentifier(result);
+            return result.isEmpty() ? null : InstanceIdentifier.create(result);
         }
 
-        private List<Predicate> keyValuesToPredicateList(Map<QName, Object> keyValues) {
+        private List<Predicate> keyValuesToPredicateList(final Map<QName, Object> keyValues) {
             List<Predicate> result = new ArrayList<>();
             for (QName qName : keyValues.keySet()) {
                 Object value = keyValues.get(qName);
@@ -305,7 +304,7 @@ public class RestCodec {
             return result;
         }
 
-        private IdentityValue qNameToIdentityValue(QName qName) {
+        private IdentityValue qNameToIdentityValue(final QName qName) {
             if (qName != null) {
                 return new IdentityValue(qName.getNamespace().toString(), qName.getLocalName(), qName.getPrefix());
             }
@@ -313,7 +312,7 @@ public class RestCodec {
         }
     }
 
-    private static Module getModuleByNamespace(String namespace, MountInstance mountPoint) {
+    private static Module getModuleByNamespace(final String namespace, final MountInstance mountPoint) {
         URI validNamespace = resolveValidNamespace(namespace, mountPoint);
 
         Module module = null;
@@ -329,7 +328,7 @@ public class RestCodec {
         return module;
     }
 
-    private static URI resolveValidNamespace(String namespace, MountInstance mountPoint) {
+    private static URI resolveValidNamespace(final String namespace, final MountInstance mountPoint) {
         URI validNamespace;
         if (mountPoint != null) {
             validNamespace = ControllerContext.getInstance().findNamespaceByModuleName(mountPoint, namespace);

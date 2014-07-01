@@ -54,7 +54,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
 
     private SchemaContext schemaContext;
 
-    public MountPointImpl(InstanceIdentifier path) {
+    public MountPointImpl(final InstanceIdentifier path) {
         this.mountPath = path;
         rpcs = new SchemaAwareRpcBroker(path.toString(),this);
         dataReader = new DataBrokerImpl();
@@ -71,49 +71,49 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public void publish(CompositeNode notification) {
+    public void publish(final CompositeNode notification) {
         notificationRouter.publish(notification);
     }
 
     @Override
-    public Registration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
+    public Registration<NotificationListener> addNotificationListener(final QName notification, final NotificationListener listener) {
         return notificationRouter.addNotificationListener(notification, listener);
     }
 
     @Override
-    public CompositeNode readConfigurationData(InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
         return dataReader.readConfigurationData(path);
     }
 
     @Override
-    public CompositeNode readOperationalData(InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final InstanceIdentifier path) {
         return dataReader.readOperationalData(path);
     }
 
     @Override
     public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerOperationalReader(path, reader);
     }
 
     @Override
     public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerConfigurationReader(path, reader);
     }
 
     @Override
-    public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
+    public RoutedRpcRegistration addRoutedRpcImplementation(final QName rpcType, final RpcImplementation implementation) {
         return rpcs.addRoutedRpcImplementation(rpcType, implementation);
     }
 
     @Override
-    public void setRoutedRpcDefaultDelegate(RoutedRpcDefaultImplementation defaultImplementation) {
-      rpcs.setRoutedRpcDefaultDelegate(defaultImplementation);
+    public void setRoutedRpcDefaultDelegate(final RoutedRpcDefaultImplementation defaultImplementation) {
+        rpcs.setRoutedRpcDefaultDelegate(defaultImplementation);
     }
 
-  @Override
-    public RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
+    @Override
+    public RpcRegistration addRpcImplementation(final QName rpcType, final RpcImplementation implementation)
             throws IllegalArgumentException {
         return rpcs.addRpcImplementation(rpcType, implementation);
     }
@@ -124,17 +124,17 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final CompositeNode input) {
         return rpcs.invokeRpc(rpc, input);
     }
 
     @Override
-    public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener) {
+    public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(final RpcRegistrationListener listener) {
         return rpcs.addRpcRegistrationListener(listener);
     }
 
     @Override
-    public ListenableFuture<RpcResult<CompositeNode>> rpc(QName type, CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> rpc(final QName type, final CompositeNode input) {
         return rpcs.invokeRpc( type, input );
     }
 
@@ -144,33 +144,33 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(InstanceIdentifier path,
-            DataChangeListener listener) {
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier path,
+            final DataChangeListener listener) {
         return dataReader.registerDataChangeListener(path, listener);
     }
 
     @Override
     public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
-            InstanceIdentifier path, DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
+            final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
         return dataReader.registerCommitHandler(path, commitHandler);
     }
 
     @Override
-    public void removeRefresher(DataStoreIdentifier store, DataRefresher refresher) {
-     // NOOP
+    public void removeRefresher(final DataStoreIdentifier store, final DataRefresher refresher) {
+        // NOOP
     }
 
     @Override
-    public void addRefresher(DataStoreIdentifier store, DataRefresher refresher) {
-     // NOOP
+    public void addRefresher(final DataStoreIdentifier store, final DataRefresher refresher) {
+        // NOOP
     }
 
     @Override
-    public void addValidator(DataStoreIdentifier store, DataValidator validator) {
-     // NOOP
+    public void addValidator(final DataStoreIdentifier store, final DataValidator validator) {
+        // NOOP
     }
     @Override
-    public void removeValidator(DataStoreIdentifier store, DataValidator validator) {
+    public void removeValidator(final DataStoreIdentifier store, final DataValidator validator) {
         // NOOP
     }
 
@@ -180,24 +180,22 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public void setSchemaContext(SchemaContext schemaContext) {
+    public void setSchemaContext(final SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
     }
 
     class ReadWrapper implements DataReader<InstanceIdentifier, CompositeNode> {
-
-
-        private InstanceIdentifier shortenPath(InstanceIdentifier path) {
+        private InstanceIdentifier shortenPath(final InstanceIdentifier path) {
             InstanceIdentifier ret = null;
             if(mountPath.contains(path)) {
                 List<PathArgument> newArgs = path.getPath().subList(mountPath.getPath().size(), path.getPath().size());
-                ret = new InstanceIdentifier(newArgs);
+                ret = InstanceIdentifier.create(newArgs);
             }
             return ret;
         }
 
         @Override
-        public CompositeNode readConfigurationData(InstanceIdentifier path) {
+        public CompositeNode readConfigurationData(final InstanceIdentifier path) {
             InstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
@@ -206,7 +204,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         }
 
         @Override
-        public CompositeNode readOperationalData(InstanceIdentifier path) {
+        public CompositeNode readOperationalData(final InstanceIdentifier path) {
             InstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
@@ -217,13 +215,13 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
 
     @Override
     public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+            final RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return dataReader.registerCommitHandlerListener(commitHandlerListener);
     }
 
     @Override
     public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
-            L listener) {
+            final L listener) {
         return rpcs.registerRouteChangeListener(listener);
     }
 }

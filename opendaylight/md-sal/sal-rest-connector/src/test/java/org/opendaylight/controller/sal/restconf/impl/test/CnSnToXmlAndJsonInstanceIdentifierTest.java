@@ -226,7 +226,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         pathArguments.add(new NodeIdentifier(new QName(new URI("augment:augment:module"), "lf112")));
 
-        return new InstanceIdentifier(pathArguments);
+        return InstanceIdentifier.create(pathArguments);
     }
 
     private InstanceIdentifier createInstanceIdentifierWithLeafList() throws URISyntaxException {
@@ -235,7 +235,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont1")));
         pathArguments.add(new NodeWithValue(new QName(new URI("augment:module:leaf:list"), "lflst11"), "lflst11_1"));
 
-        return new InstanceIdentifier(pathArguments);
+        return InstanceIdentifier.create(pathArguments);
     }
 
 }
