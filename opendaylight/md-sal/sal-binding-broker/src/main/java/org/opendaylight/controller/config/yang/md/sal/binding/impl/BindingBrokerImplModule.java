@@ -63,7 +63,7 @@ public final class BindingBrokerImplModule extends
         broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
-        // FIXME: Also set Async Data Broker
+       broker.setDataBroker(getRootDataBrokerDependency());
         return broker;
     }
 
@@ -77,7 +77,7 @@ public final class BindingBrokerImplModule extends
         broker.getMountManager().setDataCommitExecutor(SingletonHolder.getDefaultCommitExecutor());
         broker.getMountManager().setNotificationExecutor(SingletonHolder.getDefaultNotificationExecutor());
 
-        // FIXME: Also set Async Data Broker
+        broker.setDataBroker(getRootDataBrokerDependency());
         DomForwardingUtils.reuseForwardingFrom(broker, broker.getDataBroker());
         broker.startForwarding();
         return broker;
