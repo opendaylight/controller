@@ -286,7 +286,7 @@ public class AbsModuleGeneratedObjectFactory {
             format("private final %s oldModule;\n", abstractFQN.getTypeName())+
             format("private final %s oldInstance;\n", AutoCloseable.class.getCanonicalName())+
             format("private %s instance;\n", AutoCloseable.class.getCanonicalName())+
-            format("private final %s dependencyResolver;\n", DependencyResolver.class.getCanonicalName())+
+            format("protected final %s dependencyResolver;\n", DependencyResolver.class.getCanonicalName())+
             format("private final %s identifier;\n", ModuleIdentifier.class.getCanonicalName())+
             "@Override\n"+
             format("public %s getIdentifier() {\n", ModuleIdentifier.class.getCanonicalName())+
