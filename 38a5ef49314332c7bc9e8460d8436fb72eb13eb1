@@ -16,6 +16,23 @@
       "revId": "38a5ef49314332c7bc9e8460d8436fb72eb13eb1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_80d6e4ef",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/SynchronizedTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-01T13:12:12Z",
+      "side": 1,
+      "message": "One more reference",
+      "revId": "38a5ef49314332c7bc9e8460d8436fb72eb13eb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
