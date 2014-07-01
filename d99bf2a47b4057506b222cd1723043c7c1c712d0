@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_809a646c",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/DataBrokerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-01T12:54:44Z",
+      "side": 1,
+      "message": "Looks like we still have the old names here. Would have expected the compilation to fail on that.. \n\nEither way, we need to make a pass through and update these links.",
+      "revId": "d99bf2a47b4057506b222cd1723043c7c1c712d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e08010f9",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/DataProviderService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-01T12:54:44Z",
+      "side": 1,
+      "message": "One more location where we need to link to DOMDatastore.",
+      "revId": "d99bf2a47b4057506b222cd1723043c7c1c712d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_208b5820",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataCommitHandlerRegistration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-01T12:54:44Z",
+      "side": 1,
+      "message": "Please give a link to the new implementation or explain why this is not needed anymore.",
+      "revId": "d99bf2a47b4057506b222cd1723043c7c1c712d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
