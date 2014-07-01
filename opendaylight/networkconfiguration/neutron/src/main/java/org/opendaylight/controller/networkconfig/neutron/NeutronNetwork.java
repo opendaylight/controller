@@ -23,7 +23,7 @@ import org.opendaylight.controller.configuration.ConfigurationObject;
 @XmlRootElement(name = "network")
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronNetwork extends ConfigurationObject implements Serializable {
+public class NeutronNetwork extends ConfigurationObject implements Serializable, INeutronObject {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -92,6 +92,8 @@ public class NeutronNetwork extends ConfigurationObject implements Serializable 
     }
 
     public String getID() { return networkUUID; }
+
+    public void setID(String id) { this.networkUUID = id; }
 
     public String getNetworkUUID() {
         return networkUUID;
