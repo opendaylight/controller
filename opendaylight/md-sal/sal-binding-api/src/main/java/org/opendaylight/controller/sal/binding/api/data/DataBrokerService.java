@@ -21,7 +21,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  *
  * @see DataProviderService
+ * @deprecated Replaced by newer better documented version {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
  */
+@Deprecated
 public interface DataBrokerService extends //
         BindingAwareService, //
         DataModificationTransactionFactory<InstanceIdentifier<? extends DataObject>, DataObject>, //
@@ -31,16 +33,26 @@ public interface DataBrokerService extends //
      * Creates a data modification transaction.
      *
      * @return new blank data modification transaction.
+     * @deprecated Replaced by more specific transaction types. Please use
+     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
+     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
+     *          or
+     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
      */
+    @Deprecated
     @Override
     DataModificationTransaction beginTransaction();
 
     /**
      * Reads data subtree from configurational store.
      * (Store which is populated by consumer, which is usually used to
-     * inject state into providers. E.g. Flow configuration)-
+     * inject state into providers. E.g. Flow configuration)
+     *
+     *
+     * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
      *
      */
+    @Deprecated
     @Override
     public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
 
@@ -49,7 +61,9 @@ public interface DataBrokerService extends //
      * (Store which is populated by providers, which is usually used to
      * capture state of providers. E.g. Topology)
      *
+     * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
      */
+    @Deprecated
     @Override
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
 
@@ -58,7 +72,10 @@ public interface DataBrokerService extends //
      *
      * Callback is invoked each time data in subtree changes.
      *
+     * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#registerDataChangeListener(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, InstanceIdentifier, org.opendaylight.controller.md.sal.binding.api.DataChangeListener, org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope)}
+     * which provides more fine-grained registration options.
      */
+    @Deprecated
     @Override
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(
             InstanceIdentifier<? extends DataObject> path, DataChangeListener listener);
