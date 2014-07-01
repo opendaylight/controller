@@ -18,6 +18,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +27,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.Nullable;
+
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AbstractDependencyAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
@@ -64,27 +67,27 @@ final class ModuleMXBeanEntryBuilder {
     private TypeProviderWrapper typeProviderWrapper;
     private String packageName;
 
-    public ModuleMXBeanEntryBuilder setModule(Module module) {
+    public ModuleMXBeanEntryBuilder setModule(final Module module) {
         this.currentModule = module;
         return this;
     }
 
-    public ModuleMXBeanEntryBuilder setqNamesToSIEs(Map<QName, ServiceInterfaceEntry> qNamesToSIEs) {
+    public ModuleMXBeanEntryBuilder setqNamesToSIEs(final Map<QName, ServiceInterfaceEntry> qNamesToSIEs) {
         this.qNamesToSIEs = qNamesToSIEs;
         return this;
     }
 
-    public ModuleMXBeanEntryBuilder setSchemaContext(SchemaContext schemaContext) {
+    public ModuleMXBeanEntryBuilder setSchemaContext(final SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
         return this;
     }
 
-    public ModuleMXBeanEntryBuilder setTypeProviderWrapper(TypeProviderWrapper typeProviderWrapper) {
+    public ModuleMXBeanEntryBuilder setTypeProviderWrapper(final TypeProviderWrapper typeProviderWrapper) {
         this.typeProviderWrapper = typeProviderWrapper;
         return this;
     }
 
-    public ModuleMXBeanEntryBuilder setPackageName(String packageName) {
+    public ModuleMXBeanEntryBuilder setPackageName(final String packageName) {
         this.packageName = packageName;
         return this;
     }
@@ -147,7 +150,7 @@ final class ModuleMXBeanEntryBuilder {
         return result;
     }
 
-    private static void cleanUpNulls(Map<String, ModuleMXBeanEntry> result) {
+    private static void cleanUpNulls(final Map<String, ModuleMXBeanEntry> result) {
         for (Map.Entry<String, ModuleMXBeanEntry> entry : result.entrySet()) {
             ModuleMXBeanEntry module = entry.getValue();
             if (module.getAttributes() == null) {
@@ -160,14 +163,14 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private static void checkUnaugumentedIdentities(Map<String, IdentitySchemaNode> unaugmentedModuleIdentities) {
+    private static void checkUnaugumentedIdentities(final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities) {
         if (unaugmentedModuleIdentities.size() > 0) {
             logger.warn("Augmentation not found for all currentModule identities: {}",
                     unaugmentedModuleIdentities.keySet());
         }
     }
 
-    private static void checkAttributeNamesUniqueness(Map<String, QName> uniqueGeneratedClassesNames, Map<String, ModuleMXBeanEntry> result) {
+    private static void checkAttributeNamesUniqueness(final Map<String, QName> uniqueGeneratedClassesNames, final Map<String, ModuleMXBeanEntry> result) {
         for (Map.Entry<String, ModuleMXBeanEntry> entry : result.entrySet()) {
             checkUniqueRuntimeBeanAttributesName(entry.getValue(),
                     uniqueGeneratedClassesNames);
@@ -212,29 +215,30 @@ final class ModuleMXBeanEntryBuilder {
         return moduleIdentities;
     }
 
-    private Collection<ChoiceCaseNode> castChildNodesToChoiceCases(Set<DataSchemaNode> childNodes) {
+    private Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Set<DataSchemaNode> childNodes) {
         return Collections2.transform(childNodes, new Function<DataSchemaNode, ChoiceCaseNode>() {
             @Nullable
             @Override
-            public ChoiceCaseNode apply(@Nullable DataSchemaNode input) {
+            public ChoiceCaseNode apply(@Nullable final DataSchemaNode input) {
                 return (ChoiceCaseNode) input;
             }
         });
     }
 
-    private boolean areAllChildrenChoiceCaseNodes(Set<DataSchemaNode> childNodes) {
+    private boolean areAllChildrenChoiceCaseNodes(final Set<DataSchemaNode> childNodes) {
         for (DataSchemaNode childNode : childNodes) {
-            if (childNode instanceof ChoiceCaseNode == false)
+            if (childNode instanceof ChoiceCaseNode == false) {
                 return false;
+            }
         }
         return true;
     }
 
-    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(Map<String, ModuleMXBeanEntry> result,
-            Map<String, QName> uniqueGeneratedClassesNames, String configModulePrefix,
-            Map<String, IdentitySchemaNode> moduleIdentities,
-            Map<String, IdentitySchemaNode> unaugmentedModuleIdentities, AugmentationSchema augmentation,
-            DataSchemaNode when) {
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(final Map<String, ModuleMXBeanEntry> result,
+            final Map<String, QName> uniqueGeneratedClassesNames, final String configModulePrefix,
+            final Map<String, IdentitySchemaNode> moduleIdentities,
+            final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities, final AugmentationSchema augmentation,
+            final DataSchemaNode when) {
 
         ChoiceCaseNode choiceCaseNode = (ChoiceCaseNode) when;
         if (choiceCaseNode.getConstraints() == null || choiceCaseNode.getConstraints().getWhenCondition() == null) {
@@ -301,12 +305,12 @@ final class ModuleMXBeanEntryBuilder {
             }
             checkState(Objects.equals(nullableDummyContainerName, moduleMXBeanEntry.getNullableDummyContainerName()),
                     "Mismatch in module " + moduleMXBeanEntry.toString() + " - dummy container must be present/missing in" +
-                            " both state and configuration");
+                    " both state and configuration");
         } else {
             ModuleMXBeanEntry.ModuleMXBeanEntryInitial initial = new ModuleMXBeanEntry.ModuleMXBeanEntryInitialBuilder()
-                    .setIdSchemaNode(moduleIdentity).setPackageName(packageName).setJavaNamePrefix(javaNamePrefix)
-                    .setNamespace(currentModule.getNamespace().toString()).setqName(ModuleUtil.getQName(currentModule))
-                    .build();
+            .setIdSchemaNode(moduleIdentity).setPackageName(packageName).setJavaNamePrefix(javaNamePrefix)
+            .setNamespace(currentModule.getNamespace().toString()).setqName(ModuleUtil.getQName(currentModule))
+            .build();
 
             // construct ModuleMXBeanEntry
             ModuleMXBeanEntry moduleMXBeanEntry = new ModuleMXBeanEntry(initial, yangToAttributes, providedServices,
@@ -319,8 +323,8 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueRuntimeBeansGeneratedClasses(Map<String, QName> uniqueGeneratedClassesNames,
-            DataSchemaNode when, Collection<RuntimeBeanEntry> runtimeBeans) {
+    private void checkUniqueRuntimeBeansGeneratedClasses(final Map<String, QName> uniqueGeneratedClassesNames,
+            final DataSchemaNode when, final Collection<RuntimeBeanEntry> runtimeBeans) {
         for (RuntimeBeanEntry runtimeBean : runtimeBeans) {
             final String javaNameOfRuntimeMXBean = runtimeBean.getJavaNameOfRuntimeMXBean();
             if (uniqueGeneratedClassesNames.containsKey(javaNameOfRuntimeMXBean)) {
@@ -331,8 +335,8 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private static void checkUniqueRuntimeBeanAttributesName(ModuleMXBeanEntry mxBeanEntry,
-            Map<String, QName> uniqueGeneratedClassesNames) {
+    private static void checkUniqueRuntimeBeanAttributesName(final ModuleMXBeanEntry mxBeanEntry,
+            final Map<String, QName> uniqueGeneratedClassesNames) {
         for (RuntimeBeanEntry runtimeBeanEntry : mxBeanEntry.getRuntimeBeans()) {
             for (String runtimeAttName : runtimeBeanEntry.getYangPropertiesToTypesMap().keySet()) {
                 if (mxBeanEntry.getAttributes().keySet().contains(runtimeAttName)) {
@@ -344,8 +348,8 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueAttributesWithGeneratedClass(Map<String, QName> uniqueGeneratedClassNames,
-            QName parentQName, Map<String, AttributeIfc> yangToAttributes) {
+    private void checkUniqueAttributesWithGeneratedClass(final Map<String, QName> uniqueGeneratedClassNames,
+            final QName parentQName, final Map<String, AttributeIfc> yangToAttributes) {
         for (Map.Entry<String, AttributeIfc> attr : yangToAttributes.entrySet()) {
             if (attr.getValue() instanceof TOAttribute) {
                 checkUniqueTOAttr(uniqueGeneratedClassNames, parentQName, (TOAttribute) attr.getValue());
@@ -357,7 +361,7 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueTOAttr(Map<String, QName> uniqueGeneratedClassNames, QName parentQName, TOAttribute attr) {
+    private void checkUniqueTOAttr(final Map<String, QName> uniqueGeneratedClassNames, final QName parentQName, final TOAttribute attr) {
         final String upperCaseCamelCase = attr.getUpperCaseCammelCase();
         if (uniqueGeneratedClassNames.containsKey(upperCaseCamelCase)) {
             QName firstDefinedQName = uniqueGeneratedClassNames.get(upperCaseCamelCase);
@@ -367,9 +371,9 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private Collection<RuntimeBeanEntry> fillRuntimeBeans(DataNodeContainer dataNodeContainer, Module currentModule,
-            TypeProviderWrapper typeProviderWrapper, String packageName, String moduleLocalNameFromXPath,
-            String javaNamePrefix) {
+    private Collection<RuntimeBeanEntry> fillRuntimeBeans(final DataNodeContainer dataNodeContainer, final Module currentModule,
+            final TypeProviderWrapper typeProviderWrapper, final String packageName, final String moduleLocalNameFromXPath,
+            final String javaNamePrefix) {
 
         return RuntimeBeanEntry.extractClassNameToRuntimeBeanMap(packageName, dataNodeContainer, moduleLocalNameFromXPath,
                 typeProviderWrapper, javaNamePrefix, currentModule).values();
@@ -383,7 +387,7 @@ final class ModuleMXBeanEntryBuilder {
      * @param choiceCaseNode state or configuration case statement
      * @return either choiceCaseNode or its only child container
      */
-    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(ChoiceCaseNode choiceCaseNode) {
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final ChoiceCaseNode choiceCaseNode) {
         Set<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
         if (childNodes.size() == 1) {
             DataSchemaNode onlyChild = childNodes.iterator().next();
@@ -398,9 +402,9 @@ final class ModuleMXBeanEntryBuilder {
         return (HAS_CHILDREN_AND_QNAME) choiceCaseNode;
     }
 
-    private Map<String, AttributeIfc> fillConfiguration(DataNodeContainer dataNodeContainer, Module currentModule,
-            TypeProviderWrapper typeProviderWrapper, Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
-            SchemaContext schemaContext, String packageName) {
+    private Map<String, AttributeIfc> fillConfiguration(final DataNodeContainer dataNodeContainer, final Module currentModule,
+            final TypeProviderWrapper typeProviderWrapper, final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
+            final SchemaContext schemaContext, final String packageName) {
         Map<String, AttributeIfc> yangToAttributes = new HashMap<>();
         Set<DataSchemaNode> childNodes = dataNodeContainer.getChildNodes();
         for (DataSchemaNode attrNode : childNodes) {
@@ -411,8 +415,8 @@ final class ModuleMXBeanEntryBuilder {
         return yangToAttributes;
     }
 
-    private Map<String, QName> findProvidedServices(IdentitySchemaNode moduleIdentity, Module currentModule,
-            Map<QName, ServiceInterfaceEntry> qNamesToSIEs, SchemaContext schemaContext) {
+    private Map<String, QName> findProvidedServices(final IdentitySchemaNode moduleIdentity, final Module currentModule,
+            final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final SchemaContext schemaContext) {
         Map<String, QName> result = new HashMap<>();
         for (UnknownSchemaNode unknownNode : moduleIdentity.getUnknownSchemaNodes()) {
             if (ConfigConstants.PROVIDED_SERVICE_EXTENSION_QNAME.equals(unknownNode.getNodeType())) {
@@ -425,9 +429,9 @@ final class ModuleMXBeanEntryBuilder {
         return result;
     }
 
-    private AttributeIfc getAttributeValue(DataSchemaNode attrNode, Module currentModule,
-            Map<QName, ServiceInterfaceEntry> qNamesToSIEs, TypeProviderWrapper typeProviderWrapper,
-            SchemaContext schemaContext, String packageName) {
+    private AttributeIfc getAttributeValue(final DataSchemaNode attrNode, final Module currentModule,
+            final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final TypeProviderWrapper typeProviderWrapper,
+            final SchemaContext schemaContext, final String packageName) {
 
         if (attrNode instanceof LeafSchemaNode) {
             // simple type
@@ -460,9 +464,9 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private Optional<? extends AbstractDependencyAttribute> extractDependency(DataNodeContainer dataNodeContainer,
-            DataSchemaNode attrNode, Module currentModule, Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
-            SchemaContext schemaContext) {
+    private Optional<? extends AbstractDependencyAttribute> extractDependency(final DataNodeContainer dataNodeContainer,
+            final DataSchemaNode attrNode, final Module currentModule, final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
+            final SchemaContext schemaContext) {
         if (dataNodeContainer.getUses().size() == 1 && getChildNodeSizeWithoutUses(dataNodeContainer) == 0) {
             // reference
             UsesNode usesNode = dataNodeContainer.getUses().iterator().next();
@@ -490,7 +494,7 @@ final class ModuleMXBeanEntryBuilder {
         return Optional.absent();
     }
 
-    private int getChildNodeSizeWithoutUses(DataNodeContainer csn) {
+    private int getChildNodeSizeWithoutUses(final DataNodeContainer csn) {
         int result = 0;
         for (DataSchemaNode dsn : csn.getChildNodes()) {
             if (dsn.isAddedByUses() == false) {
@@ -500,8 +504,8 @@ final class ModuleMXBeanEntryBuilder {
         return result;
     }
 
-    private ServiceInterfaceEntry findSIE(String prefixAndIdentityLocalName, Module currentModule,
-            Map<QName, ServiceInterfaceEntry> qNamesToSIEs, SchemaContext schemaContext) {
+    private ServiceInterfaceEntry findSIE(final String prefixAndIdentityLocalName, final Module currentModule,
+            final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final SchemaContext schemaContext) {
 
         Matcher m = PREFIX_COLON_LOCAL_NAME.matcher(prefixAndIdentityLocalName);
         Module foundModule;
@@ -518,13 +522,13 @@ final class ModuleMXBeanEntryBuilder {
             foundModule = currentModule; // no prefix => SIE is in currentModule
             localSIName = prefixAndIdentityLocalName;
         }
-        QName siQName = new QName(foundModule.getNamespace(), foundModule.getRevision(), localSIName);
+        QName siQName = QName.create(foundModule.getNamespace(), foundModule.getRevision(), localSIName);
         ServiceInterfaceEntry sie = qNamesToSIEs.get(siQName);
         checkState(sie != null, "Cannot find referenced Service Interface by " + prefixAndIdentityLocalName);
         return sie;
     }
 
-    private ModuleImport findModuleImport(Module module, String prefix) {
+    private ModuleImport findModuleImport(final Module module, final String prefix) {
         for (ModuleImport moduleImport : module.getImports()) {
             if (moduleImport.getPrefix().equals(prefix)) {
                 return moduleImport;
@@ -534,13 +538,13 @@ final class ModuleMXBeanEntryBuilder {
     }
 
     @VisibleForTesting
-    static Matcher getWhenConditionMatcher(String prefix, RevisionAwareXPath whenConstraint) {
+    static Matcher getWhenConditionMatcher(final String prefix, final RevisionAwareXPath whenConstraint) {
         String xpathRegex = MODULE_CONDITION_XPATH_TEMPLATE.replace(MAGIC_STRING, prefix);
         Pattern pattern = Pattern.compile(xpathRegex);
         return pattern.matcher(whenConstraint.toString());
     }
 
-    String getConfigModulePrefixFromImport(Module currentModule) {
+    String getConfigModulePrefixFromImport(final Module currentModule) {
         for (ModuleImport currentImport : currentModule.getImports()) {
             if (currentImport.getModuleName().equals(ConfigConstants.CONFIG_MODULE)) {
                 return currentImport.getPrefix();

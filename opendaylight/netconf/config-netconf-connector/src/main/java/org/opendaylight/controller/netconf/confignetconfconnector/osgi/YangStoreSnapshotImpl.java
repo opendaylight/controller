@@ -9,6 +9,13 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import com.google.common.collect.Maps;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
@@ -21,18 +28,12 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 public class YangStoreSnapshotImpl implements YangStoreSnapshot {
     private static final Logger logger = LoggerFactory.getLogger(YangStoreSnapshotImpl.class);
 
 
     private final Map<String /* Namespace from yang file */,
-            Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
+    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
 
 
     private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
@@ -40,7 +41,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
     private final SchemaContext schemaContext;
 
 
-    public YangStoreSnapshotImpl(SchemaContext resolveSchemaContext) {
+    public YangStoreSnapshotImpl(final SchemaContext resolveSchemaContext) {
         logger.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         this.schemaContext = resolveSchemaContext;
         // JMX generator
@@ -60,7 +61,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
                     qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
                 } else {
                     throw new IllegalStateException("Cannot add two SIE with same qname "
-                                    + sieEntry.getValue());
+                            + sieEntry.getValue());
                 }
             }
         }
@@ -75,7 +76,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
             TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
                     new TypeProviderImpl(resolveSchemaContext));
 
-            QName qName = new QName(module.getNamespace(), module.getRevision(), module.getName());
+            QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
 
             Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
                     Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, resolveSchemaContext,
@@ -105,7 +106,7 @@ public class YangStoreSnapshotImpl implements YangStoreSnapshot {
     }
 
     @Override
-    public String getModuleSource(org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
+    public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
         return schemaContext.getModuleSource(moduleIdentifier).get();
     }
 

@@ -7,7 +7,35 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Sets;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.SimpleType;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
@@ -24,32 +52,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
-
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.SimpleType;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
@@ -95,7 +97,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 PACKAGE_NAME,identitiesToSIs));
         Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                 .create(jmxImplModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl(context))
-                        , PACKAGE_NAME);
+                , PACKAGE_NAME);
         Map<String, AttributeIfc> attributes = namesToMBEs.get("impl-netconf")
                 .getAttributes();
 
@@ -120,7 +122,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
         assertThat(threadFactoryAttribute.getType().getName(), is("ObjectName"));
     }
 
-    private void assertCorrectAttributesSize(Map<String, ModuleMXBeanEntry> namesToMBEs, Map<String, AttributeIfc> attributes) {
+    private void assertCorrectAttributesSize(final Map<String, ModuleMXBeanEntry> namesToMBEs, final Map<String, AttributeIfc> attributes) {
         assertEquals(14, attributes.size());
         assertEquals(1, namesToMBEs.get("impl-netconf").getRuntimeBeans().size());
         assertEquals(2, namesToMBEs.get("impl-netconf").getRuntimeBeans().iterator().next().getAttributes().size());
@@ -131,10 +133,11 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     }
 
     protected RuntimeBeanEntry findFirstByYangName(
-            Collection<RuntimeBeanEntry> runtimeBeans, String yangName) {
+            final Collection<RuntimeBeanEntry> runtimeBeans, final String yangName) {
         for (RuntimeBeanEntry rb : runtimeBeans) {
-            if (yangName.equals(rb.getYangName()))
+            if (yangName.equals(rb.getYangName())) {
                 return rb;
+            }
         }
         throw new IllegalArgumentException("Yang name not found:" + yangName
                 + " in " + runtimeBeans);
@@ -150,7 +153,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 "/config:modules/config:module/config:type=\"threadpool-dynamic\"");
     }
 
-    private void assertMatches(String prefix, String input) {
+    private void assertMatches(final String prefix, final String input) {
         RevisionAwareXPath whenConstraint = mock(RevisionAwareXPath.class);
         doReturn(input).when(whenConstraint).toString();
         Matcher output = ModuleMXBeanEntryBuilder.getWhenConditionMatcher(prefix,
@@ -181,7 +184,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                         is((Type) Types.typeForClass(Long.class)));
             }
             // check dependency on thread factory
-            QName threadfactoryQName = new QName(THREADS_NAMESPACE,
+            QName threadfactoryQName = QName.create(THREADS_NAMESPACE,
                     THREADS_REVISION_DATE, "threadfactory");
             ServiceInterfaceEntry threadFactorySIEntry = modulesToSIEs
                     .get(threadfactoryQName);
@@ -192,7 +195,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
             DataSchemaNode mockedDataSchemaNode = mock(DataSchemaNode.class);
             doReturn(Collections.emptyList()).when(mockedDataSchemaNode)
-                    .getUnknownSchemaNodes();
+            .getUnknownSchemaNodes();
             doReturn(threadfactoryQName).when(mockedDataSchemaNode).getQName();
             AttributeIfc expectedDependencyAttribute = new DependencyAttribute(
                     mockedDataSchemaNode, threadFactorySIEntry,
@@ -200,7 +203,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
             assertThat(actualThreadFactory, is(expectedDependencyAttribute));
             assertThat(
                     dynamicThreadPool
-                            .getFullyQualifiedName("DynamicThreadPoolModuleMXBean"),
+                    .getFullyQualifiedName("DynamicThreadPoolModuleMXBean"),
                     is(PACKAGE_NAME + ".DynamicThreadPoolModuleMXBean"));
             assertThat(dynamicThreadPool.getNullableDescription(),
                     is("threadpool-dynamic description"));
