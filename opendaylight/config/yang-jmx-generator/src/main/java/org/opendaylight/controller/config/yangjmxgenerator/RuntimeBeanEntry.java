@@ -13,6 +13,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
@@ -65,11 +67,11 @@ public class RuntimeBeanEntry {
     private final Set<Rpc> rpcs;
 
     @VisibleForTesting
-    RuntimeBeanEntry(String packageName,
-            DataNodeContainer nodeForReporting, String yangName,
-            String javaNamePrefix, boolean isRoot,
-            Optional<String> keyYangName, List<AttributeIfc> attributes,
-            List<RuntimeBeanEntry> children, Set<Rpc> rpcs) {
+    RuntimeBeanEntry(final String packageName,
+            final DataNodeContainer nodeForReporting, final String yangName,
+            final String javaNamePrefix, final boolean isRoot,
+            final Optional<String> keyYangName, final List<AttributeIfc> attributes,
+            final List<RuntimeBeanEntry> children, final Set<Rpc> rpcs) {
 
         checkArgument(isRoot == false || keyYangName.isPresent() == false,
                 "Root RuntimeBeanEntry must not have key " + "set");
@@ -86,7 +88,7 @@ public class RuntimeBeanEntry {
         for (AttributeIfc a : attributes) {
             checkState(map.containsKey(a.getAttributeYangName()) == false,
                     "Attribute already defined: " + a.getAttributeYangName()
-                            + " in " + nodeForReporting);
+                    + " in " + nodeForReporting);
             map.put(a.getAttributeYangName(), a);
         }
 
@@ -110,9 +112,9 @@ public class RuntimeBeanEntry {
      *         not contain special configuration for it.
      */
     public static Map<String, RuntimeBeanEntry> extractClassNameToRuntimeBeanMap(
-            String packageName, DataNodeContainer container,
-            String moduleYangName, TypeProviderWrapper typeProviderWrapper,
-            String javaNamePrefix, Module currentModule) {
+            final String packageName, final DataNodeContainer container,
+            final String moduleYangName, final TypeProviderWrapper typeProviderWrapper,
+            final String javaNamePrefix, final Module currentModule) {
 
         Map<QName, Set<RpcDefinition>> identitiesToRpcs = getIdentitiesToRpcs(currentModule);
 
@@ -151,7 +153,7 @@ public class RuntimeBeanEntry {
     }
 
     private static Map<QName/* of identity */, Set<RpcDefinition>> getIdentitiesToRpcs(
-            Module currentModule) {
+            final Module currentModule) {
         // currently only looks for local identities (found in currentModule)
         Map<QName, Set<RpcDefinition>> result = new HashMap<>();
         for (IdentitySchemaNode identity : currentModule.getIdentities()) {
@@ -164,14 +166,16 @@ public class RuntimeBeanEntry {
             if (input != null) {
                 for (UsesNode uses : input.getUses()) {
 
-                    if (uses.getGroupingPath().getPath().size() != 1)
+                    if (uses.getGroupingPath().getPath().size() != 1) {
                         continue;
+                    }
 
                     // check grouping path
                     QName qname = uses.getGroupingPath().getPath().get(0);
                     if (false == qname
-                            .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME))
+                            .equals(ConfigConstants.RPC_CONTEXT_REF_GROUPING_QNAME)) {
                         continue;
+                    }
 
                     for (SchemaNode refinedNode : uses.getRefines().values()) {
 
@@ -181,7 +185,7 @@ public class RuntimeBeanEntry {
                                     .equals(unknownSchemaNode.getNodeType())) {
                                 String localIdentityName = unknownSchemaNode
                                         .getNodeParameter();
-                                QName identityQName = new QName(
+                                QName identityQName = QName.create(
                                         currentModule.getNamespace(),
                                         currentModule.getRevision(),
                                         localIdentityName);
@@ -208,9 +212,9 @@ public class RuntimeBeanEntry {
      * in subtree.
      */
     private static AttributesRpcsAndRuntimeBeans extractSubtree(
-            String packageName, DataNodeContainer subtree,
-            TypeProviderWrapper typeProviderWrapper, Module currentModule,
-            Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
+            final String packageName, final DataNodeContainer subtree,
+            final TypeProviderWrapper typeProviderWrapper, final Module currentModule,
+            final Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
 
         List<AttributeIfc> attributes = Lists.newArrayList();
         // List<JavaAttribute> javaAttributes = new ArrayList<>();
@@ -258,7 +262,7 @@ public class RuntimeBeanEntry {
             if (ConfigConstants.RPC_CONTEXT_INSTANCE_EXTENSION_QNAME
                     .equals(unknownSchemaNode.getNodeType())) {
                 String localIdentityName = unknownSchemaNode.getNodeParameter();
-                QName identityQName = new QName(currentModule.getNamespace(),
+                QName identityQName = QName.create(currentModule.getNamespace(),
                         currentModule.getRevision(), localIdentityName);
                 Set<RpcDefinition> rpcDefinitions = identitiesToRpcs
                         .get(identityQName);
@@ -290,8 +294,8 @@ public class RuntimeBeanEntry {
                     for (DataSchemaNode childNode : sortAttributes(rpcDefinition.getInput()
                             .getChildNodes())) {
                         if (childNode.isAddedByUses() == false) { // skip
-                                                                  // refined
-                                                                  // context-instance
+                            // refined
+                            // context-instance
                             checkArgument(childNode instanceof LeafSchemaNode, "Unexpected type of rpc input type. "
                                     + "Currently only leafs and empty output nodes are supported, got " + childNode);
                             JavaAttribute javaAttribute = new JavaAttribute(
@@ -310,8 +314,8 @@ public class RuntimeBeanEntry {
                 attributes, rpcs);
     }
 
-    private static AttributeIfc getReturnTypeAttribute(DataSchemaNode child, TypeProviderWrapper typeProviderWrapper,
-                                                       String packageName) {
+    private static AttributeIfc getReturnTypeAttribute(final DataSchemaNode child, final TypeProviderWrapper typeProviderWrapper,
+            final String packageName) {
         if (child instanceof LeafSchemaNode) {
             LeafSchemaNode leaf = (LeafSchemaNode) child;
             return new JavaAttribute(leaf, typeProviderWrapper);
@@ -328,10 +332,10 @@ public class RuntimeBeanEntry {
         }
     }
 
-    private static Collection<DataSchemaNode> sortAttributes(Set<DataSchemaNode> childNodes) {
+    private static Collection<DataSchemaNode> sortAttributes(final Set<DataSchemaNode> childNodes) {
         final TreeSet<DataSchemaNode> dataSchemaNodes = new TreeSet<>(new Comparator<DataSchemaNode>() {
             @Override
-            public int compare(DataSchemaNode o1, DataSchemaNode o2) {
+            public int compare(final DataSchemaNode o1, final DataSchemaNode o2) {
                 return o1.getQName().getLocalName().compareTo(o2.getQName().getLocalName());
             }
         });
@@ -339,20 +343,21 @@ public class RuntimeBeanEntry {
         return dataSchemaNodes;
     }
 
-    private static boolean isInnerStateBean(DataSchemaNode child) {
+    private static boolean isInnerStateBean(final DataSchemaNode child) {
         for (UnknownSchemaNode unknownSchemaNode : child
                 .getUnknownSchemaNodes()) {
             if (unknownSchemaNode.getNodeType().equals(
-                    ConfigConstants.INNER_STATE_BEAN_EXTENSION_QNAME))
+                    ConfigConstants.INNER_STATE_BEAN_EXTENSION_QNAME)) {
                 return true;
+            }
         }
         return false;
     }
 
-    private static RuntimeBeanEntry createHierarchical(String packageName,
-            ListSchemaNode listSchemaNode,
-            TypeProviderWrapper typeProviderWrapper, Module currentModule,
-            Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
+    private static RuntimeBeanEntry createHierarchical(final String packageName,
+            final ListSchemaNode listSchemaNode,
+            final TypeProviderWrapper typeProviderWrapper, final Module currentModule,
+            final Map<QName, Set<RpcDefinition>> identitiesToRpcs) {
 
         // supported are numeric types, strings, enums
         // get all attributes
@@ -387,10 +392,10 @@ public class RuntimeBeanEntry {
         return rbFromAttributes;
     }
 
-    private static RuntimeBeanEntry createRoot(String packageName,
-            DataNodeContainer nodeForReporting, String attributeYangName,
-            List<AttributeIfc> attributes, String javaNamePrefix,
-            List<RuntimeBeanEntry> children, Set<Rpc> rpcs) {
+    private static RuntimeBeanEntry createRoot(final String packageName,
+            final DataNodeContainer nodeForReporting, final String attributeYangName,
+            final List<AttributeIfc> attributes, final String javaNamePrefix,
+            final List<RuntimeBeanEntry> children, final Set<Rpc> rpcs) {
         return new RuntimeBeanEntry(packageName, nodeForReporting,
                 attributeYangName, javaNamePrefix, true,
                 Optional.<String> absent(), attributes, children, rpcs);
@@ -442,8 +447,8 @@ public class RuntimeBeanEntry {
         private final Set<Rpc> rpcs;
 
         public AttributesRpcsAndRuntimeBeans(
-                List<RuntimeBeanEntry> runtimeBeanEntries,
-                List<AttributeIfc> attributes, Set<Rpc> rpcs) {
+                final List<RuntimeBeanEntry> runtimeBeanEntries,
+                final List<AttributeIfc> attributes, final Set<Rpc> rpcs) {
             this.runtimeBeanEntries = runtimeBeanEntries;
             this.attributes = attributes;
             this.rpcs = rpcs;
@@ -472,8 +477,8 @@ public class RuntimeBeanEntry {
         private final AttributeIfc returnType;
         private final String yangName;
 
-        Rpc(AttributeIfc returnType, String name, String yangName,
-                List<JavaAttribute> parameters) {
+        Rpc(final AttributeIfc returnType, final String name, final String yangName,
+                final List<JavaAttribute> parameters) {
             this.returnType = returnType;
             this.name = name;
             this.parameters = parameters;
@@ -503,12 +508,12 @@ public class RuntimeBeanEntry {
         return getJavaNameOfRuntimeMXBean(javaNamePrefix);
     }
 
-    public String getFullyQualifiedName(String typeName) {
+    public String getFullyQualifiedName(final String typeName) {
         return FullyQualifiedNameHelper.getFullyQualifiedName(packageName,
                 typeName);
     }
 
-    private static String getJavaNameOfRuntimeMXBean(String javaNamePrefix) {
+    private static String getJavaNameOfRuntimeMXBean(final String javaNamePrefix) {
         return javaNamePrefix + MXBEAN_SUFFIX;
     }
 
