@@ -46,7 +46,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
     private final Map<InstanceIdentifier, Long> instanceIdToLongId = new TreeMap<>(
             new Comparator<InstanceIdentifier>() {
                 @Override
-                public int compare(InstanceIdentifier o1, InstanceIdentifier o2) {
+                public int compare(final InstanceIdentifier o1, final InstanceIdentifier o2) {
                     return o1.toString().compareToIgnoreCase(o2.toString());
                 }
             });
@@ -71,12 +71,12 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return urlToId;
     }
 
-    public void setGlobalSchema(SchemaService globalSchema) {
+    public void setGlobalSchema(final SchemaService globalSchema) {
         this.globalSchema = globalSchema;
     }
 
-    private String findModuleName(InstanceIdentifier id, SchemaContext context) {
-        PathArgument rootQName = id.getPath().get(0);
+    private String findModuleName(final InstanceIdentifier id, final SchemaContext context) {
+        PathArgument rootQName = id.getPathArguments().iterator().next();
         for (Module mod : context.getModules()) {
             if (mod.getDataChildByName(rootQName.getNodeType()) != null) {
                 return mod.getName();
@@ -85,40 +85,39 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return null;
     }
 
-    private String generateUrlPrefixFromInstanceID(InstanceIdentifier key, String moduleName) {
-        List<PathArgument> path = key.getPath();
+    private String generateUrlPrefixFromInstanceID(final InstanceIdentifier key, final String moduleName) {
         StringBuilder builder = new StringBuilder();
         if (moduleName != null) {
             builder.append(moduleName);
-            builder.append(":");
+            builder.append(':');
         }
         boolean first = true;
-        for (PathArgument arg : path) {
+        for (PathArgument arg : key.getPathArguments()) {
 
             String name = arg.getNodeType().getLocalName();
             if (first) {
                 first = false;
             } else {
-                builder.append("/");
+                builder.append('/');
             }
             builder.append(name);
             if (arg instanceof InstanceIdentifier.NodeIdentifierWithPredicates) {
                 NodeIdentifierWithPredicates nodeId = (NodeIdentifierWithPredicates) arg;
                 for (Entry<QName, Object> entry : nodeId.getKeyValues().entrySet()) {
-                    builder.append("/").append(entry.getValue());
+                    builder.append('/').append(entry.getValue());
                 }
             }
         }
 
-        return builder.append("/").toString();
+        return builder.append('/').toString();
     }
 
-    private String getYangMountUrl(InstanceIdentifier key) {
+    private String getYangMountUrl(final InstanceIdentifier key) {
         String modName = findModuleName(key, globalSchema.getGlobalContext());
         return generateUrlPrefixFromInstanceID(key, modName) + "yang-ext:mount/";
     }
 
-    public ResourceList getResourceList(UriInfo uriInfo, Long id) {
+    public ResourceList getResourceList(final UriInfo uriInfo, final Long id) {
         InstanceIdentifier iid = getInstanceId(id);
         if (iid == null) {
             return null; // indicating not found.
@@ -139,7 +138,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return list;
     }
 
-    private InstanceIdentifier getInstanceId(Long id) {
+    private InstanceIdentifier getInstanceId(final Long id) {
         InstanceIdentifier instanceId;
         synchronized (lock) {
             instanceId = longIdToInstanceId.get(id);
@@ -147,7 +146,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return instanceId;
     }
 
-    private SchemaContext getSchemaContext(InstanceIdentifier id) {
+    private SchemaContext getSchemaContext(final InstanceIdentifier id) {
 
         if (id == null) {
             return null;
@@ -165,7 +164,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return context;
     }
 
-    public ApiDeclaration getMountPointApi(UriInfo uriInfo, Long id, String module, String revision) {
+    public ApiDeclaration getMountPointApi(final UriInfo uriInfo, final Long id, final String module, final String revision) {
         InstanceIdentifier iid = getInstanceId(id);
         SchemaContext context = getSchemaContext(iid);
         String urlPrefix = getYangMountUrl(iid);
@@ -179,7 +178,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return super.getApiDeclaration(module, revision, uriInfo, context, urlPrefix);
     }
 
-    private ApiDeclaration generateDataStoreApiDoc(UriInfo uriInfo, String context) {
+    private ApiDeclaration generateDataStoreApiDoc(final UriInfo uriInfo, final String context) {
 
         ApiDeclaration declaration = super.createApiDeclaration(createBasePathFromUriInfo(uriInfo));
         List<Api> apis = new LinkedList<>();
@@ -194,7 +193,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
 
     }
 
-    private Api createGetApi(String datastore, String note, String context) {
+    private Api createGetApi(final String datastore, final String note, final String context) {
         Operation getConfig = new Operation();
         getConfig.setMethod("GET");
         getConfig.setNickname("GET " + datastore);
@@ -207,12 +206,12 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return api;
     }
 
-    public void setMountService(MountProvisionService mountService) {
+    public void setMountService(final MountProvisionService mountService) {
         this.mountService = mountService;
     }
 
     @Override
-    public void onMountPointCreated(InstanceIdentifier path) {
+    public void onMountPointCreated(final InstanceIdentifier path) {
         synchronized (lock) {
             Long idLong = idKey.incrementAndGet();
             instanceIdToLongId.put(path, idLong);
@@ -221,7 +220,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
     }
 
     @Override
-    public void onMountPointRemoved(InstanceIdentifier path) {
+    public void onMountPointRemoved(final InstanceIdentifier path) {
         synchronized (lock) {
             Long id = instanceIdToLongId.remove(path);
             longIdToInstanceId.remove(id);

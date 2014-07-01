@@ -9,6 +9,19 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.annotation.concurrent.GuardedBy;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
@@ -20,17 +33,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.StoreTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.GuardedBy;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A set of listeners organized as a tree by node to which they listen. This class
@@ -70,7 +72,7 @@ public final class ListenerTree  {
 
         try {
             Node walkNode = rootNode;
-            for (final PathArgument arg : path.getPath()) {
+            for (final PathArgument arg : path.getPathArguments()) {
                 walkNode = walkNode.ensureChild(arg);
             }
 
