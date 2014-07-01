@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a0c68898",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/BindingBrokerImplModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:15:06Z",
+      "side": 1,
+      "message": "windows newlines",
+      "revId": "77c1d17049b8982dcc3853021859b269705666e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_60bc0007",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/DataBrokerImplModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-01T12:15:06Z",
+      "side": 1,
+      "message": "windows newlines",
+      "revId": "77c1d17049b8982dcc3853021859b269705666e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
