@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_becf8e28",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/AbstractChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "shorten to \u0027new HashSet\u003c\u003e()\u0027, this is needlessly verbose",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3ee37ea5",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowCookieManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "Please use Collections.singletonList(flowId)  instead of ArrayList here.",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fe9756ea",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "can we move to using the new data store APIs, please? the name \u0027modifTran\u0027 seems to imply modification, but we use it for a single read.",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bee6aeae",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "how do we know flowCapNode !\u003d null?",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dea2924a",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "again, how do we know flowCapNode !\u003d null?",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7e8b46c3",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "Please use guava:\n\nthis.dataService \u003d Preconditions.checkNotNull(dataService, \"dataService may not be null\");\n\nalso in other places",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9e888ac6",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowNodeReconcilProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "} catch (...) {",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3e913ef1",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/flow-node-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5e8e82d1",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-node-reconciliation.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_febe7664",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/FlowComparator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "commented-out code?",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1ec47af3",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/FlowStatsTracker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-01T09:15:29Z",
+      "side": 1,
+      "message": "why are we allocating an array of 2?",
+      "revId": "7036c9fc00102776ce2f84d986d14e00defa35a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
