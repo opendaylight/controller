@@ -74,7 +74,7 @@ public final class NetconfDeviceDataReader implements DataReader<InstanceIdentif
     private static Node<?> findNode(final CompositeNode node, final InstanceIdentifier identifier) {
 
         Node<?> current = node;
-        for (final InstanceIdentifier.PathArgument arg : identifier.getPath()) {
+        for (final InstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
             if (current instanceof SimpleNode<?>) {
                 return null;
             } else if (current instanceof CompositeNode) {
