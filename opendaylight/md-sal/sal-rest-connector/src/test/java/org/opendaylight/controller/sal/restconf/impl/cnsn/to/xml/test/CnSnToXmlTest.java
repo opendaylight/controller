@@ -226,7 +226,7 @@ public class CnSnToXmlTest extends YangAndXmlAndDataSchemaLoader {
         BitsTypeDefinition.Bit mockBit1 = mock( BitsTypeDefinition.Bit.class );
         when( mockBit1.getName() ).thenReturn( "first" );
         BitsTypeDefinition.Bit mockBit2 = mock( BitsTypeDefinition.Bit.class );
-        when( mockBit1.getName() ).thenReturn( "second" );
+        when( mockBit2.getName() ).thenReturn( "second" );
         List<BitsTypeDefinition.Bit> bitList = Lists.newArrayList( mockBit1, mockBit2 );
 
         List<TypeDefinition<?>> types = Lists.<TypeDefinition<?>>newArrayList(
