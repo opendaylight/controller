@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -68,7 +70,7 @@ public class DataNormalizerTest {
         Class<?> nodeClass;
         Object nodeData; // List for a container, value Object for a leaf
 
-        NormalizedNodeData(PathArgument nodeID, Class<?> nodeClass, Object nodeData) {
+        NormalizedNodeData(final PathArgument nodeID, final Class<?> nodeClass, final Object nodeData) {
             this.nodeID = nodeID;
             this.nodeClass = nodeClass;
             this.nodeData = nodeData;
@@ -78,9 +80,9 @@ public class DataNormalizerTest {
     static class LegacyNodeData {
         QName nodeKey;
         Object nodeData; // List for a CompositeNode, value Object for a
-                         // SimpeNode
+        // SimpeNode
 
-        LegacyNodeData(QName nodeKey, Object nodeData) {
+        LegacyNodeData(final QName nodeKey, final Object nodeData) {
             this.nodeKey = nodeKey;
             this.nodeData = nodeData;
         }
@@ -144,7 +146,7 @@ public class DataNormalizerTest {
                 OUTER_LIST_QNAME, ID_QNAME, OUTER_LIST_ID }, OUTER_CHOICE_QNAME, TWO_QNAME);
     }
 
-    private void verifyNormalizedInstanceIdentifier(InstanceIdentifier actual, Object... expPath) {
+    private void verifyNormalizedInstanceIdentifier(final InstanceIdentifier actual, final Object... expPath) {
 
         assertNotNull("Actual InstanceIdentifier is null", actual);
         assertEquals("InstanceIdentifier path length", expPath.length, actual.getPath().size());
@@ -256,12 +258,12 @@ public class DataNormalizerTest {
                                 expectCompositeNode(INNER_LIST_QNAME, expectSimpleNode(NAME_QNAME, "inner-name1"),
                                         expectSimpleNode(VALUE_QNAME, "inner-value1")),
 
-                                expectCompositeNode(INNER_LIST_QNAME, expectSimpleNode(NAME_QNAME, "inner-name2"),
-                                        expectSimpleNode(VALUE_QNAME, "inner-value2"))),
-                        expectCompositeNode(OUTER_LIST_QNAME, expectSimpleNode(ID_QNAME, outerListID2),
-                                expectSimpleNode(ONE_QNAME, "one")),
-                        expectCompositeNode(UNKEYED_LIST_QNAME, expectSimpleNode(NAME_QNAME, "unkeyed1")),
-                        expectCompositeNode(UNKEYED_LIST_QNAME, expectSimpleNode(NAME_QNAME, "unkeyed2"))));
+                                        expectCompositeNode(INNER_LIST_QNAME, expectSimpleNode(NAME_QNAME, "inner-name2"),
+                                                expectSimpleNode(VALUE_QNAME, "inner-value2"))),
+                                                expectCompositeNode(OUTER_LIST_QNAME, expectSimpleNode(ID_QNAME, outerListID2),
+                                                        expectSimpleNode(ONE_QNAME, "one")),
+                                                        expectCompositeNode(UNKEYED_LIST_QNAME, expectSimpleNode(NAME_QNAME, "unkeyed1")),
+                                                        expectCompositeNode(UNKEYED_LIST_QNAME, expectSimpleNode(NAME_QNAME, "unkeyed2"))));
 
         // Conversion of Mixin type nodes is not supported.
 
@@ -366,12 +368,12 @@ public class DataNormalizerTest {
                                 expectSimpleNode(AUGMENTED_LEAF_QNAME, "augmented-value"))));
     }
 
-    private boolean isOrdered(QName nodeName) {
+    private boolean isOrdered(final QName nodeName) {
         return ORDERED_LEAF_LIST_QNAME.equals(nodeName) || INNER_LIST_QNAME.equals(nodeName);
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyLegacyNode(Node<?> actual, LegacyNodeData expNodeData) {
+    private void verifyLegacyNode(final Node<?> actual, final LegacyNodeData expNodeData) {
 
         assertNotNull("Actual Node is null", actual);
         assertTrue("Expected CompositeNode instance", actual instanceof CompositeNode);
@@ -390,7 +392,7 @@ public class DataNormalizerTest {
 
         Collections.sort(unorderdChildData, new Comparator<LegacyNodeData>() {
             @Override
-            public int compare(LegacyNodeData arg1, LegacyNodeData arg2) {
+            public int compare(final LegacyNodeData arg1, final LegacyNodeData arg2) {
                 if (!(arg1.nodeData instanceof List) && !(arg2.nodeData instanceof List)) {
                     // if neither is a list, just compare them
                     String str1 = arg1.nodeKey.getLocalName() + arg1.nodeData;
@@ -446,7 +448,7 @@ public class DataNormalizerTest {
 
         Collections.sort(unorderedChildNodes, new Comparator<Node<?>>() {
             @Override
-            public int compare(Node<?> n1, Node<?> n2) {
+            public int compare(final Node<?> n1, final Node<?> n2) {
                 if (n1 instanceof SimpleNode && n2 instanceof SimpleNode) {
                     // if they're SimpleNodes just compare their strings
                     String str1 = n1.getKey().getLocalName() + ((SimpleNode<?>)n1).getValue();
@@ -501,7 +503,7 @@ public class DataNormalizerTest {
             assertEquals("Child node QName", expData.nodeKey, actualChild.getKey());
 
             if (expData.nodeData instanceof List) { // List represents a
-                                                    // composite node
+                // composite node
                 verifyLegacyNode(actualChild, expData);
             } else { // else a simple node
                 assertTrue("Expected SimpleNode instance", actualChild instanceof SimpleNode);
@@ -515,11 +517,11 @@ public class DataNormalizerTest {
         }
     }
 
-    private LegacyNodeData expectCompositeNode(QName key, LegacyNodeData... childData) {
+    private LegacyNodeData expectCompositeNode(final QName key, final LegacyNodeData... childData) {
         return new LegacyNodeData(key, Lists.newArrayList(childData));
     }
 
-    private LegacyNodeData expectSimpleNode(QName key, Object value) {
+    private LegacyNodeData expectSimpleNode(final QName key, final Object value) {
         return new LegacyNodeData(key, value);
     }
 
@@ -561,7 +563,7 @@ public class DataNormalizerTest {
         }
 
         Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
-                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(new InstanceIdentifier(
+                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(InstanceIdentifier.create(
                         ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
@@ -583,25 +585,25 @@ public class DataNormalizerTest {
                                                 expectMapEntryNode(INNER_LIST_QNAME, NAME_QNAME, "inner-name3",
                                                         expectLeafNode(NAME_QNAME, "inner-name3"),
                                                         expectLeafNode(VALUE_QNAME, "inner-value3")),
-                                                expectMapEntryNode(INNER_LIST_QNAME, NAME_QNAME, "inner-name2",
-                                                        expectLeafNode(NAME_QNAME, "inner-name2"),
-                                                        expectLeafNode(VALUE_QNAME, "inner-value2")),
-                                                expectMapEntryNode(INNER_LIST_QNAME, NAME_QNAME, "inner-name1",
-                                                        expectLeafNode(NAME_QNAME, "inner-name1"),
-                                                        expectLeafNode(VALUE_QNAME, "inner-value1")))),
-                                expectMapEntryNode(
-                                        OUTER_LIST_QNAME,
-                                        ID_QNAME,
-                                        20,
-                                        expectLeafNode(ID_QNAME, 20),
-                                        expectChoiceNode(OUTER_CHOICE_QNAME, expectLeafNode(TWO_QNAME, "two"),
-                                                expectLeafNode(THREE_QNAME, "three")))),
-                        expectUnkeyedListNode(
-                                UNKEYED_LIST_QNAME,
-                                expectUnkeyedListEntryNode(UNKEYED_LIST_QNAME,
-                                        expectLeafNode(NAME_QNAME, "unkeyed-name1")),
-                                expectUnkeyedListEntryNode(UNKEYED_LIST_QNAME,
-                                        expectLeafNode(NAME_QNAME, "unkeyed-name2")))));
+                                                        expectMapEntryNode(INNER_LIST_QNAME, NAME_QNAME, "inner-name2",
+                                                                expectLeafNode(NAME_QNAME, "inner-name2"),
+                                                                expectLeafNode(VALUE_QNAME, "inner-value2")),
+                                                                expectMapEntryNode(INNER_LIST_QNAME, NAME_QNAME, "inner-name1",
+                                                                        expectLeafNode(NAME_QNAME, "inner-name1"),
+                                                                        expectLeafNode(VALUE_QNAME, "inner-value1")))),
+                                                                        expectMapEntryNode(
+                                                                                OUTER_LIST_QNAME,
+                                                                                ID_QNAME,
+                                                                                20,
+                                                                                expectLeafNode(ID_QNAME, 20),
+                                                                                expectChoiceNode(OUTER_CHOICE_QNAME, expectLeafNode(TWO_QNAME, "two"),
+                                                                                        expectLeafNode(THREE_QNAME, "three")))),
+                                                                                        expectUnkeyedListNode(
+                                                                                                UNKEYED_LIST_QNAME,
+                                                                                                expectUnkeyedListEntryNode(UNKEYED_LIST_QNAME,
+                                                                                                        expectLeafNode(NAME_QNAME, "unkeyed-name1")),
+                                                                                                        expectUnkeyedListEntryNode(UNKEYED_LIST_QNAME,
+                                                                                                                expectLeafNode(NAME_QNAME, "unkeyed-name2")))));
     }
 
     @Test
@@ -625,7 +627,7 @@ public class DataNormalizerTest {
         testBuilder.add(anyXmlLegacy);
 
         Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
-                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(new InstanceIdentifier(
+                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(InstanceIdentifier.create(
                         ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
@@ -649,7 +651,7 @@ public class DataNormalizerTest {
         testBuilder.add(outerContBuilder.toInstance());
 
         Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
-                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(new InstanceIdentifier(
+                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(InstanceIdentifier.create(
                         ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
@@ -661,7 +663,7 @@ public class DataNormalizerTest {
                 expectContainerNode(TEST_QNAME, expectContainerNode(OUTER_CONTAINER_QNAME, expAugmentation)));
 
         normalizedNodeEntry = normalizer.toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(
-                new InstanceIdentifier(Lists.newArrayList(new NodeIdentifier(TEST_QNAME), new NodeIdentifier(
+                InstanceIdentifier.create(Lists.newArrayList(new NodeIdentifier(TEST_QNAME), new NodeIdentifier(
                         OUTER_CONTAINER_QNAME))), outerContBuilder.toInstance()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME, OUTER_CONTAINER_QNAME,
@@ -687,7 +689,7 @@ public class DataNormalizerTest {
         }
 
         Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedNodeEntry = normalizer
-                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(new InstanceIdentifier(
+                .toNormalized(new AbstractMap.SimpleEntry<InstanceIdentifier, CompositeNode>(InstanceIdentifier.create(
                         ImmutableList.<PathArgument> of(new NodeIdentifier(TEST_QNAME))), testBuilder.toInstance()));
 
         verifyNormalizedInstanceIdentifier(normalizedNodeEntry.getKey(), TEST_QNAME);
@@ -700,14 +702,14 @@ public class DataNormalizerTest {
                                 expectLeafSetEntryNode(UNORDERED_LEAF_LIST_QNAME, "unordered-value1"),
                                 expectLeafSetEntryNode(UNORDERED_LEAF_LIST_QNAME, "unordered-value2"),
                                 expectLeafSetEntryNode(UNORDERED_LEAF_LIST_QNAME, "unordered-value3")),
-                        expectOrderedLeafSetNode(ORDERED_LEAF_LIST_QNAME,
-                                expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value3"),
-                                expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value2"),
-                                expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value1"))));
+                                expectOrderedLeafSetNode(ORDERED_LEAF_LIST_QNAME,
+                                        expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value3"),
+                                        expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value2"),
+                                        expectLeafSetEntryNode(ORDERED_LEAF_LIST_QNAME, "ordered-value1"))));
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyNormalizedNode(NormalizedNode<?, ?> actual, NormalizedNodeData expNodeData) {
+    private void verifyNormalizedNode(final NormalizedNode<?, ?> actual, final NormalizedNodeData expNodeData) {
 
         Class<?> expNodeClass = expNodeData.nodeClass;
         PathArgument expNodeID = expNodeData.nodeID;
@@ -743,18 +745,18 @@ public class DataNormalizerTest {
                 NormalizedNodeData expChildData = expNodeClass.equals(UnkeyedListNode.class) ? expChildDataList
                         .remove(0) : expChildDataMap.remove(actualChild.getIdentifier());
 
-                assertNotNull(
-                        "Unexpected child node " + actualChild.getClass() + " with identifier "
-                                + actualChild.getIdentifier() + " for parent node " + actual.getClass()
-                                + " with identifier " + actual.getIdentifier(), expChildData);
+                        assertNotNull(
+                                "Unexpected child node " + actualChild.getClass() + " with identifier "
+                                        + actualChild.getIdentifier() + " for parent node " + actual.getClass()
+                                        + " with identifier " + actual.getIdentifier(), expChildData);
 
-                if (orderingMap != null) {
-                    assertEquals("Order index for child node " + actualChild.getIdentifier(),
-                            orderingMap.get(actualChild.getIdentifier()), Integer.valueOf(i));
-                }
+                        if (orderingMap != null) {
+                            assertEquals("Order index for child node " + actualChild.getIdentifier(),
+                                    orderingMap.get(actualChild.getIdentifier()), Integer.valueOf(i));
+                        }
 
-                verifyNormalizedNode(actualChild, expChildData);
-                i++;
+                        verifyNormalizedNode(actualChild, expChildData);
+                        i++;
             }
 
             if (expNodeClass.equals(UnkeyedListNode.class)) {
@@ -771,62 +773,62 @@ public class DataNormalizerTest {
         }
     }
 
-    private NormalizedNodeData expectOrderedLeafSetNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectOrderedLeafSetNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), OrderedLeafSetNode.class,
                 Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectLeafSetNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectLeafSetNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), LeafSetNode.class, Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectLeafSetEntryNode(QName nodeName, Object value) {
+    private NormalizedNodeData expectLeafSetEntryNode(final QName nodeName, final Object value) {
         return new NormalizedNodeData(new NodeWithValue(nodeName, value), LeafSetEntryNode.class, value);
     }
 
-    private NormalizedNodeData expectUnkeyedListNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectUnkeyedListNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), UnkeyedListNode.class,
                 Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectUnkeyedListEntryNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectUnkeyedListEntryNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), UnkeyedListEntryNode.class,
                 Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectAugmentation(QName augmentedNodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectAugmentation(final QName augmentedNodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new AugmentationIdentifier(Sets.newHashSet(augmentedNodeName)),
                 AugmentationNode.class, Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectAnyXmlNode(QName nodeName, Object value) {
+    private NormalizedNodeData expectAnyXmlNode(final QName nodeName, final Object value) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), AnyXmlNode.class, value);
     }
 
-    private NormalizedNodeData expectContainerNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectContainerNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), ContainerNode.class, Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectChoiceNode(QName nodeName, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectChoiceNode(final QName nodeName, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), ChoiceNode.class, Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectLeafNode(QName nodeName, Object value) {
+    private NormalizedNodeData expectLeafNode(final QName nodeName, final Object value) {
         return new NormalizedNodeData(new NodeIdentifier(nodeName), LeafNode.class, value);
 
     }
 
-    private NormalizedNodeData expectMapEntryNode(QName nodeName, QName key, Object value,
-            NormalizedNodeData... childData) {
+    private NormalizedNodeData expectMapEntryNode(final QName nodeName, final QName key, final Object value,
+            final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifierWithPredicates(nodeName, key, value), MapEntryNode.class,
                 Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectMapNode(QName key, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectMapNode(final QName key, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(key), MapNode.class, Lists.newArrayList(childData));
     }
 
-    private NormalizedNodeData expectOrderedMapNode(QName key, NormalizedNodeData... childData) {
+    private NormalizedNodeData expectOrderedMapNode(final QName key, final NormalizedNodeData... childData) {
         return new NormalizedNodeData(new NodeIdentifier(key), OrderedMapNode.class, Lists.newArrayList(childData));
     }
 }
