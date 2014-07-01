@@ -43,7 +43,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransaction> implements
-        DataModificationTransaction, Delegator<T> {
+DataModificationTransaction, Delegator<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BackwardsCompatibleTransaction.class);
 
@@ -228,23 +228,23 @@ public abstract class BackwardsCompatibleTransaction<T extends DOMDataReadTransa
 
             LOG.trace("write {}:{} ",store,normalizedPath);
             try {
-            List<PathArgument> currentArguments = new ArrayList<>();
-            DataNormalizationOperation<?> currentOp = getNormalizer().getRootOperation();
-            Iterator<PathArgument> iterator = normalizedPath.getPath().iterator();
-            while(iterator.hasNext()) {
-                PathArgument currentArg = iterator.next();
-                try {
-                    currentOp = currentOp.getChild(currentArg);
-                } catch (DataNormalizationException e) {
-                    throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", normalizedPath), e);
+                List<PathArgument> currentArguments = new ArrayList<>();
+                DataNormalizationOperation<?> currentOp = getNormalizer().getRootOperation();
+                Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
+                while(iterator.hasNext()) {
+                    PathArgument currentArg = iterator.next();
+                    try {
+                        currentOp = currentOp.getChild(currentArg);
+                    } catch (DataNormalizationException e) {
+                        throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", normalizedPath), e);
+                    }
+                    currentArguments.add(currentArg);
+                    InstanceIdentifier currentPath = InstanceIdentifier.create(currentArguments);
+                    boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
+                    if(isPresent == false && iterator.hasNext()) {
+                        getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
+                    }
                 }
-                currentArguments.add(currentArg);
-                InstanceIdentifier currentPath = new InstanceIdentifier(currentArguments);
-                boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
-                if(isPresent == false && iterator.hasNext()) {
-                    getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
-                }
-            }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Exception durring read.",e);
             }

@@ -120,7 +120,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
      */
     public Optional<InstanceIdentifier<? extends DataObject>> toBinding(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
-            throws DeserializationException {
+                    throws DeserializationException {
 
         PathArgument lastArgument = Iterables.getLast(normalized.getPathArguments());
         // Used instance-identifier codec do not support serialization of last
@@ -137,7 +137,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
 
     private Optional<InstanceIdentifier<? extends DataObject>> toBindingAugmented(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
-            throws DeserializationException {
+                    throws DeserializationException {
         Optional<InstanceIdentifier<? extends DataObject>> potential = toBindingImpl(normalized);
         // Shorthand check, if codec already supports deserialization
         // of AugmentationIdentifier we will return
@@ -154,9 +154,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         // path.
         LOG.trace("Looking for candidates to match {}", normalized);
         for (QName child : lastArgument.getPossibleChildNames()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier childPath = new org.opendaylight.yangtools.yang.data.api.InstanceIdentifier(
-                    ImmutableList.<PathArgument> builder().addAll(normalized.getPathArguments()).add(new NodeIdentifier(child))
-                            .build());
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier childPath = normalized.node(child);
             try {
                 if (isNotRepresentable(childPath)) {
                     LOG.trace("Path {} is not BI-representable, skipping it", childPath);
@@ -189,7 +187,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
 
     private Optional<InstanceIdentifier<? extends DataObject>> toBindingImpl(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
-            throws DeserializationException {
+                    throws DeserializationException {
         org.opendaylight.yangtools.yang.data.api.InstanceIdentifier legacyPath;
 
         try {
@@ -219,7 +217,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
 
     private DataNormalizationOperation<?> findNormalizationOperation(
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
-            throws DataNormalizationException {
+                    throws DataNormalizationException {
         DataNormalizationOperation<?> current = legacyToNormalized.getRootOperation();
         for (PathArgument arg : normalized.getPathArguments()) {
             current = current.getChild(arg);
@@ -264,7 +262,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
 
     public Optional<Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
             final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
-            throws DeserializationException {
+                    throws DeserializationException {
         Optional<InstanceIdentifier<? extends DataObject>> potentialPath = toBinding(normalized.getKey());
         if (potentialPath.isPresent()) {
             InstanceIdentifier<? extends DataObject> bindingPath = potentialPath.get();
@@ -375,18 +373,18 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             try {
                 return ClassLoaderUtils.withClassLoader(method.getDeclaringClass().getClassLoader(),
                         new Supplier<Class>() {
-                            @Override
-                            public Class get() {
-                                Type listResult = ClassLoaderUtils.getFirstGenericParameter(method
-                                        .getGenericReturnType());
-                                if (listResult instanceof Class
-                                        && DataObject.class.isAssignableFrom((Class) listResult)) {
-                                    return (Class<?>) listResult;
-                                }
-                                return null;
-                            }
+                    @Override
+                    public Class get() {
+                        Type listResult = ClassLoaderUtils.getFirstGenericParameter(method
+                                .getGenericReturnType());
+                        if (listResult instanceof Class
+                                && DataObject.class.isAssignableFrom((Class) listResult)) {
+                            return (Class<?>) listResult;
+                        }
+                        return null;
+                    }
 
-                        });
+                });
             } catch (Exception e) {
                 LOG.debug("Could not get YANG modeled entity for {}", method, e);
                 return null;

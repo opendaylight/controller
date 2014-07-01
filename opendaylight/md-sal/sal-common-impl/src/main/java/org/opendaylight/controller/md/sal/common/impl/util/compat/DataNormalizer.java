@@ -14,10 +14,12 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -48,7 +50,7 @@ public class DataNormalizer {
         ImmutableList.Builder<PathArgument> normalizedArgs = ImmutableList.builder();
 
         DataNormalizationOperation<?> currentOp = operation;
-        Iterator<PathArgument> arguments = legacy.getPath().iterator();
+        Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
 
         try {
             while (arguments.hasNext()) {
@@ -67,7 +69,7 @@ public class DataNormalizer {
             throw new IllegalArgumentException(String.format("Failed to normalize path %s", legacy), e);
         }
 
-        return new InstanceIdentifier(normalizedArgs.build());
+        return InstanceIdentifier.create(normalizedArgs.build());
     }
 
     public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
@@ -81,7 +83,7 @@ public class DataNormalizer {
         InstanceIdentifier normalizedPath = toNormalized(legacyPath);
 
         DataNormalizationOperation<?> currentOp = operation;
-        for (PathArgument arg : normalizedPath.getPath()) {
+        for (PathArgument arg : normalizedPath.getPathArguments()) {
             try {
                 currentOp = currentOp.getChild(arg);
             } catch (DataNormalizationException e) {
@@ -103,9 +105,7 @@ public class DataNormalizer {
 
             if (potentialOp.getIdentifier() instanceof AugmentationIdentifier) {
                 currentOp = potentialOp;
-                ArrayList<PathArgument> reworkedArgs = new ArrayList<>(normalizedPath.getPath());
-                reworkedArgs.add(potentialOp.getIdentifier());
-                normalizedPath = new InstanceIdentifier(reworkedArgs);
+                normalizedPath = normalizedPath.node(potentialOp.getIdentifier());
             }
         }
 
@@ -117,15 +117,14 @@ public class DataNormalizer {
 
     public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) throws DataNormalizationException {
         ImmutableList.Builder<PathArgument> legacyArgs = ImmutableList.builder();
-        PathArgument previous = null;
         DataNormalizationOperation<?> currentOp = operation;
-        for (PathArgument normalizedArg : normalized.getPath()) {
+        for (PathArgument normalizedArg : normalized.getPathArguments()) {
             currentOp = currentOp.getChild(normalizedArg);
             if(!currentOp.isMixin()) {
                 legacyArgs.add(normalizedArg);
             }
         }
-        return new InstanceIdentifier(legacyArgs.build());
+        return InstanceIdentifier.create(legacyArgs.build());
     }
 
     public CompositeNode toLegacy(final InstanceIdentifier normalizedPath, final NormalizedNode<?, ?> normalizedData) {
