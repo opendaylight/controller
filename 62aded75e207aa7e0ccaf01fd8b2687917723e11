@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e058108c",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/main/java/org/opendaylight/controller/cluster/datastore/util/EncoderDecoderUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-07-01T13:55:11Z",
+      "side": 1,
+      "message": "Duplicate conditions for LeafList and List nodes.",
+      "revId": "62aded75e207aa7e0ccaf01fd8b2687917723e11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4068dc1c",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/main/java/org/opendaylight/controller/cluster/datastore/util/EncoderDecoderUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-07-01T13:55:11Z",
+      "side": 1,
+      "message": "Duplicate conditions. for List and LeafList.",
+      "revId": "62aded75e207aa7e0ccaf01fd8b2687917723e11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8072640f",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/main/java/org/opendaylight/controller/cluster/datastore/util/EncoderDecoderUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-07-01T13:55:11Z",
+      "side": 1,
+      "message": "This should process all received elements. This way lists and similar schema nodes will not be serialized correctly.",
+      "revId": "62aded75e207aa7e0ccaf01fd8b2687917723e11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
