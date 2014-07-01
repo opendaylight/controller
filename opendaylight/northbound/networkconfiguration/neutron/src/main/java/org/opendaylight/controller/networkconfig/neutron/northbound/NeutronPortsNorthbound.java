@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -22,8 +23,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -69,6 +72,9 @@ public class NeutronPortsNorthbound {
         return o.extractFields(fields);
     }
 
+    @Context
+    UriInfo uriInfo;
+
     /**
      * Returns a list of all Ports */
 
@@ -92,10 +98,10 @@ public class NeutronPortsNorthbound {
             @QueryParam("device_id") String queryDeviceID,
             @QueryParam("device_owner") String queryDeviceOwner,
             @QueryParam("tenant_id") String queryTenantID,
-            // pagination
-            @QueryParam("limit") String limit,
+            // linkTitle
+            @QueryParam("limit") Integer limit,
             @QueryParam("marker") String marker,
-            @QueryParam("page_reverse") String pageReverse
+            @DefaultValue("false") @QueryParam("page_reverse") Boolean pageReverse
             // sorting not supported
             ) {
         INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
@@ -124,7 +130,14 @@ public class NeutronPortsNorthbound {
                 }
             }
         }
-        //TODO: apply pagination to results
+
+        if (limit != null && ans.size() > 1) {
+            // Return a paginated request
+            NeutronPortRequest request = (NeutronPortRequest) PaginatedRequestFactory.createRequest(limit,
+                    marker, pageReverse, uriInfo, ans, NeutronPort.class);
+            return Response.status(200).entity(request).build();
+        }
+
         return Response.status(200).entity(
                 new NeutronPortRequest(ans)).build();
     }

@@ -9,8 +9,6 @@
 package org.opendaylight.controller.networkconfig.neutron.northbound;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +31,7 @@ import javax.ws.rs.core.Response;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
+
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
@@ -95,13 +94,13 @@ public class NeutronNetworksNorthbound {
             @QueryParam("provider_network_type") String queryProviderNetworkType,
             @QueryParam("provider_physical_network") String queryProviderPhysicalNetwork,
             @QueryParam("provider_segmentation_id") String queryProviderSegmentationID,
-            // pagination
+            // linkTitle
             @QueryParam("limit") Integer limit,
             @QueryParam("marker") String marker,
             @DefaultValue("false") @QueryParam("page_reverse") Boolean pageReverse
             // sorting not supported
             ) {
-        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -139,89 +138,11 @@ public class NeutronNetworksNorthbound {
             }
         }
 
-        Comparator<NeutronNetwork> neutronNetworkComparator = new Comparator<NeutronNetwork>() {
-            @Override
-            public int compare(NeutronNetwork o1, NeutronNetwork o2) {
-                return o1.getID().compareTo(o2.getID());
-            }
-        };
-
-        Collections.sort(ans, neutronNetworkComparator);
-
         if (limit != null && ans.size() > 1) {
-            List<NeutronPageLink> links = new ArrayList<>();
-            Integer startPos = null;
-            String startMarker;
-            String endMarker;
-            Boolean firstPage = false;
-            Boolean lastPage = false;
-
-            if (marker == null) {
-                startPos = 0;
-            }
-
-            else {
-
-                NeutronNetwork markerNetwork = new NeutronNetwork();
-                markerNetwork.setNetworkUUID(marker);
-
-                startPos = Collections.binarySearch(ans, markerNetwork, neutronNetworkComparator);
-
-                if (!pageReverse){
-                    startPos = startPos + 1;
-                }
-                else {
-                    startPos = startPos - limit;
-                }
-
-            }
-
-            if (startPos == null) {
-                throw new ResourceNotFoundException("UUID for marker:" + marker + " could not be found");
-            }
-
-            if (startPos == 0){
-                firstPage = true;
-            }
-
-            if (startPos + limit >= ans.size()) {
-                ans = ans.subList(startPos, ans.size());
-                startMarker = ans.get(0).getID();
-                endMarker = ans.get(ans.size() - 1).getID();
-                lastPage = true;
-            }
-            else if (startPos < 0) {
-                if (startPos + limit > 0) {
-                    ans = ans.subList(0, startPos + limit);
-                    startMarker = ans.get(0).getID();
-                    endMarker = ans.get(ans.size() - 1).getID();
-                    firstPage = true;
-                }
-                else {
-                    throw new BadRequestException("Requested page is out of bounds. Please check the supplied limit and marker");
-                }
-            }
-            else {
-                ans = ans.subList(startPos, startPos + limit);
-                startMarker = ans.get(0).getID();
-                endMarker = ans.get(limit-1).getID();
-            }
-
-            if (!lastPage) {
-                NeutronPageLink next = new NeutronPageLink();
-                next.setRef("next");
-                next.setHref(uriInfo.getAbsolutePath().toString() + "?limit=" + limit.toString() + "&marker=" + endMarker);
-                links.add(next);
-            }
-
-            if (!firstPage) {
-                NeutronPageLink previous = new NeutronPageLink();
-                previous.setRef("previous");
-                previous.setHref(uriInfo.getAbsolutePath().toString() + "?limit=" + limit.toString() + "&marker=" + startMarker + "&page_reverse=True");
-                links.add(previous);
-            }
-
-            return Response.status(200).entity(new PaginatedNeutronNetworkRequest(ans, links)).build();
+            // Return a paginated request
+            NeutronNetworkRequest request = (NeutronNetworkRequest) PaginatedRequestFactory.createRequest(limit,
+                    marker, pageReverse, uriInfo, ans, NeutronNetwork.class);
+            return Response.status(200).entity(request).build();
         }
 
     return Response.status(200).entity(new NeutronNetworkRequest(ans)).build();

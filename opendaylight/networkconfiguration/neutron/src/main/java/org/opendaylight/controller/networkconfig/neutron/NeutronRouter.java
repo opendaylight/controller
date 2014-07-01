@@ -23,7 +23,7 @@ import org.opendaylight.controller.configuration.ConfigurationObject;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class NeutronRouter extends ConfigurationObject implements Serializable {
+public class NeutronRouter extends ConfigurationObject implements Serializable, INeutronObject {
     private static final long serialVersionUID = 1L;
 
     // See OpenStack Network API v2.0 Reference for description of
@@ -56,6 +56,8 @@ public class NeutronRouter extends ConfigurationObject implements Serializable {
     }
 
     public String getID() { return routerUUID; }
+
+    public void setID(String id) { this.routerUUID = id; }
 
     public String getRouterUUID() {
         return routerUUID;
