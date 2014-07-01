@@ -1,6 +1,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import junit.framework.Assert;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -19,6 +20,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
     @org.junit.Before
     public void setUp() throws Exception {
         distributedDataStore = new DistributedDataStore(getSystem(), "config");
+        distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
     }
 
     @org.junit.After
@@ -29,7 +31,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
     @org.junit.Test
     public void testRegisterChangeListener() throws Exception {
         ListenerRegistration registration =
-                distributedDataStore.registerChangeListener(InstanceIdentifier.builder().build(), new AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>() {
+                distributedDataStore.registerChangeListener(TestModel.TEST_PATH, new AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>() {
             @Override
             public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
                 throw new UnsupportedOperationException("onDataChanged");

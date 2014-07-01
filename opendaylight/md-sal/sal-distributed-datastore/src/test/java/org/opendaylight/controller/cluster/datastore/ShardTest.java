@@ -63,7 +63,7 @@ public class ShardTest extends AbstractActorTest{
 
           subject.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-          subject.tell(new RegisterChangeListener(InstanceIdentifier.builder().build(), noOpDataChangeListener() , AsyncDataBroker.DataChangeScope.BASE), getRef());
+          subject.tell(new RegisterChangeListener(TestModel.TEST_PATH, getRef().path() , AsyncDataBroker.DataChangeScope.BASE), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
