@@ -46,7 +46,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     private WebSocketServerHandshaker handshaker;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg)
+    protected void channelRead0(final ChannelHandlerContext ctx, final Object msg)
             throws Exception {
         if (msg instanceof FullHttpRequest) {
             handleHttpRequest(ctx, (FullHttpRequest) msg);
@@ -64,8 +64,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param req
      *            FullHttpRequest
      */
-    private void handleHttpRequest(ChannelHandlerContext ctx,
-            FullHttpRequest req) throws Exception {
+    private void handleHttpRequest(final ChannelHandlerContext ctx,
+            final FullHttpRequest req) throws Exception {
         // Handle a bad request.
         if (!req.getDecoderResult().isSuccess()) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1,
@@ -97,8 +97,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 getWebSocketLocation(req), null, false);
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
-            WebSocketServerHandshakerFactory
-                    .sendUnsupportedWebSocketVersionResponse(ctx.channel());
+            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
         }
@@ -115,8 +114,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param res
      *            FullHttpResponse
      */
-    private static void sendHttpResponse(ChannelHandlerContext ctx,
-            HttpRequest req, FullHttpResponse res) {
+    private static void sendHttpResponse(final ChannelHandlerContext ctx,
+            final HttpRequest req, final FullHttpResponse res) {
         // Generate an error page if response getStatus code is not OK (200).
         if (res.getStatus().code() != 200) {
             ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(),
@@ -141,8 +140,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param frame
      *            {@link WebSocketFrame}
      */
-    private void handleWebSocketFrame(ChannelHandlerContext ctx,
-            WebSocketFrame frame) throws IOException {
+    private void handleWebSocketFrame(final ChannelHandlerContext ctx,
+            final WebSocketFrame frame) throws IOException {
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(),
                     (CloseWebSocketFrame) frame.retain());
@@ -164,7 +163,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+    public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause)
             throws Exception {
         if (cause instanceof java.nio.channels.ClosedChannelException == false) {
             // cause.printStackTrace();
@@ -179,7 +178,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      *            HTTP request from which the location will be returned
      * @return String representation of web socket location.
      */
-    private static String getWebSocketLocation(HttpRequest req) {
+    private static String getWebSocketLocation(final HttpRequest req) {
         return "http://" + req.headers().get(HOST) + req.getUri();
     }
 
