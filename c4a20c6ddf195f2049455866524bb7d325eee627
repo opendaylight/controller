@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_060d0c37",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonToCompositeNodeProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Rather than reading the input to a String and dealing with charsets and encoding, we could read the bytes from from entityStream and output to a ByteArrayOutputStream. Then you can create a ByteArrayInputStream from the byte[], ie:\n\n   byte[] jsonData \u003d loadInputStream(entityStream);\n   ...\n   InputSream inputStream \u003d new  ByteArrayInputStream( jsonData );\n\nChange loadInputStream to output to a ByteArrayOutputStream, bos, and return bos.toByteArray().",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2629308a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonToCompositeNodeProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Please declare \u0027fieldName\u0027 where it is actually used on line 99",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_462eb493",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/json/to/cnsn/test/Bug1204Test.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Please name the test class to indicate what it actually does rather than referencing the bug #, e.g. JsonWithDuplicateElementsTest. You can reference the bug # in the class/test javadocs.",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c63964d8",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/json/to/cnsn/test/JsonToCnSnTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Why did you change this to get the \u0027cause\u0027 message? RestconfDocumentedException transforms the cause ex into a RestconfError. We should be checking that as in the previous code.",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a63c60c9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/json/to/cnsn/test/JsonToCnSnTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "See comment above.",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e61ee85e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNamesTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Maybe nitpicky but this class doesn\u0027t actually test ToCnSn conversion, i.e. it doesn\u0027t go though the front-end parsing. It specifically tests if RestConfImpl detects duplicate elements during normalization. So maybe re-name to NormalizationWithDuplicateNamesTest.",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_06242cad",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/bug1204/yang/bug1204.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-02T03:56:17Z",
+      "side": 1,
+      "message": "Please rename this file to reflect its actual purpose and not the bug #.",
+      "revId": "c4a20c6ddf195f2049455866524bb7d325eee627",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
