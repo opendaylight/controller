@@ -236,7 +236,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     private final class ExceptionHandlingInboundChannelHandler extends ChannelInboundHandlerAdapter {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            logger.warn("An exception occurred during negotiation on channel {}", channel.localAddress(), cause);
+            logger.warn("An exception occurred during negotiation with {}", channel.remoteAddress(), cause);
             cancelTimeout();
             negotiationFailed(cause);
             changeState(State.FAILED);
