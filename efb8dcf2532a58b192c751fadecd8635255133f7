@@ -127,6 +127,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e656e8cd",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-07-02T08:43:32Z",
+      "side": 1,
+      "message": "After a lot of head scratching on how to do this better I am back to where I was originally. Without adding a lot of duplicate code I don\u0027t see a clean way to pull this off. \nScreencap of an example. All of the IPv4 conversions would need to be done again since being outside of the Layer3 match \"choice\" excludes instantiating the functionality of inheritance. \nhttps://www.dropbox.com/s/tcqsgoyltbquwgm/Screenshot%202014-07-02%2004.28.58.png\nI say we merge this, get the OFPlugin patch merged and it will probably be clearer for you to refactor it in a way that suits you. Im going to push the ofplugin patch soon as this merges and then we can take a look end to end if interested. Thanks.",
+      "parentUuid": "fa82b9bf_c6d412bf",
+      "revId": "efb8dcf2532a58b192c751fadecd8635255133f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f68ebf4",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-table-types.yang",
         "patchSetId": 1
