@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import com.google.common.base.Preconditions;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +24,6 @@ import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-
-import com.google.common.base.Preconditions;
 
 public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, CompositeNode {
 
@@ -104,7 +104,7 @@ public final class CompositeNodeWrapper implements NodeWrapper<CompositeNode>, C
                 name = new QName(namespace, localName);
             }
 
-            List<Node<?>> nodeValues = new ArrayList<>();
+            List<Node<?>> nodeValues = new ArrayList<>(values.size());
             for (NodeWrapper<?> nodeWrapper : values) {
                 nodeValues.add(nodeWrapper.unwrap());
             }
