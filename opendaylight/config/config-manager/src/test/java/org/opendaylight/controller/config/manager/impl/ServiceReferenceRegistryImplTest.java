@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest.RecordingBundleContextServiceRegistrationHandler.RegistrationHolder;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.manager.impl.jmx.ServiceReferenceMXBean;
+import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.test.AbstractParallelAPSPTest;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
