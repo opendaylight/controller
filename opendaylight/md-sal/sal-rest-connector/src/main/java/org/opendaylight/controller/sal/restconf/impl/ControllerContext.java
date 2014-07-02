@@ -18,7 +18,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -83,6 +82,10 @@ public class ControllerContext implements SchemaContextListener {
 
     private final static String URI_ENCODING_CHAR_SET = "ISO-8859-1";
 
+    private static final Splitter SLASH_SPLITTER = Splitter.on('/');
+
+    private static final Splitter COLON_SPLITTER = Splitter.on(':');
+
     private final BiMap<URI, String> uriToModuleName = HashBiMap.<URI, String> create();
 
     private final Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
@@ -129,10 +132,8 @@ public class ControllerContext implements SchemaContextListener {
             final boolean toMountPointIdentifier ) {
         this.checkPreconditions();
 
-        Iterable<String> split = Splitter.on( "/" ).split( restconfInstance );
-        final ArrayList<String> encodedPathArgs = Lists.<String> newArrayList( split );
-        final List<String> pathArgs = this.urlPathArgsDecode( encodedPathArgs );
-        this.omitFirstAndLastEmptyString( pathArgs );
+        final List<String> pathArgs = urlPathArgsDecode( SLASH_SPLITTER.split( restconfInstance ) );
+        omitFirstAndLastEmptyString( pathArgs );
         if( pathArgs.isEmpty() ) {
             return null;
         }
@@ -158,7 +159,7 @@ public class ControllerContext implements SchemaContextListener {
         return iiWithSchemaNode;
     }
 
-    private List<String> omitFirstAndLastEmptyString( final List<String> list ) {
+    private static List<String> omitFirstAndLastEmptyString( final List<String> list ) {
         if( list.isEmpty() ) {
             return list;
         }
@@ -562,7 +563,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         String head = strings.iterator().next();
-        final String nodeName = this.toNodeName( head );
+        final String nodeName = toNodeName( head );
         final String moduleName = ControllerContext.toModuleName( head );
 
         DataSchemaNode targetNode = null;
@@ -839,20 +840,20 @@ public class ControllerContext implements SchemaContextListener {
 
     private static String toModuleName( final String str ) {
         Preconditions.<String> checkNotNull( str );
-        if( str.contains( ":" ) ) {
-            final String[] args = str.split( ":" );
-            if( args.length == 2 ) {
-                return args[0];
+        if( str.indexOf( ':' ) != -1 ) {
+            final Iterable<String> args = COLON_SPLITTER.split( str );
+            if( Iterables.size( args ) == 2 ) {
+                return args.iterator().next();
             }
         }
         return null;
     }
 
-    private String toNodeName( final String str ) {
-        if( str.contains( ":" ) ) {
-            final String[] args = str.split( ":" );
-            if( args.length == 2 ) {
-                return args[1];
+    private static String toNodeName( final String str ) {
+        if( str.indexOf( ':' ) != -1 ) {
+            final Iterable<String> args = COLON_SPLITTER.split( str );
+            if( Iterables.size( args ) == 2 ) {
+                return Iterables.get( args, 1 );
             }
         }
         return str;
@@ -860,7 +861,7 @@ public class ControllerContext implements SchemaContextListener {
 
     private QName toQName( final String name ) {
         final String module = toModuleName( name );
-        final String node = this.toNodeName( name );
+        final String node = toNodeName( name );
         Set<Module> modules = globalSchema.getModules();
 
         final Comparator<Module> comparator = new Comparator<Module>() {
@@ -916,7 +917,7 @@ public class ControllerContext implements SchemaContextListener {
         }
     }
 
-    public List<String> urlPathArgsDecode( final List<String> strings ) {
+    public static List<String> urlPathArgsDecode( final Iterable<String> strings ) {
         try {
             List<String> decodedPathArgs = new ArrayList<String>();
             for( final String pathArg : strings ) {
@@ -998,7 +999,7 @@ public class ControllerContext implements SchemaContextListener {
             try {
                 builder.append( this.toUriString( keyValues.get( key ) ) );
             } catch( UnsupportedEncodingException e ) {
-                LOG.error( "Error parsing URI: " + keyValues.get( key ), e );
+                LOG.error( "Error parsing URI: {}", keyValues.get( key ), e );
                 return null;
             }
         }
