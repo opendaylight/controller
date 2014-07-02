@@ -422,7 +422,9 @@ public class NeutronRoutersNorthbound {
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
-                service.canAttachInterface(target, input);
+                int status = service.canAttachInterface(target, input);
+                if (status < 200 || status > 299)
+                    return Response.status(status).build();
             }
         }
 
@@ -498,7 +500,9 @@ public class NeutronRoutersNorthbound {
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
-                    service.canDetachInterface(target, input);
+                    int status = service.canDetachInterface(target, input);
+                    if (status < 200 || status > 299)
+                        return Response.status(status).build();
                 }
             }
 
