@@ -21,11 +21,13 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public final class RestUtil {
 
+    // FIXME: BUG-1275: this is code duplicates data.impl.codec
+
     public static final String SQUOTE = "'";
     public static final String DQUOTE = "\"";
     private static final Pattern PREDICATE_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
-    public final static TypeDefinition<?> resolveBaseTypeFrom(TypeDefinition<?> type) {
+    public final static TypeDefinition<?> resolveBaseTypeFrom(final TypeDefinition<?> type) {
         TypeDefinition<?> superType = type;
         while (superType.getBaseType() != null) {
             superType = superType.getBaseType();
@@ -33,7 +35,7 @@ public final class RestUtil {
         return superType;
     }
 
-    public static IdentityValuesDTO asInstanceIdentifier(String value, PrefixesMaping prefixMap) {
+    public static IdentityValuesDTO asInstanceIdentifier(final String value, final PrefixesMaping prefixMap) {
         String valueTrimmed = value.trim();
         if (!valueTrimmed.startsWith("/")) {
             return null;
@@ -63,12 +65,12 @@ public final class RestUtil {
         return identityValuesDTO.getValuesWithNamespaces().isEmpty() ? null : identityValuesDTO;
     }
 
-    private static String getIdAndPrefixAsStr(String pathPart) {
+    private static String getIdAndPrefixAsStr(final String pathPart) {
         int predicateStartIndex = pathPart.indexOf("[");
         return predicateStartIndex == -1 ? pathPart : pathPart.substring(0, predicateStartIndex);
     }
 
-    private static IdentityValue toIdentity(String xPathPart, PrefixesMaping prefixMap) {
+    private static IdentityValue toIdentity(final String xPathPart, final PrefixesMaping prefixMap) {
         String xPathPartTrimmed = xPathPart.trim();
         if (xPathPartTrimmed.isEmpty()) {
             return null;
@@ -87,7 +89,7 @@ public final class RestUtil {
         return new IdentityValue(namespace, identifier, namespace.equals(prefix) ? null : prefix);
     }
 
-    private static List<Predicate> toPredicates(String predicatesStr, PrefixesMaping prefixMap) {
+    private static List<Predicate> toPredicates(final String predicatesStr, final PrefixesMaping prefixMap) {
         List<Predicate> result = new ArrayList<>();
         List<String> predicates = new ArrayList<>();
         Matcher matcher = PREDICATE_PATTERN.matcher(predicatesStr);
@@ -116,7 +118,7 @@ public final class RestUtil {
         return result;
     }
 
-    private static String toPredicateValue(String predicatedValue) {
+    private static String toPredicateValue(final String predicatedValue) {
         String predicatedValueTrimmed = predicatedValue.trim();
         if ((predicatedValueTrimmed.startsWith(DQUOTE) || predicatedValueTrimmed.startsWith(SQUOTE))
                 && (predicatedValueTrimmed.endsWith(DQUOTE) || predicatedValueTrimmed.endsWith(SQUOTE))) {
@@ -132,12 +134,12 @@ public final class RestUtil {
     public static class PrefixMapingFromXml implements PrefixesMaping {
         StartElement startElement = null;
 
-        public PrefixMapingFromXml(StartElement startElement) {
+        public PrefixMapingFromXml(final StartElement startElement) {
             this.startElement = startElement;
         }
 
         @Override
-        public String getNamespace(String prefix) {
+        public String getNamespace(final String prefix) {
             return startElement.getNamespaceContext().getNamespaceURI(prefix);
         }
     }
@@ -145,7 +147,7 @@ public final class RestUtil {
     public static class PrefixMapingFromJson implements PrefixesMaping {
 
         @Override
-        public String getNamespace(String prefix) {
+        public String getNamespace(final String prefix) {
             return prefix;
         }
     }
