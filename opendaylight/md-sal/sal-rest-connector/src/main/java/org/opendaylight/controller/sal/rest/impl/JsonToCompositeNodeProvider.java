@@ -30,29 +30,28 @@ import org.slf4j.LoggerFactory;
 
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
-        MediaType.APPLICATION_JSON })
+    MediaType.APPLICATION_JSON })
 public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
     private final static Logger LOG = LoggerFactory.getLogger( JsonToCompositeNodeProvider.class );
 
     @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return true;
     }
 
     @Override
-    public CompositeNode readFrom(Class<CompositeNode> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-            throws IOException, WebApplicationException {
-        JsonReader jsonReader = new JsonReader();
+    public CompositeNode readFrom(final Class<CompositeNode> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
+                    throws IOException, WebApplicationException {
         try {
-            return jsonReader.read(entityStream);
+            return JsonReader.read(entityStream);
         } catch (Exception e) {
-            LOG.debug( "Error parsing json input", e );
+            LOG.debug( "Error parsing json input", e);
             throw new RestconfDocumentedException(
-                            "Error parsing input: " + e.getMessage(),
-                            ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE );
+                    "Error parsing input: " + e.getMessage(),
+                    ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
     }
 

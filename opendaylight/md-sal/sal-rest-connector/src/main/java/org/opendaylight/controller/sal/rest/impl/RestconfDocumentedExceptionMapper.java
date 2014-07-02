@@ -17,6 +17,11 @@ import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ER
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.ERROR_TYPE_QNAME;
 import static org.opendaylight.controller.sal.rest.api.Draft02.RestConfModule.NAMESPACE;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.stream.JsonWriter;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -56,10 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.gson.stream.JsonWriter;
 
 /**
  * This class defines an ExceptionMapper that handles RestconfDocumentedExceptions thrown by
@@ -139,20 +140,19 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
     private Object toJsonResponseBody( final ImmutableCompositeNode errorsNode,
             final DataNodeContainer errorsSchemaNode ) {
 
-        JsonMapper jsonMapper = new JsonMapper();
+        JsonMapper jsonMapper = new JsonMapper(null);
 
         Object responseBody = null;
         try {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            JsonWriter writer = new JsonWriter( new OutputStreamWriter( outStream, "UTF-8" ) );
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter( outStream, Charsets.UTF_8));
             writer.setIndent( "    " );
 
-            jsonMapper.write( writer, errorsNode, errorsSchemaNode, null );
+            jsonMapper.write( writer, errorsNode, errorsSchemaNode);
             writer.flush();
 
             responseBody = outStream.toString( "UTF-8" );
-        }
-        catch( IOException e ) {
+        } catch( IOException e ) {
             LOG.error( "Error writing error response body", e );
         }
 
@@ -239,13 +239,11 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         try {
             doc = factory.newDocumentBuilder().parse(
                     new InputSource( new StringReader( errorInfoWithRoot ) ) );
-        }
-        catch( Exception e ) {
+        } catch( Exception e ) {
             // TODO: what if the content is text that happens to contain invalid markup? Could
             // wrap in CDATA and try again.
 
-            LOG.warn( "Error parsing restconf error-info, \"" + errorInfo + "\", as XML: " +
-                    e.toString() );
+            LOG.warn( "Error parsing restconf error-info, \"{}\", as XML", errorInfo, e);
             return null;
         }
 
