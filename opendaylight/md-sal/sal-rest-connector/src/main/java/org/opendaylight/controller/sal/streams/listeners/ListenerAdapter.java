@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.streams.listeners;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -28,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.parsers.DocumentBuilder;
@@ -64,8 +66,11 @@ import org.w3c.dom.Node;
  */
 public class ListenerAdapter implements DataChangeListener {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ListenerAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ListenerAdapter.class);
+    private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
+    private static final TransformerFactory FACTORY = TransformerFactory.newInstance();
+    private static final Pattern RFC3339_PATTERN = Pattern.compile("(\\d\\d)(\\d\\d)$");
+
     private final XmlMapper xmlMapper = new XmlMapper();
     private final SimpleDateFormat rfc3339 = new SimpleDateFormat(
             "yyyy-MM-dd'T'hh:mm:ssZ");
@@ -76,6 +81,7 @@ public class ListenerAdapter implements DataChangeListener {
     private Set<Channel> subscribers = new ConcurrentSet<>();
     private final EventBus eventBus;
     private final EventBusChangeRecorder eventBusChangeRecorder;
+
 
     /**
      * Creates new {@link ListenerAdapter} listener specified by path and stream
@@ -131,12 +137,12 @@ public class ListenerAdapter implements DataChangeListener {
             } else if (event.getType() == EventType.NOTIFY) {
                 for (Channel subscriber : subscribers) {
                     if (subscriber.isActive()) {
-                        logger.debug("Data are sent to subscriber {}:",
+                        LOG.debug("Data are sent to subscriber {}:",
                                 subscriber.remoteAddress());
                         subscriber.writeAndFlush(new TextWebSocketFrame(event
                                 .getData()));
                     } else {
-                        logger.debug(
+                        LOG.debug(
                                 "Subscriber {} is removed - channel is not active yet.",
                                 subscriber.remoteAddress());
                         subscribers.remove(subscriber);
@@ -248,22 +254,19 @@ public class ListenerAdapter implements DataChangeListener {
 
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer
-            .setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            Transformer transformer = FACTORY.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(
-                    "{http://xml.apache.org/xslt}indent-amount", "4");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.transform(new DOMSource(doc), new StreamResult(
-                    new OutputStreamWriter(out, "UTF-8")));
+                    new OutputStreamWriter(out, Charsets.UTF_8)));
             byte[] charData = out.toByteArray();
             return new String(charData, "UTF-8");
         } catch (TransformerException | UnsupportedEncodingException e) {
             String msg = "Error during transformation of Document into String";
-            logger.error(msg, e);
+            LOG.error(msg, e);
             return msg;
         }
     }
@@ -276,7 +279,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @return Data specified by RFC3339.
      */
     private String toRFC3339(final Date d) {
-        return rfc3339.format(d).replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
+        return RFC3339_PATTERN.matcher(rfc3339.format(d)).replaceAll("$1:$2");
     }
 
     /**
@@ -285,15 +288,13 @@ public class ListenerAdapter implements DataChangeListener {
      * @return {@link Document} document.
      */
     private Document createDocument() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        Document doc = null;
+        final DocumentBuilder bob;
         try {
-            DocumentBuilder bob = dbf.newDocumentBuilder();
-            doc = bob.newDocument();
+            bob = DBF.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             return null;
         }
-        return doc;
+        return bob.newDocument();
     }
 
     /**
@@ -444,7 +445,7 @@ public class ListenerAdapter implements DataChangeListener {
         DataNodeContainer schemaNode = ControllerContext.getInstance()
                 .getDataNodeContainerFor(path);
         if (schemaNode == null) {
-            logger.info(
+            LOG.info(
                     "Path '{}' contains node with unsupported type (supported type is Container or List) or some node was not found.",
                     path);
             return null;
@@ -453,7 +454,7 @@ public class ListenerAdapter implements DataChangeListener {
             Document xml = xmlMapper.write(data, schemaNode);
             return xml.getFirstChild();
         } catch (UnsupportedDataTypeException e) {
-            logger.error(
+            LOG.error(
                     "Error occured during translation of notification to XML.",
                     e);
             return null;
@@ -474,6 +475,8 @@ public class ListenerAdapter implements DataChangeListener {
         Map<String, String> prefixes = new HashMap<>();
         InstanceIdentifier instanceIdentifier = path;
         StringBuilder textContent = new StringBuilder();
+
+        // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
         for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent,
@@ -613,7 +616,7 @@ public class ListenerAdapter implements DataChangeListener {
      */
     public void addSubscriber(final Channel subscriber) {
         if (!subscriber.isActive()) {
-            logger.debug("Channel is not active between websocket server and subscriber {}"
+            LOG.debug("Channel is not active between websocket server and subscriber {}"
                     + subscriber.remoteAddress());
         }
         Event event = new Event(EventType.REGISTER);
@@ -628,7 +631,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @param subscriber
      */
     public void removeSubscriber(final Channel subscriber) {
-        logger.debug("Subscriber {} is removed.", subscriber.remoteAddress());
+        LOG.debug("Subscriber {} is removed.", subscriber.remoteAddress());
         Event event = new Event(EventType.DEREGISTER);
         event.setSubscriber(subscriber);
         eventBus.post(event);
