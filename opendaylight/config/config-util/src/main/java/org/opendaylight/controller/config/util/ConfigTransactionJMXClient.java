@@ -7,13 +7,8 @@
  */
 package org.opendaylight.controller.config.util;
 
-import org.opendaylight.controller.config.api.ConflictingVersionException;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.api.jmx.CommitStatus;
-import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
-import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
+import java.util.Map;
+import java.util.Set;
 import javax.management.Attribute;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -22,8 +17,12 @@ import javax.management.JMX;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.CommitStatus;
+import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
+import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     private final ConfigRegistryMXBean configRegistryMXBeanProxy;
@@ -44,9 +43,21 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
+        // if on is without transaction, add it. Reason is that when using getters on MXBeans the transaction name is stripped
+        on = ObjectNameUtil.withTransactionName(on, getTransactionName());
+        // if this is service reference and user requests for implementation, look it up
+        on = ConfigRegistryJMXClient.translateServiceRefIfPossible(on, clazz, configMBeanServer);
+        on = ObjectNameUtil.withTransactionName(on, getTransactionName());
         return JMX.newMXBeanProxy(configMBeanServer, on, clazz);
     }
 
+    /**
+     * Usage of this method indicates error as config JMX uses solely MXBeans.
+     * Use {@link #newMXBeanProxy(javax.management.ObjectName, Class)}
+     * or {@link JMX#newMBeanProxy(javax.management.MBeanServerConnection, javax.management.ObjectName, Class)}
+     * This method will be removed soon.
+     */
+    @Deprecated
     public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
         return JMX.newMBeanProxy(configMBeanServer, on, clazz);
     }
