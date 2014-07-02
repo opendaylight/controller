@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -156,7 +158,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static abstract class CompositeNodeNormalizationOperation<T extends PathArgument> extends
-            DataNormalizationOperation<T> {
+    DataNormalizationOperation<T> {
 
         protected CompositeNodeNormalizationOperation(final T identifier) {
             super(identifier);
@@ -218,7 +220,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static abstract class DataContainerNormalizationOperation<T extends PathArgument> extends
-            CompositeNodeNormalizationOperation<T> {
+    CompositeNodeNormalizationOperation<T> {
 
         private final DataNodeContainer schema;
         private final Map<QName, DataNormalizationOperation<?>> byQName;
@@ -276,7 +278,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static final class ListItemNormalization extends
-            DataContainerNormalizationOperation<NodeIdentifierWithPredicates> {
+    DataContainerNormalizationOperation<NodeIdentifierWithPredicates> {
 
         private final List<QName> keyDefinition;
 
@@ -356,7 +358,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static abstract class MixinNormalizationOp<T extends PathArgument> extends
-            CompositeNodeNormalizationOperation<T> {
+    CompositeNodeNormalizationOperation<T> {
 
         protected MixinNormalizationOp(final T identifier) {
             super(identifier);
@@ -615,25 +617,25 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
 
-        protected AnyXmlNormalization( NodeIdentifier identifier ) {
+        protected AnyXmlNormalization( final NodeIdentifier identifier ) {
             super( identifier );
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild( PathArgument child ) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild( final PathArgument child ) throws DataNormalizationException {
             return null;
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild( QName child ) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild( final QName child ) throws DataNormalizationException {
             return null;
         }
 
         @Override
-        public NormalizedNode<?, ?> normalize( Node<?> legacyData ) {
+        public NormalizedNode<?, ?> normalize( final Node<?> legacyData ) {
             NormalizedNodeAttrBuilder<NodeIdentifier, Node<?>, AnyXmlNode> builder =
                     Builders.anyXmlBuilder().withNodeIdentifier(
-                                                new NodeIdentifier( legacyData.getNodeType() ) );
+                            new NodeIdentifier( legacyData.getNodeType() ) );
             builder.withValue(legacyData);
             return builder.build();
         }
@@ -644,7 +646,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        public NormalizedNode<?, ?> createDefault( PathArgument currentArg ) {
+        public NormalizedNode<?, ?> createDefault( final PathArgument currentArg ) {
             return null;
         }
     }
@@ -694,7 +696,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         for (DataSchemaNode child : augmentation.getChildNodes()) {
             potentialChildren.add(child.getQName());
         }
-        return new AugmentationIdentifier(null, potentialChildren.build());
+        return new AugmentationIdentifier(potentialChildren.build());
     }
 
     private static DataNodeContainer augmentationProxy(final AugmentationSchema augmentation, final DataNodeContainer schema) {
