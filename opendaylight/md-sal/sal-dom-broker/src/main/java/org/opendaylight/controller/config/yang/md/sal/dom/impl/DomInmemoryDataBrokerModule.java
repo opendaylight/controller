@@ -7,26 +7,22 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.Executors;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.osgi.framework.BundleContext;
 
-import java.util.Hashtable;
-import java.util.concurrent.Executors;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
 *
 */
 public final class DomInmemoryDataBrokerModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModule {
-
-    private BundleContext bundleContext;
 
     public DomInmemoryDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -70,17 +66,6 @@ public final class DomInmemoryDataBrokerModule extends
 
         DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
 
-        getBundleContext().registerService(DOMDataBroker.class, newDataBroker, new Hashtable<String, String>());
-
-
         return newDataBroker;
-    }
-
-    private BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    void setBundleContext(final BundleContext ctx) {
-        bundleContext = ctx;
     }
 }

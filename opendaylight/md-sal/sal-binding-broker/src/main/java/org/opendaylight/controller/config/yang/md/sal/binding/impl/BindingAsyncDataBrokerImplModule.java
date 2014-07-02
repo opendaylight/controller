@@ -10,12 +10,10 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-import org.osgi.framework.BundleContext;
 
 public class BindingAsyncDataBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModule implements
         Provider {
-    private BundleContext bundleContext;
 
     public BindingAsyncDataBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -42,25 +40,15 @@ public class BindingAsyncDataBrokerImplModule extends
 
         // FIXME: Switch this to DOM Broker registration which would not require
         // BundleContext when API are updated.
-        ProviderSession session = domBroker.registerProvider(this, getBundleContext());
+        ProviderSession session = domBroker.registerProvider(this, null);
         DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
         SchemaService schemaService = session.getService(SchemaService.class);
         return new ForwardedBindingDataBroker(domDataBroker, mappingService, schemaService);
     }
 
-    // FIXME: Remove this when DOM Broker registration would not require
-    // BundleContext
-    @Deprecated
-    private BundleContext getBundleContext() {
-        return bundleContext;
-    }
 
-    // FIXME: Remove this when DOM Broker registration would not require
-    // BundleContext
-    @Deprecated
-    void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
+
+
 
     @Override
     public Collection<ProviderFunctionality> getProviderFunctionality() {
