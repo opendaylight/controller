@@ -21,6 +21,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -40,46 +41,68 @@ import org.w3c.dom.Document;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
-        Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 
-    private final static Logger logger = LoggerFactory.getLogger(StructuredDataToXmlProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StructuredDataToXmlProvider.class);
+    private static final TransformerFactory FACTORY = TransformerFactory.newInstance();
+    private static final ThreadLocal<Transformer> TRANSFORMER = new ThreadLocal<Transformer>() {
+        @Override
+        protected Transformer initialValue() {
+            final Transformer ret;
+            try {
+                ret = FACTORY.newTransformer();
+            } catch (TransformerConfigurationException e) {
+                LOG.error("Failed to instantiate XML transformer", e);
+                throw new IllegalStateException("XML encoding currently unavailable", e);
+            }
+
+            ret.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            ret.setOutputProperty(OutputKeys.METHOD, "xml");
+            ret.setOutputProperty(OutputKeys.INDENT, "yes");
+            ret.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            ret.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+            return ret;
+        }
+    };
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return type.equals( StructuredData.class );
     }
 
     @Override
-    public long getSize(StructuredData t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public long getSize(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public void writeTo(StructuredData t, Class<?> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
-            throws IOException, WebApplicationException {
+    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
+                    throws IOException, WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-        XmlMapper xmlMapper = new XmlMapper();
-        Document domTree = xmlMapper.write(data, (DataNodeContainer) t.getSchema());
+        final Transformer trans;
         try {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.transform(new DOMSource(domTree), new StreamResult(entityStream));
+            trans = TRANSFORMER.get();
+        } catch (RuntimeException e) {
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
+                    ErrorTag.OPERATION_FAILED);
+        }
+
+        // FIXME: BUG-1281: eliminate the intermediate Document
+        final Document domTree = new XmlMapper().write(data, (DataNodeContainer) t.getSchema());
+        try {
+            trans.transform(new DOMSource(domTree), new StreamResult(entityStream));
         } catch (TransformerException e) {
-            logger.error("Error during translation of Document to OutputStream", e);
-            throw new RestconfDocumentedException( e.getMessage(), ErrorType.TRANSPORT,
-                                                   ErrorTag.OPERATION_FAILED );
+            LOG.error("Error during translation of Document to OutputStream", e);
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
+                    ErrorTag.OPERATION_FAILED);
         }
     }
 
