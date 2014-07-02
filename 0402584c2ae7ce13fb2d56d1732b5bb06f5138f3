@@ -16,6 +16,24 @@
       "revId": "0402584c2ae7ce13fb2d56d1732b5bb06f5138f3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_89504fd5",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronPortRequest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-02T13:53:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_c995f787",
+      "revId": "0402584c2ae7ce13fb2d56d1732b5bb06f5138f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
