@@ -7,6 +7,19 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -54,19 +67,6 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class ControllerContext implements SchemaContextListener {
     private final static Logger LOG = LoggerFactory.getLogger( ControllerContext.class );
@@ -256,7 +256,7 @@ public class ControllerContext implements SchemaContextListener {
     public DataNodeContainer getDataNodeContainerFor( final InstanceIdentifier path ) {
         this.checkPreconditions();
 
-        final List<PathArgument> elements = path.getPath();
+        final Iterable<PathArgument> elements = path.getPathArguments();
         PathArgument head = elements.iterator().next();
         final QName startQName = head.getNodeType();
         final Module initialModule = globalSchema.findModuleByNamespaceAndRevision(
@@ -277,7 +277,7 @@ public class ControllerContext implements SchemaContextListener {
     public String toFullRestconfIdentifier( final InstanceIdentifier path ) {
         this.checkPreconditions();
 
-        final List<PathArgument> elements = path.getPath();
+        final Iterable<PathArgument> elements = path.getPathArguments();
         final StringBuilder builder = new StringBuilder();
         PathArgument head = elements.iterator().next();
         final QName startQName = head.getNodeType();
@@ -805,8 +805,8 @@ public class ControllerContext implements SchemaContextListener {
 
     public boolean isInstantiatedDataSchema( final DataSchemaNode node ) {
         return node instanceof LeafSchemaNode || node instanceof LeafListSchemaNode ||
-               node instanceof ContainerSchemaNode || node instanceof ListSchemaNode ||
-               node instanceof AnyXmlSchemaNode;
+                node instanceof ContainerSchemaNode || node instanceof ListSchemaNode ||
+                node instanceof AnyXmlSchemaNode;
     }
 
     private void addKeyValue( final HashMap<QName, Object> map, final DataSchemaNode node,

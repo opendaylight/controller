@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.util;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,13 +43,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class NetconfMessageTransformUtil {
 
@@ -76,7 +77,7 @@ public class NetconfMessageTransformUtil {
 
     public static Node<?> toFilterStructure(final InstanceIdentifier identifier) {
         Node<?> previous = null;
-        if (identifier.getPath().isEmpty()) {
+        if (Iterables.isEmpty(identifier.getPathArguments())) {
             return null;
         }
 
@@ -103,15 +104,15 @@ public class NetconfMessageTransformUtil {
     }
 
     public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
-        throws NetconfDocumentedException {
+            throws NetconfDocumentedException {
         final String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
         final String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
 
         if(inputMsgId.equals(outputMsgId) == false) {
             Map<String,String> errorInfo = ImmutableMap.<String,String>builder()
-                .put( "actual-message-id", outputMsgId )
-                .put( "expected-message-id", inputMsgId )
-                .build();
+                    .put( "actual-message-id", outputMsgId )
+                    .put( "expected-message-id", inputMsgId )
+                    .build();
 
             throw new NetconfDocumentedException( "Response message contained unknown \"message-id\"",
                     null, NetconfDocumentedException.ErrorType.protocol,
@@ -126,7 +127,7 @@ public class NetconfMessageTransformUtil {
         }
     }
 
-    public static RpcError toRpcError( NetconfDocumentedException ex )
+    public static RpcError toRpcError( final NetconfDocumentedException ex )
     {
         StringBuilder infoBuilder = new StringBuilder();
         Map<String, String> errorInfo = ex.getErrorInfo();
@@ -134,44 +135,45 @@ public class NetconfMessageTransformUtil {
         {
             for( Entry<String,String> e: errorInfo.entrySet() ) {
                 infoBuilder.append( '<' ).append( e.getKey() ).append( '>' ).append( e.getValue() )
-                           .append( "</" ).append( e.getKey() ).append( '>' );
+                .append( "</" ).append( e.getKey() ).append( '>' );
 
             }
         }
 
         return RpcErrors.getRpcError( null, ex.getErrorTag().getTagValue(), infoBuilder.toString(),
-                                      toRpcErrorSeverity( ex.getErrorSeverity() ), ex.getLocalizedMessage(),
-                                      toRpcErrorType( ex.getErrorType() ), ex.getCause() );
+                toRpcErrorSeverity( ex.getErrorSeverity() ), ex.getLocalizedMessage(),
+                toRpcErrorType( ex.getErrorType() ), ex.getCause() );
     }
 
-    private static ErrorSeverity toRpcErrorSeverity( NetconfDocumentedException.ErrorSeverity severity ) {
+    private static ErrorSeverity toRpcErrorSeverity( final NetconfDocumentedException.ErrorSeverity severity ) {
         switch( severity ) {
-            case warning:
-                return RpcError.ErrorSeverity.WARNING;
-            default:
-                return RpcError.ErrorSeverity.ERROR;
+        case warning:
+            return RpcError.ErrorSeverity.WARNING;
+        default:
+            return RpcError.ErrorSeverity.ERROR;
         }
     }
 
-    private static RpcError.ErrorType toRpcErrorType( NetconfDocumentedException.ErrorType type )
+    private static RpcError.ErrorType toRpcErrorType( final NetconfDocumentedException.ErrorType type )
     {
         switch( type ) {
-            case protocol:
-                return RpcError.ErrorType.PROTOCOL;
-            case rpc:
-                return RpcError.ErrorType.RPC;
-            case transport:
-                return RpcError.ErrorType.TRANSPORT;
-            default:
-                return RpcError.ErrorType.APPLICATION;
+        case protocol:
+            return RpcError.ErrorType.PROTOCOL;
+        case rpc:
+            return RpcError.ErrorType.RPC;
+        case transport:
+            return RpcError.ErrorType.TRANSPORT;
+        default:
+            return RpcError.ErrorType.APPLICATION;
         }
     }
 
     public static CompositeNode flattenInput(final CompositeNode node) {
         final QName inputQName = QName.create(node.getNodeType(), "input");
         final CompositeNode input = node.getFirstCompositeByName(inputQName);
-        if (input == null)
+        if (input == null) {
             return node;
+        }
         if (input instanceof CompositeNode) {
 
             final List<Node<?>> nodes = ImmutableList.<Node<?>> builder() //

@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.sal.streams.listeners;
 
+import com.google.common.base.Preconditions;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.internal.ConcurrentSet;
@@ -53,11 +58,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * {@link ListenerAdapter} is responsible to track events, which occurred by
  * changing data in data source.
@@ -86,10 +86,10 @@ public class ListenerAdapter implements DataChangeListener {
      * @param streamName
      *            The name of the stream.
      */
-    ListenerAdapter(InstanceIdentifier path, String streamName) {
+    ListenerAdapter(final InstanceIdentifier path, final String streamName) {
         Preconditions.checkNotNull(path);
         Preconditions
-                .checkArgument(streamName != null && !streamName.isEmpty());
+        .checkArgument(streamName != null && !streamName.isEmpty());
         this.path = path;
         this.streamName = streamName;
         eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
@@ -99,7 +99,7 @@ public class ListenerAdapter implements DataChangeListener {
 
     @Override
     public void onDataChanged(
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
+            final DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
         if (!change.getCreatedConfigurationData().isEmpty()
                 || !change.getCreatedOperationalData().isEmpty()
                 || !change.getUpdatedConfigurationData().isEmpty()
@@ -118,7 +118,7 @@ public class ListenerAdapter implements DataChangeListener {
      */
     private final class EventBusChangeRecorder {
         @Subscribe
-        public void recordCustomerChange(Event event) {
+        public void recordCustomerChange(final Event event) {
             if (event.getType() == EventType.REGISTER) {
                 Channel subscriber = event.getSubscriber();
                 if (!subscribers.contains(subscriber)) {
@@ -127,7 +127,7 @@ public class ListenerAdapter implements DataChangeListener {
             } else if (event.getType() == EventType.DEREGISTER) {
                 subscribers.remove(event.getSubscriber());
                 Notificator
-                        .removeListenerIfNoSubscriberExists(ListenerAdapter.this);
+                .removeListenerIfNoSubscriberExists(ListenerAdapter.this);
             } else if (event.getType() == EventType.NOTIFY) {
                 for (Channel subscriber : subscribers) {
                     if (subscriber.isActive()) {
@@ -161,7 +161,7 @@ public class ListenerAdapter implements DataChangeListener {
          * @param type
          *            EventType
          */
-        public Event(EventType type) {
+        public Event(final EventType type) {
             this.type = type;
         }
 
@@ -180,7 +180,7 @@ public class ListenerAdapter implements DataChangeListener {
          * @param subscriber
          *            Channel
          */
-        public void setSubscriber(Channel subscriber) {
+        public void setSubscriber(final Channel subscriber) {
             this.subscriber = subscriber;
         }
 
@@ -199,7 +199,7 @@ public class ListenerAdapter implements DataChangeListener {
          * @param String
          *            data.
          */
-        public void setData(String data) {
+        public void setData(final String data) {
             this.data = data;
         }
 
@@ -228,7 +228,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @return Data in printable form.
      */
     private String prepareXmlFrom(
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
+            final DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
         Document doc = createDocument();
         Element notificationElement = doc.createElementNS(
                 "urn:ietf:params:xml:ns:netconf:notification:1.0",
@@ -251,7 +251,7 @@ public class ListenerAdapter implements DataChangeListener {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer
-                    .setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            .setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -275,7 +275,7 @@ public class ListenerAdapter implements DataChangeListener {
      *            Date
      * @return Data specified by RFC3339.
      */
-    private String toRFC3339(Date d) {
+    private String toRFC3339(final Date d) {
         return rfc3339.format(d).replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
     }
 
@@ -306,9 +306,9 @@ public class ListenerAdapter implements DataChangeListener {
      * @param change
      *            {@link DataChangeEvent}
      */
-    private void addValuesToDataChangedNotificationEventElement(Document doc,
-            Element dataChangedNotificationEventElement,
-            DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
+    private void addValuesToDataChangedNotificationEventElement(final Document doc,
+            final Element dataChangedNotificationEventElement,
+            final DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
         addValuesFromDataToElement(doc, change.getCreatedConfigurationData(),
                 dataChangedNotificationEventElement, Store.CONFIG,
                 Operation.CREATED);
@@ -348,9 +348,9 @@ public class ListenerAdapter implements DataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc,
-            Set<InstanceIdentifier> data, Element element, Store store,
-            Operation operation) {
+    private void addValuesFromDataToElement(final Document doc,
+            final Set<InstanceIdentifier> data, final Element element, final Store store,
+            final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -375,9 +375,9 @@ public class ListenerAdapter implements DataChangeListener {
      * @param operation
      *            {@link Operation}
      */
-    private void addValuesFromDataToElement(Document doc,
-            Map<InstanceIdentifier, CompositeNode> data, Element element,
-            Store store, Operation operation) {
+    private void addValuesFromDataToElement(final Document doc,
+            final Map<InstanceIdentifier, CompositeNode> data, final Element element,
+            final Store store, final Operation operation) {
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -403,9 +403,9 @@ public class ListenerAdapter implements DataChangeListener {
      *            {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
-    private Node createDataChangeEventElement(Document doc,
-            InstanceIdentifier path, CompositeNode data, Store store,
-            Operation operation) {
+    private Node createDataChangeEventElement(final Document doc,
+            final InstanceIdentifier path, final CompositeNode data, final Store store,
+            final Operation operation) {
         Element dataChangeEventElement = doc.createElement("data-change-event");
 
         Element pathElement = doc.createElement("path");
@@ -440,7 +440,7 @@ public class ListenerAdapter implements DataChangeListener {
      *            {@link CompositeNode}
      * @return Data in XML format.
      */
-    private Node translateToXml(InstanceIdentifier path, CompositeNode data) {
+    private Node translateToXml(final InstanceIdentifier path, final CompositeNode data) {
         DataNodeContainer schemaNode = ControllerContext.getInstance()
                 .getDataNodeContainerFor(path);
         if (schemaNode == null) {
@@ -468,13 +468,13 @@ public class ListenerAdapter implements DataChangeListener {
      * @param element
      *            {@link Element}
      */
-    private void addPathAsValueToElement(InstanceIdentifier path,
-            Element element) {
+    private void addPathAsValueToElement(final InstanceIdentifier path,
+            final Element element) {
         // Map< key = namespace, value = prefix>
         Map<String, String> prefixes = new HashMap<>();
         InstanceIdentifier instanceIdentifier = path;
         StringBuilder textContent = new StringBuilder();
-        for (PathArgument pathArgument : instanceIdentifier.getPath()) {
+        for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent,
                     pathArgument.getNodeType(), prefixes);
@@ -514,8 +514,8 @@ public class ListenerAdapter implements DataChangeListener {
      * @param prefixes
      *            Map of namespaces and prefixes.
      */
-    private static void writeIdentifierWithNamespacePrefix(Element element,
-            StringBuilder textContent, QName qName, Map<String, String> prefixes) {
+    private static void writeIdentifierWithNamespacePrefix(final Element element,
+            final StringBuilder textContent, final QName qName, final Map<String, String> prefixes) {
         String namespace = qName.getNamespace().toString();
         String prefix = prefixes.get(namespace);
         if (prefix == null) {
@@ -541,7 +541,7 @@ public class ListenerAdapter implements DataChangeListener {
      *            Collection of prefixes.
      * @return New prefix which consists of four random characters <a-z>.
      */
-    private static String generateNewPrefix(Collection<String> prefixes) {
+    private static String generateNewPrefix(final Collection<String> prefixes) {
         StringBuilder result = null;
         Random random = new Random();
         do {
@@ -571,7 +571,7 @@ public class ListenerAdapter implements DataChangeListener {
      *            ListenerRegistration<DataChangeListener>
      */
     public void setRegistration(
-            ListenerRegistration<DataChangeListener> registration) {
+            final ListenerRegistration<DataChangeListener> registration) {
         this.registration = registration;
     }
 
@@ -611,7 +611,7 @@ public class ListenerAdapter implements DataChangeListener {
      * @param subscriber
      *            Channel
      */
-    public void addSubscriber(Channel subscriber) {
+    public void addSubscriber(final Channel subscriber) {
         if (!subscriber.isActive()) {
             logger.debug("Channel is not active between websocket server and subscriber {}"
                     + subscriber.remoteAddress());
@@ -627,7 +627,7 @@ public class ListenerAdapter implements DataChangeListener {
      *
      * @param subscriber
      */
-    public void removeSubscriber(Channel subscriber) {
+    public void removeSubscriber(final Channel subscriber) {
         logger.debug("Subscriber {} is removed.", subscriber.remoteAddress());
         Event event = new Event(EventType.DEREGISTER);
         event.setSubscriber(subscriber);
@@ -652,7 +652,7 @@ public class ListenerAdapter implements DataChangeListener {
 
         private final String value;
 
-        private Store(String value) {
+        private Store(final String value) {
             this.value = value;
         }
     }
@@ -666,7 +666,7 @@ public class ListenerAdapter implements DataChangeListener {
 
         private final String value;
 
-        private Operation(String value) {
+        private Operation(final String value) {
             this.value = value;
         }
     }

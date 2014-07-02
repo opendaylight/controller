@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -733,26 +736,45 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     }
 
     private boolean isKnownNodeConnector(final InstanceIdentifier<? extends Object> nodeConnectorIdentifier) {
-        final List<PathArgument> path = nodeConnectorIdentifier.getPath();
-        if (path.size() >= 3) {
-            final PathArgument nodePath = path.get(1);
-            final PathArgument nodeConnectorPath = path.get(2);
-            final List<PathArgument> nodeConnectors = nodeToNodeConnectorsMap.get(nodePath);
-            if (nodeConnectors != null) {
-                return nodeConnectors.contains(nodeConnectorPath);
-            }
+        final Iterator<PathArgument> it = nodeConnectorIdentifier.getPathArguments().iterator();
+
+        if (!it.hasNext()) {
+            return false;
         }
-        return false;
+        it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodePath = it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodeConnectorPath = it.next();
+
+        final List<PathArgument> nodeConnectors = nodeToNodeConnectorsMap.get(nodePath);
+        return nodeConnectors == null ? false :
+            nodeConnectors.contains(nodeConnectorPath);
     }
 
     private boolean recordNodeConnector(final InstanceIdentifier<? extends Object> nodeConnectorIdentifier) {
-        final List<PathArgument> path = nodeConnectorIdentifier.getPath();
-        if (path.size() < 3) {
+        final Iterator<PathArgument> it = nodeConnectorIdentifier.getPathArguments().iterator();
+
+        if (!it.hasNext()) {
             return false;
         }
+        it.next();
 
-        final PathArgument nodePath = path.get(1);
-        final PathArgument nodeConnectorPath = path.get(2);
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodePath = it.next();
+
+        if (!it.hasNext()) {
+            return false;
+        }
+        final PathArgument nodeConnectorPath = it.next();
 
         synchronized (this) {
             List<PathArgument> nodeConnectors = this.nodeToNodeConnectorsMap.get(nodePath);
@@ -766,6 +788,6 @@ public class InventoryAndReadAdapter implements IPluginInReadService, IPluginInI
     }
 
     private List<PathArgument> removeNodeConnectors(final InstanceIdentifier<? extends Object> nodeIdentifier) {
-        return this.nodeToNodeConnectorsMap.remove(nodeIdentifier.getPath().get(1));
+        return this.nodeToNodeConnectorsMap.remove(Iterables.get(nodeIdentifier.getPathArguments(), 1));
     }
 }
