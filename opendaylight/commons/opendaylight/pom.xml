@@ -33,6 +33,7 @@
     <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
     <checkstyle.version>2.12</checkstyle.version>
+    <checkstyle.header.file>controller/java.header</checkstyle.header.file>
     <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <clustering.stub.version>0.4.2-SNAPSHOT</clustering.stub.version>
@@ -2356,6 +2357,46 @@
                   <outputDirectory>${fastreassembly.directory}</outputDirectory>
                 </configuration>
               </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>style</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>${checkstyle.version}</version>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <failOnViolation>false</failOnViolation>
+              <failsOnError>false</failsOnError>
+              <configLocation>controller/odl-checkstyle.xml</configLocation>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              <sourceDirectory>${project.basedir}</sourceDirectory>
+              <includes>**\/*.java</includes>
+              <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/${jmxGeneratorPath}\/,**\/${salGeneratorPath}\/,**\/ganymed\/</excludes>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>checkstyle</artifactId>
+                <version>0.0.3-SNAPSHOT</version>
+              </dependency>
+            </dependencies>
+            <executions>
+                <execution>
+                    <id>validate</id>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                </execution>
             </executions>
           </plugin>
         </plugins>
