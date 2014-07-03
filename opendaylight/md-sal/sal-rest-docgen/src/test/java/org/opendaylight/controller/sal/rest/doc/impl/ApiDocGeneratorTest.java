@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.rest.doc.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -60,7 +61,33 @@ public class ApiDocGeneratorTest {
                 ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(),
                         "http://localhost:8080/restconf", "");
                 validateToaster(doc);
+                printDetailsForDoc(doc);
                 Assert.assertNotNull(doc);
+            }
+        }
+    }
+
+    @Test
+    public void testEdgeCases() throws Exception {
+        Preconditions.checkArgument(helper.getModules() != null, "No modules found");
+
+        for (Entry<File, Module> m : helper.getModules().entrySet()) {
+            if (m.getKey().getAbsolutePath().endsWith("toaster.yang")) {
+                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(),
+                        "http://localhost:8080/restconf", "");
+                Assert.assertNotNull(doc);
+                String jsonString = doc.getModels().toString();
+                assertTrue(
+                        jsonString.contains( "testUnion\":{\"type\":\"integer or string\",\"required\":false}" ) );
+            }
+        }
+    }
+
+    private void printDetailsForDoc(ApiDeclaration doc) {
+        System.out.println( doc.getModels() );
+        for( Api api : doc.getApis() ){
+            for( Operation opr : api.getOperations() ){
+                System.out.println( opr.getNickname() + "," + opr.getType() );
             }
         }
     }
@@ -99,6 +126,7 @@ public class ApiDocGeneratorTest {
             expectedConfigMethods.removeAll(actualConfigMethods);
             fail("Missing expected method on config API: " + expectedConfigMethods);
         }
+
         // TODO: we should really do some more validation of the
         // documentation...
         /**

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -249,7 +250,7 @@ public class ModelGenerator {
                 if (node instanceof LeafSchemaNode) {
                     property = processLeafNode((LeafSchemaNode) node);
                 } else if (node instanceof ListSchemaNode) {
-                    property = processListSchemaNode((ListSchemaNode) node, moduleName, models);
+                    property = processListSchemaNode((ListSchemaNode) node, moduleName, models, isConfig);
 
                 } else if (node instanceof LeafListSchemaNode) {
                     property = processLeafListNode((LeafListSchemaNode) node);
@@ -354,15 +355,17 @@ public class ModelGenerator {
      *
      * @param listNode
      * @param moduleName
+     * @param isConfig
      * @return
      * @throws JSONException
      * @throws IOException
      */
     private JSONObject processListSchemaNode(ListSchemaNode listNode, String moduleName,
-            JSONObject models) throws JSONException, IOException {
+            JSONObject models, Boolean isConfig) throws JSONException, IOException {
 
         Set<DataSchemaNode> listChildren = listNode.getChildNodes();
-        String fileName = listNode.getQName().getLocalName();
+        String fileName = (BooleanUtils.isNotFalse(isConfig)?OperationBuilder.CONFIG:OperationBuilder.OPERATIONAL) +
+                                                                listNode.getQName().getLocalName();
 
         JSONObject childSchemaProperties = processChildren(listChildren, moduleName, models);
         JSONObject childSchema = getSchemaTemplate();
@@ -541,12 +544,15 @@ public class ModelGenerator {
     private void processUnionType(UnionTypeDefinition unionType, JSONObject property)
             throws JSONException {
 
-        List<TypeDefinition<?>> unionTypes = unionType.getTypes();
-        JSONArray unionArray = new JSONArray();
-        for (TypeDefinition<?> typeDef : unionTypes) {
-            unionArray.put(YANG_TYPE_TO_JSON_TYPE_MAPPING.get(typeDef.getClass()));
+        StringBuilder type = new StringBuilder();
+        for (TypeDefinition<?> typeDef : unionType.getTypes() ) {
+            if( type.length() > 0 ){
+                type.append( " or " );
+            }
+            type.append(YANG_TYPE_TO_JSON_TYPE_MAPPING.get(typeDef.getClass()));
         }
-        property.put(TYPE_KEY, unionArray);
+
+        property.put(TYPE_KEY, type );
     }
 
     /**
