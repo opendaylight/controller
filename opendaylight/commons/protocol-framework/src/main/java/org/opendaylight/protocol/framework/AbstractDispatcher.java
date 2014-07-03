@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -113,6 +114,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
             // makes no sense for LocalServer and produces warning
             b.childOption(ChannelOption.SO_KEEPALIVE, true);
         }
+        b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         customizeBootstrap(b);
 
         if (b.group() == null) {
