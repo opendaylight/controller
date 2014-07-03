@@ -12,10 +12,10 @@
   <version>0.4.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
-    <dependency>
+<!--    <dependency>
       <groupId>orbit</groupId>
       <artifactId>org.apache.catalina</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>

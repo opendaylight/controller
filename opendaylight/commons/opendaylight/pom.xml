@@ -101,6 +101,7 @@
     <ietf-restconf.version>2013.10.19.1-SNAPSHOT</ietf-restconf.version>
     <ietf-topology.version>2013.10.21.2-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.4-SNAPSHOT</ietf-yang-types.version>
+    <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia-bridge.version>0.0.2-SNAPSHOT</jolokia-bridge.version>
@@ -1698,6 +1699,11 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>${javax.servlet-api.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>

@@ -104,14 +104,14 @@
       <groupId>eclipselink</groupId>
       <artifactId>javax.resource</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>javax.servlet</artifactId>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>javax.servlet.jsp</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.apache.felix.gogo.command</artifactId>
@@ -153,7 +153,7 @@
       <artifactId>org.eclipse.osgi.services</artifactId>
     </dependency>
     <!-- Gemini Web -->
-    <dependency>
+    <!--    <dependency>
       <groupId>geminiweb</groupId>
       <artifactId>org.eclipse.gemini.web.core</artifactId>
     </dependency>
@@ -192,7 +192,7 @@
     <dependency>
       <groupId>geminiweb</groupId>
       <artifactId>org.eclipse.virgo.util.parser.manifest</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-buffer</artifactId>
@@ -219,7 +219,7 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-transport</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>orbit</groupId>
       <artifactId>javax.activation</artifactId>
     </dependency>
@@ -286,7 +286,7 @@
     <dependency>
       <groupId>orbit</groupId>
       <artifactId>org.apache.tomcat.util</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.aopalliance</groupId>
       <artifactId>com.springsource.org.aopalliance</artifactId>
@@ -319,10 +319,10 @@
       <artifactId>jettison</artifactId>
     </dependency>
 
-    <dependency>
+    <!--    <dependency>
       <groupId>org.eclipse.equinox.http</groupId>
       <artifactId>servlet</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.antlr</artifactId>
@@ -339,10 +339,10 @@
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>org.jboss.spec.javax.transaction</groupId>
       <artifactId>jboss-transaction-api_1.1_spec</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-osgi</artifactId>
@@ -624,20 +624,20 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>web</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
-    </dependency>
+    </dependency> -->
 
     <!-- Third parties from opendaylight released -->
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>net.sf.jung2</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
@@ -724,10 +724,10 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
     </dependency>
-    <dependency>
+    <!--    <dependency>
       <groupId>virgomirror</groupId>
       <artifactId>org.eclipse.jdt.core.compiler.batch</artifactId>
-    </dependency>
+    </dependency> -->
   </dependencies>
 
   <build>

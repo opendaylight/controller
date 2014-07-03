@@ -13,8 +13,8 @@
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>javax.servlet</artifactId>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

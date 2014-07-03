@@ -43,7 +43,7 @@
     <module>opendaylight/usermanager/implementation</module>
     <module>opendaylight/connectionmanager/api</module>
     <module>opendaylight/connectionmanager/implementation</module>
-    <module>opendaylight/security</module>
+    <!--    <module>opendaylight/security</module> -->
 
     <!-- third-parties uncomment them if you need snapshot version of it -->
     <!-- <module>third-party/openflowj</module> -->
@@ -123,7 +123,7 @@
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
-    <module>opendaylight/commons/filter-valve</module>
+    <!--    <module>opendaylight/commons/filter-valve</module> -->
 
     <!-- Karaf Distribution -->
     <module>features/base</module>

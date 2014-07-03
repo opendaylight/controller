@@ -27,13 +27,13 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>javax.servlet</artifactId>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
-    <dependency>
+<!--    <dependency>
       <groupId>orbit</groupId>
       <artifactId>org.apache.catalina</artifactId>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
