@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.rest.doc.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -65,6 +66,24 @@ public class ApiDocGeneratorTest {
         }
     }
 
+    @Test
+    public void testEdgeCases() throws Exception {
+        Preconditions.checkArgument(helper.getModules() != null, "No modules found");
+
+        for (Entry<File, Module> m : helper.getModules().entrySet()) {
+            if (m.getKey().getAbsolutePath().endsWith("toaster.yang")) {
+                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(),
+                        "http://localhost:8080/restconf", "");
+                Assert.assertNotNull(doc);
+
+                //testing bugs.opendaylight.org bug 1290. UnionType model type.
+                String jsonString = doc.getModels().toString();
+                assertTrue(
+                        jsonString.contains( "testUnion\":{\"type\":\"integer or string\",\"required\":false}" ) );
+            }
+        }
+    }
+
     private void validateToaster(ApiDeclaration doc) throws Exception {
         Set<String> expectedUrls = new TreeSet<>(Arrays.asList(new String[] {
                 "/config/toaster2:toaster/", "/operational/toaster2:toaster/",
@@ -99,6 +118,7 @@ public class ApiDocGeneratorTest {
             expectedConfigMethods.removeAll(actualConfigMethods);
             fail("Missing expected method on config API: " + expectedConfigMethods);
         }
+
         // TODO: we should really do some more validation of the
         // documentation...
         /**
