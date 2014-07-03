@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ef3ebbd9",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-03T12:38:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_09399f40",
+      "revId": "c9a5b6f6e01b023adbf116fc342468bdcb2e20ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a94193aa",
         "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-02T15:10:52Z",
       "side": 1,
       "message": "Good comment, I would also add deprecation statement here probably.",
+      "revId": "c9a5b6f6e01b023adbf116fc342468bdcb2e20ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8f27efc9",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-03T12:38:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a94193aa",
       "revId": "c9a5b6f6e01b023adbf116fc342468bdcb2e20ee",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
