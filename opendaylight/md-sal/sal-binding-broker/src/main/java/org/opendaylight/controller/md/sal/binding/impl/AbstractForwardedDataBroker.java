@@ -187,7 +187,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         private Map<InstanceIdentifier<?>, DataObject> createdCache;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;
-        private Map<InstanceIdentifier<?>, ? extends DataObject> originalCache;
+        private Map<InstanceIdentifier<?>, DataObject> originalCache;
         private Set<InstanceIdentifier<?>> removedCache;
         private Optional<DataObject> originalDataCache;
         private Optional<DataObject> updatedDataCache;
@@ -225,7 +225,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
 
         @Override
-        public Map<InstanceIdentifier<?>, ? extends DataObject> getOriginalData() {
+        public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
             if (originalCache == null) {
                 originalCache = Collections.unmodifiableMap(toBinding(domEvent.getOriginalData()));
             }
