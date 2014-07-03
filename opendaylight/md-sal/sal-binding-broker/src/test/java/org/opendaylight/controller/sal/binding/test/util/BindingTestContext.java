@@ -17,7 +17,9 @@ import java.util.concurrent.Future;
 
 import javassist.ClassPool;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
@@ -112,6 +114,8 @@ public class BindingTestContext implements AutoCloseable {
 
     private final MockSchemaService mockSchemaService = new MockSchemaService();
 
+    private DataBroker dataBroker;
+
 
 
     public DOMDataBroker getDomAsyncDataBroker() {
@@ -148,6 +152,12 @@ public class BindingTestContext implements AutoCloseable {
         biDataImpl = new org.opendaylight.controller.sal.dom.broker.DataBrokerImpl();
         biDataImpl.setExecutor(executor);
         biDataLegacyBroker = biDataImpl;
+    }
+
+    public void startNewDataBroker() {
+        checkState(executor != null, "Executor needs to be set");
+        checkState(newDOMDataBroker != null, "DOM Data Broker must be set");
+        dataBroker = new ForwardedBindingDataBroker(newDOMDataBroker, mappingServiceImpl, mockSchemaService);
     }
 
     public void startNewDomDataBroker() {
@@ -312,11 +322,12 @@ public class BindingTestContext implements AutoCloseable {
 
     public void start() {
         startNewDomDataBroker();
+
         startDomBroker();
         startDomMountPoint();
         startBindingToDomMappingService();
+        startNewDataBroker();
         startNewBindingDataBroker();
-
         startBindingNotificationBroker();
         startBindingBroker();
 
@@ -416,6 +427,10 @@ public class BindingTestContext implements AutoCloseable {
 
     public MountProvisionService getDomMountProviderService() {
         return biMountImpl;
+    }
+
+    public DataBroker getDataBroker() {
+        return dataBroker;
     }
 
 
