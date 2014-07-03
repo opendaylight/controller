@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -469,5 +470,25 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             }
             return Optional.absent();
         }
+    }
+
+    /**
+     * Returns an default object according to YANG schema for supplied path.
+     *
+     * @param path DOM Path
+     * @return Node with defaults set on.
+     */
+    public NormalizedNode<?, ?> getDefaultNodeFor(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+        Iterator<PathArgument> iterator = path.getPathArguments().iterator();
+        DataNormalizationOperation<?> currentOp = legacyToNormalized.getRootOperation();
+        while (iterator.hasNext()) {
+            PathArgument currentArg = iterator.next();
+            try {
+                currentOp = currentOp.getChild(currentArg);
+            } catch (DataNormalizationException e) {
+                throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
+            }
+        }
+        return currentOp.createDefault(path.getLastPathArgument());
     }
 }

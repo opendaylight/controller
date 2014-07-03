@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import java.util.Collections;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -16,11 +17,13 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -49,38 +52,67 @@ public class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
 
     /**
      *
-     * Ensures list parent.
+     * Ensures list parent if item is list, otherwise noop.
      *
+     * <p>
      * One of properties of binding specification is that it is imposible
      * to represent list as a whole and thus it is impossible to write
-     * empty variation of MapNode without creating parent node.
+     * empty variation of MapNode without creating parent node, with
+     * empty list.
      *
-     * In order to allow that to be automaticly created, if we know
-     * item is list item, we will try to merge empty MapNode to
-     * ensure list exists.
+     * <p>
+     * This actually makes writes such as
+     * <pre>
+     * put("Nodes", new NodesBuilder().build());
+     * put("Nodes/Node[key]", new NodeBuilder().setKey("key").build());
+     * </pre>
+     * To result in three DOM operations:
+     * <pre>
+     * put("/nodes",domNodes);
+     * merge("/nodes/node",domNodeList);
+     * put("/nodes/node/node[key]",domNode);
+     * </pre>
      *
-     * @param store
-     * @param path
-     * @param normalized
+     *
+     * In order to allow that to be inserted if necessary, if we know
+     * item is list item, we will try to merge empty MapNode or OrderedNodeMap
+     * to ensure list exists.
+     *
+     * @param store Data Store type
+     * @param path Path to data (Binding Aware)
+     * @param normalized Normalized version of data to be written
      */
     private void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
             final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized) {
         if(Identifiable.class.isAssignableFrom(path.getTargetType())) {
-
-            normalized.getKey().getPathArguments();
-            // FIXME
-            ImmutableList list;
-            list.subList(0, list.size()-1);
-
-            getDelegate().merge(store, path, data);
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
+            NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
+            getDelegate().merge(store, parentMapPath, emptyParent);
         }
 
     }
 
+    // FIXME (should be probaly part of InstanceIdentifier)
+    protected static Optional<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> getParent(
+            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier child) {
+
+        Iterable<PathArgument> mapEntryItemPath = child.getPathArguments();
+        int parentPathSize = Iterables.size(mapEntryItemPath) - 1;
+        if(parentPathSize > 1) {
+            return Optional.of(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.create(Iterables.limit(mapEntryItemPath,  parentPathSize)));
+        } else if(parentPathSize == 0) {
+            return Optional.of(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.create(Collections.<PathArgument>emptyList()));
+        } else {
+            return Optional.absent();
+        }
+    }
+
     protected final void doMerge(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path, final DataObject data) {
+
         final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
                 .toNormalizedNode(path, data);
+        ensureListParentIfNeeded(store,path,normalized);
         getDelegate().merge(store, normalized.getKey(), normalized.getValue());
     }
 
