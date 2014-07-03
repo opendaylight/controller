@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.dom.broker;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +67,11 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     public synchronized static GlobalBundleScanningSchemaServiceImpl getInstance() {
         Preconditions.checkState(instance != null, "Global Instance was not instantiated");
         return instance;
+    }
+
+    @VisibleForTesting
+    public static synchronized void destroyInstance() {
+        instance = null;
     }
 
     public BundleContext getContext() {
