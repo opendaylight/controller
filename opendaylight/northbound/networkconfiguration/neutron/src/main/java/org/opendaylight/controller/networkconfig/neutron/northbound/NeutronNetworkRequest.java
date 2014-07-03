@@ -19,7 +19,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NeutronNetworkRequest {
+public class NeutronNetworkRequest implements INeutronRequest {
     // See OpenStack Network API v2.0 Reference for description of
     // annotated attributes
 
@@ -29,7 +29,16 @@ public class NeutronNetworkRequest {
     @XmlElement(name="networks")
     List<NeutronNetwork> bulkRequest;
 
+    @XmlElement(name="networks_links")
+    List<NeutronPageLink> links;
+
     NeutronNetworkRequest() {
+    }
+
+    NeutronNetworkRequest(List<NeutronNetwork> bulkRequest, List<NeutronPageLink> links) {
+        this.bulkRequest = bulkRequest;
+        this.links = links;
+        this.singletonNetwork = null;
     }
 
     NeutronNetworkRequest(List<NeutronNetwork> bulk) {
