@@ -44,6 +44,7 @@ public class TransactionChainProxy implements DOMStoreTransactionChain{
 
     @Override
     public void close() {
+        // FIXME : The problem here is don't know which shard the transaction chain is to be created on ???
         throw new UnsupportedOperationException("close - not sure what to do here?");
     }
 }

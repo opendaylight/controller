@@ -59,17 +59,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private static final AtomicLong counter = new AtomicLong();
 
-    private final TransactionType readOnly;
+    private final TransactionType transactionType;
     private final ActorContext actorContext;
     private final Map<String, ActorSelection> remoteTransactionPaths = new HashMap<>();
     private final String identifier;
 
     public TransactionProxy(
         ActorContext actorContext,
-        TransactionType readOnly) {
+        TransactionType transactionType) {
 
         this.identifier = "transaction-" + counter.getAndIncrement();
-        this.readOnly = readOnly;
+        this.transactionType = transactionType;
         this.actorContext = actorContext;
 
         Object response = actorContext.executeShardOperation(Shard.DEFAULT_NAME, new CreateTransaction(), ActorContext.ASK_DURATION);
