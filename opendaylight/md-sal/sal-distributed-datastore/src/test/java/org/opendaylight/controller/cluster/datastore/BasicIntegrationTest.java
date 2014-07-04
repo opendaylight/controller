@@ -77,7 +77,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(transactionChain);
 
-                    transactionChain.tell(new CreateTransaction(), getRef());
+                    transactionChain.tell(new CreateTransaction("txn-1"), getRef());
 
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>("CreateTransactionReply") {
@@ -152,6 +152,10 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertTrue(preCommitDone);
 
+                    // FIXME : When we commit on the cohort it "kills" the Transaction.
+                    // This in turn kills the child of Transaction as well.
+                    // The order in which we receive the terminated event for both
+                    // these actors is not fixed which may cause this test to fail
                     cohort.tell(new CommitTransaction(), getRef());
 
                     final Boolean terminatedCohort =
