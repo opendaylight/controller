@@ -43,16 +43,16 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * The ShardTransaction Actor represents a remote transaction
- *<p>
+ * <p>
  * The ShardTransaction Actor delegates all actions to DOMDataReadWriteTransaction
- *</p>
- *<p>
+ * </p>
+ * <p>
  * Even though the DOMStore and the DOMStoreTransactionChain implement multiple types of transactions
  * the ShardTransaction Actor only works with read-write transactions. This is just to keep the logic simple. At this
  * time there are no known advantages for creating a read-only or write-only transaction which may change over time
  * at which point we can optimize things in the distributed store as well.
- *</p>
- *<p>
+ * </p>
+ * <p>
  * Handles Messages <br/>
  * ---------------- <br/>
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.ReadData}
@@ -65,123 +65,139 @@ import java.util.concurrent.ExecutionException;
  */
 public class ShardTransaction extends UntypedActor {
 
-  private final ActorRef shardActor;
+    private final ActorRef shardActor;
 
-  private final DOMStoreReadWriteTransaction transaction;
+    private final DOMStoreReadWriteTransaction transaction;
 
-  private final MutableCompositeModification modification = new MutableCompositeModification();
+    private final MutableCompositeModification modification =
+        new MutableCompositeModification();
 
-  private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    private final LoggingAdapter log =
+        Logging.getLogger(getContext().system(), this);
 
-  public ShardTransaction(DOMStoreReadWriteTransaction transaction, ActorRef shardActor) {
-    this.transaction = transaction;
-    this.shardActor = shardActor;
-  }
-
-
-  public static Props props(final DOMStoreReadWriteTransaction transaction, final ActorRef shardActor){
-    return Props.create(new Creator<ShardTransaction>(){
-
-      @Override
-      public ShardTransaction create() throws Exception {
-        return new ShardTransaction(transaction, shardActor);
-      }
-    });
-  }
-
-  @Override
-  public void onReceive(Object message) throws Exception {
-    if(message instanceof ReadData){
-      readData((ReadData) message);
-    } else if(message instanceof WriteData){
-      writeData((WriteData) message);
-    } else if(message instanceof MergeData){
-      mergeData((MergeData) message);
-    } else if(message instanceof DeleteData){
-      deleteData((DeleteData) message);
-    } else if(message instanceof ReadyTransaction){
-      readyTransaction((ReadyTransaction) message);
-    } else if(message instanceof CloseTransaction){
-      closeTransaction((CloseTransaction) message);
-    } else if(message instanceof GetCompositedModification){
-      // This is here for testing only
-      getSender().tell(new GetCompositeModificationReply(new ImmutableCompositeModification(modification)), getSelf());
+    public ShardTransaction(DOMStoreReadWriteTransaction transaction,
+        ActorRef shardActor) {
+        this.transaction = transaction;
+        this.shardActor = shardActor;
     }
-  }
 
-  private void readData(ReadData message) {
-    final ActorRef sender = getSender();
-    final ActorRef self = getSelf();
-    final InstanceIdentifier path = message.getPath();
-    final ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(path);
 
-    future.addListener(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          Optional<NormalizedNode<?, ?>> optional = future.get();
-          if(optional.isPresent()){
-            sender.tell(new ReadDataReply(optional.get()), self);
-          } else {
-            //TODO : Need to decide what to do here
-          }
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e, "An exception happened when reading data from path : " + path.toString());
+    public static Props props(final DOMStoreReadWriteTransaction transaction,
+        final ActorRef shardActor) {
+        return Props.create(new Creator<ShardTransaction>() {
+
+            @Override
+            public ShardTransaction create() throws Exception {
+                return new ShardTransaction(transaction, shardActor);
+            }
+        });
+    }
+
+    @Override
+    public void onReceive(Object message) throws Exception {
+        log.debug("Received message {}", message);
+
+        if (message instanceof ReadData) {
+            readData((ReadData) message);
+        } else if (message instanceof WriteData) {
+            writeData((WriteData) message);
+        } else if (message instanceof MergeData) {
+            mergeData((MergeData) message);
+        } else if (message instanceof DeleteData) {
+            deleteData((DeleteData) message);
+        } else if (message instanceof ReadyTransaction) {
+            readyTransaction((ReadyTransaction) message);
+        } else if (message instanceof CloseTransaction) {
+            closeTransaction((CloseTransaction) message);
+        } else if (message instanceof GetCompositedModification) {
+            // This is here for testing only
+            getSender().tell(new GetCompositeModificationReply(
+                new ImmutableCompositeModification(modification)), getSelf());
+        }
+    }
+
+    private void readData(ReadData message) {
+        final ActorRef sender = getSender();
+        final ActorRef self = getSelf();
+        final InstanceIdentifier path = message.getPath();
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> future =
+            transaction.read(path);
+
+        future.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Optional<NormalizedNode<?, ?>> optional = future.get();
+                    if (optional.isPresent()) {
+                        sender.tell(new ReadDataReply(optional.get()), self);
+                    } else {
+                        //TODO : Need to decide what to do here
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e,
+                        "An exception happened when reading data from path : "
+                            + path.toString());
+                }
+
+            }
+        }, getContext().dispatcher());
+    }
+
+
+    private void writeData(WriteData message) {
+        modification.addModification(
+            new WriteModification(message.getPath(), message.getData()));
+        transaction.write(message.getPath(), message.getData());
+        getSender().tell(new WriteDataReply(), getSelf());
+    }
+
+    private void mergeData(MergeData message) {
+        modification.addModification(
+            new MergeModification(message.getPath(), message.getData()));
+        transaction.merge(message.getPath(), message.getData());
+        getSender().tell(new MergeDataReply(), getSelf());
+    }
+
+    private void deleteData(DeleteData message) {
+        modification.addModification(new DeleteModification(message.getPath()));
+        transaction.delete(message.getPath());
+        getSender().tell(new DeleteDataReply(), getSelf());
+    }
+
+    private void readyTransaction(ReadyTransaction message) {
+        DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
+        ActorRef cohortActor = getContext().actorOf(
+            ThreePhaseCommitCohort.props(cohort, shardActor, modification));
+        getSender()
+            .tell(new ReadyTransactionReply(cohortActor.path()), getSelf());
+
+    }
+
+    private void closeTransaction(CloseTransaction message) {
+        transaction.close();
+        getSender().tell(new CloseTransactionReply(), getSelf());
+    }
+
+
+    // These classes are in here for test purposes only
+
+
+    static class GetCompositedModification {
+
+    }
+
+
+    static class GetCompositeModificationReply {
+        private final CompositeModification modification;
+
+
+        GetCompositeModificationReply(CompositeModification modification) {
+            this.modification = modification;
         }
 
-      }
-    }, getContext().dispatcher());
-  }
 
-
-  private void writeData(WriteData message){
-    modification.addModification(new WriteModification(message.getPath(), message.getData()));
-    transaction.write(message.getPath(), message.getData());
-    getSender().tell(new WriteDataReply(), getSelf());
-  }
-
-  private void mergeData(MergeData message){
-    modification.addModification(new MergeModification(message.getPath(), message.getData()));
-    transaction.merge(message.getPath(), message.getData());
-    getSender().tell(new MergeDataReply(), getSelf());
-  }
-
-  private void deleteData(DeleteData message){
-    modification.addModification(new DeleteModification(message.getPath()));
-    transaction.delete(message.getPath());
-    getSender().tell(new DeleteDataReply(), getSelf());
-  }
-
-  private void readyTransaction(ReadyTransaction message){
-    DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
-    ActorRef cohortActor = getContext().actorOf(ThreePhaseCommitCohort.props(cohort, shardActor, modification));
-    getSender().tell(new ReadyTransactionReply(cohortActor.path()), getSelf());
-
-  }
-
-  private void closeTransaction(CloseTransaction message){
-    transaction.close();
-    getSender().tell(new CloseTransactionReply(), getSelf());
-  }
-
-
-  // These classes are in here for test purposes only
-
-  static class GetCompositedModification {
-
-  }
-
-  static class GetCompositeModificationReply {
-    private final CompositeModification modification;
-
-
-    GetCompositeModificationReply(CompositeModification modification) {
-      this.modification = modification;
+        public CompositeModification getModification() {
+            return modification;
+        }
     }
-
-
-    public CompositeModification getModification() {
-      return modification;
-    }
-  }
 }
