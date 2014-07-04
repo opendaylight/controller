@@ -43,7 +43,6 @@
     <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
     <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
     <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
-    <commons.codec.version>1.7</commons.codec.version>
     <commons.coyote>7.0.32.v201211201952</commons.coyote>
     <commons.el>7.0.32.v201211081135</commons.el>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
