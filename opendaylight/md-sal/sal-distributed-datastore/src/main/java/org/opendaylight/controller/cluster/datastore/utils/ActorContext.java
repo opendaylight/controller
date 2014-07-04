@@ -12,6 +12,7 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import akka.actor.PoisonPill;
 import akka.util.Timeout;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -144,4 +145,8 @@ public class ActorContext {
         return executeRemoteOperation(primary, message, duration);
     }
 
+    public void shutdown() {
+        shardManager.tell(PoisonPill.getInstance(), null);
+        actorSystem.shutdown();
+    }
 }

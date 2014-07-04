@@ -14,21 +14,22 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public abstract class AbstractActorTest {
-  private static ActorSystem system;
+    private static ActorSystem system;
 
-  @BeforeClass
-  public static void setUpClass(){
-    system = ActorSystem.create("test");
-  }
+    @BeforeClass
+    public static void setUpClass() {
+        System.setProperty("shard.persistent", "false");
+        system = ActorSystem.create("test");
+    }
 
-  @AfterClass
-  public static void tearDownClass(){
-    JavaTestKit.shutdownActorSystem(system);
-    system = null;
-  }
+    @AfterClass
+    public static void tearDownClass() {
+        JavaTestKit.shutdownActorSystem(system);
+        system = null;
+    }
 
-  protected ActorSystem getSystem(){
-    return system;
-  }
+    protected ActorSystem getSystem() {
+        return system;
+    }
 
 }
