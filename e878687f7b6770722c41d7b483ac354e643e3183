@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_15f1b06a",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8dddc2e2",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_adda06e6",
         "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-30T06:21:25Z",
       "side": 1,
       "message": "List must have its key element, so please define key for this \u0027queues\u0027 list.",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_35f63464",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_adda06e6",
       "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d5e6e8af",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-queue-types.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4de33aa4",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_edd48ebe",
         "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-30T06:21:25Z",
       "side": 1,
       "message": "All rpc should contain node context reference, so that rpc call can be routed to the concerned end device. Add \n\nuses inv:node-context-ref;\n\nin input {} parameters. You can refer rpc models in other yang files (e.g model-flow-service or model-flow-statistics)",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f5ebec75",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_edd48ebe",
       "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9504e04a",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_2df6f663",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0df1b26a",
         "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-30T06:21:25Z",
       "side": 1,
       "message": "User can send two type of queue-config request to the switch. 1) Request to fetch configuration of all the queue\u0027s attached to specific port of the node (as defined above). 2) Request to fetch configuration of all the queue\u0027s attached to all the ports of the node by specifying OFPP_ANY as a port. So i would suggest to define rpc for case 2) as well and rename these rpc\u0027s appropriately.\n\n\"notification\" is required to receive the queue-config reply from openflowplugin, so please define the notification model. You can refer notification yang models from model-flow-service or model-flow-statistics.",
+      "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b501e439",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/sal-queue.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-04T00:10:22Z",
+      "side": 1,
+      "message": "I have added the notification. \n\nFor the any port , since we are using node-connector-id cant we fetch the configuration by using openflow:\u003cdpid\u003e:ANY For.e.g openflow:1:ANY. \nANY is the logical name mentioned in OutputPortValues. \nI feel this way it would be protocol agnostic and will have consistency in using the node-connectors across the system",
+      "parentUuid": "fa82b9bf_0df1b26a",
       "revId": "e878687f7b6770722c41d7b483ac354e643e3183",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
