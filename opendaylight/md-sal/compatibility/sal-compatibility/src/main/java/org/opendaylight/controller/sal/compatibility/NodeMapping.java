@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
 import org.opendaylight.controller.sal.common.util.Arguments;
 import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -61,6 +62,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -94,13 +96,14 @@ public final class NodeMapping {
 
     /**
      * @param adNodeId
-     * @return
+     * @return nodeId as long
      */
-    private static Long openflowFullNodeIdToLong(String adNodeId) {
+    @VisibleForTesting
+    public static Long openflowFullNodeIdToLong(String adNodeId) {
         if (adNodeId == null) {
             return null;
         }
-        return Long.valueOf(adNodeId.replaceFirst("^.*:", ""));
+        return new BigInteger(adNodeId.replaceFirst("^.*:", "")).longValue();
     }
 
     public static NodeId toNodeId(final InstanceIdentifier<?> id) {
