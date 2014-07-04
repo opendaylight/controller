@@ -22,6 +22,7 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
+import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -82,8 +83,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     public void initializeRemoteConnection(final NetconfClientDispatcher dispatch,
-                                           final NetconfReconnectingClientConfiguration config) {
-        dispatch.createReconnectingClient(config);
+                                           final NetconfClientConfiguration config) {
+        if(config instanceof NetconfReconnectingClientConfiguration) {
+            dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+        }
+
+        dispatch.createClient(config);
     }
 
     private void tearDown( String reason ) {
