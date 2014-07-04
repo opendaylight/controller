@@ -175,6 +175,18 @@ public class NodeMappingTest {
     }
 
     /**
+     * Test method for
+     * {@link org.opendaylight.controller.sal.compatibility.NodeMapping#openflowFullNodeIdToLong(String)}
+     * .
+     * @throws ConstructionException
+     */
+    @Test
+    public void testOpenflowFullNodeIdToLong() throws ConstructionException {
+        Assert.assertEquals(42L, NodeMapping.openflowFullNodeIdToLong("42").longValue());
+        Assert.assertEquals(0xCC4E241C4A000000L, NodeMapping.openflowFullNodeIdToLong("14721743935839928320").longValue());
+    }
+
+    /**
      * @param nodeId
      * @param portId
      * @return nodeConnectorId
