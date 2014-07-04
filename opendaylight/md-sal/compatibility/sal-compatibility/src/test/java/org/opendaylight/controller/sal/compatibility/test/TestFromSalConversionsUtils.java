@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -41,6 +41,11 @@ import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.compatibility.MDFlowMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -79,11 +84,11 @@ import com.google.common.net.InetAddresses;
 
 public class TestFromSalConversionsUtils {
     private enum MtchType {
-        other, ipv4, ipv6, arp, sctp, tcp, udp
+        other, untagged, ipv4, ipv6, arp, sctp, tcp, udp
     }
 
     @Test
-    public void testFromSalConversion() {
+    public void testFromSalConversion() throws ConstructionException {
 
         Flow salFlow = prepareSalFlowCommon();
         NodeFlow odNodeFlow = MDFlowMapping.flowAdded(salFlow);
@@ -92,6 +97,9 @@ public class TestFromSalConversionsUtils {
 
         odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.other));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.other);
+
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.untagged));
+        checkOdMatch(odNodeFlow.getMatch(), MtchType.untagged);
 
         odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.arp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.arp);
@@ -160,13 +168,24 @@ public class TestFromSalConversionsUtils {
             assertNotNull("Ipv6 wasn't found", ipv6Found);
             break;
         case other:
+            assertEquals("Incoming port is wrong.", "openflow:12345:10", match.getInPort().getValue());
             assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
                     .getEthernetSource().getAddress().getValue());
             assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
                     .getEthernetDestination().getAddress().getValue());
+            assertEquals("Vlan ID is not present.", Boolean.TRUE, match.getVlanMatch().getVlanId().isVlanIdPresent());
             assertEquals("Vlan ID is wrong.", (Integer) 0xfff, match.getVlanMatch().getVlanId().getVlanId().getValue());
             assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) match.getVlanMatch().getVlanPcp()
                     .getValue());
+            assertEquals("DCSP is wrong.", (short) 0x3f, (short) match.getIpMatch().getIpDscp().getValue());
+            break;
+        case untagged:
+            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+                    .getEthernetSource().getAddress().getValue());
+            assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+                    .getEthernetDestination().getAddress().getValue());
+            assertEquals("Vlan ID is present.", Boolean.FALSE, match.getVlanMatch().getVlanId().isVlanIdPresent());
+            assertEquals("Vlan ID is wrong.", Integer.valueOf(0), match.getVlanMatch().getVlanId().getVlanId().getValue());
             assertEquals("DCSP is wrong.", (short) 0x3f, (short) match.getIpMatch().getIpDscp().getValue());
             break;
         case sctp:
@@ -334,7 +353,7 @@ public class TestFromSalConversionsUtils {
         return salFlow;
     }
 
-    private Flow prepareSalMatch(Flow salFlow, MtchType mt) {
+    private Flow prepareSalMatch(Flow salFlow, MtchType mt) throws ConstructionException {
         Match salMatch = new Match();
         switch (mt) {
         case arp:
@@ -355,10 +374,19 @@ public class TestFromSalConversionsUtils {
             salMatch.setField(MatchType.NW_DST, InetAddresses.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7336"));
             break;
         case other:
+            Node node = new Node(NodeIDType.OPENFLOW, 12345L);
+            NodeConnector port = new NodeConnector(NodeConnectorIDType.OPENFLOW, Short.valueOf((short)10), node);
+            salMatch.setField(MatchType.IN_PORT, port);
             salMatch.setField(MatchType.DL_SRC, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
             salMatch.setField(MatchType.DL_DST, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
             salMatch.setField(MatchType.DL_VLAN, (short) 0xfff);
             salMatch.setField(MatchType.DL_VLAN_PR, (byte) 0x7);
+            salMatch.setField(MatchType.NW_TOS, (byte) 0x3f);
+            break;
+        case untagged:
+            salMatch.setField(MatchType.DL_SRC, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
+            salMatch.setField(MatchType.DL_DST, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
+            salMatch.setField(MatchType.DL_VLAN, MatchType.DL_VLAN_NONE);
             salMatch.setField(MatchType.NW_TOS, (byte) 0x3f);
             break;
         case sctp:

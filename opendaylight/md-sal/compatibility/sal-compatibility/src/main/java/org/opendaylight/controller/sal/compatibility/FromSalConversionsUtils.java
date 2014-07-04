@@ -103,7 +103,8 @@ public class FromSalConversionsUtils {
     private static NodeConnectorId inPortMatch(Match sourceMatch) {
         MatchField inPort = sourceMatch.getField(MatchType.IN_PORT);
         if(inPort != null && inPort.getValue() != null && (inPort.getValue() instanceof NodeConnector)) {
-            return new NodeConnectorId(((NodeConnector) inPort.getValue()).getNodeConnectorIdAsString());
+            NodeConnector port = (NodeConnector)inPort.getValue();
+            return (NodeConnectorId)MDFlowMapping.toUri(port);
         }
         return null;
     }
@@ -203,9 +204,11 @@ public class FromSalConversionsUtils {
         MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
         if (vlan != null && vlan.getValue() != null) {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
+            short vid = (short)vlan.getValue();
+            boolean present = (vid != MatchType.DL_VLAN_NONE);
             vlanIDBuilder.setVlanId(new VlanId((NetUtils
-                    .getUnsignedShort((short) vlan.getValue()))));
-            vlanIDBuilder.setVlanIdPresent(true);
+                    .getUnsignedShort(vid))));
+            vlanIDBuilder.setVlanIdPresent(present);
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
 
