@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +25,7 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -86,6 +86,8 @@ public class ModelGenerator {
     private static final String NUMBER = "number";
     private static final String BOOLEAN = "boolean";
     private static final String STRING = "string";
+  private static final String ID_KEY = "id";
+  private static final String SUB_TYPES_KEY = "subTypes";
 
     private static final Map<Class<? extends TypeDefinition<?>>, String> YANG_TYPE_TO_JSON_TYPE_MAPPING;
 
@@ -116,6 +118,7 @@ public class ModelGenerator {
         JSONObject models = new JSONObject();
         processContainers(module, models);
         processRPCs(module, models);
+    processIdentities(module, models);
         return models;
     }
 
@@ -188,6 +191,58 @@ public class ModelGenerator {
         }
     }
 
+  /**
+   * Processes the 'identity' statement in a yang model
+   * and maps it to a 'model' in the Swagger JSON spec.
+   *
+   * @param module The module from which the identity stmt will be processed
+   * @param models The JSONObject in which the parsed identity will be put as a 'model' obj
+   * @throws JSONException
+   */
+  private void processIdentities(Module module, JSONObject models) throws JSONException {
+
+    String moduleName = module.getName();
+    Set<IdentitySchemaNode> idNodes =  module.getIdentities();
+    _logger.debug("Processing Identities for module {} . Found {} identity statements", moduleName, idNodes.size());
+
+    for(IdentitySchemaNode idNode : idNodes){
+      JSONObject identityObj=new JSONObject();
+      String identityName = idNode.getQName().getLocalName();
+      _logger.debug("Processing Identity: {}", identityName);
+
+      identityObj.put(ID_KEY, identityName);
+      identityObj.put(DESCRIPTION_KEY, idNode.getDescription());
+
+      JSONObject props = new JSONObject();
+      IdentitySchemaNode baseId = idNode.getBaseIdentity();
+
+
+      if(baseId==null) {
+        /**
+         * This is a base identity. So lets see if
+         * it has sub types. If it does, then add them to the model definition.
+         */
+        Set<IdentitySchemaNode> derivedIds = idNode.getDerivedIdentities();
+
+        if(derivedIds != null) {
+          JSONArray subTypes = new JSONArray();
+          for(IdentitySchemaNode derivedId : derivedIds){
+            subTypes.put(derivedId.getQName().getLocalName());
+          }
+          identityObj.put(SUB_TYPES_KEY, subTypes);
+        }
+      } else {
+        /**
+         * This is a derived entity. Add it's base type & move on.
+         */
+        props.put(TYPE_KEY, baseId.getQName().getLocalName());
+      }
+
+      //Add the properties. For a base type, this will be an empty object as required by the Swagger spec.
+      identityObj.put(PROPERTIES_KEY, props);
+      models.put(identityName, identityObj);
+    }
+  }
     /**
      * Processes the container node and populates the moduleJSON
      *
@@ -446,7 +501,7 @@ public class ModelGenerator {
             processUnionType((UnionTypeDefinition) leafTypeDef, property);
 
         } else if (leafTypeDef instanceof IdentityrefTypeDefinition) {
-            property.putOpt(TYPE_KEY, "object");
+      property.putOpt(TYPE_KEY, ((IdentityrefTypeDefinition) leafTypeDef).getIdentity().getQName().getLocalName());
         } else if (leafTypeDef instanceof BinaryTypeDefinition) {
             processBinaryType((BinaryTypeDefinition) leafTypeDef, property);
         } else {
