@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -57,6 +58,7 @@ import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
@@ -321,7 +323,10 @@ public class BindingIndependentConnector implements //
     public void startRpcForwarding() {
         if (biRpcRegistry != null && baRpcRegistry instanceof RouteChangePublisher<?, ?>) {
             checkState(!rpcForwarding, "Connector is already forwarding RPCs");
-            domToBindingRpcManager = baRpcRegistry.registerRouteChangeListener(new DomToBindingRpcForwardingManager());
+            final DomToBindingRpcForwardingManager biFwdManager = new DomToBindingRpcForwardingManager();
+
+            domToBindingRpcManager = baRpcRegistry.registerRouteChangeListener(biFwdManager);
+            biRpcRegistry.addRpcRegistrationListener(biFwdManager);
             if (baRpcRegistry instanceof RpcProviderRegistryImpl) {
                 baRpcRegistryImpl = (RpcProviderRegistryImpl) baRpcRegistry;
                 baRpcRegistryImpl.registerRouterInstantiationListener(domToBindingRpcManager.getInstance());
@@ -528,7 +533,7 @@ public class BindingIndependentConnector implements //
      */
     private class DomToBindingRpcForwardingManager implements
             RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>, RouterInstantiationListener,
-            GlobalRpcRegistrationListener {
+            GlobalRpcRegistrationListener, RpcRegistrationListener {
 
         private final Map<Class<? extends RpcService>, DomToBindingRpcForwarder> forwarders = new WeakHashMap<>();
         private RpcProviderRegistryImpl registryImpl;
@@ -543,7 +548,7 @@ public class BindingIndependentConnector implements //
 
         @Override
         public void onGlobalRpcRegistered(final Class<? extends RpcService> cls) {
-            getRpcForwarder(cls, null);
+            getRpcForwarder(cls, null).registerToDOMBroker();
         }
 
         @Override
@@ -588,31 +593,39 @@ public class BindingIndependentConnector implements //
             return potential;
         }
 
+        @Override
+        public void onRpcImplementationAdded(QName name) {
+
+            final Optional<Class<? extends RpcService>> rpcInterface = mappingService.getRpcServiceClassFor(
+                    name.getNamespace().toString(), name.getFormattedRevision());
+            if (rpcInterface.isPresent()) {
+                getRpcForwarder(rpcInterface.get(), null).registerToBidningBroker();
+            }
+        }
+
+        @Override
+        public void onRpcImplementationRemoved(QName name) {
+
+        }
     }
 
     private class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
 
         private final Set<QName> supportedRpcs;
         private final WeakReference<Class<? extends RpcService>> rpcServiceType;
-        private final Set<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> registrations;
+        private Set<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> registrations;
         private final Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
         private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
+        private final RpcService proxy;
 
         public DomToBindingRpcForwarder(final Class<? extends RpcService> service) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
             this.supportedRpcs = mappingService.getRpcQNamesFor(service);
-            try {
-                for (QName rpc : supportedRpcs) {
-                    RpcInvocationStrategy strategy = createInvocationStrategy(rpc, service);
-                    strategiesByMethod.put(strategy.targetMethod, strategy);
-                    strategiesByQName.put(rpc, strategy);
-                    biRpcRegistry.addRpcImplementation(rpc, this);
-                }
 
-            } catch (Exception e) {
-                LOG.error("Could not forward Rpcs of type {}", service.getName(), e);
-            }
-            registrations = ImmutableSet.of();
+            Class<?> cls = rpcServiceType.get();
+            ClassLoader clsLoader = cls.getClassLoader();
+            proxy =(RpcService) Proxy.newProxyInstance(clsLoader, new Class<?>[] { cls }, this);
+            createStrategies();
         }
 
         /**
@@ -622,16 +635,12 @@ public class BindingIndependentConnector implements //
          * @param context
          */
         public DomToBindingRpcForwarder(final Class<? extends RpcService> service,
-                final Class<? extends BaseIdentity> context) {
-            this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
-            this.supportedRpcs = mappingService.getRpcQNamesFor(service);
+                                        final Class<? extends BaseIdentity> context) {
+            this(service);
             Builder<RoutedRpcRegistration> registrationsBuilder = ImmutableSet
                     .<org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration> builder();
             try {
                 for (QName rpc : supportedRpcs) {
-                    RpcInvocationStrategy strategy = createInvocationStrategy(rpc, service);
-                    strategiesByMethod.put(strategy.targetMethod, strategy);
-                    strategiesByQName.put(rpc, strategy);
                     registrationsBuilder.add(biRpcRegistry.addRoutedRpcImplementation(rpc, this));
                 }
                 createDefaultDomForwarder();
@@ -640,6 +649,32 @@ public class BindingIndependentConnector implements //
             }
             registrations = registrationsBuilder.build();
         }
+
+
+
+        private void createStrategies() {
+            try {
+                for (QName rpc : supportedRpcs) {
+                    RpcInvocationStrategy strategy = createInvocationStrategy(rpc, rpcServiceType.get());
+                    strategiesByMethod.put(strategy.targetMethod, strategy);
+                    strategiesByQName.put(rpc, strategy);
+                }
+            } catch (Exception e) {
+                LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
+            }
+
+        }
+
+        public void registerToDOMBroker() {
+            try {
+                for (QName rpc : supportedRpcs) {
+                    biRpcRegistry.addRpcImplementation(rpc, this);
+                }
+            } catch (Exception e) {
+                LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
+            }
+        }
+
 
         public void registerPaths(final Class<? extends BaseIdentity> context,
                 final Class<? extends RpcService> service, final Set<InstanceIdentifier<?>> set) {
@@ -736,6 +771,10 @@ public class BindingIndependentConnector implements //
                 }
 
             });
+        }
+
+        public void registerToBidningBroker() {
+               baRpcRegistry.addRpcImplementation((Class)rpcServiceType.get(), proxy);
         }
     }
 
