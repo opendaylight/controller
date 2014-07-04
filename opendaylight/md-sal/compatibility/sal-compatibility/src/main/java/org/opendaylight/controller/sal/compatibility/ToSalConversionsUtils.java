@@ -430,13 +430,17 @@ public class ToSalConversionsUtils {
         if (vlanMatch != null) {
             VlanId vlanId = vlanMatch.getVlanId();
             if (vlanId != null) {
-                org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanIdInner = vlanId
-                        .getVlanId();
-                if (vlanIdInner != null) {
-                    Integer vlanValue = vlanIdInner.getValue();
-                    if (vlanValue != null) {
-                        target.setField(DL_VLAN, vlanValue.shortValue());
+                if (Boolean.TRUE.equals(vlanId.isVlanIdPresent())) {
+                    org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanIdInner = vlanId
+                            .getVlanId();
+                    if (vlanIdInner != null) {
+                        Integer vlanValue = vlanIdInner.getValue();
+                        if (vlanValue != null) {
+                            target.setField(DL_VLAN, vlanValue.shortValue());
+                        }
                     }
+                } else {
+                    target.setField(DL_VLAN, MatchType.DL_VLAN_NONE);
                 }
             }
             VlanPcp vlanPcp = vlanMatch.getVlanPcp();
