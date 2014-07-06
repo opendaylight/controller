@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.util;
 
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.Attribute;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -17,6 +18,7 @@ import javax.management.JMX;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -266,6 +268,20 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
             configMBeanServer.setAttribute(on, attribute);
         } catch (JMException e) {
             throw new IllegalStateException("Unable to set attribute "
+                    + attrName + " for " + on, e);
+        }
+    }
+
+    @Override
+    public Attribute getAttribute(ObjectName on, String attrName) {
+        if (ObjectNameUtil.getTransactionName(on) == null)
+            throw new IllegalArgumentException("Not in transaction instance "
+                    + on + ", no transaction name present");
+
+        try {
+            return new Attribute(attrName, configMBeanServer.getAttribute(on,attrName));
+        } catch (JMException e) {
+            throw new IllegalStateException("Unable to get attribute "
                     + attrName + " for " + on, e);
         }
     }
