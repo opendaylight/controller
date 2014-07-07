@@ -13,7 +13,17 @@ import org.opendaylight.yangtools.concepts.Path;
  * Read-only transaction, which provides stable view of data
  * and is {@link AutoCloseable} resource.
  *
+ *
+ * <p>
+ * <b>Note:</b>
+ * Concretization of this interface MUST provides read method, which will
+ * take DATASTORE and PATH arguments and  which will convey
+ * format specific read operations (eg. relationship between <code>path</code>
+ * and returned <code>dataObject</code>). Read methods must be asynchronous
+ * and return ListenableFuture.
+ *
  * @see AsyncReadTransaction
+ *
  *
 * @param <P>
  *            Type of path (subtree identifier), which represents location in

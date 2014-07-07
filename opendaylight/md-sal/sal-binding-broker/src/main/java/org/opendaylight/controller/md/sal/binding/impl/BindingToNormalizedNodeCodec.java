@@ -437,11 +437,12 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return count;
     }
 
-    public Function<Optional<NormalizedNode<?, ?>>, Optional<DataObject>>  deserializeFunction(final InstanceIdentifier<?> path) {
+    @SuppressWarnings("rawtypes")
+    public <T extends DataObject> Function<Optional<NormalizedNode<?, ?>>, Optional<T>>  deserializeFunction(final InstanceIdentifier<T> path) {
         return new DeserializeFunction(this, path);
     }
 
-    private static class DeserializeFunction implements Function<Optional<NormalizedNode<?, ?>>, Optional<DataObject>> {
+    private static class DeserializeFunction<T extends DataObject> implements Function<Optional<NormalizedNode<?, ?>>, Optional<T>> {
 
         private final BindingToNormalizedNodeCodec codec;
         private final InstanceIdentifier<?> path;
@@ -452,9 +453,10 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
             this.path = Preconditions.checkNotNull(path, "Path must not be null");
         }
 
+        @SuppressWarnings("rawtypes")
         @Nullable
         @Override
-        public Optional<DataObject> apply(@Nullable final Optional<NormalizedNode<?, ?>> normalizedNode) {
+        public Optional apply(@Nullable final Optional<NormalizedNode<?, ?>> normalizedNode) {
             if (normalizedNode.isPresent()) {
                 final DataObject dataObject;
                 try {
