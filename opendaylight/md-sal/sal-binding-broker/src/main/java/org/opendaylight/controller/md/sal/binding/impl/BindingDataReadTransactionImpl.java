@@ -30,6 +30,13 @@ class BindingDataReadTransactionImpl extends AbstractForwardedTransaction<DOMDat
         return doRead(getDelegate(),store, path);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public <T extends DataObject> ListenableFuture<Optional<T>> readChecked(
+            final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
+        return (ListenableFuture) read(store, path);
+    }
+
     @Override
     public void close() {
         getDelegate().close();

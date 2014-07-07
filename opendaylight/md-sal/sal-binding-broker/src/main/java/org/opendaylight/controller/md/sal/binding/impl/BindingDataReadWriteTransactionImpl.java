@@ -29,4 +29,11 @@ class BindingDataReadWriteTransactionImpl extends
             final InstanceIdentifier<?> path) {
         return doRead(getDelegate(), store, path);
     }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public <T extends DataObject> ListenableFuture<Optional<T>> readChecked(
+            final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
+        return (ListenableFuture) read(store, path);
+    }
 }
