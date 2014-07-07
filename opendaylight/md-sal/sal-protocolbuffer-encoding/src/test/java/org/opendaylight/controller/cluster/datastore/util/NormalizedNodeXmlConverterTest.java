@@ -14,7 +14,7 @@ import com.google.common.collect.Sets;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.common.SimpleNormalizedNodeMessage;
+import org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;

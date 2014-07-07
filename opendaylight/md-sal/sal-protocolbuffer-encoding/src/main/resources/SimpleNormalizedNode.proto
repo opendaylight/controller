@@ -1,6 +1,6 @@
 package org.opendaylight.controller.mdsal;
 
-option java_package = "org.opendaylight.controller.cluster.datastore.common";
+option java_package = "org.opendaylight.controller.protobuff.messages.common";
 option java_outer_classname = "SimpleNormalizedNodeMessage";
 
 message NormalizedNodeXml {
