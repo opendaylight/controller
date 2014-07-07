@@ -25,8 +25,8 @@ class BindingDataReadTransactionImpl extends AbstractForwardedTransaction<DOMDat
     }
 
     @Override
-    public ListenableFuture<Optional<DataObject>> read(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path) {
+    public <T extends DataObject> ListenableFuture<Optional<T>> read(final LogicalDatastoreType store,
+            final InstanceIdentifier<T> path) {
         return doRead(getDelegate(),store, path);
     }
 
