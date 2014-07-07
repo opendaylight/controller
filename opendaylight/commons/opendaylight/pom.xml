@@ -186,7 +186,7 @@
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
-    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
+    <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
     <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
     <spring-security-karaf.version>3.1.4.RELEASE</spring-security-karaf.version>
@@ -1039,12 +1039,12 @@
         <artifactId>netconf-client</artifactId>
         <version>${netconf.version}</version>
       </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netconf-client</artifactId>
-            <version>${netconf.version}</version>
-            <type>test-jar</type>
-        </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-client</artifactId>
+        <version>${netconf.version}</version>
+        <type>test-jar</type>
+      </dependency>
 
       <!--Netconf config-->
       <dependency>

@@ -1,4 +1,4 @@
-package org.opendaylight.controller.cluster.datastore.messages;
+package org.opendaylight.controller.protobuff.messages;
 
 /**
  * This test case is present to ensure that if others have
@@ -15,7 +15,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.shard.ShardManagerMessages;
+import org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages;
 
 import java.io.File;
 import java.io.FileInputStream;

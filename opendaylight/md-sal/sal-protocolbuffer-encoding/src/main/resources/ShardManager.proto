@@ -1,6 +1,6 @@
 package org.opendaylight.controller.mdsal;
 
-option java_package = "org.opendaylight.controller.cluster.datastore.shard";
+option java_package = "org.opendaylight.controller.protobuff.messages.shard";
 option java_outer_classname = "ShardManagerMessages";
 
 message FindPrimary {
