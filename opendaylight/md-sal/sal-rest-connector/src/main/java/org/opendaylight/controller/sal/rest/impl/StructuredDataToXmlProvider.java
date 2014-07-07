@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -26,7 +25,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -70,7 +68,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
 
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
-        return type.equals( StructuredData.class );
+        return type.equals(StructuredData.class);
     }
 
     @Override
@@ -90,6 +88,11 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
         final Transformer trans;
         try {
             trans = TRANSFORMER.get();
+            if (t.isPrettyPrintMode()) {
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            } else {
+                trans.setOutputProperty(OutputKeys.INDENT, "no");
+            }
         } catch (RuntimeException e) {
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
                     ErrorTag.OPERATION_FAILED);
