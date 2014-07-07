@@ -20,22 +20,39 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * subscribe for changes to data under a given branch of the tree.
  * <p>
  * For more information on usage, please see the documentation in {@link AsyncDataBroker}.
+ *
+ * @see AsyncDataBroker
+ * @see TransactionChainFactory
  */
 public interface DataBroker extends TransactionFactory, AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService, TransactionChainFactory<InstanceIdentifier<?>, DataObject> {
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     ReadWriteTransaction newReadWriteTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     WriteTransaction newWriteOnlyTransaction();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     ListenerRegistration<DataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
             InstanceIdentifier<?> path, DataChangeListener listener, DataChangeScope triggeringScope);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     BindingTransactionChain createTransactionChain(TransactionChainListener listener);
 }
