@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * Interface for creating transaction chains.
  */
 public interface TransactionChainFactory<P extends Path<P>, D> {
+
     /**
      * Create a new transaction chain. The chain will be initialized to read
      * from its backing datastore, with no outstanding transaction. Listener

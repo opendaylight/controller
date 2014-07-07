@@ -58,7 +58,7 @@ public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, Au
     public DOMStoreReadWriteTransaction newReadWriteTransaction();
 
     /**
-     * Create a new read write transaction which will continue the chain. The
+     * Create a new write-only transaction which will continue the chain. The
      * previous read-write transaction has to be either READY or CANCELLED.
      *
      *
