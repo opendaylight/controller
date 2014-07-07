@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -62,7 +61,10 @@ import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
+import org.opendaylight.yangtools.concepts.CompositeObjectRegistration;
+import org.opendaylight.yangtools.concepts.CompositeObjectRegistration.CompositeObjectRegistrationBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
@@ -85,6 +87,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -491,7 +494,7 @@ public class BindingIndependentConnector implements //
         public void onRegister(
                 final DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject> registration) {
 
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = mappingService.toDataDom(registration
+            mappingService.toDataDom(registration
                     .getPath());
 
         }
@@ -594,7 +597,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onRpcImplementationAdded(QName name) {
+        public void onRpcImplementationAdded(final QName name) {
 
             final Optional<Class<? extends RpcService>> rpcInterface = mappingService.getRpcServiceClassFor(
                     name.getNamespace().toString(), name.getFormattedRevision());
@@ -604,7 +607,7 @@ public class BindingIndependentConnector implements //
         }
 
         @Override
-        public void onRpcImplementationRemoved(QName name) {
+        public void onRpcImplementationRemoved(final QName name) {
 
         }
     }
@@ -617,6 +620,7 @@ public class BindingIndependentConnector implements //
         private final Map<QName, RpcInvocationStrategy> strategiesByQName = new HashMap<>();
         private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
         private final RpcService proxy;
+        private ObjectRegistration<?> forwarderRegistration;
 
         public DomToBindingRpcForwarder(final Class<? extends RpcService> service) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
@@ -665,13 +669,27 @@ public class BindingIndependentConnector implements //
 
         }
 
+        /**
+         * Registers RPC Forwarder to DOM Broker,
+         * this means Binding Aware Broker has implementation of RPC
+         * which is registered to it.
+         *
+         * If RPC Forwarder was previously registered to DOM Broker
+         * or to Bidning Broker this method is noop to prevent
+         * creating forwarding loop.
+         *
+         */
         public void registerToDOMBroker() {
-            try {
-                for (QName rpc : supportedRpcs) {
-                    biRpcRegistry.addRpcImplementation(rpc, this);
+            if(forwarderRegistration == null) {
+                CompositeObjectRegistrationBuilder<DomToBindingRpcForwarder> builder = CompositeObjectRegistration.builderFor(this);
+                try {
+                    for (QName rpc : supportedRpcs) {
+                        builder.add(biRpcRegistry.addRpcImplementation(rpc, this));
+                    }
+                } catch (Exception e) {
+                    LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
                 }
-            } catch (Exception e) {
-                LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
+                this.forwarderRegistration = builder.toInstance();
             }
         }
 
@@ -773,8 +791,24 @@ public class BindingIndependentConnector implements //
             });
         }
 
+        /**
+         * Registers RPC Forwarder to Binding Broker,
+         * this means DOM Broekr has implementation of RPC
+         * which is registered to it.
+         *
+         * If RPC Forwarder was previously registered to DOM Broker
+         * or to Bidning Broker this method is noop to prevent
+         * creating forwarding loop.
+         *
+         */
         public void registerToBidningBroker() {
-               baRpcRegistry.addRpcImplementation((Class)rpcServiceType.get(), proxy);
+            if(forwarderRegistration == null) {
+               try {
+                   this.forwarderRegistration = baRpcRegistry.addRpcImplementation((Class)rpcServiceType.get(), proxy);
+               } catch (Exception e) {
+                   LOG.error("Unable to forward RPCs for {}",rpcServiceType.get(),e);
+               }
+            }
         }
     }
 
