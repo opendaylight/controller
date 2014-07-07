@@ -97,12 +97,15 @@ public class DOMRpcServiceTestBugfix560 {
 
         assertNotNull(moduleStream);
         List<InputStream> rpcModels = Collections.singletonList(moduleStream);
+        @SuppressWarnings("deprecation")
         Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
-        schemaContext = parser.resolveSchemaContext(modules);
+        @SuppressWarnings("deprecation")
+        SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
+        schemaContext = mountSchemaContext;
     }
 
     private static org.opendaylight.yangtools.yang.data.api.InstanceIdentifier createBINodeIdentifier(
-            NodeId mountNode) {
+            final NodeId mountNode) {
         return org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
                 .builder().node(Nodes.QNAME)
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, mountNode.getValue())
@@ -110,13 +113,16 @@ public class DOMRpcServiceTestBugfix560 {
     }
 
     private static InstanceIdentifier<Node> createBANodeIdentifier(
-            NodeId mountNode) {
+            final NodeId mountNode) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(Node.class, new NodeKey(mountNode)).toInstance();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void test() throws ExecutionException, InterruptedException {
+        // FIXME: This is made to only make sure instance identifier codec
+        // for path is instantiated.
         testContext.getBindingDataBroker().readOperationalData(BA_MOUNT_ID);
         final MountProvisionInstance mountPoint = domMountPointService
                 .createMountPoint(BI_MOUNT_ID);
@@ -127,7 +133,7 @@ public class DOMRpcServiceTestBugfix560 {
 
             @Override
             public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(
-                    QName rpc, CompositeNode input) {
+                    final QName rpc, final CompositeNode input) {
 
                 return Futures.immediateFuture(Rpcs
                         .<CompositeNode> getRpcResult(true));

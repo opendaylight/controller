@@ -27,7 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.flow.node.SupportedActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -45,6 +44,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import com.google.common.util.concurrent.SettableFuture;
 
+@SuppressWarnings("deprecation")
 public class PutAugmentationTest extends AbstractDataServiceTest implements DataChangeListener {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
@@ -62,12 +62,6 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
             NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class, NODE_KEY).toInstance();
 
-    private static final InstanceIdentifier<SupportedActions> SUPPORTED_ACTIONS_INSTANCE_ID_BA = //
-            NODES_INSTANCE_ID_BA.builder() //
-            .child(Node.class, NODE_KEY) //
-            .augmentation(FlowCapableNode.class) //
-            .child(SupportedActions.class).toInstance();
-
     private static final InstanceIdentifier<FlowCapableNode> ALL_FLOW_CAPABLE_NODES = //
             NODES_INSTANCE_ID_BA.builder() //
             .child(Node.class) //
@@ -78,15 +72,6 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
-    private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME,
-            SupportedActions.QNAME.getLocalName());
-
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .node(SUPPORTED_ACTIONS_QNAME) //
             .toInstance();
     private static final InstanceIdentifier<FlowCapableNode> FLOW_AUGMENTATION_PATH =
             NODE_INSTANCE_ID_BA.builder() //
@@ -231,29 +216,9 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         assertNull(node);
     }
 
-    private void verifyNodes(final Nodes nodes, final Node original) {
-        assertNotNull(nodes);
-        assertNotNull(nodes.getNode());
-        assertEquals(1, nodes.getNode().size());
-        Node readedNode = nodes.getNode().get(0);
-        assertEquals(original.getId(), readedNode.getId());
-        assertEquals(original.getKey(), readedNode.getKey());
-
-        FlowCapableNode fnu = original.getAugmentation(FlowCapableNode.class);
-        FlowCapableNode readedAugment = readedNode.getAugmentation(FlowCapableNode.class);
-        assertNotNull(fnu);
-        assertEquals(fnu.getDescription(), readedAugment.getDescription());
-        assertEquals(fnu.getSerialNumber(), readedAugment.getSerialNumber());
-
-    }
-
     private void assertBindingIndependentVersion(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
-    }
-
-    private Nodes checkForNodes() {
-        return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
     }
 
     @Override

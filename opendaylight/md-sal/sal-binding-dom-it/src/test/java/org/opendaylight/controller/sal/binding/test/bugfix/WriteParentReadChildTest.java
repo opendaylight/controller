@@ -40,6 +40,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.collect.ImmutableList;
 
+@SuppressWarnings("deprecation")
 public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
     private static final String FLOW_ID = "1234";

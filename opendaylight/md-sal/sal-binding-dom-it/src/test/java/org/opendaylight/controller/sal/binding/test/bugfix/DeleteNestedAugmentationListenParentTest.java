@@ -24,12 +24,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.SettableFuture;
 
+@SuppressWarnings("deprecation")
 public class DeleteNestedAugmentationListenParentTest extends AbstractDataServiceTest {
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId("foo"));
@@ -37,11 +37,6 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
     private static final TableKey TABLE_KEY = new TableKey((short) 0);
 
     private static final FlowKey FLOW_KEY = new FlowKey(new FlowId("100"));
-
-    private static final InstanceIdentifier<FlowCapableNode> LISTENER_PATH = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class)
-            .augmentation(FlowCapableNode.class).build();
-
 
     private static final InstanceIdentifier<FlowCapableNode> NODE_AUGMENT_PATH = InstanceIdentifier.builder(Nodes.class)
             .child(Node.class,NODE_KEY)
@@ -63,7 +58,7 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
 
-        ListenerRegistration<DataChangeListener> listenerReg = baDataService.registerDataChangeListener(FLOW_PATH, new DataChangeListener() {
+        baDataService.registerDataChangeListener(FLOW_PATH, new DataChangeListener() {
 
             @Override
             public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
