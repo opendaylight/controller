@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fbc8baa9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-07T14:07:09Z",
+      "side": 1,
+      "message": "Please add javadoc comments, e.g.\n\n\"This class parses JSON elements from a gson JsonReader. This class differs from the gson JsonParser in that it disallows multiple elements of the same name.\"",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1bcebeb4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-07T14:07:09Z",
+      "side": 1,
+      "message": "This is not needed - see below.",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bbc6b298",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-07T14:07:09Z",
+      "side": 1,
+      "message": "We don\u0027t need to keep track of the element names - we can use JsonObject for that:\n\n    if (object.has(name)) {\n              throw new JsonSyntaxException(\"Duplicate name \"+name+\" in JSON input.\");\n    }\n\n    object.add(name, read(in));",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b3aa299",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonReader.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-07T14:07:09Z",
+      "side": 1,
+      "message": "I think we should rename this class to \u0027JsonToCompositeNodeConverter\u0027 to convey what it actually does and so as not to clash with gson JsonReader.",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bb4d5240",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNamesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-07T14:07:09Z",
+      "side": 1,
+      "message": "It looks like this test is a duplicate of MultipleEqualNamesForDataNodesTest which tests both XML and JSON. So we can get rid of this test.",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
