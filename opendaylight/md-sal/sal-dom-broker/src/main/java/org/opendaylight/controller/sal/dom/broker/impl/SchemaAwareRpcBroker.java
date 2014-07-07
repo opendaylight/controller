@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.md.sal.common.impl.routing.RoutingUtils;
@@ -140,8 +141,21 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         RpcDefinition definition = findRpcDefinition(rpcType);
         checkArgument(!isRoutedRpc(definition), "RPC Type must not be routed.");
         GlobalRpcRegistration reg = new GlobalRpcRegistration(rpcType, implementation, this);
-        implementations.putIfAbsent(rpcType, implementation);
+        final RpcImplementation previous = implementations.putIfAbsent(rpcType, implementation);
+        Preconditions.checkState(previous == null, "Rpc %s is already registered.",rpcType);
+        notifyRpcAdded(rpcType);
         return reg;
+    }
+
+    private void notifyRpcAdded(QName rpcType) {
+        for (ListenerRegistration<RpcRegistrationListener> listener : rpcRegistrationListeners) {
+            try {
+                listener.getInstance().onRpcImplementationAdded(rpcType);
+            } catch (Exception ex) {
+                LOG.error("Unhandled exception during invoking listener {}", listener.getInstance(), ex);
+            }
+
+        }
     }
 
     private boolean isRoutedRpc(RpcDefinition definition) {
@@ -150,7 +164,11 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
 
     @Override
     public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener) {
-        return rpcRegistrationListeners.register(listener);
+        ListenerRegistration<RpcRegistrationListener> reg = rpcRegistrationListeners.register(listener);
+        for (QName impl : implementations.keySet()) {
+            listener.onRpcImplementationAdded(impl);
+        }
+        return reg;
     }
 
     @Override
