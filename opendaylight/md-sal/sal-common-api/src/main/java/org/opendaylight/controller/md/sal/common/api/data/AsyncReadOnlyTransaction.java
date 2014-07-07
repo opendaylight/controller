@@ -10,12 +10,11 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
- * Read-only transaction, which provides stable view of data
- * and is {@link AutoCloseable} resource.
+ * Marker interface for a read-only view of the data tree.
  *
  * @see AsyncReadTransaction
  *
-* @param <P>
+ * @param <P>
  *            Type of path (subtree identifier), which represents location in
  *            tree
  * @param <D>

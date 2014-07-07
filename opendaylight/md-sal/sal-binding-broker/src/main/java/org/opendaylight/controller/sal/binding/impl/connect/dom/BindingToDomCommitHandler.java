@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
@@ -14,6 +15,10 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated This is part of the legacy DataBrokerService
+ */
+@Deprecated
 class BindingToDomCommitHandler implements
     DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> {
 
@@ -34,7 +39,7 @@ class BindingToDomCommitHandler implements
         this.biDataService = biDataService;
     }
 
-    public void setMappingService(BindingIndependentMappingService mappingService) {
+    public void setMappingService(final BindingIndependentMappingService mappingService) {
         this.mappingService = mappingService;
     }
 
