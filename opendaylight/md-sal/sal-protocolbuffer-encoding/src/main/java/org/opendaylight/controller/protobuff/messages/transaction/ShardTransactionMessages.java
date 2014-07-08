@@ -938,20 +938,35 @@ public final class ShardTransactionMessages {
   public interface CreateTransactionReplyOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string transactionPath = 1;
+    // required string transactionActorPath = 1;
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
-    boolean hasTransactionPath();
+    boolean hasTransactionActorPath();
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
-    java.lang.String getTransactionPath();
+    java.lang.String getTransactionActorPath();
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
     com.google.protobuf.ByteString
-        getTransactionPathBytes();
+        getTransactionActorPathBytes();
+
+    // required string transactionId = 2;
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    boolean hasTransactionId();
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    java.lang.String getTransactionId();
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getTransactionIdBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CreateTransactionReply}
@@ -1006,7 +1021,12 @@ public final class ShardTransactionMessages {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              transactionPath_ = input.readBytes();
+              transactionActorPath_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              transactionId_ = input.readBytes();
               break;
             }
           }
@@ -1049,20 +1069,20 @@ public final class ShardTransactionMessages {
     }
 
     private int bitField0_;
-    // required string transactionPath = 1;
-    public static final int TRANSACTIONPATH_FIELD_NUMBER = 1;
-    private java.lang.Object transactionPath_;
+    // required string transactionActorPath = 1;
+    public static final int TRANSACTIONACTORPATH_FIELD_NUMBER = 1;
+    private java.lang.Object transactionActorPath_;
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
-    public boolean hasTransactionPath() {
+    public boolean hasTransactionActorPath() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
-    public java.lang.String getTransactionPath() {
-      java.lang.Object ref = transactionPath_;
+    public java.lang.String getTransactionActorPath() {
+      java.lang.Object ref = transactionActorPath_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -1070,22 +1090,65 @@ public final class ShardTransactionMessages {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          transactionPath_ = s;
+          transactionActorPath_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>required string transactionPath = 1;</code>
+     * <code>required string transactionActorPath = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getTransactionPathBytes() {
-      java.lang.Object ref = transactionPath_;
+        getTransactionActorPathBytes() {
+      java.lang.Object ref = transactionActorPath_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        transactionPath_ = b;
+        transactionActorPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required string transactionId = 2;
+    public static final int TRANSACTIONID_FIELD_NUMBER = 2;
+    private java.lang.Object transactionId_;
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    public boolean hasTransactionId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    public java.lang.String getTransactionId() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          transactionId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string transactionId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTransactionIdBytes() {
+      java.lang.Object ref = transactionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        transactionId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -1093,14 +1156,19 @@ public final class ShardTransactionMessages {
     }
 
     private void initFields() {
-      transactionPath_ = "";
+      transactionActorPath_ = "";
+      transactionId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasTransactionPath()) {
+      if (!hasTransactionActorPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasTransactionId()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -1112,7 +1180,10 @@ public final class ShardTransactionMessages {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getTransactionPathBytes());
+        output.writeBytes(1, getTransactionActorPathBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getTransactionIdBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -1125,7 +1196,11 @@ public final class ShardTransactionMessages {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getTransactionPathBytes());
+          .computeBytesSize(1, getTransactionActorPathBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getTransactionIdBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1243,8 +1318,10 @@ public final class ShardTransactionMessages {
 
       public Builder clear() {
         super.clear();
-        transactionPath_ = "";
+        transactionActorPath_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
+        transactionId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -1276,7 +1353,11 @@ public final class ShardTransactionMessages {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.transactionPath_ = transactionPath_;
+        result.transactionActorPath_ = transactionActorPath_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.transactionId_ = transactionId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1293,9 +1374,14 @@ public final class ShardTransactionMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply other) {
         if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply.getDefaultInstance()) return this;
-        if (other.hasTransactionPath()) {
+        if (other.hasTransactionActorPath()) {
           bitField0_ |= 0x00000001;
-          transactionPath_ = other.transactionPath_;
+          transactionActorPath_ = other.transactionActorPath_;
+          onChanged();
+        }
+        if (other.hasTransactionId()) {
+          bitField0_ |= 0x00000002;
+          transactionId_ = other.transactionId_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -1303,7 +1389,11 @@ public final class ShardTransactionMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasTransactionPath()) {
+        if (!hasTransactionActorPath()) {
+
+          return false;
+        }
+        if (!hasTransactionId()) {
 
           return false;
         }
@@ -1329,76 +1419,150 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // required string transactionPath = 1;
-      private java.lang.Object transactionPath_ = "";
+      // required string transactionActorPath = 1;
+      private java.lang.Object transactionActorPath_ = "";
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
-      public boolean hasTransactionPath() {
+      public boolean hasTransactionActorPath() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
-      public java.lang.String getTransactionPath() {
-        java.lang.Object ref = transactionPath_;
+      public java.lang.String getTransactionActorPath() {
+        java.lang.Object ref = transactionActorPath_;
         if (!(ref instanceof java.lang.String)) {
           java.lang.String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
-          transactionPath_ = s;
+          transactionActorPath_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
       public com.google.protobuf.ByteString
-          getTransactionPathBytes() {
-        java.lang.Object ref = transactionPath_;
+          getTransactionActorPathBytes() {
+        java.lang.Object ref = transactionActorPath_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          transactionPath_ = b;
+          transactionActorPath_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
-      public Builder setTransactionPath(
+      public Builder setTransactionActorPath(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        transactionPath_ = value;
+        transactionActorPath_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
-      public Builder clearTransactionPath() {
+      public Builder clearTransactionActorPath() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        transactionPath_ = getDefaultInstance().getTransactionPath();
+        transactionActorPath_ = getDefaultInstance().getTransactionActorPath();
         onChanged();
         return this;
       }
       /**
-       * <code>required string transactionPath = 1;</code>
+       * <code>required string transactionActorPath = 1;</code>
        */
-      public Builder setTransactionPathBytes(
+      public Builder setTransactionActorPathBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        transactionPath_ = value;
+        transactionActorPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required string transactionId = 2;
+      private java.lang.Object transactionId_ = "";
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public boolean hasTransactionId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public java.lang.String getTransactionId() {
+        java.lang.Object ref = transactionId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          transactionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTransactionIdBytes() {
+        java.lang.Object ref = transactionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          transactionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public Builder setTransactionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        transactionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public Builder clearTransactionId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        transactionId_ = getDefaultInstance().getTransactionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string transactionId = 2;</code>
+       */
+      public Builder setTransactionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        transactionId_ = value;
         onChanged();
         return this;
       }
@@ -3490,19 +3654,19 @@ public final class ShardTransactionMessages {
   public interface ReadDataReplyOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.ReadDataReply}
@@ -3556,11 +3720,11 @@ public final class ShardTransactionMessages {
               break;
             }
             case 10: {
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder subBuilder = null;
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
               if (((bitField0_ & 0x00000001) == 0x00000001)) {
                 subBuilder = normalizedNode_.toBuilder();
               }
-              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.PARSER, extensionRegistry);
+              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(normalizedNode_);
                 normalizedNode_ = subBuilder.buildPartial();
@@ -3608,30 +3772,30 @@ public final class ShardTransactionMessages {
     }
 
     private int bitField0_;
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
     public static final int NORMALIZEDNODE_FIELD_NUMBER = 1;
-    private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNode_;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode() {
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
       return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder() {
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
       return normalizedNode_;
     }
 
     private void initFields() {
-      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -3787,7 +3951,7 @@ public final class ShardTransactionMessages {
       public Builder clear() {
         super.clear();
         if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
         } else {
           normalizedNodeBuilder_.clear();
         }
@@ -3882,20 +4046,20 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;
-      private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder> normalizedNodeBuilder_;
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
           return normalizedNode_;
         } else {
@@ -3903,9 +4067,9 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
-      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
+      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -3919,10 +4083,10 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder setNormalizedNode(
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder builderForValue) {
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
         if (normalizedNodeBuilder_ == null) {
           normalizedNode_ = builderForValue.build();
           onChanged();
@@ -3933,14 +4097,14 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
-      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
+      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance()) {
+              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
             normalizedNode_ =
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
           } else {
             normalizedNode_ = value;
           }
@@ -3952,11 +4116,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder clearNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
           onChanged();
         } else {
           normalizedNodeBuilder_.clear();
@@ -3965,17 +4129,17 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder getNormalizedNodeBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
         if (normalizedNodeBuilder_ != null) {
           return normalizedNodeBuilder_.getMessageOrBuilder();
         } else {
@@ -3983,14 +4147,14 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 1;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
           normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>(
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
                   normalizedNode_,
                   getParentForChildren(),
                   isClean());
@@ -4033,19 +4197,19 @@ public final class ShardTransactionMessages {
     com.google.protobuf.ByteString
         getInstanceIdentifierPathArgumentsBytes(int index);
 
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.WriteData}
@@ -4107,11 +4271,11 @@ public final class ShardTransactionMessages {
               break;
             }
             case 18: {
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder subBuilder = null;
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
               if (((bitField0_ & 0x00000001) == 0x00000001)) {
                 subBuilder = normalizedNode_.toBuilder();
               }
-              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.PARSER, extensionRegistry);
+              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(normalizedNode_);
                 normalizedNode_ = subBuilder.buildPartial();
@@ -4192,31 +4356,31 @@ public final class ShardTransactionMessages {
       return instanceIdentifierPathArguments_.getByteString(index);
     }
 
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
-    private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNode_;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode() {
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
       return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder() {
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
       return normalizedNode_;
     }
 
     private void initFields() {
       instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -4386,7 +4550,7 @@ public final class ShardTransactionMessages {
         instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
         if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
         } else {
           normalizedNodeBuilder_.clear();
         }
@@ -4590,20 +4754,20 @@ public final class ShardTransactionMessages {
         return this;
       }
 
-      // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;
-      private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder> normalizedNodeBuilder_;
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNode() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
           return normalizedNode_;
         } else {
@@ -4611,9 +4775,9 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
+      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4627,10 +4791,10 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder setNormalizedNode(
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder builderForValue) {
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
         if (normalizedNodeBuilder_ == null) {
           normalizedNode_ = builderForValue.build();
           onChanged();
@@ -4641,14 +4805,14 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
+      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance()) {
+              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
             normalizedNode_ =
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
           } else {
             normalizedNode_ = value;
           }
@@ -4660,11 +4824,11 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder clearNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
           onChanged();
         } else {
           normalizedNodeBuilder_.clear();
@@ -4673,17 +4837,17 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder getNormalizedNodeBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000002;
         onChanged();
         return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeOrBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
         if (normalizedNodeBuilder_ != null) {
           return normalizedNodeBuilder_.getMessageOrBuilder();
         } else {
@@ -4691,14 +4855,14 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNode = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
           normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>(
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
                   normalizedNode_,
                   getParentForChildren(),
                   isClean());
@@ -5097,24 +5261,23 @@ public final class ShardTransactionMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\026ShardTransaction.proto\022!org.opendaylig" +
-      "ht.controller.mdsal\032\032SimpleNormalizedNod" +
-      "e.proto\"\022\n\020CloseTransaction\"\027\n\025CloseTran" +
-      "sactionReply\"\023\n\021CreateTransaction\"1\n\026Cre" +
-      "ateTransactionReply\022\027\n\017transactionPath\030\001" +
-      " \002(\t\"\022\n\020ReadyTransaction\"*\n\025ReadyTransac" +
-      "tionReply\022\021\n\tactorPath\030\001 \002(\t\"5\n\nDeleteDa" +
-      "ta\022\'\n\037instanceIdentifierPathArguments\030\001 " +
-      "\003(\t\"\021\n\017DeleteDataReply\"3\n\010ReadData\022\'\n\037in" +
-      "stanceIdentifierPathArguments\030\001 \002(\t\"]\n\rR",
-      "eadDataReply\022L\n\016normalizedNode\030\001 \002(\01324.o" +
-      "rg.opendaylight.controller.mdsal.Normali" +
-      "zedNodeXml\"\202\001\n\tWriteData\022\'\n\037instanceIden" +
-      "tifierPathArguments\030\001 \003(\t\022L\n\016normalizedN" +
-      "ode\030\002 \002(\01324.org.opendaylight.controller." +
-      "mdsal.NormalizedNodeXml\"\020\n\016WriteDataRepl" +
-      "yBV\n:org.opendaylight.controller.protobu" +
-      "ff.messages.transactionB\030ShardTransactio" +
-      "nMessages"
+      "ht.controller.mdsal\032\014Common.proto\"\022\n\020Clo" +
+      "seTransaction\"\027\n\025CloseTransactionReply\"\023" +
+      "\n\021CreateTransaction\"M\n\026CreateTransaction" +
+      "Reply\022\034\n\024transactionActorPath\030\001 \002(\t\022\025\n\rt" +
+      "ransactionId\030\002 \002(\t\"\022\n\020ReadyTransaction\"*" +
+      "\n\025ReadyTransactionReply\022\021\n\tactorPath\030\001 \002" +
+      "(\t\"5\n\nDeleteData\022\'\n\037instanceIdentifierPa" +
+      "thArguments\030\001 \003(\t\"\021\n\017DeleteDataReply\"3\n\010" +
+      "ReadData\022\'\n\037instanceIdentifierPathArgume",
+      "nts\030\001 \002(\t\"P\n\rReadDataReply\022?\n\016normalized" +
+      "Node\030\001 \002(\0132\'.org.opendaylight.controller" +
+      ".mdsal.Node\"u\n\tWriteData\022\'\n\037instanceIden" +
+      "tifierPathArguments\030\001 \003(\t\022?\n\016normalizedN" +
+      "ode\030\002 \002(\0132\'.org.opendaylight.controller." +
+      "mdsal.Node\"\020\n\016WriteDataReplyBV\n:org.open" +
+      "daylight.controller.protobuff.messages.t" +
+      "ransactionB\030ShardTransactionMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5144,7 +5307,7 @@ public final class ShardTransactionMessages {
           internal_static_org_opendaylight_controller_mdsal_CreateTransactionReply_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CreateTransactionReply_descriptor,
-              new java.lang.String[] { "TransactionPath", });
+              new java.lang.String[] { "TransactionActorPath", "TransactionId", });
           internal_static_org_opendaylight_controller_mdsal_ReadyTransaction_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_org_opendaylight_controller_mdsal_ReadyTransaction_fieldAccessorTable = new
@@ -5199,7 +5362,7 @@ public final class ShardTransactionMessages {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.getDescriptor(),
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.getDescriptor(),
         }, assigner);
   }
 

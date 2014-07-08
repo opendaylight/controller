@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -126,7 +126,7 @@ public class ShardTest extends AbstractActorTest {
                             if (in instanceof CreateTransactionReply) {
                                 CreateTransactionReply reply =
                                     (CreateTransactionReply) in;
-                                return reply.getTransactionPath()
+                                return reply.getTransactionActorPath()
                                     .toString();
                             } else {
                                 throw noMatch();
