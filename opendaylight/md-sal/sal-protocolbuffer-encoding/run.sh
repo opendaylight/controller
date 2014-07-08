@@ -22,11 +22,17 @@
 # or run command
 #       protoc --proto_path=src/main/resources --java_out=src/main/java src/main/resources/*.proto
 #
-#5. Run mvn clean install and resolve any trailing spaces issues & build the .jar
+#5. Run mvn clean install & build the .jar
+#
+#6  !!!WARNING!!!! never edit the source files generated
+#
+#7. !!!NOTE!!! if you are planning to add new .proto file  option java_package should begin with
+#   org.opendaylight.controller.protobuff.messages to properly exclude from sonar.
 ########################################################################################################
 
 protoc --proto_path=src/main/resources --java_out=src/main/java src/main/resources/*.proto
 
 echo "Done generating Java source files."
 
+#to remove trailing spaces in the code files
 find src/main/java -type f -name '*.java' -exec sed --in-place 's/[[:space:]]\+$//' {} \+

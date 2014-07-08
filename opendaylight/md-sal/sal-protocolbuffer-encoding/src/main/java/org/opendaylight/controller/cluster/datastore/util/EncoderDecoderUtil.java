@@ -2,7 +2,7 @@ package org.opendaylight.controller.cluster.datastore.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.cluster.datastore.common.SimpleNormalizedNodeMessage;
+import org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;

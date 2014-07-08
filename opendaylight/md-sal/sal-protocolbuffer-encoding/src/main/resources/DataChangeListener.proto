@@ -2,7 +2,7 @@ package org.opendaylight.controller.mdsal;
 
 import "SimpleNormalizedNode.proto";
 
-option java_package = "org.opendaylight.controller.cluster.datastore.datachange.notification";
+option java_package = "org.opendaylight.controller.protobuff.messages.datachange.notification";
 option java_outer_classname = "DataChangeListenerMessages";
 
 message DataChanged{

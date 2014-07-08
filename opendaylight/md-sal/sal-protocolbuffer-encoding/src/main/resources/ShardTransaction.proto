@@ -1,8 +1,6 @@
 package org.opendaylight.controller.mdsal;
-
 import "SimpleNormalizedNode.proto";
-
-option java_package = "org.opendaylight.controller.cluster.datastore.transaction";
+option java_package = "org.opendaylight.controller.protobuff.messages.transaction";
 option java_outer_classname = "ShardTransactionMessages";
 
 message CloseTransaction{
