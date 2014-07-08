@@ -28,8 +28,7 @@ public class DeleteData implements SerializableMessage {
 
     @Override public Object toSerializable() {
         return ShardTransactionMessages.DeleteData.newBuilder()
-            .setInstanceIdentifierPathArguments(
-                InstanceIdentifierUtils.getParentPath(path.toString())).build();
+            .setInstanceIdentifierPathArguments(path.toString()).build();
     }
 
     public static DeleteData fromSerizalizable(Object serializable){

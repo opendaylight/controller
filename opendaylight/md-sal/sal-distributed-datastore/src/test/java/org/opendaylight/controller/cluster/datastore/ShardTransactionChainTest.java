@@ -27,7 +27,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
   @Test
   public void testOnReceiveCreateTransaction() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransactionChain.props(store.createTransactionChain());
+      final Props props = ShardTransactionChain.props(store.createTransactionChain(), TestModel.createTestContext());
       final ActorRef subject = getSystem().actorOf(props, "testCreateTransaction");
 
       new Within(duration("1 seconds")) {
@@ -62,7 +62,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
   @Test
   public void testOnReceiveCloseTransactionChain() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = ShardTransactionChain.props(store.createTransactionChain());
+      final Props props = ShardTransactionChain.props(store.createTransactionChain(), TestModel.createTestContext());
       final ActorRef subject = getSystem().actorOf(props, "testCloseTransactionChain");
 
       new Within(duration("1 seconds")) {
