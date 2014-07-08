@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.binding.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -154,6 +155,31 @@ public class RuntimeCodeGeneratorTest {
 
         // We should have call to instance 1
         verify(service[1]).simple(instance_1_input[0]);
+
+        /*
+         * Generated RPC service should throw illegalArgumentException
+         * with message if rpc input is null.
+         */
+        try {
+            product.getInvocationProxy().simple(null);
+            fail("Generated RPC router should throw IllegalArgumentException on null input");
+        } catch (IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+
+
+        /*
+         * Generated RPC service should throw illegalArgumentException
+         * with message if rpc route is null.
+         */
+        try {
+            SimpleInput withoutValue = new SimpleInputImpl(null);
+            product.getInvocationProxy().simple(withoutValue);
+            fail("Generated RPC router should throw IllegalArgumentException on null value for route");
+        } catch (IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+
     }
 
     private InstanceIdentifier<?>[][] identifiers(final int serviceSize, final int instancesPerService) {
