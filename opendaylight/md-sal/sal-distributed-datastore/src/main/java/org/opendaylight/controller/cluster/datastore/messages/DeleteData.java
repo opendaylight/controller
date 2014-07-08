@@ -8,16 +8,32 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public class DeleteData {
-  private final InstanceIdentifier path;
+public class DeleteData implements SerializableMessage {
 
-  public DeleteData(InstanceIdentifier path) {
-    this.path = path;
-  }
+    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteData.class;
 
-  public InstanceIdentifier getPath() {
-    return path;
-  }
+    private final InstanceIdentifier path;
+
+    public DeleteData(InstanceIdentifier path) {
+        this.path = path;
+    }
+
+    public InstanceIdentifier getPath() {
+        return path;
+    }
+
+    @Override public Object toSerializable() {
+        return ShardTransactionMessages.DeleteData.newBuilder()
+            .setInstanceIdentifierPathArguments(
+                InstanceIdentifierUtils.getParentPath(path.toString())).build();
+    }
+
+    public static DeleteData fromSerizalizable(Object serializable){
+        ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
+        return new DeleteData(InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments()));
+    }
 }
