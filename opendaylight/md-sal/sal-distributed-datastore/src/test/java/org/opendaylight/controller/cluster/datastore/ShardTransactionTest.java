@@ -28,6 +28,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -39,8 +40,10 @@ public class ShardTransactionTest extends AbstractActorTest {
     private static final InMemoryDOMDataStore store =
         new InMemoryDOMDataStore("OPER", storeExecutor);
 
+    private static final SchemaContext testSchemaContext = TestModel.createTestContext();
+
     static {
-        store.onGlobalContextUpdated(TestModel.createTestContext());
+        store.onGlobalContextUpdated(testSchemaContext);
     }
 
     @Test
@@ -48,7 +51,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
@@ -88,7 +91,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
@@ -161,7 +164,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testWriteData");
 
@@ -169,7 +172,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
@@ -199,7 +202,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testMergeData");
 
@@ -207,10 +210,10 @@ public class ShardTransactionTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(new MergeData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), testSchemaContext).toSerializable(),
                         getRef());
 
-                    final String out = new ExpectMsg<String>("match hint") {
+                    final String out = new ExpectMsg<String>(duration("500 milliseconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in instanceof MergeDataReply) {
@@ -238,7 +241,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testDeleteData");
 
@@ -275,7 +278,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testReadyTransaction");
 
@@ -311,7 +314,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard);
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testCloseTransaction");
 

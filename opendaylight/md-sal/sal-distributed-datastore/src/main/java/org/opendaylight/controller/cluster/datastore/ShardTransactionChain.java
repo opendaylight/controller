@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * The ShardTransactionChain Actor represents a remote TransactionChain
@@ -24,9 +25,11 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 public class ShardTransactionChain extends AbstractUntypedActor {
 
     private final DOMStoreTransactionChain chain;
+    private final SchemaContext schemaContext;
 
-    public ShardTransactionChain(DOMStoreTransactionChain chain) {
+    public ShardTransactionChain(DOMStoreTransactionChain chain, SchemaContext schemaContext) {
         this.chain = chain;
+        this.schemaContext = schemaContext;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         DOMStoreReadWriteTransaction transaction =
             chain.newReadWriteTransaction();
         ActorRef transactionActor = getContext().actorOf(ShardTransaction
-            .props(chain, transaction, getContext().parent()), "shard-" + createTransaction.getTransactionId());
+            .props(chain, transaction, getContext().parent(), schemaContext), "shard-" + createTransaction.getTransactionId());
         getSender()
             .tell(ShardTransactionMessages.CreateTransactionReply.newBuilder()
                 .setTransactionActorPath(transactionActor.path().toString())
@@ -53,12 +56,12 @@ public class ShardTransactionChain extends AbstractUntypedActor {
                 getSelf());
     }
 
-    public static Props props(final DOMStoreTransactionChain chain) {
+    public static Props props(final DOMStoreTransactionChain chain, final SchemaContext schemaContext) {
         return Props.create(new Creator<ShardTransactionChain>() {
 
             @Override
             public ShardTransactionChain create() throws Exception {
-                return new ShardTransactionChain(chain);
+                return new ShardTransactionChain(chain, schemaContext);
             }
         });
     }
