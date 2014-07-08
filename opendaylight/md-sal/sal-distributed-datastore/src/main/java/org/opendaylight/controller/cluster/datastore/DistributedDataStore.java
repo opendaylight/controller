@@ -110,6 +110,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     }
 
     @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
+        actorContext.setSchemaContext(schemaContext);
         actorContext.getShardManager().tell(
             new UpdateSchemaContext(schemaContext), null);
     }

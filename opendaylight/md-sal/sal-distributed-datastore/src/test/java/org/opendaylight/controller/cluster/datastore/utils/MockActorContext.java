@@ -12,6 +12,8 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MockActorContext extends ActorContext {
@@ -56,5 +58,7 @@ public class MockActorContext extends ActorContext {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
     }
 
-
+    @Override public SchemaContext getSchemaContext() {
+        return TestModel.createTestContext();
+    }
 }

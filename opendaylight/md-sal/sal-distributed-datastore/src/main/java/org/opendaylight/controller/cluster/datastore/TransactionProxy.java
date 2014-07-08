@@ -116,13 +116,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     @Override
     public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new WriteData(path, data), null);
+        remoteTransaction.tell(new WriteData(path, data, actorContext.getSchemaContext()), null);
     }
 
     @Override
     public void merge(InstanceIdentifier path, NormalizedNode<?, ?> data) {
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new MergeData(path, data), null);
+        remoteTransaction.tell(new MergeData(path, data, actorContext.getSchemaContext()), null);
     }
 
     @Override
