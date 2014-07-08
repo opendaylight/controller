@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4c39eaf1",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/BindingTransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Can we rename this interface to TransactionChain to remove the \"Binding\" reference? This would make it consistent with the other changes we made to remove \"Binding\" references from the DataBroker interface.\n\nWe can rename the base interface to AsyncTransactionChain to be consistent with other base interfaces (e.g. AsyncReadOnlyTransaction).",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e3997d6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "I think an example use case for chaining would help here. Eg, do you first create all transactions in the chain, then make changes/commit each one in order?",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6ca86e20",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Should this say \"previous read-only transaction\"? Or can previous be any type of transaction? If so then we can say \"previous transaction\".",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ca5b248",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: \"previous read-write transaction\"?",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0e12f756",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "I\u0027m not sure I follow the wording here. I\u0027ll try to re-word based on my understanding:\n\n\"The returned transaction presents an isolated view from any previous transactions in this chain. Any state introduced by previous transactions in this chain or by any transaction outside this chain is not visible to this transaction.\"",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0c71a2df",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: \"previous write transaction\".",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e231fa7",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: wording.",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e286386",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "\"this read-write transaction\" or, preferably, just \"this transaction\"",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8e2da797",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Are the changes also available to subsequent transactions? Either way we should state this to be clear, either\"\n\n\"transaction to be available outside this transaction chain but are not available to subsequent transactions in this chain.\"\n\nor\n\n\"transaction to be available to subsequent transactions in this chain and also transactions outside this transaction chain.\"",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac7996c9",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: \"previous write transaction\" and \"previous read-write transaction\".",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee3b13cf",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: wording.",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ce172f44",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "\"this write-only transaction\" or, preferably, just \"this transaction\"",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e1edb5f",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Same question as above re: availability to subsequent transactions?",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cc765ad7",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreTransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-08T20:41:20Z",
+      "side": 1,
+      "message": "Should \"read-write transaction\" say \"write-only transaction\"?",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
