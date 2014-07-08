@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_76c27f35",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-08T06:10:13Z",
+      "side": 1,
+      "message": "added",
+      "parentUuid": "fa82b9bf_fbc8baa9",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1bcebeb4",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-07T14:07:09Z",
       "side": 1,
       "message": "This is not needed - see below.",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_96bf03aa",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-08T06:10:13Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "fa82b9bf_1bcebeb4",
       "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_36e077cc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/gson/JsonParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-08T06:10:13Z",
+      "side": 1,
+      "message": "added",
+      "parentUuid": "fa82b9bf_bbc6b298",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3b3aa299",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonReader.java",
         "patchSetId": 7
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_56e5fbda",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonReader.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-08T06:10:13Z",
+      "side": 1,
+      "message": "I renamed it to JsonToCompositeNodeReader. There was also class XML reader which did the same thing but with XML input stream. It was also renamed.",
+      "parentUuid": "fa82b9bf_3b3aa299",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bb4d5240",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNamesTest.java",
         "patchSetId": 7
@@ -81,6 +153,24 @@
       "writtenOn": "2014-07-07T14:07:09Z",
       "side": 1,
       "message": "It looks like this test is a duplicate of MultipleEqualNamesForDataNodesTest which tests both XML and JSON. So we can get rid of this test.",
+      "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f6e52fdc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/ToCnSnWithMultipleEqualNamesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-08T06:10:13Z",
+      "side": 1,
+      "message": "you are right.",
+      "parentUuid": "fa82b9bf_bb4d5240",
       "revId": "6ce8a340e4e53c46a935d5b4fbca91ae8ab3d022",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
