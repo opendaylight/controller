@@ -73,7 +73,6 @@ module node-error {
             uses tr:transaction-metadata;
             uses flow:base-node-error-notification;
             uses flow:node-error-reference;
-            uses flow:node-error-reference;
         }
 
     notification group-mod-error-notification {
