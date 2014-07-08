@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
@@ -82,10 +82,11 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>("CreateTransactionReply") {
                             protected ActorSelection match(Object in) {
-                                if (in instanceof CreateTransactionReply) {
+                                if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(in.getClass())) {
+                                    CreateTransactionReply reply = CreateTransactionReply.fromSerializable(in);
                                     return getSystem()
-                                        .actorSelection((((CreateTransactionReply) in)
-                                            .getTransactionActorPath()));
+                                        .actorSelection(reply
+                                            .getTransactionPath());
                                 } else {
                                     throw noMatch();
                                 }

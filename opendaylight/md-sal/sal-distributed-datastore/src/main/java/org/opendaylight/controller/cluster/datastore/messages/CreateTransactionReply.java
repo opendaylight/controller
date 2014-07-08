@@ -8,30 +8,38 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorPath;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-/**
- * This is being deprecated to use sal-protocolbuff-encoding ShardTransactionMessages.CreateTransactionReply
- * This classes will be removed once complete integration of distribute datastore with
- * sal-protocolbuff-encoding is done.
- */
+public class CreateTransactionReply implements SerializableMessage {
 
-@Deprecated
-public class CreateTransactionReply {
-    private final ActorPath transactionPath;
+    public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
+    private final String transactionPath;
     private final String transactionId;
 
-    public CreateTransactionReply(ActorPath transactionPath,
+    public CreateTransactionReply(String transactionPath,
         String transactionId) {
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
     }
 
-    public ActorPath getTransactionPath() {
+    public String getTransactionPath() {
         return transactionPath;
     }
 
     public String getTransactionId() {
         return transactionId;
     }
+
+    public Object toSerializable(){
+        return ShardTransactionMessages.CreateTransactionReply.newBuilder()
+            .setTransactionActorPath(transactionPath.toString())
+            .setTransactionId(transactionId)
+            .build();
+    }
+
+    public static CreateTransactionReply fromSerializable(Object serializable){
+        ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
+        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId());
+    }
+
 }
