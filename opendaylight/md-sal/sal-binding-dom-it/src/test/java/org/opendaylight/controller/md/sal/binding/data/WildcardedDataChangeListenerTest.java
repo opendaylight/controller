@@ -43,12 +43,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.util.concurrent.SettableFuture;
 
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * FIXME: THis test should be moved to compat test-suite and rewriten
+ * to use sal-test-model
  */
+@SuppressWarnings("deprecation")
 public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
     private static final NodeKey NODE_0_KEY = new NodeKey(new NodeId("test:0"));

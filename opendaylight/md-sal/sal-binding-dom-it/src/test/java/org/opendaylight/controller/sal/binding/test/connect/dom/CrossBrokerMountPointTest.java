@@ -24,15 +24,12 @@ import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -43,13 +40,10 @@ import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
+@SuppressWarnings("deprecation")
 public class CrossBrokerMountPointTest {
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
-    private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
-    private static final QName TABLE_ID_QNAME = QName.create(Table.QNAME, "id");
-
     private static final String NODE_ID = "node:1";
 
     private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
@@ -82,8 +76,6 @@ public class CrossBrokerMountPointTest {
             .builder(NODE_INSTANCE_ID_BI)
             .nodeWithKey(QName.create(FlowCapableNode.QNAME, "group"), QName.create(FlowCapableNode.QNAME, "group-id"),
                     0L).node(AUGMENTED_GROUP_STATISTICS).toInstance();
-
-    private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
 
     private BindingTestContext testContext;
     private MountProviderService bindingMountPointService;
@@ -123,13 +115,13 @@ public class CrossBrokerMountPointTest {
         DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>() {
 
             @Override
-            public CompositeNode readConfigurationData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
+            public CompositeNode readConfigurationData(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
                 return null;
             }
 
 
             @Override
-            public CompositeNode readOperationalData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
+            public CompositeNode readOperationalData(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
                 if (arg0.equals(GROUP_STATISTICS_ID_BI)) {
                     ImmutableCompositeNode data = ImmutableCompositeNode
                             .builder()

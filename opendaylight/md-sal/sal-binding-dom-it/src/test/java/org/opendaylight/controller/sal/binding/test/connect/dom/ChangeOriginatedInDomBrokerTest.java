@@ -45,7 +45,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -63,13 +62,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.SettableFuture;
 
+// FIXME: Migrate to use new Data Broker APIs
+@SuppressWarnings("deprecation")
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
 
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
     private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
-    private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
     private static final QName TABLE_ID_QNAME = QName.create(Table.QNAME, "id");
 
     private static final String NODE_ID = "node:1";
@@ -86,13 +86,6 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
 
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
             .child(Node.class, NODE_KEY).toInstance();
-
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
-    private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
 
     private static final Map<QName, Object> FLOW_KEY_BI = //
     ImmutableMap.<QName, Object> of(FLOW_ID_QNAME, FLOW_ID.getValue());

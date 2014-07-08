@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.SettableFuture;
 
+@SuppressWarnings("deprecation")
 public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     private static final String NODE_ID = "node:1";
