@@ -7,12 +7,17 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
+import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.builder;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
@@ -32,16 +37,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.builder;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 
 /**
  * Resolve Data Change Events based on modifications and listeners
@@ -438,17 +439,19 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         Builder subtree = builder(DataChangeScope.SUBTREE).
                 setBefore(modification.getDataBefore().get()).
                 setAfter(modification.getDataAfter().get());
-
+        boolean oneModified = false;
         for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
             PathArgument childId = childMod.getIdentifier();
             InstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
+
 
             switch (childMod.getModificationType()) {
             case WRITE:
             case MERGE:
             case DELETE:
                 one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod));
+                oneModified = true;
                 break;
             case SUBTREE_MODIFIED:
                 subtree.merge(resolveSubtreeChangeEvent(childPath, childListeners, childMod));
@@ -458,11 +461,20 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                 break;
             }
         }
-        DOMImmutableDataChangeEvent oneChangeEvent = one.build();
-        subtree.merge(oneChangeEvent);
+        final DOMImmutableDataChangeEvent oneChangeEvent;
+        if(oneModified) {
+            one.addUpdated(path, modification.getDataBefore().get(), modification.getDataAfter().get());
+            oneChangeEvent = one.build();
+            subtree.merge(oneChangeEvent);
+        } else {
+            oneChangeEvent = null;
+            subtree.addUpdated(path, modification.getDataBefore().get(), modification.getDataAfter().get());
+        }
         DOMImmutableDataChangeEvent subtreeEvent = subtree.build();
         if (!listeners.isEmpty()) {
-            addPartialTask(listeners, oneChangeEvent);
+            if(oneChangeEvent != null) {
+                addPartialTask(listeners, oneChangeEvent);
+            }
             addPartialTask(listeners, subtreeEvent);
         }
         return subtreeEvent;
