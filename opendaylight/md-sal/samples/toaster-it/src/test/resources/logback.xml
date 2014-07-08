@@ -10,7 +10,9 @@
 
   <logger name="org.opendaylight.yangtools.yang.parser" level="ERROR"/>
 
-  <root level="debug">
+  <logger name="org.opendaylight.controller.sample.toaster.provider" level="DEBUG"/>
+
+  <root level="error">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

@@ -9,6 +9,8 @@
  */
 package org.opendaylight.controller.config.yang.config.kitchen_service.impl;
 
+import java.util.concurrent.Future;
+
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.impl.KitchenServiceImpl;
@@ -16,6 +18,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +66,9 @@ public final class KitchenServiceModule extends AbstractKitchenServiceModule {
             }
 
             @Override
-            public boolean makeBreakfast( final EggsType eggs, final Class<? extends ToastType> toast, final int toastDoneness ) {
+            public Future<RpcResult<Void>> makeBreakfast( final EggsType eggs,
+                                                          final Class<? extends ToastType> toast,
+                                                          final int toastDoneness ) {
                 return kitchenService.makeBreakfast( eggs, toast, toastDoneness );
             }
         }
