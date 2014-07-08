@@ -1,0 +1,37 @@
+package org.opendaylight.controller.mdsal;
+
+option java_package = "org.opendaylight.controller.protobuff.messages.cohort3pc";
+option java_outer_classname = "ThreePhaseCommitCohortMessages";
+
+
+message CanCommitTransaction{
+
+}
+
+message CanCommitTransactionReply{
+  required bool canCommit = 1;
+
+}
+
+message AbortTransaction{
+
+}
+
+message AbortTransactionReply {
+
+}
+
+message CommitTransaction{
+
+}
+
+message CommitTransactionReply{
+
+}
+
+message PreCommitTransaction{
+
+}
+message PreCommitTransactionReply{
+
+}

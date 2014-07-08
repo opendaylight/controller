@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 
@@ -39,7 +39,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
               if (in instanceof CreateTransactionReply) {
-                return ((CreateTransactionReply) in).getTransactionPath().toString();
+                return ((CreateTransactionReply) in).getTransactionActorPath().toString();
               } else {
                 throw noMatch();
               }

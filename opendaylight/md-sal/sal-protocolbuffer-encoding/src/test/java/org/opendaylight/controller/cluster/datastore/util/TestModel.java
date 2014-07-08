@@ -78,7 +78,7 @@ public class TestModel {
       QName
           .create(
               "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test",
-              "2014-04-15", "family");
+              "2014-04-17", "family");
   public static final QName CHILDREN_QNAME = QName.create(FAMILY_QNAME,
       "children");
   public static final QName GRAND_CHILDREN_QNAME = QName.create(FAMILY_QNAME,
