@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public class ReadData {
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadData.class;
   private final InstanceIdentifier path;
 
   public ReadData(InstanceIdentifier path) {
@@ -19,5 +22,16 @@ public class ReadData {
 
   public InstanceIdentifier getPath() {
     return path;
+  }
+
+  public Object toSerializable(){
+    return ShardTransactionMessages.ReadData.newBuilder()
+        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.getParentPath(path.toString()))
+        .build();
+  }
+
+  public static ReadData fromSerializable(Object serializable){
+    ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData) serializable;
+    return new ReadData(InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments()));
   }
 }
