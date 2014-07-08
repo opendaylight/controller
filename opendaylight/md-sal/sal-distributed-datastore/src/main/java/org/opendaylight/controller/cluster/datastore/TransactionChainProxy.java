@@ -13,6 +13,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.concurrent.ExecutorService;
 
@@ -22,28 +23,30 @@ import java.util.concurrent.ExecutorService;
 public class TransactionChainProxy implements DOMStoreTransactionChain{
     private final ActorContext actorContext;
     private final ExecutorService transactionExecutor;
+    private final SchemaContext schemaContext;
 
-    public TransactionChainProxy(ActorContext actorContext, ExecutorService transactionExecutor) {
+    public TransactionChainProxy(ActorContext actorContext, ExecutorService transactionExecutor, SchemaContext schemaContext) {
         this.actorContext = actorContext;
         this.transactionExecutor = transactionExecutor;
+        this.schemaContext = schemaContext;
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+            TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, schemaContext);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.WRITE_ONLY, transactionExecutor);
+            TransactionProxy.TransactionType.WRITE_ONLY, transactionExecutor, schemaContext);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new TransactionProxy(actorContext,
-            TransactionProxy.TransactionType.READ_WRITE, transactionExecutor);
+            TransactionProxy.TransactionType.READ_WRITE, transactionExecutor, schemaContext);
     }
 
     @Override

@@ -55,6 +55,4 @@ public class MockActorContext extends ActorContext {
         Object executeLocalOperationResponse) {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
     }
-
-
 }
