@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -89,6 +88,24 @@ public class ActionTest {
 
         action = new PushVlan(EtherTypes.QINQ, 0x4, -1, 2000);
         Assert.assertFalse(action.isValid());
+
+        // OF 1.3 PUSH_VLAN test.
+        for (EtherTypes tag: EtherTypes.values()) {
+            int t = tag.intValue();
+            boolean valid =
+                (tag == EtherTypes.VLANTAGGED || tag == EtherTypes.QINQ);
+            PushVlan pv = new PushVlan(tag);
+            Assert.assertEquals(valid, pv.isValid());
+            if (valid) {
+                Assert.assertEquals(t, pv.getTag());
+            }
+
+            pv = new PushVlan(t);
+            Assert.assertEquals(valid, pv.isValid());
+            if (valid) {
+                Assert.assertEquals(t, pv.getTag());
+            }
+        }
     }
 
     @Test
