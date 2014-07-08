@@ -1,0 +1,63 @@
+module samplenodeextension {
+    namespace "urn:opendaylight:samplenodeextension";
+    prefix extrinventory;
+
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import opendaylight-port-types {prefix port;revision-date "2013-09-25";}
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import opendaylight-table-types {prefix table;revision-date "2013-10-26";}
+    import opendaylight-flow-types {prefix flow;revision-date "2013-10-26";}
+
+    organization "Extreme Networks";
+
+    contact
+      "Ramkumar Gowrishankar <rgowrishankar@extremenetworks.com>";
+
+    description
+      "YANG version of the SOAPXML API.";
+
+    revision "2014-04-02" {
+      description
+        "Model of ExtremeNetwork switches.";
+    }  
+
+
+    grouping sample-node {
+
+        leaf manufacturer {
+            type string;
+        }
+        
+        list vlan {
+            key "vlanid";
+            leaf vlanid {
+                type uint32;
+            }
+            leaf-list ports {
+                type uint32;
+            }
+        }
+    }
+
+    rpc createNodeCommand {
+       input {
+        uses sample-node;
+       }
+       output {
+         leaf response {
+         type string;
+         description
+          "Indicates the response of executing the command";
+        }
+       }
+    }
+
+
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "sample-test-node";
+        uses sample-node;
+        
+    }
+
+}
