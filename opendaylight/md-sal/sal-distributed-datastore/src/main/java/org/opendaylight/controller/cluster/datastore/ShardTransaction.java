@@ -39,6 +39,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.concurrent.ExecutionException;
 
@@ -67,6 +68,7 @@ import java.util.concurrent.ExecutionException;
 public class ShardTransaction extends AbstractUntypedActor {
 
     private final ActorRef shardActor;
+    private final SchemaContext schemaContext;
 
     // FIXME : see below
     // If transactionChain is not null then this transaction is part of a
@@ -82,37 +84,38 @@ public class ShardTransaction extends AbstractUntypedActor {
         Logging.getLogger(getContext().system(), this);
 
     public ShardTransaction(DOMStoreReadWriteTransaction transaction,
-        ActorRef shardActor) {
-        this(null, transaction, shardActor);
+        ActorRef shardActor, SchemaContext schemaContext) {
+        this(null, transaction, shardActor, schemaContext);
     }
 
     public ShardTransaction(DOMStoreTransactionChain transactionChain, DOMStoreReadWriteTransaction transaction,
-        ActorRef shardActor) {
+        ActorRef shardActor, SchemaContext schemaContext) {
         this.transactionChain = transactionChain;
         this.transaction = transaction;
         this.shardActor = shardActor;
+        this.schemaContext = schemaContext;
     }
 
 
 
     public static Props props(final DOMStoreReadWriteTransaction transaction,
-        final ActorRef shardActor) {
+        final ActorRef shardActor, final SchemaContext schemaContext) {
         return Props.create(new Creator<ShardTransaction>() {
 
             @Override
             public ShardTransaction create() throws Exception {
-                return new ShardTransaction(transaction, shardActor);
+                return new ShardTransaction(transaction, shardActor, schemaContext);
             }
         });
     }
 
     public static Props props(final DOMStoreTransactionChain transactionChain, final DOMStoreReadWriteTransaction transaction,
-        final ActorRef shardActor) {
+        final ActorRef shardActor, final SchemaContext schemaContext) {
         return Props.create(new Creator<ShardTransaction>() {
 
             @Override
             public ShardTransaction create() throws Exception {
-                return new ShardTransaction(transactionChain, transaction, shardActor);
+                return new ShardTransaction(transactionChain, transaction, shardActor, schemaContext);
             }
         });
     }
@@ -122,10 +125,10 @@ public class ShardTransaction extends AbstractUntypedActor {
     public void handleReceive(Object message) throws Exception {
         if (message instanceof ReadData) {
             readData((ReadData) message);
-        } else if (message instanceof WriteData) {
-            writeData((WriteData) message);
-        } else if (message instanceof MergeData) {
-            mergeData((MergeData) message);
+        } else if (WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            writeData(WriteData.fromSerializable(message, schemaContext));
+        } else if (MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            mergeData(MergeData.fromSerializable(message, schemaContext));
         } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(DeleteData.fromSerizalizable(message));
         } else if (message instanceof ReadyTransaction) {
