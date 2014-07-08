@@ -31,7 +31,7 @@ required string actorPath = 1;
 }
 
 message DeleteData {
-repeated string instanceIdentifierPathArguments = 1;
+required string instanceIdentifierPathArguments = 1;
 }
 
 message DeleteDataReply{
@@ -46,11 +46,21 @@ message ReadDataReply{
 }
 
 message WriteData {
- repeated string instanceIdentifierPathArguments = 1;
+ required string instanceIdentifierPathArguments = 1;
 required Node normalizedNode =2;
 
 }
 
 message WriteDataReply{
+
+}
+
+message MergeData {
+ required string instanceIdentifierPathArguments = 1;
+required Node normalizedNode =2;
+
+}
+
+message MergeDataReply{
 
 }
