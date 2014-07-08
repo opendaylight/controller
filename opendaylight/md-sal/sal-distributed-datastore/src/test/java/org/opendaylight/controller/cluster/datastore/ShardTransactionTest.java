@@ -169,7 +169,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
@@ -207,7 +207,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(new MergeData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {

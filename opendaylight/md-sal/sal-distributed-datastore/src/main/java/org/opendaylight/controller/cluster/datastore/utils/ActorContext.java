@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundE
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -44,6 +45,8 @@ public class ActorContext {
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
+
+    private SchemaContext schemaContext = null;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager){
         this.actorSystem = actorSystem;

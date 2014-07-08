@@ -8,11 +8,33 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class MergeData extends ModifyData {
-  public MergeData(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-    super(path, data);
-  }
+public class MergeData extends ModifyData{
+    public MergeData(InstanceIdentifier path, NormalizedNode<?, ?> data,
+        SchemaContext context) {
+        super(path, data, context);
+    }
+
+    @Override public Object toSerializable() {
+        return ShardTransactionMessages.MergeData.newBuilder()
+            .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.getParentPath(path.toString()))
+            .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext).encode(path, data).getNormalizedNode()).build();
+    }
+
+    public static MergeData fromSerializable(Object serializable, SchemaContext schemaContext){
+        ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
+        InstanceIdentifier identifier = InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments());
+
+        NormalizedNode<?, ?> normalizedNode =
+            new NormalizedNodeToNodeCodec(schemaContext)
+                .decode(identifier, o.getNormalizedNode());
+
+        return new MergeData(identifier, normalizedNode, schemaContext);
+    }
 }
