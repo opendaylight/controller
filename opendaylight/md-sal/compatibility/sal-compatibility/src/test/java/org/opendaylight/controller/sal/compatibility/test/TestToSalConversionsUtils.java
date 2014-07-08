@@ -330,9 +330,6 @@ public class TestToSalConversionsUtils {
             // be defined
         } else if (action instanceof PushVlan) {
             assertEquals("Wrong value for action PushVlan for tag.", 0x8100, ((PushVlan) action).getTag());
-            assertEquals("Wrong value for action PushVlan for pcp.", 7, ((PushVlan) action).getPcp());
-            assertEquals("Wrong value for action PushVlan for cfi.", 1, ((PushVlan) action).getCfi());
-            assertEquals("Wrong value for action PushVlan for vlanID.", 4095, ((PushVlan) action).getVlanId());
         } else if (action instanceof SetDlDst) {
             //assertEquals("Wrong value for action SetDlDst for MAC address.", "3C:A9:F4:00:E0:C8", new String(
             //        ((SetDlDst) action).getDlAddress()));
@@ -575,9 +572,6 @@ public class TestToSalConversionsUtils {
 
     private void prepareActionPushVlan(PushVlanActionCaseBuilder wrapper) {
         PushVlanActionBuilder pushVlanActionBuilder = new PushVlanActionBuilder();
-        pushVlanActionBuilder.setPcp(7); // 3 bits
-        pushVlanActionBuilder.setCfi(new VlanCfi(1)); // 1 bit
-        pushVlanActionBuilder.setVlanId(new VlanId(4095));
         pushVlanActionBuilder.setTag(0x8100); // 12 bit
         wrapper.setPushVlanAction(pushVlanActionBuilder.build());
     }
