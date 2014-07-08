@@ -118,6 +118,12 @@
       <artifactId>scala-library</artifactId>
     </dependency>
 
+    <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-protocolbuffer-encoding</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- Test Dependencies -->
     <dependency>
       <groupId>junit</groupId>
