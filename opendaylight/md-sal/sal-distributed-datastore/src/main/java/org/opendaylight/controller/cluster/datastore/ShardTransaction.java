@@ -126,8 +126,8 @@ public class ShardTransaction extends AbstractUntypedActor {
             writeData((WriteData) message);
         } else if (message instanceof MergeData) {
             mergeData((MergeData) message);
-        } else if (message instanceof DeleteData) {
-            deleteData((DeleteData) message);
+        } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            deleteData(DeleteData.fromSerizalizable(message));
         } else if (message instanceof ReadyTransaction) {
             readyTransaction((ReadyTransaction) message);
         } else if (message instanceof CloseTransaction) {

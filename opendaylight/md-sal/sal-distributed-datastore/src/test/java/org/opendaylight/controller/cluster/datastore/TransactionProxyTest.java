@@ -185,7 +185,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof DeleteData);
+        Assert.assertEquals(DeleteData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
     }
 
     @Test
