@@ -42,7 +42,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
@@ -73,7 +73,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
@@ -104,7 +104,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
         transactionProxy.write(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
@@ -136,7 +136,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
         transactionProxy.merge(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
@@ -168,7 +168,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
         transactionProxy.delete(TestModel.TEST_PATH);
 
@@ -199,7 +199,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
@@ -222,7 +222,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
         Assert.assertNotNull(transactionProxy.getIdentifier());
     }
@@ -238,7 +238,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor);
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
         transactionProxy.close();
 
