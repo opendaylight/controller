@@ -8,28 +8,28 @@ public final class ListenerRegistrationMessages {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface CloseOrBuilder
+  public interface CloseDataChangeListenerRegistrationOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
   }
   /**
-   * Protobuf type {@code org.opendaylight.controller.mdsal.Close}
+   * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration}
    */
-  public static final class Close extends
+  public static final class CloseDataChangeListenerRegistration extends
       com.google.protobuf.GeneratedMessage
-      implements CloseOrBuilder {
-    // Use Close.newBuilder() to construct.
-    private Close(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements CloseDataChangeListenerRegistrationOrBuilder {
+    // Use CloseDataChangeListenerRegistration.newBuilder() to construct.
+    private CloseDataChangeListenerRegistration(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private Close(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private CloseDataChangeListenerRegistration(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final Close defaultInstance;
-    public static Close getDefaultInstance() {
+    private static final CloseDataChangeListenerRegistration defaultInstance;
+    public static CloseDataChangeListenerRegistration getDefaultInstance() {
       return defaultInstance;
     }
 
-    public Close getDefaultInstanceForType() {
+    public CloseDataChangeListenerRegistration getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -39,7 +39,7 @@ public final class ListenerRegistrationMessages {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private Close(
+    private CloseDataChangeListenerRegistration(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -75,28 +75,28 @@ public final class ListenerRegistrationMessages {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_Close_descriptor;
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_Close_fieldAccessorTable
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.Builder.class);
+              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<Close> PARSER =
-        new com.google.protobuf.AbstractParser<Close>() {
-      public Close parsePartialFrom(
+    public static com.google.protobuf.Parser<CloseDataChangeListenerRegistration> PARSER =
+        new com.google.protobuf.AbstractParser<CloseDataChangeListenerRegistration>() {
+      public CloseDataChangeListenerRegistration parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Close(input, extensionRegistry);
+        return new CloseDataChangeListenerRegistration(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<Close> getParserForType() {
+    public com.google.protobuf.Parser<CloseDataChangeListenerRegistration> getParserForType() {
       return PARSER;
     }
 
@@ -135,53 +135,53 @@ public final class ListenerRegistrationMessages {
       return super.writeReplace();
     }
 
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(byte[] data)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(java.io.InputStream input)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseDelimitedFrom(java.io.InputStream input)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseDelimitedFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -190,7 +190,7 @@ public final class ListenerRegistrationMessages {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close prototype) {
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -202,24 +202,24 @@ public final class ListenerRegistrationMessages {
       return builder;
     }
     /**
-     * Protobuf type {@code org.opendaylight.controller.mdsal.Close}
+     * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseOrBuilder {
+       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_Close_descriptor;
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_Close_fieldAccessorTable
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.Builder.class);
+                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.Builder.class);
       }
 
-      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.newBuilder()
+      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -248,38 +248,38 @@ public final class ListenerRegistrationMessages {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_Close_descriptor;
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor;
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close getDefaultInstanceForType() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.getDefaultInstance();
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.getDefaultInstance();
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close build() {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close result = buildPartial();
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration build() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close buildPartial() {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close(this);
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration buildPartial() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration(this);
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close) {
-          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close)other);
+        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close other) {
-        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close.getDefaultInstance()) return this;
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration other) {
+        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -292,11 +292,11 @@ public final class ListenerRegistrationMessages {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close parsedMessage = null;
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.Close) e.getUnfinishedMessage();
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistration) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -306,39 +306,39 @@ public final class ListenerRegistrationMessages {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.Close)
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration)
     }
 
     static {
-      defaultInstance = new Close(true);
+      defaultInstance = new CloseDataChangeListenerRegistration(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.Close)
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration)
   }
 
-  public interface CloseReplyOrBuilder
+  public interface CloseDataChangeListenerRegistrationReplyOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
   }
   /**
-   * Protobuf type {@code org.opendaylight.controller.mdsal.CloseReply}
+   * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply}
    */
-  public static final class CloseReply extends
+  public static final class CloseDataChangeListenerRegistrationReply extends
       com.google.protobuf.GeneratedMessage
-      implements CloseReplyOrBuilder {
-    // Use CloseReply.newBuilder() to construct.
-    private CloseReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements CloseDataChangeListenerRegistrationReplyOrBuilder {
+    // Use CloseDataChangeListenerRegistrationReply.newBuilder() to construct.
+    private CloseDataChangeListenerRegistrationReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private CloseReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private CloseDataChangeListenerRegistrationReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final CloseReply defaultInstance;
-    public static CloseReply getDefaultInstance() {
+    private static final CloseDataChangeListenerRegistrationReply defaultInstance;
+    public static CloseDataChangeListenerRegistrationReply getDefaultInstance() {
       return defaultInstance;
     }
 
-    public CloseReply getDefaultInstanceForType() {
+    public CloseDataChangeListenerRegistrationReply getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -348,7 +348,7 @@ public final class ListenerRegistrationMessages {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private CloseReply(
+    private CloseDataChangeListenerRegistrationReply(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -384,28 +384,28 @@ public final class ListenerRegistrationMessages {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor;
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseReply_fieldAccessorTable
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.Builder.class);
+              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<CloseReply> PARSER =
-        new com.google.protobuf.AbstractParser<CloseReply>() {
-      public CloseReply parsePartialFrom(
+    public static com.google.protobuf.Parser<CloseDataChangeListenerRegistrationReply> PARSER =
+        new com.google.protobuf.AbstractParser<CloseDataChangeListenerRegistrationReply>() {
+      public CloseDataChangeListenerRegistrationReply parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CloseReply(input, extensionRegistry);
+        return new CloseDataChangeListenerRegistrationReply(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<CloseReply> getParserForType() {
+    public com.google.protobuf.Parser<CloseDataChangeListenerRegistrationReply> getParserForType() {
       return PARSER;
     }
 
@@ -444,53 +444,53 @@ public final class ListenerRegistrationMessages {
       return super.writeReplace();
     }
 
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(byte[] data)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(java.io.InputStream input)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseDelimitedFrom(java.io.InputStream input)
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseDelimitedFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parseFrom(
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -499,7 +499,7 @@ public final class ListenerRegistrationMessages {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply prototype) {
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -511,24 +511,24 @@ public final class ListenerRegistrationMessages {
       return builder;
     }
     /**
-     * Protobuf type {@code org.opendaylight.controller.mdsal.CloseReply}
+     * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReplyOrBuilder {
+       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReplyOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor;
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseReply_fieldAccessorTable
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.Builder.class);
+                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.Builder.class);
       }
 
-      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.newBuilder()
+      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -557,38 +557,38 @@ public final class ListenerRegistrationMessages {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor;
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor;
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply getDefaultInstanceForType() {
-        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.getDefaultInstance();
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.getDefaultInstance();
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply build() {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply result = buildPartial();
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply build() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply buildPartial() {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply(this);
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply buildPartial() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply(this);
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply) {
-          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply)other);
+        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply other) {
-        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply.getDefaultInstance()) return this;
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply other) {
+        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -601,11 +601,11 @@ public final class ListenerRegistrationMessages {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply parsedMessage = null;
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseReply) e.getUnfinishedMessage();
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -615,27 +615,27 @@ public final class ListenerRegistrationMessages {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.CloseReply)
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply)
     }
 
     static {
-      defaultInstance = new CloseReply(true);
+      defaultInstance = new CloseDataChangeListenerRegistrationReply(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.CloseReply)
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply)
   }
 
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_opendaylight_controller_mdsal_Close_descriptor;
+    internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_opendaylight_controller_mdsal_Close_fieldAccessorTable;
+      internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor;
+    internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_opendaylight_controller_mdsal_CloseReply_fieldAccessorTable;
+      internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -646,27 +646,28 @@ public final class ListenerRegistrationMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\032ListenerRegistration.proto\022!org.openda" +
-      "ylight.controller.mdsal\"\007\n\005Close\"\014\n\nClos" +
-      "eReplyB[\n;org.opendaylight.controller.pr" +
-      "otobuff.messages.registrationB\034ListenerR" +
-      "egistrationMessages"
+      "ylight.controller.mdsal\"%\n#CloseDataChan" +
+      "geListenerRegistration\"*\n(CloseDataChang" +
+      "eListenerRegistrationReplyB[\n;org.openda" +
+      "ylight.controller.protobuff.messages.reg" +
+      "istrationB\034ListenerRegistrationMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_org_opendaylight_controller_mdsal_Close_descriptor =
+          internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_org_opendaylight_controller_mdsal_Close_fieldAccessorTable = new
+          internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_opendaylight_controller_mdsal_Close_descriptor,
+              internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor,
               new java.lang.String[] { });
-          internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor =
+          internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor =
             getDescriptor().getMessageTypes().get(1);
-          internal_static_org_opendaylight_controller_mdsal_CloseReply_fieldAccessorTable = new
+          internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_opendaylight_controller_mdsal_CloseReply_descriptor,
+              internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor,
               new java.lang.String[] { });
           return null;
         }

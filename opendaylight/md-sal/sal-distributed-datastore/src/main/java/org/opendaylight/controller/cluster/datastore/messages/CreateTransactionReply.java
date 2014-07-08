@@ -10,6 +10,13 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorPath;
 
+/**
+ * This is being deprecated to use sal-protocolbuff-encoding ShardTransactionMessages.CreateTransactionReply
+ * This classes will be removed once complete integration of distribute datastore with
+ * sal-protocolbuff-encoding is done.
+ */
+
+@Deprecated
 public class CreateTransactionReply {
     private final ActorPath transactionPath;
     private final String transactionId;

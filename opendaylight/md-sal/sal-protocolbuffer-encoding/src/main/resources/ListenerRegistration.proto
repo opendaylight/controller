@@ -3,11 +3,11 @@ package org.opendaylight.controller.mdsal;
 option java_package = "org.opendaylight.controller.protobuff.messages.registration";
 option java_outer_classname = "ListenerRegistrationMessages";
 
-message Close {
+message CloseDataChangeListenerRegistration {
 
 }
 
-message CloseReply{
+message CloseDataChangeListenerRegistrationReply{
 
 }
 
