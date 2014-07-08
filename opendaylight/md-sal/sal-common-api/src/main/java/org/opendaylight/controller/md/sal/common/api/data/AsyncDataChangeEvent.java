@@ -101,7 +101,7 @@ public interface AsyncDataChangeEvent<P extends Path<P>, D> extends Immutable {
      *
      * @return map of paths and original state of updated and removed objects.
      */
-    Map<P, ? extends D> getOriginalData();
+    Map<P, D> getOriginalData();
 
     /**
      * Returns an immutable stable view of data state, which captures the state of

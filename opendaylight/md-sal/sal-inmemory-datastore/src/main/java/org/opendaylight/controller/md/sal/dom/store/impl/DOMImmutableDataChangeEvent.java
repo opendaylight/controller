@@ -30,7 +30,7 @@ public final class DOMImmutableDataChangeEvent implements
 
     private final NormalizedNode<?, ?> original;
     private final NormalizedNode<?, ?> updated;
-    private final Map<InstanceIdentifier, ? extends NormalizedNode<?, ?>> originalData;
+    private final Map<InstanceIdentifier, NormalizedNode<?, ?>> originalData;
     private final Map<InstanceIdentifier, NormalizedNode<?, ?>> createdData;
     private final Map<InstanceIdentifier, NormalizedNode<?, ?>> updatedData;
     private final Set<InstanceIdentifier> removedPaths;
@@ -67,7 +67,7 @@ public final class DOMImmutableDataChangeEvent implements
     }
 
     @Override
-    public Map<InstanceIdentifier, ? extends NormalizedNode<?, ?>> getOriginalData() {
+    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
         return originalData;
     }
 
