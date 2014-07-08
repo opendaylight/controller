@@ -2369,25 +2369,20 @@ public final class ShardTransactionMessages {
   public interface DeleteDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // repeated string instanceIdentifierPathArguments = 1;
+    // required string instanceIdentifierPathArguments = 1;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    java.util.List<java.lang.String>
-    getInstanceIdentifierPathArgumentsList();
+    boolean hasInstanceIdentifierPathArguments();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    int getInstanceIdentifierPathArgumentsCount();
+    java.lang.String getInstanceIdentifierPathArguments();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    java.lang.String getInstanceIdentifierPathArguments(int index);
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
     com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index);
+        getInstanceIdentifierPathArgumentsBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.DeleteData}
@@ -2441,11 +2436,8 @@ public final class ShardTransactionMessages {
               break;
             }
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              instanceIdentifierPathArguments_.add(input.readBytes());
+              bitField0_ |= 0x00000001;
+              instanceIdentifierPathArguments_ = input.readBytes();
               break;
             }
           }
@@ -2456,9 +2448,6 @@ public final class ShardTransactionMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(instanceIdentifierPathArguments_);
-        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -2490,44 +2479,62 @@ public final class ShardTransactionMessages {
       return PARSER;
     }
 
-    // repeated string instanceIdentifierPathArguments = 1;
+    private int bitField0_;
+    // required string instanceIdentifierPathArguments = 1;
     public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
-    private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_;
+    private java.lang.Object instanceIdentifierPathArguments_;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    public java.util.List<java.lang.String>
-        getInstanceIdentifierPathArgumentsList() {
-      return instanceIdentifierPathArguments_;
+    public boolean hasInstanceIdentifierPathArguments() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    public int getInstanceIdentifierPathArgumentsCount() {
-      return instanceIdentifierPathArguments_.size();
+    public java.lang.String getInstanceIdentifierPathArguments() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          instanceIdentifierPathArguments_ = s;
+        }
+        return s;
+      }
     }
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    public java.lang.String getInstanceIdentifierPathArguments(int index) {
-      return instanceIdentifierPathArguments_.get(index);
-    }
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index) {
-      return instanceIdentifierPathArguments_.getByteString(index);
+        getInstanceIdentifierPathArgumentsBytes() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceIdentifierPathArguments_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private void initFields() {
-      instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      instanceIdentifierPathArguments_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasInstanceIdentifierPathArguments()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -2535,8 +2542,8 @@ public final class ShardTransactionMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-        output.writeBytes(1, instanceIdentifierPathArguments_.getByteString(i));
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getInstanceIdentifierPathArgumentsBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -2547,14 +2554,9 @@ public final class ShardTransactionMessages {
       if (size != -1) return size;
 
       size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(instanceIdentifierPathArguments_.getByteString(i));
-        }
-        size += dataSize;
-        size += 1 * getInstanceIdentifierPathArgumentsList().size();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getInstanceIdentifierPathArgumentsBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2672,7 +2674,7 @@ public final class ShardTransactionMessages {
 
       public Builder clear() {
         super.clear();
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        instanceIdentifierPathArguments_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
@@ -2701,12 +2703,12 @@ public final class ShardTransactionMessages {
       public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DeleteData buildPartial() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DeleteData result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DeleteData(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(
-              instanceIdentifierPathArguments_);
-          bitField0_ = (bitField0_ & ~0x00000001);
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
         result.instanceIdentifierPathArguments_ = instanceIdentifierPathArguments_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -2722,14 +2724,9 @@ public final class ShardTransactionMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DeleteData other) {
         if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DeleteData.getDefaultInstance()) return this;
-        if (!other.instanceIdentifierPathArguments_.isEmpty()) {
-          if (instanceIdentifierPathArguments_.isEmpty()) {
-            instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureInstanceIdentifierPathArgumentsIsMutable();
-            instanceIdentifierPathArguments_.addAll(other.instanceIdentifierPathArguments_);
-          }
+        if (other.hasInstanceIdentifierPathArguments()) {
+          bitField0_ |= 0x00000001;
+          instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -2737,6 +2734,10 @@ public final class ShardTransactionMessages {
       }
 
       public final boolean isInitialized() {
+        if (!hasInstanceIdentifierPathArguments()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -2759,95 +2760,76 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // repeated string instanceIdentifierPathArguments = 1;
-      private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureInstanceIdentifierPathArgumentsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList(instanceIdentifierPathArguments_);
-          bitField0_ |= 0x00000001;
-         }
-      }
+      // required string instanceIdentifierPathArguments = 1;
+      private java.lang.Object instanceIdentifierPathArguments_ = "";
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public java.util.List<java.lang.String>
-          getInstanceIdentifierPathArgumentsList() {
-        return java.util.Collections.unmodifiableList(instanceIdentifierPathArguments_);
+      public boolean hasInstanceIdentifierPathArguments() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public int getInstanceIdentifierPathArgumentsCount() {
-        return instanceIdentifierPathArguments_.size();
+      public java.lang.String getInstanceIdentifierPathArguments() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          instanceIdentifierPathArguments_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public java.lang.String getInstanceIdentifierPathArguments(int index) {
-        return instanceIdentifierPathArguments_.get(index);
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public com.google.protobuf.ByteString
-          getInstanceIdentifierPathArgumentsBytes(int index) {
-        return instanceIdentifierPathArguments_.getByteString(index);
+          getInstanceIdentifierPathArgumentsBytes() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceIdentifierPathArguments_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public Builder setInstanceIdentifierPathArguments(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addInstanceIdentifierPathArguments(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addAllInstanceIdentifierPathArguments(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureInstanceIdentifierPathArgumentsIsMutable();
-        super.addAll(values, instanceIdentifierPathArguments_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public Builder clearInstanceIdentifierPathArguments() {
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
+        instanceIdentifierPathArguments_ = getDefaultInstance().getInstanceIdentifierPathArguments();
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public Builder addInstanceIdentifierPathArgumentsBytes(
+      public Builder setInstanceIdentifierPathArgumentsBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
         onChanged();
         return this;
       }
@@ -4177,25 +4159,20 @@ public final class ShardTransactionMessages {
   public interface WriteDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // repeated string instanceIdentifierPathArguments = 1;
+    // required string instanceIdentifierPathArguments = 1;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    java.util.List<java.lang.String>
-    getInstanceIdentifierPathArgumentsList();
+    boolean hasInstanceIdentifierPathArguments();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    int getInstanceIdentifierPathArgumentsCount();
+    java.lang.String getInstanceIdentifierPathArguments();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    java.lang.String getInstanceIdentifierPathArguments(int index);
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
     com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index);
+        getInstanceIdentifierPathArgumentsBytes();
 
     // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     /**
@@ -4263,16 +4240,13 @@ public final class ShardTransactionMessages {
               break;
             }
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              instanceIdentifierPathArguments_.add(input.readBytes());
+              bitField0_ |= 0x00000001;
+              instanceIdentifierPathArguments_ = input.readBytes();
               break;
             }
             case 18: {
               org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = normalizedNode_.toBuilder();
               }
               normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
@@ -4280,7 +4254,7 @@ public final class ShardTransactionMessages {
                 subBuilder.mergeFrom(normalizedNode_);
                 normalizedNode_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000002;
               break;
             }
           }
@@ -4291,9 +4265,6 @@ public final class ShardTransactionMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(instanceIdentifierPathArguments_);
-        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -4326,34 +4297,47 @@ public final class ShardTransactionMessages {
     }
 
     private int bitField0_;
-    // repeated string instanceIdentifierPathArguments = 1;
+    // required string instanceIdentifierPathArguments = 1;
     public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
-    private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_;
+    private java.lang.Object instanceIdentifierPathArguments_;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    public java.util.List<java.lang.String>
-        getInstanceIdentifierPathArgumentsList() {
-      return instanceIdentifierPathArguments_;
+    public boolean hasInstanceIdentifierPathArguments() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
-    public int getInstanceIdentifierPathArgumentsCount() {
-      return instanceIdentifierPathArguments_.size();
+    public java.lang.String getInstanceIdentifierPathArguments() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          instanceIdentifierPathArguments_ = s;
+        }
+        return s;
+      }
     }
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    public java.lang.String getInstanceIdentifierPathArguments(int index) {
-      return instanceIdentifierPathArguments_.get(index);
-    }
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index) {
-      return instanceIdentifierPathArguments_.getByteString(index);
+        getInstanceIdentifierPathArgumentsBytes() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceIdentifierPathArguments_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
@@ -4363,7 +4347,7 @@ public final class ShardTransactionMessages {
      * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public boolean hasNormalizedNode() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
@@ -4379,7 +4363,7 @@ public final class ShardTransactionMessages {
     }
 
     private void initFields() {
-      instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      instanceIdentifierPathArguments_ = "";
       normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
@@ -4387,6 +4371,10 @@ public final class ShardTransactionMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasInstanceIdentifierPathArguments()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       if (!hasNormalizedNode()) {
         memoizedIsInitialized = 0;
         return false;
@@ -4402,10 +4390,10 @@ public final class ShardTransactionMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-        output.writeBytes(1, instanceIdentifierPathArguments_.getByteString(i));
-      }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getInstanceIdentifierPathArgumentsBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(2, normalizedNode_);
       }
       getUnknownFields().writeTo(output);
@@ -4417,16 +4405,11 @@ public final class ShardTransactionMessages {
       if (size != -1) return size;
 
       size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(instanceIdentifierPathArguments_.getByteString(i));
-        }
-        size += dataSize;
-        size += 1 * getInstanceIdentifierPathArgumentsList().size();
-      }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getInstanceIdentifierPathArgumentsBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, normalizedNode_);
       }
@@ -4547,7 +4530,7 @@ public final class ShardTransactionMessages {
 
       public Builder clear() {
         super.clear();
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        instanceIdentifierPathArguments_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         if (normalizedNodeBuilder_ == null) {
           normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
@@ -4583,14 +4566,12 @@ public final class ShardTransactionMessages {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.WriteData result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.WriteData(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(
-              instanceIdentifierPathArguments_);
-          bitField0_ = (bitField0_ & ~0x00000001);
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
         result.instanceIdentifierPathArguments_ = instanceIdentifierPathArguments_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000001;
+          to_bitField0_ |= 0x00000002;
         }
         if (normalizedNodeBuilder_ == null) {
           result.normalizedNode_ = normalizedNode_;
@@ -4613,14 +4594,9 @@ public final class ShardTransactionMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.WriteData other) {
         if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.WriteData.getDefaultInstance()) return this;
-        if (!other.instanceIdentifierPathArguments_.isEmpty()) {
-          if (instanceIdentifierPathArguments_.isEmpty()) {
-            instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureInstanceIdentifierPathArgumentsIsMutable();
-            instanceIdentifierPathArguments_.addAll(other.instanceIdentifierPathArguments_);
-          }
+        if (other.hasInstanceIdentifierPathArguments()) {
+          bitField0_ |= 0x00000001;
+          instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
           onChanged();
         }
         if (other.hasNormalizedNode()) {
@@ -4631,6 +4607,10 @@ public final class ShardTransactionMessages {
       }
 
       public final boolean isInitialized() {
+        if (!hasInstanceIdentifierPathArguments()) {
+
+          return false;
+        }
         if (!hasNormalizedNode()) {
 
           return false;
@@ -4661,95 +4641,76 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // repeated string instanceIdentifierPathArguments = 1;
-      private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureInstanceIdentifierPathArgumentsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList(instanceIdentifierPathArguments_);
-          bitField0_ |= 0x00000001;
-         }
-      }
+      // required string instanceIdentifierPathArguments = 1;
+      private java.lang.Object instanceIdentifierPathArguments_ = "";
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public java.util.List<java.lang.String>
-          getInstanceIdentifierPathArgumentsList() {
-        return java.util.Collections.unmodifiableList(instanceIdentifierPathArguments_);
+      public boolean hasInstanceIdentifierPathArguments() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public int getInstanceIdentifierPathArgumentsCount() {
-        return instanceIdentifierPathArguments_.size();
+      public java.lang.String getInstanceIdentifierPathArguments() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          instanceIdentifierPathArguments_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public java.lang.String getInstanceIdentifierPathArguments(int index) {
-        return instanceIdentifierPathArguments_.get(index);
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public com.google.protobuf.ByteString
-          getInstanceIdentifierPathArgumentsBytes(int index) {
-        return instanceIdentifierPathArguments_.getByteString(index);
+          getInstanceIdentifierPathArgumentsBytes() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceIdentifierPathArguments_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public Builder setInstanceIdentifierPathArguments(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addInstanceIdentifierPathArguments(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addAllInstanceIdentifierPathArguments(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureInstanceIdentifierPathArgumentsIsMutable();
-        super.addAll(values, instanceIdentifierPathArguments_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
       public Builder clearInstanceIdentifierPathArguments() {
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
+        instanceIdentifierPathArguments_ = getDefaultInstance().getInstanceIdentifierPathArguments();
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
        */
-      public Builder addInstanceIdentifierPathArgumentsBytes(
+      public Builder setInstanceIdentifierPathArgumentsBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
         onChanged();
         return this;
       }
@@ -5191,6 +5152,1002 @@ public final class ShardTransactionMessages {
     // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.WriteDataReply)
   }
 
+  public interface MergeDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string instanceIdentifierPathArguments = 1;
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    boolean hasInstanceIdentifierPathArguments();
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    java.lang.String getInstanceIdentifierPathArguments();
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdentifierPathArgumentsBytes();
+
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    boolean hasNormalizedNode();
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.MergeData}
+   */
+  public static final class MergeData extends
+      com.google.protobuf.GeneratedMessage
+      implements MergeDataOrBuilder {
+    // Use MergeData.newBuilder() to construct.
+    private MergeData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private MergeData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final MergeData defaultInstance;
+    public static MergeData getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public MergeData getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MergeData(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              instanceIdentifierPathArguments_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = normalizedNode_.toBuilder();
+              }
+              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(normalizedNode_);
+                normalizedNode_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000002;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeData_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<MergeData> PARSER =
+        new com.google.protobuf.AbstractParser<MergeData>() {
+      public MergeData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MergeData(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MergeData> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required string instanceIdentifierPathArguments = 1;
+    public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
+    private java.lang.Object instanceIdentifierPathArguments_;
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    public boolean hasInstanceIdentifierPathArguments() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    public java.lang.String getInstanceIdentifierPathArguments() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          instanceIdentifierPathArguments_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string instanceIdentifierPathArguments = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInstanceIdentifierPathArgumentsBytes() {
+      java.lang.Object ref = instanceIdentifierPathArguments_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceIdentifierPathArguments_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    public boolean hasNormalizedNode() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
+      return normalizedNode_;
+    }
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
+      return normalizedNode_;
+    }
+
+    private void initFields() {
+      instanceIdentifierPathArguments_ = "";
+      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasInstanceIdentifierPathArguments()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasNormalizedNode()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getNormalizedNode().isInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getInstanceIdentifierPathArgumentsBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeMessage(2, normalizedNode_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getInstanceIdentifierPathArgumentsBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, normalizedNode_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.MergeData}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getNormalizedNodeFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        instanceIdentifierPathArguments_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+        } else {
+          normalizedNodeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData build() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData buildPartial() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.instanceIdentifierPathArguments_ = instanceIdentifierPathArguments_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        if (normalizedNodeBuilder_ == null) {
+          result.normalizedNode_ = normalizedNode_;
+        } else {
+          result.normalizedNode_ = normalizedNodeBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData other) {
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData.getDefaultInstance()) return this;
+        if (other.hasInstanceIdentifierPathArguments()) {
+          bitField0_ |= 0x00000001;
+          instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
+          onChanged();
+        }
+        if (other.hasNormalizedNode()) {
+          mergeNormalizedNode(other.getNormalizedNode());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasInstanceIdentifierPathArguments()) {
+
+          return false;
+        }
+        if (!hasNormalizedNode()) {
+
+          return false;
+        }
+        if (!getNormalizedNode().isInitialized()) {
+
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeData) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string instanceIdentifierPathArguments = 1;
+      private java.lang.Object instanceIdentifierPathArguments_ = "";
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public boolean hasInstanceIdentifierPathArguments() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public java.lang.String getInstanceIdentifierPathArguments() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          instanceIdentifierPathArguments_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdentifierPathArgumentsBytes() {
+        java.lang.Object ref = instanceIdentifierPathArguments_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceIdentifierPathArguments_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder setInstanceIdentifierPathArguments(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder clearInstanceIdentifierPathArguments() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        instanceIdentifierPathArguments_ = getDefaultInstance().getInstanceIdentifierPathArguments();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder setInstanceIdentifierPathArgumentsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPathArguments_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public boolean hasNormalizedNode() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
+        if (normalizedNodeBuilder_ == null) {
+          return normalizedNode_;
+        } else {
+          return normalizedNodeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (normalizedNodeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          normalizedNode_ = value;
+          onChanged();
+        } else {
+          normalizedNodeBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public Builder setNormalizedNode(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = builderForValue.build();
+          onChanged();
+        } else {
+          normalizedNodeBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (normalizedNodeBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
+            normalizedNode_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
+          } else {
+            normalizedNode_ = value;
+          }
+          onChanged();
+        } else {
+          normalizedNodeBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public Builder clearNormalizedNode() {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+          onChanged();
+        } else {
+          normalizedNodeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getNormalizedNodeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
+        if (normalizedNodeBuilder_ != null) {
+          return normalizedNodeBuilder_.getMessageOrBuilder();
+        } else {
+          return normalizedNode_;
+        }
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          getNormalizedNodeFieldBuilder() {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+                  normalizedNode_,
+                  getParentForChildren(),
+                  isClean());
+          normalizedNode_ = null;
+        }
+        return normalizedNodeBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.MergeData)
+    }
+
+    static {
+      defaultInstance = new MergeData(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.MergeData)
+  }
+
+  public interface MergeDataReplyOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.MergeDataReply}
+   */
+  public static final class MergeDataReply extends
+      com.google.protobuf.GeneratedMessage
+      implements MergeDataReplyOrBuilder {
+    // Use MergeDataReply.newBuilder() to construct.
+    private MergeDataReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private MergeDataReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final MergeDataReply defaultInstance;
+    public static MergeDataReply getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public MergeDataReply getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MergeDataReply(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeDataReply_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<MergeDataReply> PARSER =
+        new com.google.protobuf.AbstractParser<MergeDataReply>() {
+      public MergeDataReply parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MergeDataReply(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MergeDataReply> getParserForType() {
+      return PARSER;
+    }
+
+    private void initFields() {
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.MergeDataReply}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReplyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeDataReply_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply build() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply buildPartial() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply(this);
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply other) {
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.MergeDataReply) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.MergeDataReply)
+    }
+
+    static {
+      defaultInstance = new MergeDataReply(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.MergeDataReply)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_mdsal_CloseTransaction_descriptor;
   private static
@@ -5251,6 +6208,16 @@ public final class ShardTransactionMessages {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_org_opendaylight_controller_mdsal_WriteDataReply_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_MergeData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_MergeDataReply_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5268,16 +6235,20 @@ public final class ShardTransactionMessages {
       "ransactionId\030\002 \002(\t\"\022\n\020ReadyTransaction\"*" +
       "\n\025ReadyTransactionReply\022\021\n\tactorPath\030\001 \002" +
       "(\t\"5\n\nDeleteData\022\'\n\037instanceIdentifierPa" +
-      "thArguments\030\001 \003(\t\"\021\n\017DeleteDataReply\"3\n\010" +
+      "thArguments\030\001 \002(\t\"\021\n\017DeleteDataReply\"3\n\010" +
       "ReadData\022\'\n\037instanceIdentifierPathArgume",
       "nts\030\001 \002(\t\"P\n\rReadDataReply\022?\n\016normalized" +
       "Node\030\001 \002(\0132\'.org.opendaylight.controller" +
       ".mdsal.Node\"u\n\tWriteData\022\'\n\037instanceIden" +
-      "tifierPathArguments\030\001 \003(\t\022?\n\016normalizedN" +
+      "tifierPathArguments\030\001 \002(\t\022?\n\016normalizedN" +
       "ode\030\002 \002(\0132\'.org.opendaylight.controller." +
-      "mdsal.Node\"\020\n\016WriteDataReplyBV\n:org.open" +
-      "daylight.controller.protobuff.messages.t" +
-      "ransactionB\030ShardTransactionMessages"
+      "mdsal.Node\"\020\n\016WriteDataReply\"u\n\tMergeDat" +
+      "a\022\'\n\037instanceIdentifierPathArguments\030\001 \002" +
+      "(\t\022?\n\016normalizedNode\030\002 \002(\0132\'.org.openday" +
+      "light.controller.mdsal.Node\"\020\n\016MergeData" +
+      "ReplyBV\n:org.opendaylight.controller.pro",
+      "tobuff.messages.transactionB\030ShardTransa" +
+      "ctionMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5355,6 +6326,18 @@ public final class ShardTransactionMessages {
           internal_static_org_opendaylight_controller_mdsal_WriteDataReply_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_WriteDataReply_descriptor,
+              new java.lang.String[] { });
+          internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor =
+            getDescriptor().getMessageTypes().get(12);
+          internal_static_org_opendaylight_controller_mdsal_MergeData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_MergeData_descriptor,
+              new java.lang.String[] { "InstanceIdentifierPathArguments", "NormalizedNode", });
+          internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor =
+            getDescriptor().getMessageTypes().get(13);
+          internal_static_org_opendaylight_controller_mdsal_MergeDataReply_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor,
               new java.lang.String[] { });
           return null;
         }
