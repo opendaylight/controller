@@ -128,7 +128,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     @Override
     public void delete(InstanceIdentifier path) {
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new DeleteData(path), null);
+        remoteTransaction.tell(new DeleteData(path).toSerializable(), null);
     }
 
     @Override
