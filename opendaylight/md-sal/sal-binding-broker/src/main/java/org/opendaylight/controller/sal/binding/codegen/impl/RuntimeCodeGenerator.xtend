@@ -82,6 +82,12 @@ class RuntimeCodeGenerator extends AbstractRuntimeCodeGenerator {
                         val rpcMeta = metadata.getRpcMethod(name);
                         val bodyTmp = '''
                         {
+                            if($1 == null) {
+                                throw new IllegalArgumentException("RPC input must not be null");
+                            }
+                            if($1.«rpcMeta.inputRouteGetter.name»() == null) {
+                                throw new IllegalArgumentException("Field «rpcMeta.inputRouteGetter.name» must not be null");
+                            }
                             final «InstanceIdentifier.name» identifier = $1.«rpcMeta.inputRouteGetter.name»()«IF rpcMeta.
                             routeEncapsulated».getValue()«ENDIF»;
                             «supertype.name» instance = («supertype.name») «rpcMeta.context.routingTableField».get(identifier);
