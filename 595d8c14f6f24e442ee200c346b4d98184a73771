@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_712da9a7",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/codegen/impl/RuntimeCodeGenerator.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-07-08T12:28:57Z",
+      "side": 1,
+      "message": "Can we be a little more descriptive in the error message here? The bug seems to indicate that this is just routed RPC messages. So could we say \"Routed RPC messages must not be null and must contain a value for field \"\u003c\u003crpcMeta.inputRouteGEtter.name\u003e\u003e\"/\n\nIf someone passed in null it was either because they had a typo and know what to do, or more likely it is someone who didn\u0027t know any better and may not be confused as to what input to pass in.",
+      "revId": "595d8c14f6f24e442ee200c346b4d98184a73771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
