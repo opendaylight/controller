@@ -8,24 +8,33 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public abstract class ModifyData {
-  private final InstanceIdentifier path;
-  private final NormalizedNode<?,?> data;
+public abstract class ModifyData implements SerializableMessage {
+    protected final InstanceIdentifier path;
+    protected final NormalizedNode<?, ?> data;
+    protected final SchemaContext schemaContext;
 
-  public ModifyData(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-    this.path = path;
-    this.data = data;
-  }
+    public ModifyData(InstanceIdentifier path, NormalizedNode<?, ?> data,
+        SchemaContext context) {
+        Preconditions.checkNotNull(context,
+            "Cannot serialize an object which does not have a schema schemaContext");
 
-  public InstanceIdentifier getPath() {
-    return path;
-  }
 
-  public NormalizedNode<?, ?> getData() {
-    return data;
-  }
+        this.path = path;
+        this.data = data;
+        this.schemaContext = context;
+    }
+
+    public InstanceIdentifier getPath() {
+        return path;
+    }
+
+    public NormalizedNode<?, ?> getData() {
+        return data;
+    }
 
 }

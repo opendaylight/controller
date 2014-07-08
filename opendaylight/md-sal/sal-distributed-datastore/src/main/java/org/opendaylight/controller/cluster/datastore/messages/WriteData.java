@@ -10,10 +10,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class WriteData extends ModifyData{
 
-  public WriteData(InstanceIdentifier path, NormalizedNode<?, ?> data) {
-    super(path, data);
+  public WriteData(InstanceIdentifier path, NormalizedNode<?, ?> data, SchemaContext schemaContext) {
+    super(path, data, schemaContext);
   }
+
+    @Override public Object toSerializable() {
+        throw new UnsupportedOperationException("toSerializable");
+    }
 }
