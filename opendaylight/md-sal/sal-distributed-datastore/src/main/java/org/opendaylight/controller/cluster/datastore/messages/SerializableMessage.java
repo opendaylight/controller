@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CreateTransactionChain {
-
-
+public interface SerializableMessage {
+    Object toSerializable();
 }
