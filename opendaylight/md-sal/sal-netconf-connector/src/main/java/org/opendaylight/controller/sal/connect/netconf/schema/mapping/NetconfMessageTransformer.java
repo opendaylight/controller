@@ -55,7 +55,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     private static CompositeNode toNotification(final NetconfMessage message, final SchemaContext ctx) {
         final Set<NotificationDefinition> notifications = ctx.getNotifications();
         final Document document = message.getDocument();
-        return XmlDocumentUtils.notificationToDomNodes(document, Optional.fromNullable(notifications));
+        return XmlDocumentUtils.notificationToDomNodes(document, Optional.fromNullable(notifications), ctx);
     }
 
     @Override
