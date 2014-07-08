@@ -37,6 +37,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,8 @@ public class Shard extends UntypedProcessor {
     // By default persistent will be true and can be turned off using the system
     // property persistent
     private final boolean persistent;
+
+    private SchemaContext schemaContext;
 
     private Shard(String name) {
 
@@ -115,7 +118,7 @@ public class Shard extends UntypedProcessor {
         DOMStoreReadWriteTransaction transaction =
             store.newReadWriteTransaction();
         ActorRef transactionActor = getContext().actorOf(
-            ShardTransaction.props(transaction, getSelf()), "shard-" + createTransaction.getTransactionId());
+            ShardTransaction.props(transaction, getSelf(), schemaContext), "shard-" + createTransaction.getTransactionId());
         getSender()
             .tell(new CreateTransactionReply(transactionActor.path().toString(), createTransaction.getTransactionId()).toSerializable(),
                 getSelf());
@@ -159,6 +162,7 @@ public class Shard extends UntypedProcessor {
     }
 
     private void updateSchemaContext(UpdateSchemaContext message) {
+        this.schemaContext = message.getSchemaContext();
         store.onGlobalContextUpdated(message.getSchemaContext());
     }
 
@@ -186,7 +190,7 @@ public class Shard extends UntypedProcessor {
     private void createTransactionChain() {
         DOMStoreTransactionChain chain = store.createTransactionChain();
         ActorRef transactionChain =
-            getContext().actorOf(ShardTransactionChain.props(chain));
+            getContext().actorOf(ShardTransactionChain.props(chain, schemaContext));
         getSender()
             .tell(new CreateTransactionChainReply(transactionChain.path()),
                 getSelf());

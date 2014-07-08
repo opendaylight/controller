@@ -122,7 +122,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof WriteData);
+        Assert.assertEquals(WriteData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
     }
 
     @Test
@@ -154,7 +154,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof MergeData);
+        Assert.assertEquals(MergeData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
     }
 
     @Test
