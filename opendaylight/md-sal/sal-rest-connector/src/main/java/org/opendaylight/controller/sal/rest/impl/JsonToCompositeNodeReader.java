@@ -11,16 +11,17 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterators;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.stream.JsonReader;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Iterator;
 import java.util.Set;
 
+import org.opendaylight.controller.sal.rest.gson.JsonParser;
 import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
@@ -29,20 +30,22 @@ import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class JsonReader {
+class JsonToCompositeNodeReader {
     private static final Logger LOG = LoggerFactory.getLogger(JsonReader.class);
     private static final Splitter COLON_SPLITTER = Splitter.on(':');
 
-    private JsonReader() {
+    private JsonToCompositeNodeReader() {
 
     }
 
-    public static CompositeNodeWrapper read(final InputStream entityStream) throws UnsupportedFormatException {
+    public static CompositeNodeWrapper read(final InputStream entityStream)
+                                                      throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
 
-        JsonElement rootElement = parser.parse(new InputStreamReader(entityStream));
+        JsonElement rootElement = parser.parse(new JsonReader(
+                                                    new InputStreamReader(entityStream)));
         if (rootElement.isJsonNull()) {
-            //no content, so return null to indicate no input
+            // no content, so return null to indicate no input
             return null;
         }
 
@@ -50,7 +53,8 @@ final class JsonReader {
             throw new UnsupportedFormatException("Root element of Json has to be Object");
         }
 
-        Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
+        Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject =
+                                                  rootElement.getAsJsonObject().entrySet();
         if (entrySetsOfRootJsonObject.size() != 1) {
             throw new UnsupportedFormatException("Json Object should contain one element");
         }
@@ -77,7 +81,8 @@ final class JsonReader {
                 "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
     }
 
-    private static CompositeNodeWrapper createStructureWithRoot(final String rootObjectName, final JsonObject rootObject) {
+    private static CompositeNodeWrapper createStructureWithRoot(final String rootObjectName,
+                                                                final JsonObject rootObject) {
         CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
                 getLocalNameFor(rootObjectName));
         for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
@@ -86,9 +91,11 @@ final class JsonReader {
         return firstNode;
     }
 
-    private static void addChildToParent(final String childName, final JsonElement childType, final CompositeNodeWrapper parent) {
+    private static void addChildToParent(final String childName, final JsonElement childType,
+                                         final CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
-            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName));
+            CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
+                    getLocalNameFor(childName));
             parent.addValue(child);
             for (Entry<String, JsonElement> childOfChild : childType.getAsJsonObject().entrySet()) {
                 addChildToParent(childOfChild.getKey(), childOfChild.getValue(), child);
@@ -96,6 +103,7 @@ final class JsonReader {
         } else if (childType.isJsonArray()) {
             if (childType.getAsJsonArray().size() == 1 && childType.getAsJsonArray().get(0).isJsonNull()) {
                 parent.addValue(new EmptyNodeWrapper(getNamespaceFor(childName), getLocalNameFor(childName)));
+
             } else {
                 for (JsonElement childOfChildType : childType.getAsJsonArray()) {
                     addChildToParent(childName, childOfChildType, parent);
@@ -145,8 +153,9 @@ final class JsonReader {
         // it could be identityref Built-In Type
         URI namespace = getNamespaceFor(value);
         if (namespace != null) {
-            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null,value);
+            return new IdentityValuesDTO(namespace.toString(), getLocalNameFor(value), null, value);
         }
+
         // it is not "prefix:value" but just "value"
         return value;
     }
