@@ -3,7 +3,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import junit.framework.Assert;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
@@ -11,6 +11,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
@@ -39,7 +40,10 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         // Make CreateTransactionReply as the default response. Will need to be
         // tuned if a specific test requires some other response
         mockActorContext.setExecuteShardOperationResponse(
-            new CreateTransactionReply(doNothingActorRef.path(), "txn-1 "));
+            CreateTransactionReply.newBuilder()
+                .setTransactionActorPath(doNothingActorRef.path().toString())
+                .setTransactionId("txn-1 ")
+                .build());
     }
 
     @org.junit.After

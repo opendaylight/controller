@@ -1,0 +1,23 @@
+package org.opendaylight.controller.mdsal;
+
+option java_package = "org.opendaylight.controller.protobuff.messages.common";
+option java_outer_classname = "NormalizedNodeMessages";
+
+
+message Attribute{
+  required string name =1;
+  optional string value=2;
+}
+
+message Node{
+  required string path = 1;
+  optional string type = 2;
+  repeated Attribute attributes = 3;
+  repeated Node child=4;
+  optional string value = 5;
+}
+
+message Container{
+  required string parentPath =1 ;
+  required Node normalizedNode=2;
+}

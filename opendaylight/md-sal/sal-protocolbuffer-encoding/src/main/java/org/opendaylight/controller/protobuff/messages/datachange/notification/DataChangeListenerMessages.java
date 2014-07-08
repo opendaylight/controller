@@ -31,19 +31,19 @@ public final class DataChangeListenerMessages {
     com.google.protobuf.ByteString
         getInstanceIdentifierPathArgumentsBytes(int index);
 
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    boolean hasNormalizedNodeXml();
+    boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNodeXml();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeXmlOrBuilder();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.DataChanged}
@@ -105,14 +105,14 @@ public final class DataChangeListenerMessages {
               break;
             }
             case 18: {
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder subBuilder = null;
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
               if (((bitField0_ & 0x00000001) == 0x00000001)) {
-                subBuilder = normalizedNodeXml_.toBuilder();
+                subBuilder = normalizedNode_.toBuilder();
               }
-              normalizedNodeXml_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.PARSER, extensionRegistry);
+              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(normalizedNodeXml_);
-                normalizedNodeXml_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(normalizedNode_);
+                normalizedNode_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000001;
               break;
@@ -190,42 +190,42 @@ public final class DataChangeListenerMessages {
       return instanceIdentifierPathArguments_.getByteString(index);
     }
 
-    // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;
-    public static final int NORMALIZEDNODEXML_FIELD_NUMBER = 2;
-    private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNodeXml_;
+    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    public boolean hasNormalizedNodeXml() {
+    public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNodeXml() {
-      return normalizedNodeXml_;
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
+      return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeXmlOrBuilder() {
-      return normalizedNodeXml_;
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
+      return normalizedNode_;
     }
 
     private void initFields() {
       instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      normalizedNodeXml_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasNormalizedNodeXml()) {
+      if (!hasNormalizedNode()) {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!getNormalizedNodeXml().isInitialized()) {
+      if (!getNormalizedNode().isInitialized()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -240,7 +240,7 @@ public final class DataChangeListenerMessages {
         output.writeBytes(1, instanceIdentifierPathArguments_.getByteString(i));
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(2, normalizedNodeXml_);
+        output.writeMessage(2, normalizedNode_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -262,7 +262,7 @@ public final class DataChangeListenerMessages {
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, normalizedNodeXml_);
+          .computeMessageSize(2, normalizedNode_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -372,7 +372,7 @@ public final class DataChangeListenerMessages {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getNormalizedNodeXmlFieldBuilder();
+          getNormalizedNodeFieldBuilder();
         }
       }
       private static Builder create() {
@@ -383,10 +383,10 @@ public final class DataChangeListenerMessages {
         super.clear();
         instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        if (normalizedNodeXmlBuilder_ == null) {
-          normalizedNodeXml_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
         } else {
-          normalizedNodeXmlBuilder_.clear();
+          normalizedNodeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
@@ -426,10 +426,10 @@ public final class DataChangeListenerMessages {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000001;
         }
-        if (normalizedNodeXmlBuilder_ == null) {
-          result.normalizedNodeXml_ = normalizedNodeXml_;
+        if (normalizedNodeBuilder_ == null) {
+          result.normalizedNode_ = normalizedNode_;
         } else {
-          result.normalizedNodeXml_ = normalizedNodeXmlBuilder_.build();
+          result.normalizedNode_ = normalizedNodeBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -457,19 +457,19 @@ public final class DataChangeListenerMessages {
           }
           onChanged();
         }
-        if (other.hasNormalizedNodeXml()) {
-          mergeNormalizedNodeXml(other.getNormalizedNodeXml());
+        if (other.hasNormalizedNode()) {
+          mergeNormalizedNode(other.getNormalizedNode());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasNormalizedNodeXml()) {
+        if (!hasNormalizedNode()) {
 
           return false;
         }
-        if (!getNormalizedNodeXml().isInitialized()) {
+        if (!getNormalizedNode().isInitialized()) {
 
           return false;
         }
@@ -588,121 +588,121 @@ public final class DataChangeListenerMessages {
         return this;
       }
 
-      // required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;
-      private org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml normalizedNodeXml_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder> normalizedNodeXmlBuilder_;
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public boolean hasNormalizedNodeXml() {
+      public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml getNormalizedNodeXml() {
-        if (normalizedNodeXmlBuilder_ == null) {
-          return normalizedNodeXml_;
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
+        if (normalizedNodeBuilder_ == null) {
+          return normalizedNode_;
         } else {
-          return normalizedNodeXmlBuilder_.getMessage();
+          return normalizedNodeBuilder_.getMessage();
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder setNormalizedNodeXml(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
-        if (normalizedNodeXmlBuilder_ == null) {
+      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (normalizedNodeBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          normalizedNodeXml_ = value;
+          normalizedNode_ = value;
           onChanged();
         } else {
-          normalizedNodeXmlBuilder_.setMessage(value);
+          normalizedNodeBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder setNormalizedNodeXml(
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder builderForValue) {
-        if (normalizedNodeXmlBuilder_ == null) {
-          normalizedNodeXml_ = builderForValue.build();
+      public Builder setNormalizedNode(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = builderForValue.build();
           onChanged();
         } else {
-          normalizedNodeXmlBuilder_.setMessage(builderForValue.build());
+          normalizedNodeBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder mergeNormalizedNodeXml(org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml value) {
-        if (normalizedNodeXmlBuilder_ == null) {
+      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (normalizedNodeBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              normalizedNodeXml_ != org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance()) {
-            normalizedNodeXml_ =
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.newBuilder(normalizedNodeXml_).mergeFrom(value).buildPartial();
+              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
+            normalizedNode_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
           } else {
-            normalizedNodeXml_ = value;
+            normalizedNode_ = value;
           }
           onChanged();
         } else {
-          normalizedNodeXmlBuilder_.mergeFrom(value);
+          normalizedNodeBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public Builder clearNormalizedNodeXml() {
-        if (normalizedNodeXmlBuilder_ == null) {
-          normalizedNodeXml_ = org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.getDefaultInstance();
+      public Builder clearNormalizedNode() {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
           onChanged();
         } else {
-          normalizedNodeXmlBuilder_.clear();
+          normalizedNodeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder getNormalizedNodeXmlBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000002;
         onChanged();
-        return getNormalizedNodeXmlFieldBuilder().getBuilder();
+        return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder getNormalizedNodeXmlOrBuilder() {
-        if (normalizedNodeXmlBuilder_ != null) {
-          return normalizedNodeXmlBuilder_.getMessageOrBuilder();
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
+        if (normalizedNodeBuilder_ != null) {
+          return normalizedNodeBuilder_.getMessageOrBuilder();
         } else {
-          return normalizedNodeXml_;
+          return normalizedNode_;
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.NormalizedNodeXml normalizedNodeXml = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>
-          getNormalizedNodeXmlFieldBuilder() {
-        if (normalizedNodeXmlBuilder_ == null) {
-          normalizedNodeXmlBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXml.Builder, org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.NormalizedNodeXmlOrBuilder>(
-                  normalizedNodeXml_,
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          getNormalizedNodeFieldBuilder() {
+        if (normalizedNodeBuilder_ == null) {
+          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+                  normalizedNode_,
                   getParentForChildren(),
                   isClean());
-          normalizedNodeXml_ = null;
+          normalizedNode_ = null;
         }
-        return normalizedNodeXmlBuilder_;
+        return normalizedNodeBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.DataChanged)
@@ -1045,14 +1045,13 @@ public final class DataChangeListenerMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\030DataChangeListener.proto\022!org.opendayl" +
-      "ight.controller.mdsal\032\032SimpleNormalizedN" +
-      "ode.proto\"\207\001\n\013DataChanged\022\'\n\037instanceIde" +
-      "ntifierPathArguments\030\001 \003(\t\022O\n\021normalized" +
-      "NodeXml\030\002 \002(\01324.org.opendaylight.control" +
-      "ler.mdsal.NormalizedNodeXml\"\022\n\020DataChang" +
-      "edReplyBd\nForg.opendaylight.controller.p" +
-      "rotobuff.messages.datachange.notificatio" +
-      "nB\032DataChangeListenerMessages"
+      "ight.controller.mdsal\032\014Common.proto\"w\n\013D" +
+      "ataChanged\022\'\n\037instanceIdentifierPathArgu" +
+      "ments\030\001 \003(\t\022?\n\016normalizedNode\030\002 \002(\0132\'.or" +
+      "g.opendaylight.controller.mdsal.Node\"\022\n\020" +
+      "DataChangedReplyBd\nForg.opendaylight.con" +
+      "troller.protobuff.messages.datachange.no" +
+      "tificationB\032DataChangeListenerMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1064,7 +1063,7 @@ public final class DataChangeListenerMessages {
           internal_static_org_opendaylight_controller_mdsal_DataChanged_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_DataChanged_descriptor,
-              new java.lang.String[] { "InstanceIdentifierPathArguments", "NormalizedNodeXml", });
+              new java.lang.String[] { "InstanceIdentifierPathArguments", "NormalizedNode", });
           internal_static_org_opendaylight_controller_mdsal_DataChangedReply_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_org_opendaylight_controller_mdsal_DataChangedReply_fieldAccessorTable = new
@@ -1077,7 +1076,7 @@ public final class DataChangeListenerMessages {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage.getDescriptor(),
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.getDescriptor(),
         }, assigner);
   }
 

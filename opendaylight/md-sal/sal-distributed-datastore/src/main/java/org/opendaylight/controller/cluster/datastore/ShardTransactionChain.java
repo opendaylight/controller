@@ -14,7 +14,7 @@ import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 
@@ -46,7 +46,10 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         ActorRef transactionActor = getContext().actorOf(ShardTransaction
             .props(chain, transaction, getContext().parent()), "shard-" + createTransaction.getTransactionId());
         getSender()
-            .tell(new CreateTransactionReply(transactionActor.path(), createTransaction.getTransactionId()),
+            .tell(ShardTransactionMessages.CreateTransactionReply.newBuilder()
+                .setTransactionActorPath(transactionActor.path().toString())
+                .setTransactionId(createTransaction.getTransactionId())
+                .build(),
                 getSelf());
     }
 

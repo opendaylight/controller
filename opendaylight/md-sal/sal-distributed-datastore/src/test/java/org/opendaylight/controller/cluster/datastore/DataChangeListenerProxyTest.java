@@ -36,7 +36,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
         }
 
         @Override
-        public Map<InstanceIdentifier, ? extends NormalizedNode<?, ?>> getOriginalData() {
+        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
             throw new UnsupportedOperationException("getOriginalData");
         }
 

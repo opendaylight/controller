@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.NonPersistent;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -37,6 +36,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +117,10 @@ public class Shard extends UntypedProcessor {
         ActorRef transactionActor = getContext().actorOf(
             ShardTransaction.props(transaction, getSelf()), "shard-" + createTransaction.getTransactionId());
         getSender()
-            .tell(new CreateTransactionReply(transactionActor.path(), createTransaction.getTransactionId()),
+            .tell(CreateTransactionReply.newBuilder()
+                    .setTransactionActorPath(transactionActor.path().toString())
+                    .setTransactionId(createTransaction.getTransactionId())
+                    .build(),
                 getSelf());
     }
 
