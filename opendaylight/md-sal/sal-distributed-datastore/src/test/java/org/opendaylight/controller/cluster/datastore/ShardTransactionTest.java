@@ -245,7 +245,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    subject.tell(new DeleteData(TestModel.TEST_PATH), getRef());
+                    subject.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
