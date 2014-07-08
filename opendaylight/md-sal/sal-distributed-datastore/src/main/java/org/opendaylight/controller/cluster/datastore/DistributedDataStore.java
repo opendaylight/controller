@@ -44,6 +44,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private final String type;
     private final ActorContext actorContext;
 
+    private SchemaContext schemaContext;
+
+
 
     /**
      * Executor used to run FutureTask's
@@ -88,28 +91,29 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(actorContext, executor);
+        return new TransactionChainProxy(actorContext, executor, schemaContext);
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_ONLY,
-            executor);
+            executor, schemaContext);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY,
-            executor);
+            executor, schemaContext);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE,
-            executor);
+            executor, schemaContext);
     }
 
     @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
+        this.schemaContext = schemaContext;
         actorContext.getShardManager().tell(
             new UpdateSchemaContext(schemaContext), null);
     }

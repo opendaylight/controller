@@ -93,7 +93,7 @@ public class ShardManager extends AbstractUntypedActor {
         getSender().tell(new PrimaryNotFound(shardName), getSelf());
       }
     } else if(message instanceof UpdateSchemaContext){
-        // FIXME : Notify all local shards of a context change
+        // FIXME : Notify all local shards of a schemaContext change
         getContext().system().actorSelection(defaultShardPath).forward(message, getContext());
     }
   }

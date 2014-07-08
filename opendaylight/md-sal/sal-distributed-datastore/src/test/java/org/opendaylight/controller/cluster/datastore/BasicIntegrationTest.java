@@ -99,7 +99,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     final ActorRef transactionActorRef = watchActor(transaction);
 
                     transaction.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()),
                         getRef());
 
                     Boolean writeDone = new ExpectMsg<Boolean>("WriteDataReply") {
