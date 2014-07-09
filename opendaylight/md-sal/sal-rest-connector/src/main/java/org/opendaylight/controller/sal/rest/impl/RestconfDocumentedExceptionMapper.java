@@ -25,10 +25,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map.Entry;
-import javax.activation.UnsupportedDataTypeException;
+
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -36,14 +35,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
@@ -54,6 +49,7 @@ import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -148,41 +144,17 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return responseBody;
     }
 
-    private Object toXMLResponseBody(final ImmutableCompositeNode errorsNode, final DataNodeContainer errorsSchemaNode) {
-
-        XmlMapper xmlMapper = new XmlMapper();
-
-        Object responseBody = null;
+    private Object toXMLResponseBody( final ImmutableCompositeNode errorsNode, final DataNodeContainer errorsSchemaNode ) {
         try {
-            Document xmlDoc = xmlMapper.write(errorsNode, errorsSchemaNode);
-
-            responseBody = documentToString(xmlDoc);
-        } catch (TransformerException | UnsupportedDataTypeException | UnsupportedEncodingException e) {
+            ByteArrayOutputStream s = new ByteArrayOutputStream();
+            XMLStreamWriter writer = XMLOutputFactory.newFactory().createXMLStreamWriter(s);
+            XmlMapper.write(writer, errorsNode, (SchemaNode)errorsSchemaNode);
+            writer.close();
+            return s.toString("UTF-8");
+        } catch (XMLStreamException | IOException e) {
             LOG.error("Error writing error response body", e);
+            return null;
         }
-
-        return responseBody;
-    }
-
-    private String documentToString(final Document doc) throws TransformerException, UnsupportedEncodingException {
-        Transformer transformer = createTransformer();
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-
-        transformer.transform(new DOMSource(doc), new StreamResult(outStream));
-
-        return outStream.toString("UTF-8");
-    }
-
-    private Transformer createTransformer() throws TransformerFactoryConfigurationError,
-            TransformerConfigurationException {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-        return transformer;
     }
 
     private Node<?> toDomNode(final RestconfError error) {
