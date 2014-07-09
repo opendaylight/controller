@@ -13,11 +13,12 @@ import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public class ServiceRegistryWrapper {
 
-    private ServiceReferenceReadableRegistry configServiceRefRegistry;
+    private final ServiceReferenceReadableRegistry configServiceRefRegistry;
 
     public ServiceRegistryWrapper(ServiceReferenceReadableRegistry configServiceRefRegistry) {
         this.configServiceRefRegistry = configServiceRefRegistry;
@@ -43,7 +44,12 @@ public class ServiceRegistryWrapper {
 
         String qNameOfService = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceName);
         try {
-            return configServiceRefRegistry.getServiceReference(qNameOfService, refName);
+            /*
+             Remove transaction name as this is redundant - will be stripped in DynamicWritableWrapper,
+             and makes it hard to compare with service references got from MXBean attributes
+            */
+            return ObjectNameUtil.withoutTransactionName(
+                    configServiceRefRegistry.getServiceReference(qNameOfService, refName));
         } catch (InstanceNotFoundException e) {
             throw new IllegalArgumentException("No serviceInstance mapped to " + refName
                     + " under service name " + serviceName + " , " + refNameToInstance.keySet(), e);
