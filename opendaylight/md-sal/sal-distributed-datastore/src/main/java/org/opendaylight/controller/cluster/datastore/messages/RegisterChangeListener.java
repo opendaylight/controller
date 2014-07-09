@@ -9,11 +9,14 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorPath;
+import akka.actor.ActorSystem;
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 public class RegisterChangeListener implements SerializableMessage {
-
+  public static final Class SERIALIZABLE_CLASS = ListenerRegistrationMessages.RegisterChangeListener.class;
     private final InstanceIdentifier path;
     private final ActorPath dataChangeListenerPath;
     private final AsyncDataBroker.DataChangeScope scope;
@@ -41,7 +44,20 @@ public class RegisterChangeListener implements SerializableMessage {
     }
 
 
-    @Override public Object toSerializable() {
-        throw new UnsupportedOperationException("foo");
+    @Override
+    public ListenerRegistrationMessages.RegisterChangeListener toSerializable() {
+      return ListenerRegistrationMessages.RegisterChangeListener.newBuilder()
+          .setInstanceIdentifierPath(path.toString())
+          .setDataChangeListenerActorPath(dataChangeListenerPath.toString())
+          .setDataChangeScope(scope.ordinal()).build();
     }
+
+  public static RegisterChangeListener fromSerializable(ActorSystem actorSystem,Object serializable){
+    ListenerRegistrationMessages.RegisterChangeListener o = (ListenerRegistrationMessages.RegisterChangeListener) serializable;
+    return new RegisterChangeListener(InstanceIdentifierUtils.from(o.getInstanceIdentifierPath()),
+                                                actorSystem.actorFor(o.getDataChangeListenerActorPath()).path(),
+                                              AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()]);
+  }
+
+
 }
