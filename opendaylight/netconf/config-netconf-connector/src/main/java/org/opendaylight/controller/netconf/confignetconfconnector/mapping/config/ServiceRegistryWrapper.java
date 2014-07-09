@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 
 public class ServiceRegistryWrapper {
 
-    private ServiceReferenceReadableRegistry configServiceRefRegistry;
+    private final ServiceReferenceReadableRegistry configServiceRefRegistry;
 
     public ServiceRegistryWrapper(ServiceReferenceReadableRegistry configServiceRefRegistry) {
         this.configServiceRefRegistry = configServiceRefRegistry;
