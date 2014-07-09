@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -57,6 +57,10 @@ public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
+    /**
+     * Priority to determine whether to override existing protocol service.
+     */
+    private static final int  PLUGIN_PRIORITY = 10;
 
     /**
      * Function that is used to communicate to dependency manager the list of
@@ -136,6 +140,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINPRIORITY.toString(),
+                      Integer.valueOf(PLUGIN_PRIORITY));
             c.setInterface(IPluginInDataPacketService.class.getName(), props);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
@@ -165,6 +171,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINPRIORITY.toString(),
+                      Integer.valueOf(PLUGIN_PRIORITY));
             c.setInterface(new String[] {
                     IReadFilterInternalListener.class.getName(),
                     IPluginInReadService.class.getName() }, props);
@@ -256,6 +264,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINPRIORITY.toString(),
+                      Integer.valueOf(PLUGIN_PRIORITY));
             c.setInterface(
                     new String[] { IPluginInFlowProgrammerService.class.getName(), IMessageListener.class.getName(),
                             IContainerListener.class.getName(), IInventoryShimExternalListener.class.getName(),

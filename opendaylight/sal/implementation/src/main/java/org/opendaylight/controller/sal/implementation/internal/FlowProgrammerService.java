@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,7 +38,6 @@ import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerSe
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.Status;
@@ -58,12 +57,12 @@ public class FlowProgrammerService implements IFlowProgrammerService,
 
     protected static final Logger logger = LoggerFactory
             .getLogger(FlowProgrammerService.class);
-    private ConcurrentHashMap<String, IPluginInFlowProgrammerService> pluginFlowProgrammer;
+    private ConcurrentHashMap<String, ProtocolService<IPluginInFlowProgrammerService>> pluginFlowProgrammer;
     private Set<IFlowProgrammerListener> listener;
     private AtomicLong seq;
 
     public FlowProgrammerService() {
-        pluginFlowProgrammer = new ConcurrentHashMap<String, IPluginInFlowProgrammerService>();
+        pluginFlowProgrammer = new ConcurrentHashMap<String, ProtocolService<IPluginInFlowProgrammerService>>();
         listener = new HashSet<IFlowProgrammerListener>();
         seq = new AtomicLong();
         /*
@@ -117,58 +116,11 @@ public class FlowProgrammerService implements IFlowProgrammerService,
 
     // Set the reference to the plugin flow programmer
     public void setService(Map<String, Object> props, IPluginInFlowProgrammerService s) {
-        if (this.pluginFlowProgrammer == null) {
-            logger.error("pluginFlowProgrammer store null");
-            return;
-        }
-
-        if (logger.isTraceEnabled()) {
-            logger.trace("Got a service set request {}", s);
-            for (Map.Entry<String, Object> entry : props.entrySet()) {
-                logger.trace("Prop key:({}) value:({})", entry.getKey(), entry.getValue());
-            }
-        }
-
-        String type = null;
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a pluginFlowProgrammer without any "
-                    + "protocolPluginType provided");
-        } else {
-            this.pluginFlowProgrammer.put(type, s);
-            logger.debug("Stored the pluginFlowProgrammer for type: {}", type);
-        }
+        ProtocolService.set(this.pluginFlowProgrammer, props, s, logger);
     }
 
     public void unsetService(Map<String, Object> props, IPluginInFlowProgrammerService s) {
-        if (this.pluginFlowProgrammer == null) {
-            logger.error("pluginFlowProgrammer store null");
-            return;
-        }
-
-        logger.debug("Received unsetpluginFlowProgrammer request");
-        if (logger.isTraceEnabled()) {
-            logger.trace("Got a service set request {}", s);
-            for (Map.Entry<String, Object> entry : props.entrySet()) {
-                logger.trace("Prop key:({}) value:({})", entry.getKey(), entry.getValue());
-            }
-        }
-
-        String type = null;
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a pluginFlowProgrammer without any "
-                    + "protocolPluginType provided");
-        } else if (this.pluginFlowProgrammer.get(type).equals(s)) {
-            this.pluginFlowProgrammer.remove(type);
-            logger.debug("Removed the pluginFlowProgrammer for type: {}", type);
-        }
+        ProtocolService.unset(this.pluginFlowProgrammer, props, s, logger);
     }
 
     public void setListener(IFlowProgrammerListener s) {
@@ -182,9 +134,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status addFlow(Node node, Flow flow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType()).addFlow(
-                        node, flow);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().addFlow(node, flow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -193,9 +146,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status removeFlow(Node node, Flow flow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .removeFlow(node, flow);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().removeFlow(node, flow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -204,9 +158,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status removeAllFlows(Node node) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .removeAllFlows(node);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().removeAllFlows(node);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -215,9 +170,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .modifyFlow(node, oldFlow, newFlow);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().modifyFlow(node, oldFlow, newFlow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -226,9 +182,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status addFlowAsync(Node node, Flow flow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType()).addFlowAsync(
-                        node, flow, getNextRid());
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().addFlowAsync(node, flow, getNextRid());
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -237,9 +194,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status removeFlowAsync(Node node, Flow flow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .removeFlowAsync(node, flow, getNextRid());
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().removeFlowAsync(node, flow, getNextRid());
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -248,9 +206,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow) {
         if (pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .modifyFlowAsync(node, oldFlow, newFlow, getNextRid());
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().modifyFlowAsync(node, oldFlow, newFlow, getNextRid());
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -508,9 +467,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status syncSendBarrierMessage(Node node) {
         if (this.pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .syncSendBarrierMessage(node);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().syncSendBarrierMessage(node);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -519,9 +479,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     @Override
     public Status asyncSendBarrierMessage(Node node) {
         if (this.pluginFlowProgrammer != null) {
-            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                        .asyncSendBarrierMessage(node);
+            ProtocolService<IPluginInFlowProgrammerService> service =
+                this.pluginFlowProgrammer.get(node.getType());
+            if (service != null) {
+                return service.getService().asyncSendBarrierMessage(node);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
