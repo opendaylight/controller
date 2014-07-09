@@ -19,5 +19,5 @@ message Node{
 
 message Container{
   required string parentPath =1 ;
-  required Node normalizedNode=2;
+  optional Node normalizedNode=2;
 }

@@ -3636,17 +3636,17 @@ public final class ShardTransactionMessages {
   public interface ReadDataReplyOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
@@ -3754,23 +3754,23 @@ public final class ShardTransactionMessages {
     }
 
     private int bitField0_;
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
     public static final int NORMALIZEDNODE_FIELD_NUMBER = 1;
     private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
       return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
       return normalizedNode_;
@@ -3784,13 +3784,11 @@ public final class ShardTransactionMessages {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasNormalizedNode()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getNormalizedNode().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasNormalizedNode()) {
+        if (!getNormalizedNode().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -3998,13 +3996,11 @@ public final class ShardTransactionMessages {
       }
 
       public final boolean isInitialized() {
-        if (!hasNormalizedNode()) {
+        if (hasNormalizedNode()) {
+          if (!getNormalizedNode().isInitialized()) {
 
-          return false;
-        }
-        if (!getNormalizedNode().isInitialized()) {
-
-          return false;
+            return false;
+          }
         }
         return true;
       }
@@ -4028,18 +4024,18 @@ public final class ShardTransactionMessages {
       }
       private int bitField0_;
 
-      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
+      // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;
       private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -4049,7 +4045,7 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -4065,7 +4061,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder setNormalizedNode(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
@@ -4079,7 +4075,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -4098,7 +4094,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public Builder clearNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -4111,7 +4107,7 @@ public final class ShardTransactionMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000001;
@@ -4119,7 +4115,7 @@ public final class ShardTransactionMessages {
         return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
         if (normalizedNodeBuilder_ != null) {
@@ -4129,7 +4125,7 @@ public final class ShardTransactionMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
@@ -6238,7 +6234,7 @@ public final class ShardTransactionMessages {
       "thArguments\030\001 \002(\t\"\021\n\017DeleteDataReply\"3\n\010" +
       "ReadData\022\'\n\037instanceIdentifierPathArgume",
       "nts\030\001 \002(\t\"P\n\rReadDataReply\022?\n\016normalized" +
-      "Node\030\001 \002(\0132\'.org.opendaylight.controller" +
+      "Node\030\001 \001(\0132\'.org.opendaylight.controller" +
       ".mdsal.Node\"u\n\tWriteData\022\'\n\037instanceIden" +
       "tifierPathArguments\030\001 \002(\t\022?\n\016normalizedN" +
       "ode\030\002 \002(\0132\'.org.opendaylight.controller." +

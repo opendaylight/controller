@@ -51,22 +51,22 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
                 protected void run() {
 
                     subject.tell(
-                        new ReadData(InstanceIdentifier.builder().build()),
+                        new ReadData(InstanceIdentifier.builder().build()).toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof ReadDataReply) {
-                                if (((ReadDataReply) in).getNormalizedNode()
-                                    != null) {
+                            if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
+                              if (ReadDataReply.fromSerializable(testSchemaContext,InstanceIdentifier.builder().build(), in)
+                                  .getNormalizedNode()!= null) {
                                     return "match";
                                 }
                                 return null;
@@ -91,21 +91,22 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config"));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
                 protected void run() {
 
                     subject.tell(
-                        new ReadData(TestModel.TEST_PATH),
+                        new ReadData(TestModel.TEST_PATH).toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof ReadDataReply) {
-                                if (((ReadDataReply) in).getNormalizedNode()
+                            if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
+                                if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
+                                    .getNormalizedNode()
                                     == null) {
                                     return "match";
                                 }

@@ -42,7 +42,7 @@ required string instanceIdentifierPathArguments=1;
 }
 
 message ReadDataReply{
-  required Node normalizedNode=1;
+  optional Node normalizedNode=1;
 }
 
 message WriteData {
