@@ -9,12 +9,6 @@ package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,6 +31,12 @@ import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 public class DataNormalizer {
 
@@ -70,6 +70,16 @@ public class DataNormalizer {
         }
 
         return InstanceIdentifier.create(normalizedArgs.build());
+    }
+
+    public DataNormalizationOperation<?> getOperation(final InstanceIdentifier legacy) throws DataNormalizationException {
+        DataNormalizationOperation<?> currentOp = operation;
+        Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
+
+        while (arguments.hasNext()) {
+            currentOp = currentOp.getChild(arguments.next());
+        }
+        return currentOp;
     }
 
     public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
@@ -120,7 +130,7 @@ public class DataNormalizer {
         DataNormalizationOperation<?> currentOp = operation;
         for (PathArgument normalizedArg : normalized.getPathArguments()) {
             currentOp = currentOp.getChild(normalizedArg);
-            if(!currentOp.isMixin()) {
+            if (!currentOp.isMixin()) {
                 legacyArgs.add(normalizedArg);
             }
         }
@@ -134,7 +144,7 @@ public class DataNormalizer {
             return toLegacyFromDataContainer((DataContainerNode<?>) normalizedData);
         } else if (normalizedData instanceof AnyXmlNode) {
             Node<?> value = ((AnyXmlNode) normalizedData).getValue();
-            return value instanceof CompositeNode ? (CompositeNode)value : null;
+            return value instanceof CompositeNode ? (CompositeNode) value : null;
         }
         return null;
     }
@@ -169,7 +179,7 @@ public class DataNormalizer {
         for (NormalizedNode<?, ?> child : node.getValue()) {
             if (child instanceof MixinNode && child instanceof NormalizedNodeContainer<?, ?, ?>) {
                 builder.addAll(toLegacyNodesFromMixin((NormalizedNodeContainer) child));
-            } else if( child instanceof UnkeyedListNode) {
+            } else if (child instanceof UnkeyedListNode) {
                 builder.addAll(toLegacyNodesFromUnkeyedList((UnkeyedListNode) child));
             } else {
                 addToBuilder(builder, toLegacy(child));
