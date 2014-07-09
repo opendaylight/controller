@@ -1,0 +1,56 @@
+module user-notification {
+    yang-version 1;
+    namespace "org:opendaylight:notification:test:ns:yang:user-notification";
+    prefix "user";
+
+    organization "Cisco Systems";
+    contact "Lukas Sedlak";
+    description "Test model for testing notifications";
+
+    revision "2014-07-08" {
+        description "Initial revision";
+    }
+
+    identity user-identity {
+        description "Identity of user incoming to Web Page";
+    }
+
+    identity public-user {
+        base user-identity;
+        description "Identity of random public non-registered user";
+    }
+
+    notification user-visited-page {
+        leaf incoming-user {
+            type identityref {
+                base "user-identity";
+            }
+        }
+
+        leaf ip-address {
+            type string;
+        }
+
+        leaf mac {
+            type string;
+        }
+
+        leaf browser-id {
+            type string;
+        }
+
+        container region {
+            leaf name {
+                type string;
+            }
+
+            leaf time-zone {
+                type string;
+            }
+        }
+
+        leaf visiting-date {
+            type string;
+        }
+    }
+}
