@@ -59,8 +59,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private final ExecutorService executor =
         Executors.newFixedThreadPool(10);
 
-    public DistributedDataStore(ActorSystem actorSystem, String type) {
-        this(new ActorContext(actorSystem, actorSystem.actorOf(ShardManager.props(type), "shardmanager-" + type)), type);
+    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
+        this(new ActorContext(actorSystem, actorSystem.actorOf(ShardManager.props(type, cluster, configuration), "shardmanager-" + type), configuration), type);
     }
 
     public DistributedDataStore(ActorContext actorContext, String type) {

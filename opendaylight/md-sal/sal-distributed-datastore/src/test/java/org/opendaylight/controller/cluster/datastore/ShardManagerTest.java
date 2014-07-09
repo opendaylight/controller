@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
+import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import scala.concurrent.duration.Duration;
 
 public class ShardManagerTest {
@@ -30,7 +32,7 @@ public class ShardManagerTest {
     public void testOnReceiveFindPrimaryForNonExistentShard() throws Exception {
 
         new JavaTestKit(system) {{
-            final Props props = ShardManager.props("config");
+            final Props props = ShardManager.props("config", new MockClusterWrapper(), new MockConfiguration());
             final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
@@ -51,7 +53,7 @@ public class ShardManagerTest {
   public void testOnReceiveFindPrimaryForExistentShard() throws Exception {
 
     new JavaTestKit(system) {{
-      final Props props = ShardManager.props("config");
+      final Props props = ShardManager.props("config", new MockClusterWrapper(), new MockConfiguration());
       final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
 
       // the run() method needs to finish within 3 seconds

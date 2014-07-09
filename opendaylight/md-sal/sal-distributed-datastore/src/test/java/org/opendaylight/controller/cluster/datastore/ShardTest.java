@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
+import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
@@ -71,7 +72,7 @@ public class ShardTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(
-                        new UpdateSchemaContext(TestModel.createTestContext()),
+                        new UpdateSchemaContext(SchemaContextHelper.full()),
                         getRef());
 
                     subject.tell(new RegisterChangeListener(TestModel.TEST_PATH,
