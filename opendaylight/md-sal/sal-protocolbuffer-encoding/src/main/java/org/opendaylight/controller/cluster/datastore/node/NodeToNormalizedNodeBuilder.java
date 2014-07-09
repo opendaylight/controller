@@ -193,7 +193,8 @@ public abstract class NodeToNormalizedNodeBuilder<T extends PathArgument>
     public final NormalizedNodeContainer<?, ?, ?> normalize(
         final QName nodeType, final Node node) {
       checkArgument(node != null);
-      if (!node.getType().equals(AugmentationNode.class.getSimpleName())) {
+
+      if (!node.getType().equals(AugmentationNode.class.getSimpleName())&& !node.getType().equals(ContainerNode.class.getSimpleName())) {
         checkArgument(nodeType != null);
       }
 
