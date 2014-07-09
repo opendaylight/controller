@@ -123,8 +123,8 @@ public class ShardTransaction extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message instanceof ReadData) {
-            readData((ReadData) message);
+        if (ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            readData(ReadData.fromSerializable(message));
         } else if (WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             writeData(WriteData.fromSerializable(message, schemaContext));
         } else if (MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
@@ -139,6 +139,8 @@ public class ShardTransaction extends AbstractUntypedActor {
             // This is here for testing only
             getSender().tell(new GetCompositeModificationReply(
                 new ImmutableCompositeModification(modification)), getSelf());
+        }else{
+          throw new Exception ("handleRecieve received an unknown mesages"+message);
         }
     }
 
@@ -155,9 +157,9 @@ public class ShardTransaction extends AbstractUntypedActor {
                 try {
                     Optional<NormalizedNode<?, ?>> optional = future.get();
                     if (optional.isPresent()) {
-                        sender.tell(new ReadDataReply(optional.get()), self);
+                        sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
                     } else {
-                        sender.tell(new ReadDataReply(null), self);
+                        sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e,

@@ -2200,17 +2200,17 @@ public final class NormalizedNodeMessages {
     com.google.protobuf.ByteString
         getParentPathBytes();
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     boolean hasNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
   }
@@ -2366,23 +2366,23 @@ public final class NormalizedNodeMessages {
       }
     }
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
     public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
     private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public boolean hasNormalizedNode() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
       return normalizedNode_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
      */
     public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
       return normalizedNode_;
@@ -2401,13 +2401,11 @@ public final class NormalizedNodeMessages {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasNormalizedNode()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getNormalizedNode().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasNormalizedNode()) {
+        if (!getNormalizedNode().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -2637,13 +2635,11 @@ public final class NormalizedNodeMessages {
 
           return false;
         }
-        if (!hasNormalizedNode()) {
+        if (hasNormalizedNode()) {
+          if (!getNormalizedNode().isInitialized()) {
 
-          return false;
-        }
-        if (!getNormalizedNode().isInitialized()) {
-
-          return false;
+            return false;
+          }
         }
         return true;
       }
@@ -2741,18 +2737,18 @@ public final class NormalizedNodeMessages {
         return this;
       }
 
-      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+      // optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
       private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public boolean hasNormalizedNode() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -2762,7 +2758,7 @@ public final class NormalizedNodeMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -2778,7 +2774,7 @@ public final class NormalizedNodeMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder setNormalizedNode(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
@@ -2792,7 +2788,7 @@ public final class NormalizedNodeMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
         if (normalizedNodeBuilder_ == null) {
@@ -2811,7 +2807,7 @@ public final class NormalizedNodeMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public Builder clearNormalizedNode() {
         if (normalizedNodeBuilder_ == null) {
@@ -2824,7 +2820,7 @@ public final class NormalizedNodeMessages {
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
         bitField0_ |= 0x00000002;
@@ -2832,7 +2828,7 @@ public final class NormalizedNodeMessages {
         return getNormalizedNodeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
         if (normalizedNodeBuilder_ != null) {
@@ -2842,7 +2838,7 @@ public final class NormalizedNodeMessages {
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
@@ -2900,7 +2896,7 @@ public final class NormalizedNodeMessages {
       "aylight.controller.mdsal.Attribute\0226\n\005ch" +
       "ild\030\004 \003(\0132\'.org.opendaylight.controller." +
       "mdsal.Node\022\r\n\005value\030\005 \001(\t\"`\n\tContainer\022\022" +
-      "\n\nparentPath\030\001 \002(\t\022?\n\016normalizedNode\030\002 \002" +
+      "\n\nparentPath\030\001 \002(\t\022?\n\016normalizedNode\030\002 \001" +
       "(\0132\'.org.opendaylight.controller.mdsal.N" +
       "odeBO\n5org.opendaylight.controller.proto",
       "buff.messages.commonB\026NormalizedNodeMess" +
