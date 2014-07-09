@@ -75,15 +75,15 @@ public class ShardTest extends AbstractActorTest {
                         getRef());
 
                     subject.tell(new RegisterChangeListener(TestModel.TEST_PATH,
-                        getRef().path(), AsyncDataBroker.DataChangeScope.BASE),
+                        getRef().path(), AsyncDataBroker.DataChangeScope.BASE).toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof RegisterChangeListenerReply) {
+                            if (in.getClass().equals(RegisterChangeListenerReply.SERIALIZABLE_CLASS)) {
                                 RegisterChangeListenerReply reply =
-                                    (RegisterChangeListenerReply) in;
+                                    RegisterChangeListenerReply.fromSerializable(getSystem(),in);
                                 return reply.getListenerRegistrationPath()
                                     .toString();
                             } else {

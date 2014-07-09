@@ -105,8 +105,8 @@ public class Shard extends UntypedProcessor {
 
         if (message instanceof CreateTransactionChain) {
             createTransactionChain();
-        } else if (message instanceof RegisterChangeListener) {
-            registerChangeListener((RegisterChangeListener) message);
+        } else if (message.getClass().equals(RegisterChangeListener.SERIALIZABLE_CLASS)) {
+            registerChangeListener(RegisterChangeListener.fromSerializable(getContext().system(), message));
         } else if (message instanceof UpdateSchemaContext) {
             updateSchemaContext((UpdateSchemaContext) message);
         } else if (message instanceof ForwardedCommitTransaction) {
@@ -117,6 +117,8 @@ public class Shard extends UntypedProcessor {
             createTransaction((CreateTransaction) message);
         } else if(message instanceof NonPersistent){
             commit(((NonPersistent)message).payload());
+        } else {
+          throw new Exception("Not recognized message in Shard::OnReceive"+message);
         }
     }
 
@@ -192,7 +194,7 @@ public class Shard extends UntypedProcessor {
             getContext().actorOf(
                 DataChangeListenerRegistration.props(registration));
         getSender()
-            .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
+            .tell(new RegisterChangeListenerReply(listenerRegistration.path()).toSerializable(),
                 getSelf());
     }
 

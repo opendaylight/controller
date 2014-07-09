@@ -79,11 +79,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         Object result = actorContext.executeShardOperation(Shard.DEFAULT_NAME,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
-                AsyncDataBroker.DataChangeScope.BASE),
+                AsyncDataBroker.DataChangeScope.BASE).toSerializable(),
             ActorContext.ASK_DURATION
         );
 
-        RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
+        RegisterChangeListenerReply reply = RegisterChangeListenerReply.fromSerializable(actorContext.getActorSystem(),result);
         return new DataChangeListenerRegistrationProxy(actorContext.actorSelection(reply.getListenerRegistrationPath()), listener, dataChangeListenerActor);
     }
 
