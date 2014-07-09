@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_71d5a61a",
+        "filename": "opendaylight/sal/implementation/src/main/java/org/opendaylight/controller/sal/implementation/internal/ProtocolService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-07-09T17:35:43Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be NEC instead of Cisco ?",
+      "revId": "e01d5aa2af89dc8384e88f959c59330ff986df51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_91daaa4a",
+        "filename": "opendaylight/sal/implementation/src/test/java/org/opendaylight/controller/sal/implementation/ProtocolServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2014-07-09T17:35:43Z",
+      "side": 1,
+      "message": "Here too, NEC instead of Cisco",
+      "revId": "e01d5aa2af89dc8384e88f959c59330ff986df51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
