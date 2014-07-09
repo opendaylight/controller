@@ -14,7 +14,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
   public void testApply() throws Exception {
 
     MutableCompositeModification compositeModification = new MutableCompositeModification();
-    compositeModification.addModification(new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
+    compositeModification.addModification(new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()));
 
     DOMStoreReadWriteTransaction transaction = store.newReadWriteTransaction();
     compositeModification.apply(transaction);

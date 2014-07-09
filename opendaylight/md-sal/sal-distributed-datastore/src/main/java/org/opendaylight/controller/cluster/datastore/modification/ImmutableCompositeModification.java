@@ -8,25 +8,39 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
 import java.util.List;
 
-public class ImmutableCompositeModification implements CompositeModification{
+public class ImmutableCompositeModification implements CompositeModification {
 
-  private final CompositeModification modification;
+    private final CompositeModification modification;
 
-  public ImmutableCompositeModification(CompositeModification modification){
-    this.modification = modification;
-  }
+    public ImmutableCompositeModification(CompositeModification modification) {
+        this.modification = modification;
+    }
 
-  @Override
-  public List<Modification> getModifications() {
-    return modification.getModifications();
-  }
+    @Override
+    public List<Modification> getModifications() {
+        return modification.getModifications();
+    }
 
-  @Override
-  public void apply(DOMStoreWriteTransaction transaction) {
-    modification.apply(transaction);
-  }
+    @Override
+    public void apply(DOMStoreWriteTransaction transaction) {
+        modification.apply(transaction);
+    }
+
+    @Override public Object toSerializable() {
+
+        PersistentMessages.CompositeModification.Builder builder =
+            PersistentMessages.CompositeModification.newBuilder();
+
+        for (Modification m : modification.getModifications()) {
+            builder.addModification(
+                (PersistentMessages.Modification) m.toSerializable());
+        }
+
+        return builder.build();
+    }
 }
