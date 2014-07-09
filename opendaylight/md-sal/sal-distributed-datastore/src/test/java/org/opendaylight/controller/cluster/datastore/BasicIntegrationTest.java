@@ -39,6 +39,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
     @Test
     public void integrationTest() throws Exception{
+        // System.setProperty("shard.persistent", "true");
         // This test will
         // - create a Shard
         // - initiate a transaction

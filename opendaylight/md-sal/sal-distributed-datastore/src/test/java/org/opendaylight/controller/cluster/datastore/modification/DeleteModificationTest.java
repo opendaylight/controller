@@ -15,7 +15,7 @@ public class DeleteModificationTest extends AbstractModificationTest{
   public void testApply() throws Exception {
     //Write something into the datastore
     DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
-    WriteModification writeModification = new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+    WriteModification writeModification = new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext());
     writeModification.apply(writeTransaction);
     commitTransaction(writeTransaction);
 
