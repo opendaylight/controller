@@ -14,6 +14,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.util.Timeout;
+import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
@@ -45,12 +46,14 @@ public class ActorContext {
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
+    private final Configuration configuration;
 
     private SchemaContext schemaContext = null;
 
-    public ActorContext(ActorSystem actorSystem, ActorRef shardManager){
+    public ActorContext(ActorSystem actorSystem, ActorRef shardManager, Configuration configuration){
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
+        this.configuration = configuration;
     }
 
     public ActorSystem getActorSystem() {

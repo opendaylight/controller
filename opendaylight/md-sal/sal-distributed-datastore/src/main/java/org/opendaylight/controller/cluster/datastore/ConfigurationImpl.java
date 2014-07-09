@@ -1,0 +1,159 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.datastore;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ConfigurationImpl implements Configuration {
+    private final List<ModuleShard> moduleShards = new ArrayList<>();
+    private final List<Module> modules = new ArrayList<>();
+
+
+    public ConfigurationImpl(String moduleShardsConfigPath,
+        String modulesConfigPath){
+        Config moduleShardsConfig = ConfigFactory.load(moduleShardsConfigPath);
+        Config modulesConfig = ConfigFactory.load(modulesConfigPath);
+
+        readModuleShards(moduleShardsConfig);
+
+        readModules(modulesConfig);
+    }
+
+    public List<String> getMemberShardNames(String memberName){
+
+        List<String> shards = new ArrayList();
+        for(ModuleShard ms : moduleShards){
+            for(Shard s : ms.getShards()){
+                for(String m : s.getReplicas()){
+                    if(memberName.equals(m)){
+                        shards.add(s.getName());
+                    }
+                }
+            }
+        }
+        return shards;
+
+    }
+
+
+    private void readModules(Config modulesConfig) {
+        List<? extends ConfigObject> modulesConfigObjectList =
+            modulesConfig.getObjectList("modules");
+
+        for(ConfigObject o : modulesConfigObjectList){
+            ConfigObjectWrapper w = new ConfigObjectWrapper(o);
+            modules.add(new Module(w.stringValue("name"), w.stringValue(
+                "namespace"), w.stringValue("sharding-strategy")));
+        }
+    }
+
+    private void readModuleShards(Config moduleShardsConfig) {
+        List<? extends ConfigObject> moduleShardsConfigObjectList =
+            moduleShardsConfig.getObjectList("module-shards");
+
+        for(ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList){
+
+            String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
+
+            List<? extends ConfigObject> shardsConfigObjectList =
+                moduleShardConfigObject.toConfig().getObjectList("shards");
+
+            List<Shard> shards = new ArrayList<>();
+
+            for(ConfigObject shard : shardsConfigObjectList){
+                String shardName = shard.get("name").unwrapped().toString();
+                List<String> replicas = shard.toConfig().getStringList("replicas");
+                shards.add(new Shard(shardName, replicas));
+            }
+
+            this.moduleShards.add(new ModuleShard(moduleName, shards));
+        }
+    }
+
+
+    public static class ModuleShard {
+        private final String moduleName;
+        private final List<Shard> shards;
+
+        public ModuleShard(String moduleName, List<Shard> shards) {
+            this.moduleName = moduleName;
+            this.shards = shards;
+        }
+
+        public String getModuleName() {
+            return moduleName;
+        }
+
+        public List<Shard> getShards() {
+            return shards;
+        }
+    }
+
+    public static class Shard {
+        private final String name;
+        private final List<String> replicas;
+
+        Shard(String name, List<String> replicas) {
+            this.name = name;
+            this.replicas = replicas;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<String> getReplicas() {
+            return replicas;
+        }
+    }
+
+    public static class Module {
+
+        private final String name;
+        private final String nameSpace;
+        private final String shardingStrategy;
+
+        Module(String name, String nameSpace, String shardingStrategy) {
+            this.name = name;
+            this.nameSpace = nameSpace;
+            this.shardingStrategy = shardingStrategy;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getNameSpace() {
+            return nameSpace;
+        }
+
+        public String getShardingStrategy() {
+            return shardingStrategy;
+        }
+    }
+
+
+    private static class ConfigObjectWrapper{
+
+        private final ConfigObject configObject;
+
+        ConfigObjectWrapper(ConfigObject configObject){
+            this.configObject = configObject;
+        }
+
+        public String stringValue(String name){
+            return configObject.get(name).unwrapped().toString();
+        }
+    }
+}
