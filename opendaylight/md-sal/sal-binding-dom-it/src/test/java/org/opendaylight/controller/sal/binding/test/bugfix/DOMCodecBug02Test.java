@@ -54,7 +54,6 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
 
         baDataService = testContext.getBindingDataBroker();
         biDataService = testContext.getDomDataBroker();
-        dataStore = testContext.getDomDataStore();
         mappingService = testContext.getBindingToDomMappingService();
     };
 
