@@ -21,11 +21,11 @@ public class MockActorContext extends ActorContext {
     private Object executeLocalOperationResponse;
 
     public MockActorContext(ActorSystem actorSystem) {
-        super(actorSystem, null);
+        super(actorSystem, null, new MockConfiguration());
     }
 
     public MockActorContext(ActorSystem actorSystem, ActorRef shardManager) {
-        super(actorSystem, shardManager);
+        super(actorSystem, shardManager, new MockConfiguration());
     }
 
 

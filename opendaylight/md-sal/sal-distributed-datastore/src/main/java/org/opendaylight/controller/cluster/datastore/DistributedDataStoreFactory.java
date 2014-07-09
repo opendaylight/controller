@@ -8,12 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorSystem;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 
 public class DistributedDataStoreFactory {
     public static DistributedDataStore createInstance(String name, SchemaService schemaService){
+        ActorSystem actorSystem = ActorSystemFactory.getInstance();
         final DistributedDataStore dataStore =
-            new DistributedDataStore(ActorSystemFactory.getInstance(), name);
+            new DistributedDataStore(actorSystem, name, new ClusterWrapperImpl(actorSystem), new ConfigurationImpl("module-shards.conf", "modules.conf"));
         schemaService
             .registerSchemaServiceListener(dataStore);
         return dataStore;

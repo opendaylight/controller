@@ -3,6 +3,8 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
+import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -17,7 +19,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     @Test
     public void integrationTest() throws Exception {
         DistributedDataStore distributedDataStore =
-            new DistributedDataStore(getSystem(), "config");
+            new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), new MockConfiguration());
 
         distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
