@@ -40,6 +40,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
+
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
                 TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
@@ -53,7 +54,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         Assert.assertFalse(normalizedNodeOptional.isPresent());
 
         actorContext.setExecuteRemoteOperationResponse(new ReadDataReply(
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
+            TestModel.createTestContext(),ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable());
 
         read = transactionProxy.read(TestModel.TEST_PATH);
 
@@ -84,7 +85,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         Assert.assertFalse(normalizedNodeOptional.isPresent());
 
         actorContext.setExecuteRemoteOperationResponse(new ReadDataReply(
-            null));
+           TestModel.createTestContext(), null).toSerializable());
 
         read = transactionProxy.read(TestModel.TEST_PATH);
 
