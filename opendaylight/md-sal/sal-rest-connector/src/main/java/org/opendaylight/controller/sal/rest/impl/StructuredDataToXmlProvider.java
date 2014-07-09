@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -18,13 +19,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -32,10 +31,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
@@ -44,27 +41,6 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
     INSTANCE;
 
     private static final Logger LOG = LoggerFactory.getLogger(StructuredDataToXmlProvider.class);
-    private static final TransformerFactory FACTORY = TransformerFactory.newInstance();
-    private static final ThreadLocal<Transformer> TRANSFORMER = new ThreadLocal<Transformer>() {
-        @Override
-        protected Transformer initialValue() {
-            final Transformer ret;
-            try {
-                ret = FACTORY.newTransformer();
-            } catch (TransformerConfigurationException e) {
-                LOG.error("Failed to instantiate XML transformer", e);
-                throw new IllegalStateException("XML encoding currently unavailable", e);
-            }
-
-            ret.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            ret.setOutputProperty(OutputKeys.METHOD, "xml");
-            ret.setOutputProperty(OutputKeys.INDENT, "yes");
-            ret.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            ret.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-            return ret;
-        }
-    };
 
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
@@ -88,26 +64,28 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-        final Transformer trans;
+        XMLStreamWriter writer;
         try {
-            trans = TRANSFORMER.get();
-            if (t.isPrettyPrintMode()) {
-                trans.setOutputProperty(OutputKeys.INDENT, "yes");
-            } else {
-                trans.setOutputProperty(OutputKeys.INDENT, "no");
-            }
-        } catch (RuntimeException e) {
-            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
+            writer = XMLOutputFactory.newFactory().createXMLStreamWriter(entityStream);
+        } catch (XMLStreamException | FactoryConfigurationError e) {
+            LOG.error("Failed to allocate XML writer", e);
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
+                    ErrorTag.OPERATION_FAILED);
         }
 
-        // FIXME: BUG-1281: eliminate the intermediate Document
-        final Document domTree = new XmlMapper().write(data, (DataNodeContainer) t.getSchema());
+        if (t.isPrettyPrintMode()) {
+            // FIXME: replace the writer with a proxy which does the indentation
+            // final Transformer trans = TRANSFORMER.get();
+            // trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            // trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        }
+
         try {
-            trans.transform(new DOMSource(domTree), new StreamResult(entityStream));
-        } catch (TransformerException e) {
-            LOG.error("Error during translation of Document to OutputStream", e);
+            XmlMapper.write(writer, data, t.getSchema());
+            writer.close();
+        } catch (XMLStreamException | FactoryConfigurationError e) {
+            LOG.error("Error during translation data to OutputStream", e);
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }
     }
-
 }
