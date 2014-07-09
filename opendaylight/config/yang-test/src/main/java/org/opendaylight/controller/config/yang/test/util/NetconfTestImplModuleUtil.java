@@ -1,13 +1,34 @@
 
 
-package org.opendaylight.controller.config.yang.test.impl;
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.config.yang.test.util;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
+import org.opendaylight.controller.config.yang.test.impl.Asdf;
+import org.opendaylight.controller.config.yang.test.impl.Deep2;
+import org.opendaylight.controller.config.yang.test.impl.Deep3;
+import org.opendaylight.controller.config.yang.test.impl.Deep4;
+import org.opendaylight.controller.config.yang.test.impl.InnerInnerRunningDataRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataAdditionalRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.InnerRunningDataRuntimeRegistration;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModule;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeMXBean;
+import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistration;
+import org.opendaylight.controller.config.yang.test.impl.NotStateBean;
+import org.opendaylight.controller.config.yang.test.impl.RetValContainer;
+import org.opendaylight.controller.config.yang.test.impl.RetValList;
 
 public class NetconfTestImplModuleUtil {
-    static NetconfTestImplRuntimeRegistration registerRuntimeBeans(final NetconfTestImplModule module) {
+    public static NetconfTestImplRuntimeRegistration registerRuntimeBeans(final NetconfTestImplModule module) {
         NetconfTestImplRuntimeRegistration reg = module.getRootRuntimeBeanRegistratorWrapper().register(new NetconfTestImplRuntimeMXBean() {
 
             @Override

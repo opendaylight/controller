@@ -104,8 +104,11 @@ public final class Services {
 
             String serviceName =  ObjectNameAttributeReadingStrategy.checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
 
-            Map<String, String> innerMap = Maps.newHashMap();
-            namespaceToServices.put(serviceName, innerMap);
+            Map<String, String> innerMap = namespaceToServices.get(serviceName);
+            if (innerMap == null) {
+                innerMap = Maps.newHashMap();
+                namespaceToServices.put(serviceName, innerMap);
+            }
 
             List<XmlElement> instances = service.getChildElements(XmlNetconfConstants.INSTANCE_KEY);
             service.checkUnrecognisedElements(instances, typeElement);

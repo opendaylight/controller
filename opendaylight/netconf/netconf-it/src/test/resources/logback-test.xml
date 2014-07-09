@@ -6,7 +6,7 @@
         </encoder>
     </appender>
 
-  <logger name="org.opendaylight.controller.netconf" level="DEBUG"/>
+  <logger name="org.opendaylight.controller.netconf" level="TRACE"/>
 
   <root level="error">
     <appender-ref ref="STDOUT" />
