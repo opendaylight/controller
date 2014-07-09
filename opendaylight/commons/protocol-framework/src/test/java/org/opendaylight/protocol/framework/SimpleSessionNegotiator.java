@@ -19,6 +19,7 @@ public class SimpleSessionNegotiator extends AbstractSessionNegotiator<SimpleMes
     @Override
     protected void startNegotiation() throws Exception {
         negotiationSuccessful(new SimpleSession());
+//        channel.close();
     }
 
     @Override

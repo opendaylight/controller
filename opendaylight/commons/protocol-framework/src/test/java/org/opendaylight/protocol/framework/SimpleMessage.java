@@ -7,6 +7,8 @@
  */
 package org.opendaylight.protocol.framework;
 
+import com.google.common.base.Objects;
+
 public class SimpleMessage {
 
     private final String s;
@@ -17,5 +19,12 @@ public class SimpleMessage {
 
     public String getMessage() {
         return this.s;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("s", s)
+                .toString();
     }
 }

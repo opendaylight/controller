@@ -7,12 +7,19 @@
  */
 package org.opendaylight.protocol.framework;
 
+import java.io.Closeable;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -27,13 +34,6 @@ import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
-
-import java.io.Closeable;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Dispatcher class for creating servers and clients. The idea is to first create servers and clients and the run the
@@ -155,7 +155,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      */
     protected Future<S> createClient(final InetSocketAddress address, final ReconnectStrategy strategy, final PipelineInitializer<S> initializer) {
         final Bootstrap b = new Bootstrap();
-        final ProtocolSessionPromise<S> p = new ProtocolSessionPromise<S>(executor, address, strategy, b);
+        final ProtocolSessionPromise<S> p = new ProtocolSessionPromise<>(executor, address, strategy, b);
         b.option(ChannelOption.SO_KEEPALIVE, true).handler(
                 new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -174,7 +174,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         // customizeBootstrap()
         try {
             b.channel(NioSocketChannel.class);
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             LOG.trace("Not overriding channelFactory on bootstrap {}", b, e);
         }
 
@@ -207,9 +207,8 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
     protected Future<Void> createReconnectingClient(final InetSocketAddress address, final ReconnectStrategyFactory connectStrategyFactory,
             final ReconnectStrategy reestablishStrategy, final PipelineInitializer<S> initializer) {
 
-        final ReconnectPromise<S, L> p = new ReconnectPromise<S, L>(GlobalEventExecutor.INSTANCE, this, address, connectStrategyFactory, reestablishStrategy, initializer);
+        final ReconnectPromise<S, L> p = new ReconnectPromise<>(GlobalEventExecutor.INSTANCE, this, address, connectStrategyFactory, initializer);
         p.connect();
-
         return p;
     }
 
@@ -225,5 +224,4 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
             this.bossGroup.shutdownGracefully();
         }
     }
-
 }
