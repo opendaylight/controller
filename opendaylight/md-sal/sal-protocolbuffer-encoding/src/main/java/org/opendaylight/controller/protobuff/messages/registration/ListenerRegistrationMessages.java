@@ -13,6 +13,10 @@ public final class ListenerRegistrationMessages {
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration}
+   *
+   * <pre>
+   ** used when a listener needs to be unregistered
+   * </pre>
    */
   public static final class CloseDataChangeListenerRegistration extends
       com.google.protobuf.GeneratedMessage
@@ -203,6 +207,10 @@ public final class ListenerRegistrationMessages {
     }
     /**
      * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistration}
+     *
+     * <pre>
+     ** used when a listener needs to be unregistered
+     * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
@@ -322,6 +330,10 @@ public final class ListenerRegistrationMessages {
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply}
+   *
+   * <pre>
+   ** reply to the CloseDataChangeListenerRegistration request
+   * </pre>
    */
   public static final class CloseDataChangeListenerRegistrationReply extends
       com.google.protobuf.GeneratedMessage
@@ -512,6 +524,10 @@ public final class ListenerRegistrationMessages {
     }
     /**
      * Protobuf type {@code org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply}
+     *
+     * <pre>
+     ** reply to the CloseDataChangeListenerRegistration request
+     * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
@@ -626,6 +642,1231 @@ public final class ListenerRegistrationMessages {
     // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.CloseDataChangeListenerRegistrationReply)
   }
 
+  public interface RegisterChangeListenerOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string instanceIdentifierPath = 1;
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    boolean hasInstanceIdentifierPath();
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    java.lang.String getInstanceIdentifierPath();
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdentifierPathBytes();
+
+    // required string dataChangeListenerActorPath = 2;
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    boolean hasDataChangeListenerActorPath();
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    java.lang.String getDataChangeListenerActorPath();
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getDataChangeListenerActorPathBytes();
+
+    // required int32 dataChangeScope = 3;
+    /**
+     * <code>required int32 dataChangeScope = 3;</code>
+     */
+    boolean hasDataChangeScope();
+    /**
+     * <code>required int32 dataChangeScope = 3;</code>
+     */
+    int getDataChangeScope();
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.RegisterChangeListener}
+   */
+  public static final class RegisterChangeListener extends
+      com.google.protobuf.GeneratedMessage
+      implements RegisterChangeListenerOrBuilder {
+    // Use RegisterChangeListener.newBuilder() to construct.
+    private RegisterChangeListener(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private RegisterChangeListener(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final RegisterChangeListener defaultInstance;
+    public static RegisterChangeListener getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public RegisterChangeListener getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RegisterChangeListener(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              instanceIdentifierPath_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              dataChangeListenerActorPath_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              dataChangeScope_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<RegisterChangeListener> PARSER =
+        new com.google.protobuf.AbstractParser<RegisterChangeListener>() {
+      public RegisterChangeListener parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RegisterChangeListener(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RegisterChangeListener> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required string instanceIdentifierPath = 1;
+    public static final int INSTANCEIDENTIFIERPATH_FIELD_NUMBER = 1;
+    private java.lang.Object instanceIdentifierPath_;
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    public boolean hasInstanceIdentifierPath() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    public java.lang.String getInstanceIdentifierPath() {
+      java.lang.Object ref = instanceIdentifierPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          instanceIdentifierPath_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string instanceIdentifierPath = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInstanceIdentifierPathBytes() {
+      java.lang.Object ref = instanceIdentifierPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceIdentifierPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required string dataChangeListenerActorPath = 2;
+    public static final int DATACHANGELISTENERACTORPATH_FIELD_NUMBER = 2;
+    private java.lang.Object dataChangeListenerActorPath_;
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    public boolean hasDataChangeListenerActorPath() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    public java.lang.String getDataChangeListenerActorPath() {
+      java.lang.Object ref = dataChangeListenerActorPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          dataChangeListenerActorPath_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string dataChangeListenerActorPath = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDataChangeListenerActorPathBytes() {
+      java.lang.Object ref = dataChangeListenerActorPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        dataChangeListenerActorPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required int32 dataChangeScope = 3;
+    public static final int DATACHANGESCOPE_FIELD_NUMBER = 3;
+    private int dataChangeScope_;
+    /**
+     * <code>required int32 dataChangeScope = 3;</code>
+     */
+    public boolean hasDataChangeScope() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 dataChangeScope = 3;</code>
+     */
+    public int getDataChangeScope() {
+      return dataChangeScope_;
+    }
+
+    private void initFields() {
+      instanceIdentifierPath_ = "";
+      dataChangeListenerActorPath_ = "";
+      dataChangeScope_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasInstanceIdentifierPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDataChangeListenerActorPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasDataChangeScope()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getInstanceIdentifierPathBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getDataChangeListenerActorPathBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, dataChangeScope_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getInstanceIdentifierPathBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getDataChangeListenerActorPathBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, dataChangeScope_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.RegisterChangeListener}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        instanceIdentifierPath_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        dataChangeListenerActorPath_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        dataChangeScope_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener build() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener buildPartial() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.instanceIdentifierPath_ = instanceIdentifierPath_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.dataChangeListenerActorPath_ = dataChangeListenerActorPath_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.dataChangeScope_ = dataChangeScope_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener other) {
+        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener.getDefaultInstance()) return this;
+        if (other.hasInstanceIdentifierPath()) {
+          bitField0_ |= 0x00000001;
+          instanceIdentifierPath_ = other.instanceIdentifierPath_;
+          onChanged();
+        }
+        if (other.hasDataChangeListenerActorPath()) {
+          bitField0_ |= 0x00000002;
+          dataChangeListenerActorPath_ = other.dataChangeListenerActorPath_;
+          onChanged();
+        }
+        if (other.hasDataChangeScope()) {
+          setDataChangeScope(other.getDataChangeScope());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasInstanceIdentifierPath()) {
+
+          return false;
+        }
+        if (!hasDataChangeListenerActorPath()) {
+
+          return false;
+        }
+        if (!hasDataChangeScope()) {
+
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListener) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string instanceIdentifierPath = 1;
+      private java.lang.Object instanceIdentifierPath_ = "";
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public boolean hasInstanceIdentifierPath() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public java.lang.String getInstanceIdentifierPath() {
+        java.lang.Object ref = instanceIdentifierPath_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          instanceIdentifierPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdentifierPathBytes() {
+        java.lang.Object ref = instanceIdentifierPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceIdentifierPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public Builder setInstanceIdentifierPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public Builder clearInstanceIdentifierPath() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        instanceIdentifierPath_ = getDefaultInstance().getInstanceIdentifierPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string instanceIdentifierPath = 1;</code>
+       */
+      public Builder setInstanceIdentifierPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        instanceIdentifierPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required string dataChangeListenerActorPath = 2;
+      private java.lang.Object dataChangeListenerActorPath_ = "";
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public boolean hasDataChangeListenerActorPath() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public java.lang.String getDataChangeListenerActorPath() {
+        java.lang.Object ref = dataChangeListenerActorPath_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          dataChangeListenerActorPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDataChangeListenerActorPathBytes() {
+        java.lang.Object ref = dataChangeListenerActorPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          dataChangeListenerActorPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public Builder setDataChangeListenerActorPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        dataChangeListenerActorPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public Builder clearDataChangeListenerActorPath() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        dataChangeListenerActorPath_ = getDefaultInstance().getDataChangeListenerActorPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string dataChangeListenerActorPath = 2;</code>
+       */
+      public Builder setDataChangeListenerActorPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        dataChangeListenerActorPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required int32 dataChangeScope = 3;
+      private int dataChangeScope_ ;
+      /**
+       * <code>required int32 dataChangeScope = 3;</code>
+       */
+      public boolean hasDataChangeScope() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 dataChangeScope = 3;</code>
+       */
+      public int getDataChangeScope() {
+        return dataChangeScope_;
+      }
+      /**
+       * <code>required int32 dataChangeScope = 3;</code>
+       */
+      public Builder setDataChangeScope(int value) {
+        bitField0_ |= 0x00000004;
+        dataChangeScope_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 dataChangeScope = 3;</code>
+       */
+      public Builder clearDataChangeScope() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        dataChangeScope_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.RegisterChangeListener)
+    }
+
+    static {
+      defaultInstance = new RegisterChangeListener(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.RegisterChangeListener)
+  }
+
+  public interface RegisterChangeListenerReplyOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string listenerRegistrationPath = 1;
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    boolean hasListenerRegistrationPath();
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    java.lang.String getListenerRegistrationPath();
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getListenerRegistrationPathBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.RegisterChangeListenerReply}
+   *
+   * <pre>
+   **
+   * This is the reply for the RegisterChangeListener message
+   * It contains the listenerRegistration actor path
+   * that can be used to unregister the listener
+   * </pre>
+   */
+  public static final class RegisterChangeListenerReply extends
+      com.google.protobuf.GeneratedMessage
+      implements RegisterChangeListenerReplyOrBuilder {
+    // Use RegisterChangeListenerReply.newBuilder() to construct.
+    private RegisterChangeListenerReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private RegisterChangeListenerReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final RegisterChangeListenerReply defaultInstance;
+    public static RegisterChangeListenerReply getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public RegisterChangeListenerReply getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RegisterChangeListenerReply(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              listenerRegistrationPath_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<RegisterChangeListenerReply> PARSER =
+        new com.google.protobuf.AbstractParser<RegisterChangeListenerReply>() {
+      public RegisterChangeListenerReply parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RegisterChangeListenerReply(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RegisterChangeListenerReply> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required string listenerRegistrationPath = 1;
+    public static final int LISTENERREGISTRATIONPATH_FIELD_NUMBER = 1;
+    private java.lang.Object listenerRegistrationPath_;
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    public boolean hasListenerRegistrationPath() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    public java.lang.String getListenerRegistrationPath() {
+      java.lang.Object ref = listenerRegistrationPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          listenerRegistrationPath_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string listenerRegistrationPath = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getListenerRegistrationPathBytes() {
+      java.lang.Object ref = listenerRegistrationPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        listenerRegistrationPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      listenerRegistrationPath_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasListenerRegistrationPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getListenerRegistrationPathBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getListenerRegistrationPathBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.RegisterChangeListenerReply}
+     *
+     * <pre>
+     **
+     * This is the reply for the RegisterChangeListener message
+     * It contains the listenerRegistration actor path
+     * that can be used to unregister the listener
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReplyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.class, org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        listenerRegistrationPath_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply build() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply buildPartial() {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply result = new org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.listenerRegistrationPath_ = listenerRegistrationPath_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply other) {
+        if (other == org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply.getDefaultInstance()) return this;
+        if (other.hasListenerRegistrationPath()) {
+          bitField0_ |= 0x00000001;
+          listenerRegistrationPath_ = other.listenerRegistrationPath_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasListenerRegistrationPath()) {
+
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages.RegisterChangeListenerReply) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string listenerRegistrationPath = 1;
+      private java.lang.Object listenerRegistrationPath_ = "";
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public boolean hasListenerRegistrationPath() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public java.lang.String getListenerRegistrationPath() {
+        java.lang.Object ref = listenerRegistrationPath_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          listenerRegistrationPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getListenerRegistrationPathBytes() {
+        java.lang.Object ref = listenerRegistrationPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          listenerRegistrationPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public Builder setListenerRegistrationPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        listenerRegistrationPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public Builder clearListenerRegistrationPath() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        listenerRegistrationPath_ = getDefaultInstance().getListenerRegistrationPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string listenerRegistrationPath = 1;</code>
+       */
+      public Builder setListenerRegistrationPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        listenerRegistrationPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.RegisterChangeListenerReply)
+    }
+
+    static {
+      defaultInstance = new RegisterChangeListenerReply(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.RegisterChangeListenerReply)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistration_descriptor;
   private static
@@ -636,6 +1877,16 @@ public final class ListenerRegistrationMessages {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -648,9 +1899,14 @@ public final class ListenerRegistrationMessages {
       "\n\032ListenerRegistration.proto\022!org.openda" +
       "ylight.controller.mdsal\"%\n#CloseDataChan" +
       "geListenerRegistration\"*\n(CloseDataChang" +
-      "eListenerRegistrationReplyB[\n;org.openda" +
-      "ylight.controller.protobuff.messages.reg" +
-      "istrationB\034ListenerRegistrationMessages"
+      "eListenerRegistrationReply\"v\n\026RegisterCh" +
+      "angeListener\022\036\n\026instanceIdentifierPath\030\001" +
+      " \002(\t\022#\n\033dataChangeListenerActorPath\030\002 \002(" +
+      "\t\022\027\n\017dataChangeScope\030\003 \002(\005\"?\n\033RegisterCh" +
+      "angeListenerReply\022 \n\030listenerRegistratio" +
+      "nPath\030\001 \002(\tB[\n;org.opendaylight.controll" +
+      "er.protobuff.messages.registrationB\034List",
+      "enerRegistrationMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -669,6 +1925,18 @@ public final class ListenerRegistrationMessages {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_CloseDataChangeListenerRegistrationReply_descriptor,
               new java.lang.String[] { });
+          internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor,
+              new java.lang.String[] { "InstanceIdentifierPath", "DataChangeListenerActorPath", "DataChangeScope", });
+          internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor,
+              new java.lang.String[] { "ListenerRegistrationPath", });
           return null;
         }
       };
