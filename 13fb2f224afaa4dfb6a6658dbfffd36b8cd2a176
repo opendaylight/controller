@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_712e0645",
+        "filename": "opendaylight/northbound/commons/src/main/java/org/opendaylight/controller/northbound/commons/exception/WebApplicationExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2014-07-09T16:52:57Z",
+      "side": 1,
+      "message": "Sending out 404 indicates the resource is unavailable. This exception is indicative of an error during processing. 500 seems like a correct response considering that WebApplicationException maps to 500 by default.\n\nI think we can do away with this and let the GenericExceptionMapper handle all cases of unhandled exceptions.",
+      "revId": "13fb2f224afaa4dfb6a6658dbfffd36b8cd2a176",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
