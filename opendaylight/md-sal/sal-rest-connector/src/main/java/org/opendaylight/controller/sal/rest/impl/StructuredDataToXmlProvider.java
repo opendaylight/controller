@@ -81,7 +81,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
         }
 
         try {
-            XmlMapper.write(writer, data, t.getSchema());
+            XmlMapper.writeDocument(writer, data, t.getSchema());
             writer.close();
         } catch (XMLStreamException | FactoryConfigurationError e) {
             LOG.error("Error during translation data to OutputStream", e);
