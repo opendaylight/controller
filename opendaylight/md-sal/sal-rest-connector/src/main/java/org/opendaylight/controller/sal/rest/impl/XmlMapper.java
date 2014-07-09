@@ -70,7 +70,11 @@ public class XmlMapper {
         return XmlDocumentUtils.toDocument(data, schema, XML_CODEC_PROVIDER_IMPL);
     }
 
-    public static void write(final XMLStreamWriter writer, final CompositeNode data, final SchemaNode schema) throws XMLStreamException {
+    public static void writeDocument(final XMLStreamWriter writer, final CompositeNode data, final SchemaNode schema) throws XMLStreamException {
         XmlStreamUtils.writeDataDocument(writer, data, schema, XML_CODEC_PROVIDER_IMPL);
+    }
+
+    public void writeData(final XMLStreamWriter writer, final CompositeNode data, final DataNodeContainer schema) throws XMLStreamException {
+        XmlStreamUtils.writeData(writer, data, (SchemaNode)schema, XML_CODEC_PROVIDER_IMPL);
     }
 }
