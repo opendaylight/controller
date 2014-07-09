@@ -602,7 +602,7 @@ public class BindingIndependentConnector implements //
             final Optional<Class<? extends RpcService>> rpcInterface = mappingService.getRpcServiceClassFor(
                     name.getNamespace().toString(), name.getFormattedRevision());
             if (rpcInterface.isPresent()) {
-                getRpcForwarder(rpcInterface.get(), null).registerToBidningBroker();
+                getRpcForwarder(rpcInterface.get(), null).registerToBindingBroker();
             }
         }
 
@@ -621,6 +621,7 @@ public class BindingIndependentConnector implements //
         private final WeakHashMap<Method, RpcInvocationStrategy> strategiesByMethod = new WeakHashMap<>();
         private final RpcService proxy;
         private ObjectRegistration<?> forwarderRegistration;
+        private boolean registrationInProgress = false;
 
         public DomToBindingRpcForwarder(final Class<? extends RpcService> service) {
             this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
@@ -680,7 +681,8 @@ public class BindingIndependentConnector implements //
          *
          */
         public void registerToDOMBroker() {
-            if(forwarderRegistration == null) {
+            if(!registrationInProgress && forwarderRegistration == null) {
+                registrationInProgress = true;
                 CompositeObjectRegistrationBuilder<DomToBindingRpcForwarder> builder = CompositeObjectRegistration.builderFor(this);
                 try {
                     for (QName rpc : supportedRpcs) {
@@ -690,6 +692,7 @@ public class BindingIndependentConnector implements //
                     LOG.error("Could not forward Rpcs of type {}", rpcServiceType.get(), e);
                 }
                 this.forwarderRegistration = builder.toInstance();
+                registrationInProgress = false;
             }
         }
 
@@ -801,12 +804,15 @@ public class BindingIndependentConnector implements //
          * creating forwarding loop.
          *
          */
-        public void registerToBidningBroker() {
-            if(forwarderRegistration == null) {
+        public void registerToBindingBroker() {
+            if(!registrationInProgress && forwarderRegistration == null) {
                try {
+                   registrationInProgress = true;
                    this.forwarderRegistration = baRpcRegistry.addRpcImplementation((Class)rpcServiceType.get(), proxy);
                } catch (Exception e) {
                    LOG.error("Unable to forward RPCs for {}",rpcServiceType.get(),e);
+               } finally {
+                   registrationInProgress = false;
                }
             }
         }
