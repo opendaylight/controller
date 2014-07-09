@@ -8,13 +8,19 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Optional;
+
 import javax.activation.UnsupportedDataTypeException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.codec.LeafrefCodec;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlCodecProvider;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlStreamUtils;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.Leafref;
@@ -25,26 +31,26 @@ public class XmlMapper {
             Optional.<LeafrefTypeDefinition> absent());
 
     private static class LeafrefCodecImpl extends TypeDefinitionAwareCodec<Object, LeafrefTypeDefinition> implements
-            LeafrefCodec<String> {
+    LeafrefCodec<String> {
 
-        protected LeafrefCodecImpl(Optional<LeafrefTypeDefinition> typeDef) {
+        protected LeafrefCodecImpl(final Optional<LeafrefTypeDefinition> typeDef) {
             super(typeDef, Object.class);
         }
 
         @Override
-        public String serialize(Object data) {
+        public String serialize(final Object data) {
             return String.valueOf(data);
         }
 
         @Override
-        public Object deserialize(String data) {
+        public Object deserialize(final String data) {
             return data;
         }
     }
 
     private static class XmlCodecProviderImpl implements XmlCodecProvider {
         @Override
-        public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(TypeDefinition<?> baseType) {
+        public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(final TypeDefinition<?> baseType) {
             TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codec = TypeDefinitionAwareCodec
                     .from(baseType);
 
@@ -59,7 +65,12 @@ public class XmlMapper {
 
     private static final XmlCodecProvider XML_CODEC_PROVIDER_IMPL = new XmlCodecProviderImpl();
 
-    public Document write(CompositeNode data, DataNodeContainer schema) throws UnsupportedDataTypeException {
+    @Deprecated
+    public Document write(final CompositeNode data, final DataNodeContainer schema) throws UnsupportedDataTypeException {
         return XmlDocumentUtils.toDocument(data, schema, XML_CODEC_PROVIDER_IMPL);
+    }
+
+    public static void write(final XMLStreamWriter writer, final CompositeNode data, final SchemaNode schema) throws XMLStreamException {
+        XmlStreamUtils.writeDataDocument(writer, data, schema, XML_CODEC_PROVIDER_IMPL);
     }
 }
