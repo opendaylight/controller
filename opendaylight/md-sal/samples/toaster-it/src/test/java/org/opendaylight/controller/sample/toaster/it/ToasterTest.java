@@ -93,13 +93,13 @@ public class ToasterTest {
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(0, toastsMade);
 
-        boolean toasts = true;
+        boolean success = true;
 
         // Make toasts using OSGi service
-        toasts &= kitchenService.makeBreakfast( EggsType.SCRAMBLED, HashBrown.class, 4);
-        toasts &= kitchenService.makeBreakfast( EggsType.POACHED, WhiteBread.class, 8 );
+        success &= kitchenService.makeBreakfast( EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
+        success &= kitchenService.makeBreakfast( EggsType.POACHED, WhiteBread.class, 8 ).get().isSuccessful();
 
-        Assert.assertTrue("Not all toasts done by " + kitchenService, toasts);
+        Assert.assertTrue("Not all breakfasts succeeded", success);
 
         // Verify toasts made count on provider via JMX/config-subsystem
         toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
