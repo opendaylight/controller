@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -59,7 +60,7 @@ public class Shard extends UntypedProcessor {
 
     private final InMemoryDOMDataStore store;
 
-    private final Map<Modification, DOMStoreThreePhaseCommitCohort>
+    private final Map<Object, DOMStoreThreePhaseCommitCohort>
         modificationToCohort = new HashMap<>();
 
     private final LoggingAdapter log =
@@ -97,6 +98,11 @@ public class Shard extends UntypedProcessor {
     public void onReceive(Object message) throws Exception {
         log.debug("Received message {}", message);
 
+        if(!recoveryFinished()){
+            // FIXME : Properly handle recovery
+            return;
+        }
+
         if (message instanceof CreateTransactionChain) {
             createTransactionChain();
         } else if (message instanceof RegisterChangeListener) {
@@ -106,11 +112,11 @@ public class Shard extends UntypedProcessor {
         } else if (message instanceof ForwardedCommitTransaction) {
             handleForwardedCommit((ForwardedCommitTransaction) message);
         } else if (message instanceof Persistent) {
-            commit((Modification) ((Persistent) message).payload());
+            commit(((Persistent)message).payload());
         } else if (message instanceof CreateTransaction) {
             createTransaction((CreateTransaction) message);
         } else if(message instanceof NonPersistent){
-            commit((Modification) ((NonPersistent) message).payload());
+            commit(((NonPersistent)message).payload());
         }
     }
 
@@ -124,9 +130,10 @@ public class Shard extends UntypedProcessor {
                 getSelf());
     }
 
-    private void commit(Modification modification) {
+    private void commit(Object serialized) {
+        Modification modification = MutableCompositeModification.fromSerializable(serialized, schemaContext);
         DOMStoreThreePhaseCommitCohort cohort =
-            modificationToCohort.remove(modification);
+            modificationToCohort.remove(serialized);
         if (cohort == null) {
             log.error(
                 "Could not find cohort for modification : " + modification);
@@ -150,13 +157,15 @@ public class Shard extends UntypedProcessor {
     }
 
     private void handleForwardedCommit(ForwardedCommitTransaction message) {
+        Object serializedModification = message.getModification().toSerializable();
+
         modificationToCohort
-            .put(message.getModification(), message.getCohort());
+            .put(serializedModification , message.getCohort());
         if(persistent) {
-            getSelf().forward(Persistent.create(message.getModification()),
+            getSelf().forward(Persistent.create(serializedModification),
                 getContext());
         } else {
-            getSelf().forward(NonPersistent.create(message.getModification()),
+            getSelf().forward(NonPersistent.create(serializedModification),
                 getContext());
         }
     }

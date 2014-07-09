@@ -1,0 +1,18 @@
+package org.opendaylight.controller.mdsal;
+
+import "Common.proto";
+
+option java_package = "org.opendaylight.controller.protobuff.messages.persistent";
+option java_outer_classname = "PersistentMessages";
+
+
+message Modification {
+    required string type=1;
+    required string path=2;
+    optional Node data=3;
+}
+
+
+message CompositeModification {
+    repeated Modification modification=1;
+}

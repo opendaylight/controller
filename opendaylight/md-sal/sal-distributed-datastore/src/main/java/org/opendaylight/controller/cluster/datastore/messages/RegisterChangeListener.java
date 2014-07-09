@@ -12,7 +12,8 @@ import akka.actor.ActorPath;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public class RegisterChangeListener {
+public class RegisterChangeListener implements SerializableMessage {
+
     private final InstanceIdentifier path;
     private final ActorPath dataChangeListenerPath;
     private final AsyncDataBroker.DataChangeScope scope;
@@ -37,5 +38,10 @@ public class RegisterChangeListener {
 
     public ActorPath getDataChangeListenerPath() {
         return dataChangeListenerPath;
+    }
+
+
+    @Override public Object toSerializable() {
+        throw new UnsupportedOperationException("foo");
     }
 }

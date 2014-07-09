@@ -8,9 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * WriteModification stores all the parameters required to write data to the specified path
@@ -18,15 +23,42 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class WriteModification extends AbstractModification {
 
   private final NormalizedNode data;
+    private final SchemaContext schemaContext;
 
-  public WriteModification(InstanceIdentifier path, NormalizedNode data) {
+    public WriteModification(InstanceIdentifier path, NormalizedNode data, SchemaContext schemaContext) {
     super(path);
     this.data = data;
-  }
+        this.schemaContext = schemaContext;
+    }
 
   @Override
   public void apply(DOMStoreWriteTransaction transaction) {
     transaction.write(path, data);
   }
 
+    @Override public Object toSerializable() {
+        NormalizedNodeMessages.Container encode =
+            new NormalizedNodeToNodeCodec(schemaContext).encode(
+                InstanceIdentifierUtils.from(path.toString()), data);
+
+
+        return PersistentMessages.Modification.newBuilder()
+            .setType(this.getClass().toString())
+            .setPath(this.path.toString())
+            .setData(encode.getNormalizedNode())
+            .build();
+
+    }
+
+    public static WriteModification fromSerializable(
+        Object serializable,
+        SchemaContext schemaContext) {
+        PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
+
+        InstanceIdentifier path = InstanceIdentifierUtils.from(o.getPath());
+        NormalizedNode data = new NormalizedNodeToNodeCodec(schemaContext).decode(
+            path, o.getData());
+
+        return new WriteModification(path, data, schemaContext);
+    }
 }
