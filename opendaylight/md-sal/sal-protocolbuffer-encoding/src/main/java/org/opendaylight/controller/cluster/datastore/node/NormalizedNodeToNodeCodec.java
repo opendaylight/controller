@@ -54,7 +54,11 @@ public class NormalizedNodeToNodeCodec {
                 }
             }
             try {
-                return currentOp.normalize(nodeType , node);
+                if((node != null)&& (!node.getType().isEmpty())){
+                   return currentOp.normalize(nodeType, node);
+                }else{
+                  return null;
+               }
             } catch(RuntimeException e){
                 throw e;
         }

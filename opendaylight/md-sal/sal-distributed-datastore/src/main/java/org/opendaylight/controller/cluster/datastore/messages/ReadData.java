@@ -26,7 +26,7 @@ public class ReadData {
 
   public Object toSerializable(){
     return ShardTransactionMessages.ReadData.newBuilder()
-        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.getParentPath(path.toString()))
+        .setInstanceIdentifierPathArguments(path.toString())
         .build();
   }
 

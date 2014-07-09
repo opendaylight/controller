@@ -1,5 +1,5 @@
 package org.opendaylight.controller.cluster.datastore.node;
-import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -46,15 +46,21 @@ public class NormalizedNodeToProtocolBufferNode {
       parentPath = "";
     }
 
-    Preconditions.checkArgument(normalizedNode!=null);
-
-    navigateNormalizedNode(0, parentPath,normalizedNode, builderRoot);
-    // here we need to put back the Node Tree in Container
     NormalizedNodeMessages.Container.Builder containerBuilder =
         NormalizedNodeMessages.Container.newBuilder();
-    containerBuilder.setParentPath(parentPath).setNormalizedNode(
-        builderRoot.build());
-    container = containerBuilder.build();
+
+    if(normalizedNode != null) {
+
+      navigateNormalizedNode(0, parentPath, normalizedNode, builderRoot);
+      // here we need to put back the Node Tree in Container
+
+      container= containerBuilder.setParentPath(parentPath).setNormalizedNode(
+          builderRoot.build()).build();
+    }else {
+      //this can happen when an attempt was made to read from datastore and normalized node was null.
+      container = containerBuilder.setParentPath(parentPath).build();
+
+    }
 
   }
 

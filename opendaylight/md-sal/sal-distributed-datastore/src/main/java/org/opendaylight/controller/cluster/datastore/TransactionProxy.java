@@ -94,10 +94,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
             @Override public Optional<NormalizedNode<?,?>> call() throws Exception {
                 Object response = actorContext
-                    .executeRemoteOperation(remoteTransaction, new ReadData(path),
+                    .executeRemoteOperation(remoteTransaction, new ReadData(path).toSerializable(),
                         ActorContext.ASK_DURATION);
-                if(response instanceof ReadDataReply){
-                    ReadDataReply reply = (ReadDataReply) response;
+                if(response.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)){
+                    ReadDataReply reply = ReadDataReply.fromSerializable(schemaContext,path, response);
                     if(reply.getNormalizedNode() == null){
                         return Optional.absent();
                     }

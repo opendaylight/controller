@@ -8,17 +8,41 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class ReadDataReply {
+public class ReadDataReply implements SerializableMessage{
   private final NormalizedNode<?, ?> normalizedNode;
-
-  public ReadDataReply(NormalizedNode<?, ?> normalizedNode){
+  private final SchemaContext schemaContext;
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadDataReply.class;
+  public ReadDataReply(SchemaContext context,NormalizedNode<?, ?> normalizedNode){
 
     this.normalizedNode = normalizedNode;
+    this.schemaContext = context;
   }
 
   public NormalizedNode<?, ?> getNormalizedNode() {
     return normalizedNode;
+  }
+
+  public Object toSerializable(){
+    if(normalizedNode != null) {
+      return ShardTransactionMessages.ReadDataReply.newBuilder()
+          .setNormalizedNode(new NormalizedNodeToNodeCodec(schemaContext)
+                  .encode(InstanceIdentifier.builder().build(), normalizedNode).getNormalizedNode()
+          ).build();
+    }else{
+      return ShardTransactionMessages.ReadDataReply.newBuilder().build();
+
+    }
+
+  }
+
+  public static ReadDataReply fromSerializable(SchemaContext schemaContext,InstanceIdentifier id,Object serializable){
+    ShardTransactionMessages.ReadDataReply o = (ShardTransactionMessages.ReadDataReply) serializable;
+    return new ReadDataReply(schemaContext,new NormalizedNodeToNodeCodec(schemaContext).decode(id, o.getNormalizedNode()));
   }
 }
