@@ -148,7 +148,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         try {
             ByteArrayOutputStream s = new ByteArrayOutputStream();
             XMLStreamWriter writer = XMLOutputFactory.newFactory().createXMLStreamWriter(s);
-            XmlMapper.write(writer, errorsNode, (SchemaNode)errorsSchemaNode);
+            XmlMapper.writeDocument(writer, errorsNode, (SchemaNode)errorsSchemaNode);
             writer.close();
             return s.toString("UTF-8");
         } catch (XMLStreamException | IOException e) {
