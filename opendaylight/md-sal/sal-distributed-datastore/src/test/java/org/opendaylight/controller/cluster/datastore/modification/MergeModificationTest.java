@@ -16,7 +16,7 @@ public class MergeModificationTest extends AbstractModificationTest{
 
     //Write something into the datastore
     DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
-    MergeModification writeModification = new MergeModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+    MergeModification writeModification = new MergeModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext());
     writeModification.apply(writeTransaction);
     commitTransaction(writeTransaction);
 

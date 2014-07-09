@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
+import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
@@ -23,4 +25,16 @@ public class DeleteModification extends AbstractModification {
   public void apply(DOMStoreWriteTransaction transaction) {
     transaction.delete(path);
   }
+
+    @Override public Object toSerializable() {
+        return PersistentMessages.Modification.newBuilder()
+            .setType(this.getClass().toString())
+            .setPath(this.path.toString())
+            .build();
+    }
+
+    public static DeleteModification fromSerializable(Object serializable){
+        PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
+        return new DeleteModification(InstanceIdentifierUtils.from(o.getPath()));
+    }
 }
