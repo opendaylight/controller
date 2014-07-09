@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -40,7 +39,6 @@ import org.opendaylight.controller.sal.packet.LinkEncap;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,9 +57,9 @@ public class DataPacketService implements IPluginOutDataPacketService,
      * adding a new service, removing a service, going through all of
      * them maybe different.
      */
-    private ConcurrentHashMap<String, IPluginInDataPacketService>
+    private ConcurrentHashMap<String, ProtocolService<IPluginInDataPacketService>>
         pluginInDataService =
-        new ConcurrentHashMap<String, IPluginInDataPacketService>();
+        new ConcurrentHashMap<String, ProtocolService<IPluginInDataPacketService>>();
     private Map<String, AtomicInteger> statistics = new HashMap<String, AtomicInteger>();
 
     /**
@@ -186,11 +184,11 @@ public class DataPacketService implements IPluginOutDataPacketService,
                         String t = p.getNode()
                                 .getType();
                         // Now locate the TX dispatcher
-                        IPluginInDataPacketService s = pluginInDataService
-                                .get(t);
-                        if (s != null) {
+                        ProtocolService<IPluginInDataPacketService> service =
+                            pluginInDataService.get(t);
+                        if (service != null) {
                             try {
-                                s.transmitDataPacket(pkt);
+                                service.getService().transmitDataPacket(pkt);
                                 increaseStat("TXPacketSuccess");
                             } catch (Exception e) {
                                 increaseStat("TXPacketFailedForException");
@@ -207,54 +205,11 @@ public class DataPacketService implements IPluginOutDataPacketService,
     }
 
     void setPluginInDataService(Map props, IPluginInDataPacketService s) {
-        if (this.pluginInDataService == null) {
-            logger.error("pluginInDataService store null");
-            return;
-        }
-        String type = null;
-        logger.trace("Received setPluginInDataService request");
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
-        }
-
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a PluginInDataService without any "
-                    + "protocolPluginType provided");
-        } else {
-            this.pluginInDataService.put(type, s);
-            logger.debug("Stored the PluginInDataService for type: {}", type);
-        }
+        ProtocolService.set(this.pluginInDataService, props, s, logger);
     }
 
     void unsetPluginInDataService(Map props, IPluginInDataPacketService s) {
-        if (this.pluginInDataService == null) {
-            logger.error("pluginInDataService store null");
-            return;
-        }
-
-        String type = null;
-        logger.trace("Received unsetPluginInDataService request");
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
-        }
-
-        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
-        if (value instanceof String) {
-            type = (String) value;
-        }
-        if (type == null) {
-            logger.error("Received a PluginInDataService without any "
-                    + "protocolPluginType provided");
-        } else if (this.pluginInDataService.get(type).equals(s)) {
-            this.pluginInDataService.remove(type);
-            logger.debug("Removed the PluginInDataService for type: {}", type);
-        }
+        ProtocolService.unset(this.pluginInDataService, props, s, logger);
     }
 
     void setListenDataPacket(Map props, IListenDataPacket s) {
