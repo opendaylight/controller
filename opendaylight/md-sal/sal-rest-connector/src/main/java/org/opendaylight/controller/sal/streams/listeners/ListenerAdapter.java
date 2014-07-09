@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.streams.listeners;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -16,45 +15,30 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.internal.ConcurrentSet;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-import javax.activation.UnsupportedDataTypeException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.rest.impl.XmlMapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlStreamUtils;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * {@link ListenerAdapter} is responsible to track events, which occurred by changing data in data source.
@@ -62,8 +46,6 @@ import org.w3c.dom.Node;
 public class ListenerAdapter implements DataChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListenerAdapter.class);
-    private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
-    private static final TransformerFactory FACTORY = TransformerFactory.newInstance();
     private static final Pattern RFC3339_PATTERN = Pattern.compile("(\\d\\d)(\\d\\d)$");
 
     private final XmlMapper xmlMapper = new XmlMapper();
@@ -217,35 +199,28 @@ public class ListenerAdapter implements DataChangeListener {
      * @return Data in printable form.
      */
     private String prepareXmlFrom(final DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
-        Document doc = createDocument();
-        Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
-                "notification");
-        doc.appendChild(notificationElement);
-
-        Element eventTimeElement = doc.createElement("eventTime");
-        eventTimeElement.setTextContent(toRFC3339(new Date()));
-        notificationElement.appendChild(eventTimeElement);
-
-        Element dataChangedNotificationEventElement = doc.createElementNS(
-                "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "data-changed-notification");
-        addValuesToDataChangedNotificationEventElement(doc, dataChangedNotificationEventElement, change);
-        notificationElement.appendChild(dataChangedNotificationEventElement);
-
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Transformer transformer = FACTORY.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out, Charsets.UTF_8)));
-            byte[] charData = out.toByteArray();
-            return new String(charData, "UTF-8");
-        } catch (TransformerException | UnsupportedEncodingException e) {
-            String msg = "Error during transformation of Document into String";
-            LOG.error(msg, e);
-            return msg;
+            final ByteArrayOutputStream s = new ByteArrayOutputStream();
+            final XMLStreamWriter w = XMLOutputFactory.newFactory().createXMLStreamWriter(s);
+            w.writeStartDocument();
+            w.writeStartElement("urn:ietf:params:xml:ns:netconf:notification:1.0", "notification");
+
+            w.writeStartElement("eventTime");
+            w.writeCharacters(toRFC3339(new Date()));
+            w.writeEndElement();
+
+            w.writeStartElement("urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "data-changed-notification");
+            writeDataChangedNotification(w, change);
+            w.writeEndElement();
+
+            w.writeEndElement();
+            w.writeEndDocument();
+            w.close();
+
+            return s.toString("UTF-8");
+        } catch (XMLStreamException | UnsupportedEncodingException e) {
+            LOG.error("Failed to create XML", e);
+            return null;
         }
     }
 
@@ -261,106 +236,85 @@ public class ListenerAdapter implements DataChangeListener {
     }
 
     /**
-     * Creates {@link Document} document.
-     *
-     * @return {@link Document} document.
-     */
-    private Document createDocument() {
-        final DocumentBuilder bob;
-        try {
-            bob = DBF.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            return null;
-        }
-        return bob.newDocument();
-    }
-
-    /**
      * Adds values to data changed notification event element.
      *
-     * @param doc
-     *            {@link Document}
-     * @param dataChangedNotificationEventElement
-     *            {@link Element}
-     * @param change
-     *            {@link DataChangeEvent}
+     * @param writer XML stream writer
+     * @param change {@link DataChangeEvent}
+     * @throws XMLStreamException
      */
-    private void addValuesToDataChangedNotificationEventElement(final Document doc,
-            final Element dataChangedNotificationEventElement,
-            final DataChangeEvent<InstanceIdentifier, CompositeNode> change) {
-        addValuesFromDataToElement(doc, change.getCreatedConfigurationData(), dataChangedNotificationEventElement,
+    private void writeDataChangedNotification(final XMLStreamWriter writer, final DataChangeEvent<InstanceIdentifier, CompositeNode> change) throws XMLStreamException {
+        addValuesFromDataToElement(writer, change.getCreatedConfigurationData(),
                 Store.CONFIG, Operation.CREATED);
-        addValuesFromDataToElement(doc, change.getCreatedOperationalData(), dataChangedNotificationEventElement,
+        addValuesFromDataToElement(writer, change.getCreatedOperationalData(),
                 Store.OPERATION, Operation.CREATED);
         if (change.getCreatedConfigurationData().isEmpty()) {
-            addValuesFromDataToElement(doc, change.getUpdatedConfigurationData(), dataChangedNotificationEventElement,
+            addValuesFromDataToElement(writer,
+                    change.getUpdatedConfigurationData(),
                     Store.CONFIG, Operation.UPDATED);
         }
         if (change.getCreatedOperationalData().isEmpty()) {
-            addValuesFromDataToElement(doc, change.getUpdatedOperationalData(), dataChangedNotificationEventElement,
+            addValuesFromDataToElement(writer, change.getUpdatedOperationalData(),
                     Store.OPERATION, Operation.UPDATED);
         }
-        addValuesFromDataToElement(doc, change.getRemovedConfigurationData(), dataChangedNotificationEventElement,
+        addValuesFromDataToElement(writer, change.getRemovedConfigurationData(),
                 Store.CONFIG, Operation.DELETED);
-        addValuesFromDataToElement(doc, change.getRemovedOperationalData(), dataChangedNotificationEventElement,
+        addValuesFromDataToElement(writer, change.getRemovedOperationalData(),
                 Store.OPERATION, Operation.DELETED);
     }
 
     /**
      * Adds values from data to element.
      *
-     * @param doc
-     *            {@link Document}
+     * @param writer
+     *            {@link XMLStreamWriter}
      * @param data
      *            Set of {@link InstanceIdentifier}.
-     * @param element
-     *            {@link Element}
      * @param store
      *            {@link Store}
      * @param operation
      *            {@link Operation}
+     * @throws XMLStreamException
      */
-    private void addValuesFromDataToElement(final Document doc, final Set<InstanceIdentifier> data,
-            final Element element, final Store store, final Operation operation) {
-        if (data == null || data.isEmpty()) {
-            return;
-        }
-        for (InstanceIdentifier path : data) {
-            Node node = createDataChangeEventElement(doc, path, null, store, operation);
-            element.appendChild(node);
+    private void addValuesFromDataToElement(final XMLStreamWriter writer,
+            final Set<InstanceIdentifier> data, final Store store,
+            final Operation operation) throws XMLStreamException {
+        if (data != null) {
+            for (InstanceIdentifier path : data) {
+                createDataChangeEventElement(writer, path, null, store,
+                        operation);
+            }
         }
     }
 
     /**
      * Adds values from data to element.
      *
-     * @param doc
-     *            {@link Document}
+     * @param writer
+     *            {@link XMLStreamWriter}
      * @param data
      *            Map of {@link InstanceIdentifier} and {@link CompositeNode}.
-     * @param element
-     *            {@link Element}
      * @param store
      *            {@link Store}
      * @param operation
      *            {@link Operation}
+     * @throws XMLStreamException
      */
-    private void addValuesFromDataToElement(final Document doc, final Map<InstanceIdentifier, CompositeNode> data,
-            final Element element, final Store store, final Operation operation) {
-        if (data == null || data.isEmpty()) {
-            return;
-        }
-        for (Entry<InstanceIdentifier, CompositeNode> entry : data.entrySet()) {
-            Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), store, operation);
-            element.appendChild(node);
+    private void addValuesFromDataToElement(final XMLStreamWriter writer,
+            final Map<InstanceIdentifier, CompositeNode> data,
+            final Store store, final Operation operation) throws XMLStreamException {
+        if (data != null) {
+            for (Entry<InstanceIdentifier, CompositeNode> entry : data.entrySet()) {
+                createDataChangeEventElement(writer, entry.getKey(),
+                        entry.getValue(), store, operation);
+            }
         }
     }
 
     /**
      * Creates changed event element from data.
      *
-     * @param doc
-     *            {@link Document}
+     * @param writer
+     *            {@link XMLStreamWriter}
      * @param path
      *            Path to data in data store.
      * @param data
@@ -369,33 +323,32 @@ public class ListenerAdapter implements DataChangeListener {
      *            {@link Store}
      * @param operation
      *            {@link Operation}
-     * @return {@link Node} node represented by changed event element.
+     * @throws XMLStreamException
      */
-    private Node createDataChangeEventElement(final Document doc, final InstanceIdentifier path,
-            final CompositeNode data, final Store store, final Operation operation) {
-        Element dataChangeEventElement = doc.createElement("data-change-event");
+    private void createDataChangeEventElement(final XMLStreamWriter writer,
+            final InstanceIdentifier path, final CompositeNode data, final Store store,
+            final Operation operation) throws XMLStreamException {
+        writer.writeStartElement("data-change-event");
 
-        Element pathElement = doc.createElement("path");
-        addPathAsValueToElement(path, pathElement);
-        dataChangeEventElement.appendChild(pathElement);
+        writer.writeStartElement("path");
+        XmlStreamUtils.write(writer, path);
+        writer.writeEndElement();
 
-        Element storeElement = doc.createElement("store");
-        storeElement.setTextContent(store.value);
-        dataChangeEventElement.appendChild(storeElement);
+        writer.writeStartElement("store");
+        writer.writeCharacters(store.value);
+        writer.writeEndElement();
 
-        Element operationElement = doc.createElement("operation");
-        operationElement.setTextContent(operation.value);
-        dataChangeEventElement.appendChild(operationElement);
+        writer.writeStartElement("operation");
+        writer.writeCharacters(operation.value);
+        writer.writeEndElement();
 
         if (data != null) {
-            Element dataElement = doc.createElement("data");
-            Node dataAnyXml = translateToXml(path, data);
-            Node adoptedNode = doc.adoptNode(dataAnyXml);
-            dataElement.appendChild(adoptedNode);
-            dataChangeEventElement.appendChild(dataElement);
+            writer.writeStartElement("data");
+            translateToXml(writer, path, data);
+            writer.writeEndElement();
         }
 
-        return dataChangeEventElement;
+        writer.writeEndElement();
     }
 
     /**
@@ -406,113 +359,18 @@ public class ListenerAdapter implements DataChangeListener {
      * @param data
      *            {@link CompositeNode}
      * @return Data in XML format.
+     * @throws XMLStreamException
      */
-    private Node translateToXml(final InstanceIdentifier path, final CompositeNode data) {
-        DataNodeContainer schemaNode = ControllerContext.getInstance().getDataNodeContainerFor(path);
-        if (schemaNode == null) {
+    private void translateToXml(final XMLStreamWriter writer, final InstanceIdentifier path, final CompositeNode data) throws XMLStreamException {
+        DataNodeContainer schemaNode = ControllerContext.getInstance()
+                .getDataNodeContainerFor(path);
+        if (schemaNode != null) {
+            xmlMapper.writeData(writer, data, schemaNode);
+        } else {
             LOG.info(
                     "Path '{}' contains node with unsupported type (supported type is Container or List) or some node was not found.",
                     path);
-            return null;
         }
-        try {
-            Document xml = xmlMapper.write(data, schemaNode);
-            return xml.getFirstChild();
-        } catch (UnsupportedDataTypeException e) {
-            LOG.error("Error occured during translation of notification to XML.", e);
-            return null;
-        }
-    }
-
-    /**
-     * Adds path as value to element.
-     *
-     * @param path
-     *            Path to data in data store.
-     * @param element
-     *            {@link Element}
-     */
-    private void addPathAsValueToElement(final InstanceIdentifier path, final Element element) {
-        // Map< key = namespace, value = prefix>
-        Map<String, String> prefixes = new HashMap<>();
-        InstanceIdentifier instanceIdentifier = path;
-        StringBuilder textContent = new StringBuilder();
-
-        // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
-        for (PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
-            textContent.append("/");
-            writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
-            if (pathArgument instanceof NodeIdentifierWithPredicates) {
-                Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
-                for (QName keyValue : predicates.keySet()) {
-                    String predicateValue = String.valueOf(predicates.get(keyValue));
-                    textContent.append("[");
-                    writeIdentifierWithNamespacePrefix(element, textContent, keyValue, prefixes);
-                    textContent.append("='");
-                    textContent.append(predicateValue);
-                    textContent.append("'");
-                    textContent.append("]");
-                }
-            } else if (pathArgument instanceof NodeWithValue) {
-                textContent.append("[.='");
-                textContent.append(((NodeWithValue) pathArgument).getValue());
-                textContent.append("'");
-                textContent.append("]");
-            }
-        }
-        element.setTextContent(textContent.toString());
-    }
-
-    /**
-     * Writes identifier that consists of prefix and QName.
-     *
-     * @param element
-     *            {@link Element}
-     * @param textContent
-     *            StringBuilder
-     * @param qName
-     *            QName
-     * @param prefixes
-     *            Map of namespaces and prefixes.
-     */
-    private static void writeIdentifierWithNamespacePrefix(final Element element, final StringBuilder textContent,
-            final QName qName, final Map<String, String> prefixes) {
-        String namespace = qName.getNamespace().toString();
-        String prefix = prefixes.get(namespace);
-        if (prefix == null) {
-            prefix = qName.getPrefix();
-            if (prefix == null || prefix.isEmpty() || prefixes.containsValue(prefix)) {
-                prefix = generateNewPrefix(prefixes.values());
-            }
-        }
-
-        element.setAttribute("xmlns:" + prefix, namespace);
-        textContent.append(prefix);
-        prefixes.put(namespace, prefix);
-
-        textContent.append(":");
-        textContent.append(qName.getLocalName());
-    }
-
-    /**
-     * Generates new prefix which consists of four random characters <a-z>.
-     *
-     * @param prefixes
-     *            Collection of prefixes.
-     * @return New prefix which consists of four random characters <a-z>.
-     */
-    private static String generateNewPrefix(final Collection<String> prefixes) {
-        StringBuilder result = null;
-        Random random = new Random();
-        do {
-            result = new StringBuilder();
-            for (int i = 0; i < 4; i++) {
-                int randomNumber = 0x61 + (Math.abs(random.nextInt()) % 26);
-                result.append(Character.toChars(randomNumber));
-            }
-        } while (prefixes.contains(result.toString()));
-
-        return result.toString();
     }
 
     /**
