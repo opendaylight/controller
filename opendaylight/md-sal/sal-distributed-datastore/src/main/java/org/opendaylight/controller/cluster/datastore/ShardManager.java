@@ -12,9 +12,11 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
+import akka.cluster.ClusterEvent;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
@@ -78,20 +80,17 @@ public class ShardManager extends AbstractUntypedActor {
      *             configuration or operational
      */
     private ShardManager(String type, ClusterWrapper cluster, Configuration configuration) {
-        this.type = type;
-        this.cluster = cluster;
-        this.configuration = configuration;
-        String memberName = cluster.getCurrentMemberName();
-        List<String> memberShardNames =
-            configuration.getMemberShardNames(memberName);
 
-        for(String shardName : memberShardNames){
-            String shardActorName = getShardActorName(memberName, shardName);
-            ActorRef actor = getContext()
-                .actorOf(Shard.props(shardActorName), shardActorName);
-            ActorPath path = actor.path();
-            localShards.put(shardName, path);
-        }
+        this.type = Preconditions.checkNotNull(type, "type should not be null");
+        this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
+        this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
+
+        // Subscribe this actor to cluster member events
+        cluster.subscribeToMemberEvents(getSelf());
+
+        // Create all the local Shards and make them a child of the ShardManager
+        // TODO: This may need to be initiated when we first get the schema context
+        createLocalShards();
     }
 
     public static Props props(final String type,
@@ -109,52 +108,88 @@ public class ShardManager extends AbstractUntypedActor {
     @Override
     public void handleReceive(Object message) throws Exception {
         if (message instanceof FindPrimary) {
-            FindPrimary msg = ((FindPrimary) message);
-            String shardName = msg.getShardName();
-
-            List<String> members =
-                configuration.getMembersFromShardName(shardName);
-
-            for(String memberName : members) {
-                if (memberName.equals(cluster.getCurrentMemberName())) {
-                    // This is a local shard
-                    ActorPath shardPath = localShards.get(shardName);
-                    // FIXME: This check may be redundant
-                    if (shardPath == null) {
-                        getSender()
-                            .tell(new PrimaryNotFound(shardName), getSelf());
-                        return;
-                    }
-                    getSender().tell(new PrimaryFound(shardPath.toString()),
-                        getSelf());
-                    return;
-                } else {
-                    Address address = memberNameToAddress.get(shardName);
-                    if(address != null){
-                        String path =
-                            address.toString() + "/user/" + getShardActorName(
-                                memberName, shardName);
-                        getSender().tell(new PrimaryFound(path), getSelf());
-                    }
-
-
-                }
-            }
-
-            getSender().tell(new PrimaryNotFound(shardName), getSelf());
+            findPrimary(
+                (FindPrimary) message);
 
         } else if (message instanceof UpdateSchemaContext) {
-            for(ActorPath path : localShards.values()){
-                getContext().system().actorSelection(path)
-                    .forward(message,
-                        getContext());
+            updateSchemaContext(message);
+        } else if (message instanceof ClusterEvent.MemberUp){
+            memberUp((ClusterEvent.MemberUp) message);
+        } else if(message instanceof ClusterEvent.MemberRemoved){
+            memberRemoved((ClusterEvent.MemberRemoved) message);
+        }
+    }
+
+    private void memberRemoved(ClusterEvent.MemberRemoved message) {
+        memberNameToAddress.remove(message.member().roles().head());
+    }
+
+    private void memberUp(ClusterEvent.MemberUp message) {
+        memberNameToAddress.put(message.member().roles().head(), message.member().address());
+    }
+
+    private void updateSchemaContext(Object message) {
+        for(ActorPath path : localShards.values()){
+            getContext().system().actorSelection(path)
+                .forward(message,
+                    getContext());
+        }
+    }
+
+    private void findPrimary(FindPrimary message) {
+        String shardName = message.getShardName();
+
+        List<String> members =
+            configuration.getMembersFromShardName(shardName);
+
+        for(String memberName : members) {
+            if (memberName.equals(cluster.getCurrentMemberName())) {
+                // This is a local shard
+                ActorPath shardPath = localShards.get(shardName);
+                if (shardPath == null) {
+                    getSender()
+                        .tell(new PrimaryNotFound(shardName), getSelf());
+                    return;
+                }
+                getSender().tell(new PrimaryFound(shardPath.toString()),
+                    getSelf());
+                return;
+            } else {
+                Address address = memberNameToAddress.get(memberName);
+                if(address != null){
+                    String path =
+                        address.toString() + "/user/" + getShardActorName(
+                            memberName, shardName);
+                    getSender().tell(new PrimaryFound(path), getSelf());
+                    return;
+                }
+
+
             }
         }
+
+        getSender().tell(new PrimaryNotFound(shardName), getSelf());
     }
 
     private String getShardActorName(String memberName, String shardName){
         return memberName + "-shard-" + shardName + "-" + this.type;
     }
+
+    // Create the shards that are local to this member
+    private void createLocalShards() {
+        String memberName = this.cluster.getCurrentMemberName();
+        List<String> memberShardNames =
+            this.configuration.getMemberShardNames(memberName);
+
+        for(String shardName : memberShardNames){
+            String shardActorName = getShardActorName(memberName, shardName);
+            ActorRef actor = getContext()
+                .actorOf(Shard.props(shardActorName), shardActorName);
+            ActorPath path = actor.path();
+            localShards.put(shardName, path);
+        }
+    }
+
 
 
 }
