@@ -8,7 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CanCommitTransactionReply {
+import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+
+public class CanCommitTransactionReply implements SerializableMessage {
+  public static Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class;
   private final Boolean canCommit;
 
   public CanCommitTransactionReply(Boolean canCommit) {
@@ -17,5 +20,15 @@ public class CanCommitTransactionReply {
 
   public Boolean getCanCommit() {
     return canCommit;
+  }
+
+  @Override
+  public Object toSerializable() {
+    return  ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(canCommit).build();
+  }
+
+
+  public static CanCommitTransactionReply fromSerializable(Object message) {
+    return  new CanCommitTransactionReply(((ThreePhaseCommitCohortMessages.CanCommitTransactionReply)message).getCanCommit());
   }
 }
