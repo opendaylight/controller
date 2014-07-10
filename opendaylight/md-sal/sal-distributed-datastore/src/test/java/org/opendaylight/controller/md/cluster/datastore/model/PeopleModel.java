@@ -36,18 +36,18 @@ public class PeopleModel {
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
             ImmutableMapNodeBuilder.create().withNodeIdentifier(
                 new InstanceIdentifier.NodeIdentifier(
-                    QName.create(PEOPLE_QNAME, "person")));
+                    PERSON_QNAME));
 
         // Create an entry for the person jack
         MapEntryNode jack =
-            ImmutableNodes.mapEntryBuilder(PEOPLE_QNAME, PERSON_NAME_QNAME, "jack")
+            ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jack")
                 .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jack"))
                 .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100))
                 .build();
 
         // Create an entry for the person jill
         MapEntryNode jill =
-            ImmutableNodes.mapEntryBuilder(PEOPLE_QNAME, PERSON_NAME_QNAME, "jill")
+            ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jill")
                 .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jill"))
                 .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200))
                 .build();
