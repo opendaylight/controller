@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.sample.toaster.provider;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,8 +25,6 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterInput;
@@ -43,7 +38,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
@@ -163,8 +158,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
         }
 
         // Always return success from the cancel toast call.
-        return Futures.immediateFuture( Rpcs.<Void> getRpcResult( true,
-                                        Collections.<RpcError>emptyList() ) );
+        return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
     }
 
     /**
@@ -181,17 +175,14 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
         return futureResult;
     }
 
-    private List<RpcError> makeToasterOutOfBreadError() {
-        return Arrays.asList(
-                RpcErrors.getRpcError( "out-of-stock", "resource-denied", null, null,
-                                       "Toaster is out of bread",
-                                       ErrorType.APPLICATION, null ) );
+    private RpcError makeToasterOutOfBreadError() {
+        return RpcResultBuilder.newError( ErrorType.APPLICATION, "resource-denied",
+                "Toaster is out of bread", "out-of-stock", null, null );
     }
 
-    private List<RpcError> makeToasterInUseError() {
-        return Arrays.asList(
-            RpcErrors.getRpcError( "", "in-use", null, ErrorSeverity.WARNING,
-                                   "Toaster is busy", ErrorType.APPLICATION, null ) );
+    private RpcError makeToasterInUseError() {
+        return RpcResultBuilder.newWarning( ErrorType.APPLICATION, "in-use",
+                "Toaster is busy", null, null, null );
     }
 
     private void checkStatusAndMakeToast( final MakeToastInput input,
@@ -225,8 +216,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                         if( outOfBread() ) {
                             LOG.debug( "Toaster is out of bread" );
 
-                            return Futures.immediateFuture( Rpcs.<TransactionStatus>getRpcResult(
-                                       false, null, makeToasterOutOfBreadError() ) );
+                            return Futures.immediateFuture( RpcResultBuilder.<TransactionStatus>failed()
+                                    .withRpcError( makeToasterOutOfBreadError() ).build() );
                         }
 
                         LOG.debug( "Setting Toaster status to Down" );
@@ -244,8 +235,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                     // Return an error since we are already making toast. This will get
                     // propagated to the commitFuture below which will interpret the null
                     // TransactionStatus in the RpcResult as an error condition.
-                    return Futures.immediateFuture( Rpcs.<TransactionStatus>getRpcResult(
-                            false, null, makeToasterInUseError() ) );
+                    return Futures.immediateFuture( RpcResultBuilder.<TransactionStatus>failed()
+                            .withRpcError( makeToasterInUseError() ).build() );
                 }
         } );
 
@@ -265,7 +256,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                     // the read above returned ToasterStatus.Down. Either way, fail the
                     // futureResult and copy the errors.
 
-                    futureResult.set( Rpcs.<Void>getRpcResult( false, null, result.getErrors() ) );
+                    futureResult.set( RpcResultBuilder.<Void>failed().withRpcErrors(
+                                                                     result.getErrors() ).build() );
                 }
             }
 
@@ -286,10 +278,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                     LOG.error( "Failed to commit Toaster status", ex );
 
                     // Got some unexpected error so fail.
-                    futureResult.set( Rpcs.<Void> getRpcResult( false, null, Arrays.asList(
-                        RpcErrors.getRpcError( null, null, null, ErrorSeverity.ERROR,
-                                               ex.getMessage(),
-                                               ErrorType.APPLICATION, ex ) ) ) );
+                    futureResult.set( RpcResultBuilder.<Void> failed()
+                                        .withError( ErrorType.APPLICATION, ex.getMessage() ).build() );
                 }
             }
         } );
@@ -312,7 +302,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
             notificationProvider.publish( reStockedNotification );
         }
 
-        return Futures.immediateFuture(Rpcs.<Void> getRpcResult(true, Collections.<RpcError>emptyList()));
+        return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
     }
 
     /**
@@ -416,8 +406,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
                     LOG.debug("Toast done");
 
-                    futureResult.set( Rpcs.<Void>getRpcResult( true, null,
-                                                          Collections.<RpcError>emptyList() ) );
+                    futureResult.set( RpcResultBuilder.<Void>success().build() );
 
                     return null;
                 }

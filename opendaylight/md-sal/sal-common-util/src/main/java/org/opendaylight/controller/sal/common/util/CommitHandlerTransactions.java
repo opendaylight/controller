@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
-import java.util.Collections;
-
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.yangtools.concepts.Path;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 public class CommitHandlerTransactions {
 
@@ -26,11 +24,11 @@ public class CommitHandlerTransactions {
         }
         @Override
         public RpcResult<Void> rollback() throws IllegalStateException {
-            return Rpcs.<Void>getRpcResult(true, null, Collections.<RpcError>emptyList());
+            return RpcResultBuilder.<Void>success().build();
         }
         @Override
         public RpcResult<Void> finish() throws IllegalStateException {
-            return Rpcs.<Void>getRpcResult(true, null, Collections.<RpcError>emptyList());
+            return RpcResultBuilder.<Void>success().build();
         }
 
         @Override
