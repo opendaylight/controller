@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
@@ -38,8 +37,8 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -65,8 +64,8 @@ public class NetconfDeviceTest {
         }
     }
 
-    private static final  RpcResult<NetconfMessage> rpcResult = Rpcs.getRpcResult(true, netconfMessage, Collections.<RpcError>emptySet());
-    private static final  RpcResult<CompositeNode> rpcResultC = Rpcs.getRpcResult(true, compositeNode, Collections.<RpcError>emptySet());
+    private static final  RpcResult<NetconfMessage> rpcResult = RpcResultBuilder.success(netconfMessage).build();
+    private static final  RpcResult<CompositeNode> rpcResultC = RpcResultBuilder.success(compositeNode).build();
 
     public static final String TEST_NAMESPACE = "test:namespace";
     public static final String TEST_MODULE = "test-module";
