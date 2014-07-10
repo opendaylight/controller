@@ -695,6 +695,8 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             dot1q.setVid(vlan);
             dot1q.setEtherType(EtherTypes.ARP.shortValue());
             dot1q.setPayload(arp);
+            dot1q.setCfi((byte)0);
+            dot1q.setPcp((byte)0);
             ethernet.setEtherType(EtherTypes.VLANTAGGED.shortValue());
             ethernet.setPayload(dot1q);
         }
