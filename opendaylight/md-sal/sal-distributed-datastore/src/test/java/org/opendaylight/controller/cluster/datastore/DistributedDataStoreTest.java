@@ -5,8 +5,10 @@ import akka.actor.Props;
 import junit.framework.Assert;
 
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -28,6 +30,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
 
     @org.junit.Before
     public void setUp() throws Exception {
+        ShardStrategyFactory.setConfiguration(new MockConfiguration());
         final Props props = Props.create(DoNothingActor.class);
 
         doNothingActorRef = getSystem().actorOf(props);
