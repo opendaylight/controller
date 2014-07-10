@@ -85,6 +85,18 @@ public class ConfigurationImpl implements Configuration {
         return Collections.EMPTY_LIST;
     }
 
+    @Override public List<String> getMembersFromShardName(String shardName) {
+        List<String> shards = new ArrayList();
+        for(ModuleShard ms : moduleShards){
+            for(Shard s : ms.getShards()) {
+                if(s.getName().equals(shardName)){
+                    return s.getReplicas();
+                }
+            }
+        }
+        return Collections.EMPTY_LIST;
+    }
+
 
 
     private void readModules(Config modulesConfig) {
