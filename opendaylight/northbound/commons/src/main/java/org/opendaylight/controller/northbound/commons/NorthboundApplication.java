@@ -20,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.northbound.bundlescanner.IBundleScanService;
+import org.opendaylight.controller.northbound.commons.exception.GenericExceptionMapper;
 import org.opendaylight.controller.northbound.commons.query.QueryContextProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -60,6 +61,7 @@ public class NorthboundApplication extends Application {
         _singletons.add(getJsonProvider());
         _singletons.add(new JacksonJsonProcessingExceptionMapper());
         _singletons.add(new QueryContextProvider());
+        _singletons.add(new GenericExceptionMapper());
     }
 
     ////////////////////////////////////////////////////////////////
