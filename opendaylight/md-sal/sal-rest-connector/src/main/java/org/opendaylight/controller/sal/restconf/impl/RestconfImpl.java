@@ -878,7 +878,7 @@ public class RestconfImpl implements RestconfService {
         broker.registerToListenDataChanges(listener);
 
         final UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
-        UriBuilder port = uriBuilder.port(WebSocketServer.PORT);
+        UriBuilder port = uriBuilder.port(WebSocketServer.getInstance().getPort());
         final URI uriToWebsocketServer = port.replacePath(streamName).build();
 
         return Response.status(Status.OK).location(uriToWebsocketServer).build();

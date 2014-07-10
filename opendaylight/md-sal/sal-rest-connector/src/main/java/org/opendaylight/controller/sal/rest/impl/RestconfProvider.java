@@ -51,12 +51,15 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
 
     @Override
     public void start(BundleContext context) throws Exception {
+        String websocketPortStr = context.getProperty(WebSocketServer.WEBSOCKET_SERVER_CONFIG_PROPERTY);
+        int websocketPort = (websocketPortStr != null && !"".equals(websocketPortStr))
+                ? Integer.parseInt(websocketPortStr) :  WebSocketServer.DEFAULT_PORT;
         bundleContext = context;
-        brokerServiceTrancker = new ServiceTracker<>(context, Broker.class, this);
-        brokerServiceTrancker.open();
-        webSocketServerThread = new Thread(new WebSocketServer());
+        webSocketServerThread = new Thread(WebSocketServer.createInstance(websocketPort));
         webSocketServerThread.setName("Web socket server");
         webSocketServerThread.start();
+        brokerServiceTrancker = new ServiceTracker<>(context, Broker.class, this);
+        brokerServiceTrancker.open();
     }
 
     @Override
