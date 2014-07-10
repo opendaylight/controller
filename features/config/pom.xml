@@ -5,6 +5,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
     <version>0.2.5-SNAPSHOT</version>
+    <relativePath>../../opendaylight/config/</relativePath>
   </parent>
   <artifactId>config-features</artifactId>
 
