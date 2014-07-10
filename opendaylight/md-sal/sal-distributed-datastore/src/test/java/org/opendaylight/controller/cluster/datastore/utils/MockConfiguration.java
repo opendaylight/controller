@@ -38,4 +38,10 @@ public class MockConfiguration implements Configuration{
         String moduleName) {
         return Collections.EMPTY_LIST;
     }
+
+    @Override public List<String> getMembersFromShardName(String shardName) {
+        List<String> shardNames = new ArrayList<>();
+        shardNames.add("member-1");
+        return shardNames;
+    }
 }

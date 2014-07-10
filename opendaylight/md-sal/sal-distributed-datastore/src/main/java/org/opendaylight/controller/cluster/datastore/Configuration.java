@@ -19,4 +19,5 @@ public interface Configuration {
     Optional<String> getModuleNameFromNameSpace(String nameSpace);
     Map<String, ShardStrategy> getModuleNameToShardStrategyMap();
     List<String> getShardNamesFromModuleName(String moduleName);
+    List<String> getMembersFromShardName(String shardName);
 }
