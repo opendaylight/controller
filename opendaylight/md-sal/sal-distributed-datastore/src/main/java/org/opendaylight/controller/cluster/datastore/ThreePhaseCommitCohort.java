@@ -58,14 +58,16 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message instanceof CanCommitTransaction) {
-            canCommit((CanCommitTransaction) message);
-        } else if (message instanceof PreCommitTransaction) {
-            preCommit((PreCommitTransaction) message);
-        } else if (message instanceof CommitTransaction) {
-            commit((CommitTransaction) message);
-        } else if (message instanceof AbortTransaction) {
-            abort((AbortTransaction) message);
+        if (message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
+            canCommit(new CanCommitTransaction());
+        } else if (message.getClass().equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
+            preCommit(new PreCommitTransaction());
+        } else if (message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
+            commit(new CommitTransaction());
+        } else if (message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
+            abort(new AbortTransaction());
+        } else {
+          throw new Exception ("Not recognized message received,message="+message);
         }
     }
 
@@ -79,7 +81,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new AbortTransactionReply(), self);
+                    sender.tell(new AbortTransactionReply().toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e, "An exception happened when aborting");
                 }
@@ -107,7 +109,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new PreCommitTransactionReply(), self);
+                    sender.tell(new PreCommitTransactionReply().toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e, "An exception happened when preCommitting");
                 }
@@ -126,7 +128,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     Boolean canCommit = future.get();
-                    sender.tell(new CanCommitTransactionReply(canCommit), self);
+                    sender.tell(new CanCommitTransactionReply(canCommit).toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e, "An exception happened when aborting");
                 }

@@ -8,10 +8,11 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeLis
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.List;
@@ -21,10 +22,10 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
     private ActorRef dataChangeListenerActor = getSystem().actorOf(Props.create(DoNothingActor.class));
 
     private static class MockDataChangeListener implements
-        AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
+        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
         @Override public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             throw new UnsupportedOperationException("onDataChanged");
         }
     }
@@ -59,7 +60,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
         //Check if it was received by the remote actor
         ActorContext
-            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockConfiguration());
+            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)),new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages",
                 ActorContext.ASK_DURATION);
@@ -72,6 +73,6 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof CloseDataChangeListenerRegistration);
+        Assert.assertTrue(listMessages.get(0).getClass().equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS));
     }
 }

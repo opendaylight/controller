@@ -12,50 +12,51 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class SampleModelsTest {
     @Test
     public void testPeopleModel(){
-        NormalizedNode<?, ?> expected = PeopleModel.emptyContainer();
+        NormalizedNode<?, ?> expected = PeopleModel.create();
 
 
         NormalizedNodeMessages.Container node =
             new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
-                .encode(InstanceIdentifier.of(PeopleModel.BASE_QNAME),
+                .encode(YangInstanceIdentifier.of(PeopleModel.BASE_QNAME),
                     expected);
 
         NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
-        NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(InstanceIdentifier.of(PeopleModel.BASE_QNAME),
+        NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(YangInstanceIdentifier.of(PeopleModel.BASE_QNAME),
             normalizedNode);
 
 
-        Assert.assertEquals(expected, actual);
+        Assert.assertEquals(expected.toString(), actual.toString());
 
     }
 
 
     @Test
     public void testCarsModel(){
-        NormalizedNode<?, ?> expected = CarsModel.emptyContainer();
+        NormalizedNode<?, ?> expected = CarsModel.create();
 
 
         NormalizedNodeMessages.Container node =
             new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
-                .encode(InstanceIdentifier.of(CarsModel.BASE_QNAME),
+                .encode(YangInstanceIdentifier.of(CarsModel.BASE_QNAME),
                     expected);
 
         NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
-        NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(InstanceIdentifier.of(CarsModel.BASE_QNAME),
+        NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(
+            YangInstanceIdentifier.of(CarsModel.BASE_QNAME),
             normalizedNode);
 
 
-        Assert.assertEquals(expected, actual);
+        Assert.assertEquals(expected.toString(), actual.toString());
 
     }
 }

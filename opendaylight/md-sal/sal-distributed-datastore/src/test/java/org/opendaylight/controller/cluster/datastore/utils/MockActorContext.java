@@ -21,11 +21,11 @@ public class MockActorContext extends ActorContext {
     private Object executeLocalOperationResponse;
 
     public MockActorContext(ActorSystem actorSystem) {
-        super(actorSystem, null, new MockConfiguration());
+        super(actorSystem, null, new MockClusterWrapper(), new MockConfiguration());
     }
 
     public MockActorContext(ActorSystem actorSystem, ActorRef shardManager) {
-        super(actorSystem, shardManager, new MockConfiguration());
+        super(actorSystem, shardManager, new MockClusterWrapper(), new MockConfiguration());
     }
 
 
@@ -54,5 +54,10 @@ public class MockActorContext extends ActorContext {
     public void setExecuteLocalOperationResponse(
         Object executeLocalOperationResponse) {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
+    }
+
+    @Override public Object executeLocalOperation(ActorRef actor,
+        Object message, FiniteDuration duration) {
+        return this.executeLocalOperationResponse;
     }
 }

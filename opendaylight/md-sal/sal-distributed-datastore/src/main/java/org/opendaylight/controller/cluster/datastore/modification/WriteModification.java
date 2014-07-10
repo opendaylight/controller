@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUti
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -25,7 +25,7 @@ public class WriteModification extends AbstractModification {
   private final NormalizedNode data;
     private final SchemaContext schemaContext;
 
-    public WriteModification(InstanceIdentifier path, NormalizedNode data, SchemaContext schemaContext) {
+    public WriteModification(YangInstanceIdentifier path, NormalizedNode data, SchemaContext schemaContext) {
     super(path);
     this.data = data;
         this.schemaContext = schemaContext;
@@ -39,12 +39,12 @@ public class WriteModification extends AbstractModification {
     @Override public Object toSerializable() {
         NormalizedNodeMessages.Container encode =
             new NormalizedNodeToNodeCodec(schemaContext).encode(
-                InstanceIdentifierUtils.from(path.toString()), data);
+                path, data);
 
 
         return PersistentMessages.Modification.newBuilder()
             .setType(this.getClass().toString())
-            .setPath(this.path.toString())
+            .setPath(InstanceIdentifierUtils.toSerializable(this.path))
             .setData(encode.getNormalizedNode())
             .build();
 
@@ -55,7 +55,7 @@ public class WriteModification extends AbstractModification {
         SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
 
-        InstanceIdentifier path = InstanceIdentifierUtils.from(o.getPath());
+        YangInstanceIdentifier path = InstanceIdentifierUtils.fromSerializable(o.getPath());
         NormalizedNode data = new NormalizedNodeToNodeCodec(schemaContext).decode(
             path, o.getData());
 

@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -24,10 +25,9 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -62,7 +62,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private final TransactionType transactionType;
     private final ActorContext actorContext;
-    private final Map<String, ActorSelection> remoteTransactionPaths = new HashMap<>();
+    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
     private final String identifier;
     private final ExecutorService executor;
     private final SchemaContext schemaContext;
@@ -74,7 +74,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         SchemaContext schemaContext
         ) {
 
-        this.identifier = "txn-" + counter.getAndIncrement();
+        this.identifier = actorContext.getCurrentMemberName() + "-txn-" + counter.getAndIncrement();
         this.transactionType = transactionType;
         this.actorContext = actorContext;
         this.executor = executor;
@@ -84,7 +84,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -118,7 +118,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void write(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -127,7 +127,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void merge(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void merge(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -136,7 +136,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void delete(InstanceIdentifier path) {
+    public void delete(YangInstanceIdentifier path) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -148,15 +148,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     public DOMStoreThreePhaseCommitCohort ready() {
         List<ActorPath> cohortPaths = new ArrayList<>();
 
-        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
-            Object result = actorContext.executeRemoteOperation(remoteTransaction,
-                new ReadyTransaction(),
+        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+            Object result = actorContext.executeRemoteOperation(transactionContext.getActor(),
+                new ReadyTransaction().toSerializable(),
                 ActorContext.ASK_DURATION
             );
 
-            if(result instanceof ReadyTransactionReply){
-                ReadyTransactionReply reply = (ReadyTransactionReply) result;
-                cohortPaths.add(reply.getCohortPath());
+            if(result.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)){
+                ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(actorContext.getActorSystem(),result);
+                String resolvedCohortPath = transactionContext
+                    .getResolvedCohortPath(reply.getCohortPath().toString());
+                cohortPaths.add(actorContext.actorFor(resolvedCohortPath));
             }
         }
 
@@ -170,37 +172,74 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void close() {
-        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
-            remoteTransaction.tell(new CloseTransaction(), null);
+        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+            transactionContext.getActor().tell(
+                new CloseTransaction().toSerializable(), null);
         }
     }
 
-    private ActorSelection remoteTransactionFromIdentifier(InstanceIdentifier path){
+    private ActorSelection remoteTransactionFromIdentifier(YangInstanceIdentifier path){
         String shardName = shardNameFromIdentifier(path);
-        return remoteTransactionPaths.get(shardName);
+        return remoteTransactionPaths.get(shardName).getActor();
     }
 
-    private String shardNameFromIdentifier(InstanceIdentifier path){
+    private String shardNameFromIdentifier(YangInstanceIdentifier path){
         return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
 
-    private void createTransactionIfMissing(ActorContext actorContext, InstanceIdentifier path) {
+    private void createTransactionIfMissing(ActorContext actorContext, YangInstanceIdentifier path) {
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
-        ActorSelection actorSelection =
+        TransactionContext transactionContext =
             remoteTransactionPaths.get(shardName);
 
-        if(actorSelection != null){
+        if(transactionContext != null){
             // A transaction already exists with that shard
             return;
         }
 
-        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier), ActorContext.ASK_DURATION);
-        if(response instanceof CreateTransactionReply){
-            CreateTransactionReply reply = (CreateTransactionReply) response;
-            remoteTransactionPaths.put(shardName, actorContext.actorSelection(reply.getTransactionActorPath()));
+        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier).toSerializable(), ActorContext.ASK_DURATION);
+        if(response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)){
+            CreateTransactionReply reply = CreateTransactionReply.fromSerializable(response);
+            String transactionPath = actorContext.getRemoteActorPath(shardName, reply.getTransactionPath());
+
+            ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
+            transactionContext = new TransactionContext(shardName, transactionPath, transactionActor);
+
+            remoteTransactionPaths.put(shardName, transactionContext);
         }
     }
 
+
+    private class TransactionContext {
+        private final String shardName;
+        private final String actorPath;
+        private final ActorSelection  actor;
+
+
+        private TransactionContext(String shardName, String actorPath,
+            ActorSelection actor) {
+            this.shardName = shardName;
+            this.actorPath = actorPath;
+            this.actor = actor;
+        }
+
+
+        public String getShardName() {
+            return shardName;
+        }
+
+        public String getActorPath() {
+            return actorPath;
+        }
+
+        public ActorSelection getActor() {
+            return actor;
+        }
+
+        public String getResolvedCohortPath(String cohortPath){
+            return actorContext.resolvePath(actorPath, cohortPath);
+        }
+    }
 
 }

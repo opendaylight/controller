@@ -64,6 +64,9 @@
     <!--sal-protocolbuffer-encoding-->
     <module>sal-protocolbuffer-encoding</module>
 
+    <!--sal-distributed-datastore-->
+    <module>sal-distributed-datastore</module>
+
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
   </modules>

@@ -19,15 +19,16 @@ public class NodeIdentifierWithPredicatesGenerator{
     private final boolean doesMatch;
     private final ListSchemaNode listSchemaNode;
 
-    public NodeIdentifierWithPredicatesGenerator(String id){
-        this(id, null);
-    }
-
-    public NodeIdentifierWithPredicatesGenerator(String id, ListSchemaNode schemaNode){
+    public NodeIdentifierWithPredicatesGenerator(String id, DataSchemaNode schemaNode){
         this.id = id;
         matcher = pattern.matcher(this.id);
         doesMatch = matcher.matches();
-        this.listSchemaNode = schemaNode;
+
+        if(schemaNode instanceof  ListSchemaNode){
+            this.listSchemaNode = (ListSchemaNode) schemaNode;
+        } else {
+            this.listSchemaNode = null;
+        }
     }
 
 

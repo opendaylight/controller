@@ -32,7 +32,7 @@ public class CreateTransactionReply implements SerializableMessage {
 
     public Object toSerializable(){
         return ShardTransactionMessages.CreateTransactionReply.newBuilder()
-            .setTransactionActorPath(transactionPath.toString())
+            .setTransactionActorPath(transactionPath)
             .setTransactionId(transactionId)
             .build();
     }

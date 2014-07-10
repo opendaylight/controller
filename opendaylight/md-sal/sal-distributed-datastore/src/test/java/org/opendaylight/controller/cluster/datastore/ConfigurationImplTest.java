@@ -1,9 +1,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import com.typesafe.config.ConfigFactory;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -29,5 +31,11 @@ public class ConfigurationImplTest {
 
         assertTrue(memberShardNames.contains("people-1"));
         assertTrue(memberShardNames.contains("cars-1"));
+    }
+
+    @Test
+    public void testReadConfigurationFromFile(){
+        File f = new File("./module-shards.conf");
+        ConfigFactory.parseFile(f);
     }
 }
