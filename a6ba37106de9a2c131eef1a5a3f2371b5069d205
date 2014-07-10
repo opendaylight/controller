@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_17120a57",
+        "filename": "opendaylight/commons/checkstyle/src/main/resources/controller/java.header",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 491
+      },
+      "writtenOn": "2014-07-10T18:16:44Z",
+      "side": 1,
+      "message": "It would be nice to allow for more than one organization to hold copyright on a file, I remember seeing a discussion on one of the mailing lists concluding that significant changes on a file entitles the authors to add a copyright line.",
+      "revId": "a6ba37106de9a2c131eef1a5a3f2371b5069d205",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b71a3e6d",
+        "filename": "opendaylight/commons/checkstyle/src/main/resources/controller/odl-checkstyle.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 491
+      },
+      "writtenOn": "2014-07-10T18:16:44Z",
+      "side": 1,
+      "message": "Maybe add 3 as a value too (see comment on java.header)",
+      "revId": "a6ba37106de9a2c131eef1a5a3f2371b5069d205",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
