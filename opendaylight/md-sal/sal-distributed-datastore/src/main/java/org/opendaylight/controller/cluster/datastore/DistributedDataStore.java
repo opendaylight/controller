@@ -13,6 +13,7 @@ import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -77,7 +78,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(
             DataChangeListener.props(listener));
 
-        Object result = actorContext.executeShardOperation(Shard.DEFAULT_NAME,
+        String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
+
+        Object result = actorContext.executeShardOperation(shardName,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
                 AsyncDataBroker.DataChangeScope.BASE).toSerializable(),
             ActorContext.ASK_DURATION
