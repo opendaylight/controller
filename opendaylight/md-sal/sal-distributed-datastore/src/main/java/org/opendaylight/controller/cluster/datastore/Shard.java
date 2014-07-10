@@ -147,7 +147,7 @@ public class Shard extends UntypedProcessor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new CommitTransactionReply(), self);
+                    sender.tell(new CommitTransactionReply().toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     // FIXME : Handle this properly
                     log.error(e, "An exception happened when committing");

@@ -67,12 +67,12 @@ public class ThreePhaseCommitCohortProxy implements
                 try {
                     Object response =
                         actorContext.executeRemoteOperation(cohort,
-                            new CanCommitTransaction(),
+                            new CanCommitTransaction().toSerializable(),
                             ActorContext.ASK_DURATION);
 
-                    if (response instanceof CanCommitTransactionReply) {
+                    if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
                         CanCommitTransactionReply reply =
-                            (CanCommitTransactionReply) response;
+                            CanCommitTransactionReply.fromSerializable(response);
                         if (!reply.getCanCommit()) {
                             return false;
                         }
@@ -97,15 +97,15 @@ public class ThreePhaseCommitCohortProxy implements
     }
 
     @Override public ListenableFuture<Void> preCommit() {
-        return voidOperation(new PreCommitTransaction(), PreCommitTransactionReply.class);
+        return voidOperation(new PreCommitTransaction().toSerializable(), PreCommitTransactionReply.SERIALIZABLE_CLASS);
     }
 
     @Override public ListenableFuture<Void> abort() {
-        return voidOperation(new AbortTransaction(), AbortTransactionReply.class);
+        return voidOperation(new AbortTransaction().toSerializable(), AbortTransactionReply.SERIALIZABLE_CLASS);
     }
 
     @Override public ListenableFuture<Void> commit() {
-        return voidOperation(new CommitTransaction(), CommitTransactionReply.class);
+        return voidOperation(new CommitTransaction().toSerializable(), CommitTransactionReply.SERIALIZABLE_CLASS);
     }
 
     private ListenableFuture<Void> voidOperation(final Object message, final Class expectedResponseClass){
