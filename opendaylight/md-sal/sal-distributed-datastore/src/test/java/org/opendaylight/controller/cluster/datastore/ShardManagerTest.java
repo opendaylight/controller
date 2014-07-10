@@ -18,12 +18,12 @@ public class ShardManagerTest {
     private static ActorSystem system;
 
     @BeforeClass
-    public static void setUp(){
+    public static void setUp() {
         system = ActorSystem.create("test");
     }
 
     @AfterClass
-    public static void tearDown(){
+    public static void tearDown() {
         JavaTestKit.shutdownActorSystem(system);
         system = null;
     }
@@ -32,15 +32,19 @@ public class ShardManagerTest {
     public void testOnReceiveFindPrimaryForNonExistentShard() throws Exception {
 
         new JavaTestKit(system) {{
-            final Props props = ShardManager.props("config", new MockClusterWrapper(), new MockConfiguration());
-            final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
+            final Props props = ShardManager
+                .props("config", new MockClusterWrapper(),
+                    new MockConfiguration());
+            final TestActorRef<ShardManager> subject =
+                TestActorRef.create(system, props);
 
             new Within(duration("1 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindPrimary("inventory"), getRef());
 
-                    expectMsgEquals(Duration.Zero(), new PrimaryNotFound("inventory"));
+                    expectMsgEquals(Duration.Zero(),
+                        new PrimaryNotFound("inventory"));
 
                     // Will wait for the rest of the 3 seconds
                     expectNoMsg();
@@ -49,24 +53,27 @@ public class ShardManagerTest {
         }};
     }
 
-  @Test
-  public void testOnReceiveFindPrimaryForExistentShard() throws Exception {
+    @Test
+    public void testOnReceiveFindPrimaryForExistentShard() throws Exception {
 
-    new JavaTestKit(system) {{
-      final Props props = ShardManager.props("config", new MockClusterWrapper(), new MockConfiguration());
-      final TestActorRef<ShardManager> subject = TestActorRef.create(system, props);
+        new JavaTestKit(system) {{
+            final Props props = ShardManager
+                .props("config", new MockClusterWrapper(),
+                    new MockConfiguration());
+            final TestActorRef<ShardManager> subject =
+                TestActorRef.create(system, props);
 
-      // the run() method needs to finish within 3 seconds
-      new Within(duration("1 seconds")) {
-        protected void run() {
+            // the run() method needs to finish within 3 seconds
+            new Within(duration("1 seconds")) {
+                protected void run() {
 
-          subject.tell(new FindPrimary(Shard.DEFAULT_NAME), getRef());
+                    subject.tell(new FindPrimary(Shard.DEFAULT_NAME), getRef());
 
-          expectMsgClass(PrimaryFound.class);
+                    expectMsgClass(PrimaryFound.class);
 
-          expectNoMsg();
-        }
-      };
-    }};
-  }
+                    expectNoMsg();
+                }
+            };
+        }};
+    }
 }
