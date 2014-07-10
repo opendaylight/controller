@@ -117,8 +117,6 @@ public class Shard extends UntypedProcessor {
             createTransaction((CreateTransaction) message);
         } else if(message instanceof NonPersistent){
             commit(((NonPersistent)message).payload());
-        } else {
-          throw new Exception("Not recognized message in Shard::OnReceive"+message);
         }
     }
 
