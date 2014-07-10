@@ -41,7 +41,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     @Test
     public void testCanCommit() throws Exception {
-        actorContext.setExecuteRemoteOperationResponse(new CanCommitTransactionReply(true));
+        actorContext.setExecuteRemoteOperationResponse(new CanCommitTransactionReply(true).toSerializable());
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
@@ -51,7 +51,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     @Test
     public void testPreCommit() throws Exception {
-        actorContext.setExecuteRemoteOperationResponse(new PreCommitTransactionReply());
+        actorContext.setExecuteRemoteOperationResponse(new PreCommitTransactionReply().toSerializable());
 
         ListenableFuture<Void> future = proxy.preCommit();
 
@@ -61,7 +61,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     @Test
     public void testAbort() throws Exception {
-        actorContext.setExecuteRemoteOperationResponse(new AbortTransactionReply());
+        actorContext.setExecuteRemoteOperationResponse(new AbortTransactionReply().toSerializable());
 
         ListenableFuture<Void> future = proxy.abort();
 
@@ -71,7 +71,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     @Test
     public void testCommit() throws Exception {
-        actorContext.setExecuteRemoteOperationResponse(new CommitTransactionReply());
+        actorContext.setExecuteRemoteOperationResponse(new CommitTransactionReply().toSerializable());
 
         ListenableFuture<Void> future = proxy.commit();
 
