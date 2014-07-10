@@ -696,8 +696,8 @@ public class ControllerContext implements SchemaContextListener {
             final int keysSize = listNode.getKeyDefinition().size();
             if( (strings.size() - consumed) < keysSize ) {
                 throw new RestconfDocumentedException(
-                        "Missing key for list \"" + listNode.getQName().getLocalName() + "\".",
-                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
+                        "Missing key value for list element '" + listNode.getQName().getLocalName() + "' in the URI.",
+                        ErrorType.PROTOCOL, ErrorTag.DATA_MISSING );
             }
 
             final List<String> uriKeyValues = strings.subList( consumed, consumed + keysSize );

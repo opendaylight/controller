@@ -52,6 +52,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -674,6 +676,7 @@ public class RestconfImpl implements RestconfService {
 
         MountInstance mountPoint = iiWithData.getMountPoint();
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
+        validateListKeysEqualityInPayloadAndUri(iiWithData, payload);
         RpcResult<TransactionStatus> status = null;
 
         try {
@@ -693,6 +696,52 @@ public class RestconfImpl implements RestconfService {
         }
 
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * Validates whether keys in {@code payload} are equal to values of keys in
+     * {@code iiWithData} for list schema node
+     *
+     * @throws RestconfDocumentedException
+     *             if key values or key count in payload and URI isn't equal
+     *
+     */
+    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdWithSchemaNode iiWithData,
+            final CompositeNode payload) {
+        if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
+            final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
+            final PathArgument lastPathArgument = iiWithData.getInstanceIdentifier().getLastPathArgument();
+            if (lastPathArgument instanceof NodeIdentifierWithPredicates) {
+                final Map<QName, Object> uriKeyValues = ((NodeIdentifierWithPredicates) lastPathArgument)
+                        .getKeyValues();
+                isEqualUriAndPayloadKeyValues(uriKeyValues, payload, keyDefinitions);
+            }
+        }
+    }
+
+    private void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues, final CompositeNode payload,
+            final List<QName> keyDefinitions) {
+        for (QName keyDefinition : keyDefinitions) {
+            final Object uriKeyValue = uriKeyValues.get(keyDefinition);
+            // should be caught during parsing URI to InstanceIdentifier
+            if (uriKeyValue == null) {
+                throw new RestconfDocumentedException("Missing key " + keyDefinition + " in URI.",
+                        ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
+            }
+            final List<SimpleNode<?>> payloadKeyValues = payload.getSimpleNodesByName(keyDefinition.getLocalName());
+            if (payloadKeyValues.isEmpty()) {
+                throw new RestconfDocumentedException("Missing key " + keyDefinition.getLocalName()
+                        + " in the message body.", ErrorType.PROTOCOL,
+                        ErrorTag.DATA_MISSING);
+            }
+
+            Object payloadKeyValue = payloadKeyValues.iterator().next().getValue();
+            if (!uriKeyValue.equals(payloadKeyValue)) {
+                throw new RestconfDocumentedException("The value '"+uriKeyValue+ "' for key '" + keyDefinition.getLocalName() +
+                        "' specified in the URI doesn't match the value '" + payloadKeyValue + "' specified in the message body. ",
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+            }
+        }
     }
 
     @Override
@@ -1190,9 +1239,9 @@ public class RestconfImpl implements RestconfService {
 
                 if (!foundKey) {
                     throw new RestconfDocumentedException(
-                            "Missing key in URI \"" + listKey.getLocalName() +
-                            "\" of list \"" + listSchemaNode.getQName().getLocalName() + "\"",
-                            ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE );
+                            "Missing key '" + listKey.getLocalName() +
+                            "' for list '" + listSchemaNode.getQName().getLocalName() + "' in the message body",
+                            ErrorType.PROTOCOL, ErrorTag.DATA_MISSING );
                 }
             }
         }
