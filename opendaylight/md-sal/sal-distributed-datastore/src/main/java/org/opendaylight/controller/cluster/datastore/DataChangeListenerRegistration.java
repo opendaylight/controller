@@ -29,9 +29,9 @@ public class DataChangeListenerRegistration extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message instanceof CloseDataChangeListenerRegistration) {
+        if (message.getClass().equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS)) {
             closeListenerRegistration(
-                (CloseDataChangeListenerRegistration) message);
+                new CloseDataChangeListenerRegistration());
         }
     }
 
@@ -50,7 +50,7 @@ public class DataChangeListenerRegistration extends AbstractUntypedActor {
         CloseDataChangeListenerRegistration message) {
         registration.close();
         getSender()
-            .tell(new CloseDataChangeListenerRegistrationReply(), getSelf());
+            .tell(new CloseDataChangeListenerRegistrationReply().toSerializable(), getSelf());
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 }
