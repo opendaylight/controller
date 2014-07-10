@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class SampleModelsTest {
     @Test
     public void testPeopleModel(){
-        NormalizedNode<?, ?> expected = PeopleModel.emptyContainer();
+        NormalizedNode<?, ?> expected = PeopleModel.create();
 
 
         NormalizedNodeMessages.Container node =
@@ -33,14 +33,14 @@ public class SampleModelsTest {
             normalizedNode);
 
 
-        Assert.assertEquals(expected, actual);
+        Assert.assertEquals(expected.toString(), actual.toString());
 
     }
 
 
     @Test
     public void testCarsModel(){
-        NormalizedNode<?, ?> expected = CarsModel.emptyContainer();
+        NormalizedNode<?, ?> expected = CarsModel.create();
 
 
         NormalizedNodeMessages.Container node =
@@ -55,7 +55,7 @@ public class SampleModelsTest {
             normalizedNode);
 
 
-        Assert.assertEquals(expected, actual);
+        Assert.assertEquals(expected.toString(), actual.toString());
 
     }
 }
