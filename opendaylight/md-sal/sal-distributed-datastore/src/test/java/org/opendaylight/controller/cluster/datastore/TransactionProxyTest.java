@@ -204,6 +204,8 @@ public class TransactionProxyTest extends AbstractActorTest {
                 TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
+        transactionProxy.read(TestModel.TEST_PATH);
+
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
         Assert.assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
@@ -241,6 +243,8 @@ public class TransactionProxyTest extends AbstractActorTest {
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
                 TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+
+        transactionProxy.read(TestModel.TEST_PATH);
 
         transactionProxy.close();
 

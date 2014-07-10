@@ -106,7 +106,6 @@ public class ShardManager extends AbstractUntypedActor {
             FindPrimary msg = ((FindPrimary) message);
             String shardName = msg.getShardName();
 
-
             if (Shard.DEFAULT_NAME.equals(shardName)) {
                 ActorPath defaultShardPath = localShards.get(shardName);
                 if(defaultShardPath == null){

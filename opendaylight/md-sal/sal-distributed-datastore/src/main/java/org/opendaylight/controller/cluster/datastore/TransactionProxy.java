@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -79,15 +80,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this.executor = executor;
         this.schemaContext = schemaContext;
 
-        Object response = actorContext.executeShardOperation(Shard.DEFAULT_NAME, new CreateTransaction(identifier), ActorContext.ASK_DURATION);
-        if(response instanceof CreateTransactionReply){
-            CreateTransactionReply reply = (CreateTransactionReply) response;
-            remoteTransactionPaths.put(Shard.DEFAULT_NAME, actorContext.actorSelection(reply.getTransactionActorPath()));
-        }
+
     }
 
     @Override
     public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
+
+        createTransactionIfMissing(actorContext, path);
+
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
 
         Callable<Optional<NormalizedNode<?,?>>> call = new Callable() {
@@ -119,18 +119,27 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+
+        createTransactionIfMissing(actorContext, path);
+
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
         remoteTransaction.tell(new WriteData(path, data, schemaContext).toSerializable(), null);
     }
 
     @Override
     public void merge(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+
+        createTransactionIfMissing(actorContext, path);
+
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
         remoteTransaction.tell(new MergeData(path, data, schemaContext).toSerializable(), null);
     }
 
     @Override
     public void delete(InstanceIdentifier path) {
+
+        createTransactionIfMissing(actorContext, path);
+
         final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
         remoteTransaction.tell(new DeleteData(path).toSerializable(), null);
     }
@@ -172,6 +181,26 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     private String shardNameFromIdentifier(InstanceIdentifier path){
-        return Shard.DEFAULT_NAME;
+        return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
+
+    private void createTransactionIfMissing(ActorContext actorContext, InstanceIdentifier path) {
+        String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
+
+        ActorSelection actorSelection =
+            remoteTransactionPaths.get(shardName);
+
+        if(actorSelection != null){
+            // A transaction already exists with that shard
+            return;
+        }
+
+        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier), ActorContext.ASK_DURATION);
+        if(response instanceof CreateTransactionReply){
+            CreateTransactionReply reply = (CreateTransactionReply) response;
+            remoteTransactionPaths.put(shardName, actorContext.actorSelection(reply.getTransactionActorPath()));
+        }
+    }
+
+
 }
