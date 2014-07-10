@@ -45,7 +45,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
 
     @Override
     public void close() {
-        listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration(), null);
+        listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration().toSerializable(), null);
         dataChangeListenerActor.tell(PoisonPill.getInstance(), null);
     }
 }

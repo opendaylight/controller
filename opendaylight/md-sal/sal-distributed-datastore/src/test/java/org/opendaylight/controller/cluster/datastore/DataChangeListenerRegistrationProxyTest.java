@@ -59,7 +59,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
         //Check if it was received by the remote actor
         ActorContext
-            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockConfiguration());
+            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)),new MockConfiguration());
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages",
                 ActorContext.ASK_DURATION);
@@ -72,6 +72,6 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof CloseDataChangeListenerRegistration);
+        Assert.assertTrue(listMessages.get(0).getClass().equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS));
     }
 }
