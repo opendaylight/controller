@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.compatibility.adsal;
 import java.math.BigInteger;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.compatibility.InventoryMapping;
 import org.opendaylight.controller.sal.compatibility.ToSalConversionsUtils;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -32,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,8 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
         AddFlowOutputBuilder builder = new AddFlowOutputBuilder();
         builder.setTransactionId(new TransactionId(BigInteger.valueOf(status.getRequestId())));
         AddFlowOutput rpcResultType = builder.build();
-        return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
+        return Futures.immediateFuture(RpcResultBuilder.<AddFlowOutput>status(status.isSuccess())
+                .withResult(rpcResultType).build());
     }
 
     @Override
@@ -84,7 +85,8 @@ public class FlowServiceAdapter implements SalFlowService, IFlowProgrammerListen
         RemoveFlowOutputBuilder builder = new RemoveFlowOutputBuilder();
         builder.setTransactionId(new TransactionId(BigInteger.valueOf(status.getRequestId())));
         RemoveFlowOutput rpcResultType = builder.build();
-        return Futures.immediateFuture(Rpcs.getRpcResult(status.isSuccess(), rpcResultType, null));
+        return Futures.immediateFuture(RpcResultBuilder.<RemoveFlowOutput>status(status.isSuccess())
+                                                         .withResult(rpcResultType).build());
 
     }
 

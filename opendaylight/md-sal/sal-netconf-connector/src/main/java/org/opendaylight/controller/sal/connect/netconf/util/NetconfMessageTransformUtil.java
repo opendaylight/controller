@@ -27,9 +27,9 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -140,9 +140,14 @@ public class NetconfMessageTransformUtil {
             }
         }
 
-        return RpcErrors.getRpcError( null, ex.getErrorTag().getTagValue(), infoBuilder.toString(),
-                toRpcErrorSeverity( ex.getErrorSeverity() ), ex.getLocalizedMessage(),
-                toRpcErrorType( ex.getErrorType() ), ex.getCause() );
+        ErrorSeverity severity = toRpcErrorSeverity( ex.getErrorSeverity() );
+        return severity == ErrorSeverity.ERROR ?
+                    RpcResultBuilder.newError(
+                        toRpcErrorType( ex.getErrorType() ), ex.getErrorTag().getTagValue(),
+                        ex.getLocalizedMessage(), null, infoBuilder.toString(), ex.getCause() ) :
+                    RpcResultBuilder.newWarning(
+                        toRpcErrorType( ex.getErrorType() ), ex.getErrorTag().getTagValue(),
+                        ex.getLocalizedMessage(), null, infoBuilder.toString(), ex.getCause() );
     }
 
     private static ErrorSeverity toRpcErrorSeverity( final NetconfDocumentedException.ErrorSeverity severity ) {

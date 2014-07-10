@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
 
 import com.google.common.util.concurrent.Futures;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,16 +29,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
@@ -52,7 +54,7 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -125,8 +127,10 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         List<RpcError> rpcErrors = new ArrayList<>();
-        rpcErrors.add( RpcErrors.getRpcError("applicationTag1", "tag1", "info1", ErrorSeverity.ERROR, "message1", ErrorType.RPC, null));
-        rpcErrors.add( RpcErrors.getRpcError("applicationTag2", "tag2", "info2", ErrorSeverity.WARNING, "message2", ErrorType.PROTOCOL, null));
+        rpcErrors.add( RpcResultBuilder.newError( ErrorType.RPC, "tag1", "message1",
+                                                  "applicationTag1", "info1", null ) );
+        rpcErrors.add( RpcResultBuilder.newWarning( ErrorType.PROTOCOL, "tag2", "message2",
+                                                    "applicationTag2", "info2", null ) );
         mockInvokeRpc(null, false, rpcErrors);
         assertEquals(500,post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 

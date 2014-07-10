@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,14 +31,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
@@ -50,8 +51,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
@@ -117,7 +118,7 @@ public class InvokeRpcMethodTest {
 
         when(mockedBrokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class)))
             .thenReturn( Futures.<RpcResult<CompositeNode>>immediateFuture(
-                                               Rpcs.<CompositeNode>getRpcResult( true ) ) );
+                    RpcResultBuilder.<CompositeNode>success().build() ) );
 
         StructuredData structData = restconf.invokeRpc("invoke-rpc-module:rpc-test", payload,uriInfo);
         assertTrue(structData == null);
@@ -137,7 +138,7 @@ public class InvokeRpcMethodTest {
 
     @Test
     public void testInvokeRpcWithNoPayloadRpc_FailNoErrors() {
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( false );
+        RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>failed().build();
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
@@ -185,12 +186,12 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcWithNoPayloadRpc_FailWithRpcError() {
         List<RpcError> rpcErrors = Arrays.asList(
-            RpcErrors.getRpcError( null, "bogusTag", null, ErrorSeverity.ERROR, "foo",
-                                   RpcError.ErrorType.TRANSPORT, null ),
-            RpcErrors.getRpcError( "app-tag", "in-use", null, ErrorSeverity.WARNING, "bar",
-                                   RpcError.ErrorType.RPC, null ));
+            RpcResultBuilder.newError( RpcError.ErrorType.TRANSPORT, "bogusTag", "foo" ),
+            RpcResultBuilder.newWarning( RpcError.ErrorType.RPC, "in-use", "bar",
+                                         "app-tag", null, null ) );
 
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( false, rpcErrors );
+        RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>failed()
+                                                              .withRpcErrors(rpcErrors).build();
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
@@ -214,7 +215,7 @@ public class InvokeRpcMethodTest {
 
     @Test
     public void testInvokeRpcWithNoPayload_Success() {
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
+        RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
@@ -255,7 +256,7 @@ public class InvokeRpcMethodTest {
 
     @Test
     public void testInvokeRpcMethodWithInput() {
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
+        RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
 
         CompositeNode payload = mock(CompositeNode.class);
 
@@ -288,8 +289,8 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcWithNoPayloadWithOutput_Success() {
         CompositeNode compositeNode = mock( CompositeNode.class );
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true, compositeNode,
-                                                            Collections.<RpcError>emptyList() );
+        RpcResult<CompositeNode> rpcResult =
+                                  RpcResultBuilder.<CompositeNode>success(compositeNode).build();
 
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when( brokerFacade.invokeRpc(
@@ -308,7 +309,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testMountedRpcCallNoPayload_Success() throws Exception
     {
-        RpcResult<CompositeNode> rpcResult = Rpcs.<CompositeNode>getRpcResult( true );
+        RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
 
         ListenableFuture<RpcResult<CompositeNode>> mockListener = mock( ListenableFuture.class );
         when( mockListener.get() ).thenReturn( rpcResult );
