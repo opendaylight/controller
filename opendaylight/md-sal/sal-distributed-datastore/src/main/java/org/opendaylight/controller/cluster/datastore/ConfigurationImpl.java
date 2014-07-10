@@ -8,15 +8,24 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Optional;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigurationImpl implements Configuration {
+
     private final List<ModuleShard> moduleShards = new ArrayList<>();
+
     private final List<Module> modules = new ArrayList<>();
 
 
@@ -30,8 +39,7 @@ public class ConfigurationImpl implements Configuration {
         readModules(modulesConfig);
     }
 
-    public List<String> getMemberShardNames(String memberName){
-
+    @Override public List<String> getMemberShardNames(String memberName){
         List<String> shards = new ArrayList();
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()){
@@ -46,6 +54,38 @@ public class ConfigurationImpl implements Configuration {
 
     }
 
+    @Override public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
+        for(Module m : modules){
+            if(m.getNameSpace().equals(nameSpace)){
+                return Optional.of(m.getName());
+            }
+        }
+        return Optional.absent();
+    }
+
+    @Override public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
+        Map<String, ShardStrategy> map = new HashMap<>();
+        for(Module m : modules){
+            map.put(m.getName(), m.getShardStrategy());
+        }
+        return map;
+    }
+
+    @Override public List<String> getShardNamesFromModuleName(String moduleName) {
+        for(ModuleShard m : moduleShards){
+            if(m.getModuleName().equals(moduleName)){
+                List<String> l = new ArrayList<>();
+                for(Shard s : m.getShards()){
+                    l.add(s.getName());
+                }
+                return l;
+            }
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
+
 
     private void readModules(Config modulesConfig) {
         List<? extends ConfigObject> modulesConfigObjectList =
@@ -54,7 +94,7 @@ public class ConfigurationImpl implements Configuration {
         for(ConfigObject o : modulesConfigObjectList){
             ConfigObjectWrapper w = new ConfigObjectWrapper(o);
             modules.add(new Module(w.stringValue("name"), w.stringValue(
-                "namespace"), w.stringValue("sharding-strategy")));
+                "namespace"), w.stringValue("shard-strategy")));
         }
     }
 
@@ -82,7 +122,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
 
-    public static class ModuleShard {
+    private class ModuleShard {
         private final String moduleName;
         private final List<Shard> shards;
 
@@ -100,7 +140,7 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    public static class Shard {
+    private class Shard {
         private final String name;
         private final List<String> replicas;
 
@@ -118,16 +158,20 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    public static class Module {
+    private class Module {
 
         private final String name;
         private final String nameSpace;
-        private final String shardingStrategy;
+        private final ShardStrategy shardStrategy;
 
-        Module(String name, String nameSpace, String shardingStrategy) {
+        Module(String name, String nameSpace, String shardStrategy) {
             this.name = name;
             this.nameSpace = nameSpace;
-            this.shardingStrategy = shardingStrategy;
+            if(ModuleShardStrategy.NAME.equals(shardStrategy)){
+                this.shardStrategy = new ModuleShardStrategy(name, ConfigurationImpl.this);
+            } else {
+                this.shardStrategy = new DefaultShardStrategy();
+            }
         }
 
         public String getName() {
@@ -138,8 +182,8 @@ public class ConfigurationImpl implements Configuration {
             return nameSpace;
         }
 
-        public String getShardingStrategy() {
-            return shardingStrategy;
+        public ShardStrategy getShardStrategy() {
+            return shardStrategy;
         }
     }
 

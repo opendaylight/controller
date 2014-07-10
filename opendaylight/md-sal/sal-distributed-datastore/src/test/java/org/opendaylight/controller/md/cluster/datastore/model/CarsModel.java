@@ -22,6 +22,8 @@ public class CarsModel {
     public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13",
         "cars");
 
+    public static final InstanceIdentifier BASE_PATH = InstanceIdentifier.of(BASE_QNAME);
+
     public static final QName CARS_QNAME = QName.create(BASE_QNAME, "cars");
     public static final QName CAR_QNAME = QName.create(CARS_QNAME, "car");
     public static final QName CAR_NAME_QNAME = QName.create(CAR_QNAME, "name");
