@@ -12,42 +12,29 @@ import static org.junit.Assert.assertEquals;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 
-public class WriteTransactionTest extends AbstractDataServiceTest {
+public class WriteTransactionTest extends AbstractDataBrokerTest {
 
-    private DataBroker dataBroker;
-
-    private static final InstanceIdentifier<Nodes> NODES_PATH = InstanceIdentifier.create(Nodes.class);
-
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId("foo"));
-
-    private static final InstanceIdentifier<Node> NODE_PATH = NODES_PATH.child(Node.class, NODE_KEY);
-
-    @Override
-    public void setUp() {
-        super.setUp();
-
-        dataBroker = testContext.getDataBroker();
-    }
+    private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
+    private static final TopLevelListKey TOP_LIST_KEY = new TopLevelListKey("foo");
+    private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);
 
     @Test
     public void test() throws InterruptedException, ExecutionException {
-        WriteTransaction writeTx = dataBroker.newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.OPERATIONAL, NODES_PATH, new NodesBuilder().build());
-        writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, new NodeBuilder().setKey(NODE_KEY).build());
+        WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
+        writeTx.put(LogicalDatastoreType.OPERATIONAL, TOP_PATH, new TopBuilder().build());
+        writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, new TopLevelListBuilder().setKey(TOP_LIST_KEY).build());
         assertEquals(TransactionStatus.COMMITED, writeTx.commit().get().getResult());
     }
 
