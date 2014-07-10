@@ -22,10 +22,12 @@ public class PeopleModel {
     public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:people", "2014-03-13",
         "people");
 
+    public static final InstanceIdentifier BASE_PATH = InstanceIdentifier.of(BASE_QNAME);
     public static final QName PEOPLE_QNAME = QName.create(BASE_QNAME, "people");
     public static final QName PERSON_QNAME = QName.create(PEOPLE_QNAME, "person");
     public static final QName PERSON_NAME_QNAME = QName.create(PERSON_QNAME, "name");
     public static final QName PERSON_AGE_QNAME = QName.create(PERSON_QNAME, "age");
+
 
 
     public static NormalizedNode create(){
@@ -62,7 +64,8 @@ public class PeopleModel {
 
     public static NormalizedNode emptyContainer(){
         return ImmutableContainerNodeBuilder.create()
-            .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(BASE_QNAME))
+            .withNodeIdentifier(
+                new InstanceIdentifier.NodeIdentifier(BASE_QNAME))
             .build();
     }
 
