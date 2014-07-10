@@ -36,18 +36,18 @@ public class CarsModel {
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
             ImmutableMapNodeBuilder.create().withNodeIdentifier(
                 new InstanceIdentifier.NodeIdentifier(
-                    QName.create(CARS_QNAME, "car")));
+                    CAR_QNAME));
 
         // Create an entry for the car altima
         MapEntryNode altima =
-            ImmutableNodes.mapEntryBuilder(CARS_QNAME, CAR_NAME_QNAME, "altima")
+            ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
                 .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
                 .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, 1000))
                 .build();
 
         // Create an entry for the car accord
         MapEntryNode honda =
-            ImmutableNodes.mapEntryBuilder(CARS_QNAME, CAR_NAME_QNAME, "accord")
+            ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
                 .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
                 .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, 2000))
                 .build();
