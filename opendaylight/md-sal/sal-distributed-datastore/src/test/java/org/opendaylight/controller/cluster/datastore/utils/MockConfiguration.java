@@ -12,16 +12,14 @@ import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class MockConfiguration implements Configuration{
     @Override public List<String> getMemberShardNames(String memberName) {
-        List<String> shardNames = new ArrayList<>();
-        shardNames.add("default");
-        return shardNames;
+        return Arrays.asList("default");
     }
 
     @Override public Optional<String> getModuleNameFromNameSpace(
@@ -40,8 +38,12 @@ public class MockConfiguration implements Configuration{
     }
 
     @Override public List<String> getMembersFromShardName(String shardName) {
-        List<String> shardNames = new ArrayList<>();
-        shardNames.add("member-1");
-        return shardNames;
+        if("default".equals(shardName)) {
+            return Arrays.asList("member-1", "member-2");
+        } else if("astronauts".equals(shardName)){
+            return Arrays.asList("member-2", "member-3");
+        }
+
+        return Collections.EMPTY_LIST;
     }
 }
