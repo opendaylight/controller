@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import org.opendaylight.controller.cluster.datastore.Configuration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ModuleShardStrategy implements ShardStrategy {
 
@@ -24,7 +24,7 @@ public class ModuleShardStrategy implements ShardStrategy {
         this.configuration = configuration;
     }
 
-    @Override public String findShard(InstanceIdentifier path) {
+    @Override public String findShard(YangInstanceIdentifier path) {
         return configuration.getShardNamesFromModuleName(moduleName).get(0);
     }
 }

@@ -8,5 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CloseDataChangeListenerRegistrationReply {
+import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
+
+public class CloseDataChangeListenerRegistrationReply implements SerializableMessage{
+  public static Class SERIALIZABLE_CLASS = ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.class;
+
+  @Override
+  public Object toSerializable() {
+    return ListenerRegistrationMessages.CloseDataChangeListenerRegistrationReply.newBuilder().build();
+  }
+
 }

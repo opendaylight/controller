@@ -15,10 +15,13 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.persistence.Persistent;
+import akka.persistence.RecoveryCompleted;
 import akka.persistence.UntypedProcessor;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
@@ -36,7 +39,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -63,7 +66,7 @@ public class Shard extends UntypedProcessor {
     private final Map<Object, DOMStoreThreePhaseCommitCohort>
         modificationToCohort = new HashMap<>();
 
-    private final LoggingAdapter log =
+    private final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
 
     // By default persistent will be true and can be turned off using the system
@@ -72,14 +75,20 @@ public class Shard extends UntypedProcessor {
 
     private SchemaContext schemaContext;
 
+    private final ShardStats shardMBean;
+
     private Shard(String name) {
 
         String setting = System.getProperty("shard.persistent");
+
         this.persistent = !"false".equals(setting);
 
-        log.info("Creating shard : {} persistent : {}", name , persistent);
+        LOG.info("Creating shard : {} persistent : {}", name, persistent);
 
         store = new InMemoryDOMDataStore(name, storeExecutor);
+
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
+
     }
 
     public static Props props(final String name) {
@@ -96,14 +105,14 @@ public class Shard extends UntypedProcessor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        log.debug("Received message {}", message);
+        LOG.debug("Received message " + message.getClass().toString());
 
         if(!recoveryFinished()){
             // FIXME : Properly handle recovery
             return;
         }
 
-        if (message instanceof CreateTransactionChain) {
+        if (message.getClass().equals(CreateTransactionChain.SERIALIZABLE_CLASS)) {
             createTransactionChain();
         } else if (message.getClass().equals(RegisterChangeListener.SERIALIZABLE_CLASS)) {
             registerChangeListener(RegisterChangeListener.fromSerializable(getContext().system(), message));
@@ -113,12 +122,15 @@ public class Shard extends UntypedProcessor {
             handleForwardedCommit((ForwardedCommitTransaction) message);
         } else if (message instanceof Persistent) {
             commit(((Persistent)message).payload());
-        } else if (message instanceof CreateTransaction) {
-            createTransaction((CreateTransaction) message);
+        } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+            createTransaction(CreateTransaction.fromSerializable(message));
         } else if(message instanceof NonPersistent){
             commit(((NonPersistent)message).payload());
-        } else {
-          throw new Exception("Not recognized message in Shard::OnReceive"+message);
+        }else if (message instanceof RecoveryCompleted) {
+            //FIXME: PROPERLY HANDLE RECOVERY COMPLETED
+
+        }else {
+          throw new Exception("Not recognized message found message=" + message);
         }
     }
 
@@ -137,11 +149,12 @@ public class Shard extends UntypedProcessor {
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
-            log.error(
+            LOG.error(
                 "Could not find cohort for modification : " + modification);
             return;
         }
         final ListenableFuture<Void> future = cohort.commit();
+        shardMBean.incrementCommittedTransactionCount();
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         future.addListener(new Runnable() {
@@ -149,10 +162,10 @@ public class Shard extends UntypedProcessor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new CommitTransactionReply(), self);
+                    sender.tell(new CommitTransactionReply().toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     // FIXME : Handle this properly
-                    log.error(e, "An exception happened when committing");
+                    LOG.error(e, "An exception happened when committing");
                 }
             }
         }, getContext().dispatcher());
@@ -180,19 +193,25 @@ public class Shard extends UntypedProcessor {
     private void registerChangeListener(
         RegisterChangeListener registerChangeListener) {
 
+        LOG.debug("registerDataChangeListener for " + registerChangeListener.getPath());
+
+
         ActorSelection dataChangeListenerPath = getContext()
             .system().actorSelection(registerChangeListener.getDataChangeListenerPath());
 
-        AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>
-            listener = new DataChangeListenerProxy(dataChangeListenerPath);
+        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>
+            listener = new DataChangeListenerProxy(schemaContext,dataChangeListenerPath);
 
-        org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
+        org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
             registration =
             store.registerChangeListener(registerChangeListener.getPath(),
                 listener, registerChangeListener.getScope());
         ActorRef listenerRegistration =
             getContext().actorOf(
                 DataChangeListenerRegistration.props(registration));
+
+        LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = " + listenerRegistration.path().toString());
+
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()).toSerializable(),
                 getSelf());
@@ -203,7 +222,7 @@ public class Shard extends UntypedProcessor {
         ActorRef transactionChain =
             getContext().actorOf(ShardTransactionChain.props(chain, schemaContext));
         getSender()
-            .tell(new CreateTransactionChainReply(transactionChain.path()),
+            .tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
     }
 }

@@ -37,7 +37,7 @@ public class NormalizedNodeToNodeCodec {
     public NormalizedNode<?,?> decode(YangInstanceIdentifier id, NormalizedNodeMessages.Node node){
             NodeToNormalizedNodeBuilder currentOp = NodeToNormalizedNodeBuilder.from(ctx);
 
-            for(YangInstanceIdentifier.PathArgument pathArgument : id.getPath()){
+            for(YangInstanceIdentifier.PathArgument pathArgument : id.getPathArguments()){
                 currentOp = currentOp.getChild(pathArgument);
             }
 
@@ -53,15 +53,11 @@ public class NormalizedNodeToNodeCodec {
                     nodeType = pathArgument.getNodeType();
                 }
             }
-            try {
-                if((node != null)&& (!node.getType().isEmpty())){
-                   return currentOp.normalize(nodeType, node);
-                }else{
-                  return null;
-               }
-            } catch(RuntimeException e){
-                throw e;
-        }
+            if((node != null)&& (!node.getType().isEmpty())){
+               return currentOp.normalize(nodeType, node);
+            } else{
+              return null;
+            }
     }
 
 

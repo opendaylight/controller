@@ -11,13 +11,13 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * DeleteModification store all the parameters required to delete a path from the data tree
  */
 public class DeleteModification extends AbstractModification {
-  public DeleteModification(InstanceIdentifier path) {
+  public DeleteModification(YangInstanceIdentifier path) {
     super(path);
   }
 
@@ -29,12 +29,12 @@ public class DeleteModification extends AbstractModification {
     @Override public Object toSerializable() {
         return PersistentMessages.Modification.newBuilder()
             .setType(this.getClass().toString())
-            .setPath(this.path.toString())
+            .setPath(InstanceIdentifierUtils.toSerializable(this.path))
             .build();
     }
 
     public static DeleteModification fromSerializable(Object serializable){
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
-        return new DeleteModification(InstanceIdentifierUtils.from(o.getPath()));
+        return new DeleteModification(InstanceIdentifierUtils.fromSerializable(o.getPath()));
     }
 }

@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import static org.junit.Assert.assertEquals;
@@ -39,12 +39,12 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
       new Within(duration("1 seconds")) {
         protected void run() {
 
-          subject.tell(new CloseDataChangeListenerRegistration(), getRef());
+          subject.tell(new CloseDataChangeListenerRegistration().toSerializable(), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
-              if (in instanceof CloseDataChangeListenerRegistrationReply) {
+              if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.SERIALIZABLE_CLASS)) {
                 return "match";
               } else {
                 throw noMatch();
@@ -62,10 +62,10 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
     }};
   }
 
-  private  AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener(){
-    return new AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>() {
+  private  AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener(){
+    return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
       @Override
-      public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+      public void onDataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
 
       }
     };
