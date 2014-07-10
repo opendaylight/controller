@@ -137,12 +137,12 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     // Add a watch on the transaction actor so that we are notified when it dies
                     final ActorRef cohorActorRef = watchActor(cohort);
 
-                    cohort.tell(new PreCommitTransaction(), getRef());
+                    cohort.tell(new PreCommitTransaction().toSerializable(), getRef());
 
                     Boolean preCommitDone =
                         new ExpectMsg<Boolean>("PreCommitTransactionReply") {
                             protected Boolean match(Object in) {
-                                if (in instanceof PreCommitTransactionReply) {
+                                if (in.getClass().equals(PreCommitTransactionReply.SERIALIZABLE_CLASS)) {
                                     return true;
                                 } else {
                                     throw noMatch();
@@ -156,7 +156,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     // This in turn kills the child of Transaction as well.
                     // The order in which we receive the terminated event for both
                     // these actors is not fixed which may cause this test to fail
-                    cohort.tell(new CommitTransaction(), getRef());
+                    cohort.tell(new CommitTransaction().toSerializable(), getRef());
 
                     final Boolean terminatedCohort =
                         new ExpectMsg<Boolean>("Terminated Cohort") {
@@ -188,7 +188,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     final Boolean commitDone =
                         new ExpectMsg<Boolean>("CommitTransactionReply") {
                             protected Boolean match(Object in) {
-                                if (in instanceof CommitTransactionReply) {
+                                if (in.getClass().equals(CommitTransactionReply.SERIALIZABLE_CLASS)) {
                                     return true;
                                 } else {
                                     throw noMatch();
