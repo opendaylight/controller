@@ -9,14 +9,11 @@
         <feature version='${project.version}'>odl-mdsal-restconf</feature>
     </feature>
     <feature name='odl-mdsal-commons' version='${project.version}'>
-        <feature version='${yangtools.version}'>yangtools-concepts</feature>
-        <feature version='${yangtools.version}'>yangtools-binding</feature>
+        <feature version='${yangtools.version}'>yangtools-data-binding</feature>
         <bundle>mvn:org.opendaylight.controller/sal-common/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-common-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-common-impl/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-common-util/${project.version}</bundle>
-        <bundle>wrap:mvn:com.google.guava/guava/${guava.version}</bundle>
-        <bundle>wrap:mvn:org.eclipse.xtend/org.eclipse.xtend.lib/${xtend.version}</bundle>
     </feature>
     <feature name='odl-mdsal-broker' version='${project.version}'>
         <feature version='${yangtools.version}'>yangtools-concepts</feature>
@@ -31,6 +28,7 @@
         <bundle>mvn:org.opendaylight.controller/sal-binding-broker-impl/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-util/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-connector-api/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
     </feature>
     <feature name='odl-mdsal-restconf' version='${project.version}'>
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
