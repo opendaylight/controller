@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+   <feature name="odl-web-all" description="OpenDaylight Legacy WebApp :: All Features" version="${web.version}">
+      <feature version="${web.version}">odl-web-core</feature>
+      <feature version="${topology.version}">odl-web-topology</feature>
+      <feature version="${flows.version}">odl-web-flows</feature>
+      <feature version="${troubleshoot.version}">odl-web-troubleshoot</feature>
+      <feature version="${devices.version}">odl-web-devices</feature>
+      <feature version="${osgi-brandfragment.web.version}">odl-web-webconsole-branding</feature>
+   </feature>
+
+   <feature name="odl-web-core" description="OpenDaylight :: Web :: Core" version="${web.version}">
+      <feature>base-gemini-web</feature>
+      <feature>base-tomcat</feature>
+      <bundle>mvn:org.opendaylight.controller/web/${web.version}</bundle>
+   </feature>
+
+  <feature name="odl-web-topology" description="OpenDaylight :: Web :: Toplogy Add-on" version="${web.version}">
+      <bundle>mvn:org.opendaylight.controller/topology.web/${topology.web.version}</bundle>
+  </feature>
+  <feature name="odl-web-flows" description="OpenDaylight :: Web :: Flows Add-on" version="${flows.web.version}">
+      <bundle>mvn:org.opendaylight.controller/flows.web/${flows.web.version}</bundle>
+  </feature>
+  <feature name="odl-web-troubleshoot" description="OpenDaylight :: Web :: Troubleshoot Add-on" version="${troubleshoot.web.version}">
+      <bundle>mvn:org.opendaylight.controller/troubleshoot.web/${troubleshoot.web.version}</bundle>
+  </feature>
+  <feature name="odl-web-devices" description="OpenDaylight :: Web :: Devices Add-on" version="${devices.web.version}">
+      <bundle>mvn:org.opendaylight.controller/devices.web/${devices.web.version}</bundle>
+  </feature>
+  <feature name="odl-web-webconsole-branding" description="OpenDaylight :: Web :: Felix Webconsole Brand Fragment" version="${osgi-brandfragment.web.version}">
+      <feature>webconsole</feature>
+      <bundle>mvn:org.opendaylight.controller/osgi-brandfragment.web/${osgi-brandfragment.web.version}</bundle>
+  </feature>
+</features>
