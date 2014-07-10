@@ -39,7 +39,6 @@
     <module>shutdown-impl</module>
     <module>netconf-config-dispatcher</module>
     <module>config-module-archetype</module>
-    <module>feature</module>
   </modules>
 
   <dependencies>

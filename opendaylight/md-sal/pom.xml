@@ -63,9 +63,6 @@
     <!--sal-protocolbuffer-encoding-->
     <module>sal-protocolbuffer-encoding</module>
 
-    <!--  Karaf feature -->
-    <module>feature</module>
-
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
   </modules>
