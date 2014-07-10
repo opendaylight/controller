@@ -1,15 +1,12 @@
 package org.opendaylight.controller.sample.kitchen.impl;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.config.yang.config.kitchen_service.impl.KitchenServiceRuntimeMXBean;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
@@ -20,10 +17,10 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +86,8 @@ public class KitchenServiceImpl implements KitchenService, KitchenServiceRuntime
                     }
 
                     return Futures.immediateFuture(
-                              Rpcs.<Void> getRpcResult( atLeastOneSucceeded, errorList.build() ) );
+                              RpcResultBuilder.<Void> status( atLeastOneSucceeded )
+                                              .withRpcErrors( errorList.build() ).build() );
                 }
         } );
     }
@@ -102,7 +100,7 @@ public class KitchenServiceImpl implements KitchenService, KitchenServiceRuntime
             public RpcResult<Void> call() throws Exception {
 
                 // We don't actually do anything here - just return a successful result.
-                return Rpcs.<Void> getRpcResult( true, Collections.<RpcError>emptyList() );
+                return RpcResultBuilder.<Void> success().build();
             }
         } );
     }
@@ -113,11 +111,9 @@ public class KitchenServiceImpl implements KitchenService, KitchenServiceRuntime
         if( toasterOutOfBread )
         {
             log.info( "We're out of toast but we can make eggs" );
-            return Futures.immediateFuture( Rpcs.<Void> getRpcResult( true,
-                       Arrays.asList( RpcErrors.getRpcError( "", "partial-operation", null,
-                                          ErrorSeverity.WARNING,
-                                          "Toaster is out of bread but we can make you eggs",
-                                          ErrorType.APPLICATION, null ) ) ) );
+            return Futures.immediateFuture( RpcResultBuilder.<Void> success()
+                     .withWarning( ErrorType.APPLICATION, "partial-operation",
+                                      "Toaster is out of bread but we can make you eggs" ).build() );
         }
 
         // Access the ToasterService to make the toast.

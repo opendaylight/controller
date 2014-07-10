@@ -8,12 +8,13 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.util.concurrent.Futures;
-import java.util.Collections;
+
 import java.util.concurrent.Future;
+
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
@@ -24,8 +25,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -176,8 +177,8 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         LOG.info("Delete Configuration via Restconf: {}", path);
         CompositeNode redDataAtPath = transaction.readConfigurationData(path);
         if (redDataAtPath == null) {
-            return Futures.immediateFuture(Rpcs.<TransactionStatus> getRpcResult(true, TransactionStatus.COMMITED,
-                    Collections.<RpcError> emptyList()));
+            return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>
+                                                    success(TransactionStatus.COMMITED).build());
         }
         transaction.removeConfigurationData(path);
         return transaction.commit();

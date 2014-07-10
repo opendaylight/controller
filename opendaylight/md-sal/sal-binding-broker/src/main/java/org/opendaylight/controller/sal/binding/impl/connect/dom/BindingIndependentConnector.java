@@ -51,7 +51,6 @@ import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.GlobalRpcRegistrationListener;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl.RouterInstantiationListener;
 import org.opendaylight.controller.sal.common.util.CommitHandlerTransactions;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Provider;
@@ -78,8 +77,8 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -406,7 +405,7 @@ public class BindingIndependentConnector implements //
         @Override
         public RpcResult<Void> rollback() throws IllegalStateException {
             // backing.cancel();
-            return Rpcs.<Void> getRpcResult(true, null, Collections.<RpcError> emptySet());
+            return RpcResultBuilder.<Void> success().build();
         }
 
         @Override
@@ -414,7 +413,8 @@ public class BindingIndependentConnector implements //
             Future<RpcResult<TransactionStatus>> result = backing.commit();
             try {
                 RpcResult<TransactionStatus> baResult = result.get();
-                return Rpcs.<Void> getRpcResult(baResult.isSuccessful(), null, baResult.getErrors());
+                return RpcResultBuilder.<Void> status(baResult.isSuccessful())
+                                           .withRpcErrors(baResult.getErrors()).build();
             } catch (InterruptedException e) {
                 throw new IllegalStateException("", e);
             } catch (ExecutionException e) {
@@ -446,7 +446,8 @@ public class BindingIndependentConnector implements //
             Future<RpcResult<TransactionStatus>> result = backing.commit();
             try {
                 RpcResult<TransactionStatus> biResult = result.get();
-                return Rpcs.<Void> getRpcResult(biResult.isSuccessful(), null, biResult.getErrors());
+                return RpcResultBuilder.<Void> status(biResult.isSuccessful())
+                                           .withRpcErrors(biResult.getErrors()).build();
             } catch (InterruptedException e) {
                 throw new IllegalStateException("", e);
             } catch (ExecutionException e) {
@@ -459,7 +460,7 @@ public class BindingIndependentConnector implements //
         @Override
         public RpcResult<Void> rollback() throws IllegalStateException {
             domOpenedTransactions.remove(backing.getIdentifier());
-            return Rpcs.<Void> getRpcResult(true, null, Collections.<RpcError> emptySet());
+            return RpcResultBuilder.<Void> success().build();
         }
     }
 

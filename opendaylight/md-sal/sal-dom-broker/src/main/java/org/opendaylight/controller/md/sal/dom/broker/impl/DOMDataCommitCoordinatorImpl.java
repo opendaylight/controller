@@ -6,7 +6,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -16,10 +15,9 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,7 +219,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
          */
         private RpcResult<TransactionStatus> commitBlocking() throws TransactionCommitFailedException {
             commitAll().checkedGet();
-            return Rpcs.getRpcResult(true, TransactionStatus.COMMITED, Collections.<RpcError> emptySet());
+            return RpcResultBuilder.<TransactionStatus>success(TransactionStatus.COMMITED).build();
         }
 
         /**
