@@ -41,9 +41,12 @@ public interface AsyncDataChangeListener<P extends Path<P>, D> extends EventList
      * This initial event will contain all preexisting data as created.
      *
      * <p>
-     * <b>Note</b> that this method may be invoked from a shared thread pool, so
-     * implementations SHOULD NOT perform CPU-intensive operations and they
-     * definitely MUST NOT invoke any potentially blocking operations.
+     * <b>Note</b>: This method may be invoked from a shared thread pool.
+     * <li>Implementations <b>SHOULD NOT</b> perform CPU-intensive operations on the calling thread.
+     * <li>Implementations <b>MUST NOT block the calling thread</b> - to do so could lead to deadlock
+     * scenarios.
+     *
+     *<br>
      *
      * @param change
      *            Data Change Event being delivered.
