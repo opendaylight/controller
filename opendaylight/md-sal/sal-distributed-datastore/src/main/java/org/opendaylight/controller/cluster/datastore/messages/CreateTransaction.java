@@ -8,15 +8,30 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CreateTransaction {
-    private final String transactionId;
 
-    public CreateTransaction(String transactionId){
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-        this.transactionId = transactionId;
-    }
 
-    public String getTransactionId() {
-        return transactionId;
-    }
+public class CreateTransaction implements SerializableMessage {
+  public static Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
+  private final String transactionId;
+
+  public CreateTransaction(String transactionId){
+
+    this.transactionId = transactionId;
+  }
+
+  public String getTransactionId() {
+    return transactionId;
+  }
+
+  @Override
+  public Object toSerializable() {
+    return  ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId).build();
+  }
+
+  public static CreateTransaction fromSerializable(Object message){
+    return new CreateTransaction(((ShardTransactionMessages.CreateTransaction)message).getTransactionId());
+  }
+
 }
