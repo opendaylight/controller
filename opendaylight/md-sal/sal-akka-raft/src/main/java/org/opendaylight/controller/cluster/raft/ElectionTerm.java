@@ -39,5 +39,5 @@ public interface ElectionTerm {
      * @param currentTerm
      * @param votedFor
      */
-    void update(AtomicLong currentTerm, String votedFor);
+    void update(long currentTerm, String votedFor);
 }

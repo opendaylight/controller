@@ -11,10 +11,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
-public class RequestVote {
-
-    // candidate’s term
-    private final long term;
+public class RequestVote extends AbstractRaftRPC{
 
     // candidate requesting vote
     private final String candidateId;
@@ -27,7 +24,7 @@ public class RequestVote {
 
     public RequestVote(long term, String candidateId, long lastLogIndex,
         long lastLogTerm) {
-        this.term = term;
+        super(term);
         this.candidateId = candidateId;
         this.lastLogIndex = lastLogIndex;
         this.lastLogTerm = lastLogTerm;

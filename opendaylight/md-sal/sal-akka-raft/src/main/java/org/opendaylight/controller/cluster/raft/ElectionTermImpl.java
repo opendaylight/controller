@@ -38,8 +38,8 @@ public class ElectionTermImpl implements ElectionTerm{
         return votedFor;
     }
 
-    public void update(AtomicLong currentTerm, String votedFor){
-        this.currentTerm = currentTerm;
+    public void update(long currentTerm, String votedFor){
+        this.currentTerm.set(currentTerm);
         this.votedFor = votedFor;
 
         // TODO : Write to some persistent state
