@@ -25,9 +25,8 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
- * If more then one data element with equal name exists where container or
- * leaf schema node should be present the RestconfDocumentedException has to
- * be raised
+ * If more then one data element with equal name exists where container or leaf schema node should be present the
+ * RestconfDocumentedException has to be raised
  *
  * Tests for BUG 1204
  */
@@ -35,31 +34,32 @@ public class MultipleEqualNamesForDataNodesTest {
 
     @Test
     public void multipleEqualNameDataNodeTestForContainerJsonTest() {
-        multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-container.json", ErrorType.APPLICATION,
-                ErrorTag.BAD_ELEMENT,JsonToCompositeNodeProvider.INSTANCE);
+        multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-container.json",
+                ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT, JsonToCompositeNodeProvider.INSTANCE);
     }
 
     @Test
     public void multipleEqualNameDataNodeTestForLeafJsonTest() {
         multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-leaf.json", ErrorType.PROTOCOL,
-                ErrorTag.MALFORMED_MESSAGE,JsonToCompositeNodeProvider.INSTANCE);
+                ErrorTag.MALFORMED_MESSAGE, JsonToCompositeNodeProvider.INSTANCE);
     }
 
     @Test
     public void multipleEqualNameDataNodeTestForContainerXmlTest() {
-        multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-container.xml", ErrorType.APPLICATION,
-                ErrorTag.BAD_ELEMENT,XmlToCompositeNodeProvider.INSTANCE);
+        multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-container.xml",
+                ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT, XmlToCompositeNodeProvider.INSTANCE);
     }
 
     @Test
     public void multipleEqualNameDataNodeTestForLeafXmlTest() {
         multipleEqualNameDataNodeTest("/equal-data-node-names/equal-name-data-for-leaf.xml", ErrorType.APPLICATION,
-                ErrorTag.BAD_ELEMENT,XmlToCompositeNodeProvider.INSTANCE);
+                ErrorTag.BAD_ELEMENT, XmlToCompositeNodeProvider.INSTANCE);
     }
 
-    private void multipleEqualNameDataNodeTest(String path, ErrorType errorType, ErrorTag errorTag,MessageBodyReader<CompositeNode> messageBodyReader) {
+    private void multipleEqualNameDataNodeTest(String path, ErrorType errorType, ErrorTag errorTag,
+            MessageBodyReader<CompositeNode> messageBodyReader) {
         try {
-            CompositeNode compositeNode = TestUtils.readInputToCnSn(path, false,messageBodyReader);
+            CompositeNode compositeNode = TestUtils.readInputToCnSn(path, false, messageBodyReader);
             assertNotNull(compositeNode);
 
             Set<Module> modules = null;

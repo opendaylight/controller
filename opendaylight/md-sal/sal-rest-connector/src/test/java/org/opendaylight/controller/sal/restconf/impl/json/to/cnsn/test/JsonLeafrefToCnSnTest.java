@@ -28,8 +28,7 @@ public class JsonLeafrefToCnSnTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * JSON values which represents leafref are always loaded to simple node as
-     * string
+     * JSON values which represents leafref are always loaded to simple node as string
      */
     @Test
     public void jsonIdentityrefToCompositeNode() {

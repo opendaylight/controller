@@ -8,10 +8,8 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Preconditions;
-
 import java.net.URI;
 import java.util.Collections;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -85,8 +83,9 @@ public final class EmptyNodeWrapper implements NodeWrapper<Node<?>>, Node<Void> 
                 Preconditions.checkNotNull(namespace);
                 name = new QName(namespace, localName);
             }
-            if(composite) {
-                unwrapped = NodeFactory.createImmutableCompositeNode(name, null, Collections.<Node<?>>emptyList(),null);
+            if (composite) {
+                unwrapped = NodeFactory.createImmutableCompositeNode(name, null, Collections.<Node<?>> emptyList(),
+                        null);
             } else {
                 unwrapped = NodeFactory.createImmutableSimpleNode(name, null, null);
             }

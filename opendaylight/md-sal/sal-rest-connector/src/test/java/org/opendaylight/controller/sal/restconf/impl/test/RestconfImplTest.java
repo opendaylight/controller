@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,33 +39,27 @@ public class RestconfImplTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils
-                .loadModulesFrom("/full-versions/yangs");
+        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
         assertNotNull(allModules);
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
-        controllerContext = spy( ControllerContext.getInstance() );
+        controllerContext = spy(ControllerContext.getInstance());
         controllerContext.setSchemas(schemaContext);
 
     }
 
     @Before
-    public void initMethod()
-    {
+    public void initMethod() {
         restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setControllerContext( controllerContext );
+        restconfImpl.setControllerContext(controllerContext);
     }
 
     @Test
     public void testExample() throws FileNotFoundException {
-        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn(
-                "/parts/ietf-interfaces_interfaces.xml",
+        CompositeNode loadedCompositeNode = TestUtils.readInputToCnSn("/parts/ietf-interfaces_interfaces.xml",
                 XmlToCompositeNodeProvider.INSTANCE);
         BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class)))
-                .thenReturn(loadedCompositeNode);
-        assertEquals(loadedCompositeNode,
-                brokerFacade.readOperationalData(null));
+        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(loadedCompositeNode);
+        assertEquals(loadedCompositeNode, brokerFacade.readOperationalData(null));
     }
-
 
 }

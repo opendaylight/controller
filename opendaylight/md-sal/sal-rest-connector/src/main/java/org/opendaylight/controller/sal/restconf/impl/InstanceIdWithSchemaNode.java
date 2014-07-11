@@ -17,7 +17,8 @@ public class InstanceIdWithSchemaNode {
     private final DataSchemaNode schemaNode;
     private final MountInstance mountPoint;
 
-    public InstanceIdWithSchemaNode(InstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode, MountInstance mountPoint) {
+    public InstanceIdWithSchemaNode(InstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode,
+            MountInstance mountPoint) {
         this.instanceIdentifier = instanceIdentifier;
         this.schemaNode = schemaNode;
         this.mountPoint = mountPoint;

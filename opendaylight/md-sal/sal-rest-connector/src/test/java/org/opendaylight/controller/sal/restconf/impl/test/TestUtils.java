@@ -147,10 +147,9 @@ public final class TestUtils {
 
     /**
      *
-     * Fill missing data (namespaces) and build correct data type in
-     * {@code compositeNode} according to {@code dataSchemaNode}. The method
-     * {@link RestconfImpl#createConfigurationData createConfigurationData} is
-     * used because it contains calling of method {code normalizeNode}
+     * Fill missing data (namespaces) and build correct data type in {@code compositeNode} according to
+     * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
+     * because it contains calling of method {code normalizeNode}
      */
     public static void normalizeCompositeNode(CompositeNode compositeNode, Set<Module> modules, String schemaNodePath) {
         RestconfImpl restconf = RestconfImpl.getInstance();
@@ -161,9 +160,8 @@ public final class TestUtils {
     }
 
     /**
-     * Searches module with name {@code searchedModuleName} in {@code modules}.
-     * If module name isn't specified and module set has only one element then
-     * this element is returned.
+     * Searches module with name {@code searchedModuleName} in {@code modules}. If module name isn't specified and
+     * module set has only one element then this element is returned.
      *
      */
     public static Module resolveModule(String searchedModuleName, Set<Module> modules) {
@@ -279,8 +277,8 @@ public final class TestUtils {
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null, null,
-                byteArrayOS);
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null,
+                null, byteArrayOS);
 
         return byteArrayOS.toString();
     }
@@ -298,7 +296,7 @@ public final class TestUtils {
         return result.toString();
     }
 
-    private static Pattern patternForStringsSeparatedByWhiteChars(String ... substrings ) {
+    private static Pattern patternForStringsSeparatedByWhiteChars(String... substrings) {
         StringBuilder pattern = new StringBuilder();
         pattern.append(".*");
         for (String substring : substrings) {
@@ -309,7 +307,7 @@ public final class TestUtils {
         return Pattern.compile(pattern.toString(), Pattern.DOTALL);
     }
 
-    public static boolean containsStringData(String jsonOutput,String ...substrings ) {
+    public static boolean containsStringData(String jsonOutput, String... substrings) {
         Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
         Matcher matcher = pattern.matcher(jsonOutput);
         return matcher.matches();

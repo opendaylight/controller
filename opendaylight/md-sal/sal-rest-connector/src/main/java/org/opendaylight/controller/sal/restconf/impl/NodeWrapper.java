@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import java.net.URI;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
 

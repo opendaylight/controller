@@ -39,7 +39,7 @@ import org.w3c.dom.Document;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
-    Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+        Draft02.MediaTypes.OPERATION + RestconfService.XML, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 
@@ -67,19 +67,22 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
     };
 
     @Override
-    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
+    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType) {
         return type.equals(StructuredData.class);
     }
 
     @Override
-    public long getSize(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
+    public long getSize(final StructuredData t, final Class<?> type, final Type genericType,
+            final Annotation[] annotations, final MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
-                    throws IOException, WebApplicationException {
+    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType,
+            final Annotation[] annotations, final MediaType mediaType,
+            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
+            WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
@@ -94,8 +97,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
                 trans.setOutputProperty(OutputKeys.INDENT, "no");
             }
         } catch (RuntimeException e) {
-            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
-                    ErrorTag.OPERATION_FAILED);
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }
 
         // FIXME: BUG-1281: eliminate the intermediate Document
@@ -104,8 +106,7 @@ public enum StructuredDataToXmlProvider implements MessageBodyWriter<StructuredD
             trans.transform(new DOMSource(domTree), new StreamResult(entityStream));
         } catch (TransformerException e) {
             LOG.error("Error during translation of Document to OutputStream", e);
-            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT,
-                    ErrorTag.OPERATION_FAILED);
+            throw new RestconfDocumentedException(e.getMessage(), ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED);
         }
     }
 

@@ -46,14 +46,12 @@ public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLo
     @Test
     public void incorrectTopLevelElementTest() throws WebApplicationException, IOException {
         String jsonOutput = null;
-        jsonOutput = TestUtils
-                .writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
-                        Collections.<Module>emptySet(), prepareDataSchemaNode(),
-                        StructuredDataToJsonProvider.INSTANCE);
+        jsonOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(prepareCompositeNode(),
+                Collections.<Module> emptySet(), prepareDataSchemaNode(), StructuredDataToJsonProvider.INSTANCE);
         assertNotNull(jsonOutput);
 
-//      pattern for e.g. >    "lf1"   : ""    < or >"lf1":""<
-        assertTrue(containsStringData(jsonOutput, "\"lf1\"",":","\"\""));
+        // pattern for e.g. > "lf1" : "" < or >"lf1":""<
+        assertTrue(containsStringData(jsonOutput, "\"lf1\"", ":", "\"\""));
     }
 
     private CompositeNode prepareCompositeNode() {

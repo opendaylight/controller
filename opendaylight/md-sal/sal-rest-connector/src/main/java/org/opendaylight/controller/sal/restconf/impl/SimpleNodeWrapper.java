@@ -8,9 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Preconditions;
-
 import java.net.URI;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
@@ -128,7 +126,5 @@ public final class SimpleNodeWrapper implements NodeWrapper<SimpleNode<?>>, Simp
     public Object setValue(final Object value) {
         return unwrap().setValue(value);
     }
-
-
 
 }

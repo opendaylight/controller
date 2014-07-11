@@ -29,8 +29,7 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     /**
-     * Test of json output when as input are specified composite node with empty
-     * data + YANG file
+     * Test of json output when as input are specified composite node with empty data + YANG file
      */
     @Test
     public void augmentedElementsToJson() {
@@ -46,12 +45,12 @@ public class CnSnToJsonWithAugmentTest extends YangAndXmlAndDataSchemaLoader {
         }
         assertNotNull(jsonOutput);
 
-        assertTrue(containsStringData(jsonOutput,"\"augment-leaf:lf2\"",":", "\"lf2\""));
-        assertTrue(containsStringData(jsonOutput,"\"augment-container:cont1\"",":", "\\{"));
-        assertTrue(containsStringData(jsonOutput,"\"augment-container:lf11\"",":", "\"lf11\""));
-        assertTrue(containsStringData(jsonOutput,"\"augment-list:lst1\"",":", "\\["));
-        assertTrue(containsStringData(jsonOutput,"\"augment-list:lf11\"",":", "\"lf1_1\""));
-        assertTrue(containsStringData(jsonOutput,"\"augment-list:lf11\"",":", "\"lf1_2\""));
-        assertTrue(containsStringData(jsonOutput,"\"augment-leaflist:lflst1\"",":", "\\["));
+        assertTrue(containsStringData(jsonOutput, "\"augment-leaf:lf2\"", ":", "\"lf2\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-container:cont1\"", ":", "\\{"));
+        assertTrue(containsStringData(jsonOutput, "\"augment-container:lf11\"", ":", "\"lf11\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lst1\"", ":", "\\["));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lf11\"", ":", "\"lf1_1\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-list:lf11\"", ":", "\"lf1_2\""));
+        assertTrue(containsStringData(jsonOutput, "\"augment-leaflist:lflst1\"", ":", "\\["));
     }
 }
