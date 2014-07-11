@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ReadDataReply implements SerializableMessage{
+
   private final NormalizedNode<?, ?> normalizedNode;
   private final SchemaContext schemaContext;
   public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadDataReply.class;

@@ -107,9 +107,9 @@ public class ShardManager extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message instanceof FindPrimary) {
+        if (message.getClass().equals(FindPrimary.SERIALIZABLE_CLASS)) {
             findPrimary(
-                (FindPrimary) message);
+                FindPrimary.fromSerializable(message));
 
         } else if (message instanceof UpdateSchemaContext) {
             updateSchemaContext(message);
@@ -117,7 +117,10 @@ public class ShardManager extends AbstractUntypedActor {
             memberUp((ClusterEvent.MemberUp) message);
         } else if(message instanceof ClusterEvent.MemberRemoved){
             memberRemoved((ClusterEvent.MemberRemoved) message);
+        }else{
+          throw new Exception ("Not recognized message received, message="+message);
         }
+
     }
 
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
@@ -148,10 +151,10 @@ public class ShardManager extends AbstractUntypedActor {
                 ActorPath shardPath = localShards.get(shardName);
                 if (shardPath == null) {
                     getSender()
-                        .tell(new PrimaryNotFound(shardName), getSelf());
+                        .tell(new PrimaryNotFound(shardName).toSerializable(), getSelf());
                     return;
                 }
-                getSender().tell(new PrimaryFound(shardPath.toString()),
+                getSender().tell(new PrimaryFound(shardPath.toString()).toSerializable(),
                     getSelf());
                 return;
             } else {
@@ -160,7 +163,7 @@ public class ShardManager extends AbstractUntypedActor {
                     String path =
                         address.toString() + "/user/" + getShardActorName(
                             memberName, shardName);
-                    getSender().tell(new PrimaryFound(path), getSelf());
+                    getSender().tell(new PrimaryFound(path).toSerializable(), getSelf());
                     return;
                 }
 
@@ -168,7 +171,7 @@ public class ShardManager extends AbstractUntypedActor {
             }
         }
 
-        getSender().tell(new PrimaryNotFound(shardName), getSelf());
+        getSender().tell(new PrimaryNotFound(shardName).toSerializable(), getSelf());
     }
 
     private String getShardActorName(String memberName, String shardName){
