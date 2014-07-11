@@ -12,9 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
@@ -40,7 +38,7 @@ public class CnSnInstanceIdentifierToXmlTest extends YangAndXmlAndDataSchemaLoad
 
     @Test
     public void snAsYangInstanceIdentifier() throws WebApplicationException, IOException, URISyntaxException {
-        CompositeNode cnSnData = prepareCnStructForYangData( );
+        CompositeNode cnSnData = prepareCnStructForYangData();
         String xmlOutput = TestUtils.writeCompNodeWithSchemaContextToOutput(cnSnData, modules, dataSchemaNode,
                 StructuredDataToXmlProvider.INSTANCE);
         assertNotNull(xmlOutput);

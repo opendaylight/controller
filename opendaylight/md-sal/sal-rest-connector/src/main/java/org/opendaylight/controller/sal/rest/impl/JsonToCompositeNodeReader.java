@@ -13,14 +13,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Map.Entry;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.sal.rest.gson.JsonParser;
 import org.opendaylight.controller.sal.rest.impl.RestUtil.PrefixMapingFromJson;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -38,12 +36,10 @@ class JsonToCompositeNodeReader {
 
     }
 
-    public static CompositeNodeWrapper read(final InputStream entityStream)
-                                                      throws UnsupportedFormatException {
+    public static CompositeNodeWrapper read(final InputStream entityStream) throws UnsupportedFormatException {
         JsonParser parser = new JsonParser();
 
-        JsonElement rootElement = parser.parse(new JsonReader(
-                                                    new InputStreamReader(entityStream)));
+        JsonElement rootElement = parser.parse(new JsonReader(new InputStreamReader(entityStream)));
         if (rootElement.isJsonNull()) {
             // no content, so return null to indicate no input
             return null;
@@ -53,8 +49,7 @@ class JsonToCompositeNodeReader {
             throw new UnsupportedFormatException("Root element of Json has to be Object");
         }
 
-        Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject =
-                                                  rootElement.getAsJsonObject().entrySet();
+        Set<Entry<String, JsonElement>> entrySetsOfRootJsonObject = rootElement.getAsJsonObject().entrySet();
         if (entrySetsOfRootJsonObject.size() != 1) {
             throw new UnsupportedFormatException("Json Object should contain one element");
         }
@@ -81,8 +76,7 @@ class JsonToCompositeNodeReader {
                 "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet.");
     }
 
-    private static CompositeNodeWrapper createStructureWithRoot(final String rootObjectName,
-                                                                final JsonObject rootObject) {
+    private static CompositeNodeWrapper createStructureWithRoot(final String rootObjectName, final JsonObject rootObject) {
         CompositeNodeWrapper firstNode = new CompositeNodeWrapper(getNamespaceFor(rootObjectName),
                 getLocalNameFor(rootObjectName));
         for (Entry<String, JsonElement> childOfFirstNode : rootObject.entrySet()) {
@@ -92,7 +86,7 @@ class JsonToCompositeNodeReader {
     }
 
     private static void addChildToParent(final String childName, final JsonElement childType,
-                                         final CompositeNodeWrapper parent) {
+            final CompositeNodeWrapper parent) {
         if (childType.isJsonObject()) {
             CompositeNodeWrapper child = new CompositeNodeWrapper(getNamespaceFor(childName),
                     getLocalNameFor(childName));

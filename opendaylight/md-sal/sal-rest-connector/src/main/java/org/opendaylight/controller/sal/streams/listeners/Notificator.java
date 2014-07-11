@@ -12,11 +12,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 /**
- * {@link Notificator} is responsible to create, remove and find {@link ListenerAdapter} listener.
+ * {@link Notificator} is responsible to create, remove and find
+ * {@link ListenerAdapter} listener.
  */
 public class Notificator {
 
@@ -33,7 +33,6 @@ public class Notificator {
     public static Set<String> getStreamNames() {
         return listenersByStreamName.keySet();
     }
-
 
     /**
      * Gets {@link ListenerAdapter} specified by stream name.
@@ -81,8 +80,7 @@ public class Notificator {
      * @return New {@link ListenerAdapter} listener from
      *         {@link InstanceIdentifier} path and stream name.
      */
-    public static ListenerAdapter createListener(InstanceIdentifier path,
-            String streamName) {
+    public static ListenerAdapter createListener(InstanceIdentifier path, String streamName) {
         ListenerAdapter listener = new ListenerAdapter(path, streamName);
         try {
             lock.lock();
@@ -148,14 +146,13 @@ public class Notificator {
     }
 
     /**
-     * Checks if listener has at least one subscriber. In case it doesn't have any, delete
-     * listener.
+     * Checks if listener has at least one subscriber. In case it doesn't have
+     * any, delete listener.
      *
      * @param listener
      *            ListenerAdapter
      */
-    public static void removeListenerIfNoSubscriberExists(
-            ListenerAdapter listener) {
+    public static void removeListenerIfNoSubscriberExists(ListenerAdapter listener) {
         if (!listener.hasSubscribers()) {
             deleteListener(listener);
         }

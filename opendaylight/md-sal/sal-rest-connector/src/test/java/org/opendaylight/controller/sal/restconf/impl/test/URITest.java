@@ -15,10 +15,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Iterables;
-
 import java.io.FileNotFoundException;
 import java.util.Set;
-
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;

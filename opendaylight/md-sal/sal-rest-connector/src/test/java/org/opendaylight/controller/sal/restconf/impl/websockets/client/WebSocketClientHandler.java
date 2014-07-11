@@ -18,7 +18,6 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     private ChannelPromise handshakeFuture;
     private final IClientMessageCallback messageListener;
 
-
-    public WebSocketClientHandler(WebSocketClientHandshaker handshaker,IClientMessageCallback listener) {
+    public WebSocketClientHandler(WebSocketClientHandshaker handshaker, IClientMessageCallback listener) {
         this.handshaker = handshaker;
         this.messageListener = listener;
     }
@@ -92,4 +90,3 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         ctx.close();
     }
 }
-

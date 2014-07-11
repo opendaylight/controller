@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.stream.events.StartElement;
-
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate;
@@ -106,8 +104,7 @@ public final class RestUtil {
                     }
                     result.add(new Predicate(null, predicateValue));
                 } else {
-                    IdentityValue identityValue = toIdentity(predicate.substring(0, indexOfEqualityMark),
-                            prefixMap);
+                    IdentityValue identityValue = toIdentity(predicate.substring(0, indexOfEqualityMark), prefixMap);
                     if (identityValue == null || predicateValue == null) {
                         return null;
                     }

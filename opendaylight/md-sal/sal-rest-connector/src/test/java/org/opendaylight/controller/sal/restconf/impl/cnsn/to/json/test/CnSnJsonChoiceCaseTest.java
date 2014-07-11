@@ -10,9 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;

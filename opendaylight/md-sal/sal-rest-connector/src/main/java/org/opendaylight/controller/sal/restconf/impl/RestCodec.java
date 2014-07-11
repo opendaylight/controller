@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityValue;
@@ -47,7 +46,8 @@ public class RestCodec {
     private RestCodec() {
     }
 
-    public static final Codec<Object, Object> from(final TypeDefinition<?> typeDefinition, final MountInstance mountPoint) {
+    public static final Codec<Object, Object> from(final TypeDefinition<?> typeDefinition,
+            final MountInstance mountPoint) {
         return new ObjectCodec(typeDefinition, mountPoint);
     }
 
@@ -90,7 +90,7 @@ public class RestCodec {
                     return null;
                 } else if (type instanceof LeafrefTypeDefinition) {
                     if (input instanceof IdentityValuesDTO) {
-                        return LEAFREF_DEFAULT_CODEC.deserialize(((IdentityValuesDTO)input).getOriginValue());
+                        return LEAFREF_DEFAULT_CODEC.deserialize(((IdentityValuesDTO) input).getOriginValue());
                     }
                     return LEAFREF_DEFAULT_CODEC.deserialize(input);
                 } else if (type instanceof InstanceIdentifierTypeDefinition) {
@@ -106,7 +106,7 @@ public class RestCodec {
                             .from(type);
                     if (typeAwarecodec != null) {
                         if (input instanceof IdentityValuesDTO) {
-                            return typeAwarecodec.deserialize(((IdentityValuesDTO)input).getOriginValue());
+                            return typeAwarecodec.deserialize(((IdentityValuesDTO) input).getOriginValue());
                         }
                         return typeAwarecodec.deserialize(String.valueOf(input));
                     } else {
@@ -168,7 +168,7 @@ public class RestCodec {
 
         @Override
         public IdentityValuesDTO serialize(final QName data) {
-            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix(),null);
+            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), data.getPrefix(), null);
         }
 
         @Override
@@ -234,8 +234,10 @@ public class RestCodec {
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
             if (module == null) {
-                logger.info("Module by namespace '{}' of first node in instance-identiefier was not found.", valueWithNamespace.getNamespace());
-                logger.info("Instance-identifier will be translated as NULL for data - {}", String.valueOf(valueWithNamespace.getValue()));
+                logger.info("Module by namespace '{}' of first node in instance-identiefier was not found.",
+                        valueWithNamespace.getNamespace());
+                logger.info("Instance-identifier will be translated as NULL for data - {}",
+                        String.valueOf(valueWithNamespace.getValue()));
                 return null;
             }
 
@@ -248,7 +250,8 @@ public class RestCodec {
                         parentContainer, identityValue.getValue(), validNamespace);
                 if (node == null) {
                     logger.info("'{}' node was not found in {}", identityValue, parentContainer.getChildNodes());
-                    logger.info("Instance-identifier will be translated as NULL for data - {}", String.valueOf(identityValue.getValue()));
+                    logger.info("Instance-identifier will be translated as NULL for data - {}",
+                            String.valueOf(identityValue.getValue()));
                     return null;
                 }
                 QName qName = node.getQName();
@@ -256,37 +259,47 @@ public class RestCodec {
                 if (identityValue.getPredicates().isEmpty()) {
                     pathArgument = new NodeIdentifier(qName);
                 } else {
-                    if (node instanceof LeafListSchemaNode) { // predicate is value of leaf-list entry
+                    if (node instanceof LeafListSchemaNode) { // predicate is
+                                                              // value of
+                                                              // leaf-list entry
                         Predicate leafListPredicate = identityValue.getPredicates().get(0);
                         if (!leafListPredicate.isLeafList()) {
                             logger.info("Predicate's data is not type of leaf-list. It should be in format \".='value'\"");
-                            logger.info("Instance-identifier will be translated as NULL for data - {}", String.valueOf(identityValue.getValue()));
+                            logger.info("Instance-identifier will be translated as NULL for data - {}",
+                                    String.valueOf(identityValue.getValue()));
                             return null;
                         }
                         pathArgument = new NodeWithValue(qName, leafListPredicate.getValue());
-                    } else if (node instanceof ListSchemaNode) { // predicates are keys of list
+                    } else if (node instanceof ListSchemaNode) { // predicates
+                                                                 // are keys of
+                                                                 // list
                         DataNodeContainer listNode = (DataNodeContainer) node;
                         Map<QName, Object> predicatesMap = new HashMap<>();
                         for (Predicate predicate : identityValue.getPredicates()) {
                             validNamespace = resolveValidNamespace(predicate.getName().getNamespace(), mountPoint);
-                            DataSchemaNode listKey = ControllerContext.getInstance().findInstanceDataChildByNameAndNamespace(
-                                    listNode, predicate.getName().getValue(), validNamespace);
+                            DataSchemaNode listKey = ControllerContext.getInstance()
+                                    .findInstanceDataChildByNameAndNamespace(listNode, predicate.getName().getValue(),
+                                            validNamespace);
                             predicatesMap.put(listKey.getQName(), predicate.getValue());
                         }
                         pathArgument = new NodeIdentifierWithPredicates(qName, predicatesMap);
                     } else {
                         logger.info("Node {} is not List or Leaf-list.", node);
-                        logger.info("Instance-identifier will be translated as NULL for data - {}", String.valueOf(identityValue.getValue()));
+                        logger.info("Instance-identifier will be translated as NULL for data - {}",
+                                String.valueOf(identityValue.getValue()));
                         return null;
                     }
                 }
                 result.add(pathArgument);
-                if (i < identities.size() - 1) { // last element in instance-identifier can be other than DataNodeContainer
+                if (i < identities.size() - 1) { // last element in
+                                                 // instance-identifier can be
+                                                 // other than DataNodeContainer
                     if (node instanceof DataNodeContainer) {
                         parentContainer = (DataNodeContainer) node;
                     } else {
                         logger.info("Node {} isn't instance of DataNodeContainer", node);
-                        logger.info("Instance-identifier will be translated as NULL for data - {}", String.valueOf(identityValue.getValue()));
+                        logger.info("Instance-identifier will be translated as NULL for data - {}",
+                                String.valueOf(identityValue.getValue()));
                         return null;
                     }
                 }

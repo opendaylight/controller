@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -57,26 +56,26 @@ public class XmlToCnSnTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     @Test
-    public void testXmlBlankInput() throws Exception{
-        InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
-        CompositeNode compositeNode =
-                XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+    public void testXmlBlankInput() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream("".getBytes());
+        CompositeNode compositeNode = XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null,
+                inputStream);
 
-        assertNull( compositeNode );
+        assertNull(compositeNode);
     }
 
     @Test
-    public void testXmlBlankInputUnmarkableStream() throws Exception{
-        InputStream inputStream = new ByteArrayInputStream( "".getBytes() ){
+    public void testXmlBlankInputUnmarkableStream() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream("".getBytes()) {
             @Override
             public boolean markSupported() {
                 return false;
             }
         };
-        CompositeNode compositeNode =
-                XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
+        CompositeNode compositeNode = XmlToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null,
+                inputStream);
 
-        assertNull( compositeNode );
+        assertNull(compositeNode);
     }
 
 }

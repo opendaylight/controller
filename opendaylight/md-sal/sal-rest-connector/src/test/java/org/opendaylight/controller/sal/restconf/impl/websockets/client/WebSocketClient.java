@@ -23,15 +23,13 @@ import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebSocketClient  {
+public class WebSocketClient {
 
     private final URI uri;
     private Bootstrap bootstrap = new Bootstrap();;
@@ -40,51 +38,57 @@ public class WebSocketClient  {
     private Channel clientChannel;
     private final EventLoopGroup group = new NioEventLoopGroup();
 
-    public WebSocketClient(URI uri,IClientMessageCallback clientMessageCallback) {
+    public WebSocketClient(URI uri, IClientMessageCallback clientMessageCallback) {
         this.uri = uri;
-        clientHandler = new WebSocketClientHandler(
-                WebSocketClientHandshakerFactory.newHandshaker(
-                        uri, WebSocketVersion.V13, null, false,null),clientMessageCallback); // last null could be replaced with DefaultHttpHeaders
+        clientHandler = new WebSocketClientHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
+                WebSocketVersion.V13, null, false, null), clientMessageCallback); // last
+                                                                                  // null
+                                                                                  // could
+                                                                                  // be
+                                                                                  // replaced
+                                                                                  // with
+                                                                                  // DefaultHttpHeaders
         initialize();
     }
-    private void initialize(){
+
+    private void initialize() {
 
         String protocol = uri.getScheme();
         if (!"http".equals(protocol)) {
             throw new IllegalArgumentException("Unsupported protocol: " + protocol);
         }
 
-        bootstrap.group(group)
-                .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("http-codec", new HttpClientCodec());
-                        pipeline.addLast("aggregator", new HttpObjectAggregator(8192));
-                        pipeline.addLast("ws-handler", clientHandler);
-                    }
-                });
+        bootstrap.group(group).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast("http-codec", new HttpClientCodec());
+                pipeline.addLast("aggregator", new HttpObjectAggregator(8192));
+                pipeline.addLast("ws-handler", clientHandler);
+            }
+        });
     }
-    public void connect() throws InterruptedException{
+
+    public void connect() throws InterruptedException {
         System.out.println("WebSocket Client connecting");
-        clientChannel  = bootstrap.connect(uri.getHost(), uri.getPort()).sync().channel();
+        clientChannel = bootstrap.connect(uri.getHost(), uri.getPort()).sync().channel();
         clientHandler.handshakeFuture().sync();
     }
 
-    public void writeAndFlush(String message){
+    public void writeAndFlush(String message) {
         clientChannel.writeAndFlush(new TextWebSocketFrame(message));
     }
-    public void writeAndFlush(Object message){
+
+    public void writeAndFlush(Object message) {
         clientChannel.writeAndFlush(message);
     }
 
-    public void ping(){
-        clientChannel.writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer(new byte[]{1, 2, 3, 4, 5, 6})));
+    public void ping() {
+        clientChannel.writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer(new byte[] { 1, 2, 3, 4, 5, 6 })));
     }
 
     public void close(String reasonText) throws InterruptedException {
-        CloseWebSocketFrame closeWebSocketFrame = new CloseWebSocketFrame(1000,reasonText);
+        CloseWebSocketFrame closeWebSocketFrame = new CloseWebSocketFrame(1000, reasonText);
         clientChannel.writeAndFlush(closeWebSocketFrame);
 
         // WebSocketClientHandler will close the connection when the server
@@ -122,7 +126,7 @@ public class WebSocketClient  {
         @Override
         public void onMessageReceived(Object message) {
             if (message instanceof TextWebSocketFrame) {
-                logger.info("received message {}"+ ((TextWebSocketFrame)message).text());
+                logger.info("received message {}" + ((TextWebSocketFrame) message).text());
             }
         }
     }

@@ -12,10 +12,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
 import javax.activation.UnsupportedDataTypeException;
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -147,7 +145,8 @@ public class CnSnToJsonIncorrectTopLevelTest extends YangAndXmlAndDataSchemaLoad
     @Test
     public void incorrectTopLevelElementTest() {
 
-        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml", XmlToCompositeNodeProvider.INSTANCE);
+        CompositeNode compositeNode = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml",
+                XmlToCompositeNodeProvider.INSTANCE);
         DataSchemaNode incorrectDataSchema = null;
         incorrectDataSchema = new IncorrectDataSchema();
 

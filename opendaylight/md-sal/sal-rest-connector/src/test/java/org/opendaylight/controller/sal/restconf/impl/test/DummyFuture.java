@@ -34,7 +34,6 @@ public class DummyFuture<T> implements Future<RpcResult<T>> {
         result = builder.result;
     }
 
-
     @Override
     public boolean cancel(final boolean mayInterruptIfRunning) {
         return cancel;
@@ -56,8 +55,8 @@ public class DummyFuture<T> implements Future<RpcResult<T>> {
     }
 
     @Override
-    public RpcResult<T> get(final long timeout, final TimeUnit unit) throws InterruptedException,
-    ExecutionException, TimeoutException {
+    public RpcResult<T> get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
+            TimeoutException {
         return result;
     }
 

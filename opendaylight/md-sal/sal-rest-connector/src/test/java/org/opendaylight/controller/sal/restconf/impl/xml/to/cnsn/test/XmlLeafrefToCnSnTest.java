@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -322,8 +321,8 @@ public class XmlLeafrefToCnSnTest {
         assertEquals((short) 100, cont1_lf11.getValue());
     }
 
-    private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName, final String schemaName,
-            final int moduleCount, final String resultLocalName, final String resultNamespace) {
+    private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName,
+            final String schemaName, final int moduleCount, final String resultLocalName, final String resultNamespace) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 

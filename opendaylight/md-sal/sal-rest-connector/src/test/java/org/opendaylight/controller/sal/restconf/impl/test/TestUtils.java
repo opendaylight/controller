@@ -279,8 +279,8 @@ public final class TestUtils {
 
         ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
 
-        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null, null,
-                byteArrayOS);
+        messageBodyWriter.writeTo(new StructuredData(compositeNode, dataSchemaNode, null), null, null, null, null,
+                null, byteArrayOS);
 
         return byteArrayOS.toString();
     }
@@ -298,7 +298,7 @@ public final class TestUtils {
         return result.toString();
     }
 
-    private static Pattern patternForStringsSeparatedByWhiteChars(String ... substrings ) {
+    private static Pattern patternForStringsSeparatedByWhiteChars(String... substrings) {
         StringBuilder pattern = new StringBuilder();
         pattern.append(".*");
         for (String substring : substrings) {
@@ -309,7 +309,7 @@ public final class TestUtils {
         return Pattern.compile(pattern.toString(), Pattern.DOTALL);
     }
 
-    public static boolean containsStringData(String jsonOutput,String ...substrings ) {
+    public static boolean containsStringData(String jsonOutput, String... substrings) {
         Pattern pattern = patternForStringsSeparatedByWhiteChars(substrings);
         Matcher matcher = pattern.matcher(jsonOutput);
         return matcher.matches();

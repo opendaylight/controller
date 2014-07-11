@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import java.util.Collection;
-
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
