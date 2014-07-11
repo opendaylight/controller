@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -53,9 +49,9 @@ public class AbstractDataBrokerTest extends AbstractSchemaAwareTest {
         return domBroker;
     }
 
-    protected static final void assertCommit(final ListenableFuture<RpcResult<TransactionStatus>> commit) {
+    protected static final void assertCommit(final ListenableFuture<Void> commit) {
         try {
-            assertEquals(TransactionStatus.COMMITED,commit.get(500, TimeUnit.MILLISECONDS).getResult());
+            commit.get(500, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new IllegalStateException(e);
         }

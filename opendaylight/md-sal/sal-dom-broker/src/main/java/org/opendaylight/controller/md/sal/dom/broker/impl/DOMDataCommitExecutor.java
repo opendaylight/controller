@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * Executor of Three Phase Commit coordination for
@@ -40,12 +38,12 @@ interface DOMDataCommitExecutor {
      *            subtransactoins.
      * @param listener
      *            Error listener which should be notified if transaction failed.
-     * @return ListenableFuture which contains RpcResult with
-     *         {@link TransactionStatus#COMMITED} if commit coordination on
-     *         cohorts finished successfully.
+     * @return a CheckedFuture. if commit coordination on cohorts finished successfully,
+     *         nothing is returned from the Future, On failure,
+     *         the Future fails with a {@link TransactionCommitFailedException}.
      *
      */
-    ListenableFuture<RpcResult<TransactionStatus>> submit(DOMDataWriteTransaction tx,
+    CheckedFuture<Void,TransactionCommitFailedException> submit(DOMDataWriteTransaction tx,
             Iterable<DOMStoreThreePhaseCommitCohort> cohort, Optional<DOMDataCommitErrorListener> listener);
 
 }

@@ -13,6 +13,8 @@ import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -23,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -39,7 +42,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * </ul>
  * <p>
  * {@link #commit()} will result in invocation of
- * {@link DOMDataCommitImplementation#commit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
+ * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
  * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
  * transactions.
  *
@@ -74,7 +77,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
      *
      */
     @GuardedBy("this")
-    private volatile ListenableFuture<RpcResult<TransactionStatus>> commitFuture;
+    private volatile CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
     protected DOMForwardedWriteTransaction(final Object identifier,
             final ImmutableMap<LogicalDatastoreType, T> backingTxs, final DOMDataCommitImplementation commitImpl) {
@@ -119,6 +122,11 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     @Override
     public synchronized ListenableFuture<RpcResult<TransactionStatus>> commit() {
+        return AbstractDataTransaction.convertToLegacyCommitFuture(submit());
+    }
+
+    @Override
+    public CheckedFuture<Void,TransactionCommitFailedException> submit() {
         checkNotReady();
 
         ImmutableList.Builder<DOMStoreThreePhaseCommitCohort> cohortsBuilder = ImmutableList.builder();
@@ -126,7 +134,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
             cohortsBuilder.add(subTx.ready());
         }
         ImmutableList<DOMStoreThreePhaseCommitCohort> cohorts = cohortsBuilder.build();
-        commitFuture = commitImpl.commit(this, cohorts);
+        commitFuture = commitImpl.submit(this, cohorts);
 
         /*
          *We remove reference to Commit Implementation in order
@@ -148,5 +156,4 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     private void checkNotCommited() {
         checkState(commitFuture == null, "Transaction was already submited.");
     }
-
 }

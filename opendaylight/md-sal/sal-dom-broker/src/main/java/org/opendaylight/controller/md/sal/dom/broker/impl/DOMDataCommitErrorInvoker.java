@@ -6,10 +6,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 
@@ -22,7 +19,7 @@ import com.google.common.util.concurrent.FutureCallback;
  * callback is invoked with associated transaction and throwable is invoked on listener.
  *
  */
-class DOMDataCommitErrorInvoker implements FutureCallback<RpcResult<TransactionStatus>> {
+class DOMDataCommitErrorInvoker implements FutureCallback<Void> {
 
     private final DOMDataWriteTransaction tx;
     private final DOMDataCommitErrorListener listener;
@@ -46,7 +43,7 @@ class DOMDataCommitErrorInvoker implements FutureCallback<RpcResult<TransactionS
     }
 
     @Override
-    public void onSuccess(RpcResult<TransactionStatus> result) {
+    public void onSuccess(Void result) {
         // NOOP
     }
 }

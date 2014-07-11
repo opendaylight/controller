@@ -1,5 +1,8 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+
 /**
 *
 * Failure of asynchronous transaction commit caused by failure
@@ -18,17 +21,13 @@ public class OptimisticLockFailedException extends TransactionCommitFailedExcept
 
     private static final long serialVersionUID = 1L;
 
-    protected OptimisticLockFailedException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
-
     public OptimisticLockFailedException(final String message, final Throwable cause) {
-        super(message, cause);
+        super(message, cause, RpcResultBuilder.newError(ErrorType.APPLICATION, "resource-denied",
+                                                        message, null, null, cause));
     }
 
     public OptimisticLockFailedException(final String message) {
-        super(message);
+        this(message, null);
     }
 
 }

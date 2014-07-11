@@ -11,13 +11,19 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.AbstractDataModification;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class AbstractDataTransaction<P extends Path<P>, D extends Object> extends
         AbstractDataModification<P, D> {
@@ -83,18 +89,23 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AbstractDataTransaction<?, ?> other = (AbstractDataTransaction<?, ?>) obj;
         if (identifier == null) {
-            if (other.identifier != null)
+            if (other.identifier != null) {
                 return false;
-        } else if (!identifier.equals(other.identifier))
+            }
+        } else if (!identifier.equals(other.identifier)) {
             return false;
+        }
         return true;
     }
 
@@ -121,5 +132,16 @@ public abstract class AbstractDataTransaction<P extends Path<P>, D extends Objec
         LOG.debug("Transaction {} transitioned from {} to {}", getIdentifier(), this.status, status);
         this.status = status;
         this.onStatusChange(status);
+    }
+
+    public static ListenableFuture<RpcResult<TransactionStatus>> convertToLegacyCommitFuture(
+                                        CheckedFuture<Void,TransactionCommitFailedException> from ) {
+        return Futures.transform(from, new AsyncFunction<Void, RpcResult<TransactionStatus>>() {
+            @Override
+            public ListenableFuture<RpcResult<TransactionStatus>> apply(Void input) throws Exception {
+                return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>
+                                                              success(TransactionStatus.COMMITED).build());
+            }
+        } );
     }
 }
