@@ -489,6 +489,21 @@ public final class ShardManagerMessages {
 
   public interface PrimaryFoundOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // required string primaryPath = 1;
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    boolean hasPrimaryPath();
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    java.lang.String getPrimaryPath();
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getPrimaryPathBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.PrimaryFound}
@@ -523,6 +538,7 @@ public final class ShardManagerMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -538,6 +554,11 @@ public final class ShardManagerMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              primaryPath_ = input.readBytes();
               break;
             }
           }
@@ -579,13 +600,62 @@ public final class ShardManagerMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // required string primaryPath = 1;
+    public static final int PRIMARYPATH_FIELD_NUMBER = 1;
+    private java.lang.Object primaryPath_;
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    public boolean hasPrimaryPath() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    public java.lang.String getPrimaryPath() {
+      java.lang.Object ref = primaryPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          primaryPath_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string primaryPath = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPrimaryPathBytes() {
+      java.lang.Object ref = primaryPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        primaryPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      primaryPath_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasPrimaryPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -593,6 +663,9 @@ public final class ShardManagerMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getPrimaryPathBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -602,6 +675,10 @@ public final class ShardManagerMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getPrimaryPathBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -718,6 +795,8 @@ public final class ShardManagerMessages {
 
       public Builder clear() {
         super.clear();
+        primaryPath_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -744,6 +823,13 @@ public final class ShardManagerMessages {
 
       public org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryFound buildPartial() {
         org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryFound result = new org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryFound(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.primaryPath_ = primaryPath_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -759,11 +845,20 @@ public final class ShardManagerMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryFound other) {
         if (other == org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryFound.getDefaultInstance()) return this;
+        if (other.hasPrimaryPath()) {
+          bitField0_ |= 0x00000001;
+          primaryPath_ = other.primaryPath_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasPrimaryPath()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -784,6 +879,81 @@ public final class ShardManagerMessages {
         }
         return this;
       }
+      private int bitField0_;
+
+      // required string primaryPath = 1;
+      private java.lang.Object primaryPath_ = "";
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public boolean hasPrimaryPath() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public java.lang.String getPrimaryPath() {
+        java.lang.Object ref = primaryPath_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          primaryPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPrimaryPathBytes() {
+        java.lang.Object ref = primaryPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          primaryPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public Builder setPrimaryPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        primaryPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public Builder clearPrimaryPath() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        primaryPath_ = getDefaultInstance().getPrimaryPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string primaryPath = 1;</code>
+       */
+      public Builder setPrimaryPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        primaryPath_ = value;
+        onChanged();
+        return this;
+      }
 
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.PrimaryFound)
     }
@@ -798,6 +968,21 @@ public final class ShardManagerMessages {
 
   public interface PrimaryNotFoundOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
+
+    // required string shardName = 1;
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    boolean hasShardName();
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    java.lang.String getShardName();
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getShardNameBytes();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.PrimaryNotFound}
@@ -832,6 +1017,7 @@ public final class ShardManagerMessages {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -847,6 +1033,11 @@ public final class ShardManagerMessages {
                                      extensionRegistry, tag)) {
                 done = true;
               }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              shardName_ = input.readBytes();
               break;
             }
           }
@@ -888,13 +1079,62 @@ public final class ShardManagerMessages {
       return PARSER;
     }
 
+    private int bitField0_;
+    // required string shardName = 1;
+    public static final int SHARDNAME_FIELD_NUMBER = 1;
+    private java.lang.Object shardName_;
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    public boolean hasShardName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    public java.lang.String getShardName() {
+      java.lang.Object ref = shardName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          shardName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string shardName = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getShardNameBytes() {
+      java.lang.Object ref = shardName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        shardName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
+      shardName_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasShardName()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -902,6 +1142,9 @@ public final class ShardManagerMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getShardNameBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -911,6 +1154,10 @@ public final class ShardManagerMessages {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getShardNameBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -1027,6 +1274,8 @@ public final class ShardManagerMessages {
 
       public Builder clear() {
         super.clear();
+        shardName_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -1053,6 +1302,13 @@ public final class ShardManagerMessages {
 
       public org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryNotFound buildPartial() {
         org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryNotFound result = new org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryNotFound(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.shardName_ = shardName_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -1068,11 +1324,20 @@ public final class ShardManagerMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryNotFound other) {
         if (other == org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages.PrimaryNotFound.getDefaultInstance()) return this;
+        if (other.hasShardName()) {
+          bitField0_ |= 0x00000001;
+          shardName_ = other.shardName_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasShardName()) {
+
+          return false;
+        }
         return true;
       }
 
@@ -1091,6 +1356,81 @@ public final class ShardManagerMessages {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string shardName = 1;
+      private java.lang.Object shardName_ = "";
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public boolean hasShardName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public java.lang.String getShardName() {
+        java.lang.Object ref = shardName_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          shardName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getShardNameBytes() {
+        java.lang.Object ref = shardName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          shardName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public Builder setShardName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        shardName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public Builder clearShardName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        shardName_ = getDefaultInstance().getShardName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string shardName = 1;</code>
+       */
+      public Builder setShardNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        shardName_ = value;
+        onChanged();
         return this;
       }
 
@@ -1131,8 +1471,9 @@ public final class ShardManagerMessages {
     java.lang.String[] descriptorData = {
       "\n\022ShardManager.proto\022!org.opendaylight.c" +
       "ontroller.mdsal\" \n\013FindPrimary\022\021\n\tshardN" +
-      "ame\030\001 \002(\t\"\016\n\014PrimaryFound\"\021\n\017PrimaryNotF" +
-      "oundBL\n4org.opendaylight.controller.prot" +
+      "ame\030\001 \002(\t\"#\n\014PrimaryFound\022\023\n\013primaryPath" +
+      "\030\001 \002(\t\"$\n\017PrimaryNotFound\022\021\n\tshardName\030\001" +
+      " \002(\tBL\n4org.opendaylight.controller.prot" +
       "obuff.messages.shardB\024ShardManagerMessag" +
       "es"
     };
@@ -1152,13 +1493,13 @@ public final class ShardManagerMessages {
           internal_static_org_opendaylight_controller_mdsal_PrimaryFound_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_PrimaryFound_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "PrimaryPath", });
           internal_static_org_opendaylight_controller_mdsal_PrimaryNotFound_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_org_opendaylight_controller_mdsal_PrimaryNotFound_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_PrimaryNotFound_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { "ShardName", });
           return null;
         }
       };
