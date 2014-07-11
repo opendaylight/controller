@@ -14,10 +14,7 @@ import java.util.List;
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
-public class AppendEntries {
-    // Leaders term
-    private final long term;
-
+public class AppendEntries extends AbstractRaftRPC {
     // So that follower can redirect clients
     private final String leaderId;
 
@@ -31,17 +28,17 @@ public class AppendEntries {
     // may send more than one for efficiency)
     private final List<Object> entries;
 
+    // leader's commitIndex
+    private final long leaderCommit;
+
     public AppendEntries(long term, String leaderId, long prevLogIndex,
-        long prevLogTerm, List<Object> entries) {
-        this.term = term;
+        long prevLogTerm, List<Object> entries, long leaderCommit) {
+        super(term);
         this.leaderId = leaderId;
         this.prevLogIndex = prevLogIndex;
         this.prevLogTerm = prevLogTerm;
         this.entries = entries;
-    }
-
-    public long getTerm() {
-        return term;
+        this.leaderCommit = leaderCommit;
     }
 
     public String getLeaderId() {
@@ -58,5 +55,9 @@ public class AppendEntries {
 
     public List<Object> getEntries() {
         return entries;
+    }
+
+    public long getLeaderCommit() {
+        return leaderCommit;
     }
 }

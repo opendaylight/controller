@@ -8,25 +8,17 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-/**
- * Reply for the AppendEntriesRpc message
- */
-public class AppendEntriesReply extends AbstractRaftRPC{
+public class AbstractRaftRPC implements RaftRPC {
+    // term
+    protected long term;
 
-    // true if follower contained entry matching
-    // prevLogIndex and prevLogTerm
-    private final boolean success;
-
-    public AppendEntriesReply(long term, boolean success) {
-        super(term);
-        this.success = success;
+    protected AbstractRaftRPC(long term){
+        this.term = term;
     }
 
     public long getTerm() {
         return term;
     }
 
-    public boolean isSuccess() {
-        return success;
-    }
+
 }

@@ -16,6 +16,9 @@ import org.opendaylight.controller.cluster.raft.RaftReplicator;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestVote;
+import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +74,30 @@ public class Leader extends AbstractRaftActorBehavior {
 
     }
 
+    @Override protected RaftState handleAppendEntries(ActorRef sender,
+        AppendEntries appendEntries, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
+        AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleRequestVote(ActorRef sender,
+        RequestVote requestVote, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleRequestVoteReply(ActorRef sender,
+        RequestVoteReply requestVoteReply, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState state() {
+        return RaftState.Leader;
+    }
+
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
@@ -79,8 +106,9 @@ public class Leader extends AbstractRaftActorBehavior {
                 context.getTermInformation().getCurrentTerm().get() , context.getId(),
                 context.getReplicatedLog().last().getIndex(),
                 context.getReplicatedLog().last().getTerm(),
-                Collections.EMPTY_LIST), context.getActor());
+                Collections.EMPTY_LIST, context.getCommitIndex().get()), context.getActor());
+            return state();
         }
-        return RaftState.Leader;
+        return super.handleMessage(sender, message);
     }
 }

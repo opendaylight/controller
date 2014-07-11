@@ -11,6 +11,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestVote;
+import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 import java.util.List;
 
@@ -40,8 +44,32 @@ public class Candidate extends AbstractRaftActorBehavior {
         this.peers = peers;
     }
 
+    @Override protected RaftState handleAppendEntries(ActorRef sender,
+        AppendEntries appendEntries, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
+        AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleRequestVote(ActorRef sender,
+        RequestVote requestVote, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState handleRequestVoteReply(ActorRef sender,
+        RequestVoteReply requestVoteReply, RaftState suggestedState) {
+        return suggestedState;
+    }
+
+    @Override protected RaftState state() {
+        return RaftState.Candidate;
+    }
+
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
-        return RaftState.Candidate;
+        return super.handleMessage(sender, message);
     }
 }
