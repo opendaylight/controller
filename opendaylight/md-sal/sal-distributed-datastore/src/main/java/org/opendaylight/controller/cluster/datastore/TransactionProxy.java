@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -195,10 +195,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return;
         }
 
-        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier), ActorContext.ASK_DURATION);
-        if(response instanceof CreateTransactionReply){
-            CreateTransactionReply reply = (CreateTransactionReply) response;
-            remoteTransactionPaths.put(shardName, actorContext.actorSelection(reply.getTransactionActorPath()));
+        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier).toSerializable(), ActorContext.ASK_DURATION);
+        if(response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)){
+            CreateTransactionReply reply = CreateTransactionReply.fromSerializable(response);
+            remoteTransactionPaths.put(shardName, actorContext.actorSelection(reply.getTransactionPath()));
         }
     }
 
