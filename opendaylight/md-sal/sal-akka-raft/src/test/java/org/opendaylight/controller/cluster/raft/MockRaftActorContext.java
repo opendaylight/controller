@@ -95,4 +95,8 @@ public class MockRaftActorContext implements RaftActorContext {
             }
         };
     }
+
+    @Override public ActorSystem getActorSystem() {
+        return this.system;
+    }
 }
