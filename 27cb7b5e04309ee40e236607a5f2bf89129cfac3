@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8284965e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "As I know we should use formatter SunCodingStyle to formate java source code.\nEnum items in one row is output of this formatter",
+      "parentUuid": "fa82b9bf_f46e842e",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_34338c63",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "Although this error shouldn\u0027t happen at this point, it indicates a missing key in URI so message should reflect that:\n  \"Missing key \" + keyDefinition + \" in URI\" \n\nAlso the error tag should be DATA_MISSING. I think MALFORMED_MESSAGE is really for syntax error in the payload.\nAnd the type should be PROTOCOL.",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a2899a76",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "applied",
+      "parentUuid": "fa82b9bf_34338c63",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_427a0e78",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "applied",
+      "parentUuid": "fa82b9bf_d44340ad",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_340aac79",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "For the message, how about:\n   \"The value \u0027\" + uriKeyValue + \"\u0027 for key \" + keyDefinition.getLocalName() + \" specified in the URI doesn\u0027t match the value \u0027\" + payloadKeyValue + \"\u0027 specified in the message body.\"\n\nAlso the error tag should be INVALID_VALUE and type PROTOCOL.",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_22958a86",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "applied",
+      "parentUuid": "fa82b9bf_340aac79",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_029886be",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_14da08e8",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d4f6e05c",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "Can we rename this method to \"testValidKeys\"?",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c28dbe7d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_d4f6e05c",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e28a4263",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_7497d4ec",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_949cd810",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_82eb3612",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_949cd810",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_349dcc0a",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "Can we rename this method to \"testMissingKeyInPayload\"?",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a2f0bafe",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_349dcc0a",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +351,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_42f1aeff",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_54a2d04b",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f48a04be",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
         "patchSetId": 1
@@ -200,6 +380,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "message text: \"RestconfError getErrorType()\"",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_62f632fb",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_f48a04be",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +421,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c2e4de3d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa82b9bf_1488c8c3",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b490fced",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
         "patchSetId": 1
@@ -234,6 +450,24 @@
       "writtenOn": "2014-07-10T16:56:53Z",
       "side": 1,
       "message": "This check should be payloadKey2 !\u003d null",
+      "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8239f6a5",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/input/to/cnsn/test/RestPutListDataTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-07-11T08:05:27Z",
+      "side": 1,
+      "message": "yes, thanks",
+      "parentUuid": "fa82b9bf_b490fced",
       "revId": "27cb7b5e04309ee40e236607a5f2bf89129cfac3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
