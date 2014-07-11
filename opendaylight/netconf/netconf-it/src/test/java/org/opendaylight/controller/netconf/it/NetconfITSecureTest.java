@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.it;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -99,7 +100,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     protected List<ModuleFactory> getModuleFactories() {
-        return NetconfITTest.getModuleFactoriesS();
+        return asList(NetconfITTest.FACTORIES);
     }
 
     @Test

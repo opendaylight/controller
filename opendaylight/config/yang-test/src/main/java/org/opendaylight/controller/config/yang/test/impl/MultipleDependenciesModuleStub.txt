@@ -1,0 +1,5 @@
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+            }
+        };
