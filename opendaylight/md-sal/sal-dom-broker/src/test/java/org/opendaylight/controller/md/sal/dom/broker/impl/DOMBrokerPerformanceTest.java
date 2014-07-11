@@ -169,7 +169,7 @@ public class DOMBrokerPerformanceTest {
                             public List<ListenableFuture<?>> call() throws Exception {
                                 List<ListenableFuture<?>> builder = new ArrayList<>(txNum);
                                 for (DOMDataReadWriteTransaction tx :transactions) {
-                                    builder.add(tx.commit());
+                                    builder.add(tx.submit());
                                 }
                                 return builder;
                             }
@@ -267,7 +267,7 @@ public class DOMBrokerPerformanceTest {
                 measure("Txs:1 Submit", new Callable<ListenableFuture<?>>() {
                     @Override
                     public ListenableFuture<?> call() throws Exception {
-                        return writeTx.commit();
+                        return writeTx.submit();
                     }
                 }).get();
                 return null;

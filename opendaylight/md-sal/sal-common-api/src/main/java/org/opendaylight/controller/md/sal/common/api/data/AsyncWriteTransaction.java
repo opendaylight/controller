@@ -11,6 +11,7 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -65,7 +66,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * <tt>true</tt> otherwise
      *
      */
-    public boolean cancel();
+    boolean cancel();
 
     /**
      * Store a piece of data at specified path. This acts as an add / replace
@@ -97,7 +98,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException
      *             if the transaction is no longer {@link TransactionStatus#NEW}
      */
-    public void put(LogicalDatastoreType store, P path, D data);
+    void put(LogicalDatastoreType store, P path, D data);
 
     /**
      * Store a piece of data at the specified path. This acts as a merge operation,
@@ -132,7 +133,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException
      *             if the transaction is no longer {@link TransactionStatus#NEW}
      */
-    public void merge(LogicalDatastoreType store, P path, D data);
+    void merge(LogicalDatastoreType store, P path, D data);
 
     /**
      * Remove a piece of data from specified path. This operation does not fail
@@ -145,10 +146,14 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException
      *             if the transaction is no longer {@link TransactionStatus#NEW}
      */
-    public void delete(LogicalDatastoreType store, P path);
+    void delete(LogicalDatastoreType store, P path);
 
     /**
-     * Submits transaction to be applied to update logical data tree.
+     * Submits this transaction to be asynchronously applied to update the logical data tree.
+     * The returned CheckedFuture conveys the result of applying the data changes.
+     * <p>
+     * <b>Note:</b> It is strongly recommended to process the CheckedFuture result in an asynchronous
+     * manner rather than using the blocking get() method. See example usage below.
      * <p>
      * This call logically seals the transaction, which prevents the client from
      * further changing data tree using this transaction. Any subsequent calls to
@@ -158,31 +163,65 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * {@link IllegalStateException}.
      *
      * The transaction is marked as {@link TransactionStatus#SUBMITED} and
-     * enqueued into the data store backed for processing.
+     * enqueued into the data store back-end for processing.
      *
      * <p>
      * Whether or not the commit is successful is determined by versioning
-     * of data tree and validation of registered commit participants
-     * {@link AsyncConfigurationCommitHandler}
-     * if transaction changes {@link LogicalDatastoreType#CONFIGURATION} data tree.
-     *<p>
-     * The effects of successful commit of data depends on
-     * other data change listeners {@link AsyncDataChangeListener} and
-     * {@link AsyncConfigurationCommitHandler}, which was registered to the
-     * same {@link AsyncDataBroker}, to which this transaction belongs.
+     * of the data tree and validation of registered commit participants
+     * ({@link AsyncConfigurationCommitHandler})
+     * if the transaction changes the data tree.
+     * <p>
+     * The effects of a successful commit of data depends on data change listeners
+     * ({@link AsyncDataChangeListener}) and commit participants
+     * ({@link AsyncConfigurationCommitHandler}) that are registered with the data broker.
+     * <p>
+     * <h3>Example usage:</h3>
+     * <pre>
+     *  private void doWrite( final int tries ) {
+     *      WriteTransaction writeTx = dataBroker.newWriteOnlyTransaction();
      *
+     *      MyDataObject data = ...;
+     *      InstanceIdentifier<MyDataObject> path = ...;
+     *      writeTx.put( LogicalDatastoreType.OPERATIONAL, path, data );
+     *
+     *      Futures.addCallback( writeTx.commit(), new FutureCallback<Void>() {
+     *          public void onSuccess( Void result ) {
+     *              // succeeded
+     *          }
+     *
+     *          public void onFailure( Throwable t ) {
+     *              if( t instanceof OptimisticLockFailedException ) {
+     *                  if( ( tries - 1 ) > 0 ) {
+     *                      // do retry
+     *                      doWrite( tries - 1 );
+     *                  } else {
+     *                      // out of retries
+     *                  }
+     *              } else {
+     *                  // failed due to another type of TransactionCommitFailedException.
+     *              }
+     *          } );
+     * }
+     * ...
+     * doWrite( 2 );
+     * </pre>
      * <h2>Failure scenarios</h2>
      * <p>
      * Transaction may fail because of multiple reasons, such as
      * <ul>
-     * <li>Another transaction finished earlier and modified the same node in
-     * non-compatible way (see below). In this case the returned future will fail with
+     * <li>Another transaction finished earlier and modified the same node in a
+     * non-compatible way (see below). In this case the returned future will fail with an
      * {@link OptimisticLockFailedException}. It is the responsibility of the
      * caller to create a new transaction and submit the same modification again in
-     * order to update data tree.</li>
+     * order to update data tree. <i><b>Warning</b>: In most cases, retrying after an
+     * OptimisticLockFailedException will result in a high probability of success.
+     * However, there are scenarios, albeit unusual, where any number of retries will
+     * not succeed. Therefore it is strongly recommended to limit the number of retries (2 or 3)
+     * to avoid an endless loop.</i>
+     * </li>
      * <li>Data change introduced by this transaction did not pass validation by
      * commit handlers or data was incorrectly structured. Returned future will
-     * fail with {@link DataValidationFailedException}. User should not retry to
+     * fail with a {@link DataValidationFailedException}. User should not retry to
      * create new transaction with same data, since it probably will fail again.
      * </li>
      * </ul>
@@ -288,19 +327,21 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * with {@link OptimisticLockFailedException} exception, which indicates to
      * client that concurrent transaction prevented the submitted transaction from being
      * applied.
-     *
-     * @return Result of the Commit, containing success information or list of
-     *         encountered errors, if commit was not successful. The Future
-     *         blocks until {@link TransactionStatus#COMMITED} is reached.
-     *         Future will fail with {@link TransactionCommitFailedException} if
-     *         Commit of this transaction failed. TODO: Usability: Consider
-     *         change from ListenableFuture to
-     *         {@link com.google.common.util.concurrent.CheckedFuture} which
-     *         will throw {@link TransactionCommitFailedException}.
+     * <br>
+     * @return a CheckFuture containing the result of the commit. The Future blocks until the
+     *         commit operation is complete. A successful commit returns nothing. On failure,
+     *         the Future will fail with a {@link TransactionCommitFailedException} or an exception
+     *         derived from TransactionCommitFailedException.
      *
      * @throws IllegalStateException
      *             if the transaction is not {@link TransactionStatus#NEW}
      */
-    public ListenableFuture<RpcResult<TransactionStatus>> commit();
+    CheckedFuture<Void,TransactionCommitFailedException> submit();
+
+    /**
+     * @deprecated Use {@link #submit()} instead.
+     */
+    @Deprecated
+    ListenableFuture<RpcResult<TransactionStatus>> commit();
 
 }

@@ -12,12 +12,9 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.concurrent.GuardedBy;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,18 +79,19 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
     }
 
     @Override
-    public ListenableFuture<RpcResult<TransactionStatus>> submit(final DOMDataWriteTransaction transaction,
+    public CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, final Optional<DOMDataCommitErrorListener> listener) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         Preconditions.checkArgument(listener != null, "Listener must not be null");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
-        ListenableFuture<RpcResult<TransactionStatus>> commitFuture = executor.submit(new CommitCoordinationTask(
+        ListenableFuture<Void> commitFuture = executor.submit(new CommitCoordinationTask(
                 transaction, cohorts, listener));
         if (listener.isPresent()) {
             Futures.addCallback(commitFuture, new DOMDataCommitErrorInvoker(transaction, listener.get()));
         }
-        return commitFuture;
+
+        return Futures.makeChecked(commitFuture, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
     }
 
     /**
@@ -139,7 +137,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
      * support of cancelation.
      *
      */
-    private static class CommitCoordinationTask implements Callable<RpcResult<TransactionStatus>> {
+    private static class CommitCoordinationTask implements Callable<Void> {
 
         private final DOMDataWriteTransaction tx;
         private final Iterable<DOMStoreThreePhaseCommitCohort> cohorts;
@@ -156,12 +154,13 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         }
 
         @Override
-        public RpcResult<TransactionStatus> call() throws TransactionCommitFailedException {
+        public Void call() throws TransactionCommitFailedException {
 
             try {
                 canCommitBlocking();
                 preCommitBlocking();
-                return commitBlocking();
+                commitBlocking();
+                return null;
             } catch (TransactionCommitFailedException e) {
                 LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), currentPhase, e);
                 abortBlocking(e);
@@ -217,9 +216,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
          *             If one of cohorts failed preCommit
          *
          */
-        private RpcResult<TransactionStatus> commitBlocking() throws TransactionCommitFailedException {
+        private void commitBlocking() throws TransactionCommitFailedException {
             commitAll().checkedGet();
-            return RpcResultBuilder.<TransactionStatus>success(TransactionStatus.COMMITED).build();
         }
 
         /**
