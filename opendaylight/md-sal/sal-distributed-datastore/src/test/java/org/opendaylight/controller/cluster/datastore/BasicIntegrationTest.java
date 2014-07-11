@@ -59,14 +59,14 @@ public class BasicIntegrationTest extends AbstractActorTest {
                         new UpdateSchemaContext(TestModel.createTestContext()),
                         getRef());
 
-                    shard.tell(new CreateTransactionChain(), getRef());
+                    shard.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final ActorSelection transactionChain =
                         new ExpectMsg<ActorSelection>("CreateTransactionChainReply") {
                             protected ActorSelection match(Object in) {
-                                if (in instanceof CreateTransactionChainReply) {
+                                if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)) {
                                     ActorPath transactionChainPath =
-                                        ((CreateTransactionChainReply) in)
+                                        CreateTransactionChainReply.fromSerializable(getSystem(),in)
                                             .getTransactionChainPath();
                                     return getSystem()
                                         .actorSelection(transactionChainPath);
@@ -78,7 +78,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(transactionChain);
 
-                    transactionChain.tell(new CreateTransaction("txn-1"), getRef());
+                    transactionChain.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
 
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>("CreateTransactionReply") {
