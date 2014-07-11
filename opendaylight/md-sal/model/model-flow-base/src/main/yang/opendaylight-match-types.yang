@@ -364,5 +364,13 @@ module opendaylight-match-types {
         container tcp-flag-match {
             uses "tcp-flag-match-fields";
         }
+        
+        list match-extensions {
+            description "list of vendor extensions";
+            
+            choice match-choice {
+                description "augmentation point for vendor extensions";
+            }
+        }
     }
 }
