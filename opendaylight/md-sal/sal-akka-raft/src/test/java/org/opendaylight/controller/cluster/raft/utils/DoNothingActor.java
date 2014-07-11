@@ -6,13 +6,12 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft.internal.messages;
+package org.opendaylight.controller.cluster.raft.utils;
 
-/**
- * This messages is sent to the Leader to prompt it to send a heartbeat
- * to it's followers.
- *
- * Typically the Leader to itself on a schedule
- */
-public class SendHeartBeat {
+import akka.actor.UntypedActor;
+
+public class DoNothingActor extends UntypedActor{
+    @Override public void onReceive(Object message) throws Exception {
+
+    }
 }
