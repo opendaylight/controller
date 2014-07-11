@@ -114,7 +114,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
-     * {@link #commit(DOMDataWriteTransaction, Iterable)} with transaction which
+     * {@link #submit(DOMDataWriteTransaction, Iterable)} with transaction which
      * was commited and gathered results.
      * </ul>
      *
@@ -167,7 +167,7 @@ public abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreT
      * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
-     * {@link #commit(DOMDataWriteTransaction, Iterable)} with transaction which
+     * {@link #submit(DOMDataWriteTransaction, Iterable)} with transaction which
      * was commited and gathered results.
      * <li>
      * </ul>

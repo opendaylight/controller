@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * <li>{@link #merge(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
  * </ul>
  * {@link #commit()} will result in invocation of
- * {@link DOMDataCommitImplementation#commit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
+ * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
  * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
  * transactions.
  *

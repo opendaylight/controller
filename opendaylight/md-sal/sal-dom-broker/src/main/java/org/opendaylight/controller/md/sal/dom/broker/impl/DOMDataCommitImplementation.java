@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  *
@@ -23,10 +21,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 public interface DOMDataCommitImplementation {
 
     /**
-     * User-supplied implementation of {@link DOMDataWriteTransaction#commit()}
+     * User-supplied implementation of {@link DOMDataWriteTransaction#submit()}
      * for transaction.
      *
-     * Callback invoked when {@link DOMDataWriteTransaction#commit()} is invoked
+     * Callback invoked when {@link DOMDataWriteTransaction#submit()} is invoked
      * on transaction created by this factory.
      *
      * @param transaction
@@ -37,7 +35,7 @@ public interface DOMDataCommitImplementation {
      *            commited transaction.
      *
      */
-    ListenableFuture<RpcResult<TransactionStatus>> commit(final DOMDataWriteTransaction transaction,
+    CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
             final Iterable<DOMStoreThreePhaseCommitCohort> cohorts);
 }
 

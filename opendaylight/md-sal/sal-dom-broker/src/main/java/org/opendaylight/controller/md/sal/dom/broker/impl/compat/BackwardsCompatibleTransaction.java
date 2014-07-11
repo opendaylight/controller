@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
@@ -204,7 +205,7 @@ DataModificationTransaction, Delegator<T> {
         public Future<RpcResult<TransactionStatus>> commit() {
             Preconditions.checkState(status == TransactionStatus.NEW);
             status = TransactionStatus.SUBMITED;
-            return getDelegate().commit();
+            return AbstractDataTransaction.convertToLegacyCommitFuture(getDelegate().submit());
         }
 
         @Override

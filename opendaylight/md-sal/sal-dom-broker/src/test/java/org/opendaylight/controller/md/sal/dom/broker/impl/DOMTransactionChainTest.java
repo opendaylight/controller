@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -29,7 +27,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -80,7 +77,7 @@ public class DOMTransactionChainTest {
          * First transaction is marked as ready, we are able to allocate chained
          * transactions
          */
-        ListenableFuture<RpcResult<TransactionStatus>> firstWriteTxFuture = firstTx.commit();
+        ListenableFuture<Void> firstWriteTxFuture = firstTx.submit();
 
         /**
          * We alocate chained transaction - read transaction.
@@ -126,7 +123,7 @@ public class DOMTransactionChainTest {
         /**
          * third transaction is sealed and commited
          */
-        ListenableFuture<RpcResult<TransactionStatus>> thirdDeleteTxFuture = thirdDeleteTx.commit();
+        ListenableFuture<Void> thirdDeleteTxFuture = thirdDeleteTx.submit();
         assertCommitSuccessful(thirdDeleteTxFuture);
 
         /**
@@ -188,11 +185,9 @@ public class DOMTransactionChainTest {
         return tx;
     }
 
-    private static void assertCommitSuccessful(final ListenableFuture<RpcResult<TransactionStatus>> future)
+    private static void assertCommitSuccessful(final ListenableFuture<Void> future)
             throws InterruptedException, ExecutionException {
-        RpcResult<TransactionStatus> rpcResult = future.get();
-        assertTrue(rpcResult.isSuccessful());
-        assertEquals(TransactionStatus.COMMITED, rpcResult.getResult());
+        future.get();
     }
 
     private static void assertTestContainerExists(final DOMDataReadTransaction readTx) throws InterruptedException,

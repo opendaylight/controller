@@ -48,7 +48,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     protected void setupWithDataBroker(final DataBroker dataBroker) {
         WriteTransaction initialTx = dataBroker.newWriteOnlyTransaction();
         initialTx.put(CONFIGURATION, TOP, top(topLevelList(TOP_FOO_KEY)));
-        assertCommit(initialTx.commit());
+        assertCommit(initialTx.submit());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.put(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
-        assertCommit(writeTx.commit());
+        assertCommit(writeTx.submit());
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> top = topListener.event();
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> all = allListener.event();
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> foo = fooListener.event();
@@ -115,7 +115,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
-        assertCommit(writeTx.commit());
+        assertCommit(writeTx.submit());
 
         verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
     }
@@ -129,7 +129,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.put(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
-        assertCommit(writeTx.commit());
+        assertCommit(writeTx.submit());
 
         verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
     }
@@ -143,7 +143,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
-        assertCommit(writeTx.commit());
+        assertCommit(writeTx.submit());
 
         verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
     }

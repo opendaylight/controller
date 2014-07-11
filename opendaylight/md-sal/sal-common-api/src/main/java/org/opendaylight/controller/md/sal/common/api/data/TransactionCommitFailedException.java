@@ -7,6 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+
+import com.google.common.collect.ImmutableList;
+
 /**
  *
  * Failed commit of asynchronous transaction
@@ -17,18 +26,39 @@ package org.opendaylight.controller.md.sal.common.api.data;
  */
 public class TransactionCommitFailedException extends Exception {
 
-    private static final long serialVersionUID = -6138306275373237068L;
+    private static final long serialVersionUID = 1L;
 
-    protected TransactionCommitFailedException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    private final List<RpcError> errorList;
+
+    public TransactionCommitFailedException(final String message, final RpcError... errors) {
+        this(message, null, errors);
     }
 
-    public TransactionCommitFailedException(final String message, final Throwable cause) {
+    public TransactionCommitFailedException(final String message, final Throwable cause,
+                                            final RpcError... errors) {
         super(message, cause);
+
+        if( errors != null && errors.length > 0 ) {
+            errorList = ImmutableList.<RpcError>builder().addAll( Arrays.asList( errors ) ).build();
+        }
+        else {
+            // Add a default RpcError.
+            errorList = ImmutableList.of(RpcResultBuilder.newError(ErrorType.APPLICATION, null,
+                    getMessage(), null, null, getCause()));
+        }
     }
 
-    public TransactionCommitFailedException(final String message) {
-        super(message);
+    /**
+     * Returns additional error information about this exception.
+     *
+     * @return a List of RpcErrors. There is always at least one RpcError.
+     */
+    public List<RpcError> getErrorList() {
+        return errorList;
     }
 
+    @Override
+    public String getMessage() {
+        return new StringBuilder( super.getMessage() ).append(", errors: ").append( errorList ).toString();
+    }
 }
