@@ -8,7 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CreateTransactionChain {
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
 
+public class CreateTransactionChain implements SerializableMessage{
+  public static Class SERIALIZABLE_CLASS = ShardTransactionChainMessages.CreateTransactionChain.class;
 
+  @Override
+  public Object toSerializable() {
+    return  ShardTransactionChainMessages.CreateTransactionChain.newBuilder().build();
+  }
 }

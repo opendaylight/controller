@@ -14,7 +14,7 @@ import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -34,12 +34,14 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message instanceof CreateTransaction) {
-            CreateTransaction createTransaction = (CreateTransaction) message;
+        if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+            CreateTransaction createTransaction = CreateTransaction.fromSerializable( message);
             createTransaction(createTransaction);
         } else if (message instanceof CloseTransactionChain) {
             chain.close();
             getSender().tell(new CloseTransactionChainReply(), getSelf());
+        }else{
+          throw new Exception("Not recognized message recieved="+message);
         }
     }
 
@@ -49,10 +51,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         ActorRef transactionActor = getContext().actorOf(ShardTransaction
             .props(chain, transaction, getContext().parent(), schemaContext), "shard-" + createTransaction.getTransactionId());
         getSender()
-            .tell(ShardTransactionMessages.CreateTransactionReply.newBuilder()
-                .setTransactionActorPath(transactionActor.path().toString())
-                .setTransactionId(createTransaction.getTransactionId())
-                .build(),
+            .tell(new CreateTransactionReply(transactionActor.path().toString(),createTransaction.getTransactionId()).toSerializable(),
                 getSelf());
     }
 
