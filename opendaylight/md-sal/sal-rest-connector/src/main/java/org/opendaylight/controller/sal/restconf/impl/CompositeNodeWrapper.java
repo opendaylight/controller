@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Preconditions;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;

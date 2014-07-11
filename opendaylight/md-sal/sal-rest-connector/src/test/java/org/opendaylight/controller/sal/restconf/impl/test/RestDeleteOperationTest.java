@@ -57,10 +57,10 @@ public class RestDeleteOperationTest extends JerseyTest {
     @Override
     protected Application configure() {
         /* enable/disable Jersey logs to console */
-//        enable(TestProperties.LOG_TRAFFIC);
-//        enable(TestProperties.DUMP_ENTITY);
-//        enable(TestProperties.RECORD_LOG_LEVEL);
-//        set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
+        // enable(TestProperties.LOG_TRAFFIC);
+        // enable(TestProperties.DUMP_ENTITY);
+        // enable(TestProperties.RECORD_LOG_LEVEL);
+        // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
                 XmlToCompositeNodeProvider.INSTANCE);
@@ -82,7 +82,8 @@ public class RestDeleteOperationTest extends JerseyTest {
     }
 
     private Future<RpcResult<TransactionStatus>> createFuture(TransactionStatus statusName) {
-        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName).build();
+        RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
+                .build();
         return new DummyFuture.Builder<TransactionStatus>().rpcResult(rpcResult).build();
     }
 

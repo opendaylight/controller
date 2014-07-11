@@ -36,8 +36,7 @@ public class XmlToCompositeNodeReader {
     public CompositeNodeWrapper read(InputStream entityStream) throws XMLStreamException, UnsupportedFormatException,
             IOException {
         // Get an XML stream which can be marked, and reset, so we can check and
-        // see if there is
-        // any content being provided.
+        // see if there is any content being provided.
         entityStream = getMarkableStream(entityStream);
 
         if (isInputStreamEmpty(entityStream)) {
@@ -103,9 +102,8 @@ public class XmlToCompositeNodeReader {
     }
 
     /**
-     * If the input stream is not markable, then it wraps the input stream with
-     * a buffered stream, which is mark able. That way we can check if the
-     * stream is empty safely.
+     * If the input stream is not markable, then it wraps the input stream with a buffered stream, which is mark able.
+     * That way we can check if the stream is empty safely.
      *
      * @param entityStream
      * @return

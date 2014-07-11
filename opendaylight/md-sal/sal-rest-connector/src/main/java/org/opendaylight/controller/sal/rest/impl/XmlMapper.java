@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.common.base.Optional;
 import javax.activation.UnsupportedDataTypeException;
-
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.codec.LeafrefCodec;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
@@ -19,8 +19,6 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.Leafref;
 import org.w3c.dom.Document;
-
-import com.google.common.base.Optional;
 
 public class XmlMapper {
     private static final LeafrefCodecImpl LEAFREF_DEFAULT_CODEC = new LeafrefCodecImpl(

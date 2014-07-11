@@ -11,7 +11,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
@@ -26,7 +25,7 @@ public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
         dataLoad("/normalize-node/yang/");
     }
 
-    @Test(expected=RestconfDocumentedException.class)
+    @Test(expected = RestconfDocumentedException.class)
     public void namespaceNotNullAndInvalidNamespaceAndNoModuleNameTest() {
 
         TestUtils.normalizeCompositeNode(prepareCnSn("wrongnamespace"), modules, schemaNodePath);

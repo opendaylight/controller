@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
@@ -30,8 +29,7 @@ public class XmlLeafrefToCnSnTest {
     private static final Logger LOG = LoggerFactory.getLogger(XmlLeafrefToCnSnTest.class);
 
     /**
-     * top level element represents container. second level element is list with
-     * two elements.
+     * top level element represents container. second level element is list with two elements.
      */
     @Test
     public void testXmlDataContainer() {
@@ -202,8 +200,7 @@ public class XmlLeafrefToCnSnTest {
 
     /**
      *
-     * Test case like <lf11 xmlns="namespace1"
-     * xmlns:x="namespace">identity</lf11>
+     * Test case like <lf11 xmlns="namespace1" xmlns:x="namespace">identity</lf11>
      */
 
     @Test
@@ -214,8 +211,7 @@ public class XmlLeafrefToCnSnTest {
 
     /**
      *
-     * Test case like <cont1 xmlns="namespace1"> <lf11
-     * xmlns:x="namespace">identity</lf11> </cont1>
+     * Test case like <cont1 xmlns="namespace1"> <lf11 xmlns:x="namespace">identity</lf11> </cont1>
      */
     @Test
     public void testIdentityrefDefaultNmspcInParrentElement() {
@@ -225,8 +221,7 @@ public class XmlLeafrefToCnSnTest {
 
     /**
      *
-     * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace">
-     * <lf11>x:identity</lf11> </cont1>
+     * Test case like <cont1 xmlns="namespace1" xmlns:x="namespace"> <lf11>x:identity</lf11> </cont1>
      */
     @Ignore
     @Test
@@ -237,8 +232,7 @@ public class XmlLeafrefToCnSnTest {
 
     /**
      *
-     * Test case like (without namespace in xml) <cont1> <lf11>x:identity</lf11>
-     * </cont1>
+     * Test case like (without namespace in xml) <cont1> <lf11>x:identity</lf11> </cont1>
      */
     @Test
     public void testIdentityrefNoNmspcValueWithPrefix() {
@@ -248,8 +242,7 @@ public class XmlLeafrefToCnSnTest {
 
     /**
      *
-     * Test case like (without namespace in xml) <cont1> <lf11>identity</lf11>
-     * </cont1>
+     * Test case like (without namespace in xml) <cont1> <lf11>identity</lf11> </cont1>
      */
     @Test
     public void testIdentityrefNoNmspcValueWithoutPrefix() {
@@ -322,8 +315,8 @@ public class XmlLeafrefToCnSnTest {
         assertEquals((short) 100, cont1_lf11.getValue());
     }
 
-    private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName, final String schemaName,
-            final int moduleCount, final String resultLocalName, final String resultNamespace) {
+    private void testIdentityrefToCnSn(final String xmlPath, final String yangPath, final String moduleName,
+            final String schemaName, final int moduleCount, final String resultLocalName, final String resultNamespace) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(xmlPath, false, XmlToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 

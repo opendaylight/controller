@@ -13,9 +13,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
@@ -74,14 +72,16 @@ public class CnSnToJsonIdentityrefTest extends YangAndXmlAndDataSchemaLoader {
     }
 
     private CompositeNode prepareCompositeNode(final Object value) {
-        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont","identityref:module","2013-12-2"), null, null,
-                ModifyAction.CREATE, null);
-        MutableCompositeNode cont1 = NodeFactory.createMutableCompositeNode(TestUtils.buildQName("cont1","identityref:module","2013-12-2"), cont, null,
-                ModifyAction.CREATE, null);
+        MutableCompositeNode cont = NodeFactory.createMutableCompositeNode(
+                TestUtils.buildQName("cont", "identityref:module", "2013-12-2"), null, null, ModifyAction.CREATE, null);
+        MutableCompositeNode cont1 = NodeFactory
+                .createMutableCompositeNode(TestUtils.buildQName("cont1", "identityref:module", "2013-12-2"), cont,
+                        null, ModifyAction.CREATE, null);
         cont.getValue().add(cont1);
 
-        MutableSimpleNode<?> lf1 = NodeFactory.createMutableSimpleNode(TestUtils.buildQName("lf1","identityref:module","2013-12-2"), cont1, value,
-                ModifyAction.CREATE, null);
+        MutableSimpleNode<?> lf1 = NodeFactory
+                .createMutableSimpleNode(TestUtils.buildQName("lf1", "identityref:module", "2013-12-2"), cont1, value,
+                        ModifyAction.CREATE, null);
 
         cont1.getValue().add(lf1);
         cont1.init();

@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
@@ -82,8 +81,8 @@ public class JsonToCnSnTest {
     }
 
     /**
-     * List contains 4 items and in every item are other elements. It is
-     * supposed that there should be: lf11, lflst11, cont11, lst11
+     * List contains 4 items and in every item are other elements. It is supposed that there should be: lf11, lflst11,
+     * cont11, lst11
      */
     @Test
     public void multipleItemsInListTest() {
@@ -116,14 +115,19 @@ public class JsonToCnSnTest {
     public void incorrectTopLevelElementsTest() {
         RestconfDocumentedException cause1 = null;
         try {
-            TestUtils.readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
+            TestUtils
+                    .readInputToCnSn("/json-to-cnsn/wrong-top-level1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
             cause1 = e;
         }
 
         assertNotNull(cause1);
-        assertTrue(cause1.getErrors().get( 0 ).getErrorMessage().contains(
-            "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
+        assertTrue(cause1
+                .getErrors()
+                .get(0)
+                .getErrorMessage()
+                .contains(
+                        "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
 
         RestconfDocumentedException cause2 = null;
         try {
@@ -133,26 +137,29 @@ public class JsonToCnSnTest {
             cause2 = e;
         }
         assertNotNull(cause2);
-        assertTrue(cause2.getErrors().get( 0 ).getErrorMessage().contains(
-                                                     "Json Object should contain one element"));
+        assertTrue(cause2.getErrors().get(0).getErrorMessage().contains("Json Object should contain one element"));
 
         RestconfDocumentedException cause3 = null;
         try {
             TestUtils
 
-                    .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
+            .readInputToCnSn("/json-to-cnsn/wrong-top-level3.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
             cause3 = e;
         }
         assertNotNull(cause3);
-        assertTrue(cause3.getErrors().get( 0 ).getErrorMessage().contains(
-            "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
+        assertTrue(cause3
+                .getErrors()
+                .get(0)
+                .getErrorMessage()
+                .contains(
+                        "First element in Json Object has to be \"Object\" or \"Array with one Object element\". Other scenarios are not supported yet."));
 
     }
 
     /**
-     * if leaf list with no data is in json then no corresponding data is
-     * created in composite node. if leaf with no data then exception is raised
+     * if leaf list with no data is in json then no corresponding data is created in composite node. if leaf with no
+     * data then exception is raised
      */
     @Test
     public void emptyDataReadTest() {
@@ -172,7 +179,7 @@ public class JsonToCnSnTest {
         try {
             TestUtils.readInputToCnSn("/json-to-cnsn/empty-data1.json", true, JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
-            reason = e.getErrors().get( 0 ).getErrorMessage();
+            reason = e.getErrors().get(0).getErrorMessage();
         }
 
         assertTrue(reason.contains("Expected value at line"));
@@ -180,17 +187,16 @@ public class JsonToCnSnTest {
     }
 
     @Test
-    public void testJsonBlankInput() throws Exception{
-        InputStream inputStream = new ByteArrayInputStream( "".getBytes() );
-        CompositeNode compositeNode =
-                JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null, inputStream);
-        assertNull( compositeNode );
+    public void testJsonBlankInput() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream("".getBytes());
+        CompositeNode compositeNode = JsonToCompositeNodeProvider.INSTANCE.readFrom(null, null, null, null, null,
+                inputStream);
+        assertNull(compositeNode);
     }
 
     /**
-     * Tests whether namespace <b>stay unchanged</b> if concrete values are
-     * present in composite or simple node and if the method for update is
-     * called.
+     * Tests whether namespace <b>stay unchanged</b> if concrete values are present in composite or simple node and if
+     * the method for update is called.
      *
      */
     @Test
@@ -284,13 +290,14 @@ public class JsonToCnSnTest {
 
     }
 
-    private void simpleTest(final String jsonPath, final String yangPath, final String topLevelElementName, final String namespace,
-            final String moduleName) {
+    private void simpleTest(final String jsonPath, final String yangPath, final String topLevelElementName,
+            final String namespace, final String moduleName) {
         CompositeNode compNode = loadAndNormalizeData(jsonPath, yangPath, topLevelElementName, moduleName);
         verifyCompositeNode(compNode, namespace);
     }
 
-    private CompositeNode loadAndNormalizeData(final String jsonPath, final String yangPath, final String topLevelElementName, final String moduleName) {
+    private CompositeNode loadAndNormalizeData(final String jsonPath, final String yangPath,
+            final String topLevelElementName, final String moduleName) {
         CompositeNode compositeNode = TestUtils.readInputToCnSn(jsonPath, false, JsonToCompositeNodeProvider.INSTANCE);
         assertNotNull(compositeNode);
 
@@ -395,7 +402,7 @@ public class JsonToCnSnTest {
             TestUtils.readInputToCnSn("/json-to-cnsn/unsupported-json-format.json", true,
                     JsonToCompositeNodeProvider.INSTANCE);
         } catch (RestconfDocumentedException e) {
-            exceptionMessage = e.getErrors().get( 0 ).getErrorMessage();
+            exceptionMessage = e.getErrors().get(0).getErrorMessage();
         }
         assertTrue(exceptionMessage.contains("Root element of Json has to be Object"));
     }

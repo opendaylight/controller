@@ -7,8 +7,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 
 /**
- * {@link WebSocketServerInitializer} is used to setup the
- * {@link ChannelPipeline} of a {@link io.netty.channel.Channel}.
+ * {@link WebSocketServerInitializer} is used to setup the {@link ChannelPipeline} of a {@link io.netty.channel.Channel}
+ * .
  */
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 

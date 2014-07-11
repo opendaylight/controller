@@ -30,24 +30,27 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
-    Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
+        Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
 public enum StructuredDataToJsonProvider implements MessageBodyWriter<StructuredData> {
     INSTANCE;
 
     @Override
-    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
+    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType) {
         return type.equals(StructuredData.class);
     }
 
     @Override
-    public long getSize(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
+    public long getSize(final StructuredData t, final Class<?> type, final Type genericType,
+            final Annotation[] annotations, final MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
-                    throws IOException, WebApplicationException {
+    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType,
+            final Annotation[] annotations, final MediaType mediaType,
+            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
+            WebApplicationException {
         CompositeNode data = t.getData();
         if (data == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);

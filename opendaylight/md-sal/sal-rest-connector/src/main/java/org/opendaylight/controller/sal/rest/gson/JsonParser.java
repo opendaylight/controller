@@ -22,8 +22,8 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
- * This class parses JSON elements from a gson JsonReader. It disallows multiple
- * elements of the same name unlike the default gson JsonParser."
+ * This class parses JSON elements from a gson JsonReader. It disallows multiple elements of the same name unlike the
+ * default gson JsonParser."
  */
 public class JsonParser {
     public JsonElement parse(JsonReader reader) throws JsonIOException, JsonSyntaxException {

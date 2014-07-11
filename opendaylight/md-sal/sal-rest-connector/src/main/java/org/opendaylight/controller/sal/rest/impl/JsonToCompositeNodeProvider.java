@@ -28,32 +28,30 @@ import org.slf4j.LoggerFactory;
 
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
-    MediaType.APPLICATION_JSON })
+        MediaType.APPLICATION_JSON })
 public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
     INSTANCE;
 
     private final static Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeProvider.class);
 
     @Override
-    public boolean isReadable(final Class<?> type, final Type genericType,
-                              final Annotation[] annotations, final MediaType mediaType) {
+    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType) {
         return true;
     }
 
     @Override
     public CompositeNode readFrom(final Class<CompositeNode> type, final Type genericType,
-                                  final Annotation[] annotations, final MediaType mediaType,
-                                  final MultivaluedMap<String, String> httpHeaders,
-                                  final InputStream entityStream)
-                                          throws IOException, WebApplicationException {
+            final Annotation[] annotations, final MediaType mediaType,
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
+            WebApplicationException {
         try {
             return JsonToCompositeNodeReader.read(entityStream);
         } catch (Exception e) {
-            LOG.debug( "Error parsing json input", e);
+            LOG.debug("Error parsing json input", e);
 
-            throw new RestconfDocumentedException(
-                    "Error parsing input: " + e.getMessage(),
-                    ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
+            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+                    ErrorTag.MALFORMED_MESSAGE);
         }
     }
 }

@@ -125,10 +125,12 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         List<RpcError> rpcErrors = new ArrayList<>();
-        rpcErrors.add( RpcErrors.getRpcError("applicationTag1", "tag1", "info1", ErrorSeverity.ERROR, "message1", ErrorType.RPC, null));
-        rpcErrors.add( RpcErrors.getRpcError("applicationTag2", "tag2", "info2", ErrorSeverity.WARNING, "message2", ErrorType.PROTOCOL, null));
+        rpcErrors.add(RpcErrors.getRpcError("applicationTag1", "tag1", "info1", ErrorSeverity.ERROR, "message1",
+                ErrorType.RPC, null));
+        rpcErrors.add(RpcErrors.getRpcError("applicationTag2", "tag2", "info2", ErrorSeverity.WARNING, "message2",
+                ErrorType.PROTOCOL, null));
         mockInvokeRpc(null, false, rpcErrors);
-        assertEquals(500,post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
 
         uri = "/operations/test-module:rpc-wrongtest";
         assertEquals(400, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
@@ -198,8 +200,8 @@ public class RestPostOperationTest extends JerseyTest {
             builder.errors(errors);
         }
         RpcResult<CompositeNode> rpcResult = builder.build();
-        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class)))
-                .thenReturn(Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
+        when(brokerFacade.invokeRpc(any(QName.class), any(CompositeNode.class))).thenReturn(
+                Futures.<RpcResult<CompositeNode>> immediateFuture(rpcResult));
     }
 
     private void mockInvokeRpc(CompositeNode result, boolean sucessful) {
