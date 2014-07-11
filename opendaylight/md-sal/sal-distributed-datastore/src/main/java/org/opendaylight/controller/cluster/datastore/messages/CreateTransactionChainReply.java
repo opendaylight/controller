@@ -9,8 +9,11 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorPath;
+import akka.actor.ActorSystem;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
 
-public class CreateTransactionChainReply {
+public class CreateTransactionChainReply implements SerializableMessage {
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionChainMessages.CreateTransactionChainReply.class;
   private final ActorPath transactionChainPath;
 
   public CreateTransactionChainReply(ActorPath transactionChainPath) {
@@ -20,4 +23,17 @@ public class CreateTransactionChainReply {
   public ActorPath getTransactionChainPath() {
     return transactionChainPath;
   }
+
+  @Override
+  public ShardTransactionChainMessages.CreateTransactionChainReply toSerializable() {
+    return ShardTransactionChainMessages.CreateTransactionChainReply.newBuilder()
+        .setTransactionChainPath(transactionChainPath.toString()).build();
+  }
+
+  public static CreateTransactionChainReply fromSerializable(ActorSystem actorSystem,Object serializable){
+    ShardTransactionChainMessages.CreateTransactionChainReply o = (ShardTransactionChainMessages.CreateTransactionChainReply) serializable;
+    return new CreateTransactionChainReply(
+        actorSystem.actorFor(o.getTransactionChainPath()).path());
+  }
+
 }
