@@ -11,6 +11,7 @@ package org.opendaylight.controller.sal.packet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.match.Match;
@@ -156,4 +157,14 @@ public class IEEE8021Q extends Packet {
         match.setField(MatchType.DL_VLAN_PR, this.getPcp());
         match.setField(MatchType.DL_TYPE, this.getEtherType());
     }
+
+    /**
+     * Gets the header size in bits
+     * @return The .1Q header size in bits
+     */
+    @Override
+    public int getHeaderSize() {
+        return 32;
+    }
+
 }
