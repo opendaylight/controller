@@ -9,13 +9,14 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages;
 
 /**
  * The FindPrimary message is used to locate the primary of any given shard
  *
- * TODO : Make this serializable
  */
-public class FindPrimary{
+public class FindPrimary implements SerializableMessage{
+  public static final Class SERIALIZABLE_CLASS = ShardManagerMessages.FindPrimary.class;
     private final String shardName;
 
     public FindPrimary(String shardName){
@@ -28,4 +29,13 @@ public class FindPrimary{
     public String getShardName() {
         return shardName;
     }
+
+  @Override
+  public Object toSerializable() {
+    return ShardManagerMessages.FindPrimary.newBuilder().setShardName(shardName).build();
+  }
+
+  public static FindPrimary fromSerializable(Object message){
+    return new FindPrimary(((ShardManagerMessages.FindPrimary)message).getShardName());
+  }
 }

@@ -81,10 +81,10 @@ public class ActorContext {
      */
     public ActorSelection findPrimary(String shardName) {
         Object result = executeLocalOperation(shardManager,
-            new FindPrimary(shardName), ASK_DURATION);
+            new FindPrimary(shardName).toSerializable(), ASK_DURATION);
 
-        if(result instanceof PrimaryFound){
-            PrimaryFound found = (PrimaryFound) result;
+        if(result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)){
+            PrimaryFound found = PrimaryFound.fromSerializable(result);
 
             LOG.error("Primary found {}", found.getPrimaryPath());
 
