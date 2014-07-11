@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d71a62c5",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ClusterHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Does this method belong in this class or in the RpcRegistry?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_777b56f5",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/Monitor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "This class probably belongs in the messages package",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_97805ac1",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Should this still be CompositeNode?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_37814ec3",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Why are we catching Exception?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f76e862e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "nitpicking - generally a good idea to set parameters passed to a field first and then set other fields. This is obviously natural when you first validate input and only then proceed with the construction of the rest of the object.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_578652dc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "What do we intend to do with the BundleContext?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_176c4a34",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Why do we have these setters? Can\u0027t these objects be passed to this object during it\u0027s construction?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7747efe",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "nitpicking - the name of an actor will be used to create a path for an actor. The path is a URI and we know that URIs in camel case look bad. I would recommend using an hyphen to separate words in an actor name.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d771020d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Clearly you can pass bundleContext and the broker to RemoteRpcProvider in the constructor. That way you can use them as invariants in RemoteRpcProvider.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7762763f",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Why does this have to be a bean? Could we eliminate setters and pass all dependencies to the object during construction instead?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_575df277",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "By default declare all fields as final. Unless there is a good reason why you need the fields to change during the object\u0027s lifecycle it\u0027s safer to make a field final.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d74822b5",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutingTable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "The RoutingTable is currently shared. So the listener threads are being used to modify them and the RpcRegistry Actor is using it to invoke/execute Rpc. Ideally when using the actor model the state should be owned by the actor. Routing table should ideally be the state of the RpcRegistry actor and should only be modifiable from outside by passing messages to RpcRegistry.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_77c91625",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "Do not take routing table as input. Create it here.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_57d412bc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/TerminationMonitor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-11T00:19:36Z",
+      "side": 1,
+      "message": "We need to create a clustering-common package and start putting some of these utility classes over there.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
