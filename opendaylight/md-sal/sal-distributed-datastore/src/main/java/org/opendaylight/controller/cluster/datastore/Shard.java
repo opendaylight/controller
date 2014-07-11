@@ -15,6 +15,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.persistence.Persistent;
+import akka.persistence.RecoveryCompleted;
 import akka.persistence.UntypedProcessor;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -103,7 +104,7 @@ public class Shard extends UntypedProcessor {
             return;
         }
 
-        if (message instanceof CreateTransactionChain) {
+        if (message.getClass().equals(CreateTransactionChain.SERIALIZABLE_CLASS)) {
             createTransactionChain();
         } else if (message.getClass().equals(RegisterChangeListener.SERIALIZABLE_CLASS)) {
             registerChangeListener(RegisterChangeListener.fromSerializable(getContext().system(), message));
@@ -113,10 +114,15 @@ public class Shard extends UntypedProcessor {
             handleForwardedCommit((ForwardedCommitTransaction) message);
         } else if (message instanceof Persistent) {
             commit(((Persistent)message).payload());
-        } else if (message instanceof CreateTransaction) {
-            createTransaction((CreateTransaction) message);
+        } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
+            createTransaction(CreateTransaction.fromSerializable(message));
         } else if(message instanceof NonPersistent){
             commit(((NonPersistent)message).payload());
+        }else if (message instanceof RecoveryCompleted) {
+            //FIXME: PROPERLY HANDLE RECOVERY COMPLETED
+            return;
+        }else {
+          throw new Exception("Not recognized message found message=" + message);
         }
     }
 
@@ -201,7 +207,7 @@ public class Shard extends UntypedProcessor {
         ActorRef transactionChain =
             getContext().actorOf(ShardTransactionChain.props(chain, schemaContext));
         getSender()
-            .tell(new CreateTransactionChainReply(transactionChain.path()),
+            .tell(new CreateTransactionChainReply(transactionChain.path()).toSerializable(),
                 getSelf());
     }
 }
