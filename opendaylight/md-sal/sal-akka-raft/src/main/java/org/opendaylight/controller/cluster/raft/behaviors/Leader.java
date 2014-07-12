@@ -61,10 +61,8 @@ public class Leader extends AbstractRaftActorBehavior {
      * Since this is set to 100 milliseconds the Election timeout should be
      * at least 200 milliseconds
      */
-    private static final FiniteDuration HEART_BEAT_INTERVAL =
+    public static final FiniteDuration HEART_BEAT_INTERVAL =
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
-
-    private final Map<String, ActorRef> followerToReplicator = new HashMap<>();
 
     private final Map<String, FollowerLogInformation> followerToLog =
         new HashMap();
@@ -73,19 +71,18 @@ public class Leader extends AbstractRaftActorBehavior {
 
     private Cancellable heartbeatCancel = null;
 
-    public Leader(RaftActorContext context, List<String> followers) {
+    public Leader(RaftActorContext context, List<String> followePaths) {
         super(context);
 
-        for (String follower : followers) {
-
+        for (String followerPath : followePaths) {
             FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(follower,
+                new FollowerLogInformationImpl(followerPath,
                     new AtomicLong(0),
                     new AtomicLong(0));
 
-            followerToActor.put(follower,
+            followerToActor.put(followerPath,
                 context.actorSelection(followerLogInformation.getId()));
-            followerToLog.put(follower, followerLogInformation);
+            followerToLog.put(followerPath, followerLogInformation);
 
         }
 
@@ -147,8 +144,8 @@ public class Leader extends AbstractRaftActorBehavior {
             heartbeatCancel.cancel();
         }
 
-        // Schedule a heartbeat. When the scheduler triggers the replicator
-        // will let the RaftActor (leader) know that a new heartbeat needs to be sent
+        // Schedule a heartbeat. When the scheduler triggers a SendHeartbeat
+        // message is sent to itself.
         // Scheduling the heartbeat only once here because heartbeats do not
         // need to be sent if there are other messages being sent to the remote
         // actor.
