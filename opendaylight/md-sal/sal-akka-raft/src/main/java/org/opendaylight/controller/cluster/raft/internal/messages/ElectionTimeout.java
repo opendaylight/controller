@@ -8,9 +8,5 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
-/**
- * Sent to a replicator when log entries need to be replicated to other
- * members in the cluster
- */
-public class ReplicateEntry {
+public class ElectionTimeout {
 }
