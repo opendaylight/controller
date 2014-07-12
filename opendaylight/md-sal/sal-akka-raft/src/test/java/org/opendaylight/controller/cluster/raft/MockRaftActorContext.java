@@ -22,15 +22,18 @@ public class MockRaftActorContext implements RaftActorContext {
     private ActorRef actor;
     private AtomicLong index = new AtomicLong(0);
     private AtomicLong lastApplied = new AtomicLong(0);
+    private final ElectionTerm electionTerm;
 
     public MockRaftActorContext(){
-
+        electionTerm = null;
     }
 
     public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
         this.id = id;
         this.system = system;
         this.actor = actor;
+
+        electionTerm = new ElectionTermImpl(id);
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -50,7 +53,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     @Override public ElectionTerm getTermInformation() {
-        return new ElectionTermImpl(this.id);
+        return electionTerm;
     }
 
     public void setIndex(AtomicLong index){
