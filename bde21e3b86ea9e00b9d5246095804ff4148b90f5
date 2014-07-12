@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b790feed",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ClusterHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d71a62c5",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_777b56f5",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/Monitor.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "This class probably belongs in the messages package",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d78d82d4",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/Monitor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_777b56f5",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_77bef666",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Asked question about it, will update accordingly.",
+      "parentUuid": "fa82b9bf_97805ac1",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_37814ec3",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "Why are we catching Exception?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b77ebead",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Akka API itself throw Exception, i have added code to add Rpc error from exception and return it",
+      "parentUuid": "fa82b9bf_37814ec3",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d77b42bc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f76e862e",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_578652dc",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "What do we intend to do with the BundleContext?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_774cb69e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "not required anymore, removing it.",
+      "parentUuid": "fa82b9bf_578652dc",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d7526234",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_176c4a34",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b7747efe",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "nitpicking - the name of an actor will be used to create a path for an actor. The path is a URI and we know that URIs in camel case look bad. I would recommend using an hyphen to separate words in an actor name.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_77335614",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_b7747efe",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_97385af0",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d771020d",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7762763f",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "Why does this have to be a bean? Could we eliminate setters and pass all dependencies to the object during construction instead?",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d946b41",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7762763f",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_573e52db",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_575df277",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d74822b5",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutingTable.java",
         "patchSetId": 4
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bd9c5f6b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutingTable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d74822b5",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_77c91625",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcRegistry.java",
         "patchSetId": 4
@@ -217,6 +433,24 @@
       "writtenOn": "2014-07-11T00:19:36Z",
       "side": 1,
       "message": "Do not take routing table as input. Create it here.",
+      "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dd99237a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-07-12T02:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_77c91625",
       "revId": "bde21e3b86ea9e00b9d5246095804ff4148b90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
