@@ -27,15 +27,57 @@ import com.google.common.util.concurrent.ListenableFuture;
  * change for the data tree and it is not visible to any other concurrently running
  * transaction.
  * <p>
- * Applications publish the changes proposed in the transaction by calling {@link #commit}
- * on the transaction. This seals the transaction
+ * Applications make changes to the local data tree in the transaction by via the
+ * <b>put</b>, <b>merge</b>, and <b>delete</b> operations.
+ *
+ * <h2>Put operation</h2>
+ * Stores a piece of data at a specified path. This acts as an add / replace
+ * operation, which is to say that whole subtree will be replaced by the
+ * specified data.
+ * <p>
+ * Performing the following put operations:
+ *
+ * <pre>
+ * 1) container { list [ a ] }
+ * 2) container { list [ b ] }
+ * </pre>
+ *
+ * will result in the following data being present:
+ *
+ * <pre>
+ * container { list [ b ] }
+ * </pre>
+ * <h2>Merge operation</h2>
+ * Merges a piece of data with the existing data at a specified path. Any pre-existing data
+ * which is not explicitly overwritten will be preserved. This means that if you store a container,
+ * its child lists will be merged.
+ * <p>
+ * Performing the following merge operations:
+ *
+ * <pre>
+ * 1) container { list [ a ] }
+ * 2) container { list [ b ] }
+ * </pre>
+ *
+ * will result in the following data being present:
+ *
+ * <pre>
+ * container { list [ a, b ] }
+ * </pre>
+ *
+ * This also means that storing the container will preserve any
+ * augmentations which have been attached to it.
+ *
+ * <h2>Delete operation</h2>
+ * Removes a piece of data from a specified path.
+ * <p>
+ * After applying changes to the local data tree, applications publish the changes proposed in the
+ * transaction by calling {@link #submit} on the transaction. This seals the transaction
  * (preventing any further writes using this transaction) and submits it to be
  * processed and applied to global conceptual data tree.
  * <p>
  * The transaction commit may fail due to a concurrent transaction modifying and committing data in
- * an incompatible way. See {@link #commit()} for more concrete commit failure examples.
- *
- *
+ * an incompatible way. See {@link #submit} for more concrete commit failure examples.
  * <p>
  * <b>Implementation Note:</b> This interface is not intended to be implemented
  * by users of MD-SAL, but only to be consumed by them.
@@ -57,7 +99,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * {@link TransactionStatus#CANCELED} will have no effect, and transaction
      * is considered cancelled.
      *
-     * Invoking cancel() on finished transaction  (future returned by {@link #commit()}
+     * Invoking cancel() on finished transaction  (future returned by {@link #submit()}
      * already completed with {@link TransactionStatus#COMMITED}) will always
      * fail (return false).
      *
@@ -69,74 +111,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
     boolean cancel();
 
     /**
-     * Store a piece of data at specified path. This acts as an add / replace
-     * operation, which is to say that whole subtree will be replaced by
-     * specified path. Performing the following put operations:
-     *
-     * <pre>
-     * 1) container { list [ a ] }
-     * 2) container { list [ b ] }
-     * </pre>
-     *
-     * will result in the following data being present:
-     *
-     * <pre>
-     * container { list [ b ] }
-     * </pre>
-     *
-     *
-     * If you need to make sure that a parent object exists, but you do not want modify
-     * its preexisting state by using put, consider using
-     * {@link #merge(LogicalDatastoreType, Path, Object)}
-     *
-     * @param store
-     *            Logical data store which should be modified
-     * @param path
-     *            Data object path
-     * @param data
-     *            Data object to be written to specified path
-     * @throws IllegalStateException
-     *             if the transaction is no longer {@link TransactionStatus#NEW}
-     */
-    void put(LogicalDatastoreType store, P path, D data);
-
-    /**
-     * Store a piece of data at the specified path. This acts as a merge operation,
-     * which is to say that any pre-existing data which is not explicitly
-     * overwritten will be preserved. This means that if you store a container,
-     * its child lists will be merged. Performing the following merge
-     * operations:
-     *
-     * <pre>
-     * 1) container { list [ a ] }
-     * 2) container { list [ b ] }
-     * </pre>
-     *
-     * will result in the following data being present:
-     *
-     * <pre>
-     * container { list [ a, b ] }
-     * </pre>
-     *
-     * This also means that storing the container will preserve any
-     * augmentations which have been attached to it.
-     *<p>
-     * If you require an explicit replace operation, use
-     * {@link #put(LogicalDatastoreType, Path, Object)} instead.
-     *
-     * @param store
-     *            Logical data store which should be modified
-     * @param path
-     *            Data object path
-     * @param data
-     *            Data object to be written to specified path
-     * @throws IllegalStateException
-     *             if the transaction is no longer {@link TransactionStatus#NEW}
-     */
-    void merge(LogicalDatastoreType store, P path, D data);
-
-    /**
-     * Remove a piece of data from specified path. This operation does not fail
+     * Removes a piece of data from specified path. This operation does not fail
      * if the specified path does not exist.
      *
      * @param store
@@ -184,7 +159,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *      InstanceIdentifier<MyDataObject> path = ...;
      *      writeTx.put( LogicalDatastoreType.OPERATIONAL, path, data );
      *
-     *      Futures.addCallback( writeTx.commit(), new FutureCallback<Void>() {
+     *      Futures.addCallback( writeTx.submit(), new FutureCallback<Void>() {
      *          public void onSuccess( Void result ) {
      *              // succeeded
      *          }
@@ -312,8 +287,8 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * txA.put(CONFIGURATION, PATH, A);    // writes to PATH value A
      * txB.put(CONFIGURATION, PATH, B)     // writes to PATH value B
      *
-     * ListenableFuture futureA = txA.commit(); // transaction A is sealed and committed
-     * ListenebleFuture futureB = txB.commit(); // transaction B is sealed and committed
+     * ListenableFuture futureA = txA.submit(); // transaction A is sealed and submitted
+     * ListenebleFuture futureB = txB.submit(); // transaction B is sealed and submitted
      * </pre>
      *
      * Commit of transaction A will be processed asynchronously and data tree
