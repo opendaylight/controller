@@ -27,12 +27,14 @@ class BindingDataWriteTransactionImpl<T extends DOMDataWriteTransaction> extends
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final InstanceIdentifier<?> path, final DataObject data) {
+    public <T extends DataObject> void put(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+                                           final T data) {
         doPut(store, path, data);
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final InstanceIdentifier<?> path, final DataObject data) {
+    public <T extends DataObject> void merge(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+                                             final T data) {
         doMerge(store, path, data);
     }
 
