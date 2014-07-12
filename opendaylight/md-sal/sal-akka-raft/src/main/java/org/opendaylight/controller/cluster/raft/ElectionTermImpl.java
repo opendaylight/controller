@@ -8,15 +8,13 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class ElectionTermImpl implements ElectionTerm{
     /**
      * Identifier of the actor whose election term information this is
      */
     private final String id;
 
-    private AtomicLong currentTerm;
+    private long currentTerm;
 
     private String votedFor;
 
@@ -24,13 +22,13 @@ public class ElectionTermImpl implements ElectionTerm{
         this.id = id;
 
         // TODO: Read currentTerm from some persistent state
-        currentTerm = new AtomicLong(0);
+        currentTerm = 0;
 
         // TODO: Read votedFor from some file
         votedFor = "";
     }
 
-    public AtomicLong getCurrentTerm() {
+    public long getCurrentTerm() {
         return currentTerm;
     }
 
@@ -39,7 +37,7 @@ public class ElectionTermImpl implements ElectionTerm{
     }
 
     public void update(long currentTerm, String votedFor){
-        this.currentTerm.set(currentTerm);
+        this.currentTerm = currentTerm;
         this.votedFor = votedFor;
 
         // TODO : Write to some persistent state

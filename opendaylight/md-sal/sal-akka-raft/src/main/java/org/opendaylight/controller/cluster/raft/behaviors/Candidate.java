@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
@@ -18,14 +17,10 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The behavior of a RaftActor when it is in the CandidateState
@@ -47,22 +42,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Candidate extends AbstractRaftActorBehavior {
 
-    /**
-     * The maximum election time variance
-     */
-    private static final int ELECTION_TIME_MAX_VARIANCE = 100;
-
-    /**
-     * The interval in which a new election would get triggered if no leader is found
-     */
-    private static final long ELECTION_TIME_INTERVAL = Leader.HEART_BEAT_INTERVAL.toMillis() * 2;
-
-    /**
-     *
-     */
     private final Map<String, ActorSelection> peerToActor = new HashMap<>();
-
-    private Cancellable electionCancel = null;
 
     private int voteCount;
 
@@ -96,7 +76,8 @@ public class Candidate extends AbstractRaftActorBehavior {
             votesRequired = 0;
         }
 
-        scheduleElection(randomizedDuration());
+        startNewTerm();
+        scheduleElection(electionDuration());
     }
 
     @Override protected RaftState handleAppendEntries(ActorRef sender,
@@ -105,7 +86,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         // There is some peer who thinks it's a leader but is not
         // I will not accept this append entries
         sender.tell(new AppendEntriesReply(
-            context.getTermInformation().getCurrentTerm().get(), false),
+            context.getTermInformation().getCurrentTerm(), false),
             context.getActor());
 
         return suggestedState;
@@ -115,18 +96,6 @@ public class Candidate extends AbstractRaftActorBehavior {
         AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
 
         // Some peer thinks I was a leader and sent me a reply
-
-        return suggestedState;
-    }
-
-    @Override protected RaftState handleRequestVote(ActorRef sender,
-        RequestVote requestVote, RaftState suggestedState) {
-
-        // We got this RequestVote because the term in there is less than
-        // or equal to our current term, so do not grant the vote
-        sender.tell(new RequestVoteReply(
-            context.getTermInformation().getCurrentTerm().get(), false),
-            context.getActor());
 
         return suggestedState;
     }
@@ -164,45 +133,32 @@ public class Candidate extends AbstractRaftActorBehavior {
                 // to send a message to the candidate
                 return RaftState.Leader;
             }
-            scheduleElection(randomizedDuration());
+            startNewTerm();
+            scheduleElection(electionDuration());
             return state();
         }
         return super.handleMessage(sender, message);
     }
 
-    private FiniteDuration randomizedDuration(){
-        long variance = new Random().nextInt(ELECTION_TIME_MAX_VARIANCE);
-        return new FiniteDuration(ELECTION_TIME_INTERVAL + variance, TimeUnit.MILLISECONDS);
-    }
 
-    private void scheduleElection(FiniteDuration interval) {
-
+    private void startNewTerm(){
         // set voteCount back to 1 (that is voting for self)
         voteCount = 1;
 
         // Increment the election term and vote for self
-        AtomicLong currentTerm = context.getTermInformation().getCurrentTerm();
-        context.getTermInformation().update(currentTerm.incrementAndGet(), context.getId());
+        long currentTerm = context.getTermInformation().getCurrentTerm();
+        context.getTermInformation().update(currentTerm+1, context.getId());
 
         // Request for a vote
         for(ActorSelection peerActor : peerToActor.values()){
             peerActor.tell(new RequestVote(
-                context.getTermInformation().getCurrentTerm().get(),
-                context.getId(), context.getReplicatedLog().last().getIndex(),
-                context.getReplicatedLog().last().getTerm()),
+                    context.getTermInformation().getCurrentTerm(),
+                    context.getId(), context.getReplicatedLog().last().getIndex(),
+                    context.getReplicatedLog().last().getTerm()),
                 context.getActor());
         }
 
-        if (electionCancel != null && !electionCancel.isCancelled()) {
-            electionCancel.cancel();
-        }
 
-        // Schedule an election. When the scheduler triggers an ElectionTimeout
-        // message is sent to itself
-        electionCancel =
-            context.getActorSystem().scheduler().scheduleOnce(interval,
-                context.getActor(), new ElectionTimeout(),
-                context.getActorSystem().dispatcher(), context.getActor());
     }
 
 }

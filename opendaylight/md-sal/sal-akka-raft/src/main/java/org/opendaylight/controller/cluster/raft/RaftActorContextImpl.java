@@ -14,8 +14,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class RaftActorContextImpl implements RaftActorContext{
 
     private final ActorRef actor;
@@ -26,16 +24,16 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private final ElectionTerm termInformation;
 
-    private final AtomicLong commitIndex;
+    private long commitIndex;
 
-    private final AtomicLong lastApplied;
+    private long lastApplied;
 
     private final ReplicatedLog replicatedLog;
 
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
-        ElectionTerm termInformation, AtomicLong commitIndex,
-        AtomicLong lastApplied, ReplicatedLog replicatedLog) {
+        ElectionTerm termInformation, long commitIndex,
+        long lastApplied, ReplicatedLog replicatedLog) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -65,12 +63,20 @@ public class RaftActorContextImpl implements RaftActorContext{
         return termInformation;
     }
 
-    public AtomicLong getCommitIndex() {
+    public long getCommitIndex() {
         return commitIndex;
     }
 
-    public AtomicLong getLastApplied() {
+    @Override public void setCommitIndex(long commitIndex) {
+        this.commitIndex = commitIndex;
+    }
+
+    public long getLastApplied() {
         return lastApplied;
+    }
+
+    @Override public void setLastApplied(long lastApplied) {
+        this.lastApplied = lastApplied;
     }
 
     @Override public ReplicatedLog getReplicatedLog() {

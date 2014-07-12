@@ -13,19 +13,20 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class MockRaftActorContext implements RaftActorContext {
 
     private String id;
     private ActorSystem system;
     private ActorRef actor;
-    private AtomicLong index = new AtomicLong(0);
-    private AtomicLong lastApplied = new AtomicLong(0);
+    private long index = 0;
+    private long lastApplied = 0;
     private final ElectionTerm electionTerm;
+    private ReplicatedLog replicatedLog;
 
     public MockRaftActorContext(){
         electionTerm = null;
+
+        initReplicatedLog();
     }
 
     public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
@@ -34,6 +35,16 @@ public class MockRaftActorContext implements RaftActorContext {
         this.actor = actor;
 
         electionTerm = new ElectionTermImpl(id);
+
+        initReplicatedLog();
+    }
+
+
+    public void initReplicatedLog(){
+        MockReplicatedLog mockReplicatedLog = new MockReplicatedLog();
+        this.replicatedLog = mockReplicatedLog;
+        mockReplicatedLog.setLast(new MockReplicatedLogEntry(1,1,""));
+        mockReplicatedLog.setReplicatedLogEntry(new MockReplicatedLogEntry(1,1, ""));
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -56,50 +67,84 @@ public class MockRaftActorContext implements RaftActorContext {
         return electionTerm;
     }
 
-    public void setIndex(AtomicLong index){
+    public void setIndex(long index){
         this.index = index;
     }
 
-    @Override public AtomicLong getCommitIndex() {
+    @Override public long getCommitIndex() {
         return index;
     }
 
-    public void setLastApplied(AtomicLong lastApplied){
+    @Override public void setCommitIndex(long commitIndex) {
+        this.index = commitIndex;
+    }
+
+    @Override public void setLastApplied(long lastApplied){
         this.lastApplied = lastApplied;
     }
 
-    @Override public AtomicLong getLastApplied() {
+    @Override public long getLastApplied() {
         return lastApplied;
     }
 
+    public void setReplicatedLog(ReplicatedLog replicatedLog) {
+        this.replicatedLog = replicatedLog;
+    }
+
     @Override public ReplicatedLog getReplicatedLog() {
-        return new ReplicatedLog(){
-
-            @Override public ReplicatedLogEntry getReplicatedLogEntry(
-                long index) {
-                throw new UnsupportedOperationException(
-                    "getReplicatedLogEntry");
-            }
-
-            @Override public ReplicatedLogEntry last() {
-                return new ReplicatedLogEntry() {
-                    @Override public Object getData() {
-                        return null;
-                    }
-
-                    @Override public long getTerm() {
-                        return 1;
-                    }
-
-                    @Override public long getIndex() {
-                        return 1;
-                    }
-                };
-            }
-        };
+        return replicatedLog;
     }
 
     @Override public ActorSystem getActorSystem() {
         return this.system;
+    }
+
+
+    public static class MockReplicatedLog implements ReplicatedLog {
+        private ReplicatedLogEntry replicatedLogEntry = new MockReplicatedLogEntry(0,0, "");
+        private ReplicatedLogEntry last = new MockReplicatedLogEntry(0,0, "");
+
+        @Override public ReplicatedLogEntry getReplicatedLogEntry(long index) {
+            return replicatedLogEntry;
+        }
+
+        @Override public ReplicatedLogEntry last() {
+            return last;
+        }
+
+        public void setReplicatedLogEntry(
+            ReplicatedLogEntry replicatedLogEntry) {
+            this.replicatedLogEntry = replicatedLogEntry;
+        }
+
+        public void setLast(ReplicatedLogEntry last) {
+            this.last = last;
+        }
+    }
+
+    public static class MockReplicatedLogEntry implements ReplicatedLogEntry {
+
+        private final long term;
+        private final long index;
+        private final Object data;
+
+        public MockReplicatedLogEntry(long term, long index, Object data){
+
+            this.term = term;
+            this.index = index;
+            this.data = data;
+        }
+
+        @Override public Object getData() {
+            return data;
+        }
+
+        @Override public long getTerm() {
+            return term;
+        }
+
+        @Override public long getIndex() {
+            return index;
+        }
     }
 }

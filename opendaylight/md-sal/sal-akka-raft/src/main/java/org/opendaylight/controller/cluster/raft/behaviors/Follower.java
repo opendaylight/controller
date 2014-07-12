@@ -11,9 +11,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
@@ -30,6 +30,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 public class Follower extends AbstractRaftActorBehavior {
     public Follower(RaftActorContext context) {
         super(context);
+
+        scheduleElection(electionDuration());
     }
 
     @Override protected RaftState handleAppendEntries(ActorRef sender,
@@ -39,11 +41,6 @@ public class Follower extends AbstractRaftActorBehavior {
 
     @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
-        return suggestedState;
-    }
-
-    @Override protected RaftState handleRequestVote(ActorRef sender,
-        RequestVote requestVote, RaftState suggestedState) {
         return suggestedState;
     }
 
@@ -57,6 +54,12 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
+        if(message instanceof ElectionTimeout){
+            return RaftState.Candidate;
+        }
+
+        scheduleElection(electionDuration());
+
         return super.handleMessage(sender, message);
     }
 }

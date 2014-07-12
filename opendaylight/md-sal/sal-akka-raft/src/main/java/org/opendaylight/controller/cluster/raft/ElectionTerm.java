@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * ElectionTerm contains information about a RaftActors election term.
  * <p>
@@ -23,7 +21,7 @@ public interface ElectionTerm {
      * latest term server has seen (initialized to 0
      * on first boot, increases monotonically)
      */
-    AtomicLong getCurrentTerm();
+    long getCurrentTerm();
 
     /**
      * candidateId that received vote in current
