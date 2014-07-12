@@ -13,8 +13,6 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
  * needs to be shared with it's behaviors. A RaftActorContext should NEVER be
@@ -62,7 +60,13 @@ public interface RaftActorContext {
      *    monotonically)
      * @return
      */
-    AtomicLong getCommitIndex();
+    long getCommitIndex();
+
+
+    /**
+     *
+     */
+    void setCommitIndex(long commitIndex);
 
     /**
      * index of highest log entry applied to state
@@ -70,7 +74,13 @@ public interface RaftActorContext {
      *    monotonically)
      * @return
      */
-    AtomicLong getLastApplied();
+    long getLastApplied();
+
+
+    /**
+     *
+     */
+    void setLastApplied(long lastApplied);
 
     /**
      * @return A representation of the log

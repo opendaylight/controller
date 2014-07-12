@@ -40,11 +40,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     @Test
     public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself(){
         RaftActorContext raftActorContext = createActorContext();
-        long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm().get();
+        long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm();
 
         new Candidate(raftActorContext, Collections.EMPTY_LIST);
 
-        assertEquals(expectedTerm+1, raftActorContext.getTermInformation().getCurrentTerm().get());
+        assertEquals(expectedTerm+1, raftActorContext.getTermInformation().getCurrentTerm());
         assertEquals(raftActorContext.getId(), raftActorContext.getTermInformation().getVotedFor());
     }
 
@@ -190,6 +190,74 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         }};
     }
 
+    @Test
+    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNull(){
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    RaftActorContext context = createActorContext(getTestActor());
+
+                    context.getTermInformation().update(1000, null);
+
+                    // Once a candidate is created it will immediately increment the current term so after
+                    // construction the currentTerm should be 1001
+                    RaftActorBehavior follower = createBehavior(context);
+
+                    follower.handleMessage(getTestActor(), new RequestVote(1001, "test", 10000, 999));
+
+                    final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
+                        // do not put code outside this method, will run afterwards
+                        protected Boolean match(Object in) {
+                            if (in instanceof RequestVoteReply) {
+                                RequestVoteReply reply = (RequestVoteReply) in;
+                                return reply.isVoteGranted();
+                            } else {
+                                throw noMatch();
+                            }
+                        }
+                    }.get();
+
+                    assertEquals(true, out);
+                }
+            };
+        }};
+    }
+
+    @Test
+    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId(){
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    RaftActorContext context = createActorContext(getTestActor());
+
+                    context.getTermInformation().update(1000, "test");
+
+                    RaftActorBehavior follower = createBehavior(context);
+
+                    follower.handleMessage(getTestActor(), new RequestVote(1001, "candidate", 10000, 999));
+
+                    final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
+                        // do not put code outside this method, will run afterwards
+                        protected Boolean match(Object in) {
+                            if (in instanceof RequestVoteReply) {
+                                RequestVoteReply reply = (RequestVoteReply) in;
+                                return reply.isVoteGranted();
+                            } else {
+                                throw noMatch();
+                            }
+                        }
+                    }.get();
+
+                    assertEquals(false, out);
+                }
+            };
+        }};
+    }
+
 
 
     @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
@@ -200,8 +268,5 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         return new MockRaftActorContext("test", getSystem(), candidateActor);
     }
 
-    protected RaftActorContext createActorContext(ActorRef candidateActor) {
-        return new MockRaftActorContext("test", getSystem(), candidateActor);
-    }
 
 }

@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -105,11 +104,6 @@ public class Leader extends AbstractRaftActorBehavior {
         return suggestedState;
     }
 
-    @Override protected RaftState handleRequestVote(ActorRef sender,
-        RequestVote requestVote, RaftState suggestedState) {
-        return suggestedState;
-    }
-
     @Override protected RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState) {
         return suggestedState;
@@ -127,11 +121,11 @@ public class Leader extends AbstractRaftActorBehavior {
         if (message instanceof SendHeartBeat) {
             for (ActorSelection follower : followerToActor.values()) {
                 follower.tell(new AppendEntries(
-                    context.getTermInformation().getCurrentTerm().get(),
+                    context.getTermInformation().getCurrentTerm(),
                     context.getId(),
                     context.getReplicatedLog().last().getIndex(),
                     context.getReplicatedLog().last().getTerm(),
-                    Collections.EMPTY_LIST, context.getCommitIndex().get()),
+                    Collections.EMPTY_LIST, context.getCommitIndex()),
                     context.getActor());
             }
             return state();

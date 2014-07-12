@@ -15,7 +15,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized
@@ -77,7 +76,7 @@ public abstract class RaftActor extends UntypedEventsourcedProcessor {
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(),
             id, new ElectionTermImpl(id),
-            new AtomicLong(0), new AtomicLong(0), new ReplicatedLogImpl());
+            0, 0, new ReplicatedLogImpl());
         currentBehavior = switchBehavior(RaftState.Follower);
     }
 
