@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3dcfef2a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "Do you have block comments set to 80 char line width? Since code lines can have a larger char width than 80, so should comment blocks.",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5dd433bc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "The line wrapping is strange here.",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dd4843b5",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "The line wrapping is strange here.",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7dc9f724",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "The line wrapping is strange here.",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9dce3b2d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/RestconfDocumentedExceptionMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "The line wrapping is strange here.",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bd4bffaf",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfError.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T14:44:04Z",
+      "side": 1,
+      "message": "This formatting looks ugly. There are too many to try to cram on one line and the inline comments get screwed up. The previous code is much more readable - this is why I prefer separating enums on different lines. \n\nWhile the Sun coding formatter crams enums on one line, this is not required by the ODL coding style. See https://wiki.opendaylight.org/view/OpenDaylight_Java_Style_Guide_-_Proposed#Enum_Classes",
+      "revId": "971cadfafea46adfd2cc4f2c15780c0877adb78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
