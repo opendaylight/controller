@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5debd377",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"an instance identifier\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fd8ae7bd",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"a reference that points ...\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d88ebc3",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"a reference that points ...\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9df5db58",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "How about \"\"A node-context is a classifier for node elements\"?",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3de60fb1",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "How about \"\"A node-connector-context is a classifier for node-connector elements\"?",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fd03c73f",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"can be extended\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d01cb37",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"can be extended\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bdf9bf4f",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"A list of node-connector elements that belong to this node\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5da2f34b",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "How about \"a reference to a node classified with a node-context\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bd90dfed",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "How about \"A reference to a particular node  classified with a node-context\".",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dd8da3d4",
+        "filename": "opendaylight/md-sal/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-12T17:21:59Z",
+      "side": 1,
+      "message": "\"The root container ...\"",
+      "revId": "db814e98204b7c786e6560ca7fe4610c5aa14577",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
