@@ -53,15 +53,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Leader extends AbstractRaftActorBehavior {
 
-    /**
-     * The interval at which a heart beat message will be sent to the remote
-     * RaftActor
-     * <p/>
-     * Since this is set to 100 milliseconds the Election timeout should be
-     * at least 200 milliseconds
-     */
-    public static final FiniteDuration HEART_BEAT_INTERVAL =
-        new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
     private final Map<String, FollowerLogInformation> followerToLog =
         new HashMap();
@@ -70,10 +61,10 @@ public class Leader extends AbstractRaftActorBehavior {
 
     private Cancellable heartbeatCancel = null;
 
-    public Leader(RaftActorContext context, List<String> followePaths) {
+    public Leader(RaftActorContext context, List<String> followerPaths) {
         super(context);
 
-        for (String followerPath : followePaths) {
+        for (String followerPath : followerPaths) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerPath,
                     new AtomicLong(0),
