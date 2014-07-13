@@ -43,8 +43,8 @@ public class TransactionCommitFailedException extends Exception {
         }
         else {
             // Add a default RpcError.
-            errorList = ImmutableList.of(RpcResultBuilder.newError(ErrorType.APPLICATION, null,
-                    getMessage(), null, null, getCause()));
+            errorList = ImmutableList.of(RpcResultBuilder.newError(ErrorType.APPLICATION,
+                    "operation-failed", getMessage(), null, null, getCause()));
         }
     }
 

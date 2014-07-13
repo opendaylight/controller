@@ -9,12 +9,17 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +30,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ForwardingListenableFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -65,6 +71,12 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         }
     };
 
+    /**
+     * A ThreadLocal used to detect deadlock scenarios between the commit thread and DataChangeListener
+     * and commit Future callback notifications.
+     */
+    private static final ThreadLocal<Boolean> COMMIT_DEADLOCK_DETECTOR_TL = new ThreadLocal<>();
+
     private final ListeningExecutorService executor;
 
     /**
@@ -80,18 +92,60 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
 
     @Override
     public CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts, final Optional<DOMDataCommitErrorListener> listener) {
+            final Iterable<DOMStoreThreePhaseCommitCohort> cohorts,
+            final Optional<DOMDataCommitErrorListener> listener) {
+
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         Preconditions.checkArgument(listener != null, "Listener must not be null");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
         ListenableFuture<Void> commitFuture = executor.submit(new CommitCoordinationTask(
                 transaction, cohorts, listener));
+
+        commitFuture = createDeadlockDetectorFuture( commitFuture );
+
         if (listener.isPresent()) {
             Futures.addCallback(commitFuture, new DOMDataCommitErrorInvoker(transaction, listener.get()));
         }
 
         return Futures.makeChecked(commitFuture, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+    }
+
+    private ListenableFuture<Void> createDeadlockDetectorFuture( ListenableFuture<Void> commitFuture ) {
+        // This creates a forwarding Future that overrides calls to get(...) to check, via a ThreadLocal,
+        // if the caller is doing a blocking call on the single commit thread. This is to detect deadlocks
+        // that can occur if a client DataChangeListener or commit Future callback attempts to submit
+        // another write Tx but invokes the returned Future's get methods synchronously (bug 1386).
+
+        return new ForwardingListenableFuture.SimpleForwardingListenableFuture<Void>( commitFuture ) {
+
+            @Override
+            public Void get() throws InterruptedException, ExecutionException {
+                checkDeadLockDetectorTL();
+                return super.get();
+            }
+
+            @Override
+            public Void get( long timeout, TimeUnit unit )
+                    throws InterruptedException, ExecutionException, TimeoutException {
+                checkDeadLockDetectorTL();
+                return super.get( timeout, unit );
+            }
+
+            void checkDeadLockDetectorTL() throws ExecutionException {
+                if( COMMIT_DEADLOCK_DETECTOR_TL.get() != null ) {
+                    String message =
+                            "An attempt to block on a commit callback from a write transaction was " +
+                            "detected that would result in deadlock. The commit callback must be " +
+                            "performed asynchronously to avoid deadlock.";
+
+                    throw new ExecutionException( "A potential deadlock was detected.",
+                            new TransactionCommitDeadlockException( message,
+                                    RpcResultBuilder.newError( ErrorType.APPLICATION,
+                                            "lock-denied", message ) ) );
+                }
+            }
+        };
     }
 
     /**
@@ -156,6 +210,7 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         @Override
         public Void call() throws TransactionCommitFailedException {
 
+            COMMIT_DEADLOCK_DETECTOR_TL.set( Boolean.TRUE );
             try {
                 canCommitBlocking();
                 preCommitBlocking();
@@ -165,6 +220,9 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
                 LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), currentPhase, e);
                 abortBlocking(e);
                 throw e;
+            }
+            finally {
+                COMMIT_DEADLOCK_DETECTOR_TL.set( null );
             }
         }
 
