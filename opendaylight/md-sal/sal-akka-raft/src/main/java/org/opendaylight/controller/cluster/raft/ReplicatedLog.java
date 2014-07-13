@@ -18,7 +18,7 @@ public interface ReplicatedLog {
      * @param index
      * @return
      */
-    ReplicatedLogEntry getReplicatedLogEntry(long index);
+    ReplicatedLogEntry get(long index);
 
 
     /**
@@ -27,4 +27,18 @@ public interface ReplicatedLog {
      * @return
      */
     ReplicatedLogEntry last();
+
+    /**
+     * Remove all the entries from the log starting from and including
+     * the index
+     *
+     * @param index
+     */
+    void removeFrom(long index);
+
+    /**
+     * Append an entry to the log
+     * @param replicatedLogEntry
+     */
+    void append(ReplicatedLogEntry replicatedLogEntry);
 }

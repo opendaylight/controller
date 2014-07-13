@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+
 import java.util.List;
 
 /**
@@ -26,13 +28,13 @@ public class AppendEntries extends AbstractRaftRPC {
 
     // log entries to store (empty for heartbeat;
     // may send more than one for efficiency)
-    private final List<Object> entries;
+    private final List<ReplicatedLogEntry> entries;
 
     // leader's commitIndex
     private final long leaderCommit;
 
     public AppendEntries(long term, String leaderId, long prevLogIndex,
-        long prevLogTerm, List<Object> entries, long leaderCommit) {
+        long prevLogTerm, List<ReplicatedLogEntry> entries, long leaderCommit) {
         super(term);
         this.leaderId = leaderId;
         this.prevLogIndex = prevLogIndex;
@@ -53,7 +55,7 @@ public class AppendEntries extends AbstractRaftRPC {
         return prevLogTerm;
     }
 
-    public List<Object> getEntries() {
+    public List<ReplicatedLogEntry> getEntries() {
         return entries;
     }
 

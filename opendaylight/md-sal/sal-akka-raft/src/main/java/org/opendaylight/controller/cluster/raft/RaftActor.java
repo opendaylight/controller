@@ -103,12 +103,20 @@ public abstract class RaftActor extends UntypedEventsourcedProcessor {
 
     private class ReplicatedLogImpl implements ReplicatedLog {
 
-        @Override public ReplicatedLogEntry getReplicatedLogEntry(long index) {
-            throw new UnsupportedOperationException("getReplicatedLogEntry");
+        @Override public ReplicatedLogEntry get(long index) {
+            throw new UnsupportedOperationException("get");
         }
 
         @Override public ReplicatedLogEntry last() {
             throw new UnsupportedOperationException("last");
+        }
+
+        @Override public void removeFrom(long index) {
+            throw new UnsupportedOperationException("removeFrom");
+        }
+
+        @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
+            throw new UnsupportedOperationException("append");
         }
     }
 }

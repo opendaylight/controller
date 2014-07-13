@@ -13,6 +13,9 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MockRaftActorContext implements RaftActorContext {
 
     private String id;
@@ -104,12 +107,18 @@ public class MockRaftActorContext implements RaftActorContext {
         private ReplicatedLogEntry replicatedLogEntry = new MockReplicatedLogEntry(0,0, "");
         private ReplicatedLogEntry last = new MockReplicatedLogEntry(0,0, "");
 
-        @Override public ReplicatedLogEntry getReplicatedLogEntry(long index) {
+        @Override public ReplicatedLogEntry get(long index) {
             return replicatedLogEntry;
         }
 
         @Override public ReplicatedLogEntry last() {
             return last;
+        }
+
+        @Override public void removeFrom(long index) {
+        }
+
+        @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
         }
 
         public void setReplicatedLogEntry(
@@ -119,6 +128,28 @@ public class MockRaftActorContext implements RaftActorContext {
 
         public void setLast(ReplicatedLogEntry last) {
             this.last = last;
+        }
+    }
+
+    public static class SimpleReplicatedLog implements ReplicatedLog {
+        private final List<ReplicatedLogEntry> log = new ArrayList<>(10000);
+
+        @Override public ReplicatedLogEntry get(long index) {
+            return log.get((int) index);
+        }
+
+        @Override public ReplicatedLogEntry last() {
+            return log.get(log.size()-1);
+        }
+
+        @Override public void removeFrom(long index) {
+            for(int i=(int) index ; i < log.size() ; i++) {
+                log.remove(i);
+            }
+        }
+
+        @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
+            log.add(replicatedLogEntry);
         }
     }
 
