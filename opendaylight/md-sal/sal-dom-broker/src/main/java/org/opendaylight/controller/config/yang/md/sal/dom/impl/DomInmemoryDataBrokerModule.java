@@ -10,9 +10,11 @@ package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 import java.util.concurrent.Executors;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -64,7 +66,9 @@ public final class DomInmemoryDataBrokerModule extends
                 .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore).build();
 
-        DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores, MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
+        DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores,
+                new DeadlockDetectingListeningExecutorService(Executors.newSingleThreadExecutor(),
+                                              TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION));
 
         return newDataBroker;
     }
