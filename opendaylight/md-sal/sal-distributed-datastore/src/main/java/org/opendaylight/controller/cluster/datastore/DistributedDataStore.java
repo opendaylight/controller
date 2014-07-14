@@ -76,13 +76,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         AsyncDataBroker.DataChangeScope scope) {
 
         ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(
-            DataChangeListener.props(listener));
+            DataChangeListener.props(schemaContext,listener));
 
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
         Object result = actorContext.executeShardOperation(shardName,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
-                AsyncDataBroker.DataChangeScope.BASE).toSerializable(),
+                scope).toSerializable(),
             ActorContext.ASK_DURATION
         );
 
