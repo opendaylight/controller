@@ -8,9 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -19,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  *
@@ -30,8 +29,9 @@ import com.google.common.util.concurrent.ListenableFuture;
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
  */
-final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction implements
-DOMStoreReadTransaction {
+final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
+                                          implements DOMStoreReadTransaction {
+
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);
     private DataTreeSnapshot stableSnapshot;
 
@@ -48,9 +48,19 @@ DOMStoreReadTransaction {
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
+        LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");
-        checkState(stableSnapshot != null, "Transaction is closed");
-        return Futures.immediateFuture(stableSnapshot.readNode(path));
+
+        if(stableSnapshot == null) {
+            return Futures.immediateFailedCheckedFuture(new ReadFailedException("Transaction is closed"));
+        }
+
+        try {
+            return Futures.immediateCheckedFuture(stableSnapshot.readNode(path));
+        } catch (Exception e) {
+            LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
+            return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
+        }
     }
 }

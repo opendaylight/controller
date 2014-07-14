@@ -9,11 +9,12 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * A transaction that provides read access to a logical data store.
@@ -33,14 +34,17 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
      * @param path
      *            Path which uniquely identifies subtree which client want to
      *            read
-     * @return Listenable Future which contains read result
+     * @return a CheckFuture containing the result of the read. The Future blocks until the
+     *         commit operation is complete. Once complete:
      *         <ul>
-     *         <li>If data at supplied path exists the
-     *         {@link ListeblaFuture#get()} returns Optional object containing
-     *         data once read is done.
-     *         <li>If data at supplied path does not exists the
-     *         {@link ListenbleFuture#get()} returns {@link Optional#absent()}.
+     *         <li>If the data at the supplied path exists, the Future returns an Optional object
+     *         containing the data.</li>
+     *         <li>If the data at the supplied path does not exist, the Future returns
+     *         Optional#absent().</li>
+     *         <li>If the read of the data fails, the Future will fail with a
+     *         {@link ReadFailedException} or an exception derived from ReadFailedException.</li>
      *         </ul>
      */
-    ListenableFuture<Optional<NormalizedNode<?,?>>> read(LogicalDatastoreType store,YangInstanceIdentifier path);
+    CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(
+            LogicalDatastoreType store, YangInstanceIdentifier path);
 }
