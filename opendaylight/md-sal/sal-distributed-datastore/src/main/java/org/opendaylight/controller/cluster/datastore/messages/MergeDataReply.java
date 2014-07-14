@@ -8,5 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class MergeDataReply {
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+
+public class MergeDataReply implements SerializableMessage{
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.MergeDataReply.class;
+
+  @Override
+  public Object toSerializable() {
+    return ShardTransactionMessages.MergeDataReply.newBuilder().build();
+  }
 }
