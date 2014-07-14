@@ -49,7 +49,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return suggestedState;
     }
 
-    @Override protected RaftState state() {
+    @Override public RaftState state() {
         return RaftState.Follower;
     }
 
@@ -61,5 +61,9 @@ public class Follower extends AbstractRaftActorBehavior {
         scheduleElection(electionDuration());
 
         return super.handleMessage(sender, message);
+    }
+
+    @Override public void close() throws Exception {
+        stopElection();
     }
 }

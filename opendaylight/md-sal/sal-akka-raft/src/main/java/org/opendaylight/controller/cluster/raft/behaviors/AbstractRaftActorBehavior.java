@@ -68,6 +68,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     private Cancellable electionCancel = null;
 
+    /**
+     *
+     */
+    private String leaderId = null;
+
 
     protected AbstractRaftActorBehavior(RaftActorContext context) {
         this.context = context;
@@ -93,25 +98,38 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
 
     protected RaftState appendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState raftState){
+        AppendEntries appendEntries, RaftState raftState) {
+
+        if(raftState != state()){
+            context.getLogger().debug("Suggested state is " + raftState
+                + " current behavior state is " + state());
+        }
 
         // 1. Reply false if term < currentTerm (§5.1)
-        if(appendEntries.getTerm() < currentTerm()){
-            sender.tell(new AppendEntriesReply(currentTerm(), false), actor());
+        if (appendEntries.getTerm() < currentTerm()) {
+            sender.tell(
+                new AppendEntriesReply(context.getId(), currentTerm(), false,
+                    lastIndex(), lastTerm()), actor());
             return state();
         }
+
+        // If we got here then we do appear to be talking to the leader
+        leaderId = appendEntries.getLeaderId();
 
         // 2. Reply false if log doesn’t contain an entry at prevLogIndex
         // whose term matches prevLogTerm (§5.3)
         ReplicatedLogEntry previousEntry = context.getReplicatedLog()
             .get(appendEntries.getPrevLogIndex());
 
-        if(previousEntry == null || previousEntry.getTerm() != appendEntries.getPrevLogTerm()){
-            sender.tell(new AppendEntriesReply(currentTerm(), false), actor());
+        if (previousEntry == null || previousEntry.getTerm() != appendEntries
+            .getPrevLogTerm()) {
+            sender.tell(
+                new AppendEntriesReply(context.getId(), currentTerm(), false,
+                    lastIndex(), lastTerm()), actor());
             return state();
         }
 
-        if(appendEntries.getEntries() != null) {
+        if (appendEntries.getEntries() != null) {
             // 3. If an existing entry conflicts with a new one (same index
             // but different terms), delete the existing entry and all that
             // follow it (§5.3)
@@ -121,7 +139,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 ReplicatedLogEntry newEntry = context.getReplicatedLog()
                     .get(i + 1);
 
-                if (newEntry != null && newEntry.getTerm() == appendEntries.getEntries().get(i).getTerm()){
+                if (newEntry != null && newEntry.getTerm() == appendEntries
+                    .getEntries().get(i).getTerm()) {
                     break;
                 }
                 if (newEntry != null && newEntry.getTerm() != appendEntries
@@ -151,7 +170,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             applyLogToStateMachine(appendEntries.getLeaderCommit());
         }
 
-        sender.tell(new AppendEntriesReply(currentTerm(), true), actor());
+
+
+        sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
+            lastIndex(), lastTerm()), actor());
 
         return handleAppendEntries(sender, appendEntries, raftState);
     }
@@ -236,23 +258,21 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected abstract RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState);
 
-    /**
-     * @return The derived class should return the state that corresponds to
-     * it's behavior
-     */
-    protected abstract RaftState state();
-
     protected FiniteDuration electionDuration() {
         long variance = new Random().nextInt(ELECTION_TIME_MAX_VARIANCE);
         return new FiniteDuration(ELECTION_TIME_INTERVAL + variance,
             TimeUnit.MILLISECONDS);
     }
 
-    protected void scheduleElection(FiniteDuration interval) {
-
+    protected void stopElection() {
         if (electionCancel != null && !electionCancel.isCancelled()) {
             electionCancel.cancel();
         }
+    }
+
+    protected void scheduleElection(FiniteDuration interval) {
+
+        stopElection();
 
         // Schedule an election. When the scheduler triggers an ElectionTimeout
         // message is sent to itself
@@ -275,11 +295,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected long lastTerm() {
-        return context.getReplicatedLog().last().getTerm();
+        return context.getReplicatedLog().lastTerm();
     }
 
     protected long lastIndex() {
-        return context.getReplicatedLog().last().getIndex();
+        return context.getReplicatedLog().lastIndex();
     }
 
 
@@ -305,6 +325,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                     raftState);
         }
         return raftState;
+    }
+
+    @Override public String getLeaderId() {
+        return leaderId;
     }
 
     private RaftState applyTerm(RaftRPC rpc) {

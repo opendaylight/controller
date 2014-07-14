@@ -8,13 +8,26 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.persistence.UntypedEventsourcedProcessor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+import akka.japi.Procedure;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.UntypedPersistentActor;
 import org.opendaylight.controller.cluster.raft.behaviors.Candidate;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
 
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized
@@ -58,7 +71,9 @@ import java.util.Collections;
  *
  * <a href="http://doc.akka.io/api/akka/2.3.3/index.html#akka.persistence.UntypedEventsourcedProcessor">UntypeEventSourceProcessor</a>
  */
-public abstract class RaftActor extends UntypedEventsourcedProcessor {
+public abstract class RaftActor extends UntypedPersistentActor {
+    protected final LoggingAdapter LOG =
+        Logging.getLogger(getContext().system(), this);
 
     /**
      *  The current state determines the current behavior of a RaftActor
@@ -72,51 +87,237 @@ public abstract class RaftActor extends UntypedEventsourcedProcessor {
      */
     private RaftActorContext context;
 
-    public RaftActor(String id){
+    /**
+     * The in-memory journal
+     */
+    private ReplicatedLogImpl replicatedLog = new ReplicatedLogImpl();
+
+
+
+    public RaftActor(String id, Map<String, String> peerAddresses){
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(),
-            id, new ElectionTermImpl(id),
-            0, 0, new ReplicatedLogImpl());
+            id, new ElectionTermImpl(getSelf().path().toString()),
+            0, 0, replicatedLog, peerAddresses, LOG);
         currentBehavior = switchBehavior(RaftState.Follower);
     }
 
     @Override public void onReceiveRecover(Object message) {
-        throw new UnsupportedOperationException("onReceiveRecover");
+        if(message instanceof ReplicatedLogEntry) {
+            replicatedLog.append((ReplicatedLogEntry) message);
+        } else if(message instanceof RecoveryCompleted){
+            LOG.debug("Log now has messages to index : " + replicatedLog.lastIndex());
+        }
     }
 
     @Override public void onReceiveCommand(Object message) {
-        RaftState state = currentBehavior.handleMessage(getSender(), message);
-        currentBehavior = switchBehavior(state);
+        if(message instanceof ApplyState){
+            ApplyState applyState = (ApplyState)  message;
+            applyState(applyState.getClientActor(), applyState.getIdentifier(),
+                applyState.getReplicatedLogEntry().getData());
+        } else if(message instanceof FindLeader){
+            getSender().tell(new FindLeaderReply(
+                context.getPeerAddress(currentBehavior.getLeaderId())),
+                getSelf());
+        } else {
+            RaftState state =
+                currentBehavior.handleMessage(getSender(), message);
+            currentBehavior = switchBehavior(state);
+        }
     }
 
     private RaftActorBehavior switchBehavior(RaftState state){
+        if(currentBehavior != null) {
+            if (currentBehavior.state() == state) {
+                return currentBehavior;
+            }
+            LOG.info("Switching from state " + currentBehavior.state() + " to "
+                + state);
+
+            try {
+                currentBehavior.close();
+            } catch (Exception e) {
+                LOG.error(e, "Failed to close behavior : " + currentBehavior.state());
+            }
+
+        } else {
+            LOG.info("Switching behavior to " + state);
+        }
         RaftActorBehavior behavior = null;
         if(state == RaftState.Candidate){
-            behavior = new Candidate(context, Collections.EMPTY_LIST);
+            behavior = new Candidate(context);
         } else if(state == RaftState.Follower){
             behavior = new Follower(context);
         } else {
-            behavior = new Leader(context, Collections.EMPTY_LIST);
+            behavior = new Leader(context);
         }
         return behavior;
     }
 
+    /**
+     * When a derived RaftActor needs to persist something it must call
+     * persistData.
+     *
+     * The Leader should have a scheduled task which runs about twice as
+     * frequently as the heartbeat timer. When this task runs it should
+     * look at the current log information and the follower information
+     * if it finds that the follower is behind then it should send it an
+     * AppendEntries message with all entries above the nextIndex for each
+     * follower. An alternative is to just send one at a time (which may be
+     * simpler)
+     *<p>
+     * As the replies arrive for each follower we look at the AppendEntryReply
+     * figure out which follower sent that response and if it was successful
+     * we update the FollowerLogInformation with the index that was sent
+     * back in the response set to the matchIndex and the nextIndex incremented
+     * to the next message that needs to be sent.
+     *<p>
+     * If a reply arrives which indicates a failure then the nextIndex is
+     * decremented and the AppendEntries message is sent back to the follower
+     *<p>
+     * We may need to add two extra fields on to the AppendEntriesReply
+     * <ul>
+     * <li> followerId
+     * <li> index
+     *</ul>
+     * This will indicate the id of the follower and what is it's last log index
+     *<p>
+     * The Leader also needs to track the responses as they arrive to see if
+     * the majority responses have been received. This would be done using the
+     * ClientRequestTracker which would be created for each client request
+     * to persist data. As the replies arrive the leader will check against
+     * this tracker to see a couple of things,
+     * <ul>
+     * <li> have the majority of the followers responded? If yes then we can go
+     * ahead and apply this entry to the state machine
+     * <li> if all the followers have responded then we can stop tracking the
+     * ClientRequest
+     *</ul>
+     * @param clientActor
+     * @param identifier
+     * @param data
+     */
+    protected void persistData(ActorRef clientActor, String identifier, Object data){
+        LOG.debug("Persist data " + identifier);
+        ReplicatedLogEntry replicatedLogEntry = new ReplicatedLogImplEntry(
+            context.getReplicatedLog().lastIndex() + 1,
+            context.getTermInformation().getCurrentTerm(), data);
+
+        replicatedLog.append(clientActor, identifier, replicatedLogEntry);
+    }
+
+    protected abstract void applyState(ActorRef clientActor, String identifier, Object data);
+
+    protected String getId(){
+        return context.getId();
+    }
+
+    protected boolean isLeader(){
+        return context.getId().equals(currentBehavior.getLeaderId());
+    }
+
+    protected ActorSelection getLeader(){
+        String leaderId = currentBehavior.getLeaderId();
+        String peerAddress = context.getPeerAddress(leaderId);
+        LOG.debug("getLeader leaderId = " + leaderId + " peerAddress = " + peerAddress);
+        return context.actorSelection(peerAddress);
+    }
+
     private class ReplicatedLogImpl implements ReplicatedLog {
+        private final List<ReplicatedLogEntry> journal = new ArrayList();
+        private long snapshotIndex = 0;
+        private Object snapShot = null;
+
 
         @Override public ReplicatedLogEntry get(long index) {
-            throw new UnsupportedOperationException("get");
+            if(index < 0 || journal.size() == 0){
+                return null;
+            }
+
+            return journal.get((int) (index - snapshotIndex));
         }
 
         @Override public ReplicatedLogEntry last() {
-            throw new UnsupportedOperationException("last");
+            if(journal.size() == 0){
+                return null;
+            }
+            return get(journal.size() - 1);
         }
 
+        @Override public long lastIndex() {
+            if(journal.size() == 0){
+                return -1;
+            }
+
+            return last().getIndex();
+        }
+
+        @Override public long lastTerm() {
+            if(journal.size() == 0){
+                return -1;
+            }
+
+            return last().getTerm();
+        }
+
+
         @Override public void removeFrom(long index) {
-            throw new UnsupportedOperationException("removeFrom");
+            for(int i= (int) (index - snapshotIndex) ; i < journal.size() ; i++){
+                deleteMessage(i);
+                journal.remove(i);
+            }
         }
 
         @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
-            throw new UnsupportedOperationException("append");
+            journal.add(replicatedLogEntry);
+        }
+
+        @Override public List<ReplicatedLogEntry> getFrom(long index) {
+            List<ReplicatedLogEntry> entries = new ArrayList<>(100);
+            for(int i= (int) (index - snapshotIndex); i < journal.size() ; i++){
+                entries.add(journal.get(i));
+            }
+            return entries;
+        }
+
+        public void append(final ActorRef clientActor, final String identifier, final ReplicatedLogEntry replicatedLogEntry){
+            persist(replicatedLogEntry,
+                new Procedure<ReplicatedLogEntry>() {
+                    public void apply(ReplicatedLogEntry evt) throws Exception {
+                        journal.add(evt);
+                        // Send message for replication
+                        currentBehavior.handleMessage(getSelf(), new Replicate(clientActor, identifier, replicatedLogEntry));
+                    }
+                });
         }
     }
+
+    private static class ReplicatedLogImplEntry implements ReplicatedLogEntry,
+        Serializable {
+
+        private final long index;
+        private final long term;
+        private final Object payload;
+
+        public ReplicatedLogImplEntry(long index, long term, Object payload){
+
+            this.index = index;
+            this.term = term;
+            this.payload = payload;
+        }
+
+        @Override public Object getData() {
+            return payload;
+        }
+
+        @Override public long getTerm() {
+            return term;
+        }
+
+        @Override public long getIndex() {
+            return index;
+        }
+    }
+
+
 }

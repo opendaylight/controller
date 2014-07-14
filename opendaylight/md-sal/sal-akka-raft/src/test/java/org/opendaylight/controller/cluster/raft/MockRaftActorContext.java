@@ -12,9 +12,14 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MockRaftActorContext implements RaftActorContext {
 
@@ -25,6 +30,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private long lastApplied = 0;
     private final ElectionTerm electionTerm;
     private ReplicatedLog replicatedLog;
+    private Map<String, String> peerAddresses = new HashMap();
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -102,6 +108,22 @@ public class MockRaftActorContext implements RaftActorContext {
         return this.system;
     }
 
+    @Override public LoggingAdapter getLogger() {
+        return Logging.getLogger(system, this);
+    }
+
+    @Override public Map<String, String> getPeerAddresses() {
+        return peerAddresses;
+    }
+
+    @Override public String getPeerAddress(String peerId) {
+        return peerAddresses.get(peerId);
+    }
+
+    public void setPeerAddresses(Map<String, String> peerAddresses) {
+        this.peerAddresses = peerAddresses;
+    }
+
 
     public static class MockReplicatedLog implements ReplicatedLog {
         private ReplicatedLogEntry replicatedLogEntry = new MockReplicatedLogEntry(0,0, "");
@@ -115,10 +137,22 @@ public class MockRaftActorContext implements RaftActorContext {
             return last;
         }
 
+        @Override public long lastIndex() {
+            return last.getIndex();
+        }
+
+        @Override public long lastTerm() {
+            return last.getTerm();
+        }
+
         @Override public void removeFrom(long index) {
         }
 
         @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
+        }
+
+        @Override public List<ReplicatedLogEntry> getFrom(long index) {
+            return Collections.EMPTY_LIST;
         }
 
         public void setReplicatedLogEntry(
@@ -139,7 +173,26 @@ public class MockRaftActorContext implements RaftActorContext {
         }
 
         @Override public ReplicatedLogEntry last() {
+            if(log.size() == 0){
+                return null;
+            }
             return log.get(log.size()-1);
+        }
+
+        @Override public long lastIndex() {
+            if(log.size() == 0){
+                return -1;
+            }
+
+            return last().getIndex();
+        }
+
+        @Override public long lastTerm() {
+            if(log.size() == 0){
+                return -1;
+            }
+
+            return last().getTerm();
         }
 
         @Override public void removeFrom(long index) {
@@ -150,6 +203,14 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
             log.add(replicatedLogEntry);
+        }
+
+        @Override public List<ReplicatedLogEntry> getFrom(long index) {
+            List<ReplicatedLogEntry> entries = new ArrayList<>();
+            for(int i=(int) index ; i < log.size() ; i++) {
+                entries.add(get(i));
+            }
+            return entries;
         }
     }
 
