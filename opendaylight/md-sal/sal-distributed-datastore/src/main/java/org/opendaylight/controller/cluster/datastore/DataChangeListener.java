@@ -16,34 +16,37 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener;
+    private final SchemaContext schemaContext;
 
-    public DataChangeListener(
+    public DataChangeListener(SchemaContext schemaContext,
         AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener) {
         this.listener = listener;
+        this.schemaContext = schemaContext;
     }
 
     @Override public void handleReceive(Object message) throws Exception {
-        if(message instanceof DataChanged){
-            DataChanged reply = (DataChanged) message;
+        if(message.getClass().equals(DataChanged.SERIALIZABLE_CLASS)){
+            DataChanged reply = DataChanged.fromSerialize(schemaContext,message);
             AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>
                 change = reply.getChange();
             this.listener.onDataChanged(change);
 
             if(getSender() != null){
-                getSender().tell(new DataChangedReply(), getSelf());
+                getSender().tell(new DataChangedReply().toSerializable(), getSelf());
             }
 
         }
     }
 
-    public static Props props(final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener) {
+    public static Props props(final SchemaContext schemaContext,final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener) {
         return Props.create(new Creator<DataChangeListener>() {
             @Override
             public DataChangeListener create() throws Exception {
-                return new DataChangeListener(listener);
+                return new DataChangeListener(schemaContext,listener);
             }
 
         });

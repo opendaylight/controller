@@ -179,7 +179,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof WriteDataReply) {
+                            if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
                                 throw noMatch();
@@ -217,7 +217,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>(duration("500 milliseconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof MergeDataReply) {
+                            if (in.getClass().equals(MergeDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
                                 throw noMatch();
@@ -254,7 +254,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof DeleteDataReply) {
+                            if (in.getClass().equals(DeleteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
                                 throw noMatch();
@@ -286,12 +286,12 @@ public class ShardTransactionTest extends AbstractActorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    subject.tell(new ReadyTransaction(), getRef());
+                    subject.tell(new ReadyTransaction().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof ReadyTransactionReply) {
+                            if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
                                 throw noMatch();
@@ -324,12 +324,12 @@ public class ShardTransactionTest extends AbstractActorTest {
             new Within(duration("2 seconds")) {
                 protected void run() {
 
-                    subject.tell(new CloseTransaction(), getRef());
+                    subject.tell(new CloseTransaction().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof CloseTransactionReply) {
+                            if (in.getClass().equals(CloseTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
                                 throw noMatch();

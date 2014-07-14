@@ -197,7 +197,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
         actorContext.setExecuteShardOperationResponse(createTransactionReply(doNothingActorRef));
-        actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(doNothingActorRef.path()));
+        actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(doNothingActorRef.path()).toSerializable());
 
         TransactionProxy transactionProxy =
             new TransactionProxy(actorContext,
@@ -260,7 +260,7 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof CloseTransaction);
+        Assert.assertTrue(listMessages.get(0).getClass().equals(CloseTransaction.SERIALIZABLE_CLASS));
     }
 
     private CreateTransactionReply createTransactionReply(ActorRef actorRef){

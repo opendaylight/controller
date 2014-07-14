@@ -150,12 +150,12 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
             Object result = actorContext.executeRemoteOperation(remoteTransaction,
-                new ReadyTransaction(),
+                new ReadyTransaction().toSerializable(),
                 ActorContext.ASK_DURATION
             );
 
-            if(result instanceof ReadyTransactionReply){
-                ReadyTransactionReply reply = (ReadyTransactionReply) result;
+            if(result.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)){
+                ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(actorContext.getActorSystem(),result);
                 cohortPaths.add(reply.getCohortPath());
             }
         }
@@ -171,7 +171,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     @Override
     public void close() {
         for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
-            remoteTransaction.tell(new CloseTransaction(), null);
+            remoteTransaction.tell(new CloseTransaction().toSerializable(), null);
         }
     }
 

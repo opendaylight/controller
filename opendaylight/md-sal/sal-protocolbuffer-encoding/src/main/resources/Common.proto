@@ -10,7 +10,7 @@ message Attribute{
 }
 
 message Node{
-  required string path = 1;
+  optional string path = 1;
   optional string type = 2;
   repeated Attribute attributes = 3;
   repeated Node child=4;
@@ -20,4 +20,13 @@ message Node{
 message Container{
   required string parentPath =1 ;
   optional Node normalizedNode=2;
+}
+
+message NodeMapEntry{
+  required string instanceIdentifierPath =1;
+  optional Node normalizedNode=2;
+}
+
+message NodeMap{
+repeated NodeMapEntry mapEntries=1;
 }

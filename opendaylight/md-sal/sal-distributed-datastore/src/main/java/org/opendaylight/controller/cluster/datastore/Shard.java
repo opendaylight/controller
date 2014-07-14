@@ -188,7 +188,7 @@ public class Shard extends UntypedProcessor {
             .system().actorSelection(registerChangeListener.getDataChangeListenerPath());
 
         AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>
-            listener = new DataChangeListenerProxy(dataChangeListenerPath);
+            listener = new DataChangeListenerProxy(schemaContext,dataChangeListenerPath);
 
         org.opendaylight.yangtools.concepts.ListenerRegistration<AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>>
             registration =

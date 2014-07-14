@@ -8,5 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class DeleteDataReply {
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+
+public class DeleteDataReply implements SerializableMessage{
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteDataReply.class;
+  @Override
+  public Object toSerializable() {
+    return ShardTransactionMessages.DeleteDataReply.newBuilder().build();
+  }
 }

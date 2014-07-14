@@ -105,7 +105,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Boolean writeDone = new ExpectMsg<Boolean>("WriteDataReply") {
                         protected Boolean match(Object in) {
-                            if (in instanceof WriteDataReply) {
+                            if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return true;
                             } else {
                                 throw noMatch();
@@ -115,14 +115,14 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertTrue(writeDone);
 
-                    transaction.tell(new ReadyTransaction(), getRef());
+                    transaction.tell(new ReadyTransaction().toSerializable(), getRef());
 
                     final ActorSelection cohort =
                         new ExpectMsg<ActorSelection>("ReadyTransactionReply") {
                             protected ActorSelection match(Object in) {
-                                if (in instanceof ReadyTransactionReply) {
+                                if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                     ActorPath cohortPath =
-                                        ((ReadyTransactionReply) in)
+                                        ReadyTransactionReply.fromSerializable(getSystem(),in)
                                             .getCohortPath();
                                     return getSystem()
                                         .actorSelection(cohortPath);
