@@ -113,11 +113,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-test-model</artifactId>
       <scope>test</scope>
-      <version>${project.version}</version>
-    </dependency>
+      </dependency>
   </dependencies>
 
   <build>
