@@ -13,6 +13,9 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
+import akka.event.LoggingAdapter;
+
+import java.util.Map;
 
 public class RaftActorContextImpl implements RaftActorContext{
 
@@ -30,10 +33,15 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private final ReplicatedLog replicatedLog;
 
+    private final Map<String, String> peerAddresses;
+
+    private final LoggingAdapter LOG;
+
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
-        long lastApplied, ReplicatedLog replicatedLog) {
+        long lastApplied, ReplicatedLog replicatedLog, Map<String, String> peerAddresses, LoggingAdapter logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -41,6 +49,8 @@ public class RaftActorContextImpl implements RaftActorContext{
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
         this.replicatedLog = replicatedLog;
+        this.peerAddresses = peerAddresses;
+        this.LOG = logger;
     }
 
     public ActorRef actorOf(Props props){
@@ -85,5 +95,17 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     @Override public ActorSystem getActorSystem() {
         return context.system();
+    }
+
+    @Override public LoggingAdapter getLogger() {
+        return this.LOG;
+    }
+
+    @Override public Map<String, String> getPeerAddresses() {
+        return peerAddresses;
+    }
+
+    @Override public String getPeerAddress(String peerId) {
+        return peerAddresses.get(peerId);
     }
 }

@@ -12,6 +12,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.event.LoggingAdapter;
+
+import java.util.Map;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -91,4 +94,23 @@ public interface RaftActorContext {
      * @return The ActorSystem associated with this context
      */
     ActorSystem getActorSystem();
+
+    /**
+     *
+     * @return
+     */
+    LoggingAdapter getLogger();
+
+    /**
+     * Get a mapping of peer id's their addresses
+     * @return
+     */
+    Map<String, String> getPeerAddresses();
+
+    /**
+     *
+     * @param peerId
+     * @return
+     */
+    String getPeerAddress(String peerId);
 }

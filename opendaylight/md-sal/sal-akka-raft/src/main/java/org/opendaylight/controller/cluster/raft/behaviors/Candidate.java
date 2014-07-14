@@ -18,13 +18,13 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * The behavior of a RaftActor when it is in the CandidateState
- * <p>
+ * <p/>
  * Candidates (§5.2):
  * <ul>
  * <li> On conversion to candidate, start election:
@@ -48,8 +48,10 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     private final int votesRequired;
 
-    public Candidate(RaftActorContext context, List<String> peerPaths) {
+    public Candidate(RaftActorContext context) {
         super(context);
+
+        Collection<String> peerPaths = context.getPeerAddresses().values();
 
         for (String peerPath : peerPaths) {
             peerToActor.put(peerPath,
@@ -83,11 +85,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries, RaftState suggestedState) {
 
-        // There is some peer who thinks it's a leader but is not
-        // I will not accept this append entries
-        sender.tell(new AppendEntriesReply(
-            context.getTermInformation().getCurrentTerm(), false),
-            context.getActor());
+        context.getLogger().error("An unexpected AppendEntries received in state " + state());
 
         return suggestedState;
     }
@@ -102,30 +100,30 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     @Override protected RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState) {
-        if(suggestedState == RaftState.Follower) {
+        if (suggestedState == RaftState.Follower) {
             // If base class thinks I should be follower then I am
             return suggestedState;
         }
 
-        if(requestVoteReply.isVoteGranted()){
+        if (requestVoteReply.isVoteGranted()) {
             voteCount++;
         }
 
-        if(voteCount >= votesRequired){
+        if (voteCount >= votesRequired) {
             return RaftState.Leader;
         }
 
         return state();
     }
 
-    @Override protected RaftState state() {
+    @Override public RaftState state() {
         return RaftState.Candidate;
     }
 
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
-        if(message instanceof ElectionTimeout){
-            if(votesRequired == 0){
+        if (message instanceof ElectionTimeout) {
+            if (votesRequired == 0) {
                 // If there are no peers then we should be a Leader
                 // We wait for the election timeout to occur before declare
                 // ourselves the leader. This gives enough time for a leader
@@ -141,24 +139,33 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
 
-    private void startNewTerm(){
+    private void startNewTerm() {
+
+
         // set voteCount back to 1 (that is voting for self)
         voteCount = 1;
 
         // Increment the election term and vote for self
         long currentTerm = context.getTermInformation().getCurrentTerm();
-        context.getTermInformation().update(currentTerm+1, context.getId());
+        context.getTermInformation().update(currentTerm + 1, context.getId());
+
+        context.getLogger().debug("Starting new term " + (currentTerm+1));
 
         // Request for a vote
-        for(ActorSelection peerActor : peerToActor.values()){
+        for (ActorSelection peerActor : peerToActor.values()) {
             peerActor.tell(new RequestVote(
                     context.getTermInformation().getCurrentTerm(),
-                    context.getId(), context.getReplicatedLog().last().getIndex(),
-                    context.getReplicatedLog().last().getTerm()),
-                context.getActor());
+                    context.getId(),
+                    context.getReplicatedLog().lastIndex(),
+                    context.getReplicatedLog().lastTerm()),
+                context.getActor()
+            );
         }
 
 
     }
 
+    @Override public void close() throws Exception {
+        stopElection();
+    }
 }

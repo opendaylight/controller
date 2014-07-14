@@ -12,9 +12,8 @@ import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,7 +26,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     public void testHandleMessageForUnknownMessage() throws Exception {
         new JavaTestKit(getSystem()) {{
             Leader leader =
-                new Leader(createActorContext(), Collections.EMPTY_LIST);
+                new Leader(createActorContext());
 
             // handle message should return the Leader state when it receives an
             // unknown message
@@ -46,11 +45,15 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                     ActorRef followerActor = getTestActor();
 
-                    List<String> followers = new ArrayList();
+                    MockRaftActorContext actorContext = (MockRaftActorContext) createActorContext();
 
-                    followers.add(followerActor.path().toString());
+                    Map<String, String> peerAddresses = new HashMap();
 
-                    Leader leader = new Leader(createActorContext(), followers);
+                    peerAddresses.put(followerActor.path().toString(), followerActor.path().toString());
+
+                    actorContext.setPeerAddresses(peerAddresses);
+
+                    Leader leader = new Leader(actorContext);
                     leader.handleMessage(senderActor, new SendHeartBeat());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
@@ -78,7 +81,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
-        return new Leader(actorContext, Collections.EMPTY_LIST);
+        return new Leader(actorContext);
     }
 
     @Override protected RaftActorContext createActorContext() {

@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -15,8 +16,9 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,12 +39,38 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     private final ActorRef peerActor4 = getSystem().actorOf(Props.create(
         DoNothingActor.class));
 
+    private final Map<String, String> onePeer = new HashMap<>();
+    private final Map<String, String> twoPeers = new HashMap<>();
+    private final Map<String, String> fourPeers = new HashMap<>();
+
+    @Before
+    public void setUp(){
+        onePeer.put(peerActor1.path().toString(),
+            peerActor1.path().toString());
+
+        twoPeers.put(peerActor1.path().toString(),
+            peerActor1.path().toString());
+        twoPeers.put(peerActor2.path().toString(),
+            peerActor2.path().toString());
+
+        fourPeers.put(peerActor1.path().toString(),
+            peerActor1.path().toString());
+        fourPeers.put(peerActor2.path().toString(),
+            peerActor2.path().toString());
+        fourPeers.put(peerActor3.path().toString(),
+            peerActor3.path().toString());
+        fourPeers.put(peerActor4.path().toString(),
+            peerActor3.path().toString());
+
+
+    }
+
     @Test
     public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself(){
         RaftActorContext raftActorContext = createActorContext();
         long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm();
 
-        new Candidate(raftActorContext, Collections.EMPTY_LIST);
+        new Candidate(raftActorContext);
 
         assertEquals(expectedTerm+1, raftActorContext.getTermInformation().getCurrentTerm());
         assertEquals(raftActorContext.getId(), raftActorContext.getTermInformation().getVotedFor());
@@ -55,7 +83,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    Candidate candidate = new Candidate(createActorContext(getTestActor()), Collections.EMPTY_LIST);
+                    Candidate candidate = new Candidate(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
@@ -78,7 +106,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     public void testHandleElectionTimeoutWhenThereAreZeroPeers(){
         RaftActorContext raftActorContext = createActorContext();
         Candidate candidate =
-            new Candidate(raftActorContext, Collections.EMPTY_LIST);
+            new Candidate(raftActorContext);
 
         RaftState raftState =
             candidate.handleMessage(candidateActor, new ElectionTimeout());
@@ -87,12 +115,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
-    public void testHandleElectionTimeoutWhenThereAreTwoPeers(){
-        RaftActorContext raftActorContext = createActorContext();
+    public void testHandleElectionTimeoutWhenThereAreTwoNodesInCluster(){
+        MockRaftActorContext raftActorContext =
+            (MockRaftActorContext) createActorContext();
+        raftActorContext.setPeerAddresses(onePeer);
         Candidate candidate =
-            new Candidate(raftActorContext, Arrays
-                .asList(peerActor1.path().toString(),
-                    peerActor2.path().toString()));
+            new Candidate(raftActorContext);
 
         RaftState raftState =
             candidate.handleMessage(candidateActor, new ElectionTimeout());
@@ -101,12 +129,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInThreePeerCluster(){
-        RaftActorContext raftActorContext = createActorContext();
+    public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodesInCluster(){
+        MockRaftActorContext raftActorContext =
+            (MockRaftActorContext) createActorContext();
+        raftActorContext.setPeerAddresses(twoPeers);
         Candidate candidate =
-            new Candidate(raftActorContext, Arrays
-                .asList(peerActor1.path().toString(),
-                    peerActor2.path().toString()));
+            new Candidate(raftActorContext);
 
         RaftState stateOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
 
@@ -115,17 +143,16 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInFivePeerCluster(){
-        RaftActorContext raftActorContext = createActorContext();
+    public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodesInCluster(){
+        MockRaftActorContext raftActorContext =
+            (MockRaftActorContext) createActorContext();
+        raftActorContext.setPeerAddresses(fourPeers);
         Candidate candidate =
-            new Candidate(raftActorContext, Arrays
-                .asList(peerActor1.path().toString(),
-                    peerActor2.path().toString(),
-                    peerActor3.path().toString()));
+            new Candidate(raftActorContext);
 
         RaftState stateOnFirstVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
 
-        RaftState stateOnSecondVote = candidate.handleMessage(peerActor1, new RequestVoteReply(0, true));
+        RaftState stateOnSecondVote = candidate.handleMessage(peerActor2, new RequestVoteReply(0, true));
 
         Assert.assertEquals(RaftState.Candidate, stateOnFirstVote);
         Assert.assertEquals(RaftState.Leader, stateOnSecondVote);
@@ -139,7 +166,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    Candidate candidate = new Candidate(createActorContext(getTestActor()), Collections.EMPTY_LIST);
+                    Candidate candidate = new Candidate(createActorContext(getTestActor()));
 
                     candidate.handleMessage(getTestActor(), new AppendEntries(0, "test", 0,0,Collections.EMPTY_LIST, 0));
 
@@ -168,7 +195,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    Candidate candidate = new Candidate(createActorContext(getTestActor()), Collections.EMPTY_LIST);
+                    Candidate candidate = new Candidate(createActorContext(getTestActor()));
 
                     candidate.handleMessage(getTestActor(), new RequestVote(0, "test", 0, 0));
 
@@ -261,7 +288,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
 
     @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
-        return new Candidate(actorContext, Collections.EMPTY_LIST);
+        return new Candidate(actorContext);
     }
 
     @Override protected RaftActorContext createActorContext() {
