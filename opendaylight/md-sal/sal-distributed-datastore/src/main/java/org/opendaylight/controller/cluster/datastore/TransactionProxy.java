@@ -12,10 +12,12 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
+
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
+import com.google.common.util.concurrent.ListeningExecutorService;
+
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -29,8 +31,10 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -42,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -74,13 +77,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     private final ActorContext actorContext;
     private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
     private final String identifier;
-    private final ExecutorService executor;
+    private final ListeningExecutorService executor;
     private final SchemaContext schemaContext;
 
     public TransactionProxy(
         ActorContext actorContext,
         TransactionType transactionType,
-        ExecutorService executor,
+        ListeningExecutorService executor,
         SchemaContext schemaContext
     ) {
 
@@ -94,7 +97,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+            final YangInstanceIdentifier path) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -214,7 +218,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(final YangInstanceIdentifier path);
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
+                final YangInstanceIdentifier path);
 
         void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
     }
@@ -266,9 +271,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             getActor().tell(new MergeData(path, data, schemaContext).toSerializable(), null);
         }
 
-        @Override public ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(final YangInstanceIdentifier path) {
+        @Override public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
+                final YangInstanceIdentifier path) {
 
-            Callable<Optional<NormalizedNode<?,?>>> call = new Callable() {
+            Callable<Optional<NormalizedNode<?,?>>> call = new Callable<Optional<NormalizedNode<?,?>>>() {
 
                 @Override public Optional<NormalizedNode<?,?>> call() throws Exception {
                     Object response = actorContext
@@ -279,20 +285,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                         if(reply.getNormalizedNode() == null){
                             return Optional.absent();
                         }
-                        //FIXME : A cast should not be required here ???
-                        return (Optional<NormalizedNode<?, ?>>) Optional.of(reply.getNormalizedNode());
+                        return Optional.<NormalizedNode<?,?>>of(reply.getNormalizedNode());
                     }
 
                     return Optional.absent();
                 }
             };
 
-            ListenableFutureTask<Optional<NormalizedNode<?, ?>>>
-                future = ListenableFutureTask.create(call);
-
-            executor.submit(future);
-
-            return future;
+            return MappingCheckedFuture.create(executor.submit(call), ReadFailedException.MAPPER);
         }
 
         @Override public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
@@ -342,10 +342,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         @Override
-        public ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(
+        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
             YangInstanceIdentifier path) {
             LOG.error("readData called path = {}", path);
-            return Futures.immediateFuture(
+            return Futures.immediateCheckedFuture(
                 Optional.<NormalizedNode<?, ?>>absent());
         }
 

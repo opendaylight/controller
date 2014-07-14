@@ -2,9 +2,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import junit.framework.Assert;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -28,7 +34,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TransactionProxyTest extends AbstractActorTest {
@@ -38,12 +43,17 @@ public class TransactionProxyTest extends AbstractActorTest {
     private final ActorContext testContext =
         new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), configuration );
 
-    private ExecutorService transactionExecutor =
-        Executors.newSingleThreadExecutor();
+    private final ListeningExecutorService transactionExecutor =
+        MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
     @Before
     public void setUp(){
         ShardStrategyFactory.setConfiguration(configuration);
+    }
+
+    @After
+    public void tearDown() {
+        transactionExecutor.shutdownNow();
     }
 
     @Test
