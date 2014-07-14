@@ -16,15 +16,18 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -49,11 +52,12 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         this.id = id;
     }
 
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readConfigurationData(final YangInstanceIdentifier path) {
+    private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readConfigurationData(
+            final YangInstanceIdentifier path) {
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
                 NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, toFilterStructure(path)));
 
-        return Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
@@ -66,6 +70,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
                         transform(path, node);
             }
         });
+
+        return MappingCheckedFuture.create(transformedFuture, ReadFailedException.MAPPER);
     }
 
     private void checkReadSuccess(final RpcResult<CompositeNode> result, final YangInstanceIdentifier path) {
@@ -85,10 +91,11 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         }
     }
 
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readOperationalData(final YangInstanceIdentifier path) {
+    private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readOperationalData(
+            final YangInstanceIdentifier path) {
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, toFilterStructure(path)));
 
-        return Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
@@ -101,6 +108,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
                         transform(path, node);
             }
         });
+
+        return MappingCheckedFuture.create(transformedFuture, ReadFailedException.MAPPER);
     }
 
     private static Node<?> findNode(final CompositeNode node, final YangInstanceIdentifier identifier) {
@@ -136,7 +145,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+            final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         final YangInstanceIdentifier legacyPath = toLegacyPath(normalizer, path, id);
 
         switch (store) {
