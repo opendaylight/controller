@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * The behavior of a RaftActor when it is in the CandidateState
- * <p>
+ * <p/>
  * Candidates (§5.2):
  * <ul>
  * <li> On conversion to candidate, start election:
@@ -56,7 +56,7 @@ public class Candidate extends AbstractRaftActorBehavior {
                 context.actorSelection(peerPath));
         }
 
-        if(peerPaths.size() > 0) {
+        if (peerPaths.size() > 0) {
             votesRequired = (peerPaths.size() + 1) / 2 + 1;
         } else {
             votesRequired = 0;
@@ -71,9 +71,11 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         // There is some peer who thinks it's a leader but is not
         // I will not accept this append entries
-        sender.tell(new AppendEntriesReply(
-            context.getTermInformation().getCurrentTerm(), false),
-            context.getActor());
+        sender.tell(new AppendEntriesReply(context.getId(),
+                context.getTermInformation().getCurrentTerm(), false,
+                lastIndex(), lastTerm()),
+            context.getActor()
+        );
 
         return suggestedState;
     }
@@ -88,30 +90,30 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     @Override protected RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState) {
-        if(suggestedState == RaftState.Follower) {
+        if (suggestedState == RaftState.Follower) {
             // If base class thinks I should be follower then I am
             return suggestedState;
         }
 
-        if(requestVoteReply.isVoteGranted()){
+        if (requestVoteReply.isVoteGranted()) {
             voteCount++;
         }
 
-        if(voteCount >= votesRequired){
+        if (voteCount >= votesRequired) {
             return RaftState.Leader;
         }
 
         return state();
     }
 
-    @Override protected RaftState state() {
+    @Override public RaftState state() {
         return RaftState.Candidate;
     }
 
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
-        if(message instanceof ElectionTimeout){
-            if(votesRequired == 0){
+        if (message instanceof ElectionTimeout) {
+            if (votesRequired == 0) {
                 // If there are no peers then we should be a Leader
                 // FIXME : Do I really need to wait for the Election to timeout to consider myself a leader?
                 return RaftState.Leader;
@@ -124,24 +126,29 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
 
-    private void startNewTerm(){
+    private void startNewTerm() {
         // set voteCount back to 1 (that is voting for self)
         voteCount = 1;
 
         // Increment the election term and vote for self
         long currentTerm = context.getTermInformation().getCurrentTerm();
-        context.getTermInformation().update(currentTerm+1, context.getId());
+        context.getTermInformation().update(currentTerm + 1, context.getId());
 
         // Request for a vote
-        for(ActorSelection peerActor : peerToActor.values()){
+        for (ActorSelection peerActor : peerToActor.values()) {
             peerActor.tell(new RequestVote(
                     context.getTermInformation().getCurrentTerm(),
-                    context.getId(), context.getReplicatedLog().last().getIndex(),
+                    context.getId(),
+                    context.getReplicatedLog().last().getIndex(),
                     context.getReplicatedLog().last().getTerm()),
-                context.getActor());
+                context.getActor()
+            );
         }
 
 
     }
 
+    @Override public void close() throws Exception {
+        stopElection();
+    }
 }

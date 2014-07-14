@@ -566,7 +566,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
-        return new AppendEntriesReply(100, false);
+        return new AppendEntriesReply("follower-1", 100, false, 100, 100);
     }
 
     protected RequestVote createRequestVoteWithNewerTerm() {

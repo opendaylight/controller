@@ -13,6 +13,8 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
 public class RaftActorContextImpl implements RaftActorContext{
 
@@ -30,6 +32,9 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private final ReplicatedLog replicatedLog;
 
+    private final LoggingAdapter LOG;
+
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
@@ -41,6 +46,7 @@ public class RaftActorContextImpl implements RaftActorContext{
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
         this.replicatedLog = replicatedLog;
+        this.LOG = Logging.getLogger(context.system(), this);
     }
 
     public ActorRef actorOf(Props props){
@@ -85,5 +91,9 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     @Override public ActorSystem getActorSystem() {
         return context.system();
+    }
+
+    @Override public LoggingAdapter getLogger() {
+        return this.LOG;
     }
 }

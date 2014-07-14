@@ -17,9 +17,24 @@ public class AppendEntriesReply extends AbstractRaftRPC{
     // prevLogIndex and prevLogTerm
     private final boolean success;
 
-    public AppendEntriesReply(long term, boolean success) {
+    // The index of the last entry in the followers log
+    // This will be used to set the matchIndex for the follower on the
+    // Leader
+    private final long logLastIndex;
+
+    private final long logLastTerm;
+
+    // The followerId - this will be used to figure out which follower is
+    // responding
+    private final String followerId;
+
+    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm) {
         super(term);
+
+        this.followerId = followerId;
         this.success = success;
+        this.logLastIndex = logLastIndex;
+        this.logLastTerm = logLastTerm;
     }
 
     public long getTerm() {
@@ -28,5 +43,17 @@ public class AppendEntriesReply extends AbstractRaftRPC{
 
     public boolean isSuccess() {
         return success;
+    }
+
+    public long getLogLastIndex() {
+        return logLastIndex;
+    }
+
+    public long getLogLastTerm() {
+        return logLastTerm;
+    }
+
+    public String getFollowerId() {
+        return followerId;
     }
 }

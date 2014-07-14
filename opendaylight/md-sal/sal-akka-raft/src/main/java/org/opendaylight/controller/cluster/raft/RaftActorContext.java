@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.event.LoggingAdapter;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -91,4 +92,10 @@ public interface RaftActorContext {
      * @return The ActorSystem associated with this context
      */
     ActorSystem getActorSystem();
+
+    /**
+     *
+     * @return
+     */
+    LoggingAdapter getLogger();
 }

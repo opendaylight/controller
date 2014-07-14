@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import java.util.List;
+
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor
  */
@@ -29,6 +31,12 @@ public interface ReplicatedLog {
     ReplicatedLogEntry last();
 
     /**
+     *
+     * @return
+     */
+    long lastIndex();
+
+    /**
      * Remove all the entries from the log starting from and including
      * the index
      *
@@ -41,4 +49,10 @@ public interface ReplicatedLog {
      * @param replicatedLogEntry
      */
     void append(ReplicatedLogEntry replicatedLogEntry);
+
+    /**
+     *
+     * @param index
+     */
+    List<ReplicatedLogEntry> getFrom(long index);
 }

@@ -12,17 +12,22 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
+import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +65,8 @@ public class Leader extends AbstractRaftActorBehavior {
     private final Map<String, ActorSelection> followerToActor = new HashMap<>();
 
     private Cancellable heartbeatCancel = null;
+
+    private List<ClientRequestTracker> trackerList = new ArrayList<>();
 
     public Leader(RaftActorContext context, List<String> followerPaths) {
         super(context);
@@ -100,34 +107,73 @@ public class Leader extends AbstractRaftActorBehavior {
         return suggestedState;
     }
 
-    @Override protected RaftState state() {
+    @Override public RaftState state() {
         return RaftState.Leader;
     }
 
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
+        //context.getLogger().info(message.toString());
         scheduleHeartBeat(HEART_BEAT_INTERVAL);
 
         if (message instanceof SendHeartBeat) {
-            for (ActorSelection follower : followerToActor.values()) {
-                follower.tell(new AppendEntries(
-                    context.getTermInformation().getCurrentTerm(),
-                    context.getId(),
-                    context.getReplicatedLog().last().getIndex(),
-                    context.getReplicatedLog().last().getTerm(),
-                    Collections.EMPTY_LIST, context.getCommitIndex()),
-                    context.getActor());
+            if(followerToActor.size() > 0) {
+                for (String follower : followerToActor.keySet()) {
+
+                    FollowerLogInformation followerLogInformation =
+                        followerToLog.get(follower);
+
+                    AtomicLong nextIndex =
+                        followerLogInformation.getNextIndex();
+
+                    List<ReplicatedLogEntry> entries =
+                        context.getReplicatedLog().getFrom(nextIndex.get());
+
+                    followerToActor.get(follower).tell(new AppendEntries(
+                            context.getTermInformation().getCurrentTerm(),
+                            context.getId(),
+                            context.getReplicatedLog().last().getIndex(),
+                            context.getReplicatedLog().last().getTerm(),
+                            entries, context.getCommitIndex()),
+                        context.getActor()
+                    );
+                }
             }
             return state();
+        } else if(message instanceof Replicate){
+            Replicate replicate = (Replicate) message;
+            long logIndex = replicate.getReplicatedLogEntry().getIndex();
+            if(followerToActor.size() == 0){
+                context.setCommitIndex(
+                    replicate.getReplicatedLogEntry().getIndex());
+
+                context.getActor().tell(new ApplyState(replicate.getClientActor(),
+                    replicate.getIdentifier(),
+                    replicate.getReplicatedLogEntry()), context.getActor());
+            } else {
+
+                trackerList.add(
+                    new ClientRequestTrackerImpl(replicate.getClientActor(),
+                        logIndex)
+                );
+
+                // Send an AppendEntries to all followers
+
+            }
         }
+
         return super.handleMessage(sender, message);
     }
 
-    private void scheduleHeartBeat(FiniteDuration interval) {
+    private void stopHeartBeat(){
         if (heartbeatCancel != null && !heartbeatCancel.isCancelled()) {
             heartbeatCancel.cancel();
         }
+    }
+
+    private void scheduleHeartBeat(FiniteDuration interval) {
+        stopHeartBeat();
 
         // Schedule a heartbeat. When the scheduler triggers a SendHeartbeat
         // message is sent to itself.
@@ -135,9 +181,13 @@ public class Leader extends AbstractRaftActorBehavior {
         // need to be sent if there are other messages being sent to the remote
         // actor.
         heartbeatCancel =
-            context.getActorSystem().scheduler().scheduleOnce(interval,
+            context.getActorSystem().scheduler().scheduleOnce(
+                interval,
                 context.getActor(), new SendHeartBeat(),
                 context.getActorSystem().dispatcher(), context.getActor());
     }
 
+    @Override public void close() throws Exception {
+        stopHeartBeat();
+    }
 }
