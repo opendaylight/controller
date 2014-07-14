@@ -37,9 +37,9 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
             CreateTransaction createTransaction = CreateTransaction.fromSerializable( message);
             createTransaction(createTransaction);
-        } else if (message instanceof CloseTransactionChain) {
+        } else if (message.getClass().equals(CloseTransactionChain.SERIALIZABLE_CLASS)) {
             chain.close();
-            getSender().tell(new CloseTransactionChainReply(), getSelf());
+            getSender().tell(new CloseTransactionChainReply().toSerializable(), getSelf());
         }else{
           throw new Exception("Not recognized message recieved="+message);
         }
