@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
  * In each of these behaviors the Raft Actor handles the same Raft messages
  * differently.
  */
-public interface RaftActorBehavior {
+public interface RaftActorBehavior extends AutoCloseable{
     /**
      * Handle a message. If the processing of the message warrants a state
      * change then a new state should be returned otherwise this method should
@@ -36,4 +36,17 @@ public interface RaftActorBehavior {
      * @return The new state or self (this)
      */
     RaftState handleMessage(ActorRef sender, Object message);
+
+    /**
+     * The state associated with a given behavior
+     *
+     * @return
+     */
+    RaftState state();
+
+    /**
+     *
+     * @return
+     */
+    String getLeaderId();
 }
