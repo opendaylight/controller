@@ -62,4 +62,14 @@ public class AppendEntries extends AbstractRaftRPC {
     public long getLeaderCommit() {
         return leaderCommit;
     }
+
+    @Override public String toString() {
+        return "AppendEntries{" +
+            "leaderId='" + leaderId + '\'' +
+            ", prevLogIndex=" + prevLogIndex +
+            ", prevLogTerm=" + prevLogTerm +
+            ", entries=" + entries +
+            ", leaderCommit=" + leaderCommit +
+            '}';
+    }
 }

@@ -22,10 +22,24 @@ public interface FollowerLogInformation {
     public long incrNextIndex();
 
     /**
+     * Decrement the value of the nextIndex
+     * @return
+     */
+    public long decrNextIndex();
+
+    /**
+     *
+     * @param nextIndex
+     */
+    void setNextIndex(long nextIndex);
+
+    /**
      * Increment the value of the matchIndex
      * @return
      */
     public long incrMatchIndex();
+
+    public void setMatchIndex(long matchIndex);
 
     /**
      * The identifier of the follower

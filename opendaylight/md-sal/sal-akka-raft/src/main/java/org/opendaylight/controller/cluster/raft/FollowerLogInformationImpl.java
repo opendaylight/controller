@@ -29,8 +29,20 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
         return nextIndex.incrementAndGet();
     }
 
+    @Override public long decrNextIndex() {
+        return nextIndex.decrementAndGet();
+    }
+
+    @Override public void setNextIndex(long nextIndex) {
+        this.nextIndex.set(nextIndex);
+    }
+
     public long incrMatchIndex(){
         return matchIndex.incrementAndGet();
+    }
+
+    @Override public void setMatchIndex(long matchIndex) {
+        this.matchIndex.set(matchIndex);
     }
 
     public String getId() {
