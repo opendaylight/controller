@@ -131,10 +131,10 @@ public class ShardTransaction extends AbstractUntypedActor {
             mergeData(MergeData.fromSerializable(message, schemaContext));
         } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
             deleteData(DeleteData.fromSerizalizable(message));
-        } else if (message instanceof ReadyTransaction) {
-            readyTransaction((ReadyTransaction) message);
-        } else if (message instanceof CloseTransaction) {
-            closeTransaction((CloseTransaction) message);
+        } else if (ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
+            readyTransaction(new ReadyTransaction());
+        } else if (message.getClass().equals(CloseTransaction.SERIALIZABLE_CLASS)) {
+            closeTransaction(new CloseTransaction());
         } else if (message instanceof GetCompositedModification) {
             // This is here for testing only
             getSender().tell(new GetCompositeModificationReply(
@@ -176,20 +176,20 @@ public class ShardTransaction extends AbstractUntypedActor {
         modification.addModification(
             new WriteModification(message.getPath(), message.getData(),schemaContext));
         transaction.write(message.getPath(), message.getData());
-        getSender().tell(new WriteDataReply(), getSelf());
+        getSender().tell(new WriteDataReply().toSerializable(), getSelf());
     }
 
     private void mergeData(MergeData message) {
         modification.addModification(
             new MergeModification(message.getPath(), message.getData(), schemaContext));
         transaction.merge(message.getPath(), message.getData());
-        getSender().tell(new MergeDataReply(), getSelf());
+        getSender().tell(new MergeDataReply().toSerializable(), getSelf());
     }
 
     private void deleteData(DeleteData message) {
         modification.addModification(new DeleteModification(message.getPath()));
         transaction.delete(message.getPath());
-        getSender().tell(new DeleteDataReply(), getSelf());
+        getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
     }
 
     private void readyTransaction(ReadyTransaction message) {
@@ -197,13 +197,13 @@ public class ShardTransaction extends AbstractUntypedActor {
         ActorRef cohortActor = getContext().actorOf(
             ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
         getSender()
-            .tell(new ReadyTransactionReply(cohortActor.path()), getSelf());
+            .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
 
     }
 
     private void closeTransaction(CloseTransaction message) {
         transaction.close();
-        getSender().tell(new CloseTransactionReply(), getSelf());
+        getSender().tell(new CloseTransactionReply().toSerializable(), getSelf());
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
