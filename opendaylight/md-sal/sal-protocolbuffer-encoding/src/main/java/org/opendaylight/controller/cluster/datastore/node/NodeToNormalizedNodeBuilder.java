@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
@@ -194,7 +195,8 @@ public abstract class NodeToNormalizedNodeBuilder<T extends PathArgument>
         final QName nodeType, final Node node) {
       checkArgument(node != null);
 
-      if (!node.getType().equals(AugmentationNode.class.getSimpleName())&& !node.getType().equals(ContainerNode.class.getSimpleName())) {
+      if (!node.getType().equals(AugmentationNode.class.getSimpleName())&& !node.getType().equals(ContainerNode.class.getSimpleName())
+          && !node.getType().equals(MapNode.class.getSimpleName())) {
         checkArgument(nodeType != null);
       }
 

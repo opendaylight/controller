@@ -8,5 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class ReadyTransaction {
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+
+public class ReadyTransaction implements SerializableMessage{
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.ReadyTransaction.class;
+
+  @Override
+  public Object toSerializable() {
+    return ShardTransactionMessages.ReadyTransaction.newBuilder().build();
+  }
+
 }
