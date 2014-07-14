@@ -146,8 +146,11 @@ public class NormalizedNodeToProtocolBufferNode {
           (DataContainerNode) normalizedNode;
 
       navigateDataContainerNode(level + 1, parentPath,dataContainerNode, builderParent);
-    } else {
+    }else if (normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer) {
 
+      navigateNormalizedNodeContainerMixin(level, parentPath,
+          (NormalizedNodeContainer<?, ?, ?>) normalizedNode, builderParent);
+    }else{
       if (normalizedNode instanceof LeafNode) {
         buildLeafNode(parentPath,normalizedNode, builderParent);
       } else if (normalizedNode instanceof LeafSetEntryNode) {
