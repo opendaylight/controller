@@ -10,9 +10,11 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -65,8 +67,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      *
      */
-
     private Cancellable electionCancel = null;
+
+    /**
+     *
+     */
+    private String leaderId = null;
 
 
     protected AbstractRaftActorBehavior(RaftActorContext context) {
@@ -93,57 +99,104 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
 
     protected RaftState appendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState raftState){
+        AppendEntries appendEntries, RaftState raftState) {
+
+//        context.getLogger().debug(appendEntries.toString());
+
+        if(raftState != state()){
+            context.getLogger().debug("Suggested state is " + raftState
+                + " current behavior state is " + state());
+        }
 
         // 1. Reply false if term < currentTerm (§5.1)
-        if(appendEntries.getTerm() < currentTerm()){
-            sender.tell(new AppendEntriesReply(currentTerm(), false), actor());
+        if (appendEntries.getTerm() < currentTerm()) {
+            context.getLogger().debug("Cannot append entries because sender term " + appendEntries.getTerm() + " is less than " + currentTerm());
+            sender.tell(
+                new AppendEntriesReply(context.getId(), currentTerm(), false,
+                    lastIndex(), lastTerm()), actor());
             return state();
         }
+
+        // If we got here then we do appear to be talking to the leader
+        leaderId = appendEntries.getLeaderId();
 
         // 2. Reply false if log doesn’t contain an entry at prevLogIndex
         // whose term matches prevLogTerm (§5.3)
         ReplicatedLogEntry previousEntry = context.getReplicatedLog()
             .get(appendEntries.getPrevLogIndex());
 
-        if(previousEntry == null || previousEntry.getTerm() != appendEntries.getPrevLogTerm()){
-            sender.tell(new AppendEntriesReply(currentTerm(), false), actor());
+
+        if (lastIndex() > -1 && previousEntry != null && previousEntry.getTerm() != appendEntries
+            .getPrevLogTerm()) {
+
+            context.getLogger().debug("Cannot append entries because previous entry term " + previousEntry.getTerm() + " is note equal to append entries prvLogTerm " + appendEntries.getPrevLogTerm());
+
+            sender.tell(
+                new AppendEntriesReply(context.getId(), currentTerm(), false,
+                    lastIndex(), lastTerm()), actor());
             return state();
         }
 
-        if(appendEntries.getEntries() != null) {
+        if (appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
+            context.getLogger().debug("Number of entries to be appended = " + appendEntries.getEntries().size());
             // 3. If an existing entry conflicts with a new one (same index
             // but different terms), delete the existing entry and all that
             // follow it (§5.3)
             int addEntriesFrom = 0;
-            for (int i = 0;
-                 i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
-                ReplicatedLogEntry newEntry = context.getReplicatedLog()
-                    .get(i + 1);
+            if(context.getReplicatedLog().size() > 0) {
+                for (int i = 0;
+                     i < appendEntries.getEntries()
+                         .size(); i++, addEntriesFrom++) {
+                    ReplicatedLogEntry matchEntry =
+                        appendEntries.getEntries().get(i);
+                    ReplicatedLogEntry newEntry = context.getReplicatedLog()
+                        .get(matchEntry.getIndex());
 
-                if (newEntry != null && newEntry.getTerm() == appendEntries.getEntries().get(i).getTerm()){
-                    break;
-                }
-                if (newEntry != null && newEntry.getTerm() != appendEntries
-                    .getEntries().get(i).getTerm()) {
-                    context.getReplicatedLog().removeFrom(i + 1);
-                    break;
+                    if(newEntry == null){
+                        //newEntry not found in the log
+                        break;
+                    }
+
+                    if (newEntry != null && newEntry.getTerm() == matchEntry
+                        .getTerm()) {
+                        continue;
+                    }
+                    if (newEntry != null && newEntry.getTerm() != matchEntry
+                        .getTerm()) {
+                        context.getLogger().debug("Removing entries from log starting at " + matchEntry.getIndex());
+                        context.getReplicatedLog().removeFrom(matchEntry.getIndex());
+                        break;
+                    }
                 }
             }
+
+            context.getLogger().debug("After cleanup entries to be added from = " + (addEntriesFrom + lastIndex()));
 
             // 4. Append any new entries not already in the log
             for (int i = addEntriesFrom;
                  i < appendEntries.getEntries().size(); i++) {
+                context.getLogger().debug("Append entry to log " + appendEntries.getEntries().get(i).toString());
                 context.getReplicatedLog()
-                    .append(appendEntries.getEntries().get(i));
+                    .appendAndPersist(appendEntries.getEntries().get(i));
             }
+
+            context.getLogger().debug(
+                "Log size is now " + context.getReplicatedLog().size());
         }
 
 
         // 5. If leaderCommit > commitIndex, set commitIndex =
         // min(leaderCommit, index of last new entry)
+
+        long prevCommitIndex = context.getCommitIndex();
+
         context.setCommitIndex(Math.min(appendEntries.getLeaderCommit(),
-            context.getReplicatedLog().last().getIndex()));
+            context.getReplicatedLog().lastIndex()));
+
+        if(prevCommitIndex != context.getCommitIndex()) {
+            context.getLogger()
+                .debug("Commit index set to " + context.getCommitIndex());
+        }
 
         // If commitIndex > lastApplied: increment lastApplied, apply
         // log[lastApplied] to state machine (§5.3)
@@ -151,7 +204,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             applyLogToStateMachine(appendEntries.getLeaderCommit());
         }
 
-        sender.tell(new AppendEntriesReply(currentTerm(), true), actor());
+
+
+        sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), true,
+            lastIndex(), lastTerm()), actor());
 
         return handleAppendEntries(sender, appendEntries, raftState);
     }
@@ -201,7 +257,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             if (requestVote.getLastLogTerm() > lastTerm()) {
                 candidateLatest = true;
             } else if ((requestVote.getLastLogTerm() == lastTerm())
-                && requestVote.getLastLogIndex() >= lastTerm()) {
+                && requestVote.getLastLogIndex() >= lastIndex()) {
                 candidateLatest = true;
             }
 
@@ -236,23 +292,21 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected abstract RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState);
 
-    /**
-     * @return The derived class should return the state that corresponds to
-     * it's behavior
-     */
-    protected abstract RaftState state();
-
     protected FiniteDuration electionDuration() {
         long variance = new Random().nextInt(ELECTION_TIME_MAX_VARIANCE);
         return new FiniteDuration(ELECTION_TIME_INTERVAL + variance,
             TimeUnit.MILLISECONDS);
     }
 
-    protected void scheduleElection(FiniteDuration interval) {
-
+    protected void stopElection() {
         if (electionCancel != null && !electionCancel.isCancelled()) {
             electionCancel.cancel();
         }
+    }
+
+    protected void scheduleElection(FiniteDuration interval) {
+
+        stopElection();
 
         // Schedule an election. When the scheduler triggers an ElectionTimeout
         // message is sent to itself
@@ -275,13 +329,43 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected long lastTerm() {
-        return context.getReplicatedLog().last().getTerm();
+        return context.getReplicatedLog().lastTerm();
     }
 
     protected long lastIndex() {
-        return context.getReplicatedLog().last().getIndex();
+        return context.getReplicatedLog().lastIndex();
     }
 
+    protected ClientRequestTracker findClientRequestTracker(long logIndex){
+        return null;
+    }
+
+    protected void applyLogToStateMachine(long index) {
+        // Now maybe we apply to the state machine
+        for (long i = context.getLastApplied() + 1;
+             i < index + 1; i++) {
+            ActorRef clientActor = null;
+            String identifier = null;
+            ClientRequestTracker tracker = findClientRequestTracker(i);
+
+            if (tracker != null) {
+                clientActor = tracker.getClientActor();
+                identifier = tracker.getIdentifier();
+            }
+            ReplicatedLogEntry replicatedLogEntry =
+                context.getReplicatedLog().get(i);
+
+            if(replicatedLogEntry != null) {
+                actor().tell(new ApplyState(clientActor, identifier,
+                    replicatedLogEntry), actor());
+            } else {
+                context.getLogger().error("Missing index " + i + " from log. Cannot apply state.");
+            }
+        }
+        // Send a local message to the local RaftActor (it's derived class to be
+        // specific to apply the log to it's index)
+        context.setLastApplied(index);
+    }
 
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
@@ -307,6 +391,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return raftState;
     }
 
+    @Override public String getLeaderId() {
+        return leaderId;
+    }
+
     private RaftState applyTerm(RaftRPC rpc) {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
@@ -317,12 +405,5 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
         return state();
     }
-
-    private void applyLogToStateMachine(long index) {
-        // Send a local message to the local RaftActor (it's derived class to be
-        // specific to apply the log to it's index)
-        context.setLastApplied(index);
-    }
-
 
 }

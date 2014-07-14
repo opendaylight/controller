@@ -239,7 +239,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(1, "leader-1", 2, 1, entries, 101);
+                new AppendEntries(1, "leader-1", 2, 1, entries, 4);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -281,6 +281,57 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
 
         }};
+    }
+
+    @Test
+    public void testHandleAppendEntriesAddSameEntryToLog(){
+        new JavaTestKit(getSystem()) {
+            {
+
+                MockRaftActorContext context = (MockRaftActorContext)
+                    createActorContext();
+
+                // First set the receivers term to lower number
+                context.getTermInformation().update(2, "test");
+
+                // Prepare the receivers log
+                MockRaftActorContext.SimpleReplicatedLog log =
+                    new MockRaftActorContext.SimpleReplicatedLog();
+                log.append(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+
+                context.setReplicatedLog(log);
+
+                List<ReplicatedLogEntry> entries = new ArrayList<>();
+                entries.add(
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+
+                AppendEntries appendEntries =
+                    new AppendEntries(2, "leader-1", -1, 1, entries, 0);
+
+                RaftActorBehavior behavior = createBehavior(context);
+
+                if (AbstractRaftActorBehaviorTest.this instanceof CandidateTest) {
+                    // Resetting the Candidates term to make sure it will match
+                    // the term sent by AppendEntries. If this was not done then
+                    // the test will fail because the Candidate will assume that
+                    // the message was sent to it from a lower term peer and will
+                    // thus respond with a failure
+                    context.getTermInformation().update(2, "test");
+                }
+
+                // Send an unknown message so that the state of the RaftActor remains unchanged
+                RaftState expected = behavior.handleMessage(getRef(), "unknown");
+
+                RaftState raftState =
+                    behavior.handleMessage(getRef(), appendEntries);
+
+                assertEquals(expected, raftState);
+
+                assertEquals(1, log.size());
+
+
+            }};
     }
 
     /**
@@ -326,7 +377,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 1, 1, entries, 101);
+                new AppendEntries(2, "leader-1", 1, 1, entries, 3);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -566,7 +617,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
-        return new AppendEntriesReply(100, false);
+        return new AppendEntriesReply("follower-1", 100, false, 100, 100);
     }
 
     protected RequestVote createRequestVoteWithNewerTerm() {
