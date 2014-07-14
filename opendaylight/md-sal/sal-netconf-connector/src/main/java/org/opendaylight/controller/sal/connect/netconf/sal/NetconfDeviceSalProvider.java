@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
+import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
-
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
@@ -22,8 +22,6 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 final class NetconfDeviceSalProvider implements AutoCloseable, Provider, BindingAwareProvider {
 
@@ -41,13 +39,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
     public MountProvisionInstance getMountInstance() {
         Preconditions.checkState(mountInstance != null,
-                "%s: Sal provider was not initialized by sal. Cannot publish notification", id);
+                "%s: Sal provider was not initialized by sal. Cannot get mount instance", id);
         return mountInstance;
     }
 
     public NetconfDeviceDatastoreAdapter getDatastoreAdapter() {
         Preconditions.checkState(datastoreAdapter != null,
-                "%s: Sal provider %s was not initialized by sal. Cannot publish notification", id);
+                "%s: Sal provider %s was not initialized by sal. Cannot get datastore adapter", id);
         return datastoreAdapter;
     }
 

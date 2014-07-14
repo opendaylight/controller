@@ -60,6 +60,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     }
 
     private State state = State.IDLE;
+    private final Promise<S> promise;
     private final Timer timer;
     private final long connectionTimeoutMillis;
 
@@ -68,6 +69,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
             L sessionListener, long connectionTimeoutMillis) {
         super(promise, channel);
         this.sessionPreferences = sessionPreferences;
+        this.promise = promise;
         this.timer = timer;
         this.sessionListener = sessionListener;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
@@ -106,28 +108,40 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
         channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
 
+        // FIXME, make sessionPreferences return HelloMessage, move NetconfHelloMessage to API
+        sendMessage((NetconfHelloMessage)helloMessage);
+
+        replaceHelloMessageOutboundHandler();
+        changeState(State.OPEN_WAIT);
+
         timeout = this.timer.newTimeout(new TimerTask() {
             @Override
             public void run(final Timeout timeout) {
                 synchronized (this) {
                     if (state != State.ESTABLISHED) {
+
                         logger.debug("Connection timeout after {}, session is in state {}", timeout, state);
-                        final IllegalStateException cause = new IllegalStateException(
-                                "Session was not established after " + timeout);
-                        negotiationFailed(cause);
+
+                        // Do not fail negotiation if promise is done or canceled
+                        // It would result in setting result of the promise second time and that throws exception
+                        if (isPromiseFinished() == false) {
+                            // FIXME BUG-1365 calling "negotiation failed" closes the channel, but the channel does not get closed if data is still being transferred
+                            // Loopback connection initiation might
+                            negotiationFailed(new IllegalStateException("Session was not established after " + timeout));
+                        }
+
                         changeState(State.FAILED);
                     } else if(channel.isOpen()) {
                         channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
                     }
                 }
             }
+
+            private boolean isPromiseFinished() {
+                return promise.isDone() || promise.isCancelled();
+            }
+
         }, connectionTimeoutMillis, TimeUnit.MILLISECONDS);
-
-        // FIXME, make sessionPreferences return HelloMessage, move NetconfHelloMessage to API
-        sendMessage((NetconfHelloMessage)helloMessage);
-
-        replaceHelloMessageOutboundHandler();
-        changeState(State.OPEN_WAIT);
     }
 
     private void cancelTimeout() {
