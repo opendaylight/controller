@@ -15,6 +15,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +92,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
             Futures.addCallback(commitFuture, new DOMDataCommitErrorInvoker(transaction, listener.get()));
         }
 
-        return Futures.makeChecked(commitFuture, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+        return MappingCheckedFuture.create(commitFuture,
+                TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
     }
 
     /**
@@ -285,7 +287,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
              */
             @SuppressWarnings({ "unchecked", "rawtypes" })
             ListenableFuture<Void> compositeResult = (ListenableFuture) Futures.allAsList(ops.build());
-            return Futures.makeChecked(compositeResult, TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER);
+            return MappingCheckedFuture.create(compositeResult,
+                                         TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER);
         }
 
         /**
@@ -316,7 +319,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
              */
             @SuppressWarnings({ "unchecked", "rawtypes" })
             ListenableFuture<Void> compositeResult = (ListenableFuture) Futures.allAsList(ops.build());
-            return Futures.makeChecked(compositeResult, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+            return MappingCheckedFuture.create(compositeResult,
+                                     TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
         }
 
         /**
@@ -342,8 +346,8 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
             }
             ListenableFuture<List<Boolean>> allCanCommits = Futures.allAsList(canCommitOperations.build());
             ListenableFuture<Boolean> allSuccessFuture = Futures.transform(allCanCommits, AND_FUNCTION);
-            return Futures
-                    .makeChecked(allSuccessFuture, TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER);
+            return MappingCheckedFuture.create(allSuccessFuture,
+                                       TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER);
 
         }
 
