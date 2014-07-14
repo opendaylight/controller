@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import java.util.concurrent.Executors;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -30,8 +33,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  *
@@ -41,6 +44,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
+    private static final int DEFAULT_EXECUTOR_POOL_SIZE = 10;
 
     private final String type;
     private final ActorContext actorContext;
@@ -55,10 +59,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
      * This is typically used when we need to make a request to an actor and
      * wait for it's response and the consumer needs to be provided a Future.
      *
-     * FIXME : Make the thread pool configurable
+     * FIXME : Make the thread pool size configurable.
      */
-    private final ExecutorService executor =
-        Executors.newFixedThreadPool(10);
+    private final ListeningExecutorService executor =
+        MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(DEFAULT_EXECUTOR_POOL_SIZE));
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
         this(new ActorContext(actorSystem, actorSystem

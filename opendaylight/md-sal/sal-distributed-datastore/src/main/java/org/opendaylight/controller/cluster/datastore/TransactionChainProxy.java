@@ -15,17 +15,18 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import java.util.concurrent.ExecutorService;
+import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
  * TransactionChainProxy acts as a proxy for a DOMStoreTransactionChain created on a remote shard
  */
 public class TransactionChainProxy implements DOMStoreTransactionChain{
     private final ActorContext actorContext;
-    private final ExecutorService transactionExecutor;
+    private final ListeningExecutorService transactionExecutor;
     private final SchemaContext schemaContext;
 
-    public TransactionChainProxy(ActorContext actorContext, ExecutorService transactionExecutor, SchemaContext schemaContext) {
+    public TransactionChainProxy(ActorContext actorContext, ListeningExecutorService transactionExecutor,
+            SchemaContext schemaContext) {
         this.actorContext = actorContext;
         this.transactionExecutor = transactionExecutor;
         this.schemaContext = schemaContext;
