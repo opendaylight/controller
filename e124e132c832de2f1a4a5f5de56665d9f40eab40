@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c30060ad",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-15T02:39:21Z",
+      "side": 1,
+      "message": "It probably makes sense to explicitly use \"if(state \u003d\u003d RaftState.Leader)\" and then throw an exception if we get any state other than that.",
+      "revId": "e124e132c832de2f1a4a5f5de56665d9f40eab40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
