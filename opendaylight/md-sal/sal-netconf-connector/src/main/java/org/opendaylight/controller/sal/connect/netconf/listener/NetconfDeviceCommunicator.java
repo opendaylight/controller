@@ -86,9 +86,9 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                                            final NetconfClientConfiguration config) {
         if(config instanceof NetconfReconnectingClientConfiguration) {
             dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+        } else {
+            dispatch.createClient(config);
         }
-
-        dispatch.createClient(config);
     }
 
     private void tearDown( String reason ) {
