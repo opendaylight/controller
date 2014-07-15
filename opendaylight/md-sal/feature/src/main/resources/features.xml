@@ -25,6 +25,7 @@
         <feature version='${config.version}'>odl-config-subsystem</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-config/${project.version}</bundle>
