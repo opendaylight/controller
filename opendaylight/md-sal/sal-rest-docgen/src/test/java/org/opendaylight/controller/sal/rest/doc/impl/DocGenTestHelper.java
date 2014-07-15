@@ -10,6 +10,9 @@ package org.opendaylight.controller.sal.rest.doc.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
@@ -19,22 +22,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
+import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 public class DocGenTestHelper {
 
@@ -45,7 +42,7 @@ public class DocGenTestHelper {
             URISyntaxException {
 
         URI resourceDirUri = getClass().getResource(resourceDirectory).toURI();
-        final YangModelParser parser = new YangParserImpl();
+        final YangContextParser parser = new YangParserImpl();
         final File testDir = new File(resourceDirUri);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<>();
@@ -90,6 +87,7 @@ public class DocGenTestHelper {
 
         final ArgumentCaptor<String> moduleCapture = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Date> dateCapture = ArgumentCaptor.forClass(Date.class);
+        final ArgumentCaptor<URI> namespaceCapture = ArgumentCaptor.forClass(URI.class);
         when(mockContext.findModuleByName(moduleCapture.capture(), dateCapture.capture())).then(
                 new Answer<Module>() {
                     @Override
@@ -98,6 +96,20 @@ public class DocGenTestHelper {
                         Date date = dateCapture.getValue();
                         for (Module m : modules.values()) {
                             if (m.getName().equals(module) && m.getRevision().equals(date)) {
+                                return m;
+                            }
+                        }
+                        return null;
+                    }
+                });
+        when(mockContext.findModuleByNamespaceAndRevision(namespaceCapture.capture(), dateCapture.capture())).then(
+                new Answer<Module>() {
+                    @Override
+                    public Module answer(InvocationOnMock invocation) throws Throwable {
+                        URI namespace = namespaceCapture.getValue();
+                        Date date = dateCapture.getValue();
+                        for (Module m : modules.values()) {
+                            if (m.getNamespace().equals(namespace) && m.getRevision().equals(date)) {
                                 return m;
                             }
                         }
