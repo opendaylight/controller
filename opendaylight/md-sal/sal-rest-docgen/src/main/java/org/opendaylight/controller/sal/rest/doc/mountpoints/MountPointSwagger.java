@@ -17,9 +17,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
@@ -122,9 +120,9 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         if (iid == null) {
             return null; // indicating not found.
         }
-        SchemaContext context = getSchemaContext(iid);
+        schemaContext = getSchemaContext(iid);
         String urlPrefix = getYangMountUrl(iid);
-        if (context == null) {
+        if (schemaContext == null) {
             return createResourceList();
         }
         List<Resource> resources = new LinkedList<>();
@@ -132,7 +130,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         dataStores.setDescription("Provides methods for accessing the data stores.");
         dataStores.setPath(generatePath(uriInfo, DATASTORES_LABEL, DATASTORES_REVISION));
         resources.add(dataStores);
-        ResourceList list = super.getResourceListing(uriInfo, context, urlPrefix);
+        ResourceList list = super.getResourceListing(uriInfo, urlPrefix);
         resources.addAll(list.getApis());
         list.setApis(resources);
         return list;
@@ -166,16 +164,16 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
 
     public ApiDeclaration getMountPointApi(final UriInfo uriInfo, final Long id, final String module, final String revision) {
         YangInstanceIdentifier iid = getInstanceId(id);
-        SchemaContext context = getSchemaContext(iid);
+        schemaContext = getSchemaContext(iid);
         String urlPrefix = getYangMountUrl(iid);
-        if (context == null) {
+        if (schemaContext == null) {
             return null;
         }
 
         if (DATASTORES_LABEL.equals(module) && DATASTORES_REVISION.equals(revision)) {
             return generateDataStoreApiDoc(uriInfo, urlPrefix);
         }
-        return super.getApiDeclaration(module, revision, uriInfo, context, urlPrefix);
+        return super.getApiDeclaration(module, revision, uriInfo, urlPrefix);
     }
 
     private ApiDeclaration generateDataStoreApiDoc(final UriInfo uriInfo, final String context) {
