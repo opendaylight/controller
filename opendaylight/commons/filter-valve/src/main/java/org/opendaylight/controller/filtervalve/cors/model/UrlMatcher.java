@@ -62,31 +62,31 @@ public class UrlMatcher<FILTER> {
     /**
      * Find filters matching path
      *
-     * @param pathInfo as returned by request.getPathInfo()
+     * @param path relative and decoded path to resource
      * @return list of matching filters
      */
-    public List<FILTER> findMatchingFilters(String pathInfo) {
-        checkNotNull(pathInfo);
+    public List<FILTER> findMatchingFilters(String path) {
+        checkNotNull(path);
         TreeMap<Integer, FILTER> sortedMap = new TreeMap<>();
         // add matching prefixes
         for (Entry<String, Entry<FILTER, Integer>> prefixEntry : prefixMap.entrySet()) {
-            if (pathInfo.startsWith(prefixEntry.getKey())) {
+            if (path.startsWith(prefixEntry.getKey())) {
                 put(sortedMap, prefixEntry.getValue());
             }
         }
         // add matching suffixes
         for (Entry<String, Entry<FILTER, Integer>> suffixEntry : suffixMap.entrySet()) {
-            if (pathInfo.endsWith(suffixEntry.getKey())) {
+            if (path.endsWith(suffixEntry.getKey())) {
                 put(sortedMap, suffixEntry.getValue());
             }
         }
         // add exact match
-        Entry<FILTER, Integer> exactMatch = exactMatchMap.get(pathInfo);
+        Entry<FILTER, Integer> exactMatch = exactMatchMap.get(path);
         if (exactMatch != null) {
             put(sortedMap, exactMatch);
         }
         ArrayList<FILTER> filters = new ArrayList<>(sortedMap.values());
-        logger.trace("Matching filters for path {} are {}", pathInfo, filters);
+        logger.trace("Matching filters for path {} are {}", path, filters);
         return filters;
     }
 
