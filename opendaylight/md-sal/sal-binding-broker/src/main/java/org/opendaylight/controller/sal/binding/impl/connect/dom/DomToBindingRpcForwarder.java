@@ -3,11 +3,6 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -17,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
+
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
@@ -25,20 +21,25 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.concepts.CompositeObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
-import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
 
@@ -70,7 +71,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     }
 
     public DomToBindingRpcForwarder(final Class<? extends RpcService> service, final BindingIndependentMappingService mappingService,
-        final RpcProvisionRegistry biRpcRegistry, final RpcProviderRegistry baRpcRegistry) {
+        final RpcProvisionRegistry biRpcRegistry, final RpcProviderRegistry baRpcRegistry, final RpcProviderRegistryImpl registryImpl) {
         this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
         this.supportedRpcs = mappingService.getRpcQNamesFor(service);
 
@@ -84,7 +85,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
 
         this.biRpcRegistry = biRpcRegistry;
         this.baRpcRegistry = baRpcRegistry;
-        baRpcRegistryImpl = (RpcProviderRegistryImpl) baRpcRegistry;
+        this.baRpcRegistryImpl = registryImpl;
 
         Class<?> cls = rpcServiceType.get();
         ClassLoader clsLoader = cls.getClassLoader();
@@ -97,11 +98,12 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
      *
      * @param service
      * @param context
+     * @param registryImpl
      */
     public DomToBindingRpcForwarder(final Class<? extends RpcService> service,
         final Class<? extends BaseIdentity> context, final BindingIndependentMappingService mappingService,
-        final RpcProvisionRegistry biRpcRegistry, final RpcProviderRegistry baRpcRegistry) {
-        this(service, mappingService, biRpcRegistry, baRpcRegistry);
+        final RpcProvisionRegistry biRpcRegistry, final RpcProviderRegistry baRpcRegistry, final RpcProviderRegistryImpl registryImpl) {
+        this(service, mappingService, biRpcRegistry, baRpcRegistry,registryImpl);
 
         final ImmutableSet.Builder<Broker.RoutedRpcRegistration> registrationsBuilder = ImmutableSet.builder();
         try {
