@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_35ae2399",
+        "filename": "opendaylight/md-sal/sal-restconf-broker/src/main/java/org/opendaylight/controller/sal/restconf/broker/impl/NotificationServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-07-15T13:09:17Z",
+      "side": 1,
+      "message": "This is correct. Construction desiredEventStream.get(desiredEventStream.get(notificationStreamName)) is dubious.",
+      "parentUuid": "fa82b9bf_972433b0",
+      "revId": "3b24eaffb19be43eb2dce7db97dc584060fd613f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_573d4bba",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/address/DataLinkAddress.java",
         "patchSetId": 2
