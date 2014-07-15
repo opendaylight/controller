@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.rest.doc.impl;
 
+import com.google.common.base.Preconditions;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
@@ -16,11 +16,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /**
- * This class gathers all yang defined {@link Module}s and generates Swagger
- * compliant documentation.
+ * This class gathers all yang defined {@link Module}s and generates Swagger compliant documentation.
  */
 public class ApiDocGenerator extends BaseYangSwaggerGenerator {
 
@@ -33,13 +30,15 @@ public class ApiDocGenerator extends BaseYangSwaggerGenerator {
         Preconditions.checkState(schemaService != null);
         SchemaContext schemaContext = schemaService.getGlobalContext();
         Preconditions.checkState(schemaContext != null);
-        return super.getResourceListing(uriInfo, schemaContext, "");
+        setSchemaContext(schemaContext);
+        return super.getResourceListing(uriInfo, "");
     }
 
     public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo) {
         SchemaContext schemaContext = schemaService.getGlobalContext();
         Preconditions.checkState(schemaContext != null);
-        return super.getApiDeclaration(module, revision, uriInfo, schemaContext, "");
+        setSchemaContext(schemaContext);
+        return super.getApiDeclaration(module, revision, uriInfo, "");
     }
 
     /**
