@@ -222,7 +222,15 @@ public class NeutronNetworksNorthbound {
 
             // add network to cache
             singleton.initDefaults();
-            networkInterface.addNetwork(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronNetworkCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronNetworkCRUD service = (INeutronNetworkCRUD) instance;
+                boolean status = service.addNetwork(singleton);
+                if (!status) {
+                    networkInterface.removeNetwork(singleton.getNetworkUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -265,7 +273,26 @@ public class NeutronNetworksNorthbound {
             while (i.hasNext()) {
                 NeutronNetwork test = i.next();
                 test.initDefaults();
-                networkInterface.addNetwork(test);
+                Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronNetworkCRUD.class, this, null);
+                for (Object instance : instances1) {
+                    INeutronNetworkCRUD service = (INeutronNetworkCRUD) instance;
+                    boolean status = service.addNetwork(test);
+                    if (!status) {
+                        Iterator<NeutronNetwork> j = bulk.iterator();
+                        while(j.hasNext()){
+                            NeutronNetwork tempNetwork = j.next();
+
+                            if(tempNetwork.getNetworkUUID().matches(test.getNetworkUUID())){
+                                networkInterface.removeNetwork(tempNetwork.getNetworkUUID());
+                                break;
+                            }
+                            networkInterface.removeNetwork(tempNetwork.getNetworkUUID());
+                            service.removeNetwork(tempNetwork.getNetworkUUID());
+
+                        }
+                        return Response.status(500).build();
+                    }
+                }
                 if (instances != null) {
                     for (Object instance: instances) {
                         INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -330,7 +357,16 @@ public class NeutronNetworksNorthbound {
         }
 
         // update network object and return the modified object
-                networkInterface.updateNetwork(netUUID, delta);
+                Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronNetworkCRUD.class, this, null);
+                NeutronNetwork originalNetwork = networkInterface.getNetwork(netUUID);
+                for (Object instance : instances1) {
+                    INeutronNetworkCRUD service = (INeutronNetworkCRUD) instance;
+                    boolean status = service.updateNetwork(netUUID, delta);
+                    if (!status) {
+                        networkInterface.updateNetwork(netUUID, originalNetwork);
+                        return Response.status(500).build();
+                    }
+                }
                 NeutronNetwork updatedSingleton = networkInterface.getNetwork(netUUID);
                 if (instances != null) {
                     for (Object instance : instances) {
@@ -381,7 +417,16 @@ public class NeutronNetworksNorthbound {
                 }
             }
         }
-        networkInterface.removeNetwork(netUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronNetworkCRUD.class, this, null);
+        NeutronNetwork tempOriginalNetwork = networkInterface.getNetwork(netUUID);
+        for (Object instance : instances1) {
+            INeutronNetworkCRUD service = (INeutronNetworkCRUD) instance;
+            boolean status = service.removeNetwork(netUUID);
+            if (!status) {
+                networkInterface.addNetwork(tempOriginalNetwork);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronNetworkAware service = (INeutronNetworkAware) instance;
@@ -391,3 +436,5 @@ public class NeutronNetworksNorthbound {
         return Response.status(204).build();
     }
 }
+
+

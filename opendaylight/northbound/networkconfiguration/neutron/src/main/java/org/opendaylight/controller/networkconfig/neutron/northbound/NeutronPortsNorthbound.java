@@ -276,7 +276,15 @@ public class NeutronPortsNorthbound {
 
 
             // add the port to the cache
-            portInterface.addPort(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronPortCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronPortCRUD service = (INeutronPortCRUD) instance;
+                boolean status = service.addPort(singleton);
+                if (!status) {
+                    portInterface.removePort(singleton.getPortUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronPortAware service = (INeutronPortAware) instance;
@@ -373,7 +381,26 @@ public class NeutronPortsNorthbound {
             i = bulk.iterator();
             while (i.hasNext()) {
                 NeutronPort test = i.next();
-                portInterface.addPort(test);
+                Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronPortCRUD.class, this, null);
+                for (Object instance : instances1) {
+                    INeutronPortCRUD service = (INeutronPortCRUD) instance;
+                    boolean status = service.addPort(test);
+                    if (!status) {
+                        Iterator<NeutronPort> j = bulk.iterator();
+                        while(j.hasNext()){
+                            NeutronPort tempPort = j.next();
+
+                            if(tempPort.getPortUUID().matches(test.getPortUUID())){
+                                subnetInterface.removeSubnet(tempPort.getPortUUID());
+                                break;
+                            }
+                            portInterface.removePort(tempPort.getPortUUID());
+                            service.removePort(tempPort.getPortUUID());
+
+                        }
+                        return Response.status(500).build();
+                    }
+                }
                 if (instances != null) {
                     for (Object instance : instances) {
                         INeutronPortAware service = (INeutronPortAware) instance;
@@ -473,7 +500,16 @@ public class NeutronPortsNorthbound {
 
         //        TODO: Support change of security groups
         // update the port and return the modified object
-        portInterface.updatePort(portUUID, singleton);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronPortCRUD.class, this, null);
+        for (Object instance : instances1) {
+                INeutronPortCRUD service = (INeutronPortCRUD) instance;
+            NeutronPort originalPort = service.getPort(portUUID);
+            boolean status = service.updatePort(portUUID, singleton);
+            if (!status) {
+                portInterface.updatePort(portUUID, originalPort);
+                return Response.status(500).build();
+            }
+        }
         NeutronPort updatedPort = portInterface.getPort(portUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -525,7 +561,16 @@ public class NeutronPortsNorthbound {
                 }
             }
         }
-        portInterface.removePort(portUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronPortCRUD.class, this, null);
+        NeutronPort tempOriginalPort = portInterface.getPort(portUUID);
+        for (Object instance : instances1) {
+                INeutronPortCRUD service = (INeutronPortCRUD) instance;
+            boolean status = service.removePort(portUUID);
+            if (!status) {
+                portInterface.addPort(tempOriginalPort);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronPortAware service = (INeutronPortAware) instance;
@@ -535,3 +580,5 @@ public class NeutronPortsNorthbound {
         return Response.status(204).build();
     }
 }
+
+

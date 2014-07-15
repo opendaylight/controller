@@ -210,7 +210,15 @@ public class NeutronRoutersNorthbound {
             /*
              * add router to the cache
              */
-            routerInterface.addRouter(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronRouterCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronRouterCRUD service = (INeutronRouterCRUD) instance;
+                boolean status = service.addRouter(singleton);
+                if (!status) {
+                    routerInterface.removeRouter(singleton.getRouterUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -298,7 +306,16 @@ public class NeutronRoutersNorthbound {
         /*
          * update the router entry and return the modified object
          */
-        routerInterface.updateRouter(routerUUID, singleton);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronRouterCRUD.class, this, null);
+        for (Object instance : instances1) {
+            INeutronRouterCRUD service = (INeutronRouterCRUD) instance;
+            NeutronRouter originalRouter = service.getRouter(routerUUID);
+            boolean status = service.updateRouter(routerUUID, singleton);
+            if (!status) {
+                routerInterface.updateRouter(routerUUID, originalRouter);
+                return Response.status(500).build();
+            }
+        }
         NeutronRouter updatedRouter = routerInterface.getRouter(routerUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -347,7 +364,16 @@ public class NeutronRoutersNorthbound {
                     return Response.status(status).build();
             }
         }
-        routerInterface.removeRouter(routerUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronRouterCRUD.class, this, null);
+        NeutronRouter tempOriginalRouter = routerInterface.getRouter(routerUUID);
+        for (Object instance : instances1) {
+            INeutronRouterCRUD service = (INeutronRouterCRUD) instance;
+            boolean status = service.removeRouter(routerUUID);
+            if (!status) {
+                routerInterface.addRouter(tempOriginalRouter);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -581,3 +607,4 @@ public class NeutronRoutersNorthbound {
         throw new BadRequestException("Must specify port id or subnet id or both");
     }
 }
+

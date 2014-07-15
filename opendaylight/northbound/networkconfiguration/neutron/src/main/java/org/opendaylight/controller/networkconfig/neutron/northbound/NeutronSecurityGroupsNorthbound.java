@@ -191,7 +191,15 @@ public class NeutronSecurityGroupsNorthbound {
                 }
             }
             // Add to Neutron cache
-            securityGroupInterface.addNeutronSecurityGroup(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSecurityGroupCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronSecurityGroupCRUD service = (INeutronSecurityGroupCRUD) instance;
+                boolean status = service.addNeutronSecurityGroup(singleton);
+                if (!status) {
+                    securityGroupInterface.removeNeutronSecurityGroup(singleton.getSecurityGroupUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
@@ -226,7 +234,26 @@ public class NeutronSecurityGroupsNorthbound {
             i = bulk.iterator();
             while (i.hasNext()) {
                 NeutronSecurityGroup test = i.next();
-                securityGroupInterface.addNeutronSecurityGroup(test);
+                Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSecurityGroupCRUD.class, this, null);
+                for (Object instance : instances1) {
+                    INeutronSecurityGroupCRUD service = (INeutronSecurityGroupCRUD) instance;
+                    boolean status = service.addNeutronSecurityGroup(test);
+                    if (!status) {
+                        Iterator<NeutronSecurityGroup> j = bulk.iterator();
+                        while(j.hasNext()){
+                            NeutronSecurityGroup tempSecurityGroup = j.next();
+
+                            if(tempSecurityGroup.getSecurityGroupUUID().matches(test.getSecurityGroupUUID())){
+                                securityGroupInterface.removeNeutronSecurityGroup(tempSecurityGroup.getSecurityGroupUUID());
+                                break;
+                            }
+                            securityGroupInterface.removeNeutronSecurityGroup(tempSecurityGroup.getSecurityGroupUUID());
+                            service.removeNeutronSecurityGroup(tempSecurityGroup.getSecurityGroupUUID());
+
+                        }
+                        return Response.status(500).build();
+                    }
+                }
                 if (instances != null) {
                     for (Object instance : instances) {
                         INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
@@ -294,7 +321,16 @@ public class NeutronSecurityGroupsNorthbound {
         /*
          * update the object and return it
          */
-        securityGroupInterface.updateNeutronSecurityGroup(securityGroupUUID, delta);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSecurityGroupCRUD.class, this, null);
+        for (Object instance : instances1) {
+            INeutronSecurityGroupCRUD service = (INeutronSecurityGroupCRUD) instance;
+            NeutronSecurityGroup originalSecurityGroup = service.getNeutronSecurityGroup(securityGroupUUID);
+            boolean status = service.updateNeutronSecurityGroup(securityGroupUUID, delta);
+            if (!status) {
+                securityGroupInterface.updateNeutronSecurityGroup(securityGroupUUID, originalSecurityGroup);
+                return Response.status(500).build();
+            }
+        }
         NeutronSecurityGroup updatedSecurityGroup = securityGroupInterface.getNeutronSecurityGroup(securityGroupUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -349,7 +385,16 @@ public class NeutronSecurityGroupsNorthbound {
         /*
          * remove it and return 204 status
          */
-        securityGroupInterface.removeNeutronSecurityGroup(securityGroupUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSecurityGroupCRUD.class, this, null);
+        NeutronSecurityGroup tempOriginalSecurityGroup = securityGroupInterface.getNeutronSecurityGroup(securityGroupUUID);
+        for (Object instance : instances1) {
+            INeutronSecurityGroupCRUD service = (INeutronSecurityGroupCRUD) instance;
+            boolean status = service.removeNeutronSecurityGroup(securityGroupUUID);
+            if (!status) {
+                securityGroupInterface.addNeutronSecurityGroup(tempOriginalSecurityGroup);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSecurityGroupAware service = (INeutronSecurityGroupAware) instance;
@@ -359,3 +404,4 @@ public class NeutronSecurityGroupsNorthbound {
         return Response.status(204).build();
     }
 }
+

@@ -254,7 +254,15 @@ public class NeutronFloatingIPsNorthbound {
                         return Response.status(status).build();
                 }
             }
-            floatingIPInterface.addFloatingIP(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronFloatingIPCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronFloatingIPCRUD service = (INeutronFloatingIPCRUD) instance;
+                boolean status = service.addFloatingIP(singleton);
+                if (!status) {
+                    floatingIPInterface.removeFloatingIP(singleton.getFloatingIPUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -375,7 +383,16 @@ public class NeutronFloatingIPsNorthbound {
                     return Response.status(status).build();
             }
         }
-        floatingIPInterface.updateFloatingIP(floatingipUUID, singleton);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronFloatingIPCRUD.class, this, null);
+        for (Object instance : instances1) {
+                INeutronFloatingIPCRUD service = (INeutronFloatingIPCRUD) instance;
+            NeutronFloatingIP originalFloatingIP = service.getFloatingIP(floatingipUUID);
+            boolean status = service.updateFloatingIP(floatingipUUID, singleton);
+            if (!status) {
+                floatingIPInterface.updateFloatingIP(floatingipUUID, originalFloatingIP);
+                return Response.status(500).build();
+            }
+        }
         target = floatingIPInterface.getFloatingIP(floatingipUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -418,7 +435,16 @@ public class NeutronFloatingIPsNorthbound {
                     return Response.status(status).build();
             }
         }
-        floatingIPInterface.removeFloatingIP(floatingipUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronFloatingIPCRUD.class, this, null);
+        NeutronFloatingIP tempOriginalFloatingIP = floatingIPInterface.getFloatingIP(floatingipUUID);
+        for (Object instance : instances1) {
+                INeutronFloatingIPCRUD service = (INeutronFloatingIPCRUD) instance;
+            boolean status = service.removeFloatingIP(floatingipUUID);
+            if (!status) {
+                floatingIPInterface.addFloatingIP(tempOriginalFloatingIP);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronFloatingIPAware service = (INeutronFloatingIPAware) instance;
@@ -428,3 +454,4 @@ public class NeutronFloatingIPsNorthbound {
         return Response.status(204).build();
     }
 }
+

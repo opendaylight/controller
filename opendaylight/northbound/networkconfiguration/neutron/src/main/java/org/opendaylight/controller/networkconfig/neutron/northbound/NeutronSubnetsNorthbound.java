@@ -234,7 +234,15 @@ public class NeutronSubnetsNorthbound {
                     }
                 }
             }
-            subnetInterface.addSubnet(singleton);
+            Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSubnetCRUD.class, this, null);
+            for (Object instance : instances1) {
+                INeutronSubnetCRUD service = (INeutronSubnetCRUD) instance;
+                boolean status = service.addSubnet(singleton);
+                if (!status) {
+                    subnetInterface.removeSubnet(singleton.getSubnetUUID());
+                    return Response.status(500).build();
+                }
+            }
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronSubnetAware service = (INeutronSubnetAware) instance;
@@ -292,7 +300,26 @@ public class NeutronSubnetsNorthbound {
             i = bulk.iterator();
             while (i.hasNext()) {
                 NeutronSubnet test = i.next();
-                subnetInterface.addSubnet(test);
+                Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSubnetCRUD.class, this, null);
+                for (Object instance : instances1) {
+                    INeutronSubnetCRUD service = (INeutronSubnetCRUD) instance;
+                    boolean status = service.addSubnet(test);
+                    if (!status) {
+                        Iterator<NeutronSubnet> j = bulk.iterator();
+                        while(j.hasNext()){
+                            NeutronSubnet tempSubnet = j.next();
+
+                            if(tempSubnet.getSubnetUUID().matches(test.getSubnetUUID())){
+                                subnetInterface.removeSubnet(tempSubnet.getSubnetUUID());
+                                break;
+                            }
+                            subnetInterface.removeSubnet(tempSubnet.getSubnetUUID());
+                            service.removeSubnet(tempSubnet.getSubnetUUID());
+
+                        }
+                        return Response.status(500).build();
+                    }
+                }
                 if (instances != null) {
                     for (Object instance : instances) {
                         INeutronSubnetAware service = (INeutronSubnetAware) instance;
@@ -363,7 +390,16 @@ public class NeutronSubnetsNorthbound {
         /*
          * update the object and return it
          */
-        subnetInterface.updateSubnet(subnetUUID, delta);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSubnetCRUD.class, this, null);
+        NeutronSubnet originalSubnet = subnetInterface.getSubnet(subnetUUID);
+        for (Object instance : instances1) {
+            INeutronSubnetCRUD service = (INeutronSubnetCRUD) instance;
+            boolean status = service.updateSubnet(subnetUUID, delta);
+            if (!status) {
+                subnetInterface.updateSubnet(subnetUUID, originalSubnet);
+                return Response.status(500).build();
+            }
+        }
         NeutronSubnet updatedSubnet = subnetInterface.getSubnet(subnetUUID);
         if (instances != null) {
             for (Object instance : instances) {
@@ -418,7 +454,16 @@ public class NeutronSubnetsNorthbound {
         /*
          * remove it and return 204 status
          */
-        subnetInterface.removeSubnet(subnetUUID);
+        Object[] instances1 = ServiceHelper.getGlobalInstances(INeutronSubnetCRUD.class, this, null);
+        NeutronSubnet tempOriginalSubnet = subnetInterface.getSubnet(subnetUUID);
+        for (Object instance : instances1) {
+            INeutronSubnetCRUD service = (INeutronSubnetCRUD) instance;
+            boolean status = service.removeSubnet(subnetUUID);
+            if (!status) {
+                subnetInterface.addSubnet(tempOriginalSubnet);
+                return Response.status(500).build();
+            }
+        }
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronSubnetAware service = (INeutronSubnetAware) instance;
@@ -428,3 +473,5 @@ public class NeutronSubnetsNorthbound {
         return Response.status(204).build();
     }
 }
+
+
