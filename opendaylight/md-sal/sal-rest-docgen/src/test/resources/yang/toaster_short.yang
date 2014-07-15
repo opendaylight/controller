@@ -3,7 +3,7 @@
     yang-version 1;
 
     namespace
-      "http://netconfcentral.org/ns/toaster";
+      "http://netconfcentral.org/ns/toaster2";
 
     prefix toast;
 
@@ -81,6 +81,13 @@
         description
           "The name of the toaster's manufacturer. For instance,
                 Microsoft Toaster.";
+      }
+
+      list toasterSlot {
+        key "slotId";
+        leaf slotId {
+            type string;
+        }
       }
 
       leaf toasterModelNumber {

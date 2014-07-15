@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.sal.rest.doc.impl;
 
+import static org.opendaylight.controller.sal.rest.doc.util.RestDocgenUtil.resolvePathArgumentsName;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import java.text.DateFormat;
@@ -22,9 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opendaylight.controller.sal.rest.doc.model.builder.OperationBuilder;
@@ -46,11 +50,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.base.Preconditions;
-
 public class BaseYangSwaggerGenerator {
 
     private static Logger _logger = LoggerFactory.getLogger(BaseYangSwaggerGenerator.class);
@@ -60,6 +59,7 @@ public class BaseYangSwaggerGenerator {
     protected static final String RESTCONF_CONTEXT_ROOT = "restconf";
     protected final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private final ModelGenerator jsonConverter = new ModelGenerator();
+    protected SchemaContext schemaContext;
 
     // private Map<String, ApiDeclaration> MODULE_DOC_CACHE = new HashMap<>()
     private final ObjectMapper mapper = new ObjectMapper();
@@ -75,8 +75,7 @@ public class BaseYangSwaggerGenerator {
      * @param operType
      * @return list of modules converted to swagger compliant resource list.
      */
-    public ResourceList getResourceListing(UriInfo uriInfo, SchemaContext schemaContext,
-            String context) {
+    public ResourceList getResourceListing(UriInfo uriInfo, String context) {
 
         ResourceList resourceList = createResourceList();
 
@@ -88,11 +87,9 @@ public class BaseYangSwaggerGenerator {
 
         for (Module module : modules) {
             String revisionString = SIMPLE_DATE_FORMAT.format(module.getRevision());
-
             Resource resource = new Resource();
             _logger.debug("Working on [{},{}]...", module.getName(), revisionString);
-            ApiDeclaration doc = getApiDeclaration(module.getName(), revisionString, uriInfo,
-                    schemaContext, context);
+            ApiDeclaration doc = getApiDeclaration(module.getName(), revisionString, uriInfo, context);
 
             if (doc != null) {
                 resource.setPath(generatePath(uriInfo, module.getName(), revisionString));
@@ -119,8 +116,7 @@ public class BaseYangSwaggerGenerator {
         return uri.toASCIIString();
     }
 
-    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo,
-            SchemaContext schemaContext, String context) {
+    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo, String context) {
         Date rev = null;
         try {
             rev = SIMPLE_DATE_FORMAT.parse(revision);
@@ -128,14 +124,12 @@ public class BaseYangSwaggerGenerator {
             throw new IllegalArgumentException(e);
         }
         Module m = schemaContext.findModuleByName(module, rev);
-        Preconditions.checkArgument(m != null, "Could not find module by name,revision: " + module
-                + "," + revision);
+        Preconditions.checkArgument(m != null, "Could not find module by name,revision: " + module + "," + revision);
 
-        return getApiDeclaration(m, rev, uriInfo, schemaContext, context);
+        return getApiDeclaration(m, rev, uriInfo, context);
     }
 
-    public ApiDeclaration getApiDeclaration(Module module, Date revision, UriInfo uriInfo,
-            SchemaContext schemaContext, String context) {
+    public ApiDeclaration getApiDeclaration(Module module, Date revision, UriInfo uriInfo, String context) {
         String basePath = createBasePathFromUriInfo(uriInfo);
 
         ApiDeclaration doc = getSwaggerDocSpec(module, basePath, context);
@@ -152,8 +146,8 @@ public class BaseYangSwaggerGenerator {
             portPart = ":" + port;
         }
         String basePath = new StringBuilder(uriInfo.getBaseUri().getScheme()).append("://")
-                .append(uriInfo.getBaseUri().getHost()).append(portPart).append("/")
-                .append(RESTCONF_CONTEXT_ROOT).toString();
+                .append(uriInfo.getBaseUri().getHost()).append(portPart).append("/").append(RESTCONF_CONTEXT_ROOT)
+                .toString();
         return basePath;
     }
 
@@ -167,21 +161,20 @@ public class BaseYangSwaggerGenerator {
         for (DataSchemaNode node : dataSchemaNodes) {
             if ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode)) {
 
-                _logger.debug("Is Configuration node [{}] [{}]", node.isConfiguration(), node
-                        .getQName().getLocalName());
+                _logger.debug("Is Configuration node [{}] [{}]", node.isConfiguration(), node.getQName().getLocalName());
 
                 List<Parameter> pathParams = new ArrayList<Parameter>();
-                String resourcePath = getDataStorePath("/config/", context) + m.getName() + ":";
+                String resourcePath = getDataStorePath("/config/", context);
                 addApis(node, apis, resourcePath, pathParams, true);
 
                 pathParams = new ArrayList<Parameter>();
-                resourcePath = getDataStorePath("/operational/", context) + m.getName() + ":";
+                resourcePath = getDataStorePath("/operational/", context);
                 addApis(node, apis, resourcePath, pathParams, false);
             }
 
             Set<RpcDefinition> rpcs = m.getRpcs();
             for (RpcDefinition rpcDefinition : rpcs) {
-                String resourcePath = getDataStorePath("/operations/", context) + m.getName() + ":";
+                String resourcePath = getDataStorePath("/operations/", context);
                 addRpcs(rpcDefinition, apis, resourcePath);
             }
         }
@@ -228,8 +221,8 @@ public class BaseYangSwaggerGenerator {
         return module + "(" + revision + ")";
     }
 
-    private void addApis(DataSchemaNode node, List<Api> apis, String parentPath,
-            List<Parameter> parentPathParams, boolean addConfigApi) {
+    private void addApis(DataSchemaNode node, List<Api> apis, String parentPath, List<Parameter> parentPathParams,
+            boolean addConfigApi) {
 
         Api api = new Api();
         List<Parameter> pathParams = new ArrayList<Parameter>(parentPathParams);
@@ -261,8 +254,7 @@ public class BaseYangSwaggerGenerator {
      * @param pathParams
      * @return
      */
-    private List<Operation> operations(DataSchemaNode node, List<Parameter> pathParams,
-            boolean isConfig) {
+    private List<Operation> operations(DataSchemaNode node, List<Parameter> pathParams, boolean isConfig) {
         List<Operation> operations = new ArrayList<>();
 
         OperationBuilder.Get getBuilder = new OperationBuilder.Get(node, isConfig);
@@ -284,30 +276,26 @@ public class BaseYangSwaggerGenerator {
     private String createPath(final DataSchemaNode schemaNode, List<Parameter> pathParams) {
         ArrayList<LeafSchemaNode> pathListParams = new ArrayList<LeafSchemaNode>();
         StringBuilder path = new StringBuilder();
-        QName _qName = schemaNode.getQName();
-        String localName = _qName.getLocalName();
+        String localName = resolvePathArgumentsName(schemaNode, schemaContext);
         path.append(localName);
 
         if ((schemaNode instanceof ListSchemaNode)) {
             final List<QName> listKeys = ((ListSchemaNode) schemaNode).getKeyDefinition();
             for (final QName listKey : listKeys) {
-                {
-                    DataSchemaNode _dataChildByName = ((DataNodeContainer) schemaNode)
-                            .getDataChildByName(listKey);
-                    pathListParams.add(((LeafSchemaNode) _dataChildByName));
+                DataSchemaNode _dataChildByName = ((DataNodeContainer) schemaNode).getDataChildByName(listKey);
+                pathListParams.add(((LeafSchemaNode) _dataChildByName));
 
-                    String pathParamIdentifier = new StringBuilder("/{")
-                            .append(listKey.getLocalName()).append("}").toString();
-                    path.append(pathParamIdentifier);
+                String pathParamIdentifier = new StringBuilder("/{").append(listKey.getLocalName()).append("}")
+                        .toString();
+                path.append(pathParamIdentifier);
 
-                    Parameter pathParam = new Parameter();
-                    pathParam.setName(listKey.getLocalName());
-                    pathParam.setDescription(_dataChildByName.getDescription());
-                    pathParam.setType("string");
-                    pathParam.setParamType("path");
+                Parameter pathParam = new Parameter();
+                pathParam.setName(listKey.getLocalName());
+                pathParam.setDescription(_dataChildByName.getDescription());
+                pathParam.setType("string");
+                pathParam.setParamType("path");
 
-                    pathParams.add(pathParam);
-                }
+                pathParams.add(pathParam);
             }
         }
         return path.toString();
@@ -315,7 +303,7 @@ public class BaseYangSwaggerGenerator {
 
     protected void addRpcs(RpcDefinition rpcDefn, List<Api> apis, String parentPath) {
         Api rpc = new Api();
-        String resourcePath = parentPath + rpcDefn.getQName().getLocalName();
+        String resourcePath = parentPath + resolvePathArgumentsName(rpcDefn, schemaContext);
         rpc.setPath(resourcePath);
 
         Operation operationSpec = new Operation();
@@ -363,5 +351,10 @@ public class BaseYangSwaggerGenerator {
             }
         }
         return sortedModules;
+    }
+
+    public void setSchemaContext(SchemaContext schemaContext) {
+        this.schemaContext = schemaContext;
+        jsonConverter.setSchemaContext(schemaContext);
     }
 }
