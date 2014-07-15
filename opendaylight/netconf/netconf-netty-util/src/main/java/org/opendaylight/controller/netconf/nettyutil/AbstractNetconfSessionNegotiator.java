@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.nettyutil;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -104,7 +105,7 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
 
     private void start() {
         final NetconfMessage helloMessage = this.sessionPreferences.getHelloMessage();
-        logger.debug("Session negotiation started with hello message {}", XmlUtil.toString(helloMessage.getDocument()));
+        logger.debug("Session negotiation started with hello message {} on channel {}", XmlUtil.toString(helloMessage.getDocument()), channel);
 
         channel.pipeline().addLast(NAME_OF_EXCEPTION_HANDLER, new ExceptionHandlingInboundChannelHandler());
 
@@ -125,12 +126,20 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
                         // Do not fail negotiation if promise is done or canceled
                         // It would result in setting result of the promise second time and that throws exception
                         if (isPromiseFinished() == false) {
-                            // FIXME BUG-1365 calling "negotiation failed" closes the channel, but the channel does not get closed if data is still being transferred
-                            // Loopback connection initiation might
                             negotiationFailed(new IllegalStateException("Session was not established after " + timeout));
-                        }
+                            changeState(State.FAILED);
 
-                        changeState(State.FAILED);
+                            channel.closeFuture().addListener(new GenericFutureListener<ChannelFuture>() {
+                                @Override
+                                public void operationComplete(ChannelFuture future) throws Exception {
+                                    if(future.isSuccess()) {
+                                        logger.debug("Channel {} closed: success", future.channel());
+                                    } else {
+                                        logger.warn("Channel {} closed: fail", future.channel());
+                                    }
+                                }
+                            });
+                        }
                     } else if(channel.isOpen()) {
                         channel.pipeline().remove(NAME_OF_EXCEPTION_HANDLER);
                     }
@@ -214,9 +223,9 @@ extends AbstractSessionNegotiator<NetconfHelloMessage, S> {
     protected abstract S getSession(L sessionListener, Channel channel, NetconfHelloMessage message) throws NetconfDocumentedException;
 
     private synchronized void changeState(final State newState) {
-        logger.debug("Changing state from : {} to : {}", state, newState);
-        Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s", state,
-                newState);
+        logger.debug("Changing state from : {} to : {} for channel: {}", state, newState, channel);
+        Preconditions.checkState(isStateChangePermitted(state, newState), "Cannot change state from %s to %s for chanel %s", state,
+                newState, channel);
         this.state = newState;
     }
 
