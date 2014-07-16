@@ -37,8 +37,6 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
 
     private static final Logger LOG = LoggerFactory.getLogger(RpcRouterCodegenInstance.class);
 
-    private T defaultService;
-
     private final Class<T> serviceType;
 
     private final T invocationProxy;
@@ -49,11 +47,8 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
 
     private final Map<Class<? extends BaseIdentity>, RpcRoutingTableImpl<? extends BaseIdentity, T>> routingTables;
 
-    private final String name;
-
     @SuppressWarnings("unchecked")
     public RpcRouterCodegenInstance(final String name,final Class<T> type, final T routerImpl, final Iterable<Class<? extends BaseIdentity>> contexts) {
-        this.name = name;
         this.listeners = ListenerRegistry.create();
         this.serviceType = type;
         this.invocationProxy = routerImpl;
@@ -90,7 +85,7 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
 
     @Override
     public T getDefaultService() {
-        return defaultService;
+        return RuntimeCodeHelper.getDelegate(invocationProxy);
     }
 
     @Override
@@ -125,11 +120,17 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
         return new RoutedRpcRegistrationImpl(service);
     }
 
+    public void removeDefaultImplementation(final T instance) {
+        RpcService current = RuntimeCodeHelper.getDelegate(invocationProxy);
+        if(instance == current) {
+            RuntimeCodeHelper.setDelegate(invocationProxy, null);
+        }
+    }
+
     @Override
     public RpcRegistration<T> registerDefaultService(final T service) {
-        // TODO Auto-generated method stub
         RuntimeCodeHelper.setDelegate(invocationProxy, service);
-        return null;
+        return new DefaultRpcImplementationRegistration(service);
     }
 
     private class RoutedRpcRegistrationImpl extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
@@ -168,4 +169,24 @@ RpcRouter<T>, RouteChangeListener<Class<? extends BaseIdentity>, InstanceIdentif
 
         }
     }
+
+    private class DefaultRpcImplementationRegistration extends AbstractObjectRegistration<T> implements RpcRegistration<T> {
+
+
+        protected DefaultRpcImplementationRegistration(final T instance) {
+            super(instance);
+        }
+
+        @Override
+        protected void removeRegistration() {
+            removeDefaultImplementation(this.getInstance());
+        }
+
+        @Override
+        public Class<T> getServiceType() {
+            return serviceType;
+        }
+    }
+
+
 }
