@@ -9,10 +9,12 @@ package org.opendaylight.controller.sal.rest.doc.model.builder;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendaylight.controller.sal.rest.doc.swagger.Operation;
 import org.opendaylight.controller.sal.rest.doc.swagger.Parameter;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
 /**
  *
@@ -56,21 +58,21 @@ public final class OperationBuilder {
    */
     public static class Put {
         protected Operation spec;
-        protected DataSchemaNode schemaNode;
+        protected String nodeName;
         private final String METHOD_NAME = "PUT";
 
-        public Put(DataSchemaNode node) {
-            this.schemaNode = node;
+        public Put(String nodeName, final String description) {
+            this.nodeName = nodeName;
             spec = new Operation();
-            spec.setType(CONFIG + node.getQName().getLocalName());
-            spec.setNotes(node.getDescription());
+            spec.setType(CONFIG + nodeName);
+            spec.setNotes(description);
         }
 
         public Put pathParams(List<Parameter> params) {
             List<Parameter> parameters = new ArrayList<>(params);
             Parameter payload = new Parameter();
             payload.setParamType("body");
-            payload.setType(CONFIG + schemaNode.getQName().getLocalName());
+            payload.setType(CONFIG + nodeName);
             parameters.add(payload);
             spec.setParameters(parameters);
             return this;
@@ -78,7 +80,7 @@ public final class OperationBuilder {
 
         public Operation build() {
             spec.setMethod(METHOD_NAME);
-            spec.setNickname(METHOD_NAME + "-" + schemaNode.getQName().getLocalName());
+            spec.setNickname(METHOD_NAME + "-" + nodeName);
             return spec;
         }
     }
@@ -88,17 +90,42 @@ public final class OperationBuilder {
    */
     public static final class Post extends Put {
 
-        private final String METHOD_NAME = "POST";
+        public static final String METHOD_NAME = "POST";
+        private final DataNodeContainer dataNodeContainer;
 
-        public Post(DataSchemaNode node) {
-            super(node);
+        public Post(final String nodeName, final String description, final DataNodeContainer dataNodeContainer) {
+            super(nodeName, description);
+            this.dataNodeContainer = dataNodeContainer;
+            spec.setType(CONFIG + nodeName + METHOD_NAME);
         }
 
         @Override
         public Operation build() {
             spec.setMethod(METHOD_NAME);
-            spec.setNickname(METHOD_NAME + "-" + schemaNode.getQName().getLocalName());
+            spec.setNickname(METHOD_NAME + "-" + nodeName);
             return spec;
+        }
+
+        @Override
+        public Put pathParams(List<Parameter> params) {
+            List<Parameter> parameters = new ArrayList<>(params);
+            for (DataSchemaNode node : dataNodeContainer.getChildNodes()) {
+                if (node instanceof ListSchemaNode || node instanceof ContainerSchemaNode) {
+                    Parameter payload = new Parameter();
+                    payload.setParamType("body");
+                    payload.setType(CONFIG + node.getQName().getLocalName());
+                    payload.setName("**"+CONFIG + node.getQName().getLocalName());
+                    parameters.add(payload);
+                }
+            }
+            spec.setParameters(parameters);
+            return this;
+
+        }
+
+        public Post summary(final String summary) {
+            spec.setSummary(summary);
+            return this;
         }
     }
 

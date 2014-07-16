@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,6 +24,7 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.doc.swagger.Api;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
 import org.opendaylight.controller.sal.rest.doc.swagger.Operation;
+import org.opendaylight.controller.sal.rest.doc.swagger.Parameter;
 import org.opendaylight.controller.sal.rest.doc.swagger.Resource;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -52,8 +54,7 @@ public class ApiDocGeneratorTest {
     }
 
     /**
-     * Method: getApiDeclaration(String module, String revision, UriInfo
-     * uriInfo)
+     * Method: getApiDeclaration(String module, String revision, UriInfo uriInfo)
      */
     @Test
     public void testGetModuleDoc() throws Exception {
@@ -61,13 +62,139 @@ public class ApiDocGeneratorTest {
 
         for (Entry<File, Module> m : helper.getModules().entrySet()) {
             if (m.getKey().getAbsolutePath().endsWith("toaster_short.yang")) {
-                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(),
-                        "http://localhost:8080/restconf", "",schemaContext);
+                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(), "http://localhost:8080/restconf", "",
+                        schemaContext);
                 validateToaster(doc);
                 validateTosterDocContainsModulePrefixes(doc);
-                Assert.assertNotNull(doc);
+                validateSwaggerModules(doc);
+                validateSwaggerApisForPost(doc);
             }
         }
+    }
+
+    /**
+     * Validate whether ApiDelcaration contains Apis with concrete path and whether this Apis contain specified POST
+     * operations.
+     */
+    private void validateSwaggerApisForPost(final ApiDeclaration doc) {
+        // two POST URI with concrete schema name in summary
+        Api lstApi = findApi("/config/toaster2:lst/", doc);
+        assertNotNull("Api /config/toaster2:lst/ wasn't found", lstApi);
+        assertTrue("POST for cont1 in lst is missing",
+                findOperation(lstApi.getOperations(), "POST", "(config)lstPOST", "(config)lst1", "(config)cont1"));
+
+        Api cont1Api = findApi("/config/toaster2:lst/cont1/", doc);
+        assertNotNull("Api /config/toaster2:lst/cont1/ wasn't found", cont1Api);
+        assertTrue("POST for cont11 in cont1 is missing",
+                findOperation(cont1Api.getOperations(), "POST", "(config)cont1POST", "(config)cont11", "(config)lst11"));
+
+        // no POST URI
+        Api cont11Api = findApi("/config/toaster2:lst/cont1/cont11/", doc);
+        assertNotNull("Api /config/toaster2:lst/cont1/cont11/ wasn't found", cont11Api);
+        assertTrue("POST operation shouldn't be present.", findOperations(cont11Api.getOperations(), "POST").isEmpty());
+
+    }
+
+    /**
+     * Tries to find operation with name {@code operationName} and with summary {@code summary}
+     */
+    private boolean findOperation(List<Operation> operations, String operationName, String type,
+            String... searchedParameters) {
+        Set<Operation> filteredOperations = findOperations(operations, operationName);
+        for (Operation operation : filteredOperations) {
+            if (operation.getType().equals(type)) {
+                List<Parameter> parameters = operation.getParameters();
+                return containAllParameters(parameters, searchedParameters);
+            }
+        }
+        return false;
+    }
+
+    private Set<Operation> findOperations(final List<Operation> operations, final String operationName) {
+        final Set<Operation> filteredOperations = new HashSet<>();
+        for (Operation operation : operations) {
+            if (operation.getMethod().equals(operationName)) {
+                filteredOperations.add(operation);
+            }
+        }
+        return filteredOperations;
+    }
+
+    private boolean containAllParameters(final List<Parameter> searchedIns, String[] searchedWhats) {
+        for (String searchedWhat : searchedWhats) {
+            boolean parameterFound = false;
+            for (Parameter searchedIn : searchedIns) {
+                if (searchedIn.getType().equals(searchedWhat)) {
+                    parameterFound = true;
+                }
+            }
+            if (!parameterFound) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Tries to find {@code Api} with path {@code path}
+     */
+    private Api findApi(final String path, final ApiDeclaration doc) {
+        for (Api api : doc.getApis()) {
+            if (api.getPath().equals(path)) {
+                return api;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates whether doc {@code doc} contains concrete specified models.
+     */
+    private void validateSwaggerModules(ApiDeclaration doc) {
+        JSONObject models = doc.getModels();
+        assertNotNull(models);
+        try {
+            JSONObject configLst = models.getJSONObject("(config)lst");
+            assertNotNull(configLst);
+
+            containsReferences(configLst, "lst1");
+            containsReferences(configLst, "cont1");
+
+            JSONObject configLst1 = models.getJSONObject("(config)lst1");
+            assertNotNull(configLst1);
+
+            JSONObject configCont1 = models.getJSONObject("(config)cont1");
+            assertNotNull(configCont1);
+
+            containsReferences(configCont1, "cont11");
+            containsReferences(configCont1, "lst11");
+
+            JSONObject configCont11 = models.getJSONObject("(config)cont11");
+            assertNotNull(configCont11);
+
+            JSONObject configLst11 = models.getJSONObject("(config)lst11");
+            assertNotNull(configLst11);
+        } catch (JSONException e) {
+            fail("JSONException wasn't expected");
+        }
+
+    }
+
+    /**
+     * Checks whether object {@code mainObject} contains in properties/items key $ref with concrete value.
+     */
+    private void containsReferences(final JSONObject mainObject, final String childObject) throws JSONException {
+        JSONObject properties = mainObject.getJSONObject("properties");
+        assertNotNull(properties);
+
+        JSONObject nodeInProperties = properties.getJSONObject(childObject);
+        assertNotNull(nodeInProperties);
+
+        JSONObject itemsInNodeInProperties = nodeInProperties.getJSONObject("items");
+        assertNotNull(itemsInNodeInProperties);
+
+        String itemRef = itemsInNodeInProperties.getString("$ref");
+        assertEquals("(config)" + childObject, itemRef);
     }
 
     @Test
@@ -76,14 +203,13 @@ public class ApiDocGeneratorTest {
 
         for (Entry<File, Module> m : helper.getModules().entrySet()) {
             if (m.getKey().getAbsolutePath().endsWith("toaster.yang")) {
-                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(),
-                        "http://localhost:8080/restconf", "",schemaContext);
+                ApiDeclaration doc = generator.getSwaggerDocSpec(m.getValue(), "http://localhost:8080/restconf", "",
+                        schemaContext);
                 Assert.assertNotNull(doc);
 
-                //testing bugs.opendaylight.org bug 1290. UnionType model type.
+                // testing bugs.opendaylight.org bug 1290. UnionType model type.
                 String jsonString = doc.getModels().toString();
-                assertTrue(
-                        jsonString.contains( "testUnion\":{\"type\":\"integer or string\",\"required\":false}" ) );
+                assertTrue(jsonString.contains("testUnion\":{\"type\":\"integer or string\",\"required\":false}"));
             }
         }
     }
@@ -98,10 +224,9 @@ public class ApiDocGeneratorTest {
      * @throws Exception
      */
     private void validateToaster(ApiDeclaration doc) throws Exception {
-        Set<String> expectedUrls = new TreeSet<>(Arrays.asList(new String[] {
-                "/config/toaster2:toaster/", "/operational/toaster2:toaster/",
-                "/operations/toaster2:cancel-toast", "/operations/toaster2:make-toast",
-                "/operations/toaster2:restock-toaster",
+        Set<String> expectedUrls = new TreeSet<>(Arrays.asList(new String[] { "/config/toaster2:toaster/",
+                "/operational/toaster2:toaster/", "/operations/toaster2:cancel-toast",
+                "/operations/toaster2:make-toast", "/operations/toaster2:restock-toaster",
                 "/config/toaster2:toaster/toasterSlot/{slotId}/toaster-augmented:slotInfo/" }));
 
         Set<String> actualUrls = new TreeSet<>();
@@ -120,8 +245,7 @@ public class ApiDocGeneratorTest {
             fail("Missing expected urls: " + expectedUrls);
         }
 
-        Set<String> expectedConfigMethods = new TreeSet<>(Arrays.asList(new String[] { "GET",
-                "PUT", "DELETE" }));
+        Set<String> expectedConfigMethods = new TreeSet<>(Arrays.asList(new String[] { "GET", "PUT", "DELETE" }));
         Set<String> actualConfigMethods = new TreeSet<>();
         for (Operation oper : configApi.getOperations()) {
             actualConfigMethods.add(oper.getMethod());
@@ -136,8 +260,7 @@ public class ApiDocGeneratorTest {
         // TODO: we should really do some more validation of the
         // documentation...
         /**
-         * Missing validation: Explicit validation of URLs, and their methods
-         * Input / output models.
+         * Missing validation: Explicit validation of URLs, and their methods Input / output models.
          */
     }
 
@@ -173,25 +296,25 @@ public class ApiDocGeneratorTest {
         try {
             JSONObject configToaster = topLevelJson.getJSONObject("(config)toaster");
             assertNotNull("(config)toaster JSON object missing", configToaster);
-            //without module prefix
+            // without module prefix
             containsProperties(configToaster, "toasterSlot");
 
             JSONObject toasterSlot = topLevelJson.getJSONObject("(config)toasterSlot");
             assertNotNull("(config)toasterSlot JSON object missing", toasterSlot);
-            //with module prefix
+            // with module prefix
             containsProperties(toasterSlot, "toaster-augmented:slotInfo");
 
         } catch (JSONException e) {
-            fail("Json exception while reading JSON object. Original message "+e.getMessage());
+            fail("Json exception while reading JSON object. Original message " + e.getMessage());
         }
     }
 
-    private void containsProperties(final JSONObject jsonObject,final String...properties) throws JSONException {
+    private void containsProperties(final JSONObject jsonObject, final String... properties) throws JSONException {
         for (String property : properties) {
             JSONObject propertiesObject = jsonObject.getJSONObject("properties");
             assertNotNull("Properties object missing in ", propertiesObject);
             JSONObject concretePropertyObject = propertiesObject.getJSONObject(property);
-            assertNotNull(property + " is missing",concretePropertyObject);
+            assertNotNull(property + " is missing", concretePropertyObject);
         }
     }
 }

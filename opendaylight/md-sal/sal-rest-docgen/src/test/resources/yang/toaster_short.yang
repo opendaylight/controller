@@ -129,6 +129,39 @@
           "The darkness factor. Basically, the number of ms to multiple the doneness value by.";
       }
     }  // container toaster
+    
+    list lst {
+        container cont1 {
+            container cont11 {
+                leaf lf111 {
+                    type uint32;
+                }
+                leaf lf112 {
+                    type string;
+                }
+            }
+            list lst11 {
+                leaf lf111 {
+                    type string;
+                }
+            }
+        }
+        list lst1 {
+            key "key1 key2";
+            leaf key1 {
+                type int32;
+            }
+            leaf key2 {
+                type int8;
+            }
+            leaf lf11 {
+                type int16;
+            }
+        }
+        leaf lf1 {
+            type string;
+        }
+    }    
 
     rpc make-toast {
       description
