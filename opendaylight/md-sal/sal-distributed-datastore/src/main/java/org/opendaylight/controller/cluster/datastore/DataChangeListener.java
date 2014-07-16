@@ -21,16 +21,18 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener;
     private final SchemaContext schemaContext;
+    private final InstanceIdentifier pathId;
 
     public DataChangeListener(SchemaContext schemaContext,
-        AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener) {
+                              AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener, InstanceIdentifier pathId) {
         this.listener = listener;
         this.schemaContext = schemaContext;
+        this.pathId  = pathId;
     }
 
     @Override public void handleReceive(Object message) throws Exception {
         if(message.getClass().equals(DataChanged.SERIALIZABLE_CLASS)){
-            DataChanged reply = DataChanged.fromSerialize(schemaContext,message);
+            DataChanged reply = DataChanged.fromSerialize(schemaContext,message, pathId);
             AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>
                 change = reply.getChange();
             this.listener.onDataChanged(change);
@@ -42,11 +44,11 @@ public class DataChangeListener extends AbstractUntypedActor {
         }
     }
 
-    public static Props props(final SchemaContext schemaContext,final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener) {
+    public static Props props(final SchemaContext schemaContext, final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener, final InstanceIdentifier pathId) {
         return Props.create(new Creator<DataChangeListener>() {
             @Override
             public DataChangeListener create() throws Exception {
-                return new DataChangeListener(schemaContext,listener);
+                return new DataChangeListener(schemaContext,listener,pathId );
             }
 
         });

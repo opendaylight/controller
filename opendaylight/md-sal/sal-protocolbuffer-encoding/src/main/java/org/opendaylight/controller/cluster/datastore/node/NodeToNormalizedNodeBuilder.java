@@ -15,6 +15,8 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -206,7 +208,8 @@ public abstract class NodeToNormalizedNodeBuilder<T extends PathArgument>
 
       logNode(node);
 
-      if (node.getChildCount() == 0 && !node.getType().equals(ContainerNode.class.getSimpleName())) {
+      if (node.getChildCount() == 0 && (node.getType().equals(LeafSetEntryNode.class.getSimpleName())
+          || node.getType().equals(LeafNode.class.getSimpleName()))){
         PathArgument childPathArgument =
             NodeIdentifierFactory.getArgument(node.getPath());
         NormalizedNode child = null;
