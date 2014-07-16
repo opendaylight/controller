@@ -35,6 +35,8 @@ public class NormalizedNodeToNodeCodec {
     }
 
     public NormalizedNode<?,?> decode(InstanceIdentifier id, NormalizedNodeMessages.Node node){
+            logger.debug("decode:InstanceIdentifier:"+id);
+
             NodeToNormalizedNodeBuilder currentOp = NodeToNormalizedNodeBuilder.from(ctx);
 
             for(InstanceIdentifier.PathArgument pathArgument : id.getPath()){
