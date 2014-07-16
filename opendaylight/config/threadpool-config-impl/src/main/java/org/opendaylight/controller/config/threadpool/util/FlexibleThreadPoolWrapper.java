@@ -12,7 +12,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +30,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
             ThreadFactory threadFactory) {
 
         executor = new ThreadPoolExecutor(minThreadCount, maxThreadCount, keepAlive, timeUnit,
-                new SynchronousQueue<Runnable>(), threadFactory);
+                new LinkedBlockingQueue<Runnable>(), threadFactory);
         executor.prestartAllCoreThreads();
     }
 
