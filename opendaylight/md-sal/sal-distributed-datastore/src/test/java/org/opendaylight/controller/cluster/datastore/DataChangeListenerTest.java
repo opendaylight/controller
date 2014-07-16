@@ -57,14 +57,14 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
         @Override public NormalizedNode<?, ?> getOriginalSubtree() {
 
-          //fixme: need to have some valid data here
-          return null;
+
+          return originalData.put(CompositeModel.FAMILY_PATH, CompositeModel.createFamily());
         }
 
         @Override public NormalizedNode<?, ?> getUpdatedSubtree() {
 
           //fixme: need to have some valid data here
-          return null;
+          return originalData.put(CompositeModel.FAMILY_PATH, CompositeModel.createFamily());
         }
     }
 
@@ -89,7 +89,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
     public void testDataChanged(){
         new JavaTestKit(getSystem()) {{
             final MockDataChangeListener listener = new MockDataChangeListener();
-            final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener);
+            final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener,CompositeModel.FAMILY_PATH );
             final ActorRef subject =
                 getSystem().actorOf(props, "testDataChanged");
 
