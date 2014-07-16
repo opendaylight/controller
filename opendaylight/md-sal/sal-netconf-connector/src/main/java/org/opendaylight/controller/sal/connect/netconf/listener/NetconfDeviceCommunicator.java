@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.connect.netconf.listener;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -26,16 +25,14 @@ import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguratio
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
-import org.opendaylight.controller.sal.connect.util.FailedRpcResult;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,9 +137,10 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     private RpcResult<NetconfMessage> createErrorRpcResult( RpcError.ErrorType errorType, String message )
     {
-        return new FailedRpcResult<NetconfMessage>( RpcErrors.getRpcError( null,
-                NetconfDocumentedException.ErrorTag.operation_failed.getTagValue(),
-                null, RpcError.ErrorSeverity.ERROR, message, errorType, null ) );
+        return RpcResultBuilder.<NetconfMessage>failed()
+                .withError( errorType, NetconfDocumentedException.ErrorTag.operation_failed.getTagValue(),
+                            message )
+                .build();
     }
 
     @Override
@@ -208,8 +206,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                 logger.warn( "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
                              id, msgToS( request.request ), msgToS( message ), e );
 
-                request.future.set( new FailedRpcResult<NetconfMessage>(
-                                                           NetconfMessageTransformUtil.toRpcError( e ) ) );
+                request.future.set( RpcResultBuilder.<NetconfMessage>failed()
+                        .withRpcError( NetconfMessageTransformUtil.toRpcError( e ) ).build() );
                 return;
             }
 
@@ -220,12 +218,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                 logger.warn( "{}: Error reply from remote device, request: {}, response: {}", id,
                              msgToS( request.request ), msgToS( message ), e );
 
-                request.future.set( new FailedRpcResult<NetconfMessage>(
-                                                          NetconfMessageTransformUtil.toRpcError( e ) ) );
+                request.future.set( RpcResultBuilder.<NetconfMessage>failed()
+                        .withRpcError( NetconfMessageTransformUtil.toRpcError( e ) ).build() );
                 return;
             }
 
-            request.future.set(Rpcs.getRpcResult( true, message, Collections.<RpcError>emptySet() ) );
+            request.future.set( RpcResultBuilder.<NetconfMessage>success( message ).build() );
         }
     }
 

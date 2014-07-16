@@ -16,6 +16,10 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * @deprecated Use {@link org.opendaylight.yangtools.yang.common.RpcResultBuilder}
+ */
+@Deprecated
 public class Rpcs {
 
     public static <T> RpcResult<T> getRpcResult(boolean successful) {

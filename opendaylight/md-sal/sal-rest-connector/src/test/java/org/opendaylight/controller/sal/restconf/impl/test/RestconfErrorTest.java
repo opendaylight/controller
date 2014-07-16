@@ -11,7 +11,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.opendaylight.controller.sal.common.util.RpcErrors.getRpcError;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 /**
  * Unit tests for RestconfError.
@@ -144,41 +144,41 @@ public class RestconfErrorTest {
     public void testRestConfErrorWithRpcError() {
 
         // All fields set
-        RpcError rpcError = getRpcError("mock app-tag", ErrorTag.BAD_ATTRIBUTE.getTagValue(), "mock error-info",
-                RpcError.ErrorSeverity.ERROR, "mock error-message", RpcError.ErrorType.PROTOCOL, new Exception(
-                        "mock cause"));
+        RpcError rpcError = RpcResultBuilder.newError(
+                RpcError.ErrorType.PROTOCOL, ErrorTag.BAD_ATTRIBUTE.getTagValue(), "mock error-message",
+                "mock app-tag", "mock error-info", new Exception( "mock cause" ) );
 
         validateRestConfError("mock error-message", ErrorType.PROTOCOL, ErrorTag.BAD_ATTRIBUTE, "mock app-tag",
                 "mock error-info", new RestconfError(rpcError));
 
         // All fields set except 'info' - expect error-info set to 'cause'
-        rpcError = getRpcError("mock app-tag", ErrorTag.BAD_ATTRIBUTE.getTagValue(), null,
-                RpcError.ErrorSeverity.ERROR, "mock error-message", RpcError.ErrorType.PROTOCOL, new Exception(
-                        "mock cause"));
+        rpcError = RpcResultBuilder.newError(
+                RpcError.ErrorType.PROTOCOL, ErrorTag.BAD_ATTRIBUTE.getTagValue(), "mock error-message",
+                "mock app-tag", null, new Exception( "mock cause" ) );
 
         validateRestConfError("mock error-message", ErrorType.PROTOCOL, ErrorTag.BAD_ATTRIBUTE, "mock app-tag",
                 new Contains("mock cause"), new RestconfError(rpcError));
 
         // Some fields set - expect error-info set to ErrorSeverity
-        rpcError = getRpcError(null, ErrorTag.ACCESS_DENIED.getTagValue(), null, RpcError.ErrorSeverity.ERROR, null,
-                RpcError.ErrorType.RPC, null);
+        rpcError = RpcResultBuilder.newError(
+                RpcError.ErrorType.RPC, ErrorTag.ACCESS_DENIED.getTagValue(), null, null, null, null );
 
         validateRestConfError(null, ErrorType.RPC, ErrorTag.ACCESS_DENIED, null, "<severity>error</severity>",
                 new RestconfError(rpcError));
 
         // 'tag' field not mapped to ErrorTag - expect error-tag set to
         // OPERATION_FAILED
-        rpcError = getRpcError(null, "not mapped", null, RpcError.ErrorSeverity.WARNING, null,
-                RpcError.ErrorType.TRANSPORT, null);
+        rpcError = RpcResultBuilder.newWarning(
+                RpcError.ErrorType.TRANSPORT, "not mapped", null, null, null, null );
 
         validateRestConfError(null, ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED, null,
                 "<severity>warning</severity>", new RestconfError(rpcError));
 
         // No fields set - edge case
-        rpcError = getRpcError(null, null, null, null, null, null, null);
+        rpcError = RpcResultBuilder.newError( null, null, null, null, null, null );
 
-        validateRestConfError(null, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, null, (String) null,
-                new RestconfError(rpcError));
+        validateRestConfError( null, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                               null, "<severity>error</severity>", new RestconfError( rpcError ) );
     }
 
     private void validateRestConfError(String expectedMessage, ErrorType expectedErrorType, ErrorTag expectedErrorTag,

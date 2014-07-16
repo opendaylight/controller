@@ -10,19 +10,17 @@ package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.Future;
 
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
@@ -89,7 +87,7 @@ public class RpcInvocationStrategy {
     public ListenableFuture<RpcResult<?>> forwardToDomBroker(final DataObject input) {
 
         if(biRpcRegistry == null) {
-            return Futures.<RpcResult<?>> immediateFuture(Rpcs.getRpcResult(false));
+            return Futures.<RpcResult<?>> immediateFuture(RpcResultBuilder.failed().build());
         }
 
         CompositeNode inputXml = null;
@@ -102,6 +100,7 @@ public class RpcInvocationStrategy {
 
         Function<RpcResult<CompositeNode>, RpcResult<?>> transformationFunction =
                                        new Function<RpcResult<CompositeNode>, RpcResult<?>>() {
+            @SuppressWarnings("rawtypes")
             @Override
             public RpcResult<?> apply(RpcResult<CompositeNode> result) {
 
@@ -114,7 +113,7 @@ public class RpcInvocationStrategy {
                     }
                 }
 
-                return Rpcs.getRpcResult(result.isSuccessful(), output, result.getErrors());
+                return RpcResultBuilder.from( (RpcResult)result ).withResult( output ).build();
             }
         };
 
@@ -135,22 +134,18 @@ public class RpcInvocationStrategy {
         }
 
         if (futureResult == null) {
-            return Rpcs.getRpcResult(false);
+            return RpcResultBuilder.<CompositeNode>failed().build();
         }
 
-        RpcResult<?> bindingResult = futureResult.get();
-
-        Collection<RpcError> errors = bindingResult.getErrors();
-        if( errors == null ) {
-            errors = Collections.<RpcError>emptySet();
-        }
+        @SuppressWarnings("rawtypes")
+        RpcResult bindingResult = futureResult.get();
 
         final Object resultObj = bindingResult.getResult();
-        CompositeNode output = null;
+        Object output = null;
         if (resultObj instanceof DataObject) {
             output = mappingService.toDataDom((DataObject)resultObj);
         }
-        return Rpcs.getRpcResult( bindingResult.isSuccessful(), output, errors);
+        return RpcResultBuilder.from( bindingResult ).withResult( output ).build();
     }
 
     public RpcResult<CompositeNode> invokeOn(final RpcService rpcService, final CompositeNode domInput) throws Exception {

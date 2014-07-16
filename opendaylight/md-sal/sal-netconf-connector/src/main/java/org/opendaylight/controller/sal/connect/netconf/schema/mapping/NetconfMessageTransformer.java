@@ -8,18 +8,19 @@
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
 import com.google.common.base.Optional;
-import java.util.Collections;
+
 import java.util.List;
 import java.util.Set;
+
 import javax.activation.UnsupportedDataTypeException;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.MessageCounter;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
@@ -90,7 +91,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             return toRpcResult(message, rpc, schemaContext.get());
         } else {
             final CompositeNode node = (CompositeNode) XmlDocumentUtils.toDomNode(message.getDocument());
-            return Rpcs.getRpcResult(true, node, Collections.<RpcError>emptySet());
+            return RpcResultBuilder.success( node ).build();
         }
     }
 
@@ -114,7 +115,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             compositeNode = (CompositeNode) XmlDocumentUtils.toDomNode(message.getDocument());
         }
 
-        return Rpcs.getRpcResult(true, compositeNode, Collections.<RpcError> emptySet());
+        return RpcResultBuilder.success( compositeNode ).build();
     }
 
     @Override

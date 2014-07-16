@@ -11,12 +11,11 @@ import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.common.util.RpcErrors;
-import org.opendaylight.controller.sal.connect.util.FailedRpcResult;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -74,8 +73,8 @@ public final class NetconfDeviceCommitHandler implements DataCommitHandler<Insta
 
         @Override
         public RpcResult<Void> finish() throws IllegalStateException {
-            return new FailedRpcResult<>(RpcErrors.getRpcError(null, null, null, RpcError.ErrorSeverity.ERROR,
-                    id + ": Unexpected operation error during pre-commit operations", RpcError.ErrorType.APPLICATION, e));
+            return RpcResultBuilder.<Void>failed().withError( RpcError.ErrorType.APPLICATION,
+                    id + ": Unexpected operation error during pre-commit operations", e ).build();
         }
 
         @Override

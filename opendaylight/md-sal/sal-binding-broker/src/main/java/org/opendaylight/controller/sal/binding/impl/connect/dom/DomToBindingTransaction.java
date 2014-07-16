@@ -1,15 +1,14 @@
 package org.opendaylight.controller.sal.binding.impl.connect.dom;
 
-import java.util.Collections;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
@@ -39,7 +38,7 @@ class DomToBindingTransaction implements
     @Override
     public RpcResult<Void> rollback() throws IllegalStateException {
         bindingOpenedTransactions.remove(backing.getIdentifier());
-        return Rpcs.getRpcResult(true, null, Collections.<RpcError>emptySet());
+        return RpcResultBuilder.<Void> success().build();
     }
 
     @Override
@@ -48,7 +47,8 @@ class DomToBindingTransaction implements
         try {
             RpcResult<TransactionStatus> baResult = result.get();
             bindingOpenedTransactions.remove(backing.getIdentifier());
-            return Rpcs.getRpcResult(baResult.isSuccessful(), null, baResult.getErrors());
+            return RpcResultBuilder.<Void> status(baResult.isSuccessful())
+                                          .withRpcErrors(baResult.getErrors()).build();
         } catch (InterruptedException e) {
             throw new IllegalStateException("", e);
         } catch (ExecutionException e) {
