@@ -50,10 +50,8 @@ public class MockRaftActorContext implements RaftActorContext {
 
 
     public void initReplicatedLog(){
-        MockReplicatedLog mockReplicatedLog = new MockReplicatedLog();
-        this.replicatedLog = mockReplicatedLog;
-        mockReplicatedLog.setLast(new MockReplicatedLogEntry(1,1,""));
-        mockReplicatedLog.setReplicatedLogEntry(new MockReplicatedLogEntry(1,1, ""));
+        this.replicatedLog = new SimpleReplicatedLog();
+        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, ""));
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -125,57 +123,6 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
 
-    public static class MockReplicatedLog implements ReplicatedLog {
-        private ReplicatedLogEntry replicatedLogEntry = new MockReplicatedLogEntry(0,0, "");
-        private ReplicatedLogEntry last = new MockReplicatedLogEntry(0,0, "");
-
-        @Override public ReplicatedLogEntry get(long index) {
-            return replicatedLogEntry;
-        }
-
-        @Override public ReplicatedLogEntry last() {
-            return last;
-        }
-
-        @Override public long lastIndex() {
-            return last.getIndex();
-        }
-
-        @Override public long lastTerm() {
-            return last.getTerm();
-        }
-
-        @Override public void removeFrom(long index) {
-        }
-
-        @Override public void append(ReplicatedLogEntry replicatedLogEntry) {
-        }
-
-        @Override public void appendAndPersist(
-            ReplicatedLogEntry replicatedLogEntry) {
-        }
-
-        @Override public List<ReplicatedLogEntry> getFrom(long index) {
-            return Collections.EMPTY_LIST;
-        }
-
-        @Override public long size() {
-            if(replicatedLogEntry != null){
-                return 1;
-            }
-            return 0;
-        }
-
-        public void setReplicatedLogEntry(
-            ReplicatedLogEntry replicatedLogEntry) {
-            this.replicatedLogEntry = replicatedLogEntry;
-        }
-
-        public void setLast(ReplicatedLogEntry last) {
-            this.last = last;
-        }
-    }
-
     public static class SimpleReplicatedLog implements ReplicatedLog {
         private final List<ReplicatedLogEntry> log = new ArrayList<>(10000);
 
@@ -210,6 +157,9 @@ public class MockRaftActorContext implements RaftActorContext {
         }
 
         @Override public void removeFrom(long index) {
+            if(index >= log.size() || index < 0){
+                return;
+            }
             for(int i=(int) index ; i < log.size() ; i++) {
                 log.remove(i);
             }
@@ -225,6 +175,9 @@ public class MockRaftActorContext implements RaftActorContext {
         }
 
         @Override public List<ReplicatedLogEntry> getFrom(long index) {
+            if(index >= log.size() || index < 0){
+                return Collections.EMPTY_LIST;
+            }
             List<ReplicatedLogEntry> entries = new ArrayList<>();
             for(int i=(int) index ; i < log.size() ; i++) {
                 entries.add(get(i));
@@ -234,6 +187,30 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public long size() {
             return log.size();
+        }
+
+        @Override public boolean isPresent(long index) {
+            if(index >= log.size() || index < 0){
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override public boolean isInSnapshot(long index) {
+            return false;
+        }
+
+        @Override public Object getSnapshot() {
+            return null;
+        }
+
+        @Override public long getSnapshotIndex() {
+            return -1;
+        }
+
+        @Override public long getSnapshotTerm() {
+            return -1;
         }
     }
 
