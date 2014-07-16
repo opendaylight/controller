@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_4b330614",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-16T19:28:17Z",
+      "side": 1,
+      "message": "I would argue to remove RaftState class. Its confusing whether state transitions should happen between RaftState or RaftActorBehavior.\n\nWe could change the method signature to \nprivate RaftActorBehavior switchBehavior(Class\u003c? extends RaftActorBehavior\u003e behavior) \n\nSwitching behavior based on provided behavior seems more clear.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6b6a8aef",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
