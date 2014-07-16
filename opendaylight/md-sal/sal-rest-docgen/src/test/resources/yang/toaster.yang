@@ -164,7 +164,7 @@ module toaster {
           "This variable indicates the current state of 
                the toaster.";
       }
-    } 
+    }
 
     rpc make-toast {
       description
