@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2b3ec2da",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-16T20:05:02Z",
+      "side": 1,
+      "message": "Change to \"Persisting data \" and add term and id info.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cb7876c6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/RaftActorBehavior.java",
         "patchSetId": 4
