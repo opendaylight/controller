@@ -98,6 +98,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         AppendEntries appendEntries, RaftState suggestedState);
 
 
+    /**
+     * appendEntries first processes the AppendEntries message and then
+     * delegates handling to a specific behavior
+     *
+     * @param sender
+     * @param appendEntries
+     * @param raftState
+     * @return
+     */
     protected RaftState appendEntries(ActorRef sender,
         AppendEntries appendEntries, RaftState raftState) {
 
@@ -137,10 +146,18 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *                           AppendEntriesReply message
      * @return
      */
-
     protected abstract RaftState handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply, RaftState suggestedState);
 
+    /**
+     * requestVote handles the RequestVote message. This logic is common
+     * for all behaviors
+     *
+     * @param sender
+     * @param requestVote
+     * @param suggestedState
+     * @return
+     */
     protected RaftState requestVote(ActorRef sender,
         RequestVote requestVote, RaftState suggestedState) {
 
@@ -198,24 +215,35 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *                         message
      * @return
      */
-
     protected abstract RaftState handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply, RaftState suggestedState);
 
+    /**
+     * Creates a random election duration
+     *
+     * @return
+     */
     protected FiniteDuration electionDuration() {
         long variance = new Random().nextInt(ELECTION_TIME_MAX_VARIANCE);
         return new FiniteDuration(ELECTION_TIME_INTERVAL + variance,
             TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * stop the scheduled election
+     */
     protected void stopElection() {
         if (electionCancel != null && !electionCancel.isCancelled()) {
             electionCancel.cancel();
         }
     }
 
+    /**
+     * schedule a new election
+     *
+     * @param interval
+     */
     protected void scheduleElection(FiniteDuration interval) {
-
         stopElection();
 
         // Schedule an election. When the scheduler triggers an ElectionTimeout
@@ -226,30 +254,90 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 context.getActorSystem().dispatcher(), context.getActor());
     }
 
+    /**
+     * Get the current term
+     * @return
+     */
     protected long currentTerm() {
         return context.getTermInformation().getCurrentTerm();
     }
 
+    /**
+     * Get the candidate for whom we voted in the current term
+     * @return
+     */
     protected String votedFor() {
         return context.getTermInformation().getVotedFor();
     }
 
+    /**
+     * Get the actor associated with this behavior
+     * @return
+     */
     protected ActorRef actor() {
         return context.getActor();
     }
 
+    /**
+     * Get the term from the last entry in the log
+     *
+     * @return
+     */
     protected long lastTerm() {
         return context.getReplicatedLog().lastTerm();
     }
 
+    /**
+     * Get the index from the last entry in the log
+     *
+     * @return
+     */
     protected long lastIndex() {
         return context.getReplicatedLog().lastIndex();
     }
 
+    /**
+     * Find the client request tracker for a specific logIndex
+     *
+     * @param logIndex
+     * @return
+     */
     protected ClientRequestTracker findClientRequestTracker(long logIndex) {
         return null;
     }
 
+    /**
+     * Find the log index from the previous to last entry in the log
+     *
+     * @return
+     */
+    protected long prevLogIndex(long index){
+        ReplicatedLogEntry prevEntry =
+            context.getReplicatedLog().get(index - 1);
+        if (prevEntry != null) {
+            return prevEntry.getIndex();
+        }
+        return -1;
+    }
+
+    /**
+     * Find the log term from the previous to last entry in the log
+     * @return
+     */
+    protected long prevLogTerm(long index){
+        ReplicatedLogEntry prevEntry =
+            context.getReplicatedLog().get(index - 1);
+        if (prevEntry != null) {
+            return prevEntry.getTerm();
+        }
+        return -1;
+    }
+
+    /**
+     * Apply the provided index to the state machine
+     *
+     * @param index a log index that is known to be committed
+     */
     protected void applyLogToStateMachine(long index) {
         // Now maybe we apply to the state machine
         for (long i = context.getLastApplied() + 1;
