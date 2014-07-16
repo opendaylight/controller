@@ -14,8 +14,7 @@ import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMap
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyLink;
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNode;
 import static org.opendaylight.md.controller.topology.manager.FlowCapableNodeMapping.toTopologyNodeId;
-
-import org.opendaylight.controller.md.sal.binding.util.TypeSafeDataReader;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeUpdated;
@@ -42,8 +41,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Preconditions;
-
 class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, OpendaylightInventoryListener {
     private final InstanceIdentifier<Topology> topology;
     private final OperationProcessor processor;
@@ -61,7 +58,6 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 NodeId nodeId = toTopologyNodeId(getNodeKey(notification.getNodeRef()).getId());
                 InstanceIdentifier<Node> nodeInstance = toNodeIdentifier(notification.getNodeRef());
                 transaction.removeOperationalData(nodeInstance);
-                removeAffectedLinks(transaction, nodeId);
             }
         });
     }
@@ -91,7 +87,6 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 TpId tpId = toTerminationPointId(getNodeConnectorKey(notification.getNodeConnectorRef()).getId());
 
                 transaction.removeOperationalData(tpInstance);
-                removeAffectedLinks(transaction, tpId);
             }
         });
     }
@@ -109,10 +104,6 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                     InstanceIdentifier<TerminationPoint> path = tpPath(nodeId, point.getKey().getTpId());
 
                     transaction.putOperationalData(path, point);
-                    if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
-                            || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
-                        removeAffectedLinks(transaction, point.getTpId());
-                    }
                 }
             });
         }
@@ -160,30 +151,6 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey invNodeKey = getNodeKey(ref);
         NodeConnectorKey invNodeConnectorKey = getNodeConnectorKey(ref);
         return tpPath(toTopologyNodeId(invNodeKey.getId()), toTerminationPointId(invNodeConnectorKey.getId()));
-    }
-
-    private void removeAffectedLinks(final DataModificationTransaction transaction, final NodeId id) {
-        TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
-        Topology topologyData = reader.readOperationalData(topology);
-        if (topologyData != null) {
-            for (Link link : topologyData.getLink()) {
-                if (id.equals(link.getSource().getSourceNode()) || id.equals(link.getDestination().getDestNode())) {
-                    transaction.removeOperationalData(linkPath(link));
-                }
-            }
-        }
-    }
-
-    private void removeAffectedLinks(final DataModificationTransaction transaction, final TpId id) {
-        TypeSafeDataReader reader = TypeSafeDataReader.forReader(transaction);
-        Topology topologyData = reader.readOperationalData(topology);
-        if (topologyData != null) {
-            for (Link link : topologyData.getLink()) {
-                if (id.equals(link.getSource().getSourceTp()) || id.equals(link.getDestination().getDestTp())) {
-                    transaction.removeOperationalData(linkPath(link));
-                }
-            }
-        }
     }
 
     private InstanceIdentifier<Node> getNodePath(final NodeId nodeId) {
