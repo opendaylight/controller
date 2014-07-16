@@ -20,7 +20,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * <p>
  * For more information on usage, please see the documentation in {@link AsyncDataBroker}.
  */
-public interface DataBroker extends AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService, TransactionChainFactory<InstanceIdentifier<?>, DataObject> {
+public interface DataBroker extends TransactionFactory, AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService, TransactionChainFactory<InstanceIdentifier<?>, DataObject> {
+
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
 
