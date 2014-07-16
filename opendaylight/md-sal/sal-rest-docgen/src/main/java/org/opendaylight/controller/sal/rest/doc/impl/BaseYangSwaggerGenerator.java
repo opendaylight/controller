@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.rest.doc.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import java.text.DateFormat;
@@ -22,9 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opendaylight.controller.sal.rest.doc.model.builder.OperationBuilder;
@@ -45,11 +47,6 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.base.Preconditions;
 
 public class BaseYangSwaggerGenerator {
 
@@ -269,8 +266,15 @@ public class BaseYangSwaggerGenerator {
         operations.add(getBuilder.pathParams(pathParams).build());
 
         if (isConfig) {
-            OperationBuilder.Post postBuilder = new OperationBuilder.Post(node);
-            operations.add(postBuilder.pathParams(pathParams).build());
+            if (node instanceof DataNodeContainer) {
+                for (DataSchemaNode childNode : ((DataNodeContainer)node).getChildNodes()) {
+                    if (childNode instanceof ListSchemaNode || childNode instanceof ContainerSchemaNode) {
+                        OperationBuilder.Post postBuilder = new OperationBuilder.Post(childNode)
+                            .summary(childNode.getQName().getLocalName());
+                        operations.add(postBuilder.pathParams(pathParams).build());
+                    }
+                }
+            }
 
             OperationBuilder.Put putBuilder = new OperationBuilder.Put(node);
             operations.add(putBuilder.pathParams(pathParams).build());
