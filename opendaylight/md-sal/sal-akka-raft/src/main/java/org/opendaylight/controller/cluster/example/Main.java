@@ -10,11 +10,14 @@ package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.PoisonPill;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -41,6 +44,9 @@ public class Main {
             actorSystem.actorOf(ExampleActor.props("example-3",
                 withoutPeer("example-3")), "example-3");
 
+
+        List<ActorRef> examples = Arrays.asList(example1Actor, example2Actor, example3Actor);
+
         ActorRef clientActor = actorSystem.actorOf(ClientActor.props(example1Actor));
         BufferedReader br =
             new BufferedReader(new InputStreamReader(System.in));
@@ -48,7 +54,29 @@ public class Main {
         while(true) {
             System.out.print("Enter Integer (0 to exit):");
             try {
-                int i = Integer.parseInt(br.readLine());
+                String s = br.readLine();
+                String[] split = s.split(" ");
+                if(split.length > 1) {
+                    String command = split[0];
+                    String actor = split[1];
+
+                    if ("k".equals(command)) {
+                        int i = Integer.parseInt(actor);
+                        examples.get(i - 1)
+                            .tell(PoisonPill.getInstance(), null);
+                        continue;
+                    } else if ("s".equals(command)) {
+                        int i = Integer.parseInt(actor);
+                        String actorName = "example-" + i;
+                        examples.add(i - 1,
+                            actorSystem.actorOf(ExampleActor.props(actorName,
+                                withoutPeer(actorName)), actorName));
+                        System.out.println("Created actor : " + actorName);
+                        continue;
+                    }
+                }
+
+                int i = Integer.parseInt(s);
                 if(i == 0){
                     System.exit(0);
                 }
