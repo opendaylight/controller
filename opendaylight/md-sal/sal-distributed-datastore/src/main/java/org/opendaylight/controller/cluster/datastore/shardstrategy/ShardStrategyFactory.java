@@ -45,8 +45,7 @@ public class ShardStrategyFactory {
 
 
     private static String getModuleName(InstanceIdentifier path) {
-        String namespace = path.getLastPathArgument().getNodeType().getNamespace()
-            .toASCIIString();
+        String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
 
         Optional<String> optional =
             configuration.getModuleNameFromNameSpace(namespace);
