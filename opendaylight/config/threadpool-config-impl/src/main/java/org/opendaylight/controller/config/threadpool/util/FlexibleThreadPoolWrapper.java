@@ -16,12 +16,14 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.config.threadpool.ThreadPool;
 
 /**
  * Implementation of {@link ThreadPool} using flexible number of threads wraps
  * {@link ExecutorService}.
+ *
+ * For every new submitted task a new thread is spawned until the number of threads in pool == maxThreadCount.
+ * From that moment, all new tasks are rejected.
  */
 public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
     private final ThreadPoolExecutor executor;
