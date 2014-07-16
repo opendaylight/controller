@@ -211,15 +211,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                     RaftActorContext actorContext =
                         createActorContext(behaviorActor);
 
-                    MockRaftActorContext.MockReplicatedLog
-                        log = new MockRaftActorContext.MockReplicatedLog();
-                    log.setReplicatedLogEntry(
+                    MockRaftActorContext.SimpleReplicatedLog
+                        log = new MockRaftActorContext.SimpleReplicatedLog();
+                    log.append(
                         new MockRaftActorContext.MockReplicatedLogEntry(20000,
                             1000000, ""));
-                    log.setLast(
-                        new MockRaftActorContext.MockReplicatedLogEntry(20000,
-                            1000000, "")
-                    );
 
                     ((MockRaftActorContext) actorContext).setReplicatedLog(log);
 
@@ -307,18 +303,17 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         assertEquals(RaftState.Follower, raftState);
     }
 
-    protected MockRaftActorContext.MockReplicatedLog setLastLogEntry(
+    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
         MockRaftActorContext actorContext, long term, long index, Object data) {
         return setLastLogEntry(actorContext,
             new MockRaftActorContext.MockReplicatedLogEntry(term, index, data));
     }
 
-    protected MockRaftActorContext.MockReplicatedLog setLastLogEntry(
+    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
         MockRaftActorContext actorContext, ReplicatedLogEntry logEntry) {
-        MockRaftActorContext.MockReplicatedLog
-            log = new MockRaftActorContext.MockReplicatedLog();
-        // By default MockReplicateLog has last entry set to (1,1,"")
-        log.setLast(logEntry);
+        MockRaftActorContext.SimpleReplicatedLog
+            log = new MockRaftActorContext.SimpleReplicatedLog();
+        log.append(logEntry);
         actorContext.setReplicatedLog(log);
 
         return log;

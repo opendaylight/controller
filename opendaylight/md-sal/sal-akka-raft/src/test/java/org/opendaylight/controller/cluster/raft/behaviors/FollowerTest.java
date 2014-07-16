@@ -190,13 +190,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             // Set the last log entry term for the receiver to be greater than
             // what we will be sending as the prevLogTerm in AppendEntries
-            MockRaftActorContext.MockReplicatedLog mockReplicatedLog =
+            MockRaftActorContext.SimpleReplicatedLog mockReplicatedLog =
                 setLastLogEntry(context, 20, 0, "");
-
-            // Also set the entry at index 0 with term 20 which will be greater
-            // than the prevLogTerm sent by the sender
-            mockReplicatedLog.setReplicatedLogEntry(
-                new MockRaftActorContext.MockReplicatedLogEntry(20, 0, ""));
 
             // AppendEntries is now sent with a bigger term
             // this will set the receivers term to be the same as the sender's term
