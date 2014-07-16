@@ -51,6 +51,24 @@
       "revId": "3b24eaffb19be43eb2dce7db97dc584060fd613f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3703e743",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/address/DataLinkAddress.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1946
+      },
+      "writtenOn": "2014-07-16T03:20:20Z",
+      "side": 1,
+      "message": "Since DataLinkAddress declares abstract clone method (and it expects all the concrete subclass to implement a clone method), it is recommended to implement Cloneable interface to indicate it is legal to clone the object (assuming all the subclass of DataLinkAddress implements the clone method). \n\nAs per current implementation the only sub class EthernetAddress has a valid clone method.\n\nCheck http://findbugs.sourceforge.net/bugDescriptions.html#CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE for more info.",
+      "parentUuid": "fa82b9bf_573d4bba",
+      "revId": "3b24eaffb19be43eb2dce7db97dc584060fd613f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
