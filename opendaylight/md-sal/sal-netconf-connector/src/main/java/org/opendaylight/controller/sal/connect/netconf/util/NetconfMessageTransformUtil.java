@@ -181,7 +181,7 @@ public class NetconfMessageTransformUtil {
                     .addAll(Collections2.filter(node.getValue(), new Predicate<Node<?>>() {
                         @Override
                         public boolean apply(@Nullable final Node<?> input) {
-                            return input.getNodeType() != inputQName;
+                            return !inputQName.equals(input.getNodeType());
                         }
                     })) //
                     .build();
