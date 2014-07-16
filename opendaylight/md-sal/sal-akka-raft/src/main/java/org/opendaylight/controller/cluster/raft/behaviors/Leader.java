@@ -73,7 +73,7 @@ public class Leader extends AbstractRaftActorBehavior {
     public Leader(RaftActorContext context) {
         super(context);
 
-        if(lastIndex() >= 0) {
+        if (lastIndex() >= 0) {
             context.setCommitIndex(lastIndex());
         }
 
@@ -148,7 +148,7 @@ public class Leader extends AbstractRaftActorBehavior {
                 }
             }
 
-            if (replicatedCount >= minReplicationCount){
+            if (replicatedCount >= minReplicationCount) {
                 ReplicatedLogEntry replicatedLogEntry =
                     context.getReplicatedLog().get(N);
                 if (replicatedLogEntry != null
@@ -161,7 +161,8 @@ public class Leader extends AbstractRaftActorBehavior {
             }
         }
 
-        if(context.getCommitIndex() > context.getLastApplied()){
+        // Apply the change to the state machine
+        if (context.getCommitIndex() > context.getLastApplied()) {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
@@ -194,56 +195,7 @@ public class Leader extends AbstractRaftActorBehavior {
             if (message instanceof SendHeartBeat) {
                 return sendHeartBeat();
             } else if (message instanceof Replicate) {
-
-                Replicate replicate = (Replicate) message;
-                long logIndex = replicate.getReplicatedLogEntry().getIndex();
-
-                context.getLogger().debug("Replicate message " + logIndex);
-
-                if (followerToActor.size() == 0) {
-                    context.setCommitIndex(
-                        replicate.getReplicatedLogEntry().getIndex());
-
-                    context.getActor()
-                        .tell(new ApplyState(replicate.getClientActor(),
-                                replicate.getIdentifier(),
-                                replicate.getReplicatedLogEntry()),
-                            context.getActor()
-                        );
-                } else {
-
-                    trackerList.add(
-                        new ClientRequestTrackerImpl(replicate.getClientActor(),
-                            replicate.getIdentifier(),
-                            logIndex)
-                    );
-
-                    ReplicatedLogEntry prevEntry =
-                        context.getReplicatedLog().get(lastIndex() - 1);
-                    long prevLogIndex = -1;
-                    long prevLogTerm = -1;
-                    if (prevEntry != null) {
-                        prevLogIndex = prevEntry.getIndex();
-                        prevLogTerm = prevEntry.getTerm();
-                    }
-                    // Send an AppendEntries to all followers
-                    for (String followerId : followerToActor.keySet()) {
-                        ActorSelection followerActor =
-                            followerToActor.get(followerId);
-                        FollowerLogInformation followerLogInformation =
-                            followerToLog.get(followerId);
-                        followerActor.tell(
-                            new AppendEntries(currentTerm(), context.getId(),
-                                prevLogIndex, prevLogTerm,
-                                context.getReplicatedLog().getFrom(
-                                    followerLogInformation.getNextIndex()
-                                        .get()
-                                ), context.getCommitIndex()
-                            ),
-                            actor()
-                        );
-                    }
-                }
+                replicate((Replicate) message);
             }
         } finally {
             scheduleHeartBeat(HEART_BEAT_INTERVAL);
@@ -252,28 +204,62 @@ public class Leader extends AbstractRaftActorBehavior {
         return super.handleMessage(sender, message);
     }
 
-    private RaftState sendHeartBeat() {
-        if (followerToActor.size() > 0) {
-            for (String follower : followerToActor.keySet()) {
+    private void replicate(Replicate replicate) {
+        long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
-                FollowerLogInformation followerLogInformation =
-                    followerToLog.get(follower);
+        context.getLogger().debug("Replicate message " + logIndex);
 
-                AtomicLong nextIndex =
-                    followerLogInformation.getNextIndex();
+        if (followerToActor.size() == 0) {
+            context.setCommitIndex(
+                replicate.getReplicatedLogEntry().getIndex());
 
-                List<ReplicatedLogEntry> entries =
-                    context.getReplicatedLog().getFrom(nextIndex.get());
-
-                followerToActor.get(follower).tell(new AppendEntries(
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getId(),
-                        context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm(),
-                        entries, context.getCommitIndex()),
+            context.getActor()
+                .tell(new ApplyState(replicate.getClientActor(),
+                        replicate.getIdentifier(),
+                        replicate.getReplicatedLogEntry()),
                     context.getActor()
                 );
-            }
+        } else {
+
+            // Create a tracker entry we will use this later to notify the
+            // client actor
+            trackerList.add(
+                new ClientRequestTrackerImpl(replicate.getClientActor(),
+                    replicate.getIdentifier(),
+                    logIndex)
+            );
+
+            sendAppendEntries();
+        }
+    }
+
+    private void sendAppendEntries() {
+        // Send an AppendEntries to all followers
+        for (String followerId : followerToActor.keySet()) {
+            ActorSelection followerActor =
+                followerToActor.get(followerId);
+
+            FollowerLogInformation followerLogInformation =
+                followerToLog.get(followerId);
+
+            long nextIndex = followerLogInformation.getNextIndex().get();
+
+            List<ReplicatedLogEntry> entries =
+                context.getReplicatedLog().getFrom(nextIndex);
+
+            followerActor.tell(
+                new AppendEntries(currentTerm(), context.getId(),
+                    prevLogIndex(nextIndex), prevLogTerm(nextIndex),
+                    entries, context.getCommitIndex()
+                ),
+                actor()
+            );
+        }
+    }
+
+    private RaftState sendHeartBeat() {
+        if (followerToActor.size() > 0) {
+            sendAppendEntries();
         }
         return state();
     }
@@ -285,6 +271,12 @@ public class Leader extends AbstractRaftActorBehavior {
     }
 
     private void scheduleHeartBeat(FiniteDuration interval) {
+        if(followerToActor.keySet().size() == 0){
+            // Optimization - do not bother scheduling a heartbeat as there are
+            // no followers
+            return;
+        }
+
         stopHeartBeat();
 
         // Schedule a heartbeat. When the scheduler triggers a SendHeartbeat

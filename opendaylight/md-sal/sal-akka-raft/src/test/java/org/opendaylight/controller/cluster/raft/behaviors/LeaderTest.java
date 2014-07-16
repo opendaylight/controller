@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
@@ -19,8 +21,10 @@ import static org.junit.Assert.assertEquals;
 
 public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
-    private ActorRef leaderActor = getSystem().actorOf(Props.create(DoNothingActor.class));
-    private ActorRef senderActor = getSystem().actorOf(Props.create(DoNothingActor.class));
+    private ActorRef leaderActor =
+        getSystem().actorOf(Props.create(DoNothingActor.class));
+    private ActorRef senderActor =
+        getSystem().actorOf(Props.create(DoNothingActor.class));
 
     @Test
     public void testHandleMessageForUnknownMessage() throws Exception {
@@ -37,7 +41,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
 
     @Test
-    public void testThatLeaderSendsAHeartbeatMessageToAllFollowers(){
+    public void testThatLeaderSendsAHeartbeatMessageToAllFollowers() {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
@@ -45,31 +49,35 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
                     ActorRef followerActor = getTestActor();
 
-                    MockRaftActorContext actorContext = (MockRaftActorContext) createActorContext();
+                    MockRaftActorContext actorContext =
+                        (MockRaftActorContext) createActorContext();
 
                     Map<String, String> peerAddresses = new HashMap();
 
-                    peerAddresses.put(followerActor.path().toString(), followerActor.path().toString());
+                    peerAddresses.put(followerActor.path().toString(),
+                        followerActor.path().toString());
 
                     actorContext.setPeerAddresses(peerAddresses);
 
                     Leader leader = new Leader(actorContext);
                     leader.handleMessage(senderActor, new SendHeartBeat());
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        protected String match(Object in) {
-                            if (in instanceof AppendEntries) {
-                                if (((AppendEntries) in).getTerm()
-                                    == 0) {
-                                    return "match";
+                    final String out =
+                        new ExpectMsg<String>(duration("1 seconds"),
+                            "match hint") {
+                            // do not put code outside this method, will run afterwards
+                            protected String match(Object in) {
+                                if (in instanceof AppendEntries) {
+                                    if (((AppendEntries) in).getTerm()
+                                        == 0) {
+                                        return "match";
+                                    }
+                                    return null;
+                                } else {
+                                    throw noMatch();
                                 }
-                                return null;
-                            } else {
-                                throw noMatch();
                             }
-                        }
-                    }.get(); // this extracts the received message
+                        }.get(); // this extracts the received message
 
                     assertEquals("match", out);
 
@@ -80,7 +88,114 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
         }};
     }
 
-    @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
+    @Test
+    public void testHandleReplicateMessageSendAppendEntriesToFollower() {
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    ActorRef followerActor = getTestActor();
+
+                    MockRaftActorContext actorContext =
+                        (MockRaftActorContext) createActorContext();
+
+                    Map<String, String> peerAddresses = new HashMap();
+
+                    peerAddresses.put(followerActor.path().toString(),
+                        followerActor.path().toString());
+
+                    actorContext.setPeerAddresses(peerAddresses);
+
+                    Leader leader = new Leader(actorContext);
+                    RaftState raftState = leader
+                        .handleMessage(senderActor, new Replicate(null, null,
+                            new MockRaftActorContext.MockReplicatedLogEntry(1,
+                                100,
+                                "foo")
+                        ));
+
+                    // State should not change
+                    assertEquals(RaftState.Leader, raftState);
+
+                    final String out =
+                        new ExpectMsg<String>(duration("1 seconds"),
+                            "match hint") {
+                            // do not put code outside this method, will run afterwards
+                            protected String match(Object in) {
+                                if (in instanceof AppendEntries) {
+                                    if (((AppendEntries) in).getTerm()
+                                        == 0) {
+                                        return "match";
+                                    }
+                                    return null;
+                                } else {
+                                    throw noMatch();
+                                }
+                            }
+                        }.get(); // this extracts the received message
+
+                    assertEquals("match", out);
+
+                }
+
+
+            };
+        }};
+    }
+
+    @Test
+    public void testHandleReplicateMessageWhenThereAreNoFollowers() {
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    ActorRef raftActor = getTestActor();
+
+                    MockRaftActorContext actorContext =
+                        new MockRaftActorContext("test", getSystem(), raftActor);
+
+                    Leader leader = new Leader(actorContext);
+                    RaftState raftState = leader
+                        .handleMessage(senderActor, new Replicate(null, "state-id",
+                            new MockRaftActorContext.MockReplicatedLogEntry(1,
+                                100,
+                                "foo")
+                        ));
+
+                    // State should not change
+                    assertEquals(RaftState.Leader, raftState);
+
+                    assertEquals(100, actorContext.getCommitIndex());
+
+                    final String out =
+                        new ExpectMsg<String>(duration("1 seconds"),
+                            "match hint") {
+                            // do not put code outside this method, will run afterwards
+                            protected String match(Object in) {
+                                if (in instanceof ApplyState) {
+                                    if (((ApplyState) in).getIdentifier().equals("state-id")) {
+                                        return "match";
+                                    }
+                                    return null;
+                                } else {
+                                    throw noMatch();
+                                }
+                            }
+                        }.get(); // this extracts the received message
+
+                    assertEquals("match", out);
+
+                }
+
+
+            };
+        }};
+    }
+
+    @Override protected RaftActorBehavior createBehavior(
+        RaftActorContext actorContext) {
         return new Leader(actorContext);
     }
 
