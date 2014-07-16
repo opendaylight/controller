@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
@@ -143,6 +144,12 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     @Override
     public void onNotification(final NetconfMessage notification) {
         final CompositeNode parsedNotification = messageTransformer.toNotification(notification);
+        // FIXME notification received before schema is constructed needs to be cached/queued
+        if(parsedNotification == null) {
+            logger.warn("Ignoring notification, cannot transform notification, schema for remote device is not yet fully constructed: {}",
+                    XmlUtil.toString(notification.getDocument()));
+            return;
+        }
         salFacade.onNotification(parsedNotification);
     }
 }
