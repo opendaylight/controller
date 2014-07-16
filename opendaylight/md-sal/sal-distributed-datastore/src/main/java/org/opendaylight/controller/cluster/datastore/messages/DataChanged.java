@@ -89,7 +89,7 @@ public class DataChanged implements SerializableMessage{
                                          .build();
   }
 
-  public static DataChanged fromSerialize(SchemaContext sc, Object message){
+  public static DataChanged fromSerialize(SchemaContext sc, Object message, InstanceIdentifier pathId){
     DataChangeListenerMessages.DataChanged dataChanged = (DataChangeListenerMessages.DataChanged)message;
     DataChangedEvent event = new DataChangedEvent(sc);
     if(dataChanged.getCreatedData() != null && dataChanged.getCreatedData().isInitialized()) {
@@ -104,11 +104,11 @@ public class DataChanged implements SerializableMessage{
     }
 
     if(dataChanged.getOriginalSubTree() != null && dataChanged.getOriginalSubTree().isInitialized()) {
-      event.setOriginalSubtree(dataChanged.getOriginalSubTree());
+      event.setOriginalSubtree(dataChanged.getOriginalSubTree(),pathId );
     }
 
     if(dataChanged.getUpdatedSubTree() != null && dataChanged.getUpdatedSubTree().isInitialized()) {
-      event.setUpdatedSubtree(dataChanged.getOriginalSubTree());
+      event.setUpdatedSubtree(dataChanged.getOriginalSubTree(),pathId);
     }
 
     if(dataChanged.getRemovedPathsList() != null && !dataChanged.getRemovedPathsList().isEmpty()) {
@@ -193,8 +193,8 @@ public class DataChanged implements SerializableMessage{
       return originalSubTree;
     }
 
-    DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node){
-       originalSubTree = nodeCodec.decode(InstanceIdentifier.builder().build(),node);
+    DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node, InstanceIdentifier instanceIdentifierPath){
+       originalSubTree = nodeCodec.decode(instanceIdentifierPath,node);
        return this;
     }
 
@@ -203,8 +203,8 @@ public class DataChanged implements SerializableMessage{
       return updatedSubTree;
     }
 
-    DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node){
-      updatedSubTree = nodeCodec.decode(InstanceIdentifier.builder().build(),node);
+    DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node,InstanceIdentifier instanceIdentifierPath){
+      updatedSubTree = nodeCodec.decode(instanceIdentifierPath,node);
       return this;
     }
 
