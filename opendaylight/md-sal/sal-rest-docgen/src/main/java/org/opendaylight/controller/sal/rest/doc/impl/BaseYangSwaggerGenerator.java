@@ -24,7 +24,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -115,7 +117,8 @@ public class BaseYangSwaggerGenerator {
         return uri.toASCIIString();
     }
 
-    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo, SchemaContext schemaContext, String context) {
+    public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo,
+            SchemaContext schemaContext, String context) {
         Date rev = null;
         try {
             rev = SIMPLE_DATE_FORMAT.parse(revision);
@@ -128,7 +131,8 @@ public class BaseYangSwaggerGenerator {
         return getApiDeclaration(m, rev, uriInfo, context, schemaContext);
     }
 
-    public ApiDeclaration getApiDeclaration(Module module, Date revision, UriInfo uriInfo, String context, SchemaContext schemaContext) {
+    public ApiDeclaration getApiDeclaration(Module module, Date revision, UriInfo uriInfo, String context,
+            SchemaContext schemaContext) {
         String basePath = createBasePathFromUriInfo(uriInfo);
 
         ApiDeclaration doc = getSwaggerDocSpec(module, basePath, context, schemaContext);
@@ -153,7 +157,7 @@ public class BaseYangSwaggerGenerator {
     public ApiDeclaration getSwaggerDocSpec(Module m, String basePath, String context, SchemaContext schemaContext) {
         ApiDeclaration doc = createApiDeclaration(basePath);
 
-        List<Api> apis = new ArrayList<Api>();
+        Map<String, Api> apis = new LinkedHashMap<>();
 
         Collection<DataSchemaNode> dataSchemaNodes = m.getChildNodes();
         _logger.debug("child nodes size [{}]", dataSchemaNodes.size());
@@ -181,7 +185,7 @@ public class BaseYangSwaggerGenerator {
         _logger.debug("Number of APIs found [{}]", apis.size());
 
         if (!apis.isEmpty()) {
-            doc.setApis(apis);
+            doc.setApis(new ArrayList<Api>(apis.values()));
             JSONObject models = null;
 
             try {
@@ -220,17 +224,31 @@ public class BaseYangSwaggerGenerator {
         return module + "(" + revision + ")";
     }
 
-    private void addApis(DataSchemaNode node, List<Api> apis, String parentPath, List<Parameter> parentPathParams, SchemaContext schemaContext,
-            boolean addConfigApi) {
+    private void addApis(DataSchemaNode node, Map<String, Api> apis, String parentPath,
+            List<Parameter> parentPathParams, SchemaContext schemaContext, boolean addConfigApi) {
 
+        Api apiForPost = apis.get(parentPath);
+        // apiForPost should be null only if top level (/config) path is processed. For other case Api instance should
+        // be already present in apis
+        if (apiForPost == null) {
+            apiForPost = new Api();
+            apiForPost.setPath(parentPath);
+            apis.put(parentPath, apiForPost);
+        }
         Api api = new Api();
         List<Parameter> pathParams = new ArrayList<Parameter>(parentPathParams);
 
         String resourcePath = parentPath + createPath(node, pathParams, schemaContext) + "/";
         _logger.debug("Adding path: [{}]", resourcePath);
         api.setPath(resourcePath);
-        api.setOperations(operations(node, pathParams, addConfigApi));
-        apis.add(api);
+        api.setOperations(operationWithoutPost(node, pathParams, addConfigApi));
+
+
+        List<Operation> updatedOperations = apiForPost.getOperations();
+        updatedOperations = updatedOperations == null ? new ArrayList<Operation>() : updatedOperations;
+        updatedOperations.addAll(operationPost(node, parentPathParams, addConfigApi));
+        apiForPost.setOperations(updatedOperations);
+        apis.put(resourcePath, api);
         if ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode)) {
             DataNodeContainer schemaNode = (DataNodeContainer) node;
 
@@ -253,21 +271,32 @@ public class BaseYangSwaggerGenerator {
      * @param pathParams
      * @return
      */
-    private List<Operation> operations(DataSchemaNode node, List<Parameter> pathParams, boolean isConfig) {
+    private List<Operation> operationWithoutPost(DataSchemaNode node, List<Parameter> pathParams, boolean isConfig) {
         List<Operation> operations = new ArrayList<>();
 
         OperationBuilder.Get getBuilder = new OperationBuilder.Get(node, isConfig);
         operations.add(getBuilder.pathParams(pathParams).build());
 
         if (isConfig) {
-            OperationBuilder.Post postBuilder = new OperationBuilder.Post(node);
-            operations.add(postBuilder.pathParams(pathParams).build());
-
             OperationBuilder.Put putBuilder = new OperationBuilder.Put(node);
             operations.add(putBuilder.pathParams(pathParams).build());
 
             OperationBuilder.Delete deleteBuilder = new OperationBuilder.Delete(node);
             operations.add(deleteBuilder.pathParams(pathParams).build());
+        }
+        return operations;
+    }
+
+    /**
+     * @param node
+     * @param pathParams
+     * @return
+     */
+    private List<Operation> operationPost(DataSchemaNode node, List<Parameter> pathParams, boolean isConfig) {
+        List<Operation> operations = new ArrayList<>();
+        if (isConfig) {
+            OperationBuilder.Post postBuilder = new OperationBuilder.Post(node);
+            operations.add(postBuilder.pathParams(pathParams).build());
         }
         return operations;
     }
@@ -300,9 +329,12 @@ public class BaseYangSwaggerGenerator {
         return path.toString();
     }
 
-    protected void addRpcs(RpcDefinition rpcDefn, List<Api> apis, String parentPath, SchemaContext schemaContext) {
-        Api rpc = new Api();
+    protected void addRpcs(RpcDefinition rpcDefn, Map<String, Api> apis, String parentPath, SchemaContext schemaContext) {
         String resourcePath = parentPath + resolvePathArgumentsName(rpcDefn, schemaContext);
+        Api rpc = apis.get(resourcePath);
+        if (rpc == null) {
+            rpc = new Api();
+        }
         rpc.setPath(resourcePath);
 
         Operation operationSpec = new Operation();
@@ -321,7 +353,7 @@ public class BaseYangSwaggerGenerator {
 
         rpc.setOperations(Arrays.asList(operationSpec));
 
-        apis.add(rpc);
+        apis.put(resourcePath, rpc);
     }
 
     protected SortedSet<Module> getSortedModules(SchemaContext schemaContext) {

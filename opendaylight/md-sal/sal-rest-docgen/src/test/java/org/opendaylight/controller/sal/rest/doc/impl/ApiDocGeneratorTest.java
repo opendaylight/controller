@@ -1,6 +1,7 @@
 package org.opendaylight.controller.sal.rest.doc.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -9,6 +10,7 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -28,7 +30,6 @@ import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
 /**
  *
  */
@@ -65,9 +66,107 @@ public class ApiDocGeneratorTest {
                         "http://localhost:8080/restconf", "",schemaContext);
                 validateToaster(doc);
                 validateTosterDocContainsModulePrefixes(doc);
-                Assert.assertNotNull(doc);
+                validateSwaggerModules(doc);
+                validateSwaggerApisForPost(doc);
             }
         }
+    }
+
+    /**
+     * Validate whether ApiDelcaration contains Apis with concrete path and whether this Apis contain specified POST
+     * operations.
+     */
+    private void validateSwaggerApisForPost(final ApiDeclaration doc) {
+        // two POST URI with concrete schema name in summary
+        Api lstApi = findApi("/config/toaster2:lst/", doc);
+        assertNotNull("Api /config/toaster2:lst/ wasn't found", lstApi);
+        assertTrue("POST for cont1 in lst is missing", findOperation(lstApi.getOperations(), "POST", "cont1"));
+        assertTrue("POST for lst1 in lst is missing", findOperation(lstApi.getOperations(), "POST", "lst1"));
+
+        Api cont1Api = findApi("/config/toaster2:lst/cont1/", doc);
+        assertNotNull("Api /config/toaster2:lst/cont1/ wasn't found", cont1Api);
+        assertTrue("POST for cont11 in cont1 is missing", findOperation(cont1Api.getOperations(), "POST", "cont11"));
+        assertTrue("POST for lst11 in cont1 is missing", findOperation(cont1Api.getOperations(), "POST", "lst11"));
+
+        // no POST URI
+        Api cont11Api = findApi("/config/toaster2:lst/cont1/cont11/", doc);
+        assertNotNull("Api /config/toaster2:lst/cont1/cont11/ wasn't found", cont11Api);
+        assertFalse("POST operation shouldn't be present.", findOperation(cont11Api.getOperations(), "POST", ".*"));
+
+    }
+
+    /**
+     * Tries to find operation with name {@code operationName} and with summary {@code summary}
+     */
+    private boolean findOperation(List<Operation> operations, String operationName, String summary) {
+        for (Operation operation : operations) {
+            if (operation.getMethod().equals(operationName) && operation.getSummary().matches(summary)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tries to find {@code Api} with path {@code path}
+     */
+    private Api findApi(final String path, final ApiDeclaration doc) {
+        for (Api api : doc.getApis()) {
+            if (api.getPath().equals(path)) {
+                return api;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates whether doc {@code doc} contains concrete specified models.
+     */
+    private void validateSwaggerModules(ApiDeclaration doc) {
+        JSONObject models = doc.getModels();
+        assertNotNull(models);
+        try {
+            JSONObject configLst = models.getJSONObject("(config)lst");
+            assertNotNull(configLst);
+
+            containsReferences(configLst, "lst1");
+            containsReferences(configLst, "cont1");
+
+            JSONObject configLst1 = models.getJSONObject("(config)lst1");
+            assertNotNull(configLst1);
+
+            JSONObject configCont1 = models.getJSONObject("(config)cont1");
+            assertNotNull(configCont1);
+
+            containsReferences(configCont1, "cont11");
+            containsReferences(configCont1, "lst11");
+
+            JSONObject configCont11 = models.getJSONObject("(config)cont11");
+            assertNotNull(configCont11);
+
+            JSONObject configLst11 = models.getJSONObject("(config)lst11");
+            assertNotNull(configLst11);
+        } catch (JSONException e) {
+            fail("JSONException wasn't expected");
+        }
+
+    }
+
+    /**
+     * Checks whether object {@code mainObject} contains in properties/items key $ref with concrete value.
+     */
+    private void containsReferences(final JSONObject mainObject, final String childObject) throws JSONException {
+        JSONObject properties = mainObject.getJSONObject("properties");
+        assertNotNull(properties);
+
+        JSONObject nodeInProperties = properties.getJSONObject(childObject);
+        assertNotNull(nodeInProperties);
+
+        JSONObject itemsInNodeInProperties = nodeInProperties.getJSONObject("items");
+        assertNotNull(itemsInNodeInProperties);
+
+        String itemRef = itemsInNodeInProperties.getString("$ref");
+        assertEquals("(config)" + childObject, itemRef);
     }
 
     @Test

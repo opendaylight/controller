@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.rest.doc.impl;
 
 import static org.opendaylight.controller.sal.rest.doc.util.RestDocgenUtil.resolveNodesName;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
@@ -35,6 +37,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition;
@@ -123,42 +126,21 @@ public class ModelGenerator {
     public JSONObject convertToJsonSchema(Module module, SchemaContext schemaContext) throws IOException, JSONException {
         JSONObject models = new JSONObject();
         topLevelModule = module;
-        processContainers(module, models, schemaContext);
+        processContainersAndLists(module, models, schemaContext);
         processRPCs(module, models, schemaContext);
         processIdentities(module, models);
         return models;
     }
 
-    private void processContainers(Module module, JSONObject models, SchemaContext schemaContext) throws IOException,
-            JSONException {
+    private void processContainersAndLists(Module module, JSONObject models, SchemaContext schemaContext)
+            throws IOException, JSONException {
 
         String moduleName = module.getName();
 
         for (DataSchemaNode childNode : module.getChildNodes()) {
-            JSONObject configModuleJSON = null;
-            JSONObject operationalModuleJSON = null;
-
-            String childNodeName = childNode.getQName().getLocalName();
-            /*
-             * For every container in the module
-             */
-            if (childNode instanceof ContainerSchemaNode) {
-                configModuleJSON = processContainer((ContainerSchemaNode) childNode, moduleName, true, models, true,
-                        schemaContext);
-                operationalModuleJSON = processContainer((ContainerSchemaNode) childNode, moduleName, true, models,
-                        false, schemaContext);
-            }
-
-            if (configModuleJSON != null) {
-                _logger.debug("Adding model for [{}]", OperationBuilder.CONFIG + childNodeName);
-                configModuleJSON.put("id", OperationBuilder.CONFIG + childNodeName);
-                models.put(OperationBuilder.CONFIG + childNodeName, configModuleJSON);
-            }
-            if (operationalModuleJSON != null) {
-                _logger.debug("Adding model for [{}]", OperationBuilder.OPERATIONAL + childNodeName);
-                operationalModuleJSON.put("id", OperationBuilder.OPERATIONAL + childNodeName);
-                models.put(OperationBuilder.OPERATIONAL + childNodeName, operationalModuleJSON);
-            }
+            // For every container and list in the module
+            processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, true, schemaContext);
+            processDataNodeContainer((DataNodeContainer) childNode, moduleName, models, false, schemaContext);
         }
 
     }
@@ -180,7 +162,7 @@ public class ModelGenerator {
 
             ContainerSchemaNode input = rpc.getInput();
             if (input != null) {
-                JSONObject inputJSON = processContainer(input, moduleName, true, models, schemaContext);
+                JSONObject inputJSON = processDataNodeContainer(input, moduleName, models, schemaContext);
                 String filename = "(" + rpc.getQName().getLocalName() + ")input";
                 inputJSON.put("id", filename);
                 // writeToFile(filename, inputJSON.toString(2), moduleName);
@@ -189,7 +171,7 @@ public class ModelGenerator {
 
             ContainerSchemaNode output = rpc.getOutput();
             if (output != null) {
-                JSONObject outputJSON = processContainer(output, moduleName, true, models, schemaContext);
+                JSONObject outputJSON = processDataNodeContainer(output, moduleName, models, schemaContext);
                 String filename = "(" + rpc.getQName().getLocalName() + ")output";
                 outputJSON.put("id", filename);
                 models.put(filename, outputJSON);
@@ -251,7 +233,7 @@ public class ModelGenerator {
     }
 
     /**
-     * Processes the container node and populates the moduleJSON
+     * Processes the container and list nodes and populates the moduleJSON
      *
      * @param container
      * @param moduleName
@@ -259,28 +241,37 @@ public class ModelGenerator {
      * @throws JSONException
      * @throws IOException
      */
-    private JSONObject processContainer(ContainerSchemaNode container, String moduleName, boolean addSchemaStmt,
-            JSONObject models, SchemaContext schemaContext) throws JSONException, IOException {
-        return processContainer(container, moduleName, addSchemaStmt, models, (Boolean) null, schemaContext);
+    private JSONObject processDataNodeContainer(DataNodeContainer dataNode, String moduleName, JSONObject models,
+            SchemaContext schemaContext) throws JSONException, IOException {
+        return processDataNodeContainer(dataNode, moduleName, models, (Boolean) null, schemaContext);
     }
 
-    private JSONObject processContainer(ContainerSchemaNode container, String moduleName, boolean addSchemaStmt,
-            JSONObject models, Boolean isConfig, SchemaContext schemaContext) throws JSONException, IOException {
-        JSONObject moduleJSON = getSchemaTemplate();
-        if (addSchemaStmt) {
-            moduleJSON = getSchemaTemplate();
-        } else {
-            moduleJSON = new JSONObject();
+    private JSONObject processDataNodeContainer(DataNodeContainer dataNode, String moduleName, JSONObject models,
+            Boolean isConfig, SchemaContext schemaContext) throws JSONException, IOException {
+        if (dataNode instanceof ListSchemaNode || dataNode instanceof ContainerSchemaNode) {
+            Preconditions.checkArgument(dataNode instanceof SchemaNode, "Data node should be also schema node");
+            Iterable<DataSchemaNode> containerChildren = dataNode.getChildNodes();
+            JSONObject properties = processChildren(containerChildren, ((SchemaNode) dataNode).getQName(), moduleName,
+                    models, isConfig, schemaContext);
+
+            String nodeName = (BooleanUtils.isNotFalse(isConfig) ? OperationBuilder.CONFIG
+                    : OperationBuilder.OPERATIONAL) + ((SchemaNode) dataNode).getQName().getLocalName();
+
+            JSONObject childSchema = getSchemaTemplate();
+            childSchema.put(TYPE_KEY, OBJECT_TYPE);
+            childSchema.put(PROPERTIES_KEY, properties);
+            childSchema.put("id", nodeName);
+            models.put(nodeName, childSchema);
+
+            JSONObject items = new JSONObject();
+            items.put(REF_KEY, nodeName);
+            JSONObject dataNodeProperties = new JSONObject();
+            dataNodeProperties.put(TYPE_KEY, dataNode instanceof ListSchemaNode ? ARRAY_TYPE : OBJECT_TYPE);
+            dataNodeProperties.put(ITEMS_KEY, items);
+
+            return dataNodeProperties;
         }
-        moduleJSON.put(TYPE_KEY, OBJECT_TYPE);
-
-        String containerDescription = container.getDescription();
-        moduleJSON.put(DESCRIPTION_KEY, containerDescription);
-
-        JSONObject properties = processChildren(container.getChildNodes(), container.getQName(), moduleName, models,
-                isConfig, schemaContext);
-        moduleJSON.put(PROPERTIES_KEY, properties);
-        return moduleJSON;
+        return null;
     }
 
     private JSONObject processChildren(Iterable<DataSchemaNode> nodes, QName parentQName, String moduleName,
@@ -312,7 +303,8 @@ public class ModelGenerator {
                 if (node instanceof LeafSchemaNode) {
                     property = processLeafNode((LeafSchemaNode) node);
                 } else if (node instanceof ListSchemaNode) {
-                    property = processListSchemaNode((ListSchemaNode) node, moduleName, models, isConfig, schemaContext);
+                    property = processDataNodeContainer((ListSchemaNode) node, moduleName, models, isConfig,
+                            schemaContext);
 
                 } else if (node instanceof LeafListSchemaNode) {
                     property = processLeafListNode((LeafListSchemaNode) node);
@@ -324,7 +316,7 @@ public class ModelGenerator {
                     property = processAnyXMLNode((AnyXmlSchemaNode) node);
 
                 } else if (node instanceof ContainerSchemaNode) {
-                    property = processContainer((ContainerSchemaNode) node, moduleName, false, models, isConfig,
+                    property = processDataNodeContainer((ContainerSchemaNode) node, moduleName, models, isConfig,
                             schemaContext);
 
                 } else {
@@ -405,50 +397,6 @@ public class ModelGenerator {
         if (maxElements != null) {
             props.put(MAX_ITEMS, maxElements);
         }
-    }
-
-    /**
-     * Parses a ListSchema node.
-     *
-     * Due to a limitation of the RAML--->JAX-RS tool, sub-properties must be in a separate JSON schema file. Hence, we
-     * have to write some properties to a new file, while continuing to process the rest.
-     *
-     * @param listNode
-     * @param moduleName
-     * @param isConfig
-     * @return
-     * @throws JSONException
-     * @throws IOException
-     */
-    private JSONObject processListSchemaNode(ListSchemaNode listNode, String moduleName, JSONObject models,
-            Boolean isConfig, SchemaContext schemaContext) throws JSONException, IOException {
-
-        String fileName = (BooleanUtils.isNotFalse(isConfig) ? OperationBuilder.CONFIG : OperationBuilder.OPERATIONAL)
-                + listNode.getQName().getLocalName();
-
-        JSONObject childSchemaProperties = processChildren(listNode.getChildNodes(), listNode.getQName(), moduleName,
-                models, schemaContext);
-        JSONObject childSchema = getSchemaTemplate();
-        childSchema.put(TYPE_KEY, OBJECT_TYPE);
-        childSchema.put(PROPERTIES_KEY, childSchemaProperties);
-
-        /*
-         * Due to a limitation of the RAML--->JAX-RS tool, sub-properties must be in a separate JSON schema file. Hence,
-         * we have to write some properties to a new file, while continuing to process the rest.
-         */
-        // writeToFile(fileName, childSchema.toString(2), moduleName);
-        childSchema.put("id", fileName);
-        models.put(fileName, childSchema);
-
-        JSONObject listNodeProperties = new JSONObject();
-        listNodeProperties.put(TYPE_KEY, ARRAY_TYPE);
-
-        JSONObject items = new JSONObject();
-        items.put(REF_KEY, fileName);
-        listNodeProperties.put(ITEMS_KEY, items);
-
-        return listNodeProperties;
-
     }
 
     /**
