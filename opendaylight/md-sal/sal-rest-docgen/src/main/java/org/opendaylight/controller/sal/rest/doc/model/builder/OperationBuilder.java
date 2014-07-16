@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.rest.doc.model.builder;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendaylight.controller.sal.rest.doc.swagger.Operation;
 import org.opendaylight.controller.sal.rest.doc.swagger.Parameter;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -99,6 +98,11 @@ public final class OperationBuilder {
             spec.setMethod(METHOD_NAME);
             spec.setNickname(METHOD_NAME + "-" + schemaNode.getQName().getLocalName());
             return spec;
+        }
+
+        public Post summary(final String summary) {
+            spec.setSummary(summary);
+            return this;
         }
     }
 
