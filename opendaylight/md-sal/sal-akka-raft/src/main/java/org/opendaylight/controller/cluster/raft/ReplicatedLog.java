@@ -17,8 +17,9 @@ public interface ReplicatedLog {
     /**
      * Get a replicated log entry at the specified index
      *
-     * @param index
-     * @return
+     * @param index the index of the log entry
+     * @return the ReplicatedLogEntry at index. null if index less than 0 or
+     * greater than the size of the in-memory journal.
      */
     ReplicatedLogEntry get(long index);
 
@@ -45,7 +46,7 @@ public interface ReplicatedLog {
     /**
      * Remove all the entries from the logs >= index
      *
-     * @param index
+     * @param index the index of the log entry
      */
     void removeFrom(long index);
 
@@ -63,7 +64,7 @@ public interface ReplicatedLog {
 
     /**
      *
-     * @param index
+     * @param index the index of the log entry
      */
     List<ReplicatedLogEntry> getFrom(long index);
 
@@ -73,4 +74,43 @@ public interface ReplicatedLog {
      * @return
      */
     long size();
+
+    /**
+     * Checks if the entry at the specified index is present or not
+     *
+     * @param index the index of the log entry
+     * @return true if the entry is present in the in-memory journal
+     */
+    boolean isPresent(long index);
+
+    /**
+     * Checks if the entry is present in a snapshot
+     *
+     * @param index the index of the log entry
+     * @return true if the entry is in the snapshot. false if the entry is not
+     * in the snapshot even if the entry may be present in the replicated log
+     */
+    boolean isInSnapshot(long index);
+
+    /**
+     * Get the snapshot
+     *
+     * @return an object representing the snapshot if it exists. null otherwise
+     */
+    Object getSnapshot();
+
+    /**
+     * Get the index of the snapshot
+     *
+     * @return the index from which the snapshot was created. -1 otherwise.
+     */
+    long getSnapshotIndex();
+
+    /**
+     * Get the term of the snapshot
+     *
+     * @return the term of the index from which the snapshot was created. -1
+     * otherwise
+     */
+    long getSnapshotTerm();
 }

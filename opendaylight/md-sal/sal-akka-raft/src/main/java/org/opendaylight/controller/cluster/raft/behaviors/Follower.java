@@ -12,9 +12,11 @@ import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.internal.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
@@ -165,6 +167,9 @@ public class Follower extends AbstractRaftActorBehavior {
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
         if(message instanceof ElectionTimeout){
             return RaftState.Candidate;
+        } else if(message instanceof InstallSnapshot){
+            InstallSnapshot snapshot = (InstallSnapshot) message;
+            actor().tell(new ApplySnapshot(snapshot), actor());
         }
 
         scheduleElection(electionDuration());

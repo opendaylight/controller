@@ -65,6 +65,15 @@ public class ExampleActor extends RaftActor {
         }
     }
 
+    @Override protected Object createSnapshot() {
+        return state;
+    }
+
+    @Override protected void applySnapshot(Object snapshot) {
+        state.clear();
+        state.putAll((HashMap) snapshot);
+    }
+
     @Override public void onReceiveRecover(Object message) {
         super.onReceiveRecover(message);
     }
