@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
+import com.google.common.base.Supplier;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -26,8 +28,6 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 import org.opendaylight.yangtools.yang.binding.util.ClassLoaderUtils;
-
-import com.google.common.base.Supplier;
 
 abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
     @GuardedBy("this")
@@ -122,12 +122,14 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
 
         utils.getLock().lock();
         try {
-            invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
-                @Override
-                public RuntimeGeneratedInvokerPrototype get() {
-                    return generateListenerInvoker(cls);
-                }
-            });
+            synchronized (utils) {
+                invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
+                    @Override
+                    public RuntimeGeneratedInvokerPrototype get() {
+                        return generateListenerInvoker(cls);
+                    }
+                });
+            }
 
             invokerClasses.put(cls, invoker);
             return invoker;
@@ -145,7 +147,9 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
     public final <T extends RpcService> T getDirectProxyFor(final Class<T> serviceType) {
         utils.getLock().lock();
         try {
-            return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
+            synchronized (utils) {
+                return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
+            }
         } finally {
             utils.getLock().unlock();
         }
@@ -166,8 +170,10 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
 
         utils.getLock().lock();
         try {
-            final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
-            return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
+            synchronized (utils) {
+                final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
+                return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
+            }
         } finally {
             utils.getLock().unlock();
         }
