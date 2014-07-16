@@ -12,6 +12,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
@@ -84,6 +85,32 @@ public class NetconfDeviceTest {
     }
 
     @Test
+    public void testNotificationBeforeSchema() throws Exception {
+        final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
+        final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
+
+        final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaContextProviderFactory(), getSourceProviderFactory());
+
+        device.onNotification(netconfMessage);
+        device.onNotification(netconfMessage);
+
+        verify(facade, times(0)).onNotification(any(CompositeNode.class));
+
+        final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
+                Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
+
+        device.onRemoteSessionUp(sessionCaps, listener);
+
+        verify(messageTransformer, timeout(10000).times(2)).toNotification(netconfMessage);
+        verify(facade, times(2)).onNotification(compositeNode);
+
+        device.onNotification(netconfMessage);
+        verify(messageTransformer, times(3)).toNotification(netconfMessage);
+        verify(facade, times(3)).onNotification(compositeNode);
+    }
+
+    @Test
     public void testNetconfDeviceReconnect() throws Exception {
         final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
@@ -137,6 +164,7 @@ public class NetconfDeviceTest {
         final RemoteDeviceHandler<NetconfSessionCapabilities> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
         doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContextProvider.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
         doNothing().when(remoteDeviceHandler).onDeviceDisconnected();
+        doNothing().when(remoteDeviceHandler).onNotification(any(CompositeNode.class));
         return remoteDeviceHandler;
     }
 
@@ -174,6 +202,7 @@ public class NetconfDeviceTest {
         final MessageTransformer<NetconfMessage> messageTransformer = mockClass(MessageTransformer.class);
         doReturn(netconfMessage).when(messageTransformer).toRpcRequest(any(QName.class), any(CompositeNode.class));
         doReturn(rpcResultC).when(messageTransformer).toRpcResult(any(NetconfMessage.class), any(QName.class));
+        doReturn(compositeNode).when(messageTransformer).toNotification(any(NetconfMessage.class));
         doNothing().when(messageTransformer).onGlobalContextUpdated(any(SchemaContext.class));
         return messageTransformer;
     }
