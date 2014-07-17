@@ -90,8 +90,14 @@ public final class NodeMapping {
     }
 
     public static org.opendaylight.controller.sal.core.Node toADNode(final NodeId id) throws ConstructionException {
-        Long aDNodeId = openflowFullNodeIdToLong(NodeMapping.toADNodeId(id));
-        return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+        try {
+            Long aDNodeId = openflowFullNodeIdToLong(NodeMapping.toADNodeId(id));
+            return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+        } catch (NumberFormatException e){
+            LOG.info("Node can't be transformed as OPENFLOW type.");
+        }
+        String aDNodeId = NodeMapping.toADNodeId(id);
+        return new org.opendaylight.controller.sal.core.Node(NodeIDType.PRODUCTION, aDNodeId);
     }
 
     /**
@@ -99,7 +105,7 @@ public final class NodeMapping {
      * @return nodeId as long
      */
     @VisibleForTesting
-    public static Long openflowFullNodeIdToLong(String adNodeId) {
+    public static Long openflowFullNodeIdToLong(String adNodeId) throws NumberFormatException {
         if (adNodeId == null) {
             return null;
         }
