@@ -113,4 +113,17 @@ public interface RaftActorContext {
      * @return
      */
     String getPeerAddress(String peerId);
+
+    /**
+     * Add to actor peers
+     * @param name
+     * @param address
+     */
+    void addToPeers(String name, String address);
+
+    /**
+     *
+     * @param name
+     */
+    public void removePeer(String name);
 }
