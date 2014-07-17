@@ -53,6 +53,108 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_49122e0a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "perhaps rename this to handleRequestVote() to be consistent with other method names.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_094ae625",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "Argument \"suggestedState\" seems out of place.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9b87e13",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "Couldnt this mean that a new leader has been elected and it has sent a log entry or heartbeat?\n\nAFAIK, this candidate should check the term and log entry in the incoming message \na. If incoming message has older term or log entry then reject the message\nb. Otherwise handle message and step down",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_49446e1a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "Argument \"suggestedState\" seems out of place.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_693932a3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "We should add some logging here for traceability of message.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09718675",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-17T22:23:44Z",
+      "side": 1,
+      "message": "Is there any retry logic to request for vote when a peer failed to vote?",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cb7876c6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/RaftActorBehavior.java",
         "patchSetId": 4
