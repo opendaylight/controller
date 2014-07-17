@@ -19,8 +19,10 @@ import org.opendaylight.controller.cluster.raft.behaviors.Candidate;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.AddRaftPeer;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.client.messages.RemoveRaftPeer;
 import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
 
@@ -111,7 +113,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
     }
 
     @Override public void onReceiveCommand(Object message) {
-        if(message instanceof ApplyState){
+        if (message instanceof ApplyState){
 
             ApplyState applyState = (ApplyState)  message;
 
@@ -119,10 +121,20 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
-        } else if(message instanceof FindLeader){
+
+        } else if (message instanceof FindLeader){
             getSender().tell(new FindLeaderReply(
                 context.getPeerAddress(currentBehavior.getLeaderId())),
                 getSelf());
+
+        } else if (message instanceof AddRaftPeer){
+            AddRaftPeer arp = (AddRaftPeer)message;
+           context.addToPeers(arp.getName(), arp.getAddress());
+
+        } else if (message instanceof RemoveRaftPeer){
+            RemoveRaftPeer rrp = (RemoveRaftPeer)message;
+            context.removePeer(rrp.getName());
+
         } else {
             RaftState state =
                 currentBehavior.handleMessage(getSender(), message);
@@ -185,10 +197,14 @@ public abstract class RaftActor extends UntypedPersistentActor {
         return context.getId().equals(currentBehavior.getLeaderId());
     }
 
+    protected RaftState getRaftState() {
+        return currentBehavior.state();
+    }
+
     protected ActorSelection getLeader(){
         String leaderId = currentBehavior.getLeaderId();
         String peerAddress = context.getPeerAddress(leaderId);
-        LOG.debug("getLeader leaderId = " + leaderId + " peerAddress = " + peerAddress);
+        //LOG.debug("getLeader leaderId = " + leaderId + " peerAddress = " + peerAddress);
         return context.actorSelection(peerAddress);
     }
 
