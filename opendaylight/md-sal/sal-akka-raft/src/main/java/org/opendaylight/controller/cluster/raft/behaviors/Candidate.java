@@ -58,6 +58,8 @@ public class Candidate extends AbstractRaftActorBehavior {
                 context.actorSelection(peerPath));
         }
 
+        context.getLogger().debug("Election:Candidate has following peers:"+peerToActor.keySet());
+
         if (peerPaths.size() > 0) {
             votesRequired = (peerPaths.size() + 1) / 2 + 1;
         } else {
