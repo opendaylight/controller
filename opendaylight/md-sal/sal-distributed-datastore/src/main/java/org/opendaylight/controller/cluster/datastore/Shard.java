@@ -20,6 +20,8 @@ import akka.persistence.UntypedProcessor;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
@@ -73,6 +75,8 @@ public class Shard extends UntypedProcessor {
 
     private SchemaContext schemaContext;
 
+    private final ShardStats shardMBean;
+
     private Shard(String name) {
 
         String setting = System.getProperty("shard.persistent");
@@ -81,6 +85,9 @@ public class Shard extends UntypedProcessor {
         log.info("Creating shard : {} persistent : {}", name , persistent);
 
         store = new InMemoryDOMDataStore(name, storeExecutor);
+
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
+
     }
 
     public static Props props(final String name) {
@@ -120,7 +127,7 @@ public class Shard extends UntypedProcessor {
             commit(((NonPersistent)message).payload());
         }else if (message instanceof RecoveryCompleted) {
             //FIXME: PROPERLY HANDLE RECOVERY COMPLETED
-            return;
+
         }else {
           throw new Exception("Not recognized message found message=" + message);
         }
@@ -146,6 +153,7 @@ public class Shard extends UntypedProcessor {
             return;
         }
         final ListenableFuture<Void> future = cohort.commit();
+        shardMBean.incrementCommittedTransactionCount();
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
         future.addListener(new Runnable() {
