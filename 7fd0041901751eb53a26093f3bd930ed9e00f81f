@@ -16,6 +16,24 @@
       "revId": "7fd0041901751eb53a26093f3bd930ed9e00f81f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ee00e835",
+        "filename": "opendaylight/config/threadpool-config-impl/src/main/java/org/opendaylight/controller/config/threadpool/util/FlexibleThreadPoolWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-07-17T11:58:24Z",
+      "side": 1,
+      "message": "Tested with LinkedBlockingQueue, but the ThreadPoolExecutor is implemented in this way:\n\nIf task is accepted by queue, then put task in queue and do not spawn additional thread.\nIf task is rejected by queue, then spawn thread.\nIf cannot spawn thread, then reject.\n\nAnd with LinkedQueue, there is always just one thread and all tasks are queued",
+      "parentUuid": "fa82b9bf_8ed83c1f",
+      "revId": "7fd0041901751eb53a26093f3bd930ed9e00f81f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
