@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-
 import org.opendaylight.controller.sal.common.util.Arguments;
 import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -62,16 +64,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-
 public final class NodeMapping {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(NodeMapping.class);
 
-    /** openflow id prefix */
+    /**
+     * openflow id prefix
+     */
     public static final String OPENFLOW_ID_PREFIX = "openflow:";
 
     public final static String MD_SAL_TYPE = "MD_SAL_DEPRECATED";
@@ -90,8 +90,14 @@ public final class NodeMapping {
     }
 
     public static org.opendaylight.controller.sal.core.Node toADNode(final NodeId id) throws ConstructionException {
-        Long aDNodeId = openflowFullNodeIdToLong(NodeMapping.toADNodeId(id));
-        return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+        String nodeId = NodeMapping.toADNodeId(id);
+        String nodeIdasNumber = nodeId.replaceFirst("^.*:", "");
+        if (isInteger(nodeIdasNumber)) {
+            Long aDNodeId = openflowFullNodeIdToLong(nodeIdasNumber);
+            return new org.opendaylight.controller.sal.core.Node(NodeIDType.OPENFLOW, aDNodeId);
+        } else {
+            return new org.opendaylight.controller.sal.core.Node(NodeIDType.PRODUCTION, nodeId);
+        }
     }
 
     /**
@@ -103,7 +109,7 @@ public final class NodeMapping {
         if (adNodeId == null) {
             return null;
         }
-        return new BigInteger(adNodeId.replaceFirst("^.*:", "")).longValue();
+        return new BigInteger(adNodeId).longValue();
     }
 
     public static NodeId toNodeId(final InstanceIdentifier<?> id) {
@@ -137,8 +143,8 @@ public final class NodeMapping {
     }
 
     /**
-     * @param ncid nodeConnector identifier, e.g.: OF:21 or CTRL
-     * @param node
+     * @param ncid   nodeConnector identifier, e.g.: OF:21 or CTRL
+     * @param aDNode
      * @return nodeConnector attached to given node
      * @throws ConstructionException
      */
@@ -155,7 +161,7 @@ public final class NodeMapping {
      * @return
      */
     private static NodeId toNodeId(org.opendaylight.controller.sal.core.Node aDNode) {
-        return new NodeId(aDNode.getType() + ":" +String.valueOf(aDNode.getID()));
+        return new NodeId(aDNode.getType() + ":" + String.valueOf(aDNode.getID()));
     }
 
     public static String toNodeConnectorType(final NodeConnectorId ncId, final NodeId nodeId) {
@@ -212,7 +218,7 @@ public final class NodeMapping {
     public static NodeRef toNodeRef(final org.opendaylight.controller.sal.core.Node node) {
         Preconditions.checkArgument(NodeIDType.OPENFLOW.equals(node.getType()));
         final Long nodeId = Arguments.<Long>checkInstanceOf(node.getID(), Long.class);
-        final NodeKey nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX+nodeId));
+        final NodeKey nodeKey = new NodeKey(new NodeId(OPENFLOW_ID_PREFIX + nodeId));
         final InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class).child(NODE_CLASS, nodeKey).toInstance();
         return new NodeRef(nodePath);
     }
@@ -257,7 +263,7 @@ public final class NodeMapping {
     }
 
     /**
-     * @param id
+     * @param nodeRef
      * @return node description in AD form, e.g.: OF|00:00:00:...:01
      */
     private static Description toADDescription(NodeRef nodeRef) {
@@ -462,5 +468,18 @@ public final class NodeMapping {
 
     public static Buffers toADBuffers(final Long buffers) {
         return new Buffers(buffers.intValue());
+    }
+
+
+    private static final boolean isInteger(String value) {
+        if (value.isEmpty()) return false;
+        for (int i = 0; i < value.length(); i++) {
+            if (i == 0 && value.charAt(i) == '-') {
+                if (value.length() == 1) return false;
+                else continue;
+            }
+            if (Character.digit(value.charAt(i), 10) < 0) return false;
+        }
+        return true;
     }
 }
