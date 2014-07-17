@@ -58,6 +58,7 @@ public class Candidate extends AbstractRaftActorBehavior {
                 context.actorSelection(peerPath));
         }
 
+        context.getLogger().debug("Election:Candidate has following peers:"+peerToActor.keySet());
         if(peerPaths.size() > 0) {
             // Votes are required from a majority of the peers including self.
             // The votesRequired field therefore stores a calculated value

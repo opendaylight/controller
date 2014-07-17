@@ -108,4 +108,14 @@ public class RaftActorContextImpl implements RaftActorContext{
     @Override public String getPeerAddress(String peerId) {
         return peerAddresses.get(peerId);
     }
+
+    @Override public void addToPeers(String name, String address) {
+        LOG.debug("Kamal--> addToPeer for:"+name);
+        peerAddresses.put(name, address);
+    }
+
+    @Override public void removePeer(String name) {
+        LOG.debug("Kamal--> removePeer for:"+name);
+        peerAddresses.remove(name);
+    }
 }
