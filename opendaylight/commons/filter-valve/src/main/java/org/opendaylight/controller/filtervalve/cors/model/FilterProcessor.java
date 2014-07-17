@@ -37,14 +37,14 @@ public class FilterProcessor {
             throws IOException, ServletException {
 
         String contextPath = request.getContext().getPath();
-        String pathInfo = request.getPathInfo();
+        String path = request.getDecodedRequestURI();
 
         Optional<Context> maybeContext = host.findContext(contextPath);
-        logger.trace("Processing context {} path {}, found {}", contextPath, pathInfo, maybeContext);
+        logger.trace("Processing context {} path {}, found {}", contextPath, path, maybeContext);
         if (maybeContext.isPresent()) {
             // process filters
             Context context = maybeContext.get();
-            List<Filter> matchingFilters = context.findMatchingFilters(pathInfo);
+            List<Filter> matchingFilters = context.findMatchingFilters(path);
             FilterChain fromLast = nextValveFilterChain;
             ListIterator<Filter> it = matchingFilters.listIterator(matchingFilters.size());
             final boolean trace = logger.isTraceEnabled();
