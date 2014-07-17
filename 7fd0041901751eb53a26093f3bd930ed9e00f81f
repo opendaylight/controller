@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ed83c1f",
+        "filename": "opendaylight/config/threadpool-config-impl/src/main/java/org/opendaylight/controller/config/threadpool/util/FlexibleThreadPoolWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-07-17T10:07:18Z",
+      "side": 1,
+      "message": "I would argue that proper fix would be switching to LinkedBlockingQueue. We don\u0027t control all uses of this module and the name is misleading (with current behavior).",
+      "revId": "7fd0041901751eb53a26093f3bd930ed9e00f81f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
