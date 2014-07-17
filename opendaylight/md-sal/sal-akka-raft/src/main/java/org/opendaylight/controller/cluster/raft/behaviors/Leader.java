@@ -93,8 +93,9 @@ public class Leader extends AbstractRaftActorBehavior {
                 context.actorSelection(context.getPeerAddress(followerId)));
 
             followerToLog.put(followerId, followerLogInformation);
-
         }
+
+        context.getLogger().debug("Election:Leader has following peers:"+followerToActor.keySet());
 
         if (followerToActor.size() > 0) {
             minReplicationCount = (followerToActor.size() + 1) / 2 + 1;
