@@ -118,6 +118,14 @@ public class MockRaftActorContext implements RaftActorContext {
         return peerAddresses.get(peerId);
     }
 
+    @Override public void addToPeers(String name, String address) {
+        peerAddresses.put(name, address);
+    }
+
+    @Override public void removePeer(String name) {
+        peerAddresses.remove(name);
+    }
+
     public void setPeerAddresses(Map<String, String> peerAddresses) {
         this.peerAddresses = peerAddresses;
     }

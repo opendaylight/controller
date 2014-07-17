@@ -13,6 +13,8 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
+import org.opendaylight.controller.cluster.example.messages.PrintRole;
+import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 
 import java.util.HashMap;
@@ -50,6 +52,12 @@ public class ExampleActor extends RaftActor {
             } else {
                 getLeader().forward(message, getContext());
             }
+
+        } else if (message instanceof PrintState) {
+            LOG.debug("State of the node:"+getId() + " is="+state.size());
+
+        } else if (message instanceof PrintRole) {
+            LOG.debug(getId() + " = " + getRaftState());
         }
         super.onReceiveCommand(message);
     }
