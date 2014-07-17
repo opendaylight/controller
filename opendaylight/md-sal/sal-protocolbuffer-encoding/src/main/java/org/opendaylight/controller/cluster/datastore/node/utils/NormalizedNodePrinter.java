@@ -19,7 +19,7 @@ public class NormalizedNodePrinter implements NormalizedNodeVisitor {
         System.out.println(spaces((level) * 4) + normalizedNode.getClass().toString() + ":" + normalizedNode.getIdentifier());
         if(normalizedNode instanceof LeafNode || normalizedNode instanceof LeafSetEntryNode){
             System.out.println(spaces((level) * 4) + " parentPath = " + parentPath);
-            System.out.println(spaces((level) * 4) + " key = " + normalizedNode.getClass().toString() + ":" + normalizedNode.getKey());
+            System.out.println(spaces((level) * 4) + "  key = " + normalizedNode.getClass().toString() + ":" + normalizedNode.getIdentifier());
             System.out.println(spaces((level) * 4) + " value = " + normalizedNode.getValue());
         }
     }

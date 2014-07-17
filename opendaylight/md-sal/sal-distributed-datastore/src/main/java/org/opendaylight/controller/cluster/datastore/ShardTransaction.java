@@ -140,7 +140,7 @@ public class ShardTransaction extends AbstractUntypedActor {
             getSender().tell(new GetCompositeModificationReply(
                 new ImmutableCompositeModification(modification)), getSelf());
         }else{
-          throw new Exception ("handleRecieve received an unknown mesages"+message);
+          throw new Exception ("Shard:handleRecieve received an unknown message"+message);
         }
     }
 
