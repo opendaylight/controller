@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_04940b41",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_6b6a8aef",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2b3ec2da",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a49c3f6b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "handle* methods are abstract for the most part. They are supposed to be implemented in the derived class",
+      "parentUuid": "fa82b9bf_49122e0a",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_094ae625",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 4
@@ -81,6 +117,24 @@
       "writtenOn": "2014-07-17T22:23:44Z",
       "side": 1,
       "message": "Argument \"suggestedState\" seems out of place.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c499437a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Agreed. There is one case I want to think of and then we could get rid of this.",
+      "parentUuid": "fa82b9bf_094ae625",
       "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_648ab71c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Ok so here is how it works. When the AppendEntries message comes in it is first sent to the base class AbstractRaftBehavior for processing. In AbstractRaftBehavior we check the term if the term is newer then the base class \"suggests\" that we enter the \"Follower\" state. The Candidate must go into that state.\n\nThe confusing that I have added \"for debug purposes only\" is this log message so that I can know that an AppendEntries arrived in the Candidate state.",
+      "parentUuid": "fa82b9bf_c9b87e13",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_49446e1a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 4
@@ -115,6 +187,24 @@
       "writtenOn": "2014-07-17T22:23:44Z",
       "side": 1,
       "message": "Argument \"suggestedState\" seems out of place.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24802ff6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_49446e1a",
       "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_848fbb29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_693932a3",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_09718675",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 4
@@ -155,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_047bab28",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "A peer may be unreachable for all we know. There is a retry that will happen but it will be with a new term - this is per spec.",
+      "parentUuid": "fa82b9bf_09718675",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e97d421d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 4
@@ -166,6 +292,24 @@
       "writtenOn": "2014-07-18T00:46:06Z",
       "side": 1,
       "message": "Follower can not schedule election. Candidate should be doing it.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a473df4c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "The naming may be confusing but Followers schedule a timer which is at the same cadence as an election timer. The purpose of it is simply that if no heartbeat was received during that time period then the follower needs to become a Candidate.",
+      "parentUuid": "fa82b9bf_e97d421d",
       "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -206,6 +350,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c4706342",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "See answer above.",
+      "parentUuid": "fa82b9bf_097bc628",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a973ba4c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 4
@@ -223,6 +385,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_64915746",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Same answer as above. Both Candidate\u0027s and Follower\u0027s schedule election timeout\u0027s they do different things on that timeout.",
+      "parentUuid": "fa82b9bf_a973ba4c",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cb7876c6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/RaftActorBehavior.java",
         "patchSetId": 4
@@ -234,6 +414,24 @@
       "writtenOn": "2014-07-16T19:06:33Z",
       "side": 1,
       "message": "IMO, the \"state\" belong to state machine i.e RaftActor. Infact, I would argue that state property is redundant. There are 3 distinct behavior types, Leader, Candidate and Follower that are sufficient to differentiate between behaviors.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8496db3d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/RaftActorBehavior.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-18T16:09:19Z",
+      "side": 1,
+      "message": "Agreed but I had a purpose behind it which may no longer be valid. Best explained in person :)",
+      "parentUuid": "fa82b9bf_cb7876c6",
       "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
