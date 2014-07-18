@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.md.sal.dom.broker.impl.mount;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.MutableClassToInstanceMap;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
@@ -22,20 +25,15 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.MutableClassToInstanceMap;
-
 public class DOMMountPointServiceImpl implements DOMMountPointService {
 
-    private final Map<InstanceIdentifier, SimpleDOMMountPoint> mountPoints = new HashMap<>();
+    private final Map<InstanceIdentifier, DOMMountPoint> mountPoints = new HashMap<>();
 
     private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
 
     @Override
     public Optional<DOMMountPoint> getMountPoint(final InstanceIdentifier path) {
-        return Optional.<DOMMountPoint>fromNullable(mountPoints.get(path));
+        return Optional.fromNullable(mountPoints.get(path));
     }
 
     @Override
@@ -51,21 +49,35 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         }
     }
 
+    public void notifyMountRemoved(final InstanceIdentifier identifier) {
+        for (final ListenerRegistration<MountProvisionListener> listener : listeners
+                .getListeners()) {
+            listener.getInstance().onMountPointRemoved(identifier);
+        }
+    }
+
     @Override
     public ListenerRegistration<MountProvisionListener> registerProvisionListener(
             final MountProvisionListener listener) {
         return listeners.register(listener);
     }
 
-    public ObjectRegistration<DOMMountPoint> registerMountPoint(final SimpleDOMMountPoint mountPoint) {
+    public ObjectRegistration<DOMMountPoint> registerMountPoint(final DOMMountPoint mountPoint) {
         synchronized (mountPoints) {
             Preconditions.checkState(!mountPoints.containsKey(mountPoint.getIdentifier()), "Mount point already exists");
             mountPoints.put(mountPoint.getIdentifier(), mountPoint);
         }
         notifyMountCreated(mountPoint.getIdentifier());
 
-        // FIXME this shouldnt be null
-        return null;
+        return new MountRegistration(mountPoint);
+    }
+
+    public void unregisterMountPoint(final InstanceIdentifier mountPointId) {
+        synchronized (mountPoints) {
+            Preconditions.checkState(mountPoints.containsKey(mountPointId), "Mount point does not exist");
+            mountPoints.remove(mountPointId);
+        }
+        notifyMountRemoved(mountPointId);
     }
 
     public class DOMMountPointBuilderImpl implements DOMMountPointBuilder {
@@ -96,6 +108,24 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
             Preconditions.checkState(mountPoint == null, "Mount point is already built.");
             mountPoint = SimpleDOMMountPoint.create(path, services,schemaContext);
             return registerMountPoint(mountPoint);
+        }
+    }
+
+    private final class MountRegistration implements ObjectRegistration<DOMMountPoint> {
+        private final DOMMountPoint mountPoint;
+
+        public MountRegistration(final DOMMountPoint mountPoint) {
+            this.mountPoint = mountPoint;
+        }
+
+        @Override
+        public DOMMountPoint getInstance() {
+            return mountPoint;
+        }
+
+        @Override
+        public void close() throws Exception {
+            unregisterMountPoint(mountPoint.getIdentifier());
         }
     }
 }
