@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.api.notify;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
@@ -23,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * {@link NotificationListener#onNotification(CompositeNode)}
  * </ol>
  */
-public interface NotificationPublishService extends NotificationService {
+public interface NotificationPublishService extends NotificationService, DOMService {
     /**
      * Publishes a notification.
      *
