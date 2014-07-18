@@ -12,6 +12,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -61,7 +62,8 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
-            StreamResult result = new StreamResult(new OutputStreamWriter(os));
+            // Wrap OutputStreamWriter with BufferedWriter as suggested in javadoc for OutputStreamWriter
+            StreamResult result = new StreamResult(new BufferedWriter(new OutputStreamWriter(os)));
             DOMSource source = new DOMSource(msg.getDocument());
             transformer.transform(source, result);
         }
