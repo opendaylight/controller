@@ -93,7 +93,7 @@ public final class NetconfSessionCapabilities {
     }
 
     private static boolean isModuleBasedCapability(final String capability) {
-        return capability.contains("?") && capability.contains("module=") && capability.contains("revision=");
+        return capability.contains("?") && capability.contains("module=");
     }
 
     private static String getStringAndTransform(final Iterable<String> queryParams, final String match,
