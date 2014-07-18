@@ -115,12 +115,18 @@ public class ShardManager extends AbstractUntypedActor {
             updateSchemaContext(message);
         } else if (message instanceof ClusterEvent.MemberUp){
             memberUp((ClusterEvent.MemberUp) message);
-        } else if(message instanceof ClusterEvent.MemberRemoved){
+        } else if(message instanceof ClusterEvent.MemberRemoved) {
             memberRemoved((ClusterEvent.MemberRemoved) message);
-        }else{
+        } else if(message instanceof ClusterEvent.UnreachableMember) {
+            ignoreMessage(message);
+        } else{
           throw new Exception ("Not recognized message received, message="+message);
         }
 
+    }
+
+    private void ignoreMessage(Object message){
+        LOG.debug("Unhandled message : " + message);
     }
 
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
@@ -161,7 +167,7 @@ public class ShardManager extends AbstractUntypedActor {
                 Address address = memberNameToAddress.get(memberName);
                 if(address != null){
                     String path =
-                        address.toString() + "/user/" + getShardActorName(
+                        address.toString() + "/user/shardmanager-" + this.type + "/" + getShardActorName(
                             memberName, shardName);
                     getSender().tell(new PrimaryFound(path).toSerializable(), getSelf());
                     return;
