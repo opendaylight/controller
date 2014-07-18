@@ -155,6 +155,74 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e97d421d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-18T00:46:06Z",
+      "side": 1,
+      "message": "Follower can not schedule election. Candidate should be doing it.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9707e42",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-18T00:46:06Z",
+      "side": 1,
+      "message": "Suggest breaking this method into smaller methods.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_097bc628",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-18T00:46:06Z",
+      "side": 1,
+      "message": "Scheduling election is a responsibility of Candidate.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a973ba4c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-07-18T00:46:06Z",
+      "side": 1,
+      "message": "Same comment.....start/stop election is the job of a Candidate.",
+      "revId": "ef3c9df06af2b6bff08cafb17ae686f0ad098f75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cb7876c6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/RaftActorBehavior.java",
         "patchSetId": 4
