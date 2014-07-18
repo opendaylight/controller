@@ -15,7 +15,10 @@ import com.typesafe.config.ConfigObject;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +31,34 @@ public class ConfigurationImpl implements Configuration {
 
     private final List<Module> modules = new ArrayList<>();
 
+    private static final Logger
+        LOG = LoggerFactory.getLogger(DistributedDataStore.class);
+
 
     public ConfigurationImpl(String moduleShardsConfigPath,
+
         String modulesConfigPath){
-        Config moduleShardsConfig = ConfigFactory.load(moduleShardsConfigPath);
-        Config modulesConfig = ConfigFactory.load(modulesConfigPath);
+
+        File moduleShardsFile = new File("./configuration/initial/" + moduleShardsConfigPath);
+        File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
+
+        Config moduleShardsConfig = null;
+        if(moduleShardsFile.exists()) {
+            LOG.info("module shards config file exists - reading config from it");
+            moduleShardsConfig = ConfigFactory.parseFile(moduleShardsFile);
+        } else {
+            LOG.warn("module shards configuration read from resource");
+            moduleShardsConfig = ConfigFactory.load(moduleShardsConfigPath);
+        }
+
+        Config modulesConfig = null;
+        if(modulesFile.exists()) {
+            LOG.info("modules config file exists - reading config from it");
+            modulesConfig = ConfigFactory.parseFile(modulesFile);
+        } else {
+            LOG.warn("modules configuration read from resource");
+            modulesConfig = ConfigFactory.load(modulesConfigPath);
+        }
 
         readModuleShards(moduleShardsConfig);
 

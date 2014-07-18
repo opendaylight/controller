@@ -5,13 +5,16 @@ import akka.actor.Props;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import junit.framework.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
@@ -29,11 +32,18 @@ import java.util.concurrent.Executors;
 
 public class TransactionProxyTest extends AbstractActorTest {
 
+    private final Configuration configuration = new MockConfiguration();
+
     private final ActorContext testContext =
-        new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockConfiguration());
+        new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), configuration );
 
     private ExecutorService transactionExecutor =
         Executors.newSingleThreadExecutor();
+
+    @Before
+    public void setUp(){
+        ShardStrategyFactory.setConfiguration(configuration);
+    }
 
     @Test
     public void testRead() throws Exception {
@@ -41,6 +51,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
@@ -73,6 +84,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
@@ -104,6 +116,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
@@ -129,12 +142,17 @@ public class TransactionProxyTest extends AbstractActorTest {
         Assert.assertEquals(WriteData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
     }
 
+    private Object createPrimaryFound(ActorRef actorRef) {
+        return new PrimaryFound(actorRef.path().toString()).toSerializable();
+    }
+
     @Test
     public void testMerge() throws Exception {
         final Props props = Props.create(MessageCollectorActor.class);
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
@@ -166,6 +184,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 
@@ -196,6 +215,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef doNothingActorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(doNothingActorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(doNothingActorRef));
         actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(doNothingActorRef.path()).toSerializable());
 
@@ -237,6 +257,7 @@ public class TransactionProxyTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(props);
 
         final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
         actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
         actorContext.setExecuteRemoteOperationResponse("message");
 

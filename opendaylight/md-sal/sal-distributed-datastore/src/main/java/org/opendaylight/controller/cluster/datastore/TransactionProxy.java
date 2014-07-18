@@ -62,7 +62,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private final TransactionType transactionType;
     private final ActorContext actorContext;
-    private final Map<String, ActorSelection> remoteTransactionPaths = new HashMap<>();
+    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
     private final String identifier;
     private final ExecutorService executor;
     private final SchemaContext schemaContext;
@@ -148,15 +148,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     public DOMStoreThreePhaseCommitCohort ready() {
         List<ActorPath> cohortPaths = new ArrayList<>();
 
-        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
-            Object result = actorContext.executeRemoteOperation(remoteTransaction,
+        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+            Object result = actorContext.executeRemoteOperation(transactionContext.getActor(),
                 new ReadyTransaction().toSerializable(),
                 ActorContext.ASK_DURATION
             );
 
             if(result.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)){
                 ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(actorContext.getActorSystem(),result);
-                cohortPaths.add(reply.getCohortPath());
+                String resolvedCohortPath = transactionContext
+                    .getResolvedCohortPath(reply.getCohortPath().toString());
+                cohortPaths.add(actorContext.actorFor(resolvedCohortPath));
             }
         }
 
@@ -170,14 +172,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     @Override
     public void close() {
-        for(ActorSelection remoteTransaction : remoteTransactionPaths.values()) {
-            remoteTransaction.tell(new CloseTransaction().toSerializable(), null);
+        for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+            transactionContext.getActor().tell(
+                new CloseTransaction().toSerializable(), null);
         }
     }
 
     private ActorSelection remoteTransactionFromIdentifier(InstanceIdentifier path){
         String shardName = shardNameFromIdentifier(path);
-        return remoteTransactionPaths.get(shardName);
+        return remoteTransactionPaths.get(shardName).getActor();
     }
 
     private String shardNameFromIdentifier(InstanceIdentifier path){
@@ -187,10 +190,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     private void createTransactionIfMissing(ActorContext actorContext, InstanceIdentifier path) {
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
-        ActorSelection actorSelection =
+        TransactionContext transactionContext =
             remoteTransactionPaths.get(shardName);
 
-        if(actorSelection != null){
+        if(transactionContext != null){
             // A transaction already exists with that shard
             return;
         }
@@ -198,9 +201,45 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier).toSerializable(), ActorContext.ASK_DURATION);
         if(response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)){
             CreateTransactionReply reply = CreateTransactionReply.fromSerializable(response);
-            remoteTransactionPaths.put(shardName, actorContext.actorSelection(reply.getTransactionPath()));
+            String transactionPath = actorContext.getRemoteActorPath(shardName, reply.getTransactionPath());
+
+            ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
+            transactionContext = new TransactionContext(shardName, transactionPath, transactionActor);
+
+            remoteTransactionPaths.put(shardName, transactionContext);
         }
     }
 
+
+    private class TransactionContext {
+        private final String shardName;
+        private final String actorPath;
+        private final ActorSelection  actor;
+
+
+        private TransactionContext(String shardName, String actorPath,
+            ActorSelection actor) {
+            this.shardName = shardName;
+            this.actorPath = actorPath;
+            this.actor = actor;
+        }
+
+
+        public String getShardName() {
+            return shardName;
+        }
+
+        public String getActorPath() {
+            return actorPath;
+        }
+
+        public ActorSelection getActor() {
+            return actor;
+        }
+
+        public String getResolvedCohortPath(String cohortPath){
+            return actorContext.resolvePath(actorPath, cohortPath);
+        }
+    }
 
 }
