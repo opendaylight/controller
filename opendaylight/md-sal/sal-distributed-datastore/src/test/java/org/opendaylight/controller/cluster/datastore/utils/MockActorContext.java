@@ -55,4 +55,9 @@ public class MockActorContext extends ActorContext {
         Object executeLocalOperationResponse) {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
     }
+
+    @Override public Object executeLocalOperation(ActorRef actor,
+        Object message, FiniteDuration duration) {
+        return this.executeLocalOperationResponse;
+    }
 }
