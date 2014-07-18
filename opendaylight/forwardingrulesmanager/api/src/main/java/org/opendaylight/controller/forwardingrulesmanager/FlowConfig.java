@@ -867,6 +867,7 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                     }
                     continue;
                 }
+
                 sstr = Pattern.compile(ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     if (!NetUtils.isIPAddressValid(sstr.group(1))) {
@@ -875,7 +876,57 @@ public class FlowConfig extends ConfigurationObject implements Serializable {
                     }
                     continue;
                 }
-            }
+
+                sstr = Pattern.compile(ActionType.OUTPUT + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.DROP.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.LOOPBACK.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.FLOOD_ALL.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.SW_PATH.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.HW_PATH.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.CONTROLLER.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                sstr = Pattern.compile(ActionType.POP_VLAN.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    continue;
+                }
+
+                // If execution reached here, it means there is an Action
+                // which is not recognized by the controller. Return error
+
+                return new Status(StatusCode.BADREQUEST, String.format("%s is an UnSupported Action", actiongrp));
+           }
         } catch (NumberFormatException e) {
             return new Status(StatusCode.BADREQUEST, String.format("Invalid number format %s", e.getMessage()));
         }
