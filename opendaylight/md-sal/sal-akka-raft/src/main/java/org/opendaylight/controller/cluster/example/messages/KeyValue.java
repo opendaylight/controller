@@ -26,4 +26,11 @@ public class KeyValue implements Serializable{
     public String getValue() {
         return value;
     }
+
+    @Override public String toString() {
+        return "KeyValue{" +
+            "key='" + key + '\'' +
+            ", value='" + value + '\'' +
+            '}';
+    }
 }

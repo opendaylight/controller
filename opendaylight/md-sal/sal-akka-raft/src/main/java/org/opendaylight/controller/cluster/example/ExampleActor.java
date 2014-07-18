@@ -50,7 +50,9 @@ public class ExampleActor extends RaftActor {
                 String persistId = Long.toString(persistIdentifier++);
                 persistData(getSender(), persistId, message);
             } else {
-                getLeader().forward(message, getContext());
+                if(getLeader() != null) {
+                    getLeader().forward(message, getContext());
+                }
             }
 
         } else if (message instanceof PrintState) {
