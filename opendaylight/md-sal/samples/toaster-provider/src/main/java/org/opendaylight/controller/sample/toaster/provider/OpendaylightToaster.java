@@ -105,19 +105,19 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
             ListenableFuture<RpcResult<TransactionStatus>> future = t.commit();
             Futures.addCallback( future, new FutureCallback<RpcResult<TransactionStatus>>() {
                 @Override
-                public void onSuccess( RpcResult<TransactionStatus> result ) {
+                public void onSuccess( final RpcResult<TransactionStatus> result ) {
                     LOG.debug( "Delete Toaster commit result: " + result );
                 }
 
                 @Override
-                public void onFailure( Throwable t ) {
+                public void onFailure( final Throwable t ) {
                     LOG.error( "Delete of Toaster failed", t );
                 }
             } );
         }
     }
 
-    private Toaster buildToaster( ToasterStatus status ) {
+    private Toaster buildToaster( final ToasterStatus status ) {
 
         // note - we are simulating a device whose manufacture and model are
         // fixed (embedded) into the hardware.
@@ -193,20 +193,20 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
         // to make toast.
 
         final ReadWriteTransaction tx = dataProvider.newReadWriteTransaction();
-        ListenableFuture<Optional<DataObject>> readFuture =
+        ListenableFuture<Optional<Toaster>> readFuture =
                                           tx.read( LogicalDatastoreType.OPERATIONAL, TOASTER_IID );
 
         final ListenableFuture<RpcResult<TransactionStatus>> commitFuture =
-            Futures.transform( readFuture, new AsyncFunction<Optional<DataObject>,
+            Futures.transform( readFuture, new AsyncFunction<Optional<Toaster>,
                                                                    RpcResult<TransactionStatus>>() {
 
                 @Override
                 public ListenableFuture<RpcResult<TransactionStatus>> apply(
-                        Optional<DataObject> toasterData ) throws Exception {
+                        final Optional<Toaster> toasterData ) throws Exception {
 
                     ToasterStatus toasterStatus = ToasterStatus.Up;
                     if( toasterData.isPresent() ) {
-                        toasterStatus = ((Toaster)toasterData.get()).getToasterStatus();
+                        toasterStatus = toasterData.get().getToasterStatus();
                     }
 
                     LOG.debug( "Read toaster status: {}", toasterStatus );
@@ -242,7 +242,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
         Futures.addCallback( commitFuture, new FutureCallback<RpcResult<TransactionStatus>>() {
             @Override
-            public void onSuccess( RpcResult<TransactionStatus> result ) {
+            public void onSuccess( final RpcResult<TransactionStatus> result ) {
                 if( result.getResult() == TransactionStatus.COMMITED  ) {
 
                     // OK to make toast
@@ -262,7 +262,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
             }
 
             @Override
-            public void onFailure( Throwable ex ) {
+            public void onFailure( final Throwable ex ) {
                 if( ex instanceof OptimisticLockFailedException ) {
 
                     // Another thread is likely trying to make toast simultaneously and updated the
@@ -331,7 +331,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
         Futures.addCallback( commitFuture, new FutureCallback<RpcResult<TransactionStatus>>() {
             @Override
-            public void onSuccess( RpcResult<TransactionStatus> result ) {
+            public void onSuccess( final RpcResult<TransactionStatus> result ) {
                 if( result.getResult() != TransactionStatus.COMMITED ) {
                     LOG.error( "Failed to update toaster status: " + result.getErrors() );
                 }
@@ -340,7 +340,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
             }
 
             @Override
-            public void onFailure( Throwable t ) {
+            public void onFailure( final Throwable t ) {
                 // We shouldn't get an OptimisticLockFailedException (or any ex) as no
                 // other component should be updating the operational state.
                 LOG.error( "Failed to update toaster status", t );
@@ -348,7 +348,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
                 notifyCallback( false );
             }
 
-            void notifyCallback( boolean result ) {
+            void notifyCallback( final boolean result ) {
                 if( resultCallback != null ) {
                     resultCallback.apply( result );
                 }
@@ -400,7 +400,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
             setToasterStatusUp( new Function<Boolean,Void>() {
                 @Override
-                public Void apply( Boolean result ) {
+                public Void apply( final Boolean result ) {
 
                     currentMakeToastTask.set( null );
 

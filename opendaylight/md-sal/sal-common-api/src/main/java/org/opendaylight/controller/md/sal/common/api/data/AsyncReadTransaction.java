@@ -9,12 +9,9 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.opendaylight.yangtools.concepts.Path;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
-
 /**
  *
- * Provides a stateful read view of the data tree.
+ * Marker interface for stateful read view of the data tree.
  *
  * <p>
  * View of the data tree is a stable point-in-time snapshot of the current data tree state when
@@ -47,9 +44,9 @@ import com.google.common.util.concurrent.ListenableFuture;
  * <p>
  * <b>Note:</b> example contains blocking calls on future only to illustrate
  * that action happened after other asynchronous action. Use of blocking call
- * {@link ListenableFuture#get()} is discouraged for most uses and you should
- * use
- * {@link com.google.common.util.concurrent.Futures#addCallback(ListenableFuture, com.google.common.util.concurrent.FutureCallback)}
+ * {@link com.google.common.util.concurrent.ListenableFuture#get()} is discouraged for most
+ * uses and you should use
+ * {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture, com.google.common.util.concurrent.FutureCallback)}
  * or other functions from {@link com.google.common.util.concurrent.Futures} to
  * register more specific listeners.
  *
@@ -58,30 +55,10 @@ import com.google.common.util.concurrent.ListenableFuture;
  *            tree
  * @param <D>
  *            Type of data (payload), which represents data payload
+ *
+ * @see org.opendaylight.controller.md.sal.binding.api.ReadTransaction
+ * @see org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction
  */
 public interface AsyncReadTransaction<P extends Path<P>, D> extends AsyncTransaction<P, D> {
-
-    /**
-     *
-     * Reads data from provided logical data store located at the provided path.
-     *<p>
-     * If the target is a subtree, then the whole subtree is read (and will be
-     * accessible from the returned data object).
-     *
-     * @param store
-     *            Logical data store from which read should occur.
-     * @param path
-     *            Path which uniquely identifies subtree which client want to
-     *            read
-     * @return Listenable Future which contains read result
-     *         <ul>
-     *         <li>If data at supplied path exists the
-     *         {@link ListeblaFuture#get()} returns Optional object containing
-     *         data once read is done.
-     *         <li>If data at supplied path does not exists the
-     *         {@link ListenbleFuture#get()} returns {@link Optional#absent()}.
-     *         </ul>
-     */
-    ListenableFuture<Optional<D>> read(LogicalDatastoreType store, P path);
 
 }

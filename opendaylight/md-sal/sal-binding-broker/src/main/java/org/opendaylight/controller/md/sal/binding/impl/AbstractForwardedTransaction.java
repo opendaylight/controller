@@ -54,8 +54,8 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<InstanceI
         return codec;
     }
 
-    protected final ListenableFuture<Optional<DataObject>> doRead(final DOMDataReadTransaction readTx,
-            final LogicalDatastoreType store, final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> path) {
+    protected final <T extends DataObject> ListenableFuture<Optional<T>> doRead(final DOMDataReadTransaction readTx,
+            final LogicalDatastoreType store, final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<T> path) {
         return Futures.transform(readTx.read(store, codec.toNormalized(path)), codec.deserializeFunction(path));
     }
 }
