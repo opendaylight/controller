@@ -12,6 +12,10 @@ import java.util.EventListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+/**
+ * @deprecated Use org.opendaylight.controller.md.sal.dom.api.DOMMountPointService instead
+ */
+@Deprecated
 public interface MountProvisionService extends MountService {
 
     @Override

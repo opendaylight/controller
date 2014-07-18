@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
+@Deprecated
 public class MountPointManagerImpl implements MountProvisionService {
 
     private final ListenerRegistry<MountProvisionListener> listeners =
