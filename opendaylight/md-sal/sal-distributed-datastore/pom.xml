@@ -159,6 +159,7 @@
             <Private-Package></Private-Package>
             <Import-Package>!*snappy;!org.jboss.*;*</Import-Package>
             <Embed-Dependency>
+                sal-protocolbuffer-encoding;
                 !sal*;
                 !*config-api*;
                 !*testkit*;
