@@ -42,6 +42,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+@Deprecated
 public class MountPointImpl implements MountProvisionInstance, SchemaContextProvider {
 
     private final SchemaAwareRpcBroker rpcs;

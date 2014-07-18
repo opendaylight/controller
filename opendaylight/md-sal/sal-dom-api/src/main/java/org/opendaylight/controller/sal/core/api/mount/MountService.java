@@ -13,7 +13,10 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 /**
  * Client-level interface for interacting with mount points. It provides access
  * to {@link MountInstance} instances based on their path.
+ *
+ *  @deprecated Use org.opendaylight.controller.md.sal.dom.api.DOMMountPointService instead
  */
+@Deprecated
 public interface MountService extends BrokerService {
     /**
      * Obtain access to a mount instance registered at the specified path.

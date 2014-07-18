@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * Interface representing a single mount instance and represents a way for
  * clients to access underlying data, RPCs and notifications.
  */
+@Deprecated
 public interface MountInstance extends //
         NotificationService, //
         DataBrokerService {
