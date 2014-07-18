@@ -31,6 +31,7 @@ public class NetconfToNotificationTest {
 
     NetconfMessage userNotification;
 
+    @SuppressWarnings("deprecation")
     @Before
     public void setup() throws Exception {
         final List<InputStream> modelsToParse = Collections.singletonList(getClass().getResourceAsStream("/schemas/user-notification.yang"));

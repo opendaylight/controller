@@ -70,10 +70,15 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                 if (NetconfMessageTransformUtil.isDataEditOperation(rpc)) {
                     final DataNodeContainer schemaForEdit = NetconfMessageTransformUtil.createSchemaForEdit(schemaContext.get());
                     w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForEdit, codecProvider);
+                } else if (NetconfMessageTransformUtil.isGetOperation(rpc)) {
+                    final DataNodeContainer schemaForGet = NetconfMessageTransformUtil.createSchemaForGet(schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGet, codecProvider);
+                } else if (NetconfMessageTransformUtil.isGetConfigOperation(rpc)) {
+                    final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForGetConfig(schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
                 } else {
-                    // FIXME get and get-config needs schema as well to transform filter using schema context
-                    // e.g. Identityref nodes in filter fail to serialize properly to xml without schema
-                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaContext.get(), codecProvider);
+                    final DataNodeContainer schemaForGetConfig = NetconfMessageTransformUtil.createSchemaForRpc(rpc, schemaContext.get());
+                    w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, schemaForGetConfig, codecProvider);
                 }
             } else {
                 w3cPayload = XmlDocumentUtils.toDocument(rpcPayload, codecProvider);
@@ -97,24 +102,23 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
     private static RpcResult<CompositeNode> toRpcResult(final NetconfMessage message, final QName rpc, final SchemaContext context) {
         final CompositeNode compositeNode;
-
         if (NetconfMessageTransformUtil.isDataRetrievalOperation(rpc)) {
-
             final Element xmlData = NetconfMessageTransformUtil.getDataSubtree(message.getDocument());
-
             final List<org.opendaylight.yangtools.yang.data.api.Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
                     Optional.of(context.getDataDefinitions()), context);
 
             final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
             it.setQName(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME);
             it.add(ImmutableCompositeNode.create(NetconfMessageTransformUtil.NETCONF_DATA_QNAME, dataNodes));
-
             compositeNode = it.toInstance();
         } else {
-            // TODO map rpc with schema
-            compositeNode = (CompositeNode) XmlDocumentUtils.toDomNode(message.getDocument());
+            final CompositeNode rpcReply = XmlDocumentUtils.rpcReplyToDomNodes(message.getDocument(), rpc, context);
+            if (rpcReply != null) {
+                compositeNode = rpcReply;
+            } else {
+                compositeNode = (CompositeNode) XmlDocumentUtils.toDomNode(message.getDocument());
+            }
         }
-
         return RpcResultBuilder.success( compositeNode ).build();
     }
 

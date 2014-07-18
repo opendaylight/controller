@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -226,6 +227,14 @@ public class NetconfMessageTransformUtil {
                         NETCONF_GET_QNAME.getLocalName()));
     }
 
+    public static boolean isGetOperation(final QName rpc) {
+        return NETCONF_URI.equals(rpc.getNamespace()) && rpc.getLocalName().equals(NETCONF_GET_QNAME.getLocalName());
+    }
+
+    public static boolean isGetConfigOperation(final QName rpc) {
+        return NETCONF_URI.equals(rpc.getNamespace()) && rpc.getLocalName().equals(NETCONF_GET_CONFIG_QNAME.getLocalName());
+    }
+
     public static boolean isDataEditOperation(final QName rpc) {
         return NETCONF_URI.equals(rpc.getNamespace())
                 && rpc.getLocalName().equals(NETCONF_EDIT_CONFIG_QNAME.getLocalName());
@@ -254,6 +263,80 @@ public class NetconfMessageTransformUtil {
         final NodeContainerProxy configProxy = new NodeContainerProxy(config, schemaContext.getChildNodes());
         final NodeContainerProxy editConfigProxy = new NodeContainerProxy(editConfig, Sets.<DataSchemaNode>newHashSet(configProxy));
         return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
+    }
+
+    /**
+     * Creates artificial schema node for edit-config rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   get
+     *     filter
+     *         // All schema nodes from remote schema
+     *     filter
+     *   get
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of rpc get request(especially the config node)
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForGet(final SchemaContext schemaContext) {
+        final QName filter = QName.create(NETCONF_GET_QNAME, "filter");
+        final QName get = QName.create(NETCONF_GET_QNAME, "get");
+        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
+        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(get, Sets.<DataSchemaNode>newHashSet(configProxy));
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
+    }
+
+    /**
+     * Creates artificial schema node for get rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   get-config
+     *     filter
+     *         // All schema nodes from remote schema
+     *     filter
+     *   get-config
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of rpc get-config request(especially the config node)
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForGetConfig(final SchemaContext schemaContext) {
+        final QName filter = QName.create(NETCONF_GET_CONFIG_QNAME, "filter");
+        final QName getConfig = QName.create(NETCONF_GET_CONFIG_QNAME, "get-config");
+        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
+        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(getConfig, Sets.<DataSchemaNode>newHashSet(configProxy));
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
+    }
+
+    /**
+     * Creates artificial schema node for schema defined rpc. This artificial schema looks like:
+     * <pre>
+     * {@code
+     * rpc
+     *   rpc-name
+     *      // All schema nodes from remote schema
+     *   rpc-name
+     * rpc
+     * }
+     * </pre>
+     *
+     * This makes the translation of schema defined rpc request
+     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
+     */
+    public static DataNodeContainer createSchemaForRpc(final QName rpcName, final SchemaContext schemaContext) {
+        Preconditions.checkNotNull(rpcName);
+        Preconditions.checkNotNull(schemaContext);
+
+        final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcName, schemaContext.getChildNodes());
+        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
+
     }
 
     public static CompositeNodeTOImpl wrap(final QName name, final Node<?> node) {
