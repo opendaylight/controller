@@ -132,8 +132,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
 
-            LOG.debug("Applying state for log index {}",
-                applyState.getReplicatedLogEntry().getIndex());
+            LOG.debug("Applying state for log index {} data {}",
+                applyState.getReplicatedLogEntry().getIndex(),
+                applyState.getReplicatedLogEntry().getData());
 
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
@@ -183,10 +184,12 @@ public abstract class RaftActor extends UntypedPersistentActor {
      */
     protected void persistData(ActorRef clientActor, String identifier,
         Object data) {
-        LOG.debug("Persist data " + identifier);
+
         ReplicatedLogEntry replicatedLogEntry = new ReplicatedLogImplEntry(
             context.getReplicatedLog().lastIndex() + 1,
             context.getTermInformation().getCurrentTerm(), data);
+
+        LOG.debug("Persist data {}", replicatedLogEntry);
 
         replicatedLog
             .appendAndPersist(clientActor, identifier, replicatedLogEntry);
@@ -408,7 +411,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             final String identifier,
             final ReplicatedLogEntry replicatedLogEntry) {
             context.getLogger().debug(
-                "Append log entry and persist " + replicatedLogEntry.getIndex());
+                "Append log entry and persist " + replicatedLogEntry);
             // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
             journal.add(replicatedLogEntry);
 
@@ -449,7 +452,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
         }
 
         @Override public long size() {
-            return journal.size() + snapshotIndex;
+            return journal.size() + snapshotIndex + 1;
         }
 
         @Override public boolean isPresent(long index) {
@@ -510,6 +513,13 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         @Override public long getIndex() {
             return index;
+        }
+
+        @Override public String toString() {
+            return "Entry{" +
+                "index=" + index +
+                ", term=" + term +
+                '}';
         }
     }
 

@@ -21,14 +21,13 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
  * The behavior of a RaftActor in the Follower state
- *
+ * <p/>
  * <ul>
  * <li> Respond to RPCs from candidates and leaders
  * <li> If election timeout elapses without receiving AppendEntries
  * RPC from current leader or granting vote to candidate:
  * convert to candidate
  * </ul>
- *
  */
 public class Follower extends AbstractRaftActorBehavior {
     public Follower(RaftActorContext context) {
@@ -49,16 +48,36 @@ public class Follower extends AbstractRaftActorBehavior {
             .get(appendEntries.getPrevLogIndex());
 
 
-        if (lastIndex() > -1 && previousEntry != null
-            && previousEntry.getTerm() != appendEntries
-            .getPrevLogTerm()) {
+        boolean noMatchingTerms = true;
+
+        if (lastIndex() == -1
+            && appendEntries.getPrevLogIndex() != -1) {
 
             context.getLogger().debug(
-                "Cannot append entries because previous entry term "
-                    + previousEntry.getTerm()
-                    + " is not equal to append entries prevLogTerm "
-                    + appendEntries.getPrevLogTerm());
+                "The followers log is empty and the senders prevLogIndex is {}",
+                appendEntries.getPrevLogIndex());
 
+        } else if (lastIndex() > -1
+            && appendEntries.getPrevLogIndex() != -1
+            && previousEntry == null) {
+
+            context.getLogger().debug(
+                "The log is not empty but the prevLogIndex {} was not found in it",
+                appendEntries.getPrevLogIndex());
+
+        } else if (lastIndex() > -1
+            && previousEntry != null
+            && previousEntry.getTerm()!= appendEntries.getPrevLogTerm()) {
+
+            context.getLogger().debug(
+                "Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}"
+                , previousEntry.getTerm()
+                , appendEntries.getPrevLogTerm());
+        } else {
+            noMatchingTerms = false;
+        }
+
+        if (noMatchingTerms) {
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
@@ -70,7 +89,8 @@ public class Follower extends AbstractRaftActorBehavior {
             && appendEntries.getEntries().size() > 0) {
             context.getLogger().debug(
                 "Number of entries to be appended = " + appendEntries
-                    .getEntries().size());
+                    .getEntries().size()
+            );
 
             // 3. If an existing entry conflicts with a new one (same index
             // but different terms), delete the existing entry and all that
@@ -98,7 +118,8 @@ public class Follower extends AbstractRaftActorBehavior {
                         .getTerm()) {
                         context.getLogger().debug(
                             "Removing entries from log starting at "
-                                + matchEntry.getIndex());
+                                + matchEntry.getIndex()
+                        );
                         context.getReplicatedLog()
                             .removeFrom(matchEntry.getIndex());
                         break;
@@ -108,14 +129,16 @@ public class Follower extends AbstractRaftActorBehavior {
 
             context.getLogger().debug(
                 "After cleanup entries to be added from = " + (addEntriesFrom
-                    + lastIndex()));
+                    + lastIndex())
+            );
 
             // 4. Append any new entries not already in the log
             for (int i = addEntriesFrom;
                  i < appendEntries.getEntries().size(); i++) {
                 context.getLogger().debug(
-                    "Append entry to log " + appendEntries.getEntries().get(i)
-                        .toString());
+                    "Append entry to log " + appendEntries.getEntries().get(i).getData()
+                        .toString()
+                );
                 context.getReplicatedLog()
                     .appendAndPersist(appendEntries.getEntries().get(i));
             }
@@ -165,9 +188,9 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
-        if(message instanceof ElectionTimeout){
+        if (message instanceof ElectionTimeout) {
             return RaftState.Candidate;
-        } else if(message instanceof InstallSnapshot){
+        } else if (message instanceof InstallSnapshot) {
             InstallSnapshot snapshot = (InstallSnapshot) message;
             actor().tell(new ApplySnapshot(snapshot), actor());
         }
