@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import java.util.Arrays;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.osgi.framework.ServiceReference;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
@@ -67,6 +68,13 @@ public class ProxyFactory {
     }
 
     private static Object _createProxyImpl(final ServiceReference<?> ref,
+            final DOMMountPointService service) {
+
+        return new DOMMountPointServiceProxy(
+                ((ServiceReference<DOMMountPointService>) ref), service);
+    }
+
+    private static Object _createProxyImpl(final ServiceReference<?> ref,
             final SchemaService service) {
 
         return new SchemaServiceProxy(((ServiceReference<SchemaService>) ref),
@@ -113,6 +121,8 @@ public class ProxyFactory {
             return _createProxyImpl(ref, (SchemaService) service);
         } else if (service instanceof NotificationService) {
             return _createProxyImpl(ref, (NotificationService) service);
+        } else if (service instanceof DOMMountPointService) {
+            return _createProxyImpl(ref, (DOMMountPointService) service);
         } else if (service != null) {
             return _createProxyImpl(ref, service);
         } else {
