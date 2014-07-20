@@ -169,28 +169,33 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    RaftActorBehavior follower = createBehavior(
+                    RaftActorBehavior behavior = createBehavior(
                         createActorContext(behaviorActor));
 
-                    follower.handleMessage(getTestActor(),
+                    RaftState raftState = behavior.handleMessage(getTestActor(),
                         new RequestVote(1000, "test", 10000, 999));
 
-                    final Boolean out =
-                        new ExpectMsg<Boolean>(duration("1 seconds"),
-                            "RequestVoteReply") {
-                            // do not put code outside this method, will run afterwards
-                            protected Boolean match(Object in) {
-                                if (in instanceof RequestVoteReply) {
-                                    RequestVoteReply reply =
-                                        (RequestVoteReply) in;
-                                    return reply.isVoteGranted();
-                                } else {
-                                    throw noMatch();
-                                }
-                            }
-                        }.get();
+                    if(behavior.state() != RaftState.Follower){
+                        assertEquals(RaftState.Follower, raftState);
+                    } else {
 
-                    assertEquals(true, out);
+                        final Boolean out =
+                            new ExpectMsg<Boolean>(duration("1 seconds"),
+                                "RequestVoteReply") {
+                                // do not put code outside this method, will run afterwards
+                                protected Boolean match(Object in) {
+                                    if (in instanceof RequestVoteReply) {
+                                        RequestVoteReply reply =
+                                            (RequestVoteReply) in;
+                                        return reply.isVoteGranted();
+                                    } else {
+                                        throw noMatch();
+                                    }
+                                }
+                            }.get();
+
+                        assertEquals(true, out);
+                    }
                 }
             };
         }};
@@ -219,27 +224,31 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
                     ((MockRaftActorContext) actorContext).setReplicatedLog(log);
 
-                    RaftActorBehavior follower = createBehavior(actorContext);
+                    RaftActorBehavior behavior = createBehavior(actorContext);
 
-                    follower.handleMessage(getTestActor(),
+                    RaftState raftState = behavior.handleMessage(getTestActor(),
                         new RequestVote(1000, "test", 10000, 999));
 
-                    final Boolean out =
-                        new ExpectMsg<Boolean>(duration("1 seconds"),
-                            "RequestVoteReply") {
-                            // do not put code outside this method, will run afterwards
-                            protected Boolean match(Object in) {
-                                if (in instanceof RequestVoteReply) {
-                                    RequestVoteReply reply =
-                                        (RequestVoteReply) in;
-                                    return reply.isVoteGranted();
-                                } else {
-                                    throw noMatch();
+                    if(behavior.state() != RaftState.Follower){
+                        assertEquals(RaftState.Follower, raftState);
+                    } else {
+                        final Boolean out =
+                            new ExpectMsg<Boolean>(duration("1 seconds"),
+                                "RequestVoteReply") {
+                                // do not put code outside this method, will run afterwards
+                                protected Boolean match(Object in) {
+                                    if (in instanceof RequestVoteReply) {
+                                        RequestVoteReply reply =
+                                            (RequestVoteReply) in;
+                                        return reply.isVoteGranted();
+                                    } else {
+                                        throw noMatch();
+                                    }
                                 }
-                            }
-                        }.get();
+                            }.get();
 
-                    assertEquals(false, out);
+                        assertEquals(false, out);
+                    }
                 }
             };
         }};

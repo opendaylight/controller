@@ -18,7 +18,6 @@ import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
@@ -89,13 +88,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender         The actor that sent this message
      * @param appendEntries  The AppendEntries message
-     * @param suggestedState The state that the RaftActor should be in based
-     *                       on the base class's processing of the AppendEntries
-     *                       message
      * @return
      */
     protected abstract RaftState handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState suggestedState);
+        AppendEntries appendEntries);
 
 
     /**
@@ -104,16 +100,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender
      * @param appendEntries
-     * @param raftState
      * @return
      */
     protected RaftState appendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState raftState) {
-
-        if (raftState != state()) {
-            context.getLogger().debug("Suggested state is " + raftState
-                + " current behavior state is " + state());
-        }
+        AppendEntries appendEntries) {
 
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
@@ -128,7 +118,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
 
 
-        return handleAppendEntries(sender, appendEntries, raftState);
+        return handleAppendEntries(sender, appendEntries);
     }
 
     /**
@@ -141,13 +131,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender             The actor that sent this message
      * @param appendEntriesReply The AppendEntriesReply message
-     * @param suggestedState     The state that the RaftActor should be in based
-     *                           on the base class's processing of the
-     *                           AppendEntriesReply message
      * @return
      */
     protected abstract RaftState handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply, RaftState suggestedState);
+        AppendEntriesReply appendEntriesReply);
 
     /**
      * requestVote handles the RequestVote message. This logic is common
@@ -155,11 +142,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender
      * @param requestVote
-     * @param suggestedState
      * @return
      */
     protected RaftState requestVote(ActorRef sender,
-        RequestVote requestVote, RaftState suggestedState) {
+        RequestVote requestVote) {
 
         boolean grantVote = false;
 
@@ -197,7 +183,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
         sender.tell(new RequestVoteReply(currentTerm(), grantVote), actor());
 
-        return suggestedState;
+        return state();
     }
 
     /**
@@ -210,13 +196,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender           The actor that sent this message
      * @param requestVoteReply The RequestVoteReply message
-     * @param suggestedState   The state that the RaftActor should be in based
-     *                         on the base class's processing of the RequestVote
-     *                         message
      * @return
      */
     protected abstract RaftState handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply, RaftState suggestedState);
+        RequestVoteReply requestVoteReply);
 
     /**
      * Creates a random election duration
@@ -368,41 +351,19 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
-        RaftState raftState = state();
-        if (message instanceof RaftRPC) {
-            raftState = applyTerm((RaftRPC) message);
-        }
         if (message instanceof AppendEntries) {
-            raftState = appendEntries(sender, (AppendEntries) message,
-                raftState);
+            return appendEntries(sender, (AppendEntries) message);
         } else if (message instanceof AppendEntriesReply) {
-            raftState =
-                handleAppendEntriesReply(sender, (AppendEntriesReply) message,
-                    raftState);
+            return handleAppendEntriesReply(sender, (AppendEntriesReply) message);
         } else if (message instanceof RequestVote) {
-            raftState =
-                requestVote(sender, (RequestVote) message, raftState);
+            return requestVote(sender, (RequestVote) message);
         } else if (message instanceof RequestVoteReply) {
-            raftState =
-                handleRequestVoteReply(sender, (RequestVoteReply) message,
-                    raftState);
+            return handleRequestVoteReply(sender, (RequestVoteReply) message);
         }
-        return raftState;
+        return state();
     }
 
     @Override public String getLeaderId() {
         return leaderId;
     }
-
-    private RaftState applyTerm(RaftRPC rpc) {
-        // If RPC request or response contains term T > currentTerm:
-        // set currentTerm = T, convert to follower (§5.1)
-        // This applies to all RPC messages and responses
-        if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-            context.getTermInformation().update(rpc.getTerm(), null);
-            return RaftState.Follower;
-        }
-        return state();
-    }
-
 }
