@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
@@ -84,27 +85,19 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override protected RaftState handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState suggestedState) {
+        AppendEntries appendEntries) {
 
-        context.getLogger().error("An unexpected AppendEntries received in state " + state());
-
-        return suggestedState;
+        return state();
     }
 
     @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
+        AppendEntriesReply appendEntriesReply) {
 
-        // Some peer thinks I was a leader and sent me a reply
-
-        return suggestedState;
+        return state();
     }
 
     @Override protected RaftState handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply, RaftState suggestedState) {
-        if (suggestedState == RaftState.Follower) {
-            // If base class thinks I should be follower then I am
-            return suggestedState;
-        }
+        RequestVoteReply requestVoteReply) {
 
         if (requestVoteReply.isVoteGranted()) {
             voteCount++;
@@ -123,6 +116,18 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     @Override
     public RaftState handleMessage(ActorRef sender, Object message) {
+
+        if (message instanceof RaftRPC) {
+            RaftRPC rpc = (RaftRPC) message;
+            // If RPC request or response contains term T > currentTerm:
+            // set currentTerm = T, convert to follower (§5.1)
+            // This applies to all RPC messages and responses
+            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+                context.getTermInformation().update(rpc.getTerm(), null);
+                return RaftState.Follower;
+            }
+        }
+
         if (message instanceof ElectionTimeout) {
             if (votesRequired == 0) {
                 // If there are no peers then we should be a Leader

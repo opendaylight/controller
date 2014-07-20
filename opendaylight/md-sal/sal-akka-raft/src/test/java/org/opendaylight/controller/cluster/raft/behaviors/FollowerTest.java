@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -158,9 +159,15 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             context.setLastApplied(100);
             setLastLogEntry((MockRaftActorContext) context, 0, 0, "");
 
+            List<ReplicatedLogEntry> entries =
+                Arrays.asList(
+                    (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(100, 101,
+                        "foo")
+                );
+
             // The new commitIndex is 101
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, entries, 101);
 
             RaftState raftState =
                 createBehavior(context).handleMessage(getRef(), appendEntries);
