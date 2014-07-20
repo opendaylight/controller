@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -117,20 +118,13 @@ public class Leader extends AbstractRaftActorBehavior {
     }
 
     @Override protected RaftState handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries, RaftState suggestedState) {
+        AppendEntries appendEntries) {
 
-        context.getLogger()
-            .error("An unexpected AppendEntries received in state " + state());
-
-        return suggestedState;
+        return state();
     }
 
     @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply, RaftState suggestedState) {
-
-        // Do not take any other action since a behavior change is coming
-        if (suggestedState != state())
-            return suggestedState;
+        AppendEntriesReply appendEntriesReply) {
 
         // Update the FollowerLogInformation
         String followerId = appendEntriesReply.getFollowerId();
@@ -176,7 +170,7 @@ public class Leader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
-        return suggestedState;
+        return state();
     }
 
     protected ClientRequestTracker findClientRequestTracker(long logIndex) {
@@ -190,8 +184,8 @@ public class Leader extends AbstractRaftActorBehavior {
     }
 
     @Override protected RaftState handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply, RaftState suggestedState) {
-        return suggestedState;
+        RequestVoteReply requestVoteReply) {
+        return state();
     }
 
     @Override public RaftState state() {
@@ -200,6 +194,17 @@ public class Leader extends AbstractRaftActorBehavior {
 
     @Override public RaftState handleMessage(ActorRef sender, Object message) {
         Preconditions.checkNotNull(sender, "sender should not be null");
+
+        if (message instanceof RaftRPC) {
+            RaftRPC rpc = (RaftRPC) message;
+            // If RPC request or response contains term T > currentTerm:
+            // set currentTerm = T, convert to follower (§5.1)
+            // This applies to all RPC messages and responses
+            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+                context.getTermInformation().update(rpc.getTerm(), null);
+                return RaftState.Follower;
+            }
+        }
 
         try {
             if (message instanceof SendHeartBeat) {
