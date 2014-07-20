@@ -176,7 +176,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
             if (candidateLatest) {
                 grantVote = true;
-                context.getTermInformation().update(requestVote.getTerm(),
+                context.getTermInformation().updateAndPersist(requestVote.getTerm(),
                     requestVote.getCandidateId());
             }
         }

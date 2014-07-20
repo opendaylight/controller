@@ -51,6 +51,15 @@ public interface ReplicatedLog {
      */
     void removeFrom(long index);
 
+
+    /**
+     * Remove all entries starting from the specified entry and persist the
+     * information to disk
+     *
+     * @param index
+     */
+    void removeFromAndPersist(long index);
+
     /**
      * Append an entry to the log
      * @param replicatedLogEntry
