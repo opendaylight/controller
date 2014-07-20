@@ -38,4 +38,11 @@ public interface ElectionTerm {
      * @param votedFor
      */
     void update(long currentTerm, String votedFor);
+
+    /**
+     *
+     * @param currentTerm
+     * @param votedFor
+     */
+    void updateAndPersist(long currentTerm, String votedFor);
 }

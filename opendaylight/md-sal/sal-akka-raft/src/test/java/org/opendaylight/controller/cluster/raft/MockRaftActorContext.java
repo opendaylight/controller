@@ -43,7 +43,35 @@ public class MockRaftActorContext implements RaftActorContext {
         this.system = system;
         this.actor = actor;
 
-        electionTerm = new ElectionTermImpl(id);
+        final String id1 = id;
+        electionTerm = new ElectionTerm() {
+            /**
+             * Identifier of the actor whose election term information this is
+             */
+            private final String id = id1;
+            private long currentTerm = 0;
+            private String votedFor = "";
+
+            public long getCurrentTerm() {
+                return currentTerm;
+            }
+
+            public String getVotedFor() {
+                return votedFor;
+            }
+
+            public void update(long currentTerm, String votedFor){
+                this.currentTerm = currentTerm;
+                this.votedFor = votedFor;
+
+                // TODO : Write to some persistent state
+            }
+
+            @Override public void updateAndPersist(long currentTerm,
+                String votedFor) {
+                update(currentTerm, votedFor);
+            }
+        };
 
         initReplicatedLog();
     }
@@ -131,8 +159,9 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
 
+
     public static class SimpleReplicatedLog implements ReplicatedLog {
-        private final List<ReplicatedLogEntry> log = new ArrayList<>(10000);
+        private final List<ReplicatedLogEntry> log = new ArrayList<>();
 
         @Override public ReplicatedLogEntry get(long index) {
             if(index >= log.size() || index < 0){
@@ -168,9 +197,13 @@ public class MockRaftActorContext implements RaftActorContext {
             if(index >= log.size() || index < 0){
                 return;
             }
-            for(int i=(int) index ; i < log.size() ; i++) {
-                log.remove(i);
-            }
+
+            log.subList((int) index, log.size()).clear();
+            //log.remove((int) index);
+        }
+
+        @Override public void removeFromAndPersist(long index) {
+            removeFrom(index);
         }
 
         @Override public void append(ReplicatedLogEntry replicatedLogEntry) {

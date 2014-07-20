@@ -122,7 +122,7 @@ public class Follower extends AbstractRaftActorBehavior {
                                 + matchEntry.getIndex()
                         );
                         context.getReplicatedLog()
-                            .removeFrom(matchEntry.getIndex());
+                            .removeFromAndPersist(matchEntry.getIndex());
                         break;
                     }
                 }
@@ -195,7 +195,7 @@ public class Follower extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                context.getTermInformation().update(rpc.getTerm(), null);
+                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
             }
         }
 

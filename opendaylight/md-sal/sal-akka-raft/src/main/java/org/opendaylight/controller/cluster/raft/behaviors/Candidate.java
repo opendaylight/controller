@@ -110,7 +110,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                context.getTermInformation().update(rpc.getTerm(), null);
+                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
                 return RaftState.Follower;
             }
         }
@@ -137,7 +137,7 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         // Increment the election term and vote for self
         long currentTerm = context.getTermInformation().getCurrentTerm();
-        context.getTermInformation().update(currentTerm + 1, context.getId());
+        context.getTermInformation().updateAndPersist(currentTerm + 1, context.getId());
 
         context.getLogger().debug("Starting new term " + (currentTerm+1));
 
