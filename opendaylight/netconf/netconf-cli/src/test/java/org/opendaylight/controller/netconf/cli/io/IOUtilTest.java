@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.netconf.cli.io;
 
-import com.google.common.collect.Maps;
 import java.util.Map;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 import org.opendaylight.controller.netconf.cli.commands.CommandConstants;
 import org.opendaylight.yangtools.yang.common.QName;
+
+import com.google.common.collect.Maps;
 
 public class IOUtilTest {
 
@@ -20,7 +23,7 @@ public class IOUtilTest {
     public void testQNameFromKeyStringNew() throws Exception {
         final String s = IOUtil.qNameToKeyString(CommandConstants.HELP_QNAME, "module");
         final Map<String, QName> modulesMap = Maps.newHashMap();
-        modulesMap.put("module", new QName(CommandConstants.HELP_QNAME, "module"));
+        modulesMap.put("module", QName.create(CommandConstants.HELP_QNAME, "module"));
         final QName qName = IOUtil.qNameFromKeyString(s, modulesMap);
         Assert.assertEquals(CommandConstants.HELP_QNAME, qName);
     }
