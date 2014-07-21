@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -17,8 +18,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,16 +27,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -64,10 +67,15 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class RestGetOperationTest extends JerseyTest {
 
@@ -89,6 +97,8 @@ public class RestGetOperationTest extends JerseyTest {
 
     private static SchemaContext schemaContextModules;
     private static SchemaContext schemaContextBehindMountPoint;
+
+    private static final String RESTCONF_NS = "urn:ietf:params:xml:ns:yang:ietf-restconf";
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
@@ -241,7 +251,7 @@ public class RestGetOperationTest extends JerseyTest {
         validateModulesResponseJson(response);
 
         response = target(uri).request("application/yang.api+xml").get();
-        validateModulesResponseXml(response);
+        validateModulesResponseXml(response,schemaContextModules);
     }
 
     // /streams/
@@ -257,9 +267,12 @@ public class RestGetOperationTest extends JerseyTest {
         assertTrue(responseBody.contains("streams"));
 
         response = target(uri).request("application/yang.api+xml").get();
-        responseBody = response.readEntity(String.class);
-        assertNotNull(responseBody);
-        assertTrue(responseBody.contains("<streams xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\""));
+        Document responseXmlBody = response.readEntity(Document.class);
+        assertNotNull(responseXmlBody);
+        Element rootNode = responseXmlBody.getDocumentElement();
+
+        assertEquals("streams", rootNode.getLocalName());
+        assertEquals(RESTCONF_NS, rootNode.getNamespaceURI());
     }
 
     // /modules/module
@@ -271,18 +284,23 @@ public class RestGetOperationTest extends JerseyTest {
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
-        assertTrue("Module2 in xml wasn't found", prepareXmlRegex("module2", "2014-01-02", "module:2", responseBody)
-                .find());
-        String[] split = responseBody.split("<module");
-        assertEquals("<module element is returned more then once", 2, split.length);
+        Document responseXml = response.readEntity(Document.class);
+
+
+
+        QName qname = assertedModuleXmlToModuleQName(responseXml.getDocumentElement());
+        assertNotNull(qname);
+
+        assertEquals("module2", qname.getLocalName());
+        assertEquals("module:2", qname.getNamespace().toString());
+        assertEquals("2014-01-02", qname.getFormattedRevision());
 
         response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
-        responseBody = response.readEntity(String.class);
+        String responseBody = response.readEntity(String.class);
         assertTrue("Module2 in json wasn't found", prepareJsonRegex("module2", "2014-01-02", "module:2", responseBody)
                 .find());
-        split = responseBody.split("\"module\"");
+        String[] split = responseBody.split("\"module\"");
         assertEquals("\"module\" element is returned more then once", 2, split.length);
 
     }
@@ -296,19 +314,12 @@ public class RestGetOperationTest extends JerseyTest {
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
-        assertTrue("Xml response for /operations dummy-rpc1-module1 is incorrect",
-                validateOperationsResponseXml(responseBody, "dummy-rpc1-module1", "module:1").find());
-        assertTrue("Xml response for /operations dummy-rpc2-module1 is incorrect",
-                validateOperationsResponseXml(responseBody, "dummy-rpc2-module1", "module:1").find());
-        assertTrue("Xml response for /operations dummy-rpc1-module2 is incorrect",
-                validateOperationsResponseXml(responseBody, "dummy-rpc1-module2", "module:2").find());
-        assertTrue("Xml response for /operations dummy-rpc2-module2 is incorrect",
-                validateOperationsResponseXml(responseBody, "dummy-rpc2-module2", "module:2").find());
+        Document responseDoc = response.readEntity(Document.class);
+        validateOperationsResponseXml(responseDoc, schemaContextModules);
 
         response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
-        responseBody = response.readEntity(String.class);
+        String responseBody = response.readEntity(String.class);
         assertTrue("Json response for /operations dummy-rpc1-module1 is incorrect",
                 validateOperationsResponseJson(responseBody, "dummy-rpc1-module1", "module1").find());
         assertTrue("Json response for /operations dummy-rpc2-module1 is incorrect",
@@ -317,6 +328,30 @@ public class RestGetOperationTest extends JerseyTest {
                 validateOperationsResponseJson(responseBody, "dummy-rpc1-module2", "module2").find());
         assertTrue("Json response for /operations dummy-rpc2-module2 is incorrect",
                 validateOperationsResponseJson(responseBody, "dummy-rpc2-module2", "module2").find());
+
+    }
+
+    private void validateOperationsResponseXml(final Document responseDoc, final SchemaContext schemaContext) {
+        Element operationsElem = responseDoc.getDocumentElement();
+        assertEquals(RESTCONF_NS, operationsElem.getNamespaceURI());
+        assertEquals("operations", operationsElem.getLocalName());
+
+
+        HashSet<QName> foundOperations = new HashSet<>();
+
+        NodeList operationsList = operationsElem.getChildNodes();
+        for(int i = 0;i < operationsList.getLength();i++) {
+            org.w3c.dom.Node operation = operationsList.item(i);
+
+            String namespace = operation.getNamespaceURI();
+            String name = operation.getLocalName();
+            QName opQName = QName.create(URI.create(namespace), null, name);
+            foundOperations.add(opQName);
+        }
+
+        for(RpcDefinition schemaOp : schemaContext.getOperations()) {
+            assertTrue(foundOperations.contains(schemaOp.getQName().withoutRevision()));
+        }
 
     }
 
@@ -337,15 +372,13 @@ public class RestGetOperationTest extends JerseyTest {
 
         Response response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
-        assertTrue("Xml response for /operations/mount_point rpc-behind-module1 is incorrect",
-                validateOperationsResponseXml(responseBody, "rpc-behind-module1", "module:1:behind:mount:point").find());
-        assertTrue("Xml response for /operations/mount_point rpc-behind-module2 is incorrect",
-                validateOperationsResponseXml(responseBody, "rpc-behind-module2", "module:2:behind:mount:point").find());
+
+        Document responseDoc = response.readEntity(Document.class);
+        validateOperationsResponseXml(responseDoc, schemaContextBehindMountPoint);
 
         response = target(uri).request("application/yang.api+json").get();
         assertEquals(200, response.getStatus());
-        responseBody = response.readEntity(String.class);
+        String responseBody = response.readEntity(String.class);
         assertTrue("Json response for /operations/mount_point rpc-behind-module1 is incorrect",
                 validateOperationsResponseJson(responseBody, "rpc-behind-module1", "module1-behind-mount-point").find());
         assertTrue("Json response for /operations/mount_point rpc-behind-module2 is incorrect",
@@ -441,15 +474,7 @@ public class RestGetOperationTest extends JerseyTest {
 
         response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
-        responseBody = response.readEntity(String.class);
-        assertTrue(
-                "module1-behind-mount-point in json wasn't found",
-                prepareXmlRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point", responseBody)
-                        .find());
-        assertTrue(
-                "module2-behind-mount-point in json wasn't found",
-                prepareXmlRegex("module2-behind-mount-point", "2014-02-04", "module:2:behind:mount:point", responseBody)
-                        .find());
+        validateModulesResponseXml(response, schemaContextBehindMountPoint);
 
     }
 
@@ -481,26 +506,83 @@ public class RestGetOperationTest extends JerseyTest {
 
         response = target(uri).request("application/yang.api+xml").get();
         assertEquals(200, response.getStatus());
-        responseBody = response.readEntity(String.class);
-        assertTrue(
-                "module1-behind-mount-point in json wasn't found",
-                prepareXmlRegex("module1-behind-mount-point", "2014-02-03", "module:1:behind:mount:point", responseBody)
-                        .find());
-        split = responseBody.split("<module");
-        assertEquals("<module element is returned more then once", 2, split.length);
+        Document responseXml = response.readEntity(Document.class);
+
+        QName module = assertedModuleXmlToModuleQName(responseXml.getDocumentElement());
+
+        assertEquals("module1-behind-mount-point", module.getLocalName());
+        assertEquals("2014-02-03", module.getFormattedRevision());
+        assertEquals("module:1:behind:mount:point", module.getNamespace().toString());
+
 
     }
 
-    private void validateModulesResponseXml(final Response response) {
+    private void validateModulesResponseXml(final Response response, final SchemaContext schemaContext) {
         assertEquals(200, response.getStatus());
-        String responseBody = response.readEntity(String.class);
+        Document responseBody = response.readEntity(Document.class);
+        NodeList moduleNodes = responseBody.getDocumentElement().getElementsByTagNameNS(RESTCONF_NS, "module");
 
-        assertTrue("Module1 in xml wasn't found", prepareXmlRegex("module1", "2014-01-01", "module:1", responseBody)
-                .find());
-        assertTrue("Module2 in xml wasn't found", prepareXmlRegex("module2", "2014-01-02", "module:2", responseBody)
-                .find());
-        assertTrue("Module3 in xml wasn't found", prepareXmlRegex("module3", "2014-01-03", "module:3", responseBody)
-                .find());
+        assertTrue(moduleNodes.getLength() > 0);
+
+        HashSet<QName> foundModules = new HashSet<>();
+
+        for(int i=0;i < moduleNodes.getLength();i++) {
+            org.w3c.dom.Node module = moduleNodes.item(i);
+
+            QName name = assertedModuleXmlToModuleQName(module);
+            foundModules.add(name);
+        }
+
+        assertAllModules(foundModules,schemaContext);
+    }
+
+    private void assertAllModules(final Set<QName> foundModules, final SchemaContext schemaContext) {
+        for(Module module : schemaContext.getModules()) {
+            QName current = QName.create(module.getQNameModule(),module.getName());
+            assertTrue("Module not found in response.",foundModules.contains(current));
+        }
+
+    }
+
+    private QName assertedModuleXmlToModuleQName(final org.w3c.dom.Node module) {
+        assertEquals("module", module.getLocalName());
+        assertEquals(RESTCONF_NS, module.getNamespaceURI());
+        String revision = null;
+        String namespace = null;
+        String name = null;
+
+
+        NodeList childNodes = module.getChildNodes();
+
+        for(int i =0;i < childNodes.getLength(); i++) {
+            org.w3c.dom.Node child = childNodes.item(i);
+            assertEquals(RESTCONF_NS, child.getNamespaceURI());
+
+            switch(child.getLocalName()) {
+                case "name":
+                    assertNull("Name element appeared multiple times",name);
+                    name = child.getTextContent().trim();
+                    break;
+                case "revision":
+                    assertNull("Revision element appeared multiple times",revision);
+                    revision = child.getTextContent().trim();
+                    break;
+
+                case "namespace":
+                    assertNull("Namespace element appeared multiple times",namespace);
+                    namespace = child.getTextContent().trim();
+                    break;
+            }
+        }
+
+        assertNotNull("Revision was not part of xml",revision);
+        assertNotNull("Module namespace was not part of xml",namespace);
+        assertNotNull("Module identiffier was not part of xml",name);
+
+
+        // TODO Auto-generated method stub
+
+        return QName.create(namespace,revision,name);
     }
 
     private void validateModulesResponseJson(final Response response) {
@@ -542,34 +624,6 @@ public class RestGetOperationTest extends JerseyTest {
 
     }
 
-    private Matcher prepareXmlRegex(final String module, final String revision, final String namespace,
-            final String searchIn) {
-        StringBuilder regex = new StringBuilder();
-        regex.append("^");
-
-        regex.append(".*<module.*");
-        regex.append(".*>");
-
-        regex.append(".*<name>");
-        regex.append(".*" + module);
-        regex.append(".*<\\/name>");
-
-        regex.append(".*<revision>");
-        regex.append(".*" + revision);
-        regex.append(".*<\\/revision>");
-
-        regex.append(".*<namespace>");
-        regex.append(".*" + namespace);
-        regex.append(".*<\\/namespace>");
-
-        regex.append(".*<\\/module.*>");
-
-        regex.append(".*");
-        regex.append("$");
-
-        Pattern ptrn = Pattern.compile(regex.toString(), Pattern.DOTALL);
-        return ptrn.matcher(searchIn);
-    }
 
     private void prepareMockForModulesTest(final ControllerContext mockedControllerContext)
             throws FileNotFoundException {
@@ -626,7 +680,7 @@ public class RestGetOperationTest extends JerseyTest {
         getDataWithUriIncludeWhiteCharsParameter("operational");
     }
 
-    private void getDataWithUriIncludeWhiteCharsParameter(String target) throws UnsupportedEncodingException {
+    private void getDataWithUriIncludeWhiteCharsParameter(final String target) throws UnsupportedEncodingException {
         mockReadConfigurationDataMethod();
         String uri = "/" + target + "/ietf-interfaces:interfaces/interface/eth0";
         Response response = target(uri).queryParam("prettyPrint", "false").request("application/xml").get();

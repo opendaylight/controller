@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.netconf.cli.commands.local;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.netconf.cli.NetconfDeviceConnectionManager;
 import org.opendaylight.controller.netconf.cli.commands.AbstractCommand;
 import org.opendaylight.controller.netconf.cli.commands.Command;
@@ -20,6 +19,8 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+
+import com.google.common.collect.Lists;
 
 /**
  * Local disconnect command
@@ -40,7 +41,7 @@ public class Disconnect extends AbstractCommand {
         connectionManager.disconnect();
 
         return new Output(new CompositeNodeTOImpl(getCommandId(), null,
-                Lists.<Node<?>> newArrayList(new SimpleNodeTOImpl<>(new QName(getCommandId(), "status"), null,
+                Lists.<Node<?>> newArrayList(new SimpleNodeTOImpl<>(QName.create(getCommandId(), "status"), null,
                         "Connection disconnected"))));
     }
 
