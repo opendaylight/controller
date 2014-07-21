@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5ccd0b84",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/AbstractChangeListener.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-21T18:13:18Z",
+      "side": 1,
+      "message": "please add a few words to the argument documentaiton",
+      "revId": "f422e05ab6135110c9d5076dc5e172470ec9055a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
