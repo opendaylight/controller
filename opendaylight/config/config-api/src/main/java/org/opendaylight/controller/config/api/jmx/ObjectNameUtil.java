@@ -35,7 +35,6 @@ public class ObjectNameUtil {
     public static final String SERVICE_QNAME_KEY = "serviceQName";
     public static final String INSTANCE_NAME_KEY = "instanceName";
     public static final String TYPE_KEY = ConfigRegistryConstants.TYPE_KEY;
-    public static final String TYPE_CONFIG_REGISTRY = ConfigRegistryConstants.TYPE_CONFIG_REGISTRY;
     public static final String TYPE_CONFIG_TRANSACTION = "ConfigTransaction";
     public static final String TYPE_MODULE = "Module";
     public static final String TYPE_SERVICE_REFERENCE = "ServiceReference";
@@ -43,6 +42,7 @@ public class ObjectNameUtil {
     public static final String TRANSACTION_NAME_KEY = "TransactionName";
     public static final String REF_NAME_KEY = "RefName";
     private static final String REPLACED_QUOTATION_MARK = "\\?";
+    public static final String ON_WILDCARD = "*";
 
     public static ObjectName createON(String on) {
         try {
@@ -304,12 +304,9 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String moduleName,
                                                  String instanceName) {
-        if (moduleName == null) {
-            moduleName = "*";
-        }
-        if (instanceName == null) {
-            instanceName = "*";
-        }
+        moduleName = moduleName == null ? ON_WILDCARD : moduleName;
+        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
+
         // do not return object names containing transaction name
         ObjectName namePattern = ObjectNameUtil
                 .createON(ObjectNameUtil.ON_DOMAIN + ":"
@@ -323,6 +320,10 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String ifcName,
                                                  String instanceName, String transactionName) {
+        ifcName = ifcName == null ? ON_WILDCARD : ifcName;
+        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
+        transactionName = transactionName == null ? ON_WILDCARD : transactionName;
+
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + ifcName + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "="
@@ -332,6 +333,9 @@ public class ObjectNameUtil {
 
     public static ObjectName createRuntimeBeanPattern(String moduleName,
                                                       String instanceName) {
+        moduleName = moduleName == null ? ON_WILDCARD : moduleName;
+        instanceName = instanceName == null ? ON_WILDCARD : instanceName;
+
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN + ":"
                 + ObjectNameUtil.TYPE_KEY + "="
                 + ObjectNameUtil.TYPE_RUNTIME_BEAN + ","
