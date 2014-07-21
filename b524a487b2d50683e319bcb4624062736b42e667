@@ -34,6 +34,24 @@
       "revId": "b524a487b2d50683e319bcb4624062736b42e667",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fa00a235",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-07-21T13:14:10Z",
+      "side": 1,
+      "message": "Yangtools is first project built in release train, so for now (until there will be opendaylight commons project) all general purpose utilities end up there in  common/concepts and common/util",
+      "parentUuid": "fa82b9bf_fad982f3",
+      "revId": "b524a487b2d50683e319bcb4624062736b42e667",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
