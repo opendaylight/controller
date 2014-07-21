@@ -84,7 +84,7 @@ public class RestCodec {
                     if (input instanceof IdentityValuesDTO) {
                         return identityrefCodec.deserialize(input);
                     }
-                    logger.info(
+                    logger.debug(
                             "Value is not instance of IdentityrefTypeDefinition but is {}. Therefore NULL is used as translation of  - {}",
                             input == null ? "null" : input.getClass(), String.valueOf(input));
                     return null;
