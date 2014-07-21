@@ -27,6 +27,38 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-client</artifactId>
     </dependency>
+
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>config-manager</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>config-manager</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>config-util</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>netty-threadgroup-config</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>netty-timer-config</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>mockito-configuration</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 
   <build>
