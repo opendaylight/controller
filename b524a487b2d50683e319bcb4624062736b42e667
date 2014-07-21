@@ -16,6 +16,24 @@
       "revId": "b524a487b2d50683e319bcb4624062736b42e667",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fad982f3",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-21T13:08:23Z",
+      "side": 1,
+      "message": "Yeah I could generalize it. But why in yangtools? This isn\u0027t related to yang. I would opt to put it into sal-common-util in a concurrent package.",
+      "parentUuid": "fa82b9bf_3fd4bcbb",
+      "revId": "b524a487b2d50683e319bcb4624062736b42e667",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
