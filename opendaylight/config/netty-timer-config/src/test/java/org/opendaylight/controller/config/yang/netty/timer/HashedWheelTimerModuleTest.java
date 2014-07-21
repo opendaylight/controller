@@ -34,7 +34,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
     public void setUp() {
         factory = new HashedWheelTimerModuleFactory();
         threadFactory = new NamingThreadFactoryModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory, threadFactory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, factory, threadFactory));
     }
 
     public void testValidationExceptionTickDuration() throws InstanceAlreadyExistsException {
