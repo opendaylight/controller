@@ -49,13 +49,13 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
                                 "foo").build()).build();
         initialTx.put(LogicalDatastoreType.OPERATIONAL, path(TOP_FOO_KEY),
                 topLevelList(TOP_FOO_KEY, fooAugment));
-        assertCommit(initialTx.commit());
+        assertCommit(initialTx.submit());
     }
 
     private void delete(final InstanceIdentifier<?> path) {
         WriteTransaction tx = getDataBroker().newWriteOnlyTransaction();
         tx.delete(LogicalDatastoreType.OPERATIONAL, path);
-        assertCommit(tx.commit());
+        assertCommit(tx.submit());
     }
 
     private void verifyRemoved(

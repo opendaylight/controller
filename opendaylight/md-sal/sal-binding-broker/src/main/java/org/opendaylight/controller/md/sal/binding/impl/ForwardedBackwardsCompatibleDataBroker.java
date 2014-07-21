@@ -28,6 +28,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.Data
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
@@ -160,7 +161,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             @Override
             public ListenableFuture<RpcResult<TransactionStatus>> apply(final Boolean requestCommitSuccess) throws Exception {
                 if(requestCommitSuccess) {
-                    return tx.getDelegate().commit();
+                    return AbstractDataTransaction.convertToLegacyCommitFuture(tx.getDelegate().submit());
                 }
                 return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>failed().withResult(TransactionStatus.FAILED).build());
             }

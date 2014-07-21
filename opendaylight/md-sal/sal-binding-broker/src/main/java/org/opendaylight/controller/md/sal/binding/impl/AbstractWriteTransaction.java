@@ -10,13 +10,12 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import java.util.Collections;
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  *
@@ -122,8 +121,8 @@ public class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         getDelegate().delete(store, normalized);
     }
 
-    protected final ListenableFuture<RpcResult<TransactionStatus>> doCommit() {
-        return getDelegate().commit();
+    protected final CheckedFuture<Void,TransactionCommitFailedException> doSubmit() {
+        return getDelegate().submit();
     }
 
     protected final boolean doCancel() {
