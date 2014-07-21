@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a5daa79",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/MDFlowMapping.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-07-21T12:54:42Z",
+      "side": 1,
+      "message": "Doesn\u0027t this break the existing PushVlan semantics in the AD-SAL?",
+      "revId": "058bccd45829c539a3be1e3b2ae5983a4c035d7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_da559e50",
+        "filename": "opendaylight/md-sal/compatibility/sal-compatibility/src/main/java/org/opendaylight/controller/sal/compatibility/ToSalConversionsUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-07-21T12:54:42Z",
+      "side": 1,
+      "message": "Doesn\u0027t this break the existing AD-SAL PushVlan semantics?",
+      "revId": "058bccd45829c539a3be1e3b2ae5983a4c035d7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a67b24d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/action/PushVlan.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-07-21T12:54:42Z",
+      "side": 1,
+      "message": "Could you perhaps explain this a bit more?  The existing constructors can already take an EtherType, and the existing runChecks already does the check for VLANTAGGED and QINQ... so I\u0027m a bit confused as to why the new constructor and what it buys us.",
+      "revId": "058bccd45829c539a3be1e3b2ae5983a4c035d7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
