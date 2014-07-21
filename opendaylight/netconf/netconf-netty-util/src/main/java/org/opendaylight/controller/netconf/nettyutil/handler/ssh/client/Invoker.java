@@ -13,33 +13,38 @@ import java.io.IOException;
  * Abstract class providing mechanism of invoking various SSH level services.
  * Class is not allowed to be extended, as it provides its own implementations via instance initiators.
  */
-public abstract class Invoker {
+abstract class Invoker {
     private boolean invoked = false;
 
-    private Invoker(){}
+    private Invoker() {
+    }
 
     protected boolean isInvoked() {
-        // TODO invoked is always false
         return invoked;
+    }
+
+    public void setInvoked() {
+        this.invoked = true;
     }
 
     abstract void invoke(SshSession session) throws IOException;
 
-    /**
-     * Invoker implementation to invokes subsystem SSH service.
-     *
-     * @param subsystem
-     * @return
-     */
+    public static Invoker netconfSubsystem(){
+        return subsystem("netconf");
+    }
+
     public static Invoker subsystem(final String subsystem) {
         return new Invoker() {
             @Override
-            void invoke(SshSession session) throws IOException {
+            synchronized void invoke(SshSession session) throws IOException {
                 if (isInvoked()) {
                     throw new IllegalStateException("Already invoked.");
                 }
-
-                session.startSubSystem(subsystem);
+                try {
+                    session.startSubSystem(subsystem);
+                } finally {
+                    setInvoked();
+                }
             }
         };
     }
