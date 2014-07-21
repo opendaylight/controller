@@ -7,10 +7,31 @@
  */
 package org.opendaylight.controller.cluster.datastore.util;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
@@ -44,29 +65,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -96,8 +98,8 @@ public class NormalizedNodeXmlConverterTest {
     }
   }
 
-  public static DataSchemaNode getSchemaNode(SchemaContext context,
-      String moduleName, String childNodeName) {
+  public static DataSchemaNode getSchemaNode(final SchemaContext context,
+      final String moduleName, final String childNodeName) {
     for (Module module : context.getModules()) {
       if (module.getName().equals(moduleName)) {
         DataSchemaNode found =
@@ -111,12 +113,13 @@ public class NormalizedNodeXmlConverterTest {
         + childNodeName);
   }
 
-  static DataSchemaNode findChildNode(Set<DataSchemaNode> children, String name) {
+  static DataSchemaNode findChildNode(final Set<DataSchemaNode> children, final String name) {
     List<DataNodeContainer> containers = Lists.newArrayList();
 
     for (DataSchemaNode dataSchemaNode : children) {
-      if (dataSchemaNode.getQName().getLocalName().equals(name))
+      if (dataSchemaNode.getQName().getLocalName().equals(name)) {
         return dataSchemaNode;
+    }
       if (dataSchemaNode instanceof DataNodeContainer) {
         containers.add((DataNodeContainer) dataSchemaNode);
       } else if (dataSchemaNode instanceof ChoiceNode) {
@@ -135,13 +138,13 @@ public class NormalizedNodeXmlConverterTest {
   }
 
   private static InstanceIdentifier.NodeIdentifier getNodeIdentifier(
-      String localName) {
-    return new InstanceIdentifier.NodeIdentifier(new QName(
+      final String localName) {
+    return new InstanceIdentifier.NodeIdentifier(QName.create(
         URI.create(NAMESPACE), revision, localName));
   }
 
   public static InstanceIdentifier.AugmentationIdentifier getAugmentIdentifier(
-      String... childNames) {
+      final String... childNames) {
     Set<QName> qn = Sets.newHashSet();
 
     for (String childName : childNames) {
@@ -233,7 +236,7 @@ public class NormalizedNodeXmlConverterTest {
 
 
 
-  public void init(String yangPath, String xmlPath, ContainerNode expectedNode)
+  public void init(final String yangPath, final String xmlPath, final ContainerNode expectedNode)
       throws Exception {
     SchemaContext schema = parseTestSchema(yangPath);
     this.xmlPath = xmlPath;
@@ -242,7 +245,7 @@ public class NormalizedNodeXmlConverterTest {
     this.expectedNode = expectedNode;
   }
 
-  SchemaContext parseTestSchema(String yangPath) throws Exception {
+  SchemaContext parseTestSchema(final String yangPath) throws Exception {
 
     YangParserImpl yangParserImpl = new YangParserImpl();
     InputStream stream =
@@ -268,8 +271,9 @@ public class NormalizedNodeXmlConverterTest {
             .parse(Collections.singletonList(doc.getDocumentElement()),
                 containerNode);
 
-    if (expectedNode != null)
-      junit.framework.Assert.assertEquals(expectedNode, built);
+    if (expectedNode != null) {
+        junit.framework.Assert.assertEquals(expectedNode, built);
+    }
 
     logger.info("{}", built);
 
@@ -287,10 +291,9 @@ public class NormalizedNodeXmlConverterTest {
     System.out.println(toString(doc.getDocumentElement()));
     System.out.println(toString(el));
 
-    boolean diff =
-        new Diff(
-            XMLUnit.buildControlDocument(toString(doc.getDocumentElement())),
-            XMLUnit.buildTestDocument(toString(el))).similar();
+    new Diff(
+        XMLUnit.buildControlDocument(toString(doc.getDocumentElement())),
+        XMLUnit.buildTestDocument(toString(el))).similar();
   }
 
   private static ContainerNode listLeafListWithAttributes() {
@@ -353,8 +356,9 @@ public class NormalizedNodeXmlConverterTest {
             .parse(Collections.singletonList(doc.getDocumentElement()),
                 containerNode);
 
-    if (expectedNode != null)
-      junit.framework.Assert.assertEquals(expectedNode, built);
+    if (expectedNode != null) {
+        junit.framework.Assert.assertEquals(expectedNode, built);
+    }
 
     logger.info("{}", built);
 
@@ -372,14 +376,13 @@ public class NormalizedNodeXmlConverterTest {
     System.out.println(toString(doc.getDocumentElement()));
     System.out.println(toString(el));
 
-    boolean diff =
-        new Diff(
-            XMLUnit.buildControlDocument(toString(doc.getDocumentElement())),
-            XMLUnit.buildTestDocument(toString(el))).similar();
+    new Diff(
+        XMLUnit.buildControlDocument(toString(doc.getDocumentElement())),
+        XMLUnit.buildTestDocument(toString(el))).similar();
   }
 
 
-  private Document loadDocument(String xmlPath) throws Exception {
+  private Document loadDocument(final String xmlPath) throws Exception {
     InputStream resourceAsStream =
         NormalizedNodeXmlConverterTest.class.getResourceAsStream(xmlPath);
 
@@ -399,7 +402,7 @@ public class NormalizedNodeXmlConverterTest {
     BUILDERFACTORY = factory;
   }
 
-  private Document readXmlToDocument(InputStream xmlContent)
+  private Document readXmlToDocument(final InputStream xmlContent)
       throws IOException, SAXException {
     DocumentBuilder dBuilder;
     try {
@@ -413,7 +416,7 @@ public class NormalizedNodeXmlConverterTest {
     return doc;
   }
 
-  public static String toString(Element xml) {
+  public static String toString(final Element xml) {
     try {
       Transformer transformer =
           TransformerFactory.newInstance().newTransformer();
@@ -442,11 +445,10 @@ public class NormalizedNodeXmlConverterTest {
     System.out.println(toString(convertedDoc.getDocumentElement()));
     XMLUnit.setIgnoreWhitespace(true);
     XMLUnit.setIgnoreComments(true);
-    boolean diff =
-        new Diff(XMLUnit.buildControlDocument(toString(expectedDoc
-            .getDocumentElement())),
-            XMLUnit.buildTestDocument(toString(convertedDoc
-                .getDocumentElement()))).similar();
+    new Diff(XMLUnit.buildControlDocument(toString(expectedDoc
+        .getDocumentElement())),
+        XMLUnit.buildTestDocument(toString(convertedDoc
+            .getDocumentElement()))).similar();
     System.out.println(toString(expectedDoc.getDocumentElement()));
 
   }
@@ -464,11 +466,10 @@ public class NormalizedNodeXmlConverterTest {
     System.out.println(toString(convertedDoc.getDocumentElement()));
     XMLUnit.setIgnoreWhitespace(true);
     XMLUnit.setIgnoreComments(true);
-    boolean diff =
-        new Diff(XMLUnit.buildControlDocument(toString(expectedDoc
-            .getDocumentElement())),
-            XMLUnit.buildTestDocument(toString(convertedDoc
-                .getDocumentElement()))).similar();
+    new Diff(XMLUnit.buildControlDocument(toString(expectedDoc
+        .getDocumentElement())),
+        XMLUnit.buildTestDocument(toString(convertedDoc
+            .getDocumentElement()))).similar();
     System.out.println(toString(expectedDoc.getDocumentElement()));
 
     // now we will try to convert xml back to normalize node.
