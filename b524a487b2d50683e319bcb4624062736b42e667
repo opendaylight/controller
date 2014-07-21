@@ -52,6 +52,24 @@
       "revId": "b524a487b2d50683e319bcb4624062736b42e667",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5a4c2e9e",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMDataCommitCoordinatorImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-21T13:35:25Z",
+      "side": 1,
+      "message": "I see concepts and yang.common projects. The classes in there do seem related to yang and yang-generated code. The packages names contain yangtools/yang. But this code is related to guava and concurrency and MD-SAL  - It seems strange to me to have it in a yangtools/yang package since it has nothing to do with yang tools or yang. There currently isn\u0027t a general ODL commons util project or bundle but it seems to me sal-common-util is the closest at this point. \n\nWe can discuss this further on the hackers call today. I have other general classes that I have put into sal-common-util as part of another draft.",
+      "parentUuid": "fa82b9bf_fa00a235",
+      "revId": "b524a487b2d50683e319bcb4624062736b42e667",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
