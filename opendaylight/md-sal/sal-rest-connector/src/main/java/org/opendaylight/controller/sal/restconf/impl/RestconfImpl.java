@@ -108,10 +108,16 @@ public class RestconfImpl implements RestconfService {
 
     private BrokerFacade broker;
 
+    private AuthzBrokerFacade authzBroker;
+
     private ControllerContext controllerContext;
 
     public void setBroker(final BrokerFacade broker) {
         this.broker = broker;
+    }
+
+    public void setAuthzBroker(final AuthzBrokerFacade broker){
+        this.authzBroker = broker;
     }
 
     public void setControllerContext(final ControllerContext controllerContext) {
@@ -587,8 +593,9 @@ public class RestconfImpl implements RestconfService {
         MountInstance mountPoint = iiWithData.getMountPoint();
         if (mountPoint != null) {
             data = broker.readConfigurationDataBehindMountPoint(mountPoint, iiWithData.getInstanceIdentifier());
-        } else {
-            data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
+        }
+        else {
+            data = authzBroker.readConfigurationData(iiWithData.getInstanceIdentifier());
         }
 
         data = pruneDataAtDepth(data, parseDepthParameter(uriInfo));
@@ -645,8 +652,9 @@ public class RestconfImpl implements RestconfService {
         MountInstance mountPoint = iiWithData.getMountPoint();
         if (mountPoint != null) {
             data = broker.readOperationalDataBehindMountPoint(mountPoint, iiWithData.getInstanceIdentifier());
-        } else {
-            data = broker.readOperationalData(iiWithData.getInstanceIdentifier());
+        }
+        else {
+            data = authzBroker.readOperationalData(iiWithData.getInstanceIdentifier());
         }
 
         data = pruneDataAtDepth(data, parseDepthParameter(info));

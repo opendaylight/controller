@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
+import org.opendaylight.controller.sal.restconf.impl.AuthzBrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 
@@ -27,8 +28,10 @@ public class RestconfApplication extends Application {
         Set<Object> singletons = new HashSet<>();
         ControllerContext controllerContext = ControllerContext.getInstance();
         BrokerFacade brokerFacade = BrokerFacade.getInstance();
+        AuthzBrokerFacade  authzBrokerFacade = AuthzBrokerFacade.getInstance();
         RestconfImpl restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
+        restconfImpl.setAuthzBroker(authzBrokerFacade);
         restconfImpl.setControllerContext(controllerContext);
         singletons.add(controllerContext);
         singletons.add(brokerFacade);

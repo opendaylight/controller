@@ -9,12 +9,14 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import org.opendaylight.aaa.api.AuthenticationService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.sal.restconf.impl.AuthzBrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
@@ -40,7 +42,9 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         DataBrokerService dataService = session.getService(DataBrokerService.class);
 
         BrokerFacade.getInstance().setContext(session);
+        AuthzBrokerFacade.getInstance().setContext(session);
         BrokerFacade.getInstance().setDataService(dataService);
+        AuthzBrokerFacade.getInstance().setBroker(BrokerFacade.getInstance());
 
         SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
@@ -54,6 +58,12 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         int websocketPort = (websocketPortStr != null && !"".equals(websocketPortStr)) ? Integer
                 .parseInt(websocketPortStr) : WebSocketServer.DEFAULT_PORT;
         bundleContext = context;
+
+        //Get authentication service reference
+        ServiceReference<AuthenticationService> authServiceReference = context.getServiceReference(AuthenticationService.class);
+        AuthenticationService as = context.getService(authServiceReference);
+        AuthzBrokerFacade.getInstance().setAuthService(as);
+
         webSocketServerThread = new Thread(WebSocketServer.createInstance(websocketPort));
         webSocketServerThread.setName("Web socket server");
         webSocketServerThread.start();

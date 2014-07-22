@@ -297,14 +297,6 @@ public class InvokeRpcMethodTest {
         assertNotNull(output.getSchema());
     }
 
-    /**
-     *
-     * Tests calling of RestConfImpl method invokeRpc. In the method there is searched rpc in remote schema context.
-     * This rpc is then executed.
-     *
-     * I wasn't able to simulate calling of rpc on remote device therefore this testing method raise method when rpc is
-     * invoked.
-     */
     @Test
     public void testMountedRpcCallNoPayload_Success() throws Exception {
         RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
@@ -320,32 +312,21 @@ public class InvokeRpcMethodTest {
         MountInstance mockMountPoint = mock(MountInstance.class);
         when(mockMountPoint.rpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
 
-        when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
-
         InstanceIdWithSchemaNode mockedInstanceId = mock(InstanceIdWithSchemaNode.class);
         when(mockedInstanceId.getMountPoint()).thenReturn(mockMountPoint);
 
         ControllerContext mockedContext = mock(ControllerContext.class);
-        String rpcNoop = "invoke-rpc-module:rpc-noop";
-        when(mockedContext.urlPathArgDecode(rpcNoop)).thenReturn(rpcNoop);
-        when(mockedContext.getRpcDefinition(rpcNoop)).thenReturn(mockRpc);
+        String cancelToastStr = "toaster:cancel-toast";
+        when(mockedContext.urlPathArgDecode(cancelToastStr)).thenReturn(cancelToastStr);
+        when(mockedContext.getRpcDefinition(cancelToastStr)).thenReturn(mockRpc);
         when(
-                mockedContext.toMountPointIdentifier(eq("opendaylight-inventory:nodes/node/"
-                        + "REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop"))).thenReturn(mockedInstanceId);
+                mockedContext.toMountPointIdentifier("opendaylight-inventory:nodes/node/"
+                        + "REMOTE_HOST/yang-ext:mount/toaster:cancel-toast")).thenReturn(mockedInstanceId);
 
         restconfImpl.setControllerContext(mockedContext);
-        try {
-            restconfImpl.invokeRpc(
-                    "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop", "",
-                    uriInfo);
-            fail("RestconfDocumentedException wasn't raised");
-        } catch (RestconfDocumentedException e) {
-            List<RestconfError> errors = e.getErrors();
-            assertNotNull(errors);
-            assertEquals(1, errors.size());
-            assertEquals(ErrorType.APPLICATION, errors.iterator().next().getErrorType());
-            assertEquals(ErrorTag.OPERATION_FAILED, errors.iterator().next().getErrorTag());
-        }
+        StructuredData output = restconfImpl.invokeRpc(
+                "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/toaster:cancel-toast", "", uriInfo);
+        assertEquals(null, output);
 
         // additional validation in the fact that the restconfImpl does not
         // throw an exception.
