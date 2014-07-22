@@ -760,9 +760,9 @@ public class frmTest {
         actions.add(ActionType.SET_NW_SRC.toString() + "=1.1.1.1");
         actions.add(ActionType.SET_NW_DST.toString() + "=2.2.2.2");
         actions.add(ActionType.CONTROLLER.toString());
-        actions.add(ActionType.SET_NW_TOS.toString() + "1");
-        actions.add(ActionType.SET_TP_SRC.toString() + "60");
-        actions.add(ActionType.SET_TP_DST.toString() + "8080");
+        actions.add(ActionType.SET_NW_TOS.toString() + "=1");
+        actions.add(ActionType.SET_TP_SRC.toString() + "=60");
+        actions.add(ActionType.SET_TP_DST.toString() + "=8080");
         actions.add(ActionType.SET_NEXT_HOP.toString() + "=1.1.1.1");
 
         return actions;
