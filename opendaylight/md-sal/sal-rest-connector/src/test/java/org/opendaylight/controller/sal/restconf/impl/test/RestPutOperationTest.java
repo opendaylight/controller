@@ -18,10 +18,11 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.concurrent.Future;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
@@ -37,6 +38,7 @@ import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.sal.restconf.impl.RestconfIdentifierCodecImpl;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
@@ -84,9 +86,12 @@ public class RestPutOperationTest extends JerseyTest {
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE, XmlToCompositeNodeProvider.INSTANCE,
-                JsonToCompositeNodeProvider.INSTANCE);
-        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
+                StructuredDataToJsonProvider.INSTANCE,
+                new RestconfIdentifierCodecImpl(ControllerContext.getInstance())
+                );
+        resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class,
+                XmlToCompositeNodeProvider.class,
+                JsonToCompositeNodeProvider.class);
         return resourceConfig;
     }
 
@@ -108,7 +113,7 @@ public class RestPutOperationTest extends JerseyTest {
     @Test
     public void putConfigStatusCodesEmptyBody() throws UnsupportedEncodingException {
         String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
-        Response resp = target(uri).request(MediaType.APPLICATION_JSON).put(
+        target(uri).request(MediaType.APPLICATION_JSON).put(
                 Entity.entity("", MediaType.APPLICATION_JSON));
         assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
     }
@@ -160,11 +165,11 @@ public class RestPutOperationTest extends JerseyTest {
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData3));
     }
 
-    private int put(String uri, String mediaType, String data) throws UnsupportedEncodingException {
+    private int put(final String uri, final String mediaType, final String data) throws UnsupportedEncodingException {
         return target(uri).request(mediaType).put(Entity.entity(data, mediaType)).getStatus();
     }
 
-    private void mockCommitConfigurationDataPutMethod(TransactionStatus statusName) {
+    private void mockCommitConfigurationDataPutMethod(final TransactionStatus statusName) {
         RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(statusName)
                 .build();
         Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(

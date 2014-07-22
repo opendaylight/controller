@@ -7,19 +7,27 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.ws.rs.core.Application;
+
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
+import org.opendaylight.controller.sal.restconf.impl.RestconfIdentifierCodecImpl;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+
+import com.google.common.collect.ImmutableSet;
 
 public class RestconfApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return ImmutableSet.<Class<?>> of(RestconfDocumentedExceptionMapper.class);
+        return ImmutableSet.<Class<?>> builder()
+                .add(RestconfDocumentedExceptionMapper.class)
+                .add(JsonToCompositeNodeProvider.class)
+                .add(XmlToCompositeNodeProvider.class)
+                .build();
     }
 
     @Override
@@ -33,9 +41,8 @@ public class RestconfApplication extends Application {
         singletons.add(controllerContext);
         singletons.add(brokerFacade);
         singletons.add(restconfImpl);
-        singletons.add(XmlToCompositeNodeProvider.INSTANCE);
+        singletons.add(new RestconfIdentifierCodecImpl(controllerContext));
         singletons.add(StructuredDataToXmlProvider.INSTANCE);
-        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
         singletons.add(StructuredDataToJsonProvider.INSTANCE);
         return singletons;
     }

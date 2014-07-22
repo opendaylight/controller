@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Stack;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -21,6 +22,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+
 import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.EmptyNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO;
@@ -44,7 +46,6 @@ public class XmlToCompositeNodeReader {
         }
 
         eventReader = xmlInputFactory.createXMLEventReader(entityStream);
-
         if (eventReader.hasNext()) {
             XMLEvent element = eventReader.peek();
             if (element.isStartDocument()) {
@@ -115,7 +116,7 @@ public class XmlToCompositeNodeReader {
         return entityStream;
     }
 
-    private boolean isInputStreamEmpty(InputStream entityStream) throws IOException {
+    private boolean isInputStreamEmpty(final InputStream entityStream) throws IOException {
         boolean isEmpty = false;
         entityStream.mark(1);
         if (entityStream.read() == -1) {
@@ -185,7 +186,7 @@ public class XmlToCompositeNodeReader {
                 resolveValueOfElement(data, startElement));
     }
 
-    private String getValueOf(StartElement startElement) throws XMLStreamException {
+    private String getValueOf(final StartElement startElement) throws XMLStreamException {
         String data = null;
         if (eventReader.hasNext()) {
             final XMLEvent innerEvent = eventReader.peek();
@@ -206,7 +207,7 @@ public class XmlToCompositeNodeReader {
         return data == null ? null : data.trim();
     }
 
-    private String getAdditionalData(XMLEvent event) throws XMLStreamException {
+    private String getAdditionalData(final XMLEvent event) throws XMLStreamException {
         String data = "";
         if (eventReader.hasNext()) {
             final XMLEvent innerEvent = eventReader.peek();
@@ -221,16 +222,16 @@ public class XmlToCompositeNodeReader {
         return data;
     }
 
-    private String getLocalNameFor(StartElement startElement) {
+    private String getLocalNameFor(final StartElement startElement) {
         return startElement.getName().getLocalPart();
     }
 
-    private URI getNamespaceFor(StartElement startElement) {
+    private URI getNamespaceFor(final StartElement startElement) {
         String namespaceURI = startElement.getName().getNamespaceURI();
         return namespaceURI.isEmpty() ? null : URI.create(namespaceURI);
     }
 
-    private Object resolveValueOfElement(String value, StartElement startElement) {
+    private Object resolveValueOfElement(final String value, final StartElement startElement) {
         // it could be instance-identifier Built-In Type
         if (value.startsWith("/")) {
             IdentityValuesDTO iiValue = RestUtil.asInstanceIdentifier(value, new RestUtil.PrefixMapingFromXml(

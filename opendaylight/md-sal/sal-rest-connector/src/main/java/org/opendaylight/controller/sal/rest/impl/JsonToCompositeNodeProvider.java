@@ -11,12 +11,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
+
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -29,10 +33,14 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
         MediaType.APPLICATION_JSON })
-public enum JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
-    INSTANCE;
+public class JsonToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
+
+    public static final JsonToCompositeNodeProvider INSTANCE = new JsonToCompositeNodeProvider();
 
     private final static Logger LOG = LoggerFactory.getLogger(JsonToCompositeNodeProvider.class);
+
+
+    private @Context UriInfo uriInfo;
 
     @Override
     public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,

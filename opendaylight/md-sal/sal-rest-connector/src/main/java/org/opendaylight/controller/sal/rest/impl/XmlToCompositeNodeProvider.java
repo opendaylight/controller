@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -18,8 +19,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import javax.xml.stream.XMLStreamException;
+
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
@@ -27,24 +30,35 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 @Provider
 @Consumes({ Draft02.MediaTypes.DATA + RestconfService.XML, Draft02.MediaTypes.OPERATION + RestconfService.XML,
         MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNode> {
-    INSTANCE;
+public class XmlToCompositeNodeProvider extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<CompositeNode> {
+
+    public static final XmlToCompositeNodeProvider INSTANCE = new XmlToCompositeNodeProvider();
 
     private final static Logger LOG = LoggerFactory.getLogger(XmlToCompositeNodeProvider.class);
 
     @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return true;
     }
 
     @Override
-    public CompositeNode readFrom(Class<CompositeNode> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+    public CompositeNode readFrom(final Class<CompositeNode> type, final Type genericType, final Annotation[] annotations,
+            final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
             throws IOException, WebApplicationException {
+
+        Optional<InstanceIdWithSchemaNode> schema = getIdentifierWithSchema();
+        if(schema.isPresent()) {
+            // FIXME: Add read using schema, which will be faster in general,
+            // since does not require additional verification of data.
+        }
+
         XmlToCompositeNodeReader xmlReader = new XmlToCompositeNodeReader();
+        LOG.info("URI: {}",getIdentifier());
         try {
             return xmlReader.read(entityStream);
         } catch (XMLStreamException | UnsupportedFormatException e) {
@@ -53,5 +67,7 @@ public enum XmlToCompositeNodeProvider implements MessageBodyReader<CompositeNod
                     ErrorTag.MALFORMED_MESSAGE);
         }
     }
+
+
 
 }
