@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9fe065fb",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/ProtocolSessionPromise.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-22T13:17:30Z",
+      "side": 1,
+      "message": "Is there a reason why we need this listener? The thing is: we have one promise per channel, and have an armed timer. If the channel is established, it will get a channel-level callback, so given that we initialize the pipeline to contain ClosedChannelHandler -- can\u0027t we just expand ClosedChannelHandler to also handle the connection-up case?",
+      "revId": "2ac67b59017df90a76f4fd69ebe3efa55279366e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3fe919e6",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/ReconnectPromise.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-22T13:17:30Z",
+      "side": 1,
+      "message": "We cannot issue a \u0027createClient\u0027, as that will cause a new bootstrap to be created. This will break with TCPMD5, where the bootstrap has been customized. We need to reuse the original bootstrap.",
+      "revId": "2ac67b59017df90a76f4fd69ebe3efa55279366e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
