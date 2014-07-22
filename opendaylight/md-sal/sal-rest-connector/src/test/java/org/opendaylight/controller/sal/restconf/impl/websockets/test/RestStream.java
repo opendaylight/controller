@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl.websockets.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.FileNotFoundException;
@@ -32,6 +31,10 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class RestStream extends JerseyTest {
 
@@ -68,10 +71,24 @@ public class RestStream extends JerseyTest {
     public void testCallRpcCallGet() throws UnsupportedEncodingException, InterruptedException {
         String uri = "/operations/sal-remote:create-data-change-event-subscription";
         Response responseWithStreamName = post(uri, MediaType.APPLICATION_XML, getRpcInput());
-        String xmlResponse = responseWithStreamName.readEntity(String.class);
+        Document xmlResponse = responseWithStreamName.readEntity(Document.class);
         assertNotNull(xmlResponse);
-        assertTrue(xmlResponse
-                .contains("<stream-name>ietf-interfaces:interfaces/ietf-interfaces:interface/eth0</stream-name>"));
+
+        Element outputElement = xmlResponse.getDocumentElement();
+        assertNotNull(outputElement);
+        assertEquals("output",outputElement.getLocalName());
+
+        NodeList outputChilds = outputElement.getChildNodes();
+        Node streamNameNode = null;
+        for (int i = 0;i<outputChilds.getLength();i++) {
+            Node child = outputChilds.item(i);
+            if (child.getLocalName().equals("stream-name")) {
+                streamNameNode = child;
+            }
+        }
+
+        assertNotNull("XML node for stream name wasn't found",streamNameNode);
+        assertEquals("ietf-interfaces:interfaces/ietf-interfaces:interface/eth0",streamNameNode.getTextContent());
 
         uri = "/streams/stream/ietf-interfaces:interfaces/ietf-interfaces:interface/eth0";
         Response responseWithRedirectionUri = get(uri, MediaType.APPLICATION_XML);

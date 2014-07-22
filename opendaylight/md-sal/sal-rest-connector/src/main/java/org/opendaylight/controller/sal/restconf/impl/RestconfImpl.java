@@ -106,6 +106,8 @@ public class RestconfImpl implements RestconfService {
 
     private final static String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
 
+    private static final int NOTIFICATION_PORT = 8181;
+
     private BrokerFacade broker;
 
     private ControllerContext controllerContext;
@@ -899,7 +901,14 @@ public class RestconfImpl implements RestconfService {
         broker.registerToListenDataChanges(listener);
 
         final UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
-        UriBuilder port = uriBuilder.port(WebSocketServer.getInstance().getPort());
+        int notificationPort = NOTIFICATION_PORT;
+        try {
+            WebSocketServer webSocketServerInstance = WebSocketServer.getInstance();
+            notificationPort = webSocketServerInstance.getPort();
+        } catch (NullPointerException e) {
+            WebSocketServer.createInstance(NOTIFICATION_PORT);
+        }
+        UriBuilder port = uriBuilder.port(notificationPort);
         final URI uriToWebsocketServer = port.replacePath(streamName).build();
 
         return Response.status(Status.OK).location(uriToWebsocketServer).build();
