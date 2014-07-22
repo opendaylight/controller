@@ -13,17 +13,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
+import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
+import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
+import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
+import org.opendaylight.controller.sal.dom.broker.impl.NotificationRouterImpl;
+import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
+import org.opendaylight.controller.sal.dom.broker.spi.NotificationRouter;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -32,7 +39,6 @@ import org.slf4j.LoggerFactory;
 public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionCapabilities> {
 
     private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceSalFacade.class);
-    private static final InstanceIdentifier ROOT_PATH = InstanceIdentifier.builder().toInstance();
 
     private final RemoteDeviceId id;
     private final NetconfDeviceSalProvider salProvider;
@@ -58,24 +64,50 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     @Override
     public synchronized void onDeviceConnected(final SchemaContextProvider remoteSchemaContextProvider,
                                                final NetconfSessionCapabilities netconfSessionPreferences, final RpcImplementation deviceRpc) {
-        salProvider.getMountInstance().setSchemaContext(remoteSchemaContextProvider.getSchemaContext());
+        final SchemaContext schemaContext = remoteSchemaContextProvider.getSchemaContext();
+
+        // TODO remove deprecated SchemaContextProvider from SchemaAwareRpcBroker
+        // TODO move SchemaAwareRpcBroker from sal-broker-impl, now we have depend on the whole sal-broker-impl
+        final RpcProvisionRegistry rpcRegistry = new SchemaAwareRpcBroker(id.getPath().toString(), new org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider() {
+            @Override
+            public SchemaContext getSchemaContext() {
+                return schemaContext;
+            }
+        });
+        registerRpcsToSal(schemaContext, rpcRegistry, deviceRpc);
+        final DOMDataBroker domBroker = new NetconfDeviceDataBroker(id, deviceRpc, schemaContext, netconfSessionPreferences);
+
+        // TODO NotificationPublishService and NotificationRouter have the same interface
+        final NotificationPublishService notificationService = new NotificationPublishService() {
+
+            private final NotificationRouter innerRouter = new NotificationRouterImpl();
+
+            @Override
+            public void publish(final CompositeNode notification) {
+                innerRouter.publish(notification);
+            }
+
+            @Override
+            public Registration<NotificationListener> addNotificationListener(final QName notification, final NotificationListener listener) {
+                return innerRouter.addNotificationListener(notification, listener);
+            }
+        };
+
+        salProvider.getMountInstance().onDeviceConnected(schemaContext, domBroker, rpcRegistry, notificationService);
         salProvider.getDatastoreAdapter().updateDeviceState(true, netconfSessionPreferences.getModuleBasedCaps());
-        registerDataHandlersToSal(deviceRpc, netconfSessionPreferences);
-        registerRpcsToSal(deviceRpc);
     }
 
     @Override
     public void onDeviceDisconnected() {
         salProvider.getDatastoreAdapter().updateDeviceState(false, Collections.<QName>emptySet());
+        salProvider.getMountInstance().onDeviceDisconnected();
     }
 
-    private void registerRpcsToSal(final RpcImplementation deviceRpc) {
-        final MountProvisionInstance mountInstance = salProvider.getMountInstance();
-
+    private void registerRpcsToSal(final SchemaContext schemaContext, final RpcProvisionRegistry rpcRegistry, final RpcImplementation deviceRpc) {
         final Map<QName, String> failedRpcs = Maps.newHashMap();
-        for (final RpcDefinition rpcDef : mountInstance.getSchemaContext().getOperations()) {
+        for (final RpcDefinition rpcDef : schemaContext.getOperations()) {
             try {
-                salRegistrations.add(mountInstance.addRpcImplementation(rpcDef.getQName(), deviceRpc));
+                salRegistrations.add(rpcRegistry.addRpcImplementation(rpcDef.getQName(), deviceRpc));
                 logger.debug("{}: Rpc {} from netconf registered successfully", id, rpcDef.getQName());
             } catch (final Exception e) {
                 // Only debug per rpc, warn for all of them at the end to pollute log a little less (e.g. routed rpcs)
@@ -92,18 +124,6 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
                 logger.warn("{}: Some rpcs from netconf device were not registered: {}", id, failedRpcs.keySet());
             }
         }
-    }
-
-    private void registerDataHandlersToSal(final RpcImplementation deviceRpc,
-            final NetconfSessionCapabilities netconfSessionPreferences) {
-        final NetconfDeviceDataReader dataReader = new NetconfDeviceDataReader(id, deviceRpc);
-        final NetconfDeviceCommitHandler commitHandler = new NetconfDeviceCommitHandler(id, deviceRpc,
-                netconfSessionPreferences.isRollbackSupported());
-
-        final MountProvisionInstance mountInstance = salProvider.getMountInstance();
-        salRegistrations.add(mountInstance.registerConfigurationReader(ROOT_PATH, dataReader));
-        salRegistrations.add(mountInstance.registerOperationalReader(ROOT_PATH, dataReader));
-        salRegistrations.add(mountInstance.registerCommitHandler(ROOT_PATH, commitHandler));
     }
 
     @Override
