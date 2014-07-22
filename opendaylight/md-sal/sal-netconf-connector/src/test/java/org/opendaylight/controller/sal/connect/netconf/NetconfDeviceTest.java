@@ -102,11 +102,11 @@ public class NetconfDeviceTest {
         device.onRemoteSessionUp(sessionCaps, listener);
 
         verify(messageTransformer, timeout(10000).times(2)).toNotification(netconfMessage);
-        verify(facade, times(2)).onNotification(compositeNode);
+        verify(facade, timeout(10000).times(2)).onNotification(compositeNode);
 
         device.onNotification(netconfMessage);
-        verify(messageTransformer, times(3)).toNotification(netconfMessage);
-        verify(facade, times(3)).onNotification(compositeNode);
+        verify(messageTransformer, timeout(10000).times(3)).toNotification(netconfMessage);
+        verify(facade, timeout(10000).times(3)).onNotification(compositeNode);
     }
 
     @Test
