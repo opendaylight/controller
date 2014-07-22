@@ -248,6 +248,25 @@
           </execution>
         </executions>
       </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                    <configuration>
+                        <tasks>
+                            <copy todir="${project.build.directory}/assembly/bin" overwrite="true">
+                                <fileset dir="${basedir}/src/main/resources/karaf/" includes="karaf,karaf.bat,instance,instance.bat"/>
+                            </copy>
+                        </tasks>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
   </build>
   <scm>
