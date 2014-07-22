@@ -44,6 +44,8 @@ public final class NetconfDeviceRpc implements RpcImplementation {
         return Collections.emptySet();
     }
 
+    // TODO change this to work with NormalizedNode api. Then we can loose DataNormalizer from Transactions
+
     @Override
     public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final CompositeNode input) {
         final NetconfMessage message = transformRequest(rpc, input);
