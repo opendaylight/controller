@@ -16,5 +16,8 @@ module invoke-rpc-module {
         }
     }
   }  
-  
+
+  rpc rpc-noop {
+  }
+
 }

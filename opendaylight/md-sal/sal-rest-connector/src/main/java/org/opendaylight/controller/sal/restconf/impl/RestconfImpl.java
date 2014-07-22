@@ -490,7 +490,13 @@ public class RestconfImpl implements RestconfService {
         }
 
         final String identifierDecoded = controllerContext.urlPathArgDecode(identifierEncoded);
-        RpcDefinition rpc = controllerContext.getRpcDefinition(identifierDecoded);
+
+        RpcDefinition rpc = null;
+        if (mountPoint == null) {
+            rpc = controllerContext.getRpcDefinition(identifierDecoded);
+        } else {
+            rpc = findRpc(mountPoint.getSchemaContext(), identifierDecoded);
+        }
 
         if (rpc == null) {
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
@@ -502,6 +508,25 @@ public class RestconfImpl implements RestconfService {
             return new MountPointRpcExecutor(rpc, mountPoint);
         }
 
+    }
+
+    private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
+        final String[] splittedIdentifier = identifierDecoded.split(":");
+        if (splittedIdentifier.length != 2) {
+            throw new RestconfDocumentedException(identifierDecoded
+                    + " couldn't be splitted to 2 parts (module:rpc name)", ErrorType.APPLICATION,
+                    ErrorTag.INVALID_VALUE);
+        }
+        for (Module module : schemaContext.getModules()) {
+            if (module.getName().equals(splittedIdentifier[0])) {
+                for (RpcDefinition rpcDefinition : module.getRpcs()) {
+                    if (rpcDefinition.getQName().getLocalName().equals(splittedIdentifier[1])) {
+                        return rpcDefinition;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, boolean prettyPrint) {
