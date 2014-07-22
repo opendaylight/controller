@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.util.concurrent.FutureCallback;
@@ -18,9 +19,11 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -42,10 +45,10 @@ final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
     private static final Logger logger  = LoggerFactory.getLogger(NetconfDeviceDatastoreAdapter.class);
 
     private final RemoteDeviceId id;
-    private final DataProviderService dataService;
+    private final DataBroker dataService;
     private final ListeningExecutorService executor;
 
-    NetconfDeviceDatastoreAdapter(final RemoteDeviceId deviceId, final DataProviderService dataService,
+    NetconfDeviceDatastoreAdapter(final RemoteDeviceId deviceId, final DataBroker dataService,
             final ExecutorService executor) {
         this.id = Preconditions.checkNotNull(deviceId);
         this.dataService = Preconditions.checkNotNull(dataService);
@@ -73,42 +76,57 @@ final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
         final org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node data = buildDataForDeviceState(
                 up, capabilities, id);
 
-        final DataModificationTransaction transaction = dataService.beginTransaction();
+        final ReadWriteTransaction transaction = dataService.newReadWriteTransaction();
         logger.trace("{}: Update device state transaction {} putting operational data started.", id, transaction.getIdentifier());
-        transaction.removeOperationalData(id.getBindingPath());
-        transaction.putOperationalData(id.getBindingPath(), data);
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, id.getBindingPath());
+        transaction.put(LogicalDatastoreType.OPERATIONAL, id.getBindingPath(), data);
         logger.trace("{}: Update device state transaction {} putting operational data ended.", id, transaction.getIdentifier());
 
         commitTransaction(transaction, "update");
     }
 
     private void removeDeviceConfigAndState() {
-        final DataModificationTransaction transaction = dataService.beginTransaction();
+        final WriteTransaction transaction = dataService.newWriteOnlyTransaction();
         logger.trace("{}: Close device state transaction {} removing all data started.", id, transaction.getIdentifier());
-        transaction.removeConfigurationData(id.getBindingPath());
-        transaction.removeOperationalData(id.getBindingPath());
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, id.getBindingPath());
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, id.getBindingPath());
         logger.trace("{}: Close device state transaction {} removing all data ended.", id, transaction.getIdentifier());
 
         commitTransaction(transaction, "close");
     }
 
     private void initDeviceData() {
-        final DataModificationTransaction transaction = dataService.beginTransaction();
+        final ReadWriteTransaction transaction = dataService.newReadWriteTransaction();
 
         final InstanceIdentifier<Node> path = id.getBindingPath();
 
         final Node nodeWithId = getNodeWithId(id);
-        if (operationalNodeNotExisting(transaction, path)) {
-            transaction.putOperationalData(path, nodeWithId);
-        }
-        if (configurationNodeNotExisting(transaction, path)) {
-            transaction.putConfigurationData(path, nodeWithId);
-        }
+
+        putNodeDataIfAbsentAsync(transaction, path, nodeWithId, LogicalDatastoreType.OPERATIONAL);
+        putNodeDataIfAbsentAsync(transaction, path, nodeWithId, LogicalDatastoreType.CONFIGURATION);
 
         commitTransaction(transaction, "init");
     }
 
-    private void commitTransaction(final DataModificationTransaction transaction, final String txType) {
+    private void putNodeDataIfAbsentAsync(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> path,
+                                          final Node nodeWithId, final LogicalDatastoreType store) {
+        final ListenableFuture<Optional<Node>> optionalListenableFuture = readNodeData(store, transaction, path);
+        Futures.addCallback(optionalListenableFuture, new FutureCallback<Optional<Node>>() {
+            @Override
+            public void onSuccess(final Optional<Node> result) {
+                if (result.isPresent() == false) {
+                    transaction.put(store, path, nodeWithId);
+                }
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                logger.warn("{}: Initiating {} data for mount failed", id, store, t);
+            }
+        });
+    }
+
+    private void commitTransaction(final WriteTransaction transaction, final String txType) {
         // attempt commit
         final RpcResult<TransactionStatus> result;
         try {
@@ -179,14 +197,11 @@ final class NetconfDeviceDatastoreAdapter implements AutoCloseable {
         return nodeBuilder.build();
     }
 
-    private static boolean configurationNodeNotExisting(final DataModificationTransaction transaction,
+    private static ListenableFuture<Optional<Node>> readNodeData(
+            final LogicalDatastoreType store,
+            final ReadWriteTransaction transaction,
             final InstanceIdentifier<Node> path) {
-        return null == transaction.readConfigurationData(path);
-    }
-
-    private static boolean operationalNodeNotExisting(final DataModificationTransaction transaction,
-            final InstanceIdentifier<Node> path) {
-        return null == transaction.readOperationalData(path);
+        return transaction.read(store, path);
     }
 
     private static Node getNodeWithId(final RemoteDeviceId id) {
