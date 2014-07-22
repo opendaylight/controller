@@ -13,7 +13,6 @@
 
   <dependencies>
     <dependency>
-
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-client</artifactId>
       <version>${netconf.version}</version>
@@ -61,6 +60,10 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-broker-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -159,12 +162,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-broker-impl</artifactId>
       <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-broker-impl</artifactId>
-      <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
