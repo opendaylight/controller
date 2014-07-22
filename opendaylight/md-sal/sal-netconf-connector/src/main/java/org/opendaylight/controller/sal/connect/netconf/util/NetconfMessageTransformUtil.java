@@ -12,7 +12,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.net.URI;
@@ -29,8 +28,8 @@ import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -81,8 +80,7 @@ public class NetconfMessageTransformUtil {
             return null;
         }
 
-        for (final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument component : Lists
-                .reverse(identifier.getPath())) {
+        for (final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument component : identifier.getReversePathArguments()) {
             if (component instanceof InstanceIdentifier.NodeIdentifierWithPredicates) {
                 previous = toNode((InstanceIdentifier.NodeIdentifierWithPredicates)component, previous);
             } else {
@@ -142,12 +140,12 @@ public class NetconfMessageTransformUtil {
 
         ErrorSeverity severity = toRpcErrorSeverity( ex.getErrorSeverity() );
         return severity == ErrorSeverity.ERROR ?
-                    RpcResultBuilder.newError(
+                RpcResultBuilder.newError(
                         toRpcErrorType( ex.getErrorType() ), ex.getErrorTag().getTagValue(),
                         ex.getLocalizedMessage(), null, infoBuilder.toString(), ex.getCause() ) :
-                    RpcResultBuilder.newWarning(
-                        toRpcErrorType( ex.getErrorType() ), ex.getErrorTag().getTagValue(),
-                        ex.getLocalizedMessage(), null, infoBuilder.toString(), ex.getCause() );
+                            RpcResultBuilder.newWarning(
+                                    toRpcErrorType( ex.getErrorType() ), ex.getErrorTag().getTagValue(),
+                                    ex.getLocalizedMessage(), null, infoBuilder.toString(), ex.getCause() );
     }
 
     private static ErrorSeverity toRpcErrorSeverity( final NetconfDocumentedException.ErrorSeverity severity ) {
