@@ -112,7 +112,14 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         final DOMDataBroker domBroker = getServiceWithCheck(mount, DOMDataBroker.class);
 
         this.schemaContext = mount.getSchemaContext();
+
         dataReader = new BackwardsCompatibleDataBroker(domBroker, this);
+
+        // Set schema context to provide it for BackwardsCompatibleDataBroker
+        if(schemaContext != null) {
+            setSchemaContext(schemaContext);
+        }
+
         readWrapper = new ReadWrapper();
 
         notificationPublishService = getServiceWithCheck(mount, NotificationPublishService.class);
