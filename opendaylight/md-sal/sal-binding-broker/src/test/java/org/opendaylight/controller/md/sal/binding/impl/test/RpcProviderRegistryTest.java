@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
 import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
@@ -75,6 +76,28 @@ public class RpcProviderRegistryTest {
 
         RpcRegistration<OpendaylightTestRpcServiceService> regTwo = rpcRegistry.addRpcImplementation(OpendaylightTestRpcServiceService.class, two);
         assertNotNull(regTwo);
+    }
+
+    @Test
+    public void routedRpcRegisteredUsingGlobalAsDefaultInstance() throws Exception {
+        OpendaylightTestRoutedRpcService def = Mockito.mock(OpendaylightTestRoutedRpcService.class);
+        rpcRegistry.addRpcImplementation(OpendaylightTestRoutedRpcService.class, def);
+        RpcRouter<OpendaylightTestRoutedRpcService> router = rpcRegistry.getRpcRouter(OpendaylightTestRoutedRpcService.class);
+        assertEquals(def, router.getDefaultService());
+    }
+
+    @Test
+    public void nonRoutedRegisteredAsRouted() {
+        OpendaylightTestRpcServiceService one = Mockito.mock(OpendaylightTestRpcServiceService.class);
+        try {
+            rpcRegistry.addRoutedRpcImplementation(OpendaylightTestRpcServiceService.class, one);
+            fail("RpcIsNotRoutedException should be thrown");
+        } catch (RpcIsNotRoutedException e) {
+            assertNotNull(e.getMessage());
+        } catch (Exception e) {
+            fail("RpcIsNotRoutedException should be thrown");
+        }
+
     }
 
     @Test
