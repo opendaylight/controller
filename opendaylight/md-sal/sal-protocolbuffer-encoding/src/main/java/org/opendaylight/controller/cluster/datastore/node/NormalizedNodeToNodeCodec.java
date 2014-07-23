@@ -39,7 +39,7 @@ public class NormalizedNodeToNodeCodec {
 
             NodeToNormalizedNodeBuilder currentOp = NodeToNormalizedNodeBuilder.from(ctx);
 
-            for(InstanceIdentifier.PathArgument pathArgument : id.getPath()){
+            for(InstanceIdentifier.PathArgument pathArgument : id.getPathArguments()){
                 currentOp = currentOp.getChild(pathArgument);
             }
 
@@ -55,15 +55,11 @@ public class NormalizedNodeToNodeCodec {
                     nodeType = pathArgument.getNodeType();
                 }
             }
-            try {
-                if((node != null)&& (!node.getType().isEmpty())){
-                   return currentOp.normalize(nodeType, node);
-                }else{
-                  return null;
-               }
-            } catch(RuntimeException e){
-                throw e;
-        }
+            if((node != null)&& (!node.getType().isEmpty())){
+               return currentOp.normalize(nodeType, node);
+            } else{
+              return null;
+            }
     }
 
 

@@ -175,6 +175,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void writeData(WriteData message) {
         modification.addModification(
             new WriteModification(message.getPath(), message.getData(),schemaContext));
+        LOG.debug("writeData at path : " + message.getPath().toString());
         transaction.write(message.getPath(), message.getData());
         getSender().tell(new WriteDataReply().toSerializable(), getSelf());
     }
@@ -182,6 +183,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void mergeData(MergeData message) {
         modification.addModification(
             new MergeModification(message.getPath(), message.getData(), schemaContext));
+        LOG.debug("mergeData at path : " + message.getPath().toString());
         transaction.merge(message.getPath(), message.getData());
         getSender().tell(new MergeDataReply().toSerializable(), getSelf());
     }
