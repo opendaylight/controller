@@ -7,6 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
+import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
+
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
+
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.CodecRegistryProvider;
@@ -19,22 +29,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanServer;
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
-import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
-
 public class ConfigManagerActivator implements BundleActivator {
     private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     private AutoCloseable autoCloseable;
 
     @Override
-    public void start(BundleContext context) {
+    public void start(final BundleContext context) {
 
         ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
 
@@ -84,7 +85,7 @@ public class ConfigManagerActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         autoCloseable.close();
     }
 }
