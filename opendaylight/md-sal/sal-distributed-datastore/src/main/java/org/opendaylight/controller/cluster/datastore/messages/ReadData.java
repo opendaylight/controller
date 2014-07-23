@@ -26,12 +26,12 @@ public class ReadData {
 
   public Object toSerializable(){
     return ShardTransactionMessages.ReadData.newBuilder()
-        .setInstanceIdentifierPathArguments(path.toString())
+        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path))
         .build();
   }
 
   public static ReadData fromSerializable(Object serializable){
     ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData) serializable;
-    return new ReadData(InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments()));
+    return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
   }
 }

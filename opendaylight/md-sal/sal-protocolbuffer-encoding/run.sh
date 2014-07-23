@@ -36,3 +36,6 @@ echo "Done generating Java source files."
 
 #to remove trailing spaces in the code files
 find src/main/java -type f -name '*.java' -exec sed --in-place 's/[[:space:]]\+$//' {} \+
+
+#to remove trailing spaces in the generated code on OSX
+find src/main/java -type f -print0 |xargs -0 perl -pi -e 's/ +$//'

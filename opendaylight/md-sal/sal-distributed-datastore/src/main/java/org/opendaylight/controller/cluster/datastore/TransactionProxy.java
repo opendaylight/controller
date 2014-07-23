@@ -74,7 +74,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         SchemaContext schemaContext
         ) {
 
-        this.identifier = "txn-" + counter.getAndIncrement();
+        this.identifier = actorContext.getCurrentMemberName() + "-txn-" + counter.getAndIncrement();
         this.transactionType = transactionType;
         this.actorContext = actorContext;
         this.executor = executor;

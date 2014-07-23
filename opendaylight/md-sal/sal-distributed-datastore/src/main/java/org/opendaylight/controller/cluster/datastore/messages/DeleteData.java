@@ -28,11 +28,11 @@ public class DeleteData implements SerializableMessage {
 
     @Override public Object toSerializable() {
         return ShardTransactionMessages.DeleteData.newBuilder()
-            .setInstanceIdentifierPathArguments(path.toString()).build();
+            .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path)).build();
     }
 
     public static DeleteData fromSerizalizable(Object serializable){
         ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
-        return new DeleteData(InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments()));
+        return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
     }
 }
