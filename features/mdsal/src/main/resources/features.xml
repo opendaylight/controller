@@ -7,6 +7,8 @@
         <feature version='${project.version}'>odl-mdsal-commons</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-restconf</feature>
+        <feature version='${project.version}'>odl-mdsal-model</feature>
+        <feature version='${project.version}'>odl-mdsal-misc</feature>
     </feature>
     <feature name='odl-mdsal-commons' version='${project.version}'>
         <feature version='${yangtools.version}'>yangtools-data-binding</feature>
@@ -48,6 +50,7 @@
         <bundle>wrap:mvn:io.netty/netty-transport/${netty.version}</bundle>
     </feature>
     <feature name='odl-mdsal-model' version='${project.version}'>
+        <feature version='${yangtools.version}'>yangtools-models</feature>
         <bundle>mvn:org.opendaylight.controller.model/model-flow-base/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.model/model-flow-management/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.model/model-flow-service/${project.version}</bundle>
@@ -58,8 +61,14 @@
     <feature name='odl-mdsal-toaster' version='${project.version}'>
         <feature version='${yangtools.version}'>yangtools-concepts</feature>
         <feature version='${yangtools.version}'>yangtools-binding</feature>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${yangtools.version}'>yangtools-restconf</feature>
+        <feature version='${yangtools.version}'>yangtools-common</feature>
         <feature version='${project.version}'>odl-mdsal-all</feature>
+        <feature version='${config.version}'>odl-config-dispatcher</feature>
+        <feature version='${jersey.version}'>base-jersey</feature>
+        <feature version='${jersey2.publisher.version}'>base-jersey2-osgi</feature>
+        <feature version='${jackson.version}'>base-jackson</feature>
+        <feature version="7.0.32">base-tomcat</feature>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/${project.version}</bundle>
@@ -68,11 +77,12 @@
         <bundle>mvn:org.opendaylight.controller/sal-netconf-connector/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-restconf-broker/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/topology-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/topology-lldp-discovery/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/statistics-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/inventory-manager/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.md/forwardingrules-manager/${project.version}</bundle>
+        <feature version='${config.version}'>odl-config-netty</feature>
+        <!--<bundle>mvn:org.opendaylight.controller.md/topology-manager/${project.version}</bundle>-->
+        <!--<bundle>mvn:org.opendaylight.controller.md/topology-lldp-discovery/${project.version}</bundle>-->
+        <!--<bundle>mvn:org.opendaylight.controller.md/statistics-manager/${project.version}</bundle>-->
+        <!--<bundle>mvn:org.opendaylight.controller.md/inventory-manager/${project.version}</bundle>-->
+        <!--<bundle>mvn:org.opendaylight.controller.md/forwardingrules-manager/${project.version}</bundle>-->
     </feature>
 
 </features>
