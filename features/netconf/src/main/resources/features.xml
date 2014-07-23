@@ -51,6 +51,7 @@
     <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
   </feature>
   <feature name='odl-netconf-misc' version='${project.version}'>
+      <feature version='${project.version}'>odl-netconf-netty-util</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-client/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-monitoring/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-tcp/${project.version}</bundle>

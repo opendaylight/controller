@@ -76,6 +76,7 @@
     <feature version='${project.version}'>odl-config-startup</feature>
   </feature>
   <feature name='odl-config-dispatcher' version='${project.version}'>
+      <feature version='${netconf.version}'>odl-netconf-misc</feature>
       <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${project.version}</bundle>
   </feature>
 
