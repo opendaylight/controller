@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_e506be1c",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ConfigManagerActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-23T14:59:17Z",
+      "side": 1,
+      "message": "no real changes to this file, exclude it from the patchest",
+      "revId": "3a517d146176173a6743f7875945d7f85c6d5063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0204f815",
         "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ExtensibleBundleTracker.java",
         "patchSetId": 1
