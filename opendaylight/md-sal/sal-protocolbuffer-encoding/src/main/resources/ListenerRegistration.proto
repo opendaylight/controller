@@ -1,5 +1,7 @@
 package org.opendaylight.controller.mdsal;
 
+import "Common.proto";
+
 option java_package = "org.opendaylight.controller.protobuff.messages.registration";
 option java_outer_classname = "ListenerRegistrationMessages";
 
@@ -22,7 +24,7 @@ message CloseDataChangeListenerRegistrationReply{
  */
 
 message RegisterChangeListener{
-required string instanceIdentifierPath=1;
+required InstanceIdentifier instanceIdentifierPath=1;
 required string dataChangeListenerActorPath=2;
 required int32 dataChangeScope=3;
 }

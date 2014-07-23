@@ -10,9 +10,11 @@ module odl-datastore-augmentation {
     }
 
 
-    augment "/test:test" {
-        leaf name {
-            type string;
+    augment "/test:test/test:augmented-list" {
+        container cont {
+            leaf name {
+                type string;
+            }
         }
     }
 

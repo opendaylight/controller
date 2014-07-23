@@ -482,7 +482,7 @@ public class NormalizedNodeXmlConverterTest {
     public void testInMemoryTestModelProtoBuffEncoding() throws Exception {
 
         SimpleNormalizedNodeMessage.NormalizedNodeXml nnXml =
-            EncoderDecoderUtil.encode(parseTestSchema("/odl-datastore-test.yang"),
+            EncoderDecoderUtil.encode(parseTestSchema("/odl-datastore-test-notification.yang"),
                 TestModel.createFamily());
 
         Document convertedDoc =
@@ -493,7 +493,7 @@ public class NormalizedNodeXmlConverterTest {
         // now we will try to convert xml back to normalize node.
         ContainerNode cn =
             (ContainerNode) EncoderDecoderUtil.decode(
-                parseTestSchema("/odl-datastore-test.yang"), nnXml);
+                parseTestSchema("/odl-datastore-test-notification.yang"), nnXml);
         junit.framework.Assert.assertEquals(TestModel.createFamily(), cn);
 
 

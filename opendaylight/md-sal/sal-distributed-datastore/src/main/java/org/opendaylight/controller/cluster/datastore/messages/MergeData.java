@@ -28,16 +28,16 @@ public class MergeData extends ModifyData{
     @Override public Object toSerializable() {
 
         NormalizedNodeMessages.Node normalizedNode =
-            new NormalizedNodeToNodeCodec(schemaContext).encode(InstanceIdentifierUtils.from(path.toString()), data)
+            new NormalizedNodeToNodeCodec(schemaContext).encode(path, data)
                 .getNormalizedNode();
         return ShardTransactionMessages.MergeData.newBuilder()
-            .setInstanceIdentifierPathArguments(path.toString())
+            .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path))
             .setNormalizedNode(normalizedNode).build();
     }
 
     public static MergeData fromSerializable(Object serializable, SchemaContext schemaContext){
         ShardTransactionMessages.MergeData o = (ShardTransactionMessages.MergeData) serializable;
-        InstanceIdentifier identifier = InstanceIdentifierUtils.from(o.getInstanceIdentifierPathArguments());
+        InstanceIdentifier identifier = InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments());
 
         NormalizedNode<?, ?> normalizedNode =
             new NormalizedNodeToNodeCodec(schemaContext)

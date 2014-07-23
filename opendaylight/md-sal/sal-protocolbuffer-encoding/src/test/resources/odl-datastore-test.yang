@@ -7,6 +7,9 @@ module odl-datastore-test {
         description "Initial revision.";
     }
 
+    identity feature-capability {
+    }
+
     container test {
         leaf desc {
             type string;
@@ -49,6 +52,40 @@ module odl-datastore-test {
         leaf-list number {
             type uint8;
         }
+
+        leaf pointer {
+            type leafref {
+                path "/network-topology/topology/node/termination-point/tp-id";
+            }
+        }
+
+        leaf some-ref {
+            type instance-identifier;
+        }
+
+        leaf myidentity {
+            type identityref {
+                base feature-capability;
+            }
+        }
+
+        container switch-features {
+            leaf-list capability {
+                type identityref {
+                    base feature-capability;
+                }
+
+            }
+        }
+
+        list augmented-list {
+            key id;
+
+            leaf id {
+                type uint8;
+            }
+        }
+
 
     }
 }
