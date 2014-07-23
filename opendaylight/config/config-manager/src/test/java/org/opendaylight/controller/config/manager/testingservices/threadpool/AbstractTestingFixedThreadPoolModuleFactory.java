@@ -9,6 +9,6 @@ package org.opendaylight.controller.config.manager.testingservices.threadpool;
 
 import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
 
-@ModuleQName(namespace = "namespace", revision = "revision", name = "name")
+@ModuleQName(namespace = "namespace", revision = "2012-12-12", name = "name")
 public abstract class AbstractTestingFixedThreadPoolModuleFactory {
 }

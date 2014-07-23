@@ -109,7 +109,6 @@ public class InterfacesHelper {
      */
     public static Set<Class<?>> getOsgiRegistrationTypes(
             Class<? extends Module> configBeanClass) {
-        // TODO test with service interface hierarchy
         Set<Class<?>> serviceInterfaces = getServiceInterfaces(configBeanClass);
         Set<Class<?>> result = new HashSet<>();
         for (Class<?> clazz : serviceInterfaces) {

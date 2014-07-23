@@ -8,18 +8,17 @@
 
 package org.opendaylight.controller.config.manager.impl.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class OsgiRegistrationUtil {
     private static final Logger logger = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
