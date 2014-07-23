@@ -159,7 +159,7 @@ public final class SimpleNormalizedNodeMessage {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -175,7 +175,7 @@ public final class SimpleNormalizedNodeMessage {
         getNodeIdentifierBytes() {
       java.lang.Object ref = nodeIdentifier_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         nodeIdentifier_ = b;
@@ -202,7 +202,7 @@ public final class SimpleNormalizedNodeMessage {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -218,7 +218,7 @@ public final class SimpleNormalizedNodeMessage {
         getXmlStringBytes() {
       java.lang.Object ref = xmlString_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         xmlString_ = b;
@@ -463,11 +463,11 @@ public final class SimpleNormalizedNodeMessage {
 
       public final boolean isInitialized() {
         if (!hasNodeIdentifier()) {
-
+          
           return false;
         }
         if (!hasXmlString()) {
-
+          
           return false;
         }
         return true;
@@ -521,7 +521,7 @@ public final class SimpleNormalizedNodeMessage {
           getNodeIdentifierBytes() {
         java.lang.Object ref = nodeIdentifier_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           nodeIdentifier_ = b;
@@ -595,7 +595,7 @@ public final class SimpleNormalizedNodeMessage {
           getXmlStringBytes() {
         java.lang.Object ref = xmlString_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           xmlString_ = b;

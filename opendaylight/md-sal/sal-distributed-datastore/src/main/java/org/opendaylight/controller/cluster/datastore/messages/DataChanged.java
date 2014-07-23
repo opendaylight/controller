@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DataChanged implements SerializableMessage{
-  public static final Class SERIALIZABLE_CLASS = DataChangeListenerMessages.DataChanged.class;
+public class DataChanged implements SerializableMessage {
+    public static final Class SERIALIZABLE_CLASS =
+        DataChangeListenerMessages.DataChanged.class;
     final private SchemaContext schemaContext;
     private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>
         change;
-
 
 
 
@@ -45,173 +46,217 @@ public class DataChanged implements SerializableMessage{
     }
 
 
-  private NormalizedNodeMessages.Node convertToNodeTree(NormalizedNode<?, ?> normalizedNode) {
+    private NormalizedNodeMessages.Node convertToNodeTree(
+        NormalizedNode<?, ?> normalizedNode) {
 
-      return new NormalizedNodeToNodeCodec(schemaContext).encode(InstanceIdentifier.builder().build(), normalizedNode).getNormalizedNode();
+        return new NormalizedNodeToNodeCodec(schemaContext)
+            .encode(InstanceIdentifier.builder().build(), normalizedNode)
+            .getNormalizedNode();
 
-  }
-
-  private Iterable<String> convertToRemovePaths(Set<InstanceIdentifier> removedPaths) {
-    final Set<String>removedPathInstanceIds = new HashSet<String>();
-    for(InstanceIdentifier id:removedPaths){
-      removedPathInstanceIds.add(id.toString());
-    }
-    return new Iterable<String>() {
-      public Iterator<String> iterator() {
-        return removedPathInstanceIds.iterator();
-      }
-    };
-
-  }
-
-  private NormalizedNodeMessages.NodeMap convertToNodeMap(Map<InstanceIdentifier, NormalizedNode<?, ?>> data) {
-    NormalizedNodeToNodeCodec normalizedNodeToNodeCodec = new NormalizedNodeToNodeCodec(schemaContext);
-    NormalizedNodeMessages.NodeMap.Builder nodeMapBuilder = NormalizedNodeMessages.NodeMap.newBuilder();
-    NormalizedNodeMessages.NodeMapEntry.Builder builder = NormalizedNodeMessages.NodeMapEntry.newBuilder();
-    for(Map.Entry<InstanceIdentifier,NormalizedNode<?,?>> entry:data.entrySet()){
-
-      builder.setInstanceIdentifierPath(entry.getKey().toString())
-          .setNormalizedNode(normalizedNodeToNodeCodec.encode(entry.getKey(),entry.getValue()).getNormalizedNode());
-      nodeMapBuilder.addMapEntries(builder.build());
-    }
-    return nodeMapBuilder.build();
-  }
-
-
-  @Override
-  public Object toSerializable() {
-    return DataChangeListenerMessages.DataChanged.newBuilder().addAllRemovedPaths(convertToRemovePaths(change.getRemovedPaths()))
-                                        .setCreatedData(convertToNodeMap(change.getCreatedData()))
-                                        .setOriginalData(convertToNodeMap(change.getOriginalData()))
-                                         .setUpdatedData(convertToNodeMap(change.getUpdatedData()))
-                                         .setOriginalSubTree(convertToNodeTree(change.getOriginalSubtree()))
-                                         .setUpdatedSubTree(convertToNodeTree(change.getUpdatedSubtree()))
-                                         .build();
-  }
-
-  public static DataChanged fromSerialize(SchemaContext sc, Object message, InstanceIdentifier pathId){
-    DataChangeListenerMessages.DataChanged dataChanged = (DataChangeListenerMessages.DataChanged)message;
-    DataChangedEvent event = new DataChangedEvent(sc);
-    if(dataChanged.getCreatedData() != null && dataChanged.getCreatedData().isInitialized()) {
-      event.setCreatedData(dataChanged.getCreatedData()) ;
-    }
-    if(dataChanged.getOriginalData() != null && dataChanged.getOriginalData().isInitialized()) {
-      event.setOriginalData(dataChanged.getOriginalData());
     }
 
-    if(dataChanged.getUpdatedData() != null && dataChanged.getUpdatedData().isInitialized()) {
-      event.setUpdateData(dataChanged.getUpdatedData());
+    private Iterable<NormalizedNodeMessages.InstanceIdentifier> convertToRemovePaths(
+        Set<InstanceIdentifier> removedPaths) {
+        final Set<NormalizedNodeMessages.InstanceIdentifier> removedPathInstanceIds = new HashSet<>();
+        for (InstanceIdentifier id : removedPaths) {
+            removedPathInstanceIds.add(InstanceIdentifierUtils.toSerializable(id));
+        }
+        return new Iterable<NormalizedNodeMessages.InstanceIdentifier>() {
+            public Iterator<NormalizedNodeMessages.InstanceIdentifier> iterator() {
+                return removedPathInstanceIds.iterator();
+            }
+        };
+
     }
 
-    if(dataChanged.getOriginalSubTree() != null && dataChanged.getOriginalSubTree().isInitialized()) {
-      event.setOriginalSubtree(dataChanged.getOriginalSubTree(),pathId );
-    }
+    private NormalizedNodeMessages.NodeMap convertToNodeMap(
+        Map<InstanceIdentifier, NormalizedNode<?, ?>> data) {
+        NormalizedNodeToNodeCodec normalizedNodeToNodeCodec =
+            new NormalizedNodeToNodeCodec(schemaContext);
+        NormalizedNodeMessages.NodeMap.Builder nodeMapBuilder =
+            NormalizedNodeMessages.NodeMap.newBuilder();
+        NormalizedNodeMessages.NodeMapEntry.Builder builder =
+            NormalizedNodeMessages.NodeMapEntry.newBuilder();
+        for (Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> entry : data
+            .entrySet()) {
 
-    if(dataChanged.getUpdatedSubTree() != null && dataChanged.getUpdatedSubTree().isInitialized()) {
-      event.setUpdatedSubtree(dataChanged.getOriginalSubTree(),pathId);
-    }
 
-    if(dataChanged.getRemovedPathsList() != null && !dataChanged.getRemovedPathsList().isEmpty()) {
-      event.setRemovedPaths(dataChanged.getRemovedPathsList());
-    }
+            NormalizedNodeMessages.InstanceIdentifier instanceIdentifier =
+                InstanceIdentifierUtils.toSerializable(entry.getKey());
 
-     return new DataChanged(sc,event);
-
-  }
-
-  static class DataChangedEvent implements AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>{
-    private final SchemaContext schemaContext;
-    private Map<InstanceIdentifier, NormalizedNode<?, ?>>createdData;
-    private final NormalizedNodeToNodeCodec nodeCodec;
-    private Map<InstanceIdentifier, NormalizedNode<?, ?>> updatedData;
-    private Map<InstanceIdentifier, NormalizedNode<?, ?>> originalData;
-    private NormalizedNode<?,?>originalSubTree;
-    private NormalizedNode<?,?>updatedSubTree;
-    private Set<InstanceIdentifier> removedPathIds;
-
-    DataChangedEvent(SchemaContext schemaContext){
-      this.schemaContext = schemaContext;
-      nodeCodec =  new NormalizedNodeToNodeCodec(schemaContext);
-    }
-
-    @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
-      return createdData;
-    }
-    DataChangedEvent setCreatedData(NormalizedNodeMessages.NodeMap nodeMap){
-      this.createdData = convertNodeMapToMap(nodeMap);
-      return this;
-    }
-
-    private Map<InstanceIdentifier, NormalizedNode<?, ?>> convertNodeMapToMap(NormalizedNodeMessages.NodeMap nodeMap) {
-      Map<InstanceIdentifier, NormalizedNode<?, ?>>mapEntries = new HashMap<InstanceIdentifier, NormalizedNode<?, ?>>();
-      for(NormalizedNodeMessages.NodeMapEntry nodeMapEntry:nodeMap.getMapEntriesList()){
-          InstanceIdentifier id = InstanceIdentifierUtils.from(nodeMapEntry.getInstanceIdentifierPath());
-          mapEntries.put(id,
-             nodeCodec.decode(id,nodeMapEntry.getNormalizedNode()));
-      }
-      return mapEntries;
+            builder.setInstanceIdentifierPath(instanceIdentifier)
+                .setNormalizedNode(normalizedNodeToNodeCodec
+                    .encode(entry.getKey(), entry.getValue())
+                    .getNormalizedNode());
+            nodeMapBuilder.addMapEntries(builder.build());
+        }
+        return nodeMapBuilder.build();
     }
 
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
-      return updatedData;
+    public Object toSerializable() {
+        return DataChangeListenerMessages.DataChanged.newBuilder()
+            .addAllRemovedPaths(convertToRemovePaths(change.getRemovedPaths()))
+            .setCreatedData(convertToNodeMap(change.getCreatedData()))
+            .setOriginalData(convertToNodeMap(change.getOriginalData()))
+            .setUpdatedData(convertToNodeMap(change.getUpdatedData()))
+            .setOriginalSubTree(convertToNodeTree(change.getOriginalSubtree()))
+            .setUpdatedSubTree(convertToNodeTree(change.getUpdatedSubtree()))
+            .build();
     }
 
-    DataChangedEvent setUpdateData(NormalizedNodeMessages.NodeMap nodeMap){
-      this.updatedData = convertNodeMapToMap(nodeMap);
-      return this;
+    public static DataChanged fromSerialize(SchemaContext sc, Object message,
+        InstanceIdentifier pathId) {
+        DataChangeListenerMessages.DataChanged dataChanged =
+            (DataChangeListenerMessages.DataChanged) message;
+        DataChangedEvent event = new DataChangedEvent(sc);
+        if (dataChanged.getCreatedData() != null && dataChanged.getCreatedData()
+            .isInitialized()) {
+            event.setCreatedData(dataChanged.getCreatedData());
+        }
+        if (dataChanged.getOriginalData() != null && dataChanged
+            .getOriginalData().isInitialized()) {
+            event.setOriginalData(dataChanged.getOriginalData());
+        }
+
+        if (dataChanged.getUpdatedData() != null && dataChanged.getUpdatedData()
+            .isInitialized()) {
+            event.setUpdateData(dataChanged.getUpdatedData());
+        }
+
+        if (dataChanged.getOriginalSubTree() != null && dataChanged
+            .getOriginalSubTree().isInitialized()) {
+            event.setOriginalSubtree(dataChanged.getOriginalSubTree(), pathId);
+        }
+
+        if (dataChanged.getUpdatedSubTree() != null && dataChanged
+            .getUpdatedSubTree().isInitialized()) {
+            event.setUpdatedSubtree(dataChanged.getOriginalSubTree(), pathId);
+        }
+
+        if (dataChanged.getRemovedPathsList() != null && !dataChanged
+            .getRemovedPathsList().isEmpty()) {
+            event.setRemovedPaths(dataChanged.getRemovedPathsList());
+        }
+
+        return new DataChanged(sc, event);
+
     }
 
-    @Override
-    public Set<InstanceIdentifier> getRemovedPaths() {
-      return removedPathIds;
+    static class DataChangedEvent implements
+        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
+        private final SchemaContext schemaContext;
+        private Map<InstanceIdentifier, NormalizedNode<?, ?>> createdData;
+        private final NormalizedNodeToNodeCodec nodeCodec;
+        private Map<InstanceIdentifier, NormalizedNode<?, ?>> updatedData;
+        private Map<InstanceIdentifier, NormalizedNode<?, ?>> originalData;
+        private NormalizedNode<?, ?> originalSubTree;
+        private NormalizedNode<?, ?> updatedSubTree;
+        private Set<InstanceIdentifier> removedPathIds;
+
+        DataChangedEvent(SchemaContext schemaContext) {
+            this.schemaContext = schemaContext;
+            nodeCodec = new NormalizedNodeToNodeCodec(schemaContext);
+        }
+
+        @Override
+        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+            if(createdData == null){
+                return Collections.emptyMap();
+            }
+            return createdData;
+        }
+
+        DataChangedEvent setCreatedData(
+            NormalizedNodeMessages.NodeMap nodeMap) {
+            this.createdData = convertNodeMapToMap(nodeMap);
+            return this;
+        }
+
+        private Map<InstanceIdentifier, NormalizedNode<?, ?>> convertNodeMapToMap(
+            NormalizedNodeMessages.NodeMap nodeMap) {
+            Map<InstanceIdentifier, NormalizedNode<?, ?>> mapEntries =
+                new HashMap<InstanceIdentifier, NormalizedNode<?, ?>>();
+            for (NormalizedNodeMessages.NodeMapEntry nodeMapEntry : nodeMap
+                .getMapEntriesList()) {
+                InstanceIdentifier id = InstanceIdentifierUtils
+                    .fromSerializable(nodeMapEntry.getInstanceIdentifierPath());
+                mapEntries.put(id,
+                    nodeCodec.decode(id, nodeMapEntry.getNormalizedNode()));
+            }
+            return mapEntries;
+        }
+
+
+        @Override
+        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+            if(updatedData == null){
+                return Collections.emptyMap();
+            }
+            return updatedData;
+        }
+
+        DataChangedEvent setUpdateData(NormalizedNodeMessages.NodeMap nodeMap) {
+            this.updatedData = convertNodeMapToMap(nodeMap);
+            return this;
+        }
+
+        @Override
+        public Set<InstanceIdentifier> getRemovedPaths() {
+            if (removedPathIds == null) {
+                return Collections.emptySet();
+            }
+            return removedPathIds;
+        }
+
+        public DataChangedEvent setRemovedPaths(List<NormalizedNodeMessages.InstanceIdentifier> removedPaths) {
+            Set<InstanceIdentifier> removedIds = new HashSet<>();
+            for (NormalizedNodeMessages.InstanceIdentifier path : removedPaths) {
+                removedIds.add(InstanceIdentifierUtils.fromSerializable(path));
+            }
+            this.removedPathIds = removedIds;
+            return this;
+        }
+
+        @Override
+        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+            if (originalData == null) {
+                Collections.emptyMap();
+            }
+            return originalData;
+        }
+
+        DataChangedEvent setOriginalData(
+            NormalizedNodeMessages.NodeMap nodeMap) {
+            this.originalData = convertNodeMapToMap(nodeMap);
+            return this;
+        }
+
+        @Override
+        public NormalizedNode<?, ?> getOriginalSubtree() {
+            return originalSubTree;
+        }
+
+        DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node,
+            InstanceIdentifier instanceIdentifierPath) {
+            originalSubTree = nodeCodec.decode(instanceIdentifierPath, node);
+            return this;
+        }
+
+        @Override
+        public NormalizedNode<?, ?> getUpdatedSubtree() {
+            return updatedSubTree;
+        }
+
+        DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node,
+            InstanceIdentifier instanceIdentifierPath) {
+            updatedSubTree = nodeCodec.decode(instanceIdentifierPath, node);
+            return this;
+        }
+
+
     }
-
-    public DataChangedEvent setRemovedPaths(List<String> removedPaths) {
-      Set<InstanceIdentifier> removedIds = new HashSet<>();
-      for(String path: removedPaths){
-        removedIds.add(InstanceIdentifierUtils.from(path));
-      }
-      this.removedPathIds = removedIds;
-      return this;
-    }
-
-    @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
-      return originalData;
-    }
-
-    DataChangedEvent setOriginalData(NormalizedNodeMessages.NodeMap nodeMap){
-      this.originalData = convertNodeMapToMap(nodeMap);
-      return this;
-    }
-
-    @Override
-    public NormalizedNode<?, ?> getOriginalSubtree() {
-      return originalSubTree;
-    }
-
-    DataChangedEvent setOriginalSubtree(NormalizedNodeMessages.Node node, InstanceIdentifier instanceIdentifierPath){
-       originalSubTree = nodeCodec.decode(instanceIdentifierPath,node);
-       return this;
-    }
-
-    @Override
-    public NormalizedNode<?, ?> getUpdatedSubtree() {
-      return updatedSubTree;
-    }
-
-    DataChangedEvent setUpdatedSubtree(NormalizedNodeMessages.Node node,InstanceIdentifier instanceIdentifierPath){
-      updatedSubTree = nodeCodec.decode(instanceIdentifierPath,node);
-      return this;
-    }
-
-
-  }
-
-
 
 
 

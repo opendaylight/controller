@@ -26,20 +26,19 @@ public final class PersistentMessages {
     com.google.protobuf.ByteString
         getTypeBytes();
 
-    // required string path = 2;
+    // required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
     boolean hasPath();
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
-    java.lang.String getPath();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getPath();
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
-    com.google.protobuf.ByteString
-        getPathBytes();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getPathOrBuilder();
 
     // optional .org.opendaylight.controller.mdsal.Node data = 3;
     /**
@@ -112,8 +111,16 @@ public final class PersistentMessages {
               break;
             }
             case 18: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = path_.toBuilder();
+              }
+              path_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(path_);
+                path_ = subBuilder.buildPartial();
+              }
               bitField0_ |= 0x00000002;
-              path_ = input.readBytes();
               break;
             }
             case 26: {
@@ -186,7 +193,7 @@ public final class PersistentMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -202,7 +209,7 @@ public final class PersistentMessages {
         getTypeBytes() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         type_ = b;
@@ -212,47 +219,26 @@ public final class PersistentMessages {
       }
     }
 
-    // required string path = 2;
+    // required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;
     public static final int PATH_FIELD_NUMBER = 2;
-    private java.lang.Object path_;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier path_;
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
     public boolean hasPath() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
-    public java.lang.String getPath() {
-      java.lang.Object ref = path_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          path_ = s;
-        }
-        return s;
-      }
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getPath() {
+      return path_;
     }
     /**
-     * <code>required string path = 2;</code>
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
      */
-    public com.google.protobuf.ByteString
-        getPathBytes() {
-      java.lang.Object ref = path_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        path_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getPathOrBuilder() {
+      return path_;
     }
 
     // optional .org.opendaylight.controller.mdsal.Node data = 3;
@@ -279,7 +265,7 @@ public final class PersistentMessages {
 
     private void initFields() {
       type_ = "";
-      path_ = "";
+      path_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
       data_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
@@ -292,6 +278,10 @@ public final class PersistentMessages {
         return false;
       }
       if (!hasPath()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getPath().isInitialized()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -312,7 +302,7 @@ public final class PersistentMessages {
         output.writeBytes(1, getTypeBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getPathBytes());
+        output.writeMessage(2, path_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(3, data_);
@@ -332,7 +322,7 @@ public final class PersistentMessages {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getPathBytes());
+          .computeMessageSize(2, path_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -446,6 +436,7 @@ public final class PersistentMessages {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getPathFieldBuilder();
           getDataFieldBuilder();
         }
       }
@@ -457,7 +448,11 @@ public final class PersistentMessages {
         super.clear();
         type_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        path_ = "";
+        if (pathBuilder_ == null) {
+          path_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+        } else {
+          pathBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000002);
         if (dataBuilder_ == null) {
           data_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
@@ -500,7 +495,11 @@ public final class PersistentMessages {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.path_ = path_;
+        if (pathBuilder_ == null) {
+          result.path_ = path_;
+        } else {
+          result.path_ = pathBuilder_.build();
+        }
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -531,9 +530,7 @@ public final class PersistentMessages {
           onChanged();
         }
         if (other.hasPath()) {
-          bitField0_ |= 0x00000002;
-          path_ = other.path_;
-          onChanged();
+          mergePath(other.getPath());
         }
         if (other.hasData()) {
           mergeData(other.getData());
@@ -544,16 +541,20 @@ public final class PersistentMessages {
 
       public final boolean isInitialized() {
         if (!hasType()) {
-
+          
           return false;
         }
         if (!hasPath()) {
-
+          
+          return false;
+        }
+        if (!getPath().isInitialized()) {
+          
           return false;
         }
         if (hasData()) {
           if (!getData().isInitialized()) {
-
+            
             return false;
           }
         }
@@ -608,7 +609,7 @@ public final class PersistentMessages {
           getTypeBytes() {
         java.lang.Object ref = type_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           type_ = b;
@@ -653,78 +654,121 @@ public final class PersistentMessages {
         return this;
       }
 
-      // required string path = 2;
-      private java.lang.Object path_ = "";
+      // required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier path_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> pathBuilder_;
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
       public boolean hasPath() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
-      public java.lang.String getPath() {
-        java.lang.Object ref = path_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          path_ = s;
-          return s;
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getPath() {
+        if (pathBuilder_ == null) {
+          return path_;
         } else {
-          return (java.lang.String) ref;
+          return pathBuilder_.getMessage();
         }
       }
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getPathBytes() {
-        java.lang.Object ref = path_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          path_ = b;
-          return b;
+      public Builder setPath(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (pathBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          path_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          pathBuilder_.setMessage(value);
         }
+        bitField0_ |= 0x00000002;
+        return this;
       }
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
       public Builder setPath(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        path_ = value;
-        onChanged();
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (pathBuilder_ == null) {
+          path_ = builderForValue.build();
+          onChanged();
+        } else {
+          pathBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
+       */
+      public Builder mergePath(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (pathBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              path_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance()) {
+            path_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.newBuilder(path_).mergeFrom(value).buildPartial();
+          } else {
+            path_ = value;
+          }
+          onChanged();
+        } else {
+          pathBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
       public Builder clearPath() {
+        if (pathBuilder_ == null) {
+          path_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+          onChanged();
+        } else {
+          pathBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000002);
-        path_ = getDefaultInstance().getPath();
-        onChanged();
         return this;
       }
       /**
-       * <code>required string path = 2;</code>
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
        */
-      public Builder setPathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        path_ = value;
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getPathBuilder() {
+        bitField0_ |= 0x00000002;
         onChanged();
-        return this;
+        return getPathFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getPathOrBuilder() {
+        if (pathBuilder_ != null) {
+          return pathBuilder_.getMessageOrBuilder();
+        } else {
+          return path_;
+        }
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier path = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
+          getPathFieldBuilder() {
+        if (pathBuilder_ == null) {
+          pathBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+                  path_,
+                  getParentForChildren(),
+                  isClean());
+          path_ = null;
+        }
+        return pathBuilder_;
       }
 
       // optional .org.opendaylight.controller.mdsal.Node data = 3;
@@ -831,7 +875,7 @@ public final class PersistentMessages {
        * <code>optional .org.opendaylight.controller.mdsal.Node data = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getDataFieldBuilder() {
         if (dataBuilder_ == null) {
           dataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -862,7 +906,7 @@ public final class PersistentMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
      */
-    java.util.List<org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification>
+    java.util.List<org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification> 
         getModificationList();
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
@@ -875,7 +919,7 @@ public final class PersistentMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
      */
-    java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder>
+    java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder> 
         getModificationOrBuilderList();
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
@@ -996,7 +1040,7 @@ public final class PersistentMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
      */
-    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder>
+    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder> 
         getModificationOrBuilderList() {
       return modification_;
     }
@@ -1249,7 +1293,7 @@ public final class PersistentMessages {
               modificationBuilder_ = null;
               modification_ = other.modification_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              modificationBuilder_ =
+              modificationBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getModificationFieldBuilder() : null;
             } else {
@@ -1264,7 +1308,7 @@ public final class PersistentMessages {
       public final boolean isInitialized() {
         for (int i = 0; i < getModificationCount(); i++) {
           if (!getModification(i).isInitialized()) {
-
+            
             return false;
           }
         }
@@ -1485,7 +1529,7 @@ public final class PersistentMessages {
       /**
        * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
        */
-      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder>
+      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder> 
            getModificationOrBuilderList() {
         if (modificationBuilder_ != null) {
           return modificationBuilder_.getMessageOrBuilderList();
@@ -1511,12 +1555,12 @@ public final class PersistentMessages {
       /**
        * <code>repeated .org.opendaylight.controller.mdsal.Modification modification = 1;</code>
        */
-      public java.util.List<org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification.Builder>
+      public java.util.List<org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification.Builder> 
            getModificationBuilderList() {
         return getModificationFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification, org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification.Builder, org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder>
+          org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification, org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.Modification.Builder, org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages.ModificationOrBuilder> 
           getModificationFieldBuilder() {
         if (modificationBuilder_ == null) {
           modificationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
@@ -1561,14 +1605,15 @@ public final class PersistentMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\020Persistent.proto\022!org.opendaylight.con" +
-      "troller.mdsal\032\014Common.proto\"a\n\014Modificat" +
-      "ion\022\014\n\004type\030\001 \002(\t\022\014\n\004path\030\002 \002(\t\0225\n\004data\030" +
-      "\003 \001(\0132\'.org.opendaylight.controller.mdsa" +
-      "l.Node\"^\n\025CompositeModification\022E\n\014modif" +
-      "ication\030\001 \003(\0132/.org.opendaylight.control" +
-      "ler.mdsal.ModificationBO\n9org.opendaylig" +
-      "ht.controller.protobuff.messages.persist" +
-      "entB\022PersistentMessages"
+      "troller.mdsal\032\014Common.proto\"\230\001\n\014Modifica" +
+      "tion\022\014\n\004type\030\001 \002(\t\022C\n\004path\030\002 \002(\01325.org.o" +
+      "pendaylight.controller.mdsal.InstanceIde" +
+      "ntifier\0225\n\004data\030\003 \001(\0132\'.org.opendaylight" +
+      ".controller.mdsal.Node\"^\n\025CompositeModif" +
+      "ication\022E\n\014modification\030\001 \003(\0132/.org.open" +
+      "daylight.controller.mdsal.ModificationBO" +
+      "\n9org.opendaylight.controller.protobuff." +
+      "messages.persistentB\022PersistentMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

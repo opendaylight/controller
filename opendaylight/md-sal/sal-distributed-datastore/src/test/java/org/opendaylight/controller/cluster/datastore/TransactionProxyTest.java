@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
@@ -35,7 +36,7 @@ public class TransactionProxyTest extends AbstractActorTest {
     private final Configuration configuration = new MockConfiguration();
 
     private final ActorContext testContext =
-        new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), configuration );
+        new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), configuration );
 
     private ExecutorService transactionExecutor =
         Executors.newSingleThreadExecutor();

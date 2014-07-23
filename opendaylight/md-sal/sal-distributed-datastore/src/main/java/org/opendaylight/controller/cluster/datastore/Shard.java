@@ -66,7 +66,7 @@ public class Shard extends UntypedProcessor {
     private final Map<Object, DOMStoreThreePhaseCommitCohort>
         modificationToCohort = new HashMap<>();
 
-    private final LoggingAdapter log =
+    private final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
 
     // By default persistent will be true and can be turned off using the system
@@ -82,7 +82,7 @@ public class Shard extends UntypedProcessor {
         String setting = System.getProperty("shard.persistent");
         this.persistent = !"false".equals(setting);
 
-        log.info("Creating shard : {} persistent : {}", name , persistent);
+        LOG.info("Creating shard : {} persistent : {}", name, persistent);
 
         store = new InMemoryDOMDataStore(name, storeExecutor);
 
@@ -104,7 +104,7 @@ public class Shard extends UntypedProcessor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        log.debug("Received message {}", message);
+        LOG.debug("Received message " + message.getClass().toString());
 
         if(!recoveryFinished()){
             // FIXME : Properly handle recovery
@@ -148,7 +148,7 @@ public class Shard extends UntypedProcessor {
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
-            log.error(
+            LOG.error(
                 "Could not find cohort for modification : " + modification);
             return;
         }
@@ -164,7 +164,7 @@ public class Shard extends UntypedProcessor {
                     sender.tell(new CommitTransactionReply().toSerializable(), self);
                 } catch (InterruptedException | ExecutionException e) {
                     // FIXME : Handle this properly
-                    log.error(e, "An exception happened when committing");
+                    LOG.error(e, "An exception happened when committing");
                 }
             }
         }, getContext().dispatcher());
@@ -192,6 +192,9 @@ public class Shard extends UntypedProcessor {
     private void registerChangeListener(
         RegisterChangeListener registerChangeListener) {
 
+        LOG.debug("registerDataChangeListener for " + registerChangeListener.getPath());
+
+
         ActorSelection dataChangeListenerPath = getContext()
             .system().actorSelection(registerChangeListener.getDataChangeListenerPath());
 
@@ -205,6 +208,9 @@ public class Shard extends UntypedProcessor {
         ActorRef listenerRegistration =
             getContext().actorOf(
                 DataChangeListenerRegistration.props(registration));
+
+        LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = " + listenerRegistration.path().toString());
+
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()).toSerializable(),
                 getSelf());
