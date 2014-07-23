@@ -9,16 +9,14 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -29,6 +27,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistr
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcRouter;
+import org.opendaylight.controller.sal.binding.codegen.RpcIsNotRoutedException;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
@@ -40,6 +39,13 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
 
@@ -56,7 +62,9 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
                 }
             });
 
-    private final Map<Class<? extends RpcService>, RpcRouter<?>> rpcRouters = new WeakHashMap<>();
+    private final Cache<Class<? extends RpcService>, RpcRouter<?>> rpcRouters = CacheBuilder.newBuilder().weakKeys()
+            .build();
+
     private final ListenerRegistry<RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> routeChangeListeners = ListenerRegistry
             .create();
     private final ListenerRegistry<RouterInstantiationListener> routerInstantiationListener = ListenerRegistry.create();
@@ -85,12 +93,20 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
     @Override
     public final <T extends RpcService> RpcRegistration<T> addRpcImplementation(final Class<T> type, final T implementation)
             throws IllegalStateException {
-        @SuppressWarnings("unchecked")
-        RpcRouter<T> potentialRouter = (RpcRouter<T>) rpcRouters.get(type);
-        if (potentialRouter != null) {
+
+        // FIXME: This should be well documented - addRpcImplementation for
+        // routed RPCs
+        try {
+            // Note: If RPC is really global, expected count of registrations
+            // of this method is really low.
+            RpcRouter<T> potentialRouter = getRpcRouter(type);
             checkState(potentialRouter.getDefaultService() == null,
-                    "Default service for routed RPC already registered.");
+                        "Default service for routed RPC already registered.");
             return potentialRouter.registerDefaultService(implementation);
+        } catch (RpcIsNotRoutedException e) {
+            // NOOP - we could safely continue, since RPC is not routed
+            // so we fallback to global routing.
+            LOG.debug("RPC is not routed. Using global registration.",e);
         }
         T publicProxy = getRpcService(type);
         RpcService currentDelegate = RuntimeCodeHelper.getDelegate(publicProxy);
@@ -107,28 +123,37 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
         return (T) publicProxies.getUnchecked(type);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+
     public <T extends RpcService> RpcRouter<T> getRpcRouter(final Class<T> type) {
-        RpcRouter<?> potentialRouter = rpcRouters.get(type);
-        if (potentialRouter != null) {
-            return (RpcRouter<T>) potentialRouter;
-        }
-        synchronized (this) {
-            /**
-             * Potential Router could be instantiated by other thread while we
-             * were waiting for the lock.
-             */
-            potentialRouter = rpcRouters.get(type);
-            if (potentialRouter != null) {
-                return (RpcRouter<T>) potentialRouter;
+        try {
+            final AtomicBoolean created = new AtomicBoolean(false);
+            @SuppressWarnings( "unchecked")
+            // LoadingCache is unsuitable for RpcRouter since we need to distinguish
+            // first creation of RPC Router, so that is why
+            // we are using normal cache with load API and shared AtomicBoolean
+            // for this call, which will be set to true if router was created.
+            RpcRouter<T> router = (RpcRouter<T>) rpcRouters.get(type,new Callable<RpcRouter<?>>() {
+
+                @Override
+                public org.opendaylight.controller.sal.binding.api.rpc.RpcRouter<?> call()  {
+                    RpcRouter<?> router = rpcFactory.getRouterFor(type, name);
+                    router.registerRouteChangeListener(new RouteChangeForwarder<T>(type));
+                    LOG.debug("Registering router {} as global implementation of {} in {}", router, type.getSimpleName(), this);
+                    RuntimeCodeHelper.setDelegate(getRpcService(type), router.getInvocationProxy());
+                    created.set(true);
+                    return router;
+                }
+            });
+            if(created.get()) {
+                notifyListenersRoutedCreated(router);
             }
-            RpcRouter<T> router = rpcFactory.getRouterFor(type, name);
-            router.registerRouteChangeListener(new RouteChangeForwarder(type));
-            LOG.debug("Registering router {} as global implementation of {} in {}", router, type.getSimpleName(), this);
-            RuntimeCodeHelper.setDelegate(getRpcService(type), router.getInvocationProxy());
-            rpcRouters.put(type, router);
-            notifyListenersRoutedCreated(router);
             return router;
+        } catch (ExecutionException | UncheckedExecutionException e) {
+            // We rethrow Runtime Exceptions which were wrapped by
+            // Execution Exceptions
+            // otherwise we throw IllegalStateException with original
+            Throwables.propagateIfPossible(e.getCause());
+            throw new IllegalStateException("Could not load RPC Router for "+type.getName(),e);
         }
     }
 
@@ -159,7 +184,7 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
             final RouterInstantiationListener listener) {
         ListenerRegistration<RouterInstantiationListener> reg = routerInstantiationListener.register(listener);
         try {
-            for (RpcRouter<?> router : rpcRouters.values()) {
+            for (RpcRouter<?> router : rpcRouters.asMap().values()) {
                 listener.onRpcRouterCreated(router);
             }
         } catch (Exception e) {
@@ -225,7 +250,7 @@ public class RpcProviderRegistryImpl implements RpcProviderRegistry, RouteChange
                 try {
                     listener.getInstance().onRouteChange(toPublish);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.error("Unhandled exception during invoking listener",listener.getInstance(),e);
                 }
             }
         }
