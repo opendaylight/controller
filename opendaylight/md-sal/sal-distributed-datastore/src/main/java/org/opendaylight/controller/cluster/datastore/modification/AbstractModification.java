@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.io.Serializable;
 
@@ -21,9 +21,9 @@ public abstract class AbstractModification implements Modification,
 
     private static final long serialVersionUID = 1638042650152084457L;
 
-    protected final InstanceIdentifier path;
+    protected final YangInstanceIdentifier path;
 
-    protected AbstractModification(InstanceIdentifier path) {
+    protected AbstractModification(YangInstanceIdentifier path) {
         this.path = path;
     }
 }

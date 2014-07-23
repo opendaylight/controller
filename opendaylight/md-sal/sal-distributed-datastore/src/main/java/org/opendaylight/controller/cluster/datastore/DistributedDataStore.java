@@ -23,7 +23,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -61,7 +61,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
         Executors.newFixedThreadPool(10);
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
-        this(new ActorContext(actorSystem, actorSystem.actorOf(ShardManager.props(type, cluster, configuration), "shardmanager-" + type), configuration), type);
+        this(new ActorContext(actorSystem, actorSystem
+            .actorOf(ShardManager.props(type, cluster, configuration),
+                "shardmanager-" + type), cluster, configuration), type);
     }
 
     public DistributedDataStore(ActorContext actorContext, String type) {
@@ -71,8 +73,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
 
     @Override
-    public <L extends AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
-        InstanceIdentifier path, L listener,
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
+        YangInstanceIdentifier path, L listener,
         AsyncDataBroker.DataChangeScope scope) {
 
         ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(

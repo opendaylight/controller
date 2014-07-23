@@ -8,7 +8,7 @@ option java_outer_classname = "PersistentMessages";
 
 message Modification {
     required string type=1;
-    required string path=2;
+    required InstanceIdentifier path=2;
     optional Node data=3;
 }
 

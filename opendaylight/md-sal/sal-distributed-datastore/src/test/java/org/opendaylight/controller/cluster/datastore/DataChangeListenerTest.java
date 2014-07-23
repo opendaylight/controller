@@ -9,7 +9,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.HashMap;
@@ -22,35 +22,35 @@ import static org.junit.Assert.assertTrue;
 
 public class DataChangeListenerTest extends AbstractActorTest {
 
-    private static class MockDataChangedEvent implements AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
-       Map<InstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
-       Map<InstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
-       Map<InstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
+    private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
 
 
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
             createdData.put(CompositeModel.FAMILY_PATH, CompositeModel.createFamily());
             return createdData;
         }
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
             updatedData.put(CompositeModel.FAMILY_PATH, CompositeModel.createFamily());
             return updatedData;
 
         }
 
         @Override
-        public Set<InstanceIdentifier> getRemovedPaths() {
-               Set<InstanceIdentifier>ids = new HashSet();
+        public Set<YangInstanceIdentifier> getRemovedPaths() {
+               Set<YangInstanceIdentifier>ids = new HashSet();
                ids.add( CompositeModel.TEST_PATH);
               return ids;
         }
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
           originalData.put(CompositeModel.FAMILY_PATH, CompositeModel.createFamily());
           return originalData;
         }
@@ -68,19 +68,19 @@ public class DataChangeListenerTest extends AbstractActorTest {
         }
     }
 
-    private class MockDataChangeListener implements AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
+    private class MockDataChangeListener implements AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
         private boolean gotIt = false;
-        private   AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change;
+        private   AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change;
 
         @Override public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             gotIt = true;this.change=change;
         }
 
         public boolean gotIt() {
             return gotIt;
         }
-        public  AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> getChange(){
+        public  AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChange(){
           return change;
         }
     }

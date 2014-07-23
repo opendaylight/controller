@@ -9,11 +9,12 @@ import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.HashMap;
@@ -24,36 +25,36 @@ import java.util.Set;
 
 public class DataChangeListenerProxyTest extends AbstractActorTest {
 
-  private static class MockDataChangedEvent implements AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
-    Map<InstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
-    Map<InstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
-    Map<InstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
+  private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
 
 
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
-      createdData.put(InstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+      createdData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
       return createdData;
     }
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
-      updatedData.put(InstanceIdentifier.builder().build(), CompositeModel.createTestContainer());
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+      updatedData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createTestContainer());
       return updatedData;
 
     }
 
     @Override
-    public Set<InstanceIdentifier> getRemovedPaths() {
-      Set<InstanceIdentifier>ids = new HashSet();
+    public Set<YangInstanceIdentifier> getRemovedPaths() {
+      Set<YangInstanceIdentifier>ids = new HashSet();
       ids.add( CompositeModel.TEST_PATH);
       return ids;
     }
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
-      originalData.put(InstanceIdentifier.builder().build(), CompositeModel.createFamily());
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+      originalData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createFamily());
       return originalData;
     }
 
@@ -80,7 +81,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
         //Check if it was received by the remote actor
         ActorContext
-            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockConfiguration());
+            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages",
                 ActorContext.ASK_DURATION);

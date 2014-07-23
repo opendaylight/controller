@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -24,10 +25,9 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -74,7 +74,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         SchemaContext schemaContext
         ) {
 
-        this.identifier = "txn-" + counter.getAndIncrement();
+        this.identifier = actorContext.getCurrentMemberName() + "-txn-" + counter.getAndIncrement();
         this.transactionType = transactionType;
         this.actorContext = actorContext;
         this.executor = executor;
@@ -84,7 +84,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final InstanceIdentifier path) {
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -118,7 +118,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void write(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void write(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -127,7 +127,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void merge(InstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void merge(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -136,7 +136,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     }
 
     @Override
-    public void delete(InstanceIdentifier path) {
+    public void delete(YangInstanceIdentifier path) {
 
         createTransactionIfMissing(actorContext, path);
 
@@ -178,16 +178,16 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private ActorSelection remoteTransactionFromIdentifier(InstanceIdentifier path){
+    private ActorSelection remoteTransactionFromIdentifier(YangInstanceIdentifier path){
         String shardName = shardNameFromIdentifier(path);
         return remoteTransactionPaths.get(shardName).getActor();
     }
 
-    private String shardNameFromIdentifier(InstanceIdentifier path){
+    private String shardNameFromIdentifier(YangInstanceIdentifier path){
         return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
 
-    private void createTransactionIfMissing(ActorContext actorContext, InstanceIdentifier path) {
+    private void createTransactionIfMissing(ActorContext actorContext, YangInstanceIdentifier path) {
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
         TransactionContext transactionContext =

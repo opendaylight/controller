@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.shardstrategy;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.Configuration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +29,7 @@ public class ShardStrategyFactory {
         moduleNameToStrategyMap = configuration.getModuleNameToShardStrategyMap();
     }
 
-    public static ShardStrategy getStrategy(InstanceIdentifier path) {
+    public static ShardStrategy getStrategy(YangInstanceIdentifier path) {
         Preconditions.checkState(configuration != null, "configuration should not be missing");
         Preconditions.checkNotNull(path, "path should not be null");
 
@@ -44,7 +44,7 @@ public class ShardStrategyFactory {
     }
 
 
-    private static String getModuleName(InstanceIdentifier path) {
+    private static String getModuleName(YangInstanceIdentifier path) {
         String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
 
         Optional<String> optional =

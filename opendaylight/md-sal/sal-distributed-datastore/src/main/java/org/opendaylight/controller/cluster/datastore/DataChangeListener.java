@@ -14,17 +14,17 @@ import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataChangeListener extends AbstractUntypedActor {
-    private final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener;
+    private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private final SchemaContext schemaContext;
-    private final InstanceIdentifier pathId;
+    private final YangInstanceIdentifier pathId;
 
     public DataChangeListener(SchemaContext schemaContext,
-                              AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener, InstanceIdentifier pathId) {
+                              AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, YangInstanceIdentifier pathId) {
         this.listener = listener;
         this.schemaContext = schemaContext;
         this.pathId  = pathId;
@@ -33,7 +33,7 @@ public class DataChangeListener extends AbstractUntypedActor {
     @Override public void handleReceive(Object message) throws Exception {
         if(message.getClass().equals(DataChanged.SERIALIZABLE_CLASS)){
             DataChanged reply = DataChanged.fromSerialize(schemaContext,message, pathId);
-            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>
+            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
                 change = reply.getChange();
             this.listener.onDataChanged(change);
 
@@ -44,7 +44,7 @@ public class DataChangeListener extends AbstractUntypedActor {
         }
     }
 
-    public static Props props(final SchemaContext schemaContext, final AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> listener, final InstanceIdentifier pathId) {
+    public static Props props(final SchemaContext schemaContext, final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, final YangInstanceIdentifier pathId) {
         return Props.create(new Creator<DataChangeListener>() {
             @Override
             public DataChangeListener create() throws Exception {

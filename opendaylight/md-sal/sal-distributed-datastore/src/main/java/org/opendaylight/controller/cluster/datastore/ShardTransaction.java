@@ -37,7 +37,7 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -147,7 +147,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void readData(ReadData message) {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
-        final InstanceIdentifier path = message.getPath();
+        final YangInstanceIdentifier path = message.getPath();
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> future =
             transaction.read(path);
 
@@ -175,6 +175,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void writeData(WriteData message) {
         modification.addModification(
             new WriteModification(message.getPath(), message.getData(),schemaContext));
+        LOG.debug("writeData at path : " + message.getPath().toString());
         transaction.write(message.getPath(), message.getData());
         getSender().tell(new WriteDataReply().toSerializable(), getSelf());
     }
@@ -182,6 +183,7 @@ public class ShardTransaction extends AbstractUntypedActor {
     private void mergeData(MergeData message) {
         modification.addModification(
             new MergeModification(message.getPath(), message.getData(), schemaContext));
+        LOG.debug("mergeData at path : " + message.getPath().toString());
         transaction.merge(message.getPath(), message.getData());
         getSender().tell(new MergeDataReply().toSerializable(), getSelf());
     }
