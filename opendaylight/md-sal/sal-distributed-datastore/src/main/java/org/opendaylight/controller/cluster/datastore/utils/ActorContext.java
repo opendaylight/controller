@@ -17,6 +17,7 @@ import akka.util.Timeout;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -51,14 +52,17 @@ public class ActorContext {
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
+    private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
 
     private SchemaContext schemaContext = null;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
+        ClusterWrapper clusterWrapper,
         Configuration configuration) {
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
+        this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
     }
 
@@ -97,7 +101,7 @@ public class ActorContext {
         if (result.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
             PrimaryFound found = PrimaryFound.fromSerializable(result);
 
-            LOG.error("Primary found {}", found.getPrimaryPath());
+            LOG.debug("Primary found {}", found.getPrimaryPath());
 
             return found.getPrimaryPath();
         }
@@ -135,6 +139,9 @@ public class ActorContext {
      */
     public Object executeRemoteOperation(ActorSelection actor, Object message,
         FiniteDuration duration) {
+
+        LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
+
         Future<Object> future =
             ask(actor, message, new Timeout(duration));
 
@@ -204,6 +211,10 @@ public class ActorContext {
 
     public ActorPath actorFor(String path){
         return actorSystem.actorFor(path).path();
+    }
+
+    public String getCurrentMemberName(){
+        return clusterWrapper.getCurrentMemberName();
     }
 
 }

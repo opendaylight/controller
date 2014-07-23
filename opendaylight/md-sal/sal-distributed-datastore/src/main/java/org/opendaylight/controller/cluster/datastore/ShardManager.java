@@ -11,16 +11,18 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Address;
+import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
+import akka.actor.SupervisorStrategy;
 import akka.cluster.ClusterEvent;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Creator;
+import akka.japi.Function;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,20 +53,8 @@ import java.util.Map;
  */
 public class ShardManager extends AbstractUntypedActor {
 
-    // Stores a mapping between a shard name and the address of the current primary
-    private final Map<String, Address> shardNameToPrimaryAddress =
-        new HashMap<>();
-
     // Stores a mapping between a member name and the address of the member
     private final Map<String, Address> memberNameToAddress = new HashMap<>();
-
-    // Stores a mapping between the shard name and all the members on which a replica of that shard are available
-    private final Map<String, List<String>> shardNameToMembers =
-        new HashMap<>();
-
-    private final LoggingAdapter log =
-        Logging.getLogger(getContext().system(), this);
-
 
     private final Map<String, ActorPath> localShards = new HashMap<>();
 
@@ -104,6 +94,7 @@ public class ShardManager extends AbstractUntypedActor {
             }
         });
     }
+
 
     @Override
     public void handleReceive(Object message) throws Exception {
@@ -197,8 +188,20 @@ public class ShardManager extends AbstractUntypedActor {
             ActorPath path = actor.path();
             localShards.put(shardName, path);
         }
+
     }
 
 
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return new OneForOneStrategy(10, Duration.create("1 minute"),
+            new Function<Throwable, SupervisorStrategy.Directive>() {
+                @Override
+                public SupervisorStrategy.Directive apply(Throwable t) {
+                    return SupervisorStrategy.resume();
+                }
+            }
+        );
 
+    }
 }

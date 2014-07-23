@@ -39,12 +39,12 @@ public class WriteModification extends AbstractModification {
     @Override public Object toSerializable() {
         NormalizedNodeMessages.Container encode =
             new NormalizedNodeToNodeCodec(schemaContext).encode(
-                InstanceIdentifierUtils.from(path.toString()), data);
+                path, data);
 
 
         return PersistentMessages.Modification.newBuilder()
             .setType(this.getClass().toString())
-            .setPath(this.path.toString())
+            .setPath(InstanceIdentifierUtils.toSerializable(this.path))
             .setData(encode.getNormalizedNode())
             .build();
 
@@ -55,7 +55,7 @@ public class WriteModification extends AbstractModification {
         SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
 
-        InstanceIdentifier path = InstanceIdentifierUtils.from(o.getPath());
+        InstanceIdentifier path = InstanceIdentifierUtils.fromSerializable(o.getPath());
         NormalizedNode data = new NormalizedNodeToNodeCodec(schemaContext).decode(
             path, o.getData());
 

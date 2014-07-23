@@ -11,13 +11,14 @@ package org.opendaylight.controller.cluster.datastore.node;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Container;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Container;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -57,7 +58,10 @@ public class NormalizedNodeToNodeCodecTest {
     @Test
     public void testNormalizeNodeAttributesToProtoBuffNode(){
         final NormalizedNode<?, ?> documentOne = TestModel.createTestContainer();
-        String id = "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)outer-list/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)outer-list[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=2}]/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id";
+        String id = "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test" +
+            "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)outer-list" +
+            "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)outer-list[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=2}]" +
+            "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id";
 
         NormalizedNodeGetter normalizedNodeGetter = new NormalizedNodeGetter(id);
         new NormalizedNodeNavigator(normalizedNodeGetter).navigate(
@@ -87,7 +91,6 @@ public class NormalizedNodeToNodeCodecTest {
     public void testThatANormalizedNodeToProtoBuffNodeEncodeDecode() throws Exception {
         final NormalizedNode<?, ?> documentOne = TestModel.createTestContainer();
 
-
         final NormalizedNodeToNodeCodec normalizedNodeToNodeCodec = new NormalizedNodeToNodeCodec(schemaContext);
 
         Container container = normalizedNodeToNodeCodec.encode(InstanceIdentifier.builder().build(), documentOne);
@@ -107,6 +110,15 @@ public class NormalizedNodeToNodeCodecTest {
         //check first level children are proper
         List<Node>childrenResult = containerResult.getNormalizedNode().getChildList();
         List<Node>childrenOriginal = container.getNormalizedNode().getChildList();
+
+        System.out.println("-------------------------------------------------");
+
+        System.out.println(childrenOriginal.toString());
+
+        System.out.println("-------------------------------------------------");
+
+        System.out.println(childrenResult.toString());
+
        boolean bFound;
         for(Node resultChild: childrenResult){
            bFound = false;
@@ -120,7 +132,27 @@ public class NormalizedNodeToNodeCodecTest {
           Assert.assertTrue(bFound);
         }
 
+    }
 
+    @Test
+    public void addAugmentations(){
+        String stringId = "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test" +
+            "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)augmented-list" +
+            "/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)augmented-list[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=1}]";
+
+        InstanceIdentifier identifier = instanceIdentifierFromString(stringId);
+
+        MapEntryNode uno = TestModel.createAugmentedListEntry(1, "Uno");
+
+        NormalizedNodeToNodeCodec codec =
+            new NormalizedNodeToNodeCodec(schemaContext);
+
+        Container encode = codec
+            .encode(identifier, uno);
+
+        System.out.println(encode.getNormalizedNode());
+
+        codec.decode(identifier, encode.getNormalizedNode());
     }
 
 }
