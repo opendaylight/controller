@@ -19,7 +19,7 @@ public class TestUtils {
 
     public static void assertFirstSentMessage(ActorSystem actorSystem, ActorRef actorRef, Class clazz){
         ActorContext testContext = new ActorContext(actorSystem, actorSystem.actorOf(
-            Props.create(DoNothingActor.class)), new MockConfiguration());
+            Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages",
                 ActorContext.ASK_DURATION);

@@ -11,7 +11,7 @@ message DataChanged {
   optional NodeMap originalData =3;
   optional NodeMap updatedData =4;
   optional NodeMap createdData =5;
-  repeated string removedPaths  =6;
+  repeated InstanceIdentifier removedPaths  =6;
 }
 
 message DataChangedReply{

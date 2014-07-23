@@ -29,12 +29,12 @@ public class DeleteModification extends AbstractModification {
     @Override public Object toSerializable() {
         return PersistentMessages.Modification.newBuilder()
             .setType(this.getClass().toString())
-            .setPath(this.path.toString())
+            .setPath(InstanceIdentifierUtils.toSerializable(this.path))
             .build();
     }
 
     public static DeleteModification fromSerializable(Object serializable){
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
-        return new DeleteModification(InstanceIdentifierUtils.from(o.getPath()));
+        return new DeleteModification(InstanceIdentifierUtils.fromSerializable(o.getPath()));
     }
 }
