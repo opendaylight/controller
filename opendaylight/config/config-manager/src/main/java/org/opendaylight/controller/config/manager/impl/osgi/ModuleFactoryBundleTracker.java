@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import static java.lang.String.format;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -70,9 +71,10 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
         blankTransactionServiceTracker.blankTransaction();
     }
 
-    // TODO:test
-    private static ServiceRegistration<?> registerFactory(String factoryClassName, Bundle bundle) {
+    @VisibleForTesting
+    protected static ServiceRegistration<?> registerFactory(String factoryClassName, Bundle bundle) {
         String errorMessage;
+        Exception ex = null;
         try {
             Class<?> clazz = bundle.loadClass(factoryClassName);
             if (ModuleFactory.class.isAssignableFrom(clazz)) {
@@ -86,10 +88,12 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
                     errorMessage = logMessage(
                             "Could not instantiate {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
+                    ex = e;
                 } catch (IllegalAccessException e) {
                     errorMessage = logMessage(
-                            "Illegal access during instatiation of class {} in bundle {}, reason {}",
+                            "Illegal access during instantiation of class {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
+                    ex = e;
                 }
             } else {
                 errorMessage = logMessage(
@@ -98,10 +102,12 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
             }
         } catch (ClassNotFoundException e) {
             errorMessage = logMessage(
-                    "Could not find class {} in bunde {}, reason {}",
+                    "Could not find class {} in bundle {}, reason {}",
                     factoryClassName, bundle, e);
+            ex = e;
         }
-        throw new IllegalStateException(errorMessage);
+
+        throw ex == null ? new IllegalStateException(errorMessage) : new IllegalStateException(errorMessage, ex);
     }
 
     public static String logMessage(String slfMessage, Object... params) {
