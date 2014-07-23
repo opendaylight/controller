@@ -55,6 +55,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+@SuppressWarnings("deprecation")
 public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDataBroker implements DataProviderService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ForwardedBackwardsCompatibleDataBroker.class);
@@ -213,10 +214,13 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
             boolean previouslyRemoved = posponedRemovedOperational.remove(path);
+
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                doPutWithEnsureParents(LogicalDatastoreType.OPERATIONAL, path, data);
+                put(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             } else {
-                doMergeWithEnsureParents(LogicalDatastoreType.OPERATIONAL, path, data);
+                merge(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             }
         }
 
@@ -231,10 +235,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
                 created.put(path, data);
             }
             updated.put(path, data);
+            @SuppressWarnings({"rawtypes","unchecked"})
+            final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                doPutWithEnsureParents(LogicalDatastoreType.CONFIGURATION, path, data);
+                put(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             } else {
-                doMergeWithEnsureParents(LogicalDatastoreType.CONFIGURATION, path, data);
+                merge(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             }
         }
 
