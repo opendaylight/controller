@@ -8,12 +8,12 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
@@ -21,6 +21,8 @@ import org.opendaylight.controller.config.persist.api.StorageAdapter;
 import org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * {@link Persister} implementation that delegates persisting functionality to
@@ -62,6 +64,7 @@ public final class PersisterAggregator implements Persister {
 
         private final Persister storage;
         private final boolean readOnly;
+        private AccumulatingConfigPusher acp;
 
         public PersisterWithConfiguration(Persister storage, boolean readOnly) {
             this.storage = storage;
@@ -84,6 +87,11 @@ public final class PersisterAggregator implements Persister {
                     "storage=" + storage +
                     ", readOnly=" + readOnly +
                     '}';
+        }
+
+        public void setConfigPusher(AccumulatingConfigPusher acp) {
+            storage.setConfigPusher(acp);
+
         }
     }
 
@@ -178,6 +186,7 @@ public final class PersisterAggregator implements Persister {
         return Collections.emptyList();
     }
 
+
     @VisibleForTesting
     List<PersisterWithConfiguration> getPersisterWithConfigurations() {
         return persisterWithConfigurations;
@@ -208,5 +217,13 @@ public final class PersisterAggregator implements Persister {
         return "PersisterAggregator{" +
                 "persisterWithConfigurations=" + persisterWithConfigurations +
                 '}';
+    }
+
+    public void setConfigPusher(AccumulatingConfigPusher acp) {
+        for (PersisterWithConfiguration persister : getPersisterWithConfigurations()) {
+            // You'll need
+            persister.setConfigPusher(acp);
+        }
+
     }
 }

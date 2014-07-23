@@ -100,7 +100,7 @@ public class XmlDirectoryPersister implements Persister {
 
         return Optional.absent();
     }
-
+    // Jamie, rob this method blind
     public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
