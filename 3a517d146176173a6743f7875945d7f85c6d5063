@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0204f815",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ExtensibleBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-23T14:58:46Z",
+      "side": 1,
+      "message": "move before .trace()\nrename logger to LOG since we are here\nplease give the executor name, so its threads are not anonymous",
+      "revId": "3a517d146176173a6743f7875945d7f85c6d5063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_620b842a",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ExtensibleBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-23T14:58:46Z",
+      "side": 1,
+      "message": "add trace that we fired off a task ...",
+      "revId": "3a517d146176173a6743f7875945d7f85c6d5063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2201fc05",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ExtensibleBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-23T14:58:46Z",
+      "side": 1,
+      "message": "whitespace issues\nplease add trace that we have tinished with the work unit",
+      "revId": "3a517d146176173a6743f7875945d7f85c6d5063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
