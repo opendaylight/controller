@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.CheckedFuture;
  * Abstract Base Transaction for transactions which are backed by
  * {@link DOMDataWriteTransaction}
  */
-public class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
+public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         AbstractForwardedTransaction<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractWriteTransaction.class);
@@ -40,12 +40,33 @@ public class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         super(delegate, codec);
     }
 
-    protected final void doPut(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path, final DataObject data) {
+
+    public final <U extends DataObject> void put(final LogicalDatastoreType store,
+            final InstanceIdentifier<U> path, final U data, final boolean createParents) {
        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
                 .toNormalizedNode(path, data);
-        ensureListParentIfNeeded(store,path,normalized);
+        if(createParents) {
+            ensureParentsByMerge(store, normalized.getKey(), path);
+        } else {
+            ensureListParentIfNeeded(store,path,normalized);
+        }
         getDelegate().put(store, normalized.getKey(), normalized.getValue());
+    }
+
+
+    public final <U extends DataObject> void merge(final LogicalDatastoreType store,
+            final InstanceIdentifier<U> path, final U data,final boolean createParents) {
+
+        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
+                .toNormalizedNode(path, data);
+
+        if(createParents) {
+            ensureParentsByMerge(store, normalized.getKey(), path);
+        } else {
+            ensureListParentIfNeeded(store,path,normalized);
+        }
+
+        getDelegate().merge(store, normalized.getKey(), normalized.getValue());
     }
 
 
@@ -106,14 +127,16 @@ public class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         }
     }
 
-    protected final void doMerge(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path, final DataObject data) {
-
-        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
-                .toNormalizedNode(path, data);
-        ensureListParentIfNeeded(store,path,normalized);
-        getDelegate().merge(store, normalized.getKey(), normalized.getValue());
-    }
+    /**
+     * Subclasses of this class are required to implement creation of parent
+     * nodes based on behaviour of their underlying transaction.
+     *
+     * @param store
+     * @param key
+     * @param path
+     */
+    protected abstract void ensureParentsByMerge(LogicalDatastoreType store,
+            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier key, InstanceIdentifier<?> path);
 
     protected final void doDelete(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path) {
