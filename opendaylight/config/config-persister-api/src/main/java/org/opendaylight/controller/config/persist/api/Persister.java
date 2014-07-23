@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.persist.api;
 import java.io.IOException;
 import java.util.List;
 
+
 /**
  * Base interface for persister implementation.
  */
@@ -22,5 +23,7 @@ public interface Persister extends AutoCloseable {
 
     @Override
     void close();
+
+    void setConfigPusher(AccumulatingConfigPusher acp);
 
 }

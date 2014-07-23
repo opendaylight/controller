@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.netconf.persist.impl;
 
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.config.persist.api.StorageAdapter;
+import org.opendaylight.controller.config.persist.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,5 +39,9 @@ public class NoOpStorageAdapter implements StorageAdapter, Persister {
     @Override
     public void close() {
         logger.debug("close called");
+    }
+
+    public void setConfigPusher(org.opendaylight.controller.config.persist.api.AccumulatingConfigPusher acp) {
+        //todo
     }
 }

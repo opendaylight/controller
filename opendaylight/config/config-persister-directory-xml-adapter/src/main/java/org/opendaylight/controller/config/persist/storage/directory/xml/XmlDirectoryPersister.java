@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.AccumulatingConfigPusher;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,12 @@ public class XmlDirectoryPersister implements Persister {
         return Optional.absent();
     }
 
+    @Override
+    public void setConfigPusher(AccumulatingConfigPusher acp) {
+         // Jamie, do something or nothing here
+    }
+
+    // Jamie, rob this method blind
     public static ConfigSnapshotHolder loadLastConfig(File file) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ConfigSnapshot.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();

@@ -8,11 +8,18 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.management.MBeanServer;
+
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.persist.impl.AccumulatingConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
@@ -28,11 +35,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServer;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.annotations.VisibleForTesting;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
@@ -151,9 +154,12 @@ public class ConfigPersisterActivator implements BundleActivator {
             logger.debug("Configuration Persister got {}", service);
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
+                // Jamie, rob this method blind for AccumulatingConfigPusherImpl.pushConfigs
                 public void run() {
                     try {
                         configPusher.pushConfigs(configs);
+                        AccumulatingConfigPusher acp = new AccumulatingConfigPusher();
+                        persisterAggregator.setConfigPusher(acp);
                     } catch (NetconfDocumentedException e) {
                         logger.error("Error pushing configs {}",configs);
                         throw new IllegalStateException(e);

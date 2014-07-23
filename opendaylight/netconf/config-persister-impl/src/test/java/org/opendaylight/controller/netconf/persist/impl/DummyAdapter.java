@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.persist.impl;
 
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.api.AccumulatingConfigPusher;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
 
@@ -45,4 +46,8 @@ public class DummyAdapter implements StorageAdapter, Persister {
     public void close() {
     }
 
+    @Override
+    public void setConfigPusher(AccumulatingConfigPusher acp) {
+        //todo
+    }
 }

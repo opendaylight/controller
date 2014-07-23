@@ -12,10 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.config.persist.api.Persister;
-import org.opendaylight.controller.config.persist.api.PropertiesProvider;
-import org.opendaylight.controller.config.persist.api.StorageAdapter;
+import org.opendaylight.controller.config.persist.api.*;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.Config;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
@@ -146,4 +143,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
         return "XmlFileStorageAdapter [storage=" + storage + "]";
     }
 
+    public void setConfigPusher(AccumulatingConfigPusher acp) {
+        //todo
+    }
 }
