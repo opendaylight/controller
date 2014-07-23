@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import com.google.common.annotations.VisibleForTesting;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -17,8 +19,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.ObjectName;
-
 /**
  * Every time factory is added or removed, blank transaction is triggered to handle
  * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, org.osgi.framework.BundleContext)}
@@ -27,10 +27,29 @@ import javax.management.ObjectName;
 public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<ModuleFactory, Object> {
     private static final Logger logger = LoggerFactory.getLogger(BlankTransactionServiceTracker.class);
 
-    private final ConfigRegistryImpl configRegistry;
+    public static final int DEFAULT_MAX_ATTEMPTS = 10;
 
-    public BlankTransactionServiceTracker(ConfigRegistryImpl configRegistry) {
-        this.configRegistry = configRegistry;
+    private final BlankTransaction blankTransaction;
+    private int maxAttempts;
+
+    public BlankTransactionServiceTracker(final ConfigRegistryImpl configRegistry) {
+        this(new BlankTransaction() {
+            @Override
+            public CommitStatus hit() throws ValidationException, ConflictingVersionException {
+                ObjectName tx = configRegistry.beginConfig(true);
+                return configRegistry.commitConfig(tx);
+            }
+        });
+    }
+
+    public BlankTransactionServiceTracker(final BlankTransaction blankTransaction) {
+        this(blankTransaction, DEFAULT_MAX_ATTEMPTS);
+    }
+
+    @VisibleForTesting
+    BlankTransactionServiceTracker(final BlankTransaction blankTx, final int maxAttempts) {
+        this.blankTransaction = blankTx;
+        this.maxAttempts = maxAttempts;
     }
 
     @Override
@@ -42,13 +61,10 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     synchronized void blankTransaction() {
         // race condition check: config-persister might push new configuration while server is starting up.
         ConflictingVersionException lastException = null;
-        int maxAttempts = 10;
         for (int i = 0; i < maxAttempts; i++) {
             try {
                 // create transaction
-                boolean blankTransaction = true;
-                ObjectName tx = configRegistry.beginConfig(blankTransaction);
-                CommitStatus commitStatus = configRegistry.commitConfig(tx);
+                CommitStatus commitStatus = blankTransaction.hit();
                 logger.debug("Committed blank transaction with status {}", commitStatus);
                 return;
             } catch (ConflictingVersionException e) {
@@ -76,5 +92,10 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     @Override
     public void removedService(ServiceReference<ModuleFactory> moduleFactoryServiceReference, Object o) {
         blankTransaction();
+    }
+
+    @VisibleForTesting
+    static interface BlankTransaction {
+        CommitStatus hit() throws ValidationException, ConflictingVersionException;
     }
 }
