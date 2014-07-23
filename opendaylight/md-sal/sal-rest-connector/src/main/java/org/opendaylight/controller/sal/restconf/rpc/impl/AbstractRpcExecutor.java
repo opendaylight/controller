@@ -37,6 +37,8 @@ public abstract class AbstractRpcExecutor implements RpcExecutor {
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         } catch (UnsupportedOperationException e) {
             throw new RestconfDocumentedException(e.getMessage(), ErrorType.RPC, ErrorTag.OPERATION_NOT_SUPPORTED);
+        } catch (RestconfDocumentedException e) {
+            throw e;
         } catch (Exception e) {
             throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.", e);
         }
