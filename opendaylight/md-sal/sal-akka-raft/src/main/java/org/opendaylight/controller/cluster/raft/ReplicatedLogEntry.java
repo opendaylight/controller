@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+
 /**
  * Represents one entry in the replicated log
  */
@@ -17,7 +19,7 @@ public interface ReplicatedLogEntry {
      *
      * @return
      */
-    Object getData();
+    Payload getData();
 
     /**
      * The term stored in that entry

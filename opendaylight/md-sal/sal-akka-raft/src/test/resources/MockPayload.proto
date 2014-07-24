@@ -1,0 +1,10 @@
+import "AppendEntriesMessages.proto";
+
+package org.opendaylight.controller.cluster.raft;
+
+option java_package = "org.opendaylight.controller.cluster.raft.protobuff.messages";
+option java_outer_classname = "MockPayloadMessages";
+
+extend AppendEntries.ReplicatedLogEntry.Payload {
+    optional string value = 2;
+}

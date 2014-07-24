@@ -14,6 +14,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.google.protobuf.GeneratedMessage;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
+import org.opendaylight.controller.cluster.raft.protobuff.messages.MockPayloadMessages;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +83,7 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void initReplicatedLog(){
         this.replicatedLog = new SimpleReplicatedLog();
-        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, ""));
+        this.replicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("")));
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -255,20 +259,48 @@ public class MockRaftActorContext implements RaftActorContext {
         }
     }
 
+    public static class MockPayload extends Payload {
+        private String value = "";
+
+        public MockPayload(String s) {
+            this.value = s;
+        }
+
+        @Override public  Map<GeneratedMessage.GeneratedExtension, String> getProtoBuffExtensions() {
+            Map<GeneratedMessage.GeneratedExtension, String> map = new HashMap<GeneratedMessage.GeneratedExtension, String>();
+            map.put(MockPayloadMessages.value, value);
+            return map;
+        }
+
+        @Override public Payload constructClientPayload(AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
+            String value = payloadProtoBuff.getExtension(MockPayloadMessages.value);
+            this.value = value;
+            return this;
+        }
+
+        @Override public String getClientPayloadClassName() {
+            return MockPayload.class.getName();
+        }
+
+        public String toString() {
+            return value;
+        }
+    }
+
     public static class MockReplicatedLogEntry implements ReplicatedLogEntry {
 
         private final long term;
         private final long index;
-        private final Object data;
+        private final Payload data;
 
-        public MockReplicatedLogEntry(long term, long index, Object data){
+        public MockReplicatedLogEntry(long term, long index, Payload data){
 
             this.term = term;
             this.index = index;
             this.data = data;
         }
 
-        @Override public Object getData() {
+        @Override public Payload getData() {
             return data;
         }
 
