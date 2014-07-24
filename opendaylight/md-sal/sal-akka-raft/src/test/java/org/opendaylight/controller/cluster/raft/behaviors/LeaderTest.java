@@ -12,6 +12,7 @@ import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.protobuff.ProtoBuffEncoderDecoderUtil;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
 import java.util.HashMap;
@@ -63,13 +64,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     leader.handleMessage(senderActor, new SendHeartBeat());
 
                     final String out =
-                        new ExpectMsg<String>(duration("1 seconds"),
-                            "match hint") {
+                        new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
                             protected String match(Object in) {
-                                if (in instanceof AppendEntries) {
-                                    if (((AppendEntries) in).getTerm()
-                                        == 0) {
+                                Object msg = ProtoBuffEncoderDecoderUtil.decode(in);
+                                if (msg instanceof AppendEntries) {
+                                    if (((AppendEntries)msg).getTerm() == 0) {
                                         return "match";
                                     }
                                     return null;
@@ -112,20 +112,19 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         .handleMessage(senderActor, new Replicate(null, null,
                             new MockRaftActorContext.MockReplicatedLogEntry(1,
                                 100,
-                                "foo")
+                                new MockRaftActorContext.MockPayload("foo"))
                         ));
 
                     // State should not change
                     assertEquals(RaftState.Leader, raftState);
 
                     final String out =
-                        new ExpectMsg<String>(duration("1 seconds"),
-                            "match hint") {
+                        new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
                             protected String match(Object in) {
-                                if (in instanceof AppendEntries) {
-                                    if (((AppendEntries) in).getTerm()
-                                        == 0) {
+                                Object msg = ProtoBuffEncoderDecoderUtil.decode(in);
+                                if (msg instanceof AppendEntries) {
+                                    if (((AppendEntries)msg).getTerm() == 0) {
                                         return "match";
                                     }
                                     return null;
@@ -161,7 +160,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                         .handleMessage(senderActor, new Replicate(null, "state-id",
                             new MockRaftActorContext.MockReplicatedLogEntry(1,
                                 100,
-                                "foo")
+                                new MockRaftActorContext.MockPayload("foo"))
                         ));
 
                     // State should not change

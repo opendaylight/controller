@@ -10,13 +10,14 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
-public class AppendEntries extends AbstractRaftRPC {
+public class AppendEntries extends AbstractRaftRPC implements Serializable {
     // So that follower can redirect clients
     private final String leaderId;
 

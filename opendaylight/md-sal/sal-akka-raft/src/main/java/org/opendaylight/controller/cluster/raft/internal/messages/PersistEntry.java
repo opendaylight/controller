@@ -8,8 +8,10 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
+import java.io.Serializable;
+
 /**
  * Message sent to Persist an entry into the transaction journal
  */
-public class PersistEntry {
+public class PersistEntry implements Serializable {
 }
