@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
@@ -26,14 +27,21 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
+public class RestconfProvider implements Provider, AutoCloseable {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
 
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
-    private ServiceTracker<Broker, Broker> brokerServiceTrancker;
     private BundleContext bundleContext;
     private Thread webSocketServerThread;
+
+    public Thread getWebSocketServerThread() {
+        return webSocketServerThread;
+    }
+
+    public void setWebSocketServerThread(Thread webSocketServerThread) {
+        this.webSocketServerThread = webSocketServerThread;
+    }
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
@@ -48,7 +56,6 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         ControllerContext.getInstance().setMountService(session.getService(MountService.class));
     }
 
-    @Override
     public void start(BundleContext context) throws Exception {
         String websocketPortStr = context.getProperty(WebSocketServer.WEBSOCKET_SERVER_CONFIG_PROPERTY);
         int websocketPort = (websocketPortStr != null && !"".equals(websocketPortStr)) ? Integer
@@ -57,11 +64,8 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         webSocketServerThread = new Thread(WebSocketServer.createInstance(websocketPort));
         webSocketServerThread.setName("Web socket server");
         webSocketServerThread.start();
-        brokerServiceTrancker = new ServiceTracker<>(context, Broker.class, this);
-        brokerServiceTrancker.open();
     }
 
-    @Override
     public void stop(BundleContext context) {
         if (listenerRegistration != null) {
             try {
@@ -71,7 +75,6 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
             }
         }
         webSocketServerThread.interrupt();
-        brokerServiceTrancker.close();
     }
 
     @Override
@@ -80,22 +83,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
     }
 
     @Override
-    public Broker addingService(ServiceReference<Broker> reference) {
-        Broker broker = bundleContext.getService(reference);
-        broker.registerProvider(this, bundleContext);
-        return broker;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<Broker> reference, Broker service) {
-        // NOOP
-    }
-
-    @Override
-    public void removedService(ServiceReference<Broker> reference, Broker service) {
-        bundleContext.ungetService(reference);
-        BrokerFacade.getInstance().setContext(null);
-        BrokerFacade.getInstance().setDataService(null);
-        ControllerContext.getInstance().setSchemas(null);
+    public void close() throws Exception {
+        stop(bundleContext);
     }
 }

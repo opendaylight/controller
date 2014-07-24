@@ -1,0 +1,42 @@
+module opendaylight-restconf-connector {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:restconf:connector";
+    prefix "md-sal-restconf-connector";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
+    import opendaylight-md-sal-binding {prefix sal; revision-date 2013-10-28;}
+ 
+    description
+        "Service definition for Restconf Connector";
+ 
+    revision "2014-07-24" {
+        description
+            "Initial revision";
+    }
+    
+    identity restconf-connector {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.sal.rest.api.RestconfService";
+    }
+    
+    identity restconf-connector-impl {
+        base config:module-type;
+        config:provided-service restconf-connector;
+        config:java-name-prefix RestconfConnectorImpl;
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case restconf-connector-impl {
+            when "/config:modules/config:module/config:type = 'restconf-connector-impl'";
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}
