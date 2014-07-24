@@ -891,10 +891,6 @@ public class RestconfImpl implements RestconfService {
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
             final Module module = findModule(mountPoint, payload);
-            if (module == null) {
-                throw new RestconfDocumentedException("Module was not found for \"" + payloadNS + "\"",
-                        ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-            }
 
             String payloadName = this.getName(payload);
             final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
@@ -941,11 +937,6 @@ public class RestconfImpl implements RestconfService {
         }
 
         final Module module = this.findModule(null, payload);
-        if (module == null) {
-            throw new RestconfDocumentedException(
-                    "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
-        }
 
         String payloadName = this.getName(payload);
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
@@ -1121,10 +1112,10 @@ public class RestconfImpl implements RestconfService {
             } else {
                 return this.controllerContext.findModuleByNamespace(namespace);
             }
-        } else {
-            throw new IllegalArgumentException("Unhandled parameter types: "
-                    + Arrays.<Object> asList(mountPoint, data).toString());
         }
+        throw new RestconfDocumentedException(
+                "Data has bad format. Root element node has incorrect namespace (XML format) or module name(JSON format)",
+                ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
     }
 
     private Module findModule(final DOMMountPoint mountPoint, final NodeWrapper<?> data) {
