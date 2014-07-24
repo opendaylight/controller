@@ -78,13 +78,12 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
         FlowBuilder builder = new FlowBuilder()
             .setKey(FLOW_KEY)
             .addAugmentation(FlowStatisticsData.class,new FlowStatisticsDataBuilder()
-                    .setFlowStatistics(new FlowStatisticsBuilder()
-                        .setBarrier(true)
-                        .setMatch(new MatchBuilder()
-                            .build())
-                        .build())
+                    .setFlowStatistics(new FlowStatisticsBuilder().build())
                     .build())
-        ;//.build();
+            .setBarrier(true)
+            .setMatch(new MatchBuilder()
+            .build())
+        ;
         return builder.build();
     }
 

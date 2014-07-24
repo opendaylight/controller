@@ -25,7 +25,6 @@ module opendaylight-flow-statistics {
     grouping flow-statistics {
         container flow-statistics {
             //config "false";
-            uses flow-types:flow;
             uses stat-types:generic-statistics;
         }
     }
