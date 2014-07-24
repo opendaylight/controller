@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c5c93a27",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/ExtensibleBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-07-24T09:44:22Z",
+      "side": 1,
+      "message": "Not Addition, Removal",
+      "revId": "92a9bca9109fef4ef261f5c711baa48f5d05bca2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
