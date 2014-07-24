@@ -64,31 +64,15 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     protected FlowStatsEntry updateSingleStat(final DataModificationTransaction trans, final FlowAndStatisticsMapList map) {
         short tableId = map.getTableId();
 
-        FlowBuilder flowBuilder = new FlowBuilder();
-
         FlowStatisticsDataBuilder flowStatisticsData = new FlowStatisticsDataBuilder();
 
-        FlowBuilder flow = new FlowBuilder();
-        flow.setContainerName(map.getContainerName());
-        flow.setBufferId(map.getBufferId());
-        flow.setCookie(map.getCookie());
-        flow.setCookieMask(map.getCookieMask());
-        flow.setFlags(map.getFlags());
-        flow.setFlowName(map.getFlowName());
-        flow.setHardTimeout(map.getHardTimeout());
-        if(map.getFlowId() != null)
+        FlowBuilder flow = new FlowBuilder(map);
+        if(map.getFlowId() != null) {
             flow.setId(new FlowId(map.getFlowId().getValue()));
-        flow.setIdleTimeout(map.getIdleTimeout());
-        flow.setInstallHw(map.isInstallHw());
-        flow.setInstructions(map.getInstructions());
-        if(map.getFlowId()!= null)
+        }
+        if(map.getFlowId()!= null) {
             flow.setKey(new FlowKey(new FlowId(map.getKey().getFlowId().getValue())));
-        flow.setMatch(map.getMatch());
-        flow.setOutGroup(map.getOutGroup());
-        flow.setOutPort(map.getOutPort());
-        flow.setPriority(map.getPriority());
-        flow.setStrict(map.isStrict());
-        flow.setTableId(tableId);
+        }
 
         Flow flowRule = flow.build();
 
@@ -105,22 +89,6 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         flowStatistics.setByteCount(flowStats.getByteCount());
         flowStatistics.setPacketCount(flowStats.getPacketCount());
         flowStatistics.setDuration(flowStats.getDuration());
-        flowStatistics.setContainerName(map.getContainerName());
-        flowStatistics.setBufferId(map.getBufferId());
-        flowStatistics.setCookie(map.getCookie());
-        flowStatistics.setCookieMask(map.getCookieMask());
-        flowStatistics.setFlags(map.getFlags());
-        flowStatistics.setFlowName(map.getFlowName());
-        flowStatistics.setHardTimeout(map.getHardTimeout());
-        flowStatistics.setIdleTimeout(map.getIdleTimeout());
-        flowStatistics.setInstallHw(map.isInstallHw());
-        flowStatistics.setInstructions(map.getInstructions());
-        flowStatistics.setMatch(map.getMatch());
-        flowStatistics.setOutGroup(map.getOutGroup());
-        flowStatistics.setOutPort(map.getOutPort());
-        flowStatistics.setPriority(map.getPriority());
-        flowStatistics.setStrict(map.isStrict());
-        flowStatistics.setTableId(tableId);
 
         flowStatisticsData.setFlowStatistics(flowStatistics.build());
 
@@ -143,13 +111,12 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                             .augmentation(FlowCapableNode.class)
                             .child(Table.class, new TableKey(tableId))
                             .child(Flow.class,existingFlow.getKey()).toInstance();
-                    flowBuilder.setKey(existingFlow.getKey());
-                    flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+                    flow.setKey(existingFlow.getKey());
+                    flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
                     logger.debug("Found matching flow in the datastore, augmenting statistics");
                     // Update entry with timestamp of latest response
-                    flow.setKey(existingFlow.getKey());
                     FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                    trans.putOperationalData(flowRef, flowBuilder.build());
+                    trans.putOperationalData(flowRef, flow.build());
                     return flowStatsEntry;
                 }
             }
@@ -168,13 +135,12 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                                 .augmentation(FlowCapableNode.class)
                                 .child(Table.class, new TableKey(tableId))
                                 .child(Flow.class,existingFlow.getKey()).toInstance();
-                        flowBuilder.setKey(existingFlow.getKey());
-                        flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+                        flow.setKey(existingFlow.getKey());
+                        flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
                         logger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
                         // Update entry with timestamp of latest response
-                        flow.setKey(existingFlow.getKey());
                         FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                        trans.putOperationalData(flowRef, flowBuilder.build());
+                        trans.putOperationalData(flowRef, flow.build());
                         return flowStatsEntry;
                     }
                 }
@@ -187,15 +153,15 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
                     .child(Table.class, new TableKey(tableId))
                     .child(Flow.class,newFlowKey).toInstance();
-        flowBuilder.setKey(newFlowKey);
-        flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+        flow.setKey(newFlowKey);
+        flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
         logger.debug("Flow {} is not present in config data store, augmenting statistics as an unaccounted flow",
-                    flowBuilder.build());
+                    flow.build());
 
         // Update entry with timestamp of latest response
         flow.setKey(newFlowKey);
         FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-        trans.putOperationalData(flowRef, flowBuilder.build());
+        trans.putOperationalData(flowRef, flow.build());
         return flowStatsEntry;
     }
 
