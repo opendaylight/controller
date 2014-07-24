@@ -11,6 +11,8 @@ import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.net.URISyntaxException;
+import java.net.URI;
 
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
@@ -19,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfSessionCapabilities {
-    private static final class ParameterMatcher {
+     private static final class ParameterMatcher {
         private final Predicate<String> predicate;
         private final int skipLength;
 
@@ -90,8 +92,8 @@ public final class NetconfSessionCapabilities {
     }
 
     public boolean isMonitoringSupported() {
-        return containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
-                || containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
+       return containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
+              || containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
     }
 
     public static NetconfSessionCapabilities fromNetconfSession(final NetconfClientSession session) {
@@ -106,38 +108,42 @@ public final class NetconfSessionCapabilities {
             if (qmark == -1) {
                 continue;
             }
-
             final String namespace = capability.substring(0, qmark);
             final Iterable<String> queryParams = AMP_SPLITTER.split(capability.substring(qmark + 1));
             final String moduleName = MODULE_PARAM.from(queryParams);
             if (moduleName == null) {
                 continue;
             }
-
-            String revision = REVISION_PARAM.from(queryParams);
-            if (revision != null) {
-                moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
-                continue;
-            }
-
             /*
              * We have seen devices which mis-escape revision, but the revision may not
              * even be there. First check if there is a substring that matches revision.
              */
-            if (!Iterables.any(queryParams, CONTAINS_REVISION)) {
+            String revision = REVISION_PARAM.from(queryParams);
+            if (revision == null) {
+                /*if (!Iterables.any(queryParams, CONTAINS_REVISION)) {
+                    continue;
+                }*/
+                LOG.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
+                revision = BROKEN_REVISON_PARAM.from(queryParams);
+                if (revision == null) {
+                LOG.warn("Netconf device returned revision incorrectly escaped for {}, ignoring it", capability);
+                }
+                final URI namespaceUri;
+                try {
+                    namespaceUri = new URI(namespace);
+                }catch (URISyntaxException ue) {
+                    throw new IllegalArgumentException(String.format("Namespace '%s' is not a valid URI", namespace), ue);
+                }
+                moduleBasedCaps.add(QName.create(namespaceUri,null,moduleName));
                 continue;
             }
-
-            LOG.debug("Netconf device was not reporting revision correctly, trying to get amp;revision=");
-            revision = BROKEN_REVISON_PARAM.from(queryParams);
-            if (revision == null) {
-                LOG.warn("Netconf device returned revision incorrectly escaped for {}, ignoring it", capability);
-            }
-
-            // FIXME: do we really want to continue here?
+//          FIXME: do we really want to continue here?
+//          moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+//          continue;
+//          }
             moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+            continue;
         }
-
-        return new NetconfSessionCapabilities(ImmutableSet.copyOf(capabilities), ImmutableSet.copyOf(moduleBasedCaps));
+    return new NetconfSessionCapabilities(ImmutableSet.copyOf(capabilities), ImmutableSet.copyOf(moduleBasedCaps));
     }
 }
