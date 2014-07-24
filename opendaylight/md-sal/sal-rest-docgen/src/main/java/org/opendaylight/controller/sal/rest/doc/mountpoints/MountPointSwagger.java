@@ -23,7 +23,7 @@ import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService.MountProvisionListener;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.BaseYangSwaggerGenerator;
 import org.opendaylight.controller.sal.rest.doc.swagger.Api;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
