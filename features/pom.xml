@@ -13,6 +13,7 @@
     <maven>3.0</maven>
   </prerequisites>
   <modules>
+    <module>adsal</module>
     <module>config</module>
     <module>config-persister</module>
     <module>config-netty</module>
