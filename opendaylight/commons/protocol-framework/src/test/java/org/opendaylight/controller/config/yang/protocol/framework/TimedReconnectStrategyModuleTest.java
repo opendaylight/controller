@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.config.yang.protocol.framework;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.math.BigDecimal;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -16,14 +23,6 @@ import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.netty.eventexecutor.GlobalEventExecutorModuleFactory;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-import java.math.BigDecimal;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
 
@@ -158,7 +157,7 @@ public class TimedReconnectStrategyModuleTest extends AbstractConfigTest {
         mxBean.setMaxSleep(maxSleep);
         mxBean.setMinSleep(minSleep);
         mxBean.setSleepFactor(sleepFactor);
-        mxBean.setExecutor(GlobalEventExecutorUtil.create(transaction));
+        mxBean.setTimedReconnectExecutor(GlobalEventExecutorUtil.create(transaction));
         return nameCreated;
     }
 
