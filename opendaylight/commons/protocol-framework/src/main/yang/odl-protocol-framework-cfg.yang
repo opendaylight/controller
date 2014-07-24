@@ -77,12 +77,12 @@ module protocol-framework {
         case reconnect-immediately-strategy-factory {
             when "/config:modules/config:module/config:type = 'reconnect-immediately-strategy-factory'";
 
-            leaf timeout {
+            leaf reconnect-timeout {
                 mandatory true;
                 type int32;
             }
 
-            container executor {
+            container reconnect-executor {
                 uses config:service-ref {
                     refine type {
                         mandatory true;
@@ -138,7 +138,7 @@ module protocol-framework {
                 units "milliseconds";
             }
 
-            container executor {
+            container timed-reconnect-executor {
                 uses config:service-ref {
                     refine type {
                         mandatory true;

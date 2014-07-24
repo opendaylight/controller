@@ -49,7 +49,7 @@ public final class TimedReconnectStrategyFactoryModule extends org.opendaylight.
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return new TimedReconnectStrategyFactoryCloseable(getExecutorDependency(),
+        return new TimedReconnectStrategyFactoryCloseable(getTimedReconnectExecutorDependency(),
                 getConnectTime(), getMinSleep(), getSleepFactor().doubleValue(), getMaxSleep(), getMaxAttempts(),
                 getDeadline());
     }
