@@ -75,6 +75,13 @@
         opendaylight/
       </outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/configuration/initial</directory>
+      <outputDirectory>/opendaylight/configuration/initial</outputDirectory>
+      <excludes>
+        <exclude>**/META-INF/**</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
   <files>
     <file>

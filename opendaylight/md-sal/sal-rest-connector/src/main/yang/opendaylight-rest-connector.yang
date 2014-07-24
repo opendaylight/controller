@@ -1,0 +1,47 @@
+module opendaylight-rest-connector {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector";
+    prefix "md-sal-rest-connector";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
+    import opendaylight-md-sal-binding {prefix sal; revision-date 2013-10-28;}
+    import ietf-inet-types {prefix inet; revision-date 2010-09-24;}
+ 
+    description
+        "Service definition for Rest Connector";
+ 
+    revision "2014-07-24" {
+        description
+            "Initial revision";
+    }
+    
+    identity rest-connector {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.sal.rest.api.RestConnector";
+    }
+    
+    identity rest-connector-impl {
+        base config:module-type;
+        config:provided-service rest-connector;
+        config:java-name-prefix RestConnector;
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case rest-connector-impl {
+            when "/config:modules/config:module/config:type = 'rest-connector-impl'";
+            leaf websocket-port {
+                mandatory true;
+                type inet:port-number;
+            }
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}
