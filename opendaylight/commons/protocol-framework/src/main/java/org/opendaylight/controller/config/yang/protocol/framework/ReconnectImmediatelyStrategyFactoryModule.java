@@ -32,14 +32,14 @@ public final class ReconnectImmediatelyStrategyFactoryModule extends org.openday
 
     @Override
     protected void customValidation(){
-        JmxAttributeValidationException.checkNotNull(getTimeout(), "value is not set.", timeoutJmxAttribute);
-        JmxAttributeValidationException.checkCondition(getTimeout() >= 0, "value " + getTimeout() + " is less than 0",
-                timeoutJmxAttribute);
+        JmxAttributeValidationException.checkNotNull(getReconnectTimeout(), "value is not set.", reconnectTimeoutJmxAttribute);
+        JmxAttributeValidationException.checkCondition(getReconnectTimeout() >= 0, "value " + getReconnectTimeout() + " is less than 0",
+                reconnectTimeoutJmxAttribute);
     }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return new ReconnectImmediatelyStrategyFactoryCloseable(getExecutorDependency(), getTimeout());
+        return new ReconnectImmediatelyStrategyFactoryCloseable(getReconnectExecutorDependency(), getReconnectTimeout());
     }
 
     private static final class ReconnectImmediatelyStrategyFactoryCloseable implements ReconnectStrategyFactory, AutoCloseable {
