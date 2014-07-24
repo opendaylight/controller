@@ -9,11 +9,13 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
 import java.util.ArrayList;
@@ -120,13 +122,13 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                 MockRaftActorContext.SimpleReplicatedLog log =
                     new MockRaftActorContext.SimpleReplicatedLog();
                 log.append(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
 
                 context.setReplicatedLog(log);
 
                 List<ReplicatedLogEntry> entries = new ArrayList<>();
                 entries.add(
-                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+                    new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
 
                 AppendEntries appendEntries =
                     new AppendEntries(2, "leader-1", -1, 1, entries, 0);
@@ -220,7 +222,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                         log = new MockRaftActorContext.SimpleReplicatedLog();
                     log.append(
                         new MockRaftActorContext.MockReplicatedLogEntry(20000,
-                            1000000, ""));
+                            1000000, new MockRaftActorContext.MockPayload("")));
 
                     ((MockRaftActorContext) actorContext).setReplicatedLog(log);
 
@@ -303,8 +305,9 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         ActorRef actorRef, RaftRPC rpc) {
 
         RaftActorContext actorContext = createActorContext();
+        Payload p = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(
-            (MockRaftActorContext) actorContext, 0, 0, "");
+            (MockRaftActorContext) actorContext, 0, 0, p);
 
         RaftState raftState = createBehavior(actorContext)
             .handleMessage(actorRef, rpc);
@@ -313,7 +316,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
-        MockRaftActorContext actorContext, long term, long index, Object data) {
+        MockRaftActorContext actorContext, long term, long index, Payload data) {
         return setLastLogEntry(actorContext,
             new MockRaftActorContext.MockReplicatedLogEntry(term, index, data));
     }
@@ -359,6 +362,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         return new RequestVoteReply(100, false);
     }
 
-
-
+    protected Object fromSerializableMessage(Object serializable){
+        return SerializationUtils.fromSerializable(serializable);
+    }
 }

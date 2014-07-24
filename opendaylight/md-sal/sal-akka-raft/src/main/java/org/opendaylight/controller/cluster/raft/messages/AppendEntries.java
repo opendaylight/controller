@@ -8,15 +8,28 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
-public class AppendEntries extends AbstractRaftRPC {
+public class AppendEntries extends AbstractRaftRPC implements Serializable {
+
+    public static final Class SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
+
     // So that follower can redirect clients
     private final String leaderId;
 
@@ -71,5 +84,78 @@ public class AppendEntries extends AbstractRaftRPC {
             ", entries=" + entries +
             ", leaderCommit=" + leaderCommit +
             '}';
+    }
+
+    public <T extends Object> Object toSerializable(){
+        AppendEntriesMessages.AppendEntries.Builder to = AppendEntriesMessages.AppendEntries.newBuilder();
+        to.setTerm(this.getTerm())
+            .setLeaderId(this.getLeaderId())
+            .setPrevLogTerm(this.getPrevLogTerm())
+            .setPrevLogIndex(this.getPrevLogIndex())
+            .setLeaderCommit(this.getLeaderCommit());
+
+        for (ReplicatedLogEntry logEntry : this.getEntries()) {
+
+            AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder arBuilder =
+                AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.newBuilder();
+
+            AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.Builder arpBuilder =
+                AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload.newBuilder();
+
+            //get the client specific payload extensions and add them to the payload builder
+            Map<GeneratedMessage.GeneratedExtension, T> map = logEntry.getData().encode();
+            Iterator<Map.Entry<GeneratedMessage.GeneratedExtension, T>> iter = map.entrySet().iterator();
+
+            while (iter.hasNext()) {
+                Map.Entry<GeneratedMessage.GeneratedExtension, T> entry = iter.next();
+                arpBuilder.setExtension(entry.getKey(), entry.getValue());
+            }
+
+            arpBuilder.setClientPayloadClassName(logEntry.getData().getClientPayloadClassName());
+
+            arBuilder.setData(arpBuilder).setIndex(logEntry.getIndex()).setTerm(logEntry.getTerm());
+            to.addLogEntries(arBuilder);
+        }
+
+        return to.build();
+    }
+
+    public static AppendEntries fromSerializable(Object o){
+        AppendEntriesMessages.AppendEntries from = (AppendEntriesMessages.AppendEntries) o;
+
+        List<ReplicatedLogEntry> logEntryList = new ArrayList<>();
+        for (AppendEntriesMessages.AppendEntries.ReplicatedLogEntry leProtoBuff : from.getLogEntriesList()) {
+
+            Payload payload = null ;
+            try {
+                if(leProtoBuff.getData() != null && leProtoBuff.getData().getClientPayloadClassName() != null) {
+                    String clientPayloadClassName = leProtoBuff.getData().getClientPayloadClassName();
+                    payload = (Payload)Class.forName(clientPayloadClassName).newInstance();
+                    payload = payload.decode(leProtoBuff.getData());
+                    payload.setClientPayloadClassName(clientPayloadClassName);
+                } else {
+                    LOG.error("Payload is null or payload does not have client payload class name");
+                }
+
+            } catch (InstantiationException e) {
+                LOG.error("InstantiationException when instantiating "+leProtoBuff.getData().getClientPayloadClassName(), e);
+            } catch (IllegalAccessException e) {
+                LOG.error("IllegalAccessException when accessing "+leProtoBuff.getData().getClientPayloadClassName(), e);
+            } catch (ClassNotFoundException e) {
+                LOG.error("ClassNotFoundException when loading "+leProtoBuff.getData().getClientPayloadClassName(), e);
+            }
+            ReplicatedLogEntry logEntry = new ReplicatedLogImplEntry(
+                leProtoBuff.getIndex(), leProtoBuff.getTerm(), payload);
+            logEntryList.add(logEntry);
+        }
+
+        AppendEntries to = new AppendEntries(from.getTerm(),
+            from.getLeaderId(),
+            from.getPrevLogIndex(),
+            from.getPrevLogTerm(),
+            logEntryList,
+            from.getLeaderCommit());
+
+        return to;
     }
 }

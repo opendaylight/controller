@@ -1,7 +1,14 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.controller.cluster.example.messages;
 
-/**
- * Created by kramesha on 7/17/14.
- */
-public class PrintState {
+import java.io.Serializable;
+
+public class PrintState implements Serializable {
 }

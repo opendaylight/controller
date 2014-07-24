@@ -8,10 +8,12 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.Serializable;
+
 /**
  * Reply for the AppendEntriesRpc message
  */
-public class AppendEntriesReply extends AbstractRaftRPC{
+public class AppendEntriesReply extends AbstractRaftRPC implements Serializable {
 
     // true if follower contained entry matching
     // prevLogIndex and prevLogTerm

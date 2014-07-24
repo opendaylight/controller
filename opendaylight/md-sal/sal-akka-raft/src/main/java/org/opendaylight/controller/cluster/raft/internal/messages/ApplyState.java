@@ -11,7 +11,9 @@ package org.opendaylight.controller.cluster.raft.internal.messages;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
-public class ApplyState {
+import java.io.Serializable;
+
+public class ApplyState implements Serializable {
     private final ActorRef clientActor;
     private final String identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
