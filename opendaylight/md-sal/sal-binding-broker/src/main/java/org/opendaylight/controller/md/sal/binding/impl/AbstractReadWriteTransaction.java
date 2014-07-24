@@ -10,14 +10,12 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -34,27 +32,8 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
         super(delegate, codec);
     }
 
-    protected final void doPutWithEnsureParents(final LogicalDatastoreType store, final InstanceIdentifier<?> path, final DataObject data) {
-        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
-                .toNormalizedNode(path, data);
-
-        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
-        ensureParentsByMerge(store, normalizedPath, path);
-        LOG.debug("Tx: {} : Putting data {}", getDelegate().getIdentifier(), normalizedPath);
-        doPut(store, path, data);
-    }
-
-    protected final void doMergeWithEnsureParents(final LogicalDatastoreType store, final InstanceIdentifier<?> path, final DataObject data) {
-        final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec()
-                .toNormalizedNode(path, data);
-
-        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath = normalized.getKey();
-        ensureParentsByMerge(store, normalizedPath, path);
-        LOG.debug("Tx: {} : Merge data {}", getDelegate().getIdentifier(), normalizedPath);
-        doMerge(store, path, data);
-    }
-
-    private final void ensureParentsByMerge(final LogicalDatastoreType store,
+    @Override
+    protected final void ensureParentsByMerge(final LogicalDatastoreType store,
             final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath,
             final InstanceIdentifier<?> path) {
         List<PathArgument> currentArguments = new ArrayList<>();
