@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.protobuff.ProtoBuffEncoderDecoderUtil;
 
 /**
  * The behavior of a RaftActor in the Follower state
@@ -39,7 +40,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
-
+        //System.out.println("Reached 8 message:");
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
 
@@ -188,7 +189,9 @@ public class Follower extends AbstractRaftActorBehavior {
         return RaftState.Follower;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object message) {
+    @Override public RaftState handleMessage(ActorRef sender, Object protoBufMessage) {
+        Object message = ProtoBuffEncoderDecoderUtil.decode(protoBufMessage);
+        //System.out.println("Reached 7 message:"+message);
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
             // If RPC request or response contains term T > currentTerm:
@@ -201,9 +204,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (message instanceof ElectionTimeout) {
             return RaftState.Candidate;
+
         } else if (message instanceof InstallSnapshot) {
-            InstallSnapshot snapshot = (InstallSnapshot) message;
-            actor().tell(new ApplySnapshot(snapshot), actor());
+            InstallSnapshot installSnapshot = (InstallSnapshot) message;
+            actor().tell(new ApplySnapshot(installSnapshot.getData()), actor());
         }
 
         scheduleElection(electionDuration());

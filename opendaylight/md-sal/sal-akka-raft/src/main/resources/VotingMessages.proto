@@ -1,0 +1,13 @@
+package org.opendaylight.controller.cluster.raft;
+
+option java_package = "org.opendaylight.controller.cluster.raft.protobuff.messages";
+option java_outer_classname = "VotingMessages";
+option optimize_for = SPEED;
+
+message RequestVote {
+    optional int64 term = 1;
+    optional string candidateId = 2;
+    optional int64 lastLongIndex = 3;
+    optional int64 lastLongTerm = 4;
+
+}
