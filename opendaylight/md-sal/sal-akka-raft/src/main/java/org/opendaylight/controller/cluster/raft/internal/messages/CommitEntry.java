@@ -8,8 +8,10 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
+import java.io.Serializable;
+
 /**
  * Message sent to commit an entry to the log
  */
-public class CommitEntry {
+public class CommitEntry implements Serializable {
 }

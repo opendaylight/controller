@@ -8,9 +8,11 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
+import java.io.Serializable;
+
 /**
  * This message is sent by a RaftActor to itself so that a subclass can process
  * it and use it to save it's state
  */
-public class SaveSnapshot {
+public class SaveSnapshot implements Serializable {
 }
