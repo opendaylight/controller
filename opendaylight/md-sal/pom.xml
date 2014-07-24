@@ -43,6 +43,7 @@
     <!-- Connectors -->
     <module>sal-connector-api</module>
     <module>sal-rest-connector</module>
+    <module>sal-rest-connector-config</module>
     <module>sal-netconf-connector</module>
 
     <module>inventory-manager</module>
