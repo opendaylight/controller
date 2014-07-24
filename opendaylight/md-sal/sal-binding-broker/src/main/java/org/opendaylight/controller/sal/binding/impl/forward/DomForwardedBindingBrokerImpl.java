@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService.MountProvisionListener;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 

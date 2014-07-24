@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService.MountProvisionListener;
+import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
 import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
