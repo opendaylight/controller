@@ -8,5 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
-public class SendInstallSnapshot {
+import java.io.Serializable;
+
+public class SendInstallSnapshot implements Serializable {
 }

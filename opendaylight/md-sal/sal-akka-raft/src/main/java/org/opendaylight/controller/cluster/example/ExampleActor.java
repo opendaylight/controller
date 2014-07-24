@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,10 +46,9 @@ public class ExampleActor extends RaftActor {
 
     @Override public void onReceiveCommand(Object message){
         if(message instanceof KeyValue){
-
             if(isLeader()) {
                 String persistId = Long.toString(persistIdentifier++);
-                persistData(getSender(), persistId, message);
+                persistData(getSender(), persistId, (Payload) message);
             } else {
                 if(getLeader() != null) {
                     getLeader().forward(message, getContext());
@@ -56,12 +56,13 @@ public class ExampleActor extends RaftActor {
             }
 
         } else if (message instanceof PrintState) {
-            LOG.debug("State of the node:"+getId() + " is="+state.size());
+            LOG.debug("State of the node:"+getId() + " has = "+state.size() + " entries");
 
         } else if (message instanceof PrintRole) {
             LOG.debug(getId() + " = " + getRaftState());
+        } else {
+            super.onReceiveCommand(message);
         }
-        super.onReceiveCommand(message);
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,

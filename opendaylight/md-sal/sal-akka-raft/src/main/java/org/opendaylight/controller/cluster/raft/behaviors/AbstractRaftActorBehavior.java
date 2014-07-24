@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.internal.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -347,6 +348,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         // Send a local message to the local RaftActor (it's derived class to be
         // specific to apply the log to it's index)
         context.setLastApplied(index);
+    }
+
+    protected Object fromSerializableMessage(Object serializable){
+        return SerializationUtils.fromSerializable(serializable);
     }
 
     @Override

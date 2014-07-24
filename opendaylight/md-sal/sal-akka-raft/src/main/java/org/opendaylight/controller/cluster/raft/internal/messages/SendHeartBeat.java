@@ -8,11 +8,13 @@
 
 package org.opendaylight.controller.cluster.raft.internal.messages;
 
+import java.io.Serializable;
+
 /**
  * This messages is sent to the Leader to prompt it to send a heartbeat
  * to it's followers.
  *
  * Typically the Leader to itself on a schedule
  */
-public class SendHeartBeat {
+public class SendHeartBeat implements Serializable {
 }
