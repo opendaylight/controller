@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.protobuff.ProtoBuffEncoderDecoderUtil;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
@@ -193,8 +194,10 @@ public class Leader extends AbstractRaftActorBehavior {
         return RaftState.Leader;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object message) {
+    @Override public RaftState handleMessage(ActorRef sender, Object protoBuffMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
+
+        Object message = ProtoBuffEncoderDecoderUtil.decode(protoBuffMessage);
 
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
@@ -285,13 +288,10 @@ public class Leader extends AbstractRaftActorBehavior {
                     context.getReplicatedLog().getFrom(nextIndex);
             }
 
-            followerActor.tell(
-                new AppendEntries(currentTerm(), context.getId(),
-                    prevLogIndex(nextIndex), prevLogTerm(nextIndex),
-                    entries, context.getCommitIndex()
-                ),
-                actor()
-            );
+            followerActor.tell(ProtoBuffEncoderDecoderUtil.encode(
+                new AppendEntries(currentTerm(), context.getId(), prevLogIndex(nextIndex),
+                    prevLogTerm(nextIndex), entries, context.getCommitIndex())),
+                actor());
         }
     }
 

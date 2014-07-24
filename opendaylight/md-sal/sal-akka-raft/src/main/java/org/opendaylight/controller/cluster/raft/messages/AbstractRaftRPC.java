@@ -20,5 +20,11 @@ public class AbstractRaftRPC implements RaftRPC {
         return term;
     }
 
+    // added for testing while serialize-messages=on
+    public AbstractRaftRPC() {
+    }
 
+    public void setTerm(long term) {
+        this.term = term;
+    }
 }

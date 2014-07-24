@@ -157,12 +157,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                 createActorContext();
 
             context.setLastApplied(100);
-            setLastLogEntry((MockRaftActorContext) context, 0, 0, "");
+            setLastLogEntry((MockRaftActorContext) context, 0, 0, new MockRaftActorContext.MockPayload(""));
 
             List<ReplicatedLogEntry> entries =
                 Arrays.asList(
                     (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(100, 101,
-                        "foo")
+                        new MockRaftActorContext.MockPayload("foo"))
                 );
 
             // The new commitIndex is 101
@@ -198,7 +198,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // Set the last log entry term for the receiver to be greater than
             // what we will be sending as the prevLogTerm in AppendEntries
             MockRaftActorContext.SimpleReplicatedLog mockReplicatedLog =
-                setLastLogEntry(context, 20, 0, "");
+                setLastLogEntry(context, 20, 0, new MockRaftActorContext.MockPayload(""));
 
             // AppendEntries is now sent with a bigger term
             // this will set the receivers term to be the same as the sender's term
@@ -259,20 +259,20 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             MockRaftActorContext.SimpleReplicatedLog log =
                 new MockRaftActorContext.SimpleReplicatedLog();
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, "one"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, "two"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
 
             context.setReplicatedLog(log);
 
             // Prepare the entries to be sent with AppendEntries
             List<ReplicatedLogEntry> entries = new ArrayList<>();
             entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 3, "three"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 3, new MockRaftActorContext.MockPayload("three")));
             entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 4, "four"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("four")));
 
             // Send appendEntries with the same term as was set on the receiver
             // before the new behavior was created (1 in this case)
@@ -339,20 +339,20 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             MockRaftActorContext.SimpleReplicatedLog log =
                 new MockRaftActorContext.SimpleReplicatedLog();
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, "zero"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, "one"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("one")));
             log.append(
-                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, "two"));
+                new MockRaftActorContext.MockReplicatedLogEntry(1, 2, new MockRaftActorContext.MockPayload("two")));
 
             context.setReplicatedLog(log);
 
             // Prepare the entries to be sent with AppendEntries
             List<ReplicatedLogEntry> entries = new ArrayList<>();
             entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(2, 2, "two-1"));
+                new MockRaftActorContext.MockReplicatedLogEntry(2, 2, new MockRaftActorContext.MockPayload("two-1")));
             entries.add(
-                new MockRaftActorContext.MockReplicatedLogEntry(2, 3, "three"));
+                new MockRaftActorContext.MockReplicatedLogEntry(2, 3, new MockRaftActorContext.MockPayload("three")));
 
             // Send appendEntries with the same term as was set on the receiver
             // before the new behavior was created (1 in this case)
@@ -379,9 +379,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             assertNotNull(log.get(2));
 
             // Check that the entry at index 2 has the new data
-            assertEquals("one", log.get(1).getData());
-            assertEquals("two-1", log.get(2).getData());
-            assertEquals("three", log.get(3).getData());
+            assertEquals("one", log.get(1).getData().toString());
+            assertEquals("two-1", log.get(2).getData().toString());
+            assertEquals("three", log.get(3).getData().toString());
             assertNotNull(log.get(3));
 
             // Also expect an AppendEntriesReply to be sent where success is false
