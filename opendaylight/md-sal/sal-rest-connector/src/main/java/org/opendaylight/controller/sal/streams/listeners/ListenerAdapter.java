@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.streams.listeners;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.netty.channel.Channel;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.parsers.DocumentBuilder;
@@ -85,12 +83,12 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param streamName
      *            The name of the stream.
      */
-    ListenerAdapter(final YangInstanceIdentifier path, final String streamName) {
+    ListenerAdapter(final YangInstanceIdentifier path, final String streamName, final EventBus eventBus) {
         Preconditions.checkNotNull(path);
         Preconditions.checkArgument(streamName != null && !streamName.isEmpty());
         this.path = path;
         this.streamName = streamName;
-        eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+        this.eventBus = eventBus;
         eventBusChangeRecorder = new EventBusChangeRecorder();
         eventBus.register(eventBusChangeRecorder);
     }

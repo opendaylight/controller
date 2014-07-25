@@ -12,7 +12,9 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.eventbus.AsyncEventBus;
 import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -66,7 +68,7 @@ public class URIParametersParsing {
         final String datastoreValue = datastore == null ? "CONFIGURATION" : datastore;
         final String scopeValue = scope == null ? "BASE" : scope + "";
         Notificator.createListener(iiBuilder.build(), "dummyStreamName/datastore=" + datastoreValue + "/scope="
-                + scopeValue);
+                + scopeValue, new AsyncEventBus(Executors.newSingleThreadExecutor()));
 
         UriInfo mockedUriInfo = mock(UriInfo.class);
         MultivaluedMap<String, String> mockedMultivaluedMap = mock(MultivaluedMap.class);
@@ -75,8 +77,8 @@ public class URIParametersParsing {
 
         when(mockedUriInfo.getQueryParameters(eq(false))).thenReturn(mockedMultivaluedMap);
 
-         UriBuilder uriBuilder = UriBuilder.fromUri("www.whatever.com");
-         when(mockedUriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder);
+        UriBuilder uriBuilder = UriBuilder.fromUri("www.whatever.com");
+        when(mockedUriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder);
 
         restconf.invokeRpc("sal-remote:create-data-change-event-subscription", prepareRpcNode(datastore, scope),
                 mockedUriInfo);
@@ -93,7 +95,8 @@ public class URIParametersParsing {
                 "2014-01-14", "input"));
         inputBuilder.addLeaf(
                 QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "2014-01-14", "path"),
-                YangInstanceIdentifier.builder().node(QName.create("urn:opendaylight:inventory", "2013-08-19", "nodes")).build());
+                YangInstanceIdentifier.builder()
+                        .node(QName.create("urn:opendaylight:inventory", "2013-08-19", "nodes")).build());
         inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "datastore"), datastore);
         inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "scope"), scope);
         return inputBuilder.toInstance();
