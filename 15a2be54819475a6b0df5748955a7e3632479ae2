@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f67436ff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTerm.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T20:51:55Z",
+      "side": 1,
+      "message": "Can we document why we would use this as opposed to just update() and when?",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b6622e3c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T20:51:55Z",
+      "side": 1,
+      "message": "This appears to not be used.",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d667b24b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T20:51:55Z",
+      "side": 1,
+      "message": "Can we provide some information as to when we should use removeFrom() vs. removeFromAndPersist()?",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7658268a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T20:51:55Z",
+      "side": 1,
+      "message": "This comment is now out of date.",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
