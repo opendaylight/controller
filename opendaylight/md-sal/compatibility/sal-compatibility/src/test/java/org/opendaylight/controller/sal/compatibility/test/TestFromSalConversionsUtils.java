@@ -242,30 +242,29 @@ public class TestFromSalConversionsUtils {
 
     private void checkOdActions(
             List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actions) {
-        checkOdAction(actions, FloodActionCase.class, false);
-        checkOdAction(actions, FloodAllActionCase.class, false);
-        checkOdAction(actions, HwPathActionCase.class, false);
-        checkOdAction(actions, LoopbackActionCase.class, false);
-        checkOdAction(actions, PopVlanActionCase.class, false);
-        checkOdAction(actions, PushVlanActionCase.class, true);
-        checkOdAction(actions, SetDlDstActionCase.class, true);
-        checkOdAction(actions, SetDlSrcActionCase.class, true);
-        checkOdAction(actions, SetDlTypeActionCase.class, true);
-        checkOdAction(actions, SetNwTosActionCase.class, true);
-        checkOdAction(actions, SetNwDstActionCase.class, true);
-        checkOdAction(actions, SetNwSrcActionCase.class, true);
-        checkOdAction(actions, SetNextHopActionCase.class, true);
-        checkOdAction(actions, SetTpDstActionCase.class, true);
-        checkOdAction(actions, SetTpSrcActionCase.class, true);
-        checkOdAction(actions, SetVlanCfiActionCase.class, true);
-        checkOdAction(actions, SetVlanIdActionCase.class, true);
-        checkOdAction(actions, SetVlanPcpActionCase.class, true);
-        checkOdAction(actions, SwPathActionCase.class, false);
+        checkOdAction(actions, FloodActionCase.class);
+        checkOdAction(actions, FloodAllActionCase.class);
+        checkOdAction(actions, HwPathActionCase.class);
+        checkOdAction(actions, LoopbackActionCase.class);
+        checkOdAction(actions, PopVlanActionCase.class);
+        checkOdAction(actions, PushVlanActionCase.class);
+        checkOdAction(actions, SetDlDstActionCase.class);
+        checkOdAction(actions, SetDlSrcActionCase.class);
+        checkOdAction(actions, SetDlTypeActionCase.class);
+        checkOdAction(actions, SetNwTosActionCase.class);
+        checkOdAction(actions, SetNwDstActionCase.class);
+        checkOdAction(actions, SetNwSrcActionCase.class);
+        checkOdAction(actions, SetNextHopActionCase.class);
+        checkOdAction(actions, SetTpDstActionCase.class);
+        checkOdAction(actions, SetTpSrcActionCase.class);
+        checkOdAction(actions, SetVlanCfiActionCase.class);
+        checkOdAction(actions, SetVlanIdActionCase.class);
+        checkOdAction(actions, SetVlanPcpActionCase.class);
+        checkOdAction(actions, SwPathActionCase.class);
     }
 
     private void checkOdAction(
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actions, Class<?> cl,
-            boolean b) {
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actions, Class<?> cl) {
         int numOfFoundActions = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action action : actions) {
             org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action innerAction = action
