@@ -16,6 +16,24 @@
       "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4baf7b2a",
+        "filename": "opendaylight/md-sal/model/model-flow-statistics/src/main/yang/opendaylight-flow-statistics.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2014-07-25T14:16:18Z",
+      "side": 0,
+      "message": "Hi Anil,\nthe only reason I had: when supporting vendor extensions there is vendor augmentation hooked under flow model. In order to pass this augment to md-sal via notification the appropriate augmentation must be used. \nSo we have general augmentation point hooked under the notification model  and vendor augmentation hooked somewhere under the general augmentation.\nNow if such a flow arrives to statistics manager we would have to pull those augmentations and hook their content under statistics flow augment. Which is of different class and here we have no access to vendor class.\n\nThis was the first idea Tony came with and of course if you have a better solution which enables duplicate flow model for statistics and expose vendor augmented models via restconf then I am all ear.",
+      "parentUuid": "fa82b9bf_eb520fdd",
+      "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
