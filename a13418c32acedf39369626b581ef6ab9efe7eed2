@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_56408233",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T17:48:12Z",
+      "side": 1,
+      "message": "If possible, it\u0027s nice to not have \"non changes\" in the patch. Getting the whitespace the same in both places would help.",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16467a4f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T17:48:12Z",
+      "side": 1,
+      "message": "I\u0027ll leave this up to you, but I think with adequate walking through via comments, this could stay as one method and it sums up the \"core\" of RAFT nicely in one place.",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d67b328a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T17:48:12Z",
+      "side": 1,
+      "message": "It would be great if we didn\u0027t nave \"non changes\". I\u0027m not sure what\u0027s actually changed here if anything.",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_766ca6d0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T17:48:12Z",
+      "side": 1,
+      "message": "We talked about this in the code walkthrough and I\u0027ll leave it alone if you don\u0027t want to do it, but here goes.\n\nI think it would be clearer if we changed this and the next if to \"if( appendEntries.getPrevLogIndex() !\u003d -1 \u0026\u0026 previousEntry \u003d\u003d )\" and the documentation would be something like \"The follower\u0027s log is out of sync because the leader has an entry at prevLogIndex but either our log is empty or does not yet have an entry at  that index.\"",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5695e284",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T17:48:12Z",
+      "side": 1,
+      "message": "Again. It would be great if we didn\u0027t have non-changes.",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
