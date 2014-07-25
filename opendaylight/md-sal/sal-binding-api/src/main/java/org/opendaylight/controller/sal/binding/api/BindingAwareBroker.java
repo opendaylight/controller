@@ -168,6 +168,9 @@ public interface BindingAwareBroker {
          * Returns the implemented RPC service interface.
          */
         Class<T> getServiceType();
+
+        @Override
+        void close();
     }
 
     /**
