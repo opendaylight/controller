@@ -42,27 +42,22 @@ public interface Provider {
     public void onSessionInitiated(ProviderSession session);
 
     /**
-     * Gets a set of implementations of provider functionality to be registered
-     * into system during the provider registration to the SAL.
+     * @deprecated - No longer used or needed
      *
-     * <p>
-     * This method is invoked by {@link Broker#registerProvider(Provider)} to
-     * learn the initial provided functionality
-     *
-     * @return Set of provider's functionality.
+     * Suggested implementation until removed:
+     * @code {
+     * public Collection<ProviderFunctionality> getProviderFunctionality() {
+     *  return Collections.emptySet();
+     * }
+     * }
      */
+    @Deprecated
     public Collection<ProviderFunctionality> getProviderFunctionality();
 
     /**
-     * Functionality provided by the {@link Provider}
-     *
-     * <p>
-     * Marker interface used to mark the interfaces describing specific
-     * functionality which could be exposed by providers to other components.
-     *
-
-     *
+     * @deprecated - no longer used or needed
      */
+    @Deprecated
     public interface ProviderFunctionality {
 
     }
