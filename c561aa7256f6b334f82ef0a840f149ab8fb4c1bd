@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_36b29e94",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/TestDriver.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:57:21Z",
+      "side": 1,
+      "message": "createNodes",
+      "revId": "c561aa7256f6b334f82ef0a840f149ab8fb4c1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f6a7564e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/TestDriver.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:57:21Z",
+      "side": 1,
+      "message": "Isn\u0027t this exactly the same as addNodes, but assumes that allPeers is empty and so could be removed?",
+      "revId": "c561aa7256f6b334f82ef0a840f149ab8fb4c1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36793ec8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:57:21Z",
+      "side": 1,
+      "message": "I think this is unsafe, but a later patch makes that clear.",
+      "revId": "c561aa7256f6b334f82ef0a840f149ab8fb4c1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
