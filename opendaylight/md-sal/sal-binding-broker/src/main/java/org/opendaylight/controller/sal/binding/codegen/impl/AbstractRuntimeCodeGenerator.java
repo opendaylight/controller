@@ -136,22 +136,17 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
             return invoker;
         }
 
-        utils.getLock().lock();
-        try {
-            synchronized (utils) {
-                invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
-                    @Override
-                    public RuntimeGeneratedInvokerPrototype get() {
-                        return generateListenerInvoker(cls);
-                    }
-                });
-            }
-
-            invokerClasses.put(cls, invoker);
-            return invoker;
-        } finally {
-            utils.getLock().unlock();
+        synchronized (utils) {
+            invoker = ClassLoaderUtils.withClassLoader(cls.getClassLoader(), new Supplier<RuntimeGeneratedInvokerPrototype>() {
+                @Override
+                public RuntimeGeneratedInvokerPrototype get() {
+                    return generateListenerInvoker(cls);
+                }
+            });
         }
+
+        invokerClasses.put(cls, invoker);
+        return invoker;
     }
 
     @Override
@@ -161,13 +156,8 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
 
     @Override
     public final <T extends RpcService> T getDirectProxyFor(final Class<T> serviceType) {
-        utils.getLock().lock();
-        try {
-            synchronized (utils) {
-                return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
-            }
-        } finally {
-            utils.getLock().unlock();
+        synchronized (utils) {
+            return ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), directProxySupplier(serviceType));
         }
     }
 
@@ -184,14 +174,9 @@ abstract class AbstractRuntimeCodeGenerator implements org.opendaylight.controll
             }
         });
 
-        utils.getLock().lock();
-        try {
-            synchronized (utils) {
-                final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
-                return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
-            }
-        } finally {
-            utils.getLock().unlock();
+        synchronized (utils) {
+            final T instance = ClassLoaderUtils.withClassLoader(serviceType.getClassLoader(), routerSupplier(serviceType, metadata));
+            return new RpcRouterCodegenInstance<T>(name, serviceType, instance, metadata.getContexts());
         }
     }
 
