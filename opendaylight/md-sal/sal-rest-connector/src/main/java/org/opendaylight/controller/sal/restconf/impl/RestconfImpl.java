@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.AsyncEventBus;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -501,7 +503,8 @@ public class RestconfImpl implements RestconfService {
                 null, output, null, null);
 
         if (!Notificator.existListenerFor(streamName)) {
-            Notificator.createListener(pathIdentifier, streamName);
+            Notificator.createListener(pathIdentifier, streamName,
+                    new AsyncEventBus(Executors.newSingleThreadExecutor()));
         }
 
         return new StructuredData(responseData, rpc.getOutput(), null, prettyPrint);
@@ -634,7 +637,8 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                    .getInstanceIdentifier());
             data = broker.readConfigurationData(mountPoint, normalizedII);
         } else {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -697,7 +701,8 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                    .getInstanceIdentifier());
             data = broker.readOperationalData(mountPoint, normalizedII);
         } else {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -732,7 +737,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPut(mountPoint, normalizedII, datastoreNormalizedNode).get();
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -844,7 +850,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -888,7 +895,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
 
             } else {
@@ -910,7 +918,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataDelete(mountPoint, normalizedII);
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -1410,7 +1419,8 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode, final DataSchemaNode schema) {
+    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode,
+            final DataSchemaNode schema) {
         Iterable<Node<?>> nodes = null;
         if (dataNode == null) {
             throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
@@ -1442,7 +1452,8 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to correctly interpret data."));
     }
 
-    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode, final DataSchemaNode schema) {
+    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode,
+            final DataSchemaNode schema) {
         List<Node<?>> lst = new ArrayList<Node<?>>();
         lst.add(compNode);
         if (schema instanceof ContainerSchemaNode) {
@@ -1459,7 +1470,8 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to translate specified data to datastore readable form."));
     }
 
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(final InstanceIdWithSchemaNode iiWithSchemaNode) {
+    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
+            final InstanceIdWithSchemaNode iiWithSchemaNode) {
         return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
     }
 
@@ -1470,8 +1482,8 @@ public class RestconfImpl implements RestconfService {
                 iiWithSchemaNode.getMountPoint());
     }
 
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(final YangInstanceIdentifier instIdentifier,
-            final boolean unwrapLastListNode) {
+    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(
+            final YangInstanceIdentifier instIdentifier, final boolean unwrapLastListNode) {
         Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
         final List<PathArgument> result = new ArrayList<PathArgument>();
         final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
