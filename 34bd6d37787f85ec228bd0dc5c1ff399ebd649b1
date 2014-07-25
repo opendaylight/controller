@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb520fdd",
+        "filename": "opendaylight/md-sal/model/model-flow-statistics/src/main/yang/opendaylight-flow-statistics.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-07-25T10:07:32Z",
+      "side": 0,
+      "message": "Hi Michal, any specific reason for removing this flow information? When initially i was implementing this, i also thought of removing it because i felt its duplicate data, but then i was given a suggestion that we should augment all the details which we get from switch because it might be required for various purpose. One use case was for flow reconciliation purpose. Other usecase was, what if someone manually added flow and that doesn\u0027t exist in config data base? Current We augment those flows with specific flow-id in the operational data base. So if you remove this flow information, you will just augment the statistics and there will be no flow details for these kind of flows, which i feel don\u0027t make sense. Let me know your thoughts.",
+      "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
