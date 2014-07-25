@@ -508,9 +508,9 @@ public class ControllerContext implements SchemaContextListener {
         DataSchemaNode ret = container.getDataChildByName(name);
         if (ret == null) {
             for (final DataSchemaNode node : container.getChildNodes()) {
-                if ((node instanceof ChoiceCaseNode)) {
-                    final ChoiceCaseNode caseNode = ((ChoiceCaseNode) node);
-                    DataSchemaNode childByQName = ControllerContext.childByQName(caseNode, name);
+                if ((node instanceof ChoiceNode)) {
+                    final ChoiceNode choiceNode = ((ChoiceNode) node);
+                    DataSchemaNode childByQName = ControllerContext.childByQName(choiceNode, name);
                     if (childByQName != null) {
                         return childByQName;
                     }
