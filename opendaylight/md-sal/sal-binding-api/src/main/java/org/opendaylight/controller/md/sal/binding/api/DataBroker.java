@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.api;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainFactory;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -34,4 +35,7 @@ public interface DataBroker extends TransactionFactory, AsyncDataBroker<Instance
     @Override
     ListenerRegistration<DataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
             InstanceIdentifier<?> path, DataChangeListener listener, DataChangeScope triggeringScope);
+
+    @Override
+    BindingTransactionChain createTransactionChain(TransactionChainListener listener);
 }
