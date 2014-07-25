@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f6d8b61f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:32:21Z",
+      "side": 1,
+      "message": "I *think* you mean remove all entries from the log with index \u003e\u003d the specified index, but it\u0027d be nice to be very concrete.",
+      "revId": "0abae0e57c517207381efa969097f122c64bf776",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
