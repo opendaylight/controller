@@ -224,11 +224,17 @@ public final class XmlElement {
         });
     }
 
+    /**
+     *
+     * @param tagName tag name without prefix
+     * @return
+     */
     public List<XmlElement> getChildElements(final String tagName) {
         return getChildElementsInternal(new ElementFilteringStrategy() {
             @Override
             public boolean accept(Element e) {
-                return e.getTagName().equals(tagName);
+                // localName returns pure localName without prefix
+                return e.getLocalName().equals(tagName);
             }
         });
     }
