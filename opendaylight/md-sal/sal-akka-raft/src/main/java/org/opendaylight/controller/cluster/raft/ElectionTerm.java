@@ -30,9 +30,8 @@ public interface ElectionTerm {
     String getVotedFor();
 
     /**
-     * Called when we need to update the current term either because we received
-     * a message from someone with a more uptodate term or because we just voted
-     * for someone
+     * To be called mainly when we are recovering in-memory election state from
+     * persistent storage
      *
      * @param currentTerm
      * @param votedFor
@@ -40,6 +39,13 @@ public interface ElectionTerm {
     void update(long currentTerm, String votedFor);
 
     /**
+     * To be called when we need to update the current term either because we
+     * received a message from someone with a more up-to-date term or because we
+     * just voted for someone
+     * <p>
+     * This information needs to be persisted so that on recovery the replica
+     * can start itself in the right term and know if it has already voted in
+     * that term or not
      *
      * @param currentTerm
      * @param votedFor

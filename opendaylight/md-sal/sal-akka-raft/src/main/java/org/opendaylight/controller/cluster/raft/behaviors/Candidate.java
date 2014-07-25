@@ -158,6 +158,8 @@ public class Candidate extends AbstractRaftActorBehavior {
         context.getLogger().debug("Starting new term " + (currentTerm+1));
 
         // Request for a vote
+        // TODO: Retry request for vote if replies do not arrive in a reasonable
+        // amount of time TBD
         for (ActorSelection peerActor : peerToActor.values()) {
             peerActor.tell(new RequestVote(
                     context.getTermInformation().getCurrentTerm(),

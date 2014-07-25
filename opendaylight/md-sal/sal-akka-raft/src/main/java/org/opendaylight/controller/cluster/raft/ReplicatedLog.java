@@ -44,7 +44,10 @@ public interface ReplicatedLog {
     long lastTerm();
 
     /**
-     * Remove all the entries from the logs >= index
+     * To be called when we need to remove entries from the in-memory log.
+     * This method will remove all entries >= index. This method should be used
+     * during recovery to appropriately trim the log based on persisted
+     * information
      *
      * @param index the index of the log entry
      */
@@ -52,10 +55,14 @@ public interface ReplicatedLog {
 
 
     /**
-     * Remove all entries starting from the specified entry and persist the
-     * information to disk
+     * To be called when we need to remove entries from the in-memory log and we
+     * need that information persisted to disk. This method will remove all
+     * entries >= index.
+     * <p>
+     * The persisted information would then be used during recovery to properly
+     * reconstruct the state of the in-memory replicated log
      *
-     * @param index
+     * @param index the index of the log entry
      */
     void removeFromAndPersist(long index);
 

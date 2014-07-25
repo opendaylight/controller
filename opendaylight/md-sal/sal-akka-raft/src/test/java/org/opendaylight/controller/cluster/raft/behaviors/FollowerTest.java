@@ -378,9 +378,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             assertEquals(4, log.last().getIndex() + 1);
             assertNotNull(log.get(2));
 
-            // Check that the entry at index 2 has the new data
+
             assertEquals("one", log.get(1).getData());
+
+            // Check that the entry at index 2 has the new data
             assertEquals("two-1", log.get(2).getData());
+
             assertEquals("three", log.get(3).getData());
             assertNotNull(log.get(3));
 
