@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
@@ -20,13 +18,15 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
+import java.util.Collection;
+import java.util.Collections;
+
+public class RestconfProvider implements Provider, ServiceTrackerCustomizer<Broker, Broker>, AutoCloseable {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
 
@@ -48,7 +48,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         ControllerContext.getInstance().setMountService(session.getService(MountService.class));
     }
 
-    @Override
+
     public void start(BundleContext context) throws Exception {
         String websocketPortStr = context.getProperty(WebSocketServer.WEBSOCKET_SERVER_CONFIG_PROPERTY);
         int websocketPort = (websocketPortStr != null && !"".equals(websocketPortStr)) ? Integer
@@ -61,7 +61,7 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         brokerServiceTrancker.open();
     }
 
-    @Override
+
     public void stop(BundleContext context) {
         if (listenerRegistration != null) {
             try {
@@ -98,4 +98,18 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         BrokerFacade.getInstance().setDataService(null);
         ControllerContext.getInstance().setSchemas(null);
     }
+
+  @Override
+  public void close() throws Exception {
+    stop(bundleContext);
+    webSocketServerThread.interrupt();
+  }
+
+  public Thread getWebSocketServerThread() {
+    return webSocketServerThread;
+  }
+
+  public void setWebSocketServerThread(Thread webSocketServerThread) {
+    this.webSocketServerThread = webSocketServerThread;
+  }
 }
