@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.streams.listeners;
 
+import com.google.common.eventbus.EventBus;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,8 +76,9 @@ public class Notificator {
      *            The name of the stream.
      * @return New {@link ListenerAdapter} listener from {@link InstanceIdentifier} path and stream name.
      */
-    public static ListenerAdapter createListener(InstanceIdentifier path, String streamName) {
-        ListenerAdapter listener = new ListenerAdapter(path, streamName);
+    public static ListenerAdapter createListener(final InstanceIdentifier path, final String streamName,
+            final EventBus eventBus) {
+        ListenerAdapter listener = new ListenerAdapter(path, streamName, eventBus);
         try {
             lock.lock();
             listenersByInstanceIdentifier.put(path, listener);
