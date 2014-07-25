@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9644ca1b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "You\u0027ve changed the format but not the prompt. This is probably wrong.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_564ac226",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "Is the assumption that there are no possible failures in doing this?",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1650bad2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "should be else if",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f669968c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "Indentation should match the previous line.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36229e52",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "The two above lines probably want to be one.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_969cca5e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "Either comment or name should reflect that this isn\u0027t actually to schedule installing the snapshot but to check if we need to.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d696d23e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "This should probably be installSnapshotsIfNeeded or say that in the comments.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76aee682",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T19:13:19Z",
+      "side": 1,
+      "message": "Again either change name or give documentation that indicates this isn\u0027t guaranteed to result in a snapshot being installed.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
