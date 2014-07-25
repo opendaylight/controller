@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_56c3a288",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T18:08:48Z",
+      "side": 1,
+      "message": "This patch also seems to refactor the handling of the Replicate message as well.",
+      "revId": "b3977a89f3bac527f21d8bd5283473290fea065a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36c61e9b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T18:08:48Z",
+      "side": 1,
+      "message": "Since there\u0027s also a lot of added comments, it might be nice to have that noted here.",
+      "revId": "b3977a89f3bac527f21d8bd5283473290fea065a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
