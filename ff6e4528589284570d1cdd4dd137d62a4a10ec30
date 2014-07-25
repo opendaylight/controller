@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_16499ab6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:13:51Z",
+      "side": 1,
+      "message": "It would be nice to have a comment explaining this derivation. Something like \"a majority is (#peers/2)+1 and peerPaths doesn\u0027t include us, so it is (peerPaths.size()+1)/2 + 1\"\n\nAlso, now that I think about it, sometimes, you shouldn\u0027t count yourself as a peer. Specifically when joining.",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76cfc629",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:13:51Z",
+      "side": 1,
+      "message": "should probably finish with \", so do not grant our vote\"",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_96d4cabd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:13:51Z",
+      "side": 1,
+      "message": "Presumably you want to give some time to let others respond to you to see if there\u0027s already a cluster going.",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36ddbee0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:13:51Z",
+      "side": 1,
+      "message": "When we start to allow adding of peers, I think a new peer should not be allowed to vote for himself.",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
