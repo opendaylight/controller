@@ -38,21 +38,22 @@ public interface Consumer {
     public void onSessionInitiated(ConsumerSession session);
 
     /**
-     * Get a set of implementations of consumer functionality to be registered
-     * into system during the consumer registration to the SAL.
-     *
-     * This method is invoked by {@link Broker#registerConsumer(Consumer)}.
-     *
-     * @return Set of consumer functionality.
+     * @deprecated - no longer used or needed
+     * *
+     * Suggested implementation until removed:
+     * @code {
+     * public Collection<ConsumerFunctionality> getConsumerFunctionality() {
+     *    return Collections.emptySet();
+     * }
+     * }
      */
+    @Deprecated
     public Collection<ConsumerFunctionality> getConsumerFunctionality();
 
     /**
-     * The marker interface for the interfaces describing the consumer
-     * functionality contracts.
-     *
-     *
+     * @deprecated - no longer used or needed
      */
+    @Deprecated
     public interface ConsumerFunctionality {
 
     }
