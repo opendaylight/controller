@@ -8,11 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.util.concurrent.Futures;
-
-import java.util.concurrent.Future;
-
-import javax.ws.rs.core.Response.Status;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
@@ -31,6 +26,9 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.util.concurrent.Future;
 
 public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
