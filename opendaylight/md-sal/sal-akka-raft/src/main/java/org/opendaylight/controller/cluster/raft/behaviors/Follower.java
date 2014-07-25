@@ -40,19 +40,32 @@ public class Follower extends AbstractRaftActorBehavior {
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
+        // TODO : Refactor this method into a bunch of smaller methods
+        // to make it easier to read. Before refactoring ensure tests
+        // cover the code properly
+
+        // 1. Reply false if term < currentTerm (§5.1)
+        // This is handled in the appendEntries method of the base class
+
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
 
         // 2. Reply false if log doesn’t contain an entry at prevLogIndex
         // whose term matches prevLogTerm (§5.3)
+
         ReplicatedLogEntry previousEntry = context.getReplicatedLog()
             .get(appendEntries.getPrevLogIndex());
 
 
-        boolean noMatchingTerms = true;
+        boolean outOfSync = true;
 
+        // First check if the logs are in sync or not
         if (lastIndex() == -1
             && appendEntries.getPrevLogIndex() != -1) {
+
+            // The follower's log is out of sync because the leader does have
+            // an entry at prevLogIndex and this follower has no entries in
+            // it's log.
 
             context.getLogger().debug(
                 "The followers log is empty and the senders prevLogIndex is {}",
@@ -62,6 +75,9 @@ public class Follower extends AbstractRaftActorBehavior {
             && appendEntries.getPrevLogIndex() != -1
             && previousEntry == null) {
 
+            // The follower's log is out of sync because the Leader's
+            // prevLogIndex entry was not found in it's log
+
             context.getLogger().debug(
                 "The log is not empty but the prevLogIndex {} was not found in it",
                 appendEntries.getPrevLogIndex());
@@ -70,15 +86,21 @@ public class Follower extends AbstractRaftActorBehavior {
             && previousEntry != null
             && previousEntry.getTerm()!= appendEntries.getPrevLogTerm()) {
 
+            // The follower's log is out of sync because the Leader's
+            // prevLogIndex entry does exist in the follower's log but it has
+            // a different term in it
+
             context.getLogger().debug(
                 "Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}"
                 , previousEntry.getTerm()
                 , appendEntries.getPrevLogTerm());
         } else {
-            noMatchingTerms = false;
+            outOfSync = false;
         }
 
-        if (noMatchingTerms) {
+        if (outOfSync) {
+            // We found that the log was out of sync so just send a negative
+            // reply and return
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
@@ -98,6 +120,9 @@ public class Follower extends AbstractRaftActorBehavior {
             // follow it (§5.3)
             int addEntriesFrom = 0;
             if (context.getReplicatedLog().size() > 0) {
+
+                // Find the entry up until which the one that is not in the
+                // follower's log
                 for (int i = 0;
                      i < appendEntries.getEntries()
                          .size(); i++, addEntriesFrom++) {
@@ -111,20 +136,20 @@ public class Follower extends AbstractRaftActorBehavior {
                         break;
                     }
 
-                    if (newEntry != null && newEntry.getTerm() == matchEntry
+                    if (newEntry.getTerm() == matchEntry
                         .getTerm()) {
                         continue;
                     }
-                    if (newEntry != null && newEntry.getTerm() != matchEntry
-                        .getTerm()) {
-                        context.getLogger().debug(
-                            "Removing entries from log starting at "
-                                + matchEntry.getIndex()
-                        );
-                        context.getReplicatedLog()
-                            .removeFromAndPersist(matchEntry.getIndex());
-                        break;
-                    }
+
+                    context.getLogger().debug(
+                        "Removing entries from log starting at "
+                            + matchEntry.getIndex()
+                    );
+
+                    // Entries do not match so remove all subsequent entries
+                    context.getReplicatedLog()
+                        .removeFromAndPersist(matchEntry.getIndex());
+                    break;
                 }
             }
 
@@ -136,6 +161,7 @@ public class Follower extends AbstractRaftActorBehavior {
             // 4. Append any new entries not already in the log
             for (int i = addEntriesFrom;
                  i < appendEntries.getEntries().size(); i++) {
+
                 context.getLogger().debug(
                     "Append entry to log " + appendEntries.getEntries().get(i).getData()
                         .toString()

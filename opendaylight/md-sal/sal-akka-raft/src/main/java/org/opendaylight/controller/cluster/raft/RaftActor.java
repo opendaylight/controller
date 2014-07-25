@@ -156,20 +156,26 @@ public abstract class RaftActor extends UntypedPersistentActor {
             trimPersistentData(success.metadata().sequenceNr());
 
         } else if (message instanceof SaveSnapshotFailure) {
+
             // TODO: Handle failure in saving the snapshot
-        } else if (message instanceof FindLeader){
-            getSender().tell(new FindLeaderReply(
-                context.getPeerAddress(currentBehavior.getLeaderId())),
-                getSelf());
+            // Maybe do retries on failure
 
         } else if (message instanceof AddRaftPeer){
+
+            // FIXME : Do not add raft peers like this.
+            // When adding a new Peer we have to ensure that the a majority of
+            // the peers know about the new Peer. Doing it this way may cause
+            // a situation where multiple Leaders may emerge
             AddRaftPeer arp = (AddRaftPeer)message;
            context.addToPeers(arp.getName(), arp.getAddress());
 
         } else if (message instanceof RemoveRaftPeer){
+
             RemoveRaftPeer rrp = (RemoveRaftPeer)message;
             context.removePeer(rrp.getName());
+
         } else {
+
             RaftState state =
                 currentBehavior.handleMessage(getSender(), message);
             currentBehavior = switchBehavior(state);

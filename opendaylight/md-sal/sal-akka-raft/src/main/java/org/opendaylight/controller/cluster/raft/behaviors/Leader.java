@@ -136,6 +136,13 @@ public class Leader extends AbstractRaftActorBehavior {
             followerLogInformation
                 .setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
         } else {
+
+            // TODO: When we find that the follower is out of sync with the
+            // Leader we simply decrement that followers next index by 1.
+            // Would it be possible to do better than this? The RAFT spec
+            // does not explicitly deal with it but may be something for us to
+            // think about
+
             followerLogInformation.decrNextIndex();
         }
 
@@ -214,7 +221,6 @@ public class Leader extends AbstractRaftActorBehavior {
             } else if (message instanceof Replicate) {
                 replicate((Replicate) message);
             } else if (message instanceof InstallSnapshotReply){
-                // FIXME : Should I be checking the term here too?
                 handleInstallSnapshotReply(
                     (InstallSnapshotReply) message);
             }
@@ -280,6 +286,12 @@ public class Leader extends AbstractRaftActorBehavior {
             List<ReplicatedLogEntry> entries = Collections.emptyList();
 
             if(context.getReplicatedLog().isPresent(nextIndex)){
+                // TODO: Instead of sending all entries from nextIndex
+                // only send a fixed number of entries to each follower
+                // This is to avoid the situation where there are a lot of
+                // entries to install for a fresh follower or to a follower
+                // that has fallen too far behind with the log but yet is not
+                // eligible to receive a snapshot
                 entries =
                     context.getReplicatedLog().getFrom(nextIndex);
             }
@@ -294,6 +306,11 @@ public class Leader extends AbstractRaftActorBehavior {
         }
     }
 
+    /**
+     * An installSnapshot is scheduled at a interval that is a multiple of
+     * a HEARTBEAT_INTERVAL. This is to avoid the need to check for installing
+     * snapshots at every heartbeat.
+     */
     private void installSnapshot(){
         for (String followerId : followerToActor.keySet()) {
             ActorSelection followerActor =
@@ -303,8 +320,6 @@ public class Leader extends AbstractRaftActorBehavior {
                 followerToLog.get(followerId);
 
             long nextIndex = followerLogInformation.getNextIndex().get();
-
-            List<ReplicatedLogEntry> entries = Collections.emptyList();
 
             if(!context.getReplicatedLog().isPresent(nextIndex) && context.getReplicatedLog().isInSnapshot(nextIndex)){
                 followerActor.tell(
