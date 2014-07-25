@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_368b7ec4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-25T21:35:10Z",
+      "side": 1,
+      "message": "It would be useful to add another line that says \"refactoring so that the state is managed...\"",
+      "revId": "f2edf7c815e3fe096335e6b4218335b0061c7396",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
