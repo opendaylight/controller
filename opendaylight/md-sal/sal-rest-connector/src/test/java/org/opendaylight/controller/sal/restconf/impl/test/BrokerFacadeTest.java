@@ -21,7 +21,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.util.concurrent.Futures;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -236,7 +238,7 @@ public class BrokerFacadeTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRegisterToListenDataChanges() {
-        ListenerAdapter listener = Notificator.createListener(instanceID, "stream");
+        ListenerAdapter listener = Notificator.createListener(instanceID, "stream",new AsyncEventBus(Executors.newSingleThreadExecutor()));
 
         ListenerRegistration<DOMDataChangeListener> mockRegistration = mock(ListenerRegistration.class);
 
