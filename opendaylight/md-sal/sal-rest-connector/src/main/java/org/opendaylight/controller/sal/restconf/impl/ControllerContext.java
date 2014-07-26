@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 import java.io.UnsupportedEncodingException;
@@ -25,13 +26,14 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -90,7 +92,8 @@ public class ControllerContext implements SchemaContextListener {
 
     private final Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
 
-    private final Map<QName, RpcDefinition> qnameToRpc = new ConcurrentHashMap<>();
+    private final AtomicReference<Map<QName, RpcDefinition>> qnameToRpc =
+            new AtomicReference<>(Collections.<QName, RpcDefinition>emptyMap());
 
     private volatile SchemaContext globalSchema;
     private volatile MountService mountService;
@@ -852,20 +855,22 @@ public class ControllerContext implements SchemaContextListener {
 
     public RpcDefinition getRpcDefinition(final String name) {
         final QName validName = this.toQName(name);
-        return validName == null ? null : this.qnameToRpc.get(validName);
+        return validName == null ? null : this.qnameToRpc.get().get(validName);
     }
 
     @Override
     public void onGlobalContextUpdated(final SchemaContext context) {
         if (context != null) {
-            this.qnameToRpc.clear();
-            this.setGlobalSchema(context);
-            Set<RpcDefinition> _operations = context.getOperations();
-            for (final RpcDefinition operation : _operations) {
-                {
-                    this.qnameToRpc.put(operation.getQName(), operation);
-                }
+            final Collection<RpcDefinition> defs = context.getOperations();
+            final Map<QName, RpcDefinition> newMap = new HashMap<>(defs.size());
+
+            for (final RpcDefinition operation : defs) {
+                newMap.put(operation.getQName(), operation);
             }
+
+            // FIXME: still not completely atomic
+            this.qnameToRpc.set(ImmutableMap.copyOf(newMap));
+            this.setGlobalSchema(context);
         }
     }
 
