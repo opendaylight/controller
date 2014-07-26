@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a3d50b1d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T22:12:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_16499ab6",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_76cfc629",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-25T21:13:51Z",
       "side": 1,
       "message": "should probably finish with \", so do not grant our vote\"",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c3da8f4b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T22:12:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_76cfc629",
       "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_63db834f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T22:12:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_96d4cabd",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_36ddbee0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-25T21:13:51Z",
       "side": 1,
       "message": "When we start to allow adding of peers, I think a new peer should not be allowed to vote for himself.",
+      "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_83e007fb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T22:12:00Z",
+      "side": 1,
+      "message": "The spec says the that the Candidate first votes for itself and then seeks votes. I believe the way AddRaftPeer should work is like so. A client sends an AddRaftPeer message. This arrives at the current Leader who replicates this information using AppendEntries. When the RaftPeer addition has been replicated the leader sends a response to the client who then puts the new RaftPeer into business.",
+      "parentUuid": "fa82b9bf_36ddbee0",
       "revId": "ff6e4528589284570d1cdd4dd137d62a4a10ec30",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
