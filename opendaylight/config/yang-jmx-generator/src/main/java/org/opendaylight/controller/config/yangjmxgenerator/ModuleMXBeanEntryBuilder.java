@@ -130,7 +130,7 @@ final class ModuleMXBeanEntryBuilder {
         Map<String, ModuleMXBeanEntry> result = new HashMap<>();
 
         for (AugmentationSchema augmentation : currentModule.getAugmentations()) {
-            Set<DataSchemaNode> childNodes = augmentation.getChildNodes();
+            Collection<DataSchemaNode> childNodes = augmentation.getChildNodes();
             if (areAllChildrenChoiceCaseNodes(childNodes)) {
                 for (ChoiceCaseNode childCase : castChildNodesToChoiceCases(childNodes)) {
                     // TODO refactor, extract to standalone builder class
@@ -215,7 +215,7 @@ final class ModuleMXBeanEntryBuilder {
         return moduleIdentities;
     }
 
-    private Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Set<DataSchemaNode> childNodes) {
+    private Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Collection<DataSchemaNode> childNodes) {
         return Collections2.transform(childNodes, new Function<DataSchemaNode, ChoiceCaseNode>() {
             @Nullable
             @Override
@@ -225,7 +225,7 @@ final class ModuleMXBeanEntryBuilder {
         });
     }
 
-    private boolean areAllChildrenChoiceCaseNodes(final Set<DataSchemaNode> childNodes) {
+    private boolean areAllChildrenChoiceCaseNodes(final Iterable<DataSchemaNode> childNodes) {
         for (DataSchemaNode childNode : childNodes) {
             if (childNode instanceof ChoiceCaseNode == false) {
                 return false;
@@ -388,7 +388,7 @@ final class ModuleMXBeanEntryBuilder {
      * @return either choiceCaseNode or its only child container
      */
     private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final ChoiceCaseNode choiceCaseNode) {
-        Set<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
+        Collection<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
         if (childNodes.size() == 1) {
             DataSchemaNode onlyChild = childNodes.iterator().next();
             if (onlyChild instanceof ContainerSchemaNode) {
@@ -406,8 +406,7 @@ final class ModuleMXBeanEntryBuilder {
             final TypeProviderWrapper typeProviderWrapper, final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
             final SchemaContext schemaContext, final String packageName) {
         Map<String, AttributeIfc> yangToAttributes = new HashMap<>();
-        Set<DataSchemaNode> childNodes = dataNodeContainer.getChildNodes();
-        for (DataSchemaNode attrNode : childNodes) {
+        for (DataSchemaNode attrNode : dataNodeContainer.getChildNodes()) {
             AttributeIfc attributeValue = getAttributeValue(attrNode, currentModule, qNamesToSIEs, typeProviderWrapper,
                     schemaContext, packageName);
             yangToAttributes.put(attributeValue.getAttributeYangName(), attributeValue);

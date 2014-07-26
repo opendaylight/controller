@@ -18,6 +18,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -31,7 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
@@ -721,8 +724,6 @@ public class ControllerContext implements SchemaContextListener {
     private void collectInstanceDataNodeContainers(final List<DataSchemaNode> potentialSchemaNodes,
             final DataNodeContainer container, final String name) {
 
-        Set<DataSchemaNode> childNodes = container.getChildNodes();
-
         Predicate<DataSchemaNode> filter = new Predicate<DataSchemaNode>() {
             @Override
             public boolean apply(final DataSchemaNode node) {
@@ -730,7 +731,7 @@ public class ControllerContext implements SchemaContextListener {
             }
         };
 
-        Iterable<DataSchemaNode> nodes = Iterables.filter(childNodes, filter);
+        Iterable<DataSchemaNode> nodes = Iterables.filter(container.getChildNodes(), filter);
 
         // Can't combine this loop with the filter above because the filter is
         // lazily-applied by Iterables.filter.

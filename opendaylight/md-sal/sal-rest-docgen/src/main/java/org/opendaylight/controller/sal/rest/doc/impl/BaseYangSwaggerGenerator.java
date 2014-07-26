@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -161,7 +162,7 @@ public class BaseYangSwaggerGenerator {
 
         List<Api> apis = new ArrayList<Api>();
 
-        Set<DataSchemaNode> dataSchemaNodes = m.getChildNodes();
+        Collection<DataSchemaNode> dataSchemaNodes = m.getChildNodes();
         _logger.debug("child nodes size [{}]", dataSchemaNodes.size());
         for (DataSchemaNode node : dataSchemaNodes) {
             if ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode)) {
@@ -240,9 +241,8 @@ public class BaseYangSwaggerGenerator {
         apis.add(api);
         if ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode)) {
             DataNodeContainer schemaNode = (DataNodeContainer) node;
-            Set<DataSchemaNode> dataSchemaNodes = schemaNode.getChildNodes();
 
-            for (DataSchemaNode childNode : dataSchemaNodes) {
+            for (DataSchemaNode childNode : schemaNode.getChildNodes()) {
                 // We don't support going to leaf nodes today. Only lists and
                 // containers.
                 if (childNode instanceof ListSchemaNode || childNode instanceof ContainerSchemaNode) {

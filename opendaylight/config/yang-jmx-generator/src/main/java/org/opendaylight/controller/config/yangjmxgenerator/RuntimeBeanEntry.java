@@ -332,7 +332,7 @@ public class RuntimeBeanEntry {
         }
     }
 
-    private static Collection<DataSchemaNode> sortAttributes(final Set<DataSchemaNode> childNodes) {
+    private static Collection<DataSchemaNode> sortAttributes(final Collection<DataSchemaNode> childNodes) {
         final TreeSet<DataSchemaNode> dataSchemaNodes = new TreeSet<>(new Comparator<DataSchemaNode>() {
             @Override
             public int compare(final DataSchemaNode o1, final DataSchemaNode o2) {

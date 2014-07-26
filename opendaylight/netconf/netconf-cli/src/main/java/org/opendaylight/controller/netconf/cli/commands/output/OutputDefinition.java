@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.cli.commands.output;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
@@ -20,9 +19,9 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 public class OutputDefinition implements Iterable<DataSchemaNode> {
 
     public static final OutputDefinition EMPTY_OUTPUT = new OutputDefinition(Collections.<DataSchemaNode>emptySet());
-    private final Set<DataSchemaNode> childNodes;
+    private final Iterable<DataSchemaNode> childNodes;
 
-    public OutputDefinition(final Set<DataSchemaNode> childNodes) {
+    public OutputDefinition(final Iterable<DataSchemaNode> childNodes) {
         this.childNodes = childNodes;
     }
 

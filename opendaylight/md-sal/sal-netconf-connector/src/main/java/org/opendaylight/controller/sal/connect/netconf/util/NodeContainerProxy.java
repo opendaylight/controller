@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connect.netconf.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +37,11 @@ class NodeContainerProxy implements ContainerSchemaNode {
         this.qName = Preconditions.checkNotNull(qName, "qName");
     }
 
-    public NodeContainerProxy(final QName qName, final Set<DataSchemaNode> childNodes) {
+    public NodeContainerProxy(final QName qName, final Collection<DataSchemaNode> childNodes) {
         this(qName, asMap(childNodes));
     }
 
-    private static Map<QName, DataSchemaNode> asMap(final Set<DataSchemaNode> childNodes) {
+    private static Map<QName, DataSchemaNode> asMap(final Collection<DataSchemaNode> childNodes) {
         final Map<QName, DataSchemaNode> mapped = Maps.newHashMap();
         for (final DataSchemaNode childNode : childNodes) {
             mapped.put(childNode.getQName(), childNode);
