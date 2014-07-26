@@ -20,6 +20,8 @@ public class MockRaftActorContext implements RaftActorContext {
     private String id;
     private ActorSystem system;
     private ActorRef actor;
+    private AtomicLong index = new AtomicLong(0);
+    private AtomicLong lastApplied = new AtomicLong(0);
 
     public MockRaftActorContext(){
 
@@ -51,12 +53,20 @@ public class MockRaftActorContext implements RaftActorContext {
         return new ElectionTermImpl(this.id);
     }
 
+    public void setIndex(AtomicLong index){
+        this.index = index;
+    }
+
     @Override public AtomicLong getCommitIndex() {
-        throw new UnsupportedOperationException("getCommitIndex");
+        return index;
+    }
+
+    public void setLastApplied(AtomicLong lastApplied){
+        this.lastApplied = lastApplied;
     }
 
     @Override public AtomicLong getLastApplied() {
-        throw new UnsupportedOperationException("getLastApplied");
+        return lastApplied;
     }
 
     @Override public ReplicatedLog getReplicatedLog() {

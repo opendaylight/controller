@@ -3,8 +3,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class LeaderTest extends AbstractActorTest {
+public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
     @Test
     public void testHandleMessageForUnknownMessage() throws Exception {
@@ -67,5 +67,9 @@ public class LeaderTest extends AbstractActorTest {
 
             };
         }};
+    }
+
+    @Override protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
+        return new Leader(actorContext, Collections.EMPTY_LIST);
     }
 }

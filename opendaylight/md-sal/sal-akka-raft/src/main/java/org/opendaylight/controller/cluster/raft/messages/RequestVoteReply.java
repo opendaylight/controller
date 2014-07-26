@@ -8,16 +8,13 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-public class RequestVoteReply {
-
-    // currentTerm, for candidate to update itself
-    private final long term;
+public class RequestVoteReply extends AbstractRaftRPC{
 
     // true means candidate received vot
     private final boolean voteGranted;
 
     public RequestVoteReply(long term, boolean voteGranted) {
-        this.term = term;
+        super(term);
         this.voteGranted = voteGranted;
     }
 
