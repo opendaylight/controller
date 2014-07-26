@@ -34,6 +34,24 @@
       "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f17e80ae",
+        "filename": "opendaylight/md-sal/model/model-flow-statistics/src/main/yang/opendaylight-flow-statistics.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2014-07-26T13:23:20Z",
+      "side": 0,
+      "message": "Well i don\u0027t have any alternate solution as of now, but this solution kind of loosing information which we get from switch which can use for various cases as i mentioned above. Also its going to fail lot of integration test cases for restconf + statistics manager. As per this design do we have to this for all the other elements (group/meter etc) that supports experimenters? I think we should discuss this with the openflowplugin team, before we really get rid of these addition data in statistics.",
+      "parentUuid": "fa82b9bf_4baf7b2a",
+      "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
