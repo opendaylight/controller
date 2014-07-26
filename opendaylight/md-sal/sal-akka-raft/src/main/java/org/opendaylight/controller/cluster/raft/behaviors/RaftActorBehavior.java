@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.raft.behaviors;
+
+import akka.actor.ActorRef;
+import org.opendaylight.controller.cluster.raft.RaftState;
+
+/**
+ * A RaftActorBehavior represents the specific behavior of a RaftActor
+ * <p>
+ * A RaftActor can behave as one of the following,
+ * <ul>
+ *     <li> Follower </li>
+ *     <li> Candidate </li>
+ *     <li> Leader </li>
+ * </ul>
+ * <p>
+ * In each of these behaviors the Raft Actor handles the same Raft messages
+ * differently.
+ */
+public interface RaftActorBehavior {
+    /**
+     * Handle a message. If the processing of the message warrants a state
+     * change then a new state should be returned otherwise this method should
+     * return the state for the current behavior.
+     *
+     * @param sender The sender of the message
+     * @param message A message that needs to be processed
+     *
+     * @return The new state or self (this)
+     */
+    RaftState handleMessage(ActorRef sender, Object message);
+}
