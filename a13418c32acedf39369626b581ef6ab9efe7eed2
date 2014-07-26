@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_83b327e8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:32:41Z",
+      "side": 1,
+      "message": "I agree with this. I will change this once the tests are in place.",
+      "parentUuid": "fa82b9bf_766ca6d0",
+      "revId": "a13418c32acedf39369626b581ef6ab9efe7eed2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5695e284",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 2
