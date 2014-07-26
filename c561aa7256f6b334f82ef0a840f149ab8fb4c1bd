@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c3960f3f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/TestDriver.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:29Z",
+      "side": 1,
+      "message": "Possibly - I\u0027ll let Kamal think about this one. I typically use createNodes to start with and addPeers only when I want to introduce a new peer later on.",
+      "parentUuid": "fa82b9bf_f6a7564e",
+      "revId": "c561aa7256f6b334f82ef0a840f149ab8fb4c1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_36793ec8",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
