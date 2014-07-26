@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a3918b48",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9644ca1b",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_564ac226",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-25T19:13:19Z",
       "side": 1,
       "message": "Is the assumption that there are no possible failures in doing this?",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e39c736c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "Not expecting any",
+      "parentUuid": "fa82b9bf_564ac226",
       "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_039ab76d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "Changed it slightly so it looks more uniform. In general I use IntelliJ to autoformat.",
+      "parentUuid": "fa82b9bf_f669968c",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_36229e52",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
@@ -81,6 +135,24 @@
       "writtenOn": "2014-07-25T19:13:19Z",
       "side": 1,
       "message": "The two above lines probably want to be one.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a38aeb18",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_36229e52",
       "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c38fef28",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "Changed the name to scheduleInstallSnapshotCheck",
+      "parentUuid": "fa82b9bf_969cca5e",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d696d23e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 4
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_237edb19",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "method name changed",
+      "parentUuid": "fa82b9bf_d696d23e",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_76aee682",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 4
@@ -132,6 +240,24 @@
       "writtenOn": "2014-07-25T19:13:19Z",
       "side": 1,
       "message": "Again either change name or give documentation that indicates this isn\u0027t guaranteed to result in a snapshot being installed.",
+      "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_437bdf27",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:49Z",
+      "side": 1,
+      "message": "method name changed",
+      "parentUuid": "fa82b9bf_76aee682",
       "revId": "13a1df52f5411441fd2db70f27b08b24f215a6d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
