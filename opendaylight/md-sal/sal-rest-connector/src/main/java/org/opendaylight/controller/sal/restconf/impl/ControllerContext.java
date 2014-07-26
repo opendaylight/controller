@@ -86,8 +86,6 @@ public class ControllerContext implements SchemaContextListener {
 
     private static final Splitter SLASH_SPLITTER = Splitter.on('/');
 
-    private static final Splitter COLON_SPLITTER = Splitter.on(':');
-
     private final BiMap<URI, String> uriToModuleName = HashBiMap.<URI, String> create();
 
     private final Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
@@ -796,24 +794,31 @@ public class ControllerContext implements SchemaContextListener {
     }
 
     private static String toModuleName(final String str) {
-        Preconditions.<String> checkNotNull(str);
-        if (str.indexOf(':') != -1) {
-            final Iterable<String> args = COLON_SPLITTER.split(str);
-            if (Iterables.size(args) == 2) {
-                return args.iterator().next();
-            }
+        final int idx = str.indexOf(':');
+        if (idx == -1) {
+            return null;
         }
-        return null;
+
+        // Make sure there is only one occurrence
+        if (str.indexOf(':', idx + 1) != -1) {
+            return null;
+        }
+
+        return str.substring(0, idx);
     }
 
     private static String toNodeName(final String str) {
-        if (str.indexOf(':') != -1) {
-            final Iterable<String> args = COLON_SPLITTER.split(str);
-            if (Iterables.size(args) == 2) {
-                return Iterables.get(args, 1);
-            }
+        final int idx = str.indexOf(':');
+        if (idx == -1) {
+            return str;
         }
-        return str;
+
+        // Make sure there is only one occurrence
+        if (str.indexOf(':', idx + 1) != -1) {
+            return str;
+        }
+
+        return str.substring(idx + 1);
     }
 
     private QName toQName(final String name) {
@@ -849,7 +854,7 @@ public class ControllerContext implements SchemaContextListener {
         return namespace.isPresent() ? QName.create(namespace.get(), node) : null;
     }
 
-    private boolean isListOrContainer(final DataSchemaNode node) {
+    private static boolean isListOrContainer(final DataSchemaNode node) {
         return node instanceof ListSchemaNode || node instanceof ContainerSchemaNode;
     }
 
