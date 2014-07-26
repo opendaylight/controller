@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_23a57ba1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTerm.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f67436ff",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b6622e3c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-25T20:51:55Z",
       "side": 1,
       "message": "This appears to not be used.",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_43a2ff99",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:02Z",
+      "side": 1,
+      "message": "You\u0027re right removed.",
+      "parentUuid": "fa82b9bf_b6622e3c",
       "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_03a87775",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d667b24b",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7658268a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-25T20:51:55Z",
       "side": 1,
       "message": "This comment is now out of date.",
+      "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a3b8abc8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:33:02Z",
+      "side": 1,
+      "message": "It ended up in the wrong place. Moving it.",
+      "parentUuid": "fa82b9bf_7658268a",
       "revId": "15a2be54819475a6b0df5748955a7e3632479ae2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
