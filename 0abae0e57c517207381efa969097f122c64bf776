@@ -16,6 +16,24 @@
       "revId": "0abae0e57c517207381efa969097f122c64bf776",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2397bb49",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-26T23:34:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f6d8b61f",
+      "revId": "0abae0e57c517207381efa969097f122c64bf776",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
