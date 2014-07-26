@@ -9,13 +9,11 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -824,34 +821,8 @@ public class ControllerContext implements SchemaContextListener {
     private QName toQName(final String name) {
         final String module = toModuleName(name);
         final String node = toNodeName(name);
-        Set<Module> modules = globalSchema.getModules();
-
-        final Comparator<Module> comparator = new Comparator<Module>() {
-            @Override
-            public int compare(final Module o1, final Module o2) {
-                return o1.getRevision().compareTo(o2.getRevision());
-            }
-        };
-
-        List<Module> sorted = new ArrayList<Module>(modules);
-        Collections.<Module> sort(new ArrayList<Module>(modules), comparator);
-
-        final Function<Module, QName> transform = new Function<Module, QName>() {
-            @Override
-            public QName apply(final Module m) {
-                return QName.create(m.getNamespace(), m.getRevision(), m.getName());
-            }
-        };
-
-        final Predicate<QName> findFirst = new Predicate<QName>() {
-            @Override
-            public boolean apply(final QName qn) {
-                return Objects.equal(module, qn.getLocalName());
-            }
-        };
-
-        Optional<QName> namespace = FluentIterable.from(sorted).transform(transform).firstMatch(findFirst);
-        return namespace.isPresent() ? QName.create(namespace.get(), node) : null;
+        final Module m = globalSchema.findModuleByName(module, null);
+        return m == null ? null : QName.create(m.getQNameModule(), node);
     }
 
     private static boolean isListOrContainer(final DataSchemaNode node) {
