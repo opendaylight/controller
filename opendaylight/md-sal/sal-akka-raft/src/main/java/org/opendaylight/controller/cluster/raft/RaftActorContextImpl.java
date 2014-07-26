@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
 
@@ -74,5 +75,9 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     @Override public ReplicatedLog getReplicatedLog() {
         return replicatedLog;
+    }
+
+    @Override public ActorSystem getActorSystem() {
+        return context.system();
     }
 }

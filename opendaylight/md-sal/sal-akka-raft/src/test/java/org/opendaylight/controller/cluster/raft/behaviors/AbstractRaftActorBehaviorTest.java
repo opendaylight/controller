@@ -42,10 +42,10 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest{
     public void testHandlingOfAppendEntriesWithNewerCommitIndex() throws Exception{
         new JavaTestKit(getSystem()) {{
 
-            MockRaftActorContext context =
-                new MockRaftActorContext();
+            RaftActorContext context =
+                createActorContext();
 
-            context.setLastApplied(new AtomicLong(100));
+            ((MockRaftActorContext) context).setLastApplied(new AtomicLong(100));
 
             AppendEntries appendEntries =
                 new AppendEntries(100, "leader-1", 0, 0, null, 101);
@@ -69,7 +69,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest{
     protected abstract RaftActorBehavior createBehavior(RaftActorContext actorContext);
 
     protected RaftActorBehavior createBehavior(){
-        return createBehavior(new MockRaftActorContext());
+        return createBehavior(createActorContext());
+    }
+
+    protected RaftActorContext createActorContext(){
+        return new MockRaftActorContext();
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm(){

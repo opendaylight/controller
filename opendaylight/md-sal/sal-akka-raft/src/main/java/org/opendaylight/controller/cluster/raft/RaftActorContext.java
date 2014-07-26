@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -72,7 +73,12 @@ public interface RaftActorContext {
     AtomicLong getLastApplied();
 
     /**
-     *
+     * @return A representation of the log
      */
     ReplicatedLog getReplicatedLog();
+
+    /**
+     * @return The ActorSystem associated with this context
+     */
+    ActorSystem getActorSystem();
 }
