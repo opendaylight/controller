@@ -34,7 +34,8 @@ public class SchemaUpdateForTransactionTest {
 
     @Before
     public void setupStore() {
-        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor());
+        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor(),
+                MoreExecutors.sameThreadExecutor());
         loadSchemas(RockTheHouseInput.class);
     }
 
