@@ -8,9 +8,11 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -37,11 +39,13 @@ public class DatastoreTestTask {
     private WriteTransactionCustomizer cleanup;
     private YangInstanceIdentifier changePath;
     private DataChangeScope changeScope;
-    private boolean postSetup = false;
+    private volatile boolean postSetup = false;
     private final ChangeEventListener internalListener;
+    private final TestDCLExecutorService dclExecutorService;
 
-    public DatastoreTestTask(final DOMStore datastore) {
+    public DatastoreTestTask(final DOMStore datastore, final TestDCLExecutorService dclExecutorService) {
         this.store = datastore;
+        this.dclExecutorService = dclExecutorService;
         internalListener = new ChangeEventListener();
     }
 
@@ -79,7 +83,7 @@ public class DatastoreTestTask {
         return this;
     }
 
-    public void run() throws InterruptedException, ExecutionException {
+    public void run() throws InterruptedException, ExecutionException, TimeoutException {
         if (setup != null) {
             execute(setup);
         }
@@ -89,13 +93,17 @@ public class DatastoreTestTask {
         }
 
         Preconditions.checkState(write != null, "Write Transaction must be set.");
+
         postSetup = true;
+        dclExecutorService.afterTestSetup();
+
         execute(write);
         if (registration != null) {
             registration.close();
         }
+
         if (changeListener != null) {
-            changeListener.onDataChanged(internalListener.receivedChange.get());
+            changeListener.onDataChanged(getChangeEvent());
         }
         if (read != null) {
             read.verify(store.newReadOnlyTransaction());
@@ -105,8 +113,26 @@ public class DatastoreTestTask {
         }
     }
 
-    public Future<AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>> getChangeEvent() {
-        return internalListener.receivedChange;
+    public AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChangeEvent() {
+        try {
+            return internalListener.receivedChange.get(10, TimeUnit.SECONDS);
+        } catch( Exception e ) {
+            fail( "Error getting the AsyncDataChangeEvent from the Future: " + e );
+        }
+
+        // won't get here
+        return null;
+    }
+
+    public void verifyNoChangeEvent() {
+        try {
+            Object unexpected = internalListener.receivedChange.get(500, TimeUnit.MILLISECONDS);
+            fail( "Got unexpected AsyncDataChangeEvent from the Future: " + unexpected );
+        } catch( TimeoutException e ) {
+            // Expected
+        } catch( Exception e ) {
+            fail( "Error getting the AsyncDataChangeEvent from the Future: " + e );
+        }
     }
 
     private void execute(final WriteTransactionCustomizer writeCustomizer) throws InterruptedException,
