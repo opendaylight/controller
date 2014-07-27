@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.ServiceReference;
 
@@ -21,7 +21,7 @@ public class NotificationServiceProxy extends AbstractBrokerServiceProxy<Notific
     }
 
     @Override
-    public Registration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
+    public ListenerRegistration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
         return addRegistration(getDelegate().addNotificationListener(notification, listener));
     }
 }

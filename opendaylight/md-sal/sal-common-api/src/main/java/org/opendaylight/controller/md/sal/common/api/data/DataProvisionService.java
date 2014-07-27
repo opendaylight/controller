@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.Registration;
 @Deprecated
 public interface DataProvisionService<P extends Path<P> , D> {
 
-    public Registration<DataCommitHandler<P, D>> registerCommitHandler(P path, DataCommitHandler<P, D> commitHandler);
+    public Registration registerCommitHandler(P path, DataCommitHandler<P, D> commitHandler);
 
     public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<P, D>>>
         registerCommitHandlerListener(RegistrationListener<DataCommitHandlerRegistration<P, D>> commitHandlerListener);

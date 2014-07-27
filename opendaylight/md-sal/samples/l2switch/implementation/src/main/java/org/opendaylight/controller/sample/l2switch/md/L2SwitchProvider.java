@@ -20,7 +20,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class L2SwitchProvider extends AbstractBindingAwareConsumer
 
   private final static Logger _logger = LoggerFactory.getLogger(L2SwitchProvider.class);
 
-  private Registration<NotificationListener> listenerRegistration;
+  private ListenerRegistration<NotificationListener> listenerRegistration;
   private AddressTracker addressTracker;
   private TopologyLinkDataChangeHandler topologyLinkDataChangeHandler;
 

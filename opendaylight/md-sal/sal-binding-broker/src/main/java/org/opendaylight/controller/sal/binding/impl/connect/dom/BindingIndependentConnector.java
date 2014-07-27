@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.md.sal.binding.impl.AbstractForwardedDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangePublisher;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
@@ -59,7 +58,7 @@ public class BindingIndependentConnector implements //
     private final BindingToDomCommitHandler bindingToDomCommitHandler;
     private final DomToBindingCommitHandler domToBindingCommitHandler;
 
-    private Registration<DataCommitHandler<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>> biCommitHandlerRegistration;
+    private Registration biCommitHandlerRegistration;
     private RpcProvisionRegistry biRpcRegistry;
     private RpcProviderRegistry baRpcRegistry;
 

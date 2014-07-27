@@ -33,5 +33,5 @@ public interface DataProviderService extends DataBrokerService, DataProvisionSer
      * @deprecated Data Reader contract is removed from capabilities of MD-SAL and is replaced by  replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
      */
     @Deprecated
-    Registration<DataReader<InstanceIdentifier<? extends DataObject>,DataObject>> registerDataReader(InstanceIdentifier<? extends DataObject> path,DataReader<InstanceIdentifier<? extends DataObject>,DataObject> reader);
+    Registration registerDataReader(InstanceIdentifier<? extends DataObject> path,DataReader<InstanceIdentifier<? extends DataObject>,DataObject> reader);
 }

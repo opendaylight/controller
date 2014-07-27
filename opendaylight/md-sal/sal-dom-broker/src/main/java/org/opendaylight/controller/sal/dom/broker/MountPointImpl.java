@@ -77,7 +77,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public Registration<NotificationListener> addNotificationListener(final QName notification, final NotificationListener listener) {
+    public ListenerRegistration<NotificationListener> addNotificationListener(final QName notification, final NotificationListener listener) {
         return notificationRouter.addNotificationListener(notification, listener);
     }
 
@@ -92,13 +92,13 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(
+    public Registration registerOperationalReader(
             final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerOperationalReader(path, reader);
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(
+    public Registration registerConfigurationReader(
             final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerConfigurationReader(path, reader);
     }
@@ -151,7 +151,7 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
+    public Registration registerCommitHandler(
             final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
         return dataReader.registerCommitHandler(path, commitHandler);
     }

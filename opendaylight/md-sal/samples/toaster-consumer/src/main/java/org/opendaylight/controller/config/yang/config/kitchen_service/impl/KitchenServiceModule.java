@@ -16,7 +16,7 @@ import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.impl.KitchenServiceImpl;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public final class KitchenServiceModule extends AbstractKitchenServiceModule {
 
         final KitchenServiceImpl kitchenService = new KitchenServiceImpl(toasterService);
 
-        final Registration<NotificationListener> toasterListenerReg =
+        final ListenerRegistration<NotificationListener> toasterListenerReg =
                 getNotificationServiceDependency().registerNotificationListener( kitchenService );
 
         final KitchenServiceRuntimeRegistration runtimeReg =
