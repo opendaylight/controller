@@ -15,7 +15,7 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
     private final BlockingQueue<InventoryOperation> queue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
     private final NotificationProviderService notificationService;
     private final DataProviderService dataService;
-    private Registration<?> listenerRegistration;
+    private ListenerRegistration<?> listenerRegistration;
     private Thread thread;
 
     FlowCapableInventoryProvider(final DataProviderService dataService, final NotificationProviderService notificationService) {

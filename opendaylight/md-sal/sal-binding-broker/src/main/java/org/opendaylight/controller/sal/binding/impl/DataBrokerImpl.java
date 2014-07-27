@@ -147,14 +147,14 @@ public class DataBrokerImpl extends
         }
 
         @Override
-        public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerConfigurationReader(
+        public Registration registerConfigurationReader(
                 final InstanceIdentifier<? extends DataObject> path,
                 final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
             throw new UnsupportedOperationException("Not supported");
         }
 
         @Override
-        public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerOperationalReader(
+        public Registration registerOperationalReader(
                 final InstanceIdentifier<? extends DataObject> path,
                 final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
             throw new UnsupportedOperationException("Not supported");

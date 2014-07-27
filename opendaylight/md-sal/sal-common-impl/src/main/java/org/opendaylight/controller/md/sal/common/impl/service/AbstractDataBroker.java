@@ -230,7 +230,7 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
     }
 
     @Override
-    public final Registration<DataCommitHandler<P, D>> registerCommitHandler(final P path,
+    public final Registration registerCommitHandler(final P path,
             final DataCommitHandler<P, D> commitHandler) {
         synchronized (commitHandler) {
             final DataCommitHandlerRegistrationImpl<P, D> registration = new DataCommitHandlerRegistrationImpl<P, D>(
@@ -266,8 +266,8 @@ public abstract class AbstractDataBroker<P extends Path<P>, D extends Object, DC
     public final CompositeObjectRegistration<DataReader<P, D>> registerDataReader(final P path,
             final DataReader<P, D> reader) {
 
-        final Registration<DataReader<P, D>> confReg = getDataReadRouter().registerConfigurationReader(path, reader);
-        final Registration<DataReader<P, D>> dataReg = getDataReadRouter().registerOperationalReader(path, reader);
+        final Registration confReg = getDataReadRouter().registerConfigurationReader(path, reader);
+        final Registration dataReg = getDataReadRouter().registerOperationalReader(path, reader);
         return new CompositeObjectRegistration<DataReader<P, D>>(reader, Arrays.asList(confReg, dataReg));
     }
 

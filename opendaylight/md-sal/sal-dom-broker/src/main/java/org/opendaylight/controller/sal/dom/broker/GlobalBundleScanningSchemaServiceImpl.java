@@ -49,7 +49,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     private final BundleContext context;
 
     private ServiceTracker<SchemaServiceListener, SchemaServiceListener> listenerTracker;
-    private BundleTracker<Iterable<Registration<URL>>> bundleTracker;
+    private BundleTracker<Iterable<Registration>> bundleTracker;
     private boolean starting = true;
     private static GlobalBundleScanningSchemaServiceImpl instance;
 
@@ -156,9 +156,9 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         }
     }
 
-    private class BundleScanner implements BundleTrackerCustomizer<Iterable<Registration<URL>>> {
+    private class BundleScanner implements BundleTrackerCustomizer<Iterable<Registration>> {
         @Override
-        public Iterable<Registration<URL>> addingBundle(final Bundle bundle, final BundleEvent event) {
+        public Iterable<Registration> addingBundle(final Bundle bundle, final BundleEvent event) {
 
             if (bundle.getBundleId() == 0) {
                 return Collections.emptyList();
@@ -169,7 +169,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
                 return Collections.emptyList();
             }
 
-            final List<Registration<URL>> urls = new ArrayList<>();
+            final List<Registration> urls = new ArrayList<>();
             while (enumeration.hasMoreElements()) {
                 final URL u = enumeration.nextElement();
                 try {
@@ -189,7 +189,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         }
 
         @Override
-        public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration<URL>> object) {
+        public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration> object) {
             LOG.debug("Modified bundle {} {} {}", bundle, event, object);
         }
 
@@ -200,8 +200,8 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
          */
 
         @Override
-        public synchronized void removedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration<URL>> urls) {
-            for (Registration<URL> url : urls) {
+        public synchronized void removedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration> urls) {
+            for (Registration url : urls) {
                 try {
                     url.close();
                 } catch (Exception e) {

@@ -40,14 +40,14 @@ public abstract class AbstractBindingSalProviderInstance<D extends DataProviderS
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerDataReader(
+    public Registration registerDataReader(
             InstanceIdentifier<? extends DataObject> path,
             DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
         return getDataBrokerChecked().registerDataReader(path, reader);
     }
 
     @Override
-    public Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> registerCommitHandler(
+    public Registration registerCommitHandler(
             InstanceIdentifier<? extends DataObject> path,
             DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> commitHandler) {
         return getDataBrokerChecked().registerCommitHandler(path, commitHandler);

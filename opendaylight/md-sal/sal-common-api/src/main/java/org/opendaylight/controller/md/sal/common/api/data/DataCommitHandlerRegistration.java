@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.Registration;
  * @param <D>
  */
 @Deprecated
-public interface DataCommitHandlerRegistration<P extends Path<P>,D> extends Registration<DataCommitHandler<P, D>>{
+public interface DataCommitHandlerRegistration<P extends Path<P>,D> extends Registration {
 
     P getPath();
 }

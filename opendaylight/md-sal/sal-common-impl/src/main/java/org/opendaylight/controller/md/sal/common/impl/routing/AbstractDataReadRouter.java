@@ -97,13 +97,13 @@ public abstract class AbstractDataReadRouter<P extends Path<P>, D> implements Da
      * @param reader Reader instance which is responsible for reading particular subpath.
      * @return
      */
-    public Registration<DataReader<P, D>> registerOperationalReader(P path, DataReader<P, D> reader) {
+    public Registration registerOperationalReader(P path, DataReader<P, D> reader) {
         OperationalDataReaderRegistration<P, D> ret = new OperationalDataReaderRegistration<>(path, reader);
         operationalReaders.put(path, ret);
         return ret;
     }
 
-    public Registration<DataReader<P, D>> registerConfigurationReader(P path, DataReader<P, D> reader) {
+    public Registration registerConfigurationReader(P path, DataReader<P, D> reader) {
         ConfigurationDataReaderRegistration<P, D> ret = new ConfigurationDataReaderRegistration<>(path, reader);
         configReaders.put(path, ret);
         return ret;

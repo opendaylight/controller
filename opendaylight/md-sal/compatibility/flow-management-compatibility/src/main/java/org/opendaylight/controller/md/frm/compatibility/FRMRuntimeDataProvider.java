@@ -38,7 +38,7 @@ public class FRMRuntimeDataProvider implements RuntimeDataProvider, DataCommitHa
     private DataProviderService dataService;
     private IForwardingRulesManager manager;
 
-    public Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> init() {
+    public Registration init() {
         return this.dataService.registerCommitHandler(FRMRuntimeDataProvider.FLOWS_PATH, this);
     }
 

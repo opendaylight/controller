@@ -33,7 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Node
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SwitchFlowRemoved;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
@@ -43,8 +43,8 @@ public class NotificationTest extends AbstractTest {
     private final FlowListener listener1 = new FlowListener();
     private final FlowListener listener2 = new FlowListener();
 
-    private Registration<NotificationListener> listener1Reg;
-    private Registration<NotificationListener> listener2Reg;
+    private ListenerRegistration<NotificationListener> listener1Reg;
+    private ListenerRegistration<NotificationListener> listener2Reg;
 
     private NotificationProviderService notifyProviderService;
 

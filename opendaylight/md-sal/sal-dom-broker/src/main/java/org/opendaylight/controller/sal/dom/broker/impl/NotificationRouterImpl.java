@@ -12,7 +12,7 @@ import java.util.Collection;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.dom.broker.spi.NotificationRouter;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
@@ -25,12 +25,12 @@ import com.google.common.collect.Multimaps;
 public class NotificationRouterImpl implements NotificationRouter {
     private static Logger log = LoggerFactory.getLogger(NotificationRouterImpl.class);
 
-    private final Multimap<QName, ListenerRegistration> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, ListenerRegistration>create());
+    private final Multimap<QName, MyListenerRegistration> listeners = Multimaps.synchronizedSetMultimap(HashMultimap.<QName, MyListenerRegistration>create());
 //    private Registration<NotificationListener> defaultListener;
 
     private void sendNotification(CompositeNode notification) {
         final QName type = notification.getNodeType();
-        final Collection<ListenerRegistration> toNotify = listeners.get(type);
+        final Collection<MyListenerRegistration> toNotify = listeners.get(type);
         log.trace("Publishing notification " + type);
 
         if ((toNotify == null) || toNotify.isEmpty()) {
@@ -38,7 +38,7 @@ public class NotificationRouterImpl implements NotificationRouter {
             return;
         }
 
-        for (ListenerRegistration listener : toNotify) {
+        for (MyListenerRegistration listener : toNotify) {
             try {
                 // FIXME: ensure that notification is immutable
                 listener.getInstance().onNotification(notification);
@@ -54,17 +54,17 @@ public class NotificationRouterImpl implements NotificationRouter {
     }
 
     @Override
-    public Registration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
-        ListenerRegistration ret = new ListenerRegistration(notification, listener);
+    public ListenerRegistration<NotificationListener> addNotificationListener(QName notification, NotificationListener listener) {
+        MyListenerRegistration ret = new MyListenerRegistration(notification, listener);
         listeners.put(notification, ret);
         return ret;
     }
 
-    private class ListenerRegistration extends AbstractListenerRegistration<NotificationListener> {
+    private class MyListenerRegistration extends AbstractListenerRegistration<NotificationListener> {
 
         final QName type;
 
-        public ListenerRegistration(QName type, NotificationListener instance) {
+        public MyListenerRegistration(QName type, NotificationListener instance) {
             super(instance);
             this.type = type;
         }
