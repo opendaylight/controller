@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -86,8 +87,18 @@ public class DOMDataCommitCoordinatorImpl implements DOMDataCommitExecutor {
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         Preconditions.checkArgument(listener != null, "Listener must not be null");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
-        ListenableFuture<Void> commitFuture = executor.submit(new CommitCoordinationTask(
-                transaction, cohorts, listener));
+
+        ListenableFuture<Void> commitFuture = null;
+        try {
+            commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts, listener));
+        } catch(RejectedExecutionException e) {
+            LOG.error("The commit executor's queue is full - submit task was rejected. \n" +
+                      executor, e);
+            return Futures.immediateFailedCheckedFuture(
+                    new TransactionCommitFailedException(
+                        "Could not submit the commit task - the commit queue capacity has been exceeded.", e));
+        }
+
         if (listener.isPresent()) {
             Futures.addCallback(commitFuture, new DOMDataCommitErrorInvoker(transaction, listener.get()));
         }
