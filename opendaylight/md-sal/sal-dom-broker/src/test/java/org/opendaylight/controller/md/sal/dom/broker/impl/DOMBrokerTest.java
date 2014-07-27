@@ -9,6 +9,7 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +29,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
+import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -46,11 +48,15 @@ public class DOMBrokerTest {
     private SchemaContext schemaContext;
     private DOMDataBrokerImpl domBroker;
     private ListeningExecutorService executor;
+    private ExecutorService futureExecutor;
 
     @Before
     public void setupStore() {
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
+
+        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
+                MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
+                MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
         schemaContext = TestModel.createTestContext();
 
         operStore.onGlobalContextUpdated(schemaContext);
@@ -61,15 +67,20 @@ public class DOMBrokerTest {
                 .put(OPERATIONAL, operStore) //
                 .build();
 
+        futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
         executor = new DeadlockDetectingListeningExecutorService(Executors.newSingleThreadExecutor(),
-                                          TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION);
+                TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION, futureExecutor);
         domBroker = new DOMDataBrokerImpl(stores, executor);
     }
 
     @After
     public void tearDown() {
-        if( executor != null ) {
+        if(executor != null) {
             executor.shutdownNow();
+        }
+
+        if(futureExecutor != null) {
+            futureExecutor.shutdownNow();
         }
     }
 

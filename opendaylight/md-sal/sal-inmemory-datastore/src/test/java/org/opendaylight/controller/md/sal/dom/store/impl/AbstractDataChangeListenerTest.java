@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import java.util.Collection;
 import java.util.Map;
-
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.WriteTransactionCustomizer;
@@ -18,6 +18,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.top.level.list.NestedList;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -48,6 +49,7 @@ public abstract class AbstractDataChangeListenerTest {
 
     private InMemoryDOMDataStore datastore;
     private SchemaContext schemaContext;
+    private TestDCLExecutorService dclExecutorService;
 
     @Before
     public final void setup() throws Exception {
@@ -56,13 +58,24 @@ public abstract class AbstractDataChangeListenerTest {
         ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
         context.registerModuleInfo(moduleInfo);
         schemaContext = context.tryToCreateSchemaContext().get();
+
+        dclExecutorService = new TestDCLExecutorService(
+                SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL" ));
+
         datastore = new InMemoryDOMDataStore("TEST",
-                MoreExecutors.sameThreadExecutor());
+                MoreExecutors.sameThreadExecutor(), dclExecutorService );
         datastore.onGlobalContextUpdated(schemaContext);
     }
 
+    @After
+    public void tearDown() {
+        if( dclExecutorService != null ) {
+            dclExecutorService.shutdownNow();
+        }
+    }
+
     public final DatastoreTestTask newTestTask() {
-        return new DatastoreTestTask(datastore).cleanup(DatastoreTestTask
+        return new DatastoreTestTask(datastore, dclExecutorService).cleanup(DatastoreTestTask
                 .simpleDelete(TOP_LEVEL));
     }
 
