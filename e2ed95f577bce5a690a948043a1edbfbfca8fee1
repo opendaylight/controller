@@ -16,6 +16,24 @@
       "revId": "e2ed95f577bce5a690a948043a1edbfbfca8fee1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c63e1d8c",
+        "filename": "features/nsf/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-27T23:52:52Z",
+      "side": 1,
+      "message": "Hi Mathieu, i agree. and infact I was thinking about it, but didnt have the karaf mojo in me :-).",
+      "parentUuid": "fa82b9bf_46120d58",
+      "revId": "e2ed95f577bce5a690a948043a1edbfbfca8fee1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
