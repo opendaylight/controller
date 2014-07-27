@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_236fbb2c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-07-27T00:07:21Z",
+      "side": 1,
+      "message": "Given that the spec doesn\u0027t specify how to add peers, it wouldn\u0027t specify how to behave when you were joining as a new peer. Still, we should revisit this later rather than hanging up this patch.",
+      "revId": "97222f19035815199200e727f43960513073eb9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
