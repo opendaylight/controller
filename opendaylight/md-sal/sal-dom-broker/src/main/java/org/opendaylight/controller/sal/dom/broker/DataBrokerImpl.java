@@ -45,13 +45,13 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(
+    public Registration registerConfigurationReader(
             InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
         return getDataReadRouter().registerConfigurationReader(path, reader);
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(
+    public Registration registerOperationalReader(
             InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
         return getDataReadRouter().registerOperationalReader(path, reader);
     }

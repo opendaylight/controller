@@ -77,7 +77,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
+    public Registration registerCommitHandler(
             final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
         // FIXME Do real forwarding
         return new AbstractObjectRegistration<DataCommitHandler<InstanceIdentifier,CompositeNode>>(commitHandler) {
@@ -117,13 +117,13 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(
+    public Registration registerConfigurationReader(
             final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         throw new UnsupportedOperationException("Data Reader contract is not supported.");
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(
+    public Registration registerOperationalReader(
             final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
         throw new UnsupportedOperationException("Data Reader contract is not supported.");
     }

@@ -11,7 +11,7 @@ import java.util.EventListener;
 
 import org.opendaylight.yangtools.concepts.Registration;
 
-public interface RegistrationListener<T extends Registration<?>> extends EventListener {
+public interface RegistrationListener<T extends Registration> extends EventListener {
 
     void onRegister(T registration);
 
