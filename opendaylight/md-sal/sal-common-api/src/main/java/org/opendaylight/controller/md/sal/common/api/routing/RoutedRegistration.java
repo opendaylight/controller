@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.concepts.Registration;
  * @param <P> the path identifier type
  * @param <S> the RPC implementation type
  */
-public interface RoutedRegistration<C, P extends Path<P>, S> extends Registration<S> {
+public interface RoutedRegistration<C, P extends Path<P>, S> extends Registration {
 
     /**
      * Registers the RPC implementation associated with this registration for the given path

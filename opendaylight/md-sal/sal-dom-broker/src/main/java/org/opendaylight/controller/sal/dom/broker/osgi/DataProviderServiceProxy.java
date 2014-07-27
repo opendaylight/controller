@@ -57,19 +57,19 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
     }
 
     @Override
-    public Registration<DataCommitHandler<InstanceIdentifier, CompositeNode>> registerCommitHandler(
+    public Registration registerCommitHandler(
             InstanceIdentifier path, DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
         return addRegistration(getDelegate().registerCommitHandler(path, commitHandler));
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(
+    public Registration registerConfigurationReader(
             InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerConfigurationReader(path, reader));
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(
+    public Registration registerOperationalReader(
             InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerOperationalReader(path, reader));
     }

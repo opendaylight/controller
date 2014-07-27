@@ -88,7 +88,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     @Override
-    public Registration<DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject>> registerCommitHandler(
+    public Registration registerCommitHandler(
             final InstanceIdentifier<? extends DataObject> path,
             final DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> commitHandler) {
 
@@ -123,7 +123,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     @Override
-    public Registration<DataReader<InstanceIdentifier<? extends DataObject>, DataObject>> registerDataReader(
+    public Registration registerDataReader(
             final InstanceIdentifier<? extends DataObject> path,
             final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
         throw new UnsupportedOperationException("Data reader contract is not supported.");
