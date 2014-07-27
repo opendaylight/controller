@@ -47,7 +47,8 @@ public class InMemoryDataStoreTest {
 
     @Before
     public void setupStore() {
-        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor());
+        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.sameThreadExecutor(),
+                MoreExecutors.sameThreadExecutor());
         schemaContext = TestModel.createTestContext();
         domStore.onGlobalContextUpdated(schemaContext);
     }

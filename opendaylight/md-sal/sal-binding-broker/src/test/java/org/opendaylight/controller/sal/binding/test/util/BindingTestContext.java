@@ -63,6 +63,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
@@ -133,8 +134,10 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startNewDomDataBroker() {
         checkState(executor != null, "Executor needs to be set");
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", executor);
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", executor);
+        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", executor,
+                MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", executor,
+                MoreExecutors.sameThreadExecutor());
         newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
                 .put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)

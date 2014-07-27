@@ -12,13 +12,11 @@ import java.util.concurrent.Executors;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 /**
 *
@@ -45,22 +43,17 @@ public final class DomInmemoryDataBrokerModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
         //Initializing Operational DOM DataStore defaulting to InMemoryDOMDataStore if one is not configured
         DOMStore operStore =  getOperationalDataStoreDependency();
         if(operStore == null){
            //we will default to InMemoryDOMDataStore creation
-          operStore = new InMemoryDOMDataStore("DOM-OPER", storeExecutor);
-          //here we will register the SchemaContext listener
-          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)operStore);
+          operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency());
         }
 
         DOMStore configStore = getConfigDataStoreDependency();
         if(configStore == null){
            //we will default to InMemoryDOMDataStore creation
-           configStore = new InMemoryDOMDataStore("DOM-CFG", storeExecutor);
-          //here we will register the SchemaContext listener
-          getSchemaServiceDependency().registerSchemaServiceListener((InMemoryDOMDataStore)configStore);
+           configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
         }
         ImmutableMap<LogicalDatastoreType, DOMStore> datastores = ImmutableMap
                 .<LogicalDatastoreType, DOMStore> builder().put(LogicalDatastoreType.OPERATIONAL, operStore)

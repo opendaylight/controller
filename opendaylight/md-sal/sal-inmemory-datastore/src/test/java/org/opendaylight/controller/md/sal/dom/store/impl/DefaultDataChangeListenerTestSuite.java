@@ -20,7 +20,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
     abstract protected void customizeTask(DatastoreTestTask task);
 
     @Test
-    public final void putTopLevelOneNested() throws InterruptedException, ExecutionException {
+    public final void putTopLevelOneNested() throws Exception {
 
         DatastoreTestTask task = newTestTask().test(writeOneTopMultipleNested(FOO, BAR));
         customizeTask(task);
@@ -29,7 +29,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
     }
 
     @Test
-    public final void existingTopWriteSibling() throws InterruptedException, ExecutionException {
+    public final void existingTopWriteSibling() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
                 new WriteTransactionCustomizer() {
                     @Override
@@ -46,7 +46,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
 
 
     @Test
-    public final void existingTopWriteTwoNested() throws InterruptedException, ExecutionException {
+    public final void existingTopWriteTwoNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
                 new WriteTransactionCustomizer() {
                     @Override
@@ -64,7 +64,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
 
 
     @Test
-    public final void existingOneNestedWriteAdditionalNested() throws InterruptedException, ExecutionException {
+    public final void existingOneNestedWriteAdditionalNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO, BAR)).test(
                 new WriteTransactionCustomizer() {
                     @Override
@@ -79,11 +79,10 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
 
     protected abstract void existingOneNestedWriteAdditionalNested(DatastoreTestTask task) throws InterruptedException, ExecutionException;
 
-    protected abstract void putTopLevelOneNested(DatastoreTestTask task) throws InterruptedException,
-            ExecutionException;
+    protected abstract void putTopLevelOneNested(DatastoreTestTask task) throws Exception;
 
     @Test
-    public final void replaceTopLevelNestedChanged() throws InterruptedException, ExecutionException {
+    public final void replaceTopLevelNestedChanged() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO, BAR)).test(
                 writeOneTopMultipleNested(FOO, BAZ));
         customizeTask(task);
@@ -95,7 +94,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
             ExecutionException;
 
     @Test
-    public final void putTopLevelWithTwoNested() throws InterruptedException, ExecutionException {
+    public final void putTopLevelWithTwoNested() throws Exception {
 
         DatastoreTestTask task = newTestTask().test(writeOneTopMultipleNested(FOO, BAR, BAZ));
         customizeTask(task);
@@ -107,7 +106,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
             ExecutionException;
 
     @Test
-    public final void twoNestedExistsOneIsDeleted() throws InterruptedException, ExecutionException {
+    public final void twoNestedExistsOneIsDeleted() throws Exception {
 
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO, BAR, BAZ)).test(
                 deleteNested(FOO, BAZ));
@@ -120,7 +119,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
             ExecutionException;
 
     @Test
-    public final void nestedListExistsRootDeleted() throws InterruptedException, ExecutionException {
+    public final void nestedListExistsRootDeleted() throws Exception {
 
         DatastoreTestTask task = newTestTask().cleanup(null).setup(writeOneTopMultipleNested(FOO, BAR, BAZ))
                 .test(DatastoreTestTask.simpleDelete(TOP_LEVEL));
