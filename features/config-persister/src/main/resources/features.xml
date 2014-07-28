@@ -10,6 +10,7 @@
     <feature version='${project.version}'>odl-config-netconf-connector</feature>
     <feature version='${project.version}'>odl-config-persister</feature>
     <feature version='${project.version}'>odl-netconf-impl</feature>
+    <bundle>mvn:org.opendaylight.controller/featuretracker/${project.version}</bundle>
   </feature>
   <feature name='odl-config-persister' version='${project.version}'>
     <feature version='${netconf.version}'>odl-netconf-api</feature>
@@ -17,7 +18,6 @@
     <feature version='${yangtools.version}'>yangtools-binding-generator</feature>
     <bundle>mvn:org.opendaylight.controller/config-persister-api/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/${project.version}</bundle>
-    <bundle>mvn:org.opendaylight.controller/config-persister-directory-xml-adapter/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-impl/${project.version}</bundle>
 
     <bundle>mvn:org.opendaylight.controller/netconf-util/${netconf.version}</bundle>
