@@ -23,6 +23,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigPersisterActivator implements BundleActivator {
@@ -49,11 +51,15 @@ public class ConfigPersisterActivator implements BundleActivator {
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX = "storageAdapterClass";
 
     private List<AutoCloseable> autoCloseables;
+    private BundleContext context;
 
+    ServiceRegistration<?> registration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         logger.debug("ConfigPersister starting");
+        this.context = context;
+
         autoCloseables = new ArrayList<>();
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
@@ -83,6 +89,10 @@ public class ConfigPersisterActivator implements BundleActivator {
     @Override
     public synchronized void stop(BundleContext context) throws Exception {
         CloseableUtil.closeAll(autoCloseables);
+        if (registration != null) {
+            registration.unregister();
+        }
+        this.context = null;
     }
 
 
@@ -147,13 +157,21 @@ public class ConfigPersisterActivator implements BundleActivator {
             logger.trace("Got InnerCustomizer.addingService {}", reference);
             NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
 
-            final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
+            logger.debug("Creating new job queue");
+            ConcurrentLinkedQueue queue = new ConcurrentLinkedQueue();
+
+            final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis, queue);
             logger.debug("Configuration Persister got {}", service);
+            logger.debug("Context was {}", context);
+            logger.debug("Registration was {}", registration);
+            registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
+
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        configPusher.pushConfigs(configs);
+                        configPusher.addJob(configs);
+                        //configPusher.pushConfigs(configs);
                     } catch (NetconfDocumentedException e) {
                         logger.error("Error pushing configs {}",configs);
                         throw new IllegalStateException(e);
