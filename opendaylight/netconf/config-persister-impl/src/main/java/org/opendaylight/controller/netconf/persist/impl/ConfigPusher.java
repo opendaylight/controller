@@ -17,12 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.Immutable;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -52,12 +54,36 @@ public class ConfigPusher {
     private final long maxWaitForCapabilitiesMillis;
     private final long conflictingVersionTimeoutMillis;
     private final NetconfOperationServiceFactory configNetconfConnector;
+    private ConcurrentLinkedQueue clq;
 
     public ConfigPusher(NetconfOperationServiceFactory configNetconfConnector, long maxWaitForCapabilitiesMillis,
                         long conflictingVersionTimeoutMillis) {
         this.configNetconfConnector = configNetconfConnector;
         this.maxWaitForCapabilitiesMillis = maxWaitForCapabilitiesMillis;
         this.conflictingVersionTimeoutMillis = conflictingVersionTimeoutMillis;
+    }
+
+    // Overloaded constructor
+    public ConfigPusher(NetconfOperationServiceFactory configNetconfConnector, long maxWaitForCapabilitiesMillis,
+                        long conflictingVersionTimeoutMillis, ConcurrentLinkedQueue queue) {
+        this.configNetconfConnector = configNetconfConnector;
+        this.maxWaitForCapabilitiesMillis = maxWaitForCapabilitiesMillis;
+        this.conflictingVersionTimeoutMillis = conflictingVersionTimeoutMillis;
+        this.clq = queue;
+    }
+
+    public void addJob(List<ConfigSnapshotHolder> configs) throws NetconfDocumentedException {
+        this.clq.add(configs);
+        pushConfigs();
+    }
+
+    private void pushConfigs() throws NetconfDocumentedException {
+        Iterator it = this.clq.iterator();
+        while (it.hasNext()) {
+            List<ConfigSnapshotHolder> csh = (List<ConfigSnapshotHolder>) it.next();
+            pushConfigs(csh);
+            this.clq.remove(csh);
+        }
     }
 
     public synchronized LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> pushConfigs(List<ConfigSnapshotHolder> configs) throws NetconfDocumentedException {

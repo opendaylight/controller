@@ -68,7 +68,6 @@
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-
     <!-- AD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

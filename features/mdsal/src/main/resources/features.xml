@@ -3,6 +3,10 @@
 <features name="mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/config-features/${config.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/config-persister-features/${config.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/config-netty-features/${config.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-commons</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
@@ -23,6 +27,8 @@
         <feature version='${config.version}'>odl-config-manager</feature>
         <feature version='${config.version}'>odl-config-api</feature>
         <feature version='${config.version}'>odl-config-persister</feature>
+        <feature version='${config.version}'>odl-config-startup</feature>
+        <feature version='${config.version}'>odl-config-netty</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>
@@ -32,20 +38,23 @@
         <bundle>mvn:org.opendaylight.controller/sal-binding-util/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-connector-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${mdsal.version}/xml/config</configfile>
     </feature>
     <feature name='odl-mdsal-restconf' version='${project.version}'>
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller/sal-rest-connector/${project.version}</bundle>
-        <bundle>wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <bundle>wrap:mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
-        <bundle>wrap:mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
+        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.thirdparty/com.sun.jersey.jersey-servlet/${jersey.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-buffer/${netty.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-codec/${netty.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-codec-http/${netty.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-common/${netty.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-handler/${netty.version}</bundle>
-        <bundle>wrap:mvn:io.netty/netty-transport/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.restconf.configfile}">mvn:org.opendaylight.controller/sal-rest-connector-config/${mdsal.version}/xml/config</configfile>
     </feature>
     <feature name='odl-mdsal-model' version='${project.version}'>
         <bundle>mvn:org.opendaylight.controller.model/model-flow-base/${project.version}</bundle>
@@ -63,9 +72,17 @@
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.toaster.configfile}">mvn:org.opendaylight.controller.samples/toaster-config/${project.version}/xml/config</configfile>
+    </feature>
+    <feature name='odl-mdsal-netconf-connector' version='${project.version}'>
+        <configfile finalname="${config.configfile.directory}/${config.netconf.connector.configfile}">mvn:org.opendaylight.controller/netconf-connector-config/${netconf.version}/xml/config</configfile>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${config.version}'>odl-config-dispatcher</feature>
+        <feature version='${netconf.version}'>odl-netconf-client</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-netconf-connector/${project.version}</bundle>
     </feature>
     <feature name='odl-mdsal-misc' version='${project.version}'>
-        <bundle>mvn:org.opendaylight.controller/sal-netconf-connector/${project.version}</bundle>
+        <feature version='${project.version}'>odl-sal-netconf-connector</feature>
         <bundle>mvn:org.opendaylight.controller/sal-restconf-broker/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.md/topology-manager/${project.version}</bundle>
