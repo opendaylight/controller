@@ -22,6 +22,9 @@ import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.osgi.framework.BundleContext;
+import org.opendaylight.aaa.api.AuthenticationService;
+import org.osgi.framework.ServiceReference;
 
 public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector {
 
@@ -50,6 +53,13 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
         webSocketServerThread.setName("Web socket server on port " + port);
         webSocketServerThread.start();
+    }
+
+    public void start(BundleContext context){
+        //Get authentication service reference
+        ServiceReference<AuthenticationService> authServiceReference = context.getServiceReference(AuthenticationService.class);
+        AuthenticationService as = context.getService(authServiceReference);
+        BrokerFacade.getInstance().setAuthenticationService(as);
     }
 
     @Override

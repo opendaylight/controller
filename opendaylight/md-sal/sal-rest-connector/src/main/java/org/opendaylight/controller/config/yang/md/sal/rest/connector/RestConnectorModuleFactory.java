@@ -9,7 +9,17 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.rest.connector;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.spi.Module;
+import org.osgi.framework.BundleContext;
 
 public class RestConnectorModuleFactory extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModuleFactory {
+
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+        RestConnectorModule module = (RestConnectorModule) super.createModule(instanceName, dependencyResolver,
+                bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 
 }

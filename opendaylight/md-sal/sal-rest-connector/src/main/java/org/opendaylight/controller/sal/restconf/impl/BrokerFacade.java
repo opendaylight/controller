@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.aaa.api.AuthenticationService;
 
 public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
@@ -42,6 +43,16 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
 
     private BrokerFacade() {
     }
+
+    public AuthenticationService getAuthenticationService() {
+        return authenticationService;
+    }
+
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
+    private volatile AuthenticationService authenticationService;
 
     public void setContext(final ConsumerSession context) {
         this.context = context;
