@@ -45,6 +45,6 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
         QName qName = QName.create(value);
         String identityValue = qName.getLocalName();
         String identityNamespace = qName.getNamespace().toString();
-        return XmlUtil.createTextElementWithNamespacedContent(doc, key, PREFIX, identityNamespace, identityValue);
+        return XmlUtil.createTextElementWithNamespacedContent(doc, key, PREFIX, identityNamespace, identityValue, namespace);
     }
 }
