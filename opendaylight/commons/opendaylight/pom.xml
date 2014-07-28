@@ -184,6 +184,7 @@
     <uncommons.maths.version>1.2.2</uncommons.maths.version>
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.shell.version>1.0.0-SNAPSHOT</usermanager.shell.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
     <web.version>0.4.2-SNAPSHOT</web.version>
     <xtend.dstdir>src/main/xtend-gen</xtend.dstdir>
