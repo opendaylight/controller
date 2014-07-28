@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,10 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.core.api.mount.MountInstance;
@@ -84,7 +87,7 @@ public class RestconfImpl implements RestconfService {
 
         private String uriParameterName;
 
-        UriParameters(String uriParameterName) {
+        UriParameters(final String uriParameterName) {
             this.uriParameterName = uriParameterName;
         }
 
@@ -245,7 +248,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
-            final MountInstance mountPoint, boolean prettyPrint) {
+            final MountInstance mountPoint, final boolean prettyPrint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
         final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
@@ -321,31 +324,31 @@ public class RestconfImpl implements RestconfService {
 
     private CompositeNode toStreamCompositeNode(final String streamName, final DataSchemaNode streamSchemaNode) {
         final List<Node<?>> streamNodeValues = new ArrayList<Node<?>>();
-        List<DataSchemaNode> instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "name");
         final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         streamNodeValues
-                .add(NodeFactory.<String> createImmutableSimpleNode(nameSchemaNode.getQName(), null, streamName));
+        .add(NodeFactory.<String> createImmutableSimpleNode(nameSchemaNode.getQName(), null, streamName));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "description");
         final DataSchemaNode descriptionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         streamNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(descriptionSchemaNode.getQName(), null,
                 "DESCRIPTION_PLACEHOLDER"));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "replay-support");
         final DataSchemaNode replaySupportSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         streamNodeValues.add(NodeFactory.<Boolean> createImmutableSimpleNode(replaySupportSchemaNode.getQName(), null,
                 Boolean.valueOf(true)));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "replay-log-creation-time");
         final DataSchemaNode replayLogCreationTimeSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         streamNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(replayLogCreationTimeSchemaNode.getQName(),
                 null, ""));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) streamSchemaNode), "events");
         final DataSchemaNode eventsSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         streamNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(eventsSchemaNode.getQName(), null, ""));
@@ -355,26 +358,26 @@ public class RestconfImpl implements RestconfService {
 
     private CompositeNode toModuleCompositeNode(final Module module, final DataSchemaNode moduleSchemaNode) {
         final List<Node<?>> moduleNodeValues = new ArrayList<Node<?>>();
-        List<DataSchemaNode> instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) moduleSchemaNode), "name");
         final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         moduleNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(nameSchemaNode.getQName(), null,
                 module.getName()));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) moduleSchemaNode), "revision");
         final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         Date _revision = module.getRevision();
         moduleNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(revisionSchemaNode.getQName(), null,
                 REVISION_FORMAT.format(_revision)));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) moduleSchemaNode), "namespace");
         final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         moduleNodeValues.add(NodeFactory.<String> createImmutableSimpleNode(namespaceSchemaNode.getQName(), null,
                 module.getNamespace().toString()));
 
-        instanceDataChildrenByName = this.controllerContext.findInstanceDataChildrenByName(
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 ((DataNodeContainer) moduleSchemaNode), "feature");
         final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         for (final FeatureDefinition feature : module.getFeatures()) {
@@ -529,7 +532,7 @@ public class RestconfImpl implements RestconfService {
         return null;
     }
 
-    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, boolean prettyPrint) {
+    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, final boolean prettyPrint) {
         if (rpcExecutor == null) {
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
         }
@@ -654,7 +657,7 @@ public class RestconfImpl implements RestconfService {
         return new StructuredData(data, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
     }
 
-    private boolean parsePrettyPrintParameter(UriInfo info) {
+    private boolean parsePrettyPrintParameter(final UriInfo info) {
         String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
         return Boolean.parseBoolean(param);
     }
@@ -773,7 +776,7 @@ public class RestconfImpl implements RestconfService {
             }
 
             String payloadName = this.getName(payload);
-            final DataSchemaNode schemaNode = this.controllerContext.findInstanceDataChildByNameAndNamespace(
+            final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
 
@@ -828,7 +831,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         String payloadName = this.getName(payload);
-        final DataSchemaNode schemaNode = this.controllerContext.findInstanceDataChildByNameAndNamespace(module,
+        final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
                 payloadName, module.getNamespace());
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
         final InstanceIdWithSchemaNode iiWithData = this.addLastIdentifierFromData(null, value, schemaNode);
@@ -1007,10 +1010,10 @@ public class RestconfImpl implements RestconfService {
     private boolean representsMountPointRootData(final CompositeNode data) {
         URI namespace = this.namespace(data);
         return (SchemaContext.NAME.getNamespace().equals(namespace) /*
-                                                                     * || MOUNT_POINT_MODULE_NAME .equals( namespace .
-                                                                     * toString( ) )
-                                                                     */)
-                && SchemaContext.NAME.getLocalName().equals(this.localName(data));
+         * || MOUNT_POINT_MODULE_NAME .equals( namespace .
+         * toString( ) )
+         */)
+         && SchemaContext.NAME.getLocalName().equals(this.localName(data));
     }
 
     private String addMountPointIdentifier(final String identifier) {
@@ -1137,7 +1140,7 @@ public class RestconfImpl implements RestconfService {
         final List<NodeWrapper<?>> children = compositeNodeBuilder.getValues();
         checkNodeMultiplicityAccordingToSchema(schema, children);
         for (final NodeWrapper<? extends Object> child : children) {
-            final List<DataSchemaNode> potentialSchemaNodes = this.controllerContext.findInstanceDataChildrenByName(
+            final List<DataSchemaNode> potentialSchemaNodes = ControllerContext.findInstanceDataChildrenByName(
                     schema, child.getLocalName());
 
             if (potentialSchemaNodes.size() > 1 && child.getNamespace() == null) {
@@ -1232,15 +1235,16 @@ public class RestconfImpl implements RestconfService {
         }
 
         if (nodeBuilder.getNamespace() == null || Objects.equal(nodeBuilder.getNamespace(), validQName.getNamespace())
-                || Objects.equal(nodeBuilder.getNamespace().toString(), moduleName) /*
-                                                                                     * || Note : this check is wrong -
-                                                                                     * can never be true as it compares
-                                                                                     * a URI with a String not sure what
-                                                                                     * the intention is so commented out
-                                                                                     * ... Objects . equal ( nodeBuilder
-                                                                                     * . getNamespace ( ) ,
-                                                                                     * MOUNT_POINT_MODULE_NAME )
-                                                                                     */) {
+                || Objects.equal(nodeBuilder.getNamespace().toString(), moduleName)) {
+            /*
+             * || Note : this check is wrong -
+             * can never be true as it compares
+             * a URI with a String not sure what
+             * the intention is so commented out
+             * ... Objects . equal ( nodeBuilder
+             * . getNamespace ( ) ,
+             * MOUNT_POINT_MODULE_NAME )
+             */
 
             nodeBuilder.setQname(validQName);
         }
