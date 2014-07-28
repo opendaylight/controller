@@ -9,30 +9,30 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import org.opendaylight.controller.sal.core.api.Broker;
+
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountService;
+import org.opendaylight.controller.sal.rest.api.RestConnector;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class RestconfProvider implements BundleActivator, Provider, ServiceTrackerCustomizer<Broker, Broker> {
+public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector {
 
     public final static String NOT_INITALIZED_MSG = "Restconf is not initialized yet. Please try again later";
 
     private ListenerRegistration<SchemaServiceListener> listenerRegistration;
-    private ServiceTracker<Broker, Broker> brokerServiceTrancker;
-    private BundleContext bundleContext;
+    private PortNumber port;
+    public void setWebsocketPort(PortNumber port) {
+        this.port = port;
+    }
+
     private Thread webSocketServerThread;
 
     @Override
@@ -46,32 +46,10 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
         listenerRegistration = schemaService.registerSchemaServiceListener(ControllerContext.getInstance());
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
         ControllerContext.getInstance().setMountService(session.getService(MountService.class));
-    }
 
-    @Override
-    public void start(BundleContext context) throws Exception {
-        String websocketPortStr = context.getProperty(WebSocketServer.WEBSOCKET_SERVER_CONFIG_PROPERTY);
-        int websocketPort = (websocketPortStr != null && !"".equals(websocketPortStr)) ? Integer
-                .parseInt(websocketPortStr) : WebSocketServer.DEFAULT_PORT;
-        bundleContext = context;
-        webSocketServerThread = new Thread(WebSocketServer.createInstance(websocketPort));
-        webSocketServerThread.setName("Web socket server");
+        webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
+        webSocketServerThread.setName("Web socket server on port " + port);
         webSocketServerThread.start();
-        brokerServiceTrancker = new ServiceTracker<>(context, Broker.class, this);
-        brokerServiceTrancker.open();
-    }
-
-    @Override
-    public void stop(BundleContext context) {
-        if (listenerRegistration != null) {
-            try {
-                listenerRegistration.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        webSocketServerThread.interrupt();
-        brokerServiceTrancker.close();
     }
 
     @Override
@@ -80,22 +58,10 @@ public class RestconfProvider implements BundleActivator, Provider, ServiceTrack
     }
 
     @Override
-    public Broker addingService(ServiceReference<Broker> reference) {
-        Broker broker = bundleContext.getService(reference);
-        broker.registerProvider(this, bundleContext);
-        return broker;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<Broker> reference, Broker service) {
-        // NOOP
-    }
-
-    @Override
-    public void removedService(ServiceReference<Broker> reference, Broker service) {
-        bundleContext.ungetService(reference);
-        BrokerFacade.getInstance().setContext(null);
-        BrokerFacade.getInstance().setDataService(null);
-        ControllerContext.getInstance().setSchemas(null);
+    public void close() {
+        if (listenerRegistration != null) {
+            listenerRegistration.close();
+        }
+        webSocketServerThread.interrupt();
     }
 }

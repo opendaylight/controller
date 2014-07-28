@@ -1237,6 +1237,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-rest-connector-config</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-rest-docgen</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
