@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.persist.impl.osgi;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
@@ -17,22 +18,20 @@ import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.DummyAdapter;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
@@ -49,6 +48,8 @@ final class MockedBundleContext {
     NetconfOperationServiceFactory serviceFactory;
     @Mock
     private NetconfOperationService service;
+    @Mock
+    private ServiceRegistration<?> registration;
 
     MockedBundleContext(long maxWaitForCapabilitiesMillis, long conflictingVersionTimeoutMillis) throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -77,6 +78,11 @@ final class MockedBundleContext {
         doReturn(Collections.emptySet()).when(service).getCapabilities();
         doNothing().when(service).close();
         doReturn("serviceFactoryMock").when(serviceFactory).toString();
+
+        doNothing().when(registration).unregister();
+        doReturn(registration).when(context).registerService(
+                eq(ConfigPusher.class.getName()), any(Closeable.class),
+                any(Dictionary.class));
     }
 
     public BundleContext getBundleContext() {

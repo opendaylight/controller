@@ -12,6 +12,6 @@
     <bundle>mvn:org.opendaylight.controller/threadpool-config-api/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/threadpool-config-impl/${project.version}</bundle>
     <feature version='${project.version}'>odl-config-startup</feature>
-    <configfile finalname="configuration/initial/00-netty.xml">mvn:org.opendaylight.controller/config-netty-config/${config.version}/xml/config</configfile>
+    <configfile finalname="${config.configfile.directory}/${config.netty.configfile}">mvn:org.opendaylight.controller/config-netty-config/${config.version}/xml/config</configfile>
   </feature>
 </features>
