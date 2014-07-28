@@ -97,6 +97,7 @@
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <hosttracker_new.api.version>0.4.2-SNAPSHOT</hosttracker_new.api.version>
     <hosttracker_new.implementation.version>0.4.2-SNAPSHOT</hosttracker_new.implementation.version>
+    <topologymanager.shell.version>1.0.0-SNAPSHOT</topologymanager.shell.version>
     <httpservice-bridge.northbound.version>0.0.2-SNAPSHOT</httpservice-bridge.northbound.version>
     <ietf-inet-types.version>2010.09.24.4-SNAPSHOT</ietf-inet-types.version>
     <ietf-restconf.version>2013.10.19.1-SNAPSHOT</ietf-restconf.version>
