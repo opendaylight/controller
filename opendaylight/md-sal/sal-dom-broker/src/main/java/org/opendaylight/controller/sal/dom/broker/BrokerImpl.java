@@ -62,22 +62,13 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     @Override
     public ConsumerSession registerConsumer(final Consumer consumer,
             final BundleContext ctx) {
-        checkPredicates(consumer);
-        log.trace("Registering consumer {}", consumer);
-        final ConsumerContextImpl session = newSessionFor(consumer, ctx);
-        consumer.onSessionInitiated(session);
-        sessions.add(session);
-        return session;
+        return registerConsumer(consumer);
     }
 
     @Override
     public ProviderSession registerProvider(final Provider provider,
             final BundleContext ctx) {
-        checkPredicates(provider);
-        final ProviderContextImpl session = newSessionFor(provider, ctx);
-        provider.onSessionInitiated(session);
-        providerSessions.add(session);
-        return session;
+        return registerProvider(provider);
     }
 
     protected Future<RpcResult<CompositeNode>> invokeRpcAsync(final QName rpc,
@@ -106,14 +97,12 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     }
 
     // Private Factory methods
-    private ConsumerContextImpl newSessionFor(final Consumer provider,
-            final BundleContext ctx) {
+    private ConsumerContextImpl newSessionFor(final Consumer provider) {
         ConsumerContextImpl ret = new ConsumerContextImpl(provider, this);
         return ret;
     }
 
-    private ProviderContextImpl newSessionFor(final Provider provider,
-            final BundleContext ctx) {
+    private ProviderContextImpl newSessionFor(final Provider provider) {
         ProviderContextImpl ret = new ProviderContextImpl(provider, this);
         return ret;
     }
@@ -210,14 +199,23 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
 
 
     @Override
-    public ConsumerSession registerConsumer(Consumer cons) {
-        return registerConsumer(cons,null);
+    public ConsumerSession registerConsumer(Consumer consumer) {
+        checkPredicates(consumer);
+        log.trace("Registering consumer {}", consumer);
+        final ConsumerContextImpl session = newSessionFor(consumer);
+        consumer.onSessionInitiated(session);
+        sessions.add(session);
+        return session;
     }
 
 
     @Override
-    public ProviderSession registerProvider(Provider prov) {
-        return registerProvider(prov,null);
+    public ProviderSession registerProvider(Provider provider) {
+        checkPredicates(provider);
+        final ProviderContextImpl session = newSessionFor(provider);
+        provider.onSessionInitiated(session);
+        providerSessions.add(session);
+        return session;
     }
 
 }
