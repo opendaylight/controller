@@ -17,12 +17,7 @@ import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificat
 import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
 import org.opendaylight.controller.netconf.util.CloseableUtil;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -49,11 +44,16 @@ public class ConfigPersisterActivator implements BundleActivator {
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX = "storageAdapterClass";
 
     private List<AutoCloseable> autoCloseables;
+    private BundleContext context;
 
+    ServiceRegistration<?> registration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         logger.debug("ConfigPersister starting");
+        //todo create ConfigPusher, init thread safe queue
+        this.context = context;
+
         autoCloseables = new ArrayList<>();
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
@@ -83,6 +83,10 @@ public class ConfigPersisterActivator implements BundleActivator {
     @Override
     public synchronized void stop(BundleContext context) throws Exception {
         CloseableUtil.closeAll(autoCloseables);
+        if (registration != null) {
+            registration.unregister();
+        }
+        this.context = null;
     }
 
 
@@ -149,6 +153,10 @@ public class ConfigPersisterActivator implements BundleActivator {
 
             final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
             logger.debug("Configuration Persister got {}", service);
+            logger.debug("Context was {}", context);
+            logger.debug("Registration was {}", registration);
+            registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
+
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
                 public void run() {

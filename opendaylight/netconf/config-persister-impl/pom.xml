@@ -82,7 +82,7 @@
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.persist.impl.osgi.ConfigPersisterActivator</Bundle-Activator>
             <Require-Capability>org.opendaylight.controller.config.persister.storage.adapter</Require-Capability>
-            <Export-Package></Export-Package>
+            <Export-Package>org.opendaylight.controller.netconf.persist.impl</Export-Package>
           </instructions>
         </configuration>
       </plugin>
