@@ -64,6 +64,13 @@
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
+    <config.configfile.directory>configuration/karaf</config.configfile.directory>
+    <config.netty.configfile>00-netty.xml</config.netty.configfile>
+    <config.mdsal.configfile>01-mdsal.xml</config.mdsal.configfile>
+    <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
+    <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
+    <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
+    <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
@@ -83,6 +90,7 @@
     <!-- OpenEXI third party lib for netconf-->
 
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
+    <felix.util.version>1.6.0</felix.util.version>
     <filtervalve.version>1.4.2-SNAPSHOT</filtervalve.version>
     <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>

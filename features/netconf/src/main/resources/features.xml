@@ -50,8 +50,12 @@
     <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
   </feature>
-  <feature name='odl-netconf-misc' version='${project.version}'>
+  <feature name='odl-netconf-client' version="${project.version}">
     <bundle>mvn:org.opendaylight.controller/netconf-client/${project.version}</bundle>
+    <configfile finalname="${config.configfile.directory}/${config.netconf.client.configfile}">mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>
+  </feature>
+  <feature name='odl-netconf-misc' version='${project.version}'>
+    <feature version='${project.version}'>odl-netconf-client</feature>
     <bundle>mvn:org.opendaylight.controller/netconf-monitoring/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-tcp/${project.version}</bundle>
   </feature>
