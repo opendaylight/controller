@@ -40,6 +40,7 @@
     <module>netconf-config-dispatcher</module>
     <module>config-module-archetype</module>
     <module>config-netty-config</module>
+    <module>featuretracker</module>
   </modules>
 
   <dependencies>
