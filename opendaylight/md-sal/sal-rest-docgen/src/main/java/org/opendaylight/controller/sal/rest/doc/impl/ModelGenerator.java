@@ -126,9 +126,8 @@ public class ModelGenerator {
             JSONException {
 
         String moduleName = module.getName();
-        Set<DataSchemaNode> childNodes = module.getChildNodes();
 
-        for (DataSchemaNode childNode : childNodes) {
+        for (DataSchemaNode childNode : module.getChildNodes()) {
             JSONObject configModuleJSON = null;
             JSONObject operationalModuleJSON = null;
 
@@ -271,13 +270,12 @@ public class ModelGenerator {
         String containerDescription = container.getDescription();
         moduleJSON.put(DESCRIPTION_KEY, containerDescription);
 
-        Set<DataSchemaNode> containerChildren = container.getChildNodes();
-        JSONObject properties = processChildren(containerChildren, moduleName, models, isConfig);
+        JSONObject properties = processChildren(container.getChildNodes(), moduleName, models, isConfig);
         moduleJSON.put(PROPERTIES_KEY, properties);
         return moduleJSON;
     }
 
-    private JSONObject processChildren(Set<DataSchemaNode> nodes, String moduleName,
+    private JSONObject processChildren(Iterable<DataSchemaNode> nodes, String moduleName,
             JSONObject models) throws JSONException, IOException {
         return processChildren(nodes, moduleName, models, null);
     }
@@ -292,7 +290,7 @@ public class ModelGenerator {
      * @throws JSONException
      * @throws IOException
      */
-    private JSONObject processChildren(Set<DataSchemaNode> nodes, String moduleName,
+    private JSONObject processChildren(Iterable<DataSchemaNode> nodes, String moduleName,
             JSONObject models, Boolean isConfig) throws JSONException, IOException {
 
         JSONObject properties = new JSONObject();
@@ -418,11 +416,10 @@ public class ModelGenerator {
     private JSONObject processListSchemaNode(ListSchemaNode listNode, String moduleName,
             JSONObject models, Boolean isConfig) throws JSONException, IOException {
 
-        Set<DataSchemaNode> listChildren = listNode.getChildNodes();
         String fileName = (BooleanUtils.isNotFalse(isConfig)?OperationBuilder.CONFIG:OperationBuilder.OPERATIONAL) +
                                                                 listNode.getQName().getLocalName();
 
-        JSONObject childSchemaProperties = processChildren(listChildren, moduleName, models);
+        JSONObject childSchemaProperties = processChildren(listNode.getChildNodes(), moduleName, models);
         JSONObject childSchema = getSchemaTemplate();
         childSchema.put(TYPE_KEY, OBJECT_TYPE);
         childSchema.put(PROPERTIES_KEY, childSchemaProperties);

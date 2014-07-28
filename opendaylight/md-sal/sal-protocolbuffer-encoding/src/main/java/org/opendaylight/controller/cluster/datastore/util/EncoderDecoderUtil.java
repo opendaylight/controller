@@ -31,7 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /*
  * Copyright (c) 2014 Cisco Systems, Inc. and others. All rights reserved.
@@ -57,7 +56,7 @@ public class EncoderDecoderUtil {
     factory.setIgnoringComments(true);
   }
 
-  private static DataSchemaNode findChildNode(Set<DataSchemaNode> children,
+  private static DataSchemaNode findChildNode(Iterable<DataSchemaNode> children,
       String name) {
     List<DataNodeContainer> containers = Lists.newArrayList();
 

@@ -113,7 +113,7 @@ public class NormalizedNodeXmlConverterTest {
         + childNodeName);
   }
 
-  static DataSchemaNode findChildNode(final Set<DataSchemaNode> children, final String name) {
+  static DataSchemaNode findChildNode(final Iterable<DataSchemaNode> children, final String name) {
     List<DataNodeContainer> containers = Lists.newArrayList();
 
     for (DataSchemaNode dataSchemaNode : children) {

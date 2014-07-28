@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import java.lang.reflect.Method;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -406,9 +407,8 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return Iterables.filter(augmentations, new Predicate<AugmentationSchema>() {
             @Override
             public boolean apply(final AugmentationSchema schema) {
-                final Set<DataSchemaNode> childNodes = schema.getChildNodes();
-                return !schema.getChildNodes().isEmpty()
-                        && module.equals(Iterables.get(childNodes, 0).getQName().getModule());
+                final Collection<DataSchemaNode> childNodes = schema.getChildNodes();
+                return !childNodes.isEmpty() && module.equals(Iterables.get(childNodes, 0).getQName().getModule());
             }
         });
     }

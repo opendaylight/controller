@@ -92,8 +92,7 @@ public final class YangSchemaUtils {
     }
 
     private static DataSchemaNode searchInChoices(final DataNodeContainer node, final QName arg) {
-        Set<DataSchemaNode> children = node.getChildNodes();
-        for (DataSchemaNode child : children) {
+        for (DataSchemaNode child : node.getChildNodes()) {
             if (child instanceof ChoiceNode) {
                 ChoiceNode choiceNode = (ChoiceNode) child;
                 DataSchemaNode potential = searchInCases(choiceNode, arg);

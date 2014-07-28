@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -83,7 +84,7 @@ class JsonMapper {
 
         final Set<QName> foundLists = new HashSet<>();
 
-        Set<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ? Collections.<DataSchemaNode> emptySet()
+        Collection<DataSchemaNode> parentSchemaChildNodes = parentSchema == null ? Collections.<DataSchemaNode> emptySet()
                 : parentSchema.getChildNodes();
 
         for (Node<?> child : parent.getValue()) {
@@ -170,7 +171,7 @@ class JsonMapper {
         }
     }
 
-    private static DataSchemaNode findFirstSchemaForNode(final Node<?> node, final Set<DataSchemaNode> dataSchemaNode) {
+    private static DataSchemaNode findFirstSchemaForNode(final Node<?> node, final Iterable<DataSchemaNode> dataSchemaNode) {
         for (DataSchemaNode dsn : dataSchemaNode) {
             if (node.getNodeType().equals(dsn.getQName())) {
                 return dsn;
