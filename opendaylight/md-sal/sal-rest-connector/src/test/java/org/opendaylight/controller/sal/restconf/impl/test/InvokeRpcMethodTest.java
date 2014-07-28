@@ -93,7 +93,7 @@ public class InvokeRpcMethodTest {
      * string - first argument).
      */
     @Test
-    public void invokeRpcMtethodTest() {
+    public void invokeRpcMethodTest() {
         ControllerContext contContext = controllerContext;
         try {
             contContext.findModuleNameByNamespace(new URI("invoke:rpc:module"));
