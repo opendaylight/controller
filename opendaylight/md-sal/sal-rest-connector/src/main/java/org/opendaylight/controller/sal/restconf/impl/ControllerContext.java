@@ -259,7 +259,7 @@ public class ControllerContext implements SchemaContextListener {
         for (final PathArgument element : elements) {
             QName _nodeType = element.getNodeType();
             final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
-            if (potentialNode == null || !this.isListOrContainer(potentialNode)) {
+            if (potentialNode == null || !ControllerContext.isListOrContainer(potentialNode)) {
                 return null;
             }
             node = (DataNodeContainer) potentialNode;
@@ -281,7 +281,7 @@ public class ControllerContext implements SchemaContextListener {
         for (final PathArgument element : elements) {
             QName _nodeType = element.getNodeType();
             final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
-            if (!this.isListOrContainer(potentialNode)) {
+            if (!ControllerContext.isListOrContainer(potentialNode)) {
                 return null;
             }
             node = ((DataNodeContainer) potentialNode);
@@ -647,7 +647,7 @@ public class ControllerContext implements SchemaContextListener {
             targetNode = potentialSchemaNodes.iterator().next();
         }
 
-        if (!this.isListOrContainer(targetNode)) {
+        if (!ControllerContext.isListOrContainer(targetNode)) {
             throw new RestconfDocumentedException("URI has bad format. Node \"" + head
                     + "\" must be Container or List yang type.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
