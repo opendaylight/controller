@@ -124,8 +124,14 @@ public final class XmlUtil {
     public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
                                                                  String namespace, String contentWithoutPrefix) {
 
+       return createTextElementWithNamespacedContent(document, qName, prefix, namespace, contentWithoutPrefix, Optional.<String>absent());
+    }
+
+    public static Element createTextElementWithNamespacedContent(Document document, String qName, String prefix,
+                                                                 String namespace, String contentWithoutPrefix, Optional<String> namespaceURI) {
+
         String content = createPrefixedValue(XmlNetconfConstants.PREFIX, contentWithoutPrefix);
-        Element element = createTextElement(document, qName, content, Optional.<String>absent());
+        Element element = createTextElement(document, qName, content, namespaceURI);
         String prefixedNamespaceAttr = createPrefixedValue(XMLNS_ATTRIBUTE_KEY, prefix);
         element.setAttributeNS(XMLNS_URI, prefixedNamespaceAttr, namespace);
         return element;
