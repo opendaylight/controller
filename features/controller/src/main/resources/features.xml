@@ -66,6 +66,7 @@
       <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation/${forwardingrulesmanager.implementation.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/usermanager.shell/${usermanager.shell.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/containermanager/${containermanager.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/containermanager.implementation/${containermanager.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/topologymanager/${topologymanager.version}</bundle>
