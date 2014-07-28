@@ -208,4 +208,16 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         return Optional.fromNullable(services.getInstance(service));
     }
 
+
+    @Override
+    public ConsumerSession registerConsumer(Consumer cons) {
+        return registerConsumer(cons,null);
+    }
+
+
+    @Override
+    public ProviderSession registerProvider(Provider prov) {
+        return registerProvider(prov,null);
+    }
+
 }

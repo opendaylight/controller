@@ -78,13 +78,18 @@ public interface Broker {
      *
      * @param cons
      *            Consumer to be registered.
-     * @param context
      * @return a session specific to consumer registration
      * @throws IllegalArgumentException
      *             If the consumer is <code>null</code>.
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
+    ConsumerSession registerConsumer(Consumer cons);
+
+    /*
+     * @deprecated Use registerConsumer(Consumer cons) instead (BundleContext is no longer used)
+     */
+    @Deprecated
     ConsumerSession registerConsumer(Consumer cons, BundleContext context);
 
     /**
@@ -110,13 +115,18 @@ public interface Broker {
      *
      * @param prov
      *            Provider to be registered.
-     * @param context
      * @return a session unique to the provider registration.
      * @throws IllegalArgumentException
      *             If the provider is <code>null</code>.
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
+    ProviderSession registerProvider(Provider prov);
+
+    /*
+     * @deprecated Use registerProvider(Provider cons) instead (BundleContext is no longer used)
+     */
+    @Deprecated
     ProviderSession registerProvider(Provider prov, BundleContext context);
 
     /**
