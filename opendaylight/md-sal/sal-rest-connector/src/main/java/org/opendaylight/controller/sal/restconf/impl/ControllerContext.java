@@ -143,7 +143,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
-        Module latestModule = this.getLatestModule(globalSchema, startModule);
+        Module latestModule = globalSchema.findModuleByName(startModule, null);
         InstanceIdWithSchemaNode iiWithSchemaNode = this.collectPathArguments(builder, pathArgs, latestModule, null,
                 toMountPointIdentifier);
 
@@ -175,59 +175,38 @@ public class ControllerContext implements SchemaContextListener {
 
         return list;
     }
-
-    private Module getLatestModule(final SchemaContext schema, final String moduleName) {
-        Preconditions.checkArgument(schema != null);
-        Preconditions.checkArgument(moduleName != null && !moduleName.isEmpty());
-
-        Predicate<Module> filter = new Predicate<Module>() {
-            @Override
-            public boolean apply(final Module m) {
-                return Objects.equal(m.getName(), moduleName);
-            }
-        };
-
-        Iterable<Module> modules = Iterables.filter(schema.getModules(), filter);
-        return this.filterLatestModule(modules);
-    }
-
-    private Module filterLatestModule(final Iterable<Module> modules) {
-        Module latestModule = modules.iterator().hasNext() ? modules.iterator().next() : null;
-        for (final Module module : modules) {
-            if (module.getRevision().after(latestModule.getRevision())) {
-                latestModule = module;
-            }
-        }
-        return latestModule;
-    }
-
     public Module findModuleByName(final String moduleName) {
         this.checkPreconditions();
         Preconditions.checkArgument(moduleName != null && !moduleName.isEmpty());
-        return this.getLatestModule(globalSchema, moduleName);
+        return globalSchema.findModuleByName(moduleName, null);
     }
 
     public Module findModuleByName(final MountInstance mountPoint, final String moduleName) {
         Preconditions.checkArgument(moduleName != null && mountPoint != null);
 
         final SchemaContext mountPointSchema = mountPoint.getSchemaContext();
-        return mountPointSchema == null ? null : this.getLatestModule(mountPointSchema, moduleName);
+        if (mountPointSchema == null) {
+            return null;
+        }
+
+        return mountPointSchema.findModuleByName(moduleName, null);
     }
 
     public Module findModuleByNamespace(final URI namespace) {
         this.checkPreconditions();
         Preconditions.checkArgument(namespace != null);
-
-        final Set<Module> moduleSchemas = globalSchema.findModuleByNamespace(namespace);
-        return moduleSchemas == null ? null : this.filterLatestModule(moduleSchemas);
+        return globalSchema.findModuleByNamespaceAndRevision(namespace, null);
     }
 
     public Module findModuleByNamespace(final MountInstance mountPoint, final URI namespace) {
         Preconditions.checkArgument(namespace != null && mountPoint != null);
 
         final SchemaContext mountPointSchema = mountPoint.getSchemaContext();
-        Set<Module> moduleSchemas = mountPointSchema == null ? null : mountPointSchema.findModuleByNamespace(namespace);
-        return moduleSchemas == null ? null : this.filterLatestModule(moduleSchemas);
+        if (mountPointSchema == null) {
+            return null;
+        }
+
+        return mountPointSchema.findModuleByNamespaceAndRevision(namespace, null);
     }
 
     public Module findModuleByNameAndRevision(final QName module) {
@@ -587,8 +566,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
                 }
 
-                final Module moduleBehindMountPoint = this
-                        .getLatestModule(mountPointSchema, moduleNameBehindMountPoint);
+                final Module moduleBehindMountPoint = mountPointSchema.findModuleByName(moduleNameBehindMountPoint, null);
                 if (moduleBehindMountPoint == null) {
                     throw new RestconfDocumentedException("\"" + moduleName
                             + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
@@ -601,14 +579,18 @@ public class ControllerContext implements SchemaContextListener {
 
             Module module = null;
             if (mountPoint == null) {
-                module = this.getLatestModule(globalSchema, moduleName);
+                module = globalSchema.findModuleByName(moduleName, null);
                 if (module == null) {
                     throw new RestconfDocumentedException("\"" + moduleName + "\" module does not exist.",
                             ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
                 }
             } else {
                 SchemaContext schemaContext = mountPoint.getSchemaContext();
-                module = schemaContext == null ? null : this.getLatestModule(schemaContext, moduleName);
+                if (schemaContext != null) {
+                    module = schemaContext.findModuleByName(moduleName, null);
+                } else {
+                    module = null;
+                }
                 if (module == null) {
                     throw new RestconfDocumentedException("\"" + moduleName
                             + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
