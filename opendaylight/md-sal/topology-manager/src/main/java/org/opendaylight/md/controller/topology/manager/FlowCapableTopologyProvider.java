@@ -19,7 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.osgi.framework.BundleContext;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider implements AutoCloseable {
     private final static Logger LOG = LoggerFactory.getLogger(FlowCapableTopologyProvider.class);
-    private Registration<NotificationListener> listenerRegistration;
+    private ListenerRegistration<NotificationListener> listenerRegistration;
     private Thread thread;
 
     /**

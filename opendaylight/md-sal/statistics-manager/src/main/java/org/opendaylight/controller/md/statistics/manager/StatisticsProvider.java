@@ -28,7 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.queue.statistics.rev131216.OpendaylightQueueStatisticsService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.slf4j.Logger;
@@ -76,7 +75,7 @@ public class StatisticsProvider implements AutoCloseable {
 
     private final StatisticsListener updateCommiter = new StatisticsListener(StatisticsProvider.this);
 
-    private Registration<NotificationListener> listenerRegistration;
+    private ListenerRegistration<NotificationListener> listenerRegistration;
 
     private ListenerRegistration<DataChangeListener> flowCapableTrackerRegistration;
 

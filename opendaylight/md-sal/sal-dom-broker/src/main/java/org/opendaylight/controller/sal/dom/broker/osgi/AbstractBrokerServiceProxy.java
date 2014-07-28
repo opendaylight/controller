@@ -39,9 +39,9 @@ public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implem
         return reference;
     }
 
-    private final Set<Registration<?>> registrations = Collections.synchronizedSet(new HashSet<Registration<?>>());
+    private final Set<Registration> registrations = Collections.synchronizedSet(new HashSet<Registration>());
 
-    protected <R extends Registration<?>> R addRegistration(final R registration) {
+    protected <R extends Registration> R addRegistration(final R registration) {
         if (registration != null) {
             registrations.add(registration);
         }
@@ -63,7 +63,7 @@ public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implem
             RuntimeException potentialException = new RuntimeException(
                     "Uncaught exceptions occured during unregistration");
             boolean hasSuppressed = false;
-            for (Registration<?> registration : registrations) {
+            for (Registration registration : registrations) {
                 try {
                     registration.close();
                 } catch (Exception e) {

@@ -63,9 +63,9 @@ public interface DataProviderService extends
     void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
 
 
-    Registration<DataReader<InstanceIdentifier, CompositeNode>> registerConfigurationReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+    Registration registerConfigurationReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
 
-    Registration<DataReader<InstanceIdentifier, CompositeNode>> registerOperationalReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+    Registration registerOperationalReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
 
     public interface DataRefresher extends Provider.ProviderFunctionality {
 

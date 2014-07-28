@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.core.api.notify;
 
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 
 
@@ -38,6 +38,6 @@ public interface NotificationService extends BrokerService {
      * @param notification
      * @param listener
      */
-    Registration<NotificationListener> addNotificationListener(QName notification,
+    ListenerRegistration<NotificationListener> addNotificationListener(QName notification,
             NotificationListener listener);
 }
