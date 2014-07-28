@@ -58,6 +58,7 @@
       <bundle>mvn:org.opendaylight.controller/appauth/${appauth.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/hosttracker/${hosttracker.api.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/hosttracker.implementation/${hosttracker.implementation.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/hosttracker.shell/${hosttracker.shell.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/switchmanager/${switchmanager.api.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/switchmanager.implementation/${switchmanager.implementation.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/statisticsmanager/${statisticsmanager.version}</bundle>
