@@ -1,0 +1,17 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="ConnectionManagerRef" interface="org.opendaylight.controller.connectionmanager.IConnectionManagerShell"/>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+
+    <command>
+       <action class="org.opendaylight.controller.connectionmanager.shell.Scheme">
+          <property name="connectionManager" ref="ConnectionManagerRef"/>
+       </action>
+    </command>
+    <command>
+       <action class="org.opendaylight.controller.connectionmanager.shell.PrintNodes">
+          <property name="connectionManager" ref="ConnectionManagerRef"/>
+       </action>
+    </command>
+    </command-bundle>
+</blueprint>

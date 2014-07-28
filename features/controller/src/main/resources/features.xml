@@ -73,5 +73,6 @@
       <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
       <bundle>mvn:org.opendaylight.controller/connectionmanager</bundle>
       <bundle>mvn:org.opendaylight.controller/connectionmanager.implementation</bundle>
+      <bundle>mvn:org.opendaylight.controller/connectionmanager.shell/${connectionmanager.shell.version}</bundle>
    </feature>
 </features>
