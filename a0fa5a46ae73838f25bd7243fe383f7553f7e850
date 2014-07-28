@@ -1,0 +1,310 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_17df516a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "This commit seems to be doing a little more than just switching AppendEntries to protocol buffers. Please add more detail in the commit message.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b7d7854a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/run.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Since you are excluding protobuf from checkstyle you don\u0027t really need to remove trailing spaces do you?",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_37c3758a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/ExampleActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "In which case would snapShot be null? If snapShot was indeed null we should probably be throwing an exception.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_573f1987",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/messages/PrintRole.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Copyright message is missing in this file",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_77449d1a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/messages/PrintState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Copyright message missing",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_174d113e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Why was this class made public?",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_374a9526",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Remove commented code",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d75249dd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Remove commented code",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_976041a6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "I would rather not have a ProtoBufferEncoderDecoderUtil. Atleast let\u0027s not call it that :). Also I really don\u0027t like the use of static methods in code because usually they end up make code that uses it difficult to test.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_17743166",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractRaftRPC.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Do we really need this constructor? If we do atleast move the code so that all constructors are together and not interspersed in the code.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f7666dba",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVote.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Please remove all test related setters. These variables are invariants and should not be changeable once set (that\u0027s why they were final)",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b70c65ee",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/ProtoBuffEncoderDecoderUtil.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Please create static methods on AppendEntries to do protocol buffer serialization and deserialization.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d70009ad",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/Payload.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Add copyright",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_37f855c2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/protobuff/client/messages/Payload.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Please elaborate on the documentation of this class (remove the created by)",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f7fd0db2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/resources/AppendEntriesMessages.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Why did you chooses to make most of these fields optional. They\u0027re supposed to be required aren\u0027t they?",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_972e0142",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/resources/KeyValueMessages.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Fields should be required not optional",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5724f95e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/resources/VotingMessages.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "I think by default we are optimized for speed (this may be redundant)",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b73305aa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/resources/VotingMessages.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-28T17:20:38Z",
+      "side": 1,
+      "message": "Fields should be required not optional.",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
