@@ -42,7 +42,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
 
     private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", storeExecutor);
+        new InMemoryDOMDataStore("OPER", storeExecutor, MoreExecutors.sameThreadExecutor());
 
     private static final SchemaContext testSchemaContext = TestModel.createTestContext();
 
@@ -59,6 +59,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(
@@ -67,6 +68,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                               if (ReadDataReply.fromSerializable(testSchemaContext,YangInstanceIdentifier.builder().build(), in)
@@ -99,6 +101,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(
@@ -107,6 +110,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
                                 if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
@@ -135,6 +139,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         final Class<? extends Modification> modificationType) {
         new JavaTestKit(getSystem()) {{
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
                     subject
                         .tell(new ShardTransaction.GetCompositedModification(),
@@ -143,6 +148,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     final CompositeModification compositeModification =
                         new ExpectMsg<CompositeModification>(duration("1 seconds"), "match hint") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected CompositeModification match(Object in) {
                                 if (in instanceof ShardTransaction.GetCompositeModificationReply) {
                                     return ((ShardTransaction.GetCompositeModificationReply) in)
@@ -174,6 +180,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testWriteData");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new WriteData(TestModel.TEST_PATH,
@@ -182,6 +189,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -212,6 +220,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testMergeData");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new MergeData(TestModel.TEST_PATH,
@@ -220,6 +229,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("500 milliseconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(MergeDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -251,12 +261,14 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testDeleteData");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new DeleteData(TestModel.TEST_PATH).toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(DeleteDataReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -288,12 +300,14 @@ public class ShardTransactionTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testReadyTransaction");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new ReadyTransaction().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -326,12 +340,14 @@ public class ShardTransactionTest extends AbstractActorTest {
             watch(subject);
 
             new Within(duration("2 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new CloseTransaction().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(CloseTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
@@ -345,6 +361,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     final String termination = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in instanceof Terminated) {
                                 return "match";

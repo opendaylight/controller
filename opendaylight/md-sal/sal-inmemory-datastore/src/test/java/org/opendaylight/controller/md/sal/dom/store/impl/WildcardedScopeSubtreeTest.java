@@ -32,7 +32,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
     @Override
     public void putTopLevelOneNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
 
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertNotContains(change.getCreatedData(), TOP_LEVEL);
         assertContains(change.getCreatedData(), path(FOO), path(FOO, BAR));
@@ -45,7 +45,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
     public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
 
         assertContains(change.getCreatedData(), path(FOO, BAZ));
@@ -59,7 +59,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
     protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
         assertFalse(change.getCreatedData().isEmpty());
 
@@ -74,7 +74,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
     protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
         assertTrue(change.getCreatedData().isEmpty());
         assertContains(change.getUpdatedData(), path(FOO));
@@ -86,7 +86,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
     public void nestedListExistsRootDeleted(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertEmpty(change.getCreatedData());
         assertEmpty(change.getUpdatedData());
@@ -97,7 +97,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
 
     @Override
     protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO,BAZ));
         assertNotContains(change.getCreatedData(), path(FOO,BAR));
@@ -108,7 +108,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
 
     @Override
     protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO,BAR),path(FOO,BAZ));
         assertContains(change.getUpdatedData(), path(FOO));
@@ -118,7 +118,7 @@ public class WildcardedScopeSubtreeTest extends DefaultDataChangeListenerTestSui
 
     @Override
     protected void existingTopWriteSibling(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO_SIBLING));
         assertNotContains(change.getUpdatedData(), path(FOO), TOP_LEVEL);
