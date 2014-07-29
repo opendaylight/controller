@@ -91,7 +91,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             return toRpcResult(message, rpc, schemaContext.get());
         } else {
             final CompositeNode node = (CompositeNode) XmlDocumentUtils.toDomNode(message.getDocument());
-            return RpcResultBuilder.success( node ).build();
+            return RpcResultBuilder.success(node).build();
         }
     }
 

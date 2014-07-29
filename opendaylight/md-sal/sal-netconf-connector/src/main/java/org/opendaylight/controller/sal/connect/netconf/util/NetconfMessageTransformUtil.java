@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
@@ -33,6 +34,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -48,7 +50,13 @@ public class NetconfMessageTransformUtil {
 
     private NetconfMessageTransformUtil() {}
 
-    public static final QName IETF_NETCONF_MONITORING = QName.create("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring", "2010-10-04", "ietf-netconf-monitoring");
+    public static final QName IETF_NETCONF_MONITORING = QName.create(NetconfState.QNAME, "ietf-netconf-monitoring");
+    public static final QName IETF_NETCONF_MONITORING_SCHEMA_FORMAT = QName.create(IETF_NETCONF_MONITORING, "format");
+    public static final QName IETF_NETCONF_MONITORING_SCHEMA_LOCATION = QName.create(IETF_NETCONF_MONITORING, "location");
+    public static final QName IETF_NETCONF_MONITORING_SCHEMA_IDENTIFIER = QName.create(IETF_NETCONF_MONITORING, "identifier");
+    public static final QName IETF_NETCONF_MONITORING_SCHEMA_VERSION = QName.create(IETF_NETCONF_MONITORING, "version");
+    public static final QName IETF_NETCONF_MONITORING_SCHEMA_NAMESPACE = QName.create(IETF_NETCONF_MONITORING, "namespace");
+
     public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
     public static QName NETCONF_QNAME = QName.create(NETCONF_URI, null, "netconf");
     public static QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
@@ -281,5 +289,32 @@ public class NetconfMessageTransformUtil {
         } else {
             return it.toInstance();
         }
+    }
+
+    public static Node<?> findNode(final CompositeNode node, final YangInstanceIdentifier identifier) {
+
+        Node<?> current = node;
+        for (final YangInstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
+            if (current instanceof SimpleNode<?>) {
+                return null;
+            } else if (current instanceof CompositeNode) {
+                final CompositeNode currentComposite = (CompositeNode) current;
+
+                current = currentComposite.getFirstCompositeByName(arg.getNodeType());
+                if (current == null) {
+                    current = currentComposite.getFirstCompositeByName(arg.getNodeType().withoutRevision());
+                }
+                if (current == null) {
+                    current = currentComposite.getFirstSimpleByName(arg.getNodeType());
+                }
+                if (current == null) {
+                    current = currentComposite.getFirstSimpleByName(arg.getNodeType().withoutRevision());
+                }
+                if (current == null) {
+                    return null;
+                }
+            }
+        }
+        return current;
     }
 }

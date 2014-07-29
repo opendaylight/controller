@@ -21,8 +21,6 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -53,7 +51,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 final CompositeNode data = result.getResult().getFirstCompositeByName(NETCONF_DATA_QNAME);
-                final CompositeNode node = (CompositeNode) findNode(data, path);
+                final CompositeNode node = (CompositeNode) NetconfMessageTransformUtil.findNode(data, path);
 
                 return data == null ?
                         Optional.<NormalizedNode<?, ?>>absent() :
@@ -81,40 +79,13 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 final CompositeNode data = result.getResult().getFirstCompositeByName(NETCONF_DATA_QNAME);
-                final CompositeNode node = (CompositeNode) findNode(data, path);
+                final CompositeNode node = (CompositeNode) NetconfMessageTransformUtil.findNode(data, path);
 
                 return data == null ?
                         Optional.<NormalizedNode<?, ?>>absent() :
                         transform(path, node);
             }
         });
-    }
-
-    private static Node<?> findNode(final CompositeNode node, final YangInstanceIdentifier identifier) {
-
-        Node<?> current = node;
-        for (final YangInstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
-            if (current instanceof SimpleNode<?>) {
-                return null;
-            } else if (current instanceof CompositeNode) {
-                final CompositeNode currentComposite = (CompositeNode) current;
-
-                current = currentComposite.getFirstCompositeByName(arg.getNodeType());
-                if (current == null) {
-                    current = currentComposite.getFirstCompositeByName(arg.getNodeType().withoutRevision());
-                }
-                if (current == null) {
-                    current = currentComposite.getFirstSimpleByName(arg.getNodeType());
-                }
-                if (current == null) {
-                    current = currentComposite.getFirstSimpleByName(arg.getNodeType().withoutRevision());
-                }
-                if (current == null) {
-                    return null;
-                }
-            }
-        }
-        return current;
     }
 
     @Override
