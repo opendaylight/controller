@@ -15,6 +15,9 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -34,6 +36,7 @@ import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.api.SchemaContextProviderFactory;
 import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
+import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
@@ -46,10 +49,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
 
 public class NetconfDeviceTest {
 
@@ -71,13 +70,20 @@ public class NetconfDeviceTest {
     public static final String TEST_NAMESPACE = "test:namespace";
     public static final String TEST_MODULE = "test-module";
     public static final String TEST_REVISION = "2013-07-22";
+    private NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver = new NetconfStateSchemas.NetconfStateSchemasResolver() {
+
+        @Override
+        public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id) {
+            return NetconfStateSchemas.EMPTY;
+        }
+    };
 
     @Test
     public void testNetconfDeviceWithoutMonitoring() throws Exception {
         final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), getMessageTransformer(), getSchemaContextProviderFactory(), getSourceProviderFactory());
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), getMessageTransformer(), getSchemaContextProviderFactory(), getSourceProviderFactory(), stateSchemasResolver);
         device.onRemoteSessionUp(getSessionCaps(false, Collections.<String>emptyList()), listener);
 
         Mockito.verify(facade, Mockito.timeout(5000)).onDeviceDisconnected();
@@ -89,7 +95,7 @@ public class NetconfDeviceTest {
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaContextProviderFactory(), getSourceProviderFactory());
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaContextProviderFactory(), getSourceProviderFactory(), stateSchemasResolver);
 
         device.onNotification(netconfMessage);
         device.onNotification(netconfMessage);
@@ -118,7 +124,7 @@ public class NetconfDeviceTest {
         final SchemaSourceProviderFactory<InputStream> sourceProviderFactory = getSourceProviderFactory();
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
 
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, schemaContextProviderFactory, sourceProviderFactory);
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, schemaContextProviderFactory, sourceProviderFactory, stateSchemasResolver);
         final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
         device.onRemoteSessionUp(sessionCaps, listener);
