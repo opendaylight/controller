@@ -1,6 +1,6 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,11 +21,11 @@ public class NodeIdentifierWithValueGenerator{
             return doesMatch;
         }
 
-        public InstanceIdentifier.PathArgument getPathArgument(){
+        public YangInstanceIdentifier.PathArgument getPathArgument(){
             final String name = matcher.group(1);
             final String value = matcher.group(2);
 
-            return new InstanceIdentifier.NodeWithValue(
+            return new YangInstanceIdentifier.NodeWithValue(
                 QNameFactory.create(name), value);
         }
     }

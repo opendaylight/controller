@@ -3,7 +3,7 @@ package org.opendaylight.controller.cluster.datastore.node;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.cluster.datastore.node.utils.PathUtils;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ public class NormalizedNodeToNodeCodec {
 
     }
 
-    public NormalizedNodeMessages.Container encode(InstanceIdentifier id, NormalizedNode node){
+    public NormalizedNodeMessages.Container encode(YangInstanceIdentifier id, NormalizedNode node){
         String parentPath = "";
 
         if(id != null){
@@ -34,10 +34,10 @@ public class NormalizedNodeToNodeCodec {
 
     }
 
-    public NormalizedNode<?,?> decode(InstanceIdentifier id, NormalizedNodeMessages.Node node){
+    public NormalizedNode<?,?> decode(YangInstanceIdentifier id, NormalizedNodeMessages.Node node){
             NodeToNormalizedNodeBuilder currentOp = NodeToNormalizedNodeBuilder.from(ctx);
 
-            for(InstanceIdentifier.PathArgument pathArgument : id.getPath()){
+            for(YangInstanceIdentifier.PathArgument pathArgument : id.getPath()){
                 currentOp = currentOp.getChild(pathArgument);
             }
 
@@ -46,8 +46,8 @@ public class NormalizedNodeToNodeCodec {
             if(id.getPath().size() < 1){
                 nodeType = null;
             } else {
-                final InstanceIdentifier.PathArgument pathArgument = id.getPath().get(id.getPath().size() - 1);
-                if(pathArgument instanceof InstanceIdentifier.AugmentationIdentifier){
+                final YangInstanceIdentifier.PathArgument pathArgument = id.getPath().get(id.getPath().size() - 1);
+                if(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier){
                     nodeType = null;
                 } else {
                     nodeType = pathArgument.getNodeType();

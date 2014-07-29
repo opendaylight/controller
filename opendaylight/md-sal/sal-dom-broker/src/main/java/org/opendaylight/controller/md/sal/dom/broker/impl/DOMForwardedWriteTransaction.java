@@ -19,7 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
@@ -36,9 +36,9 @@ import com.google.common.util.concurrent.ListenableFuture;
  * {@link LogicalDatastoreType} type parameter in:
  *
  * <ul>
- * <li>{@link #put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
- * <li>{@link #delete(LogicalDatastoreType, InstanceIdentifier)}
- * <li>{@link #merge(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+ * <li>{@link #put(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
+ * <li>{@link #delete(LogicalDatastoreType, YangInstanceIdentifier)}
+ * <li>{@link #merge(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
  * </ul>
  * <p>
  * {@link #commit()} will result in invocation of
@@ -86,19 +86,19 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
         getSubtransaction(store).write(path, data);
     }
 
     @Override
-    public void delete(final LogicalDatastoreType store, final InstanceIdentifier path) {
+    public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         checkNotReady();
         getSubtransaction(store).delete(path);
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
         getSubtransaction(store).merge(path, data);
     }

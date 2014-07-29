@@ -16,9 +16,9 @@ import java.util.Map;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
@@ -46,7 +46,7 @@ public class DataNormalizer {
         operation = DataNormalizationOperation.from(ctx);
     }
 
-    public InstanceIdentifier toNormalized(final InstanceIdentifier legacy) {
+    public YangInstanceIdentifier toNormalized(final YangInstanceIdentifier legacy) {
         ImmutableList.Builder<PathArgument> normalizedArgs = ImmutableList.builder();
 
         DataNormalizationOperation<?> currentOp = operation;
@@ -69,10 +69,10 @@ public class DataNormalizer {
             throw new IllegalArgumentException(String.format("Failed to normalize path %s", legacy), e);
         }
 
-        return InstanceIdentifier.create(normalizedArgs.build());
+        return YangInstanceIdentifier.create(normalizedArgs.build());
     }
 
-    public DataNormalizationOperation<?> getOperation(final InstanceIdentifier legacy) throws DataNormalizationException {
+    public DataNormalizationOperation<?> getOperation(final YangInstanceIdentifier legacy) throws DataNormalizationException {
         DataNormalizationOperation<?> currentOp = operation;
         Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
 
@@ -82,15 +82,15 @@ public class DataNormalizer {
         return currentOp;
     }
 
-    public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
-            final Map.Entry<InstanceIdentifier, CompositeNode> legacy) {
+    public Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalized(
+            final Map.Entry<YangInstanceIdentifier, CompositeNode> legacy) {
         return toNormalized(legacy.getKey(), legacy.getValue());
     }
 
-    public Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> toNormalized(final InstanceIdentifier legacyPath,
+    public Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalized(final YangInstanceIdentifier legacyPath,
             final CompositeNode legacyData) {
 
-        InstanceIdentifier normalizedPath = toNormalized(legacyPath);
+        YangInstanceIdentifier normalizedPath = toNormalized(legacyPath);
 
         DataNormalizationOperation<?> currentOp = operation;
         for (PathArgument arg : normalizedPath.getPathArguments()) {
@@ -121,11 +121,11 @@ public class DataNormalizer {
 
         Preconditions.checkArgument(currentOp != null,
                 "Instance Identifier %s does not reference correct schema Node.", normalizedPath);
-        return new AbstractMap.SimpleEntry<InstanceIdentifier, NormalizedNode<?, ?>>(normalizedPath,
+        return new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(normalizedPath,
                 currentOp.normalize(legacyData));
     }
 
-    public InstanceIdentifier toLegacy(final InstanceIdentifier normalized) throws DataNormalizationException {
+    public YangInstanceIdentifier toLegacy(final YangInstanceIdentifier normalized) throws DataNormalizationException {
         ImmutableList.Builder<PathArgument> legacyArgs = ImmutableList.builder();
         DataNormalizationOperation<?> currentOp = operation;
         for (PathArgument normalizedArg : normalized.getPathArguments()) {
@@ -134,10 +134,10 @@ public class DataNormalizer {
                 legacyArgs.add(normalizedArg);
             }
         }
-        return InstanceIdentifier.create(legacyArgs.build());
+        return YangInstanceIdentifier.create(legacyArgs.build());
     }
 
-    public CompositeNode toLegacy(final InstanceIdentifier normalizedPath, final NormalizedNode<?, ?> normalizedData) {
+    public CompositeNode toLegacy(final YangInstanceIdentifier normalizedPath, final NormalizedNode<?, ?> normalizedData) {
         // Preconditions.checkArgument(normalizedData instanceof
         // DataContainerNode<?>,"Node object %s, %s should be of type DataContainerNode",normalizedPath,normalizedData);
         if (normalizedData instanceof DataContainerNode<?>) {

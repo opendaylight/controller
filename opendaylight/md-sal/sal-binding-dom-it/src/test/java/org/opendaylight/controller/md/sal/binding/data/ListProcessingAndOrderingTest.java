@@ -56,14 +56,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 @SuppressWarnings("deprecation")
 public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier DOM_UNORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_UNORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             .builder(Lists.QNAME).node(UnorderedContainer.QNAME).node(UnorderedList.QNAME).build();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier DOM_ORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_ORDERED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             .builder(Lists.QNAME).node(OrderedContainer.QNAME).node(OrderedList.QNAME).build();
 
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier DOM_UNKEYED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier DOM_UNKEYED_LIST_PATH = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             .builder(Lists.QNAME).node(UnkeyedContainer.QNAME).node(UnkeyedList.QNAME).build();
 
     private static final InstanceIdentifier<UnorderedContainer> UNORDERED_CONTAINER_PATH = InstanceIdentifier.builder(Lists.class).child(UnorderedContainer.class).build();
@@ -135,7 +135,7 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
     }
 
     private NormalizedNode<?, ?> resolveDataAsserted(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath) {
 
         try (DOMDataReadOnlyTransaction readTx = testContext.getDomAsyncDataBroker().newReadOnlyTransaction()){
             ListenableFuture<Optional<NormalizedNode<?, ?>>> data = readTx.read(LogicalDatastoreType.OPERATIONAL, domPath);
@@ -171,7 +171,7 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
 
     private void assertXmlRepresentation(final InstanceIdentifier<?> containerPath, final String... childNameValues) {
 
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = testContext.getBindingToDomMappingService().toDataDom(containerPath);
+        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath = testContext.getBindingToDomMappingService().toDataDom(containerPath);
         CompositeNode compositeNode = testContext.getDomDataBroker().readOperationalData(domPath);
         assertNotNull(compositeNode);
 

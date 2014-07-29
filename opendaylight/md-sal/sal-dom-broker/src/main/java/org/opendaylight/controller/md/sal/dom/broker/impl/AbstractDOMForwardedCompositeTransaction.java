@@ -8,7 +8,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableMap;
  *            Subtransaction type
  */
 abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTransaction> implements
-        AsyncTransaction<InstanceIdentifier, NormalizedNode<?, ?>> {
+        AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     private final ImmutableMap<K, T> backingTxs;
     private final Object identifier;

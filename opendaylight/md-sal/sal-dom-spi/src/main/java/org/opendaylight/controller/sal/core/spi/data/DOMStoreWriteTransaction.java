@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
@@ -29,7 +29,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
      */
-    void write(InstanceIdentifier path, NormalizedNode<?, ?> data);
+    void write(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
     /**
      * Store a provided data at specified path. This acts as a add / replace
@@ -48,7 +48,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
      */
-    void merge(InstanceIdentifier path, NormalizedNode<?, ?> data);
+    void merge(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
     /**
      *
@@ -60,7 +60,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
      */
-    void delete(InstanceIdentifier path);
+    void delete(YangInstanceIdentifier path);
 
     /**
      *

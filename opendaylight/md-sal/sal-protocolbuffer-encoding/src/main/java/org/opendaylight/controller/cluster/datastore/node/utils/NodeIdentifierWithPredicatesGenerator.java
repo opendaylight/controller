@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -35,7 +35,7 @@ public class NodeIdentifierWithPredicatesGenerator{
         return doesMatch;
     }
 
-    public InstanceIdentifier.NodeIdentifierWithPredicates getPathArgument(){
+    public YangInstanceIdentifier.NodeIdentifierWithPredicates getPathArgument(){
         final String group = matcher.group(2);
         final String[] keyValues = group.split(",");
         Map<QName, Object> nameValues = new HashMap<>();
@@ -52,7 +52,7 @@ public class NodeIdentifierWithPredicatesGenerator{
             }
         }
 
-        return new InstanceIdentifier.NodeIdentifierWithPredicates(QNameFactory.create(matcher.group(1)), nameValues);
+        return new YangInstanceIdentifier.NodeIdentifierWithPredicates(QNameFactory.create(matcher.group(1)), nameValues);
     }
 
 

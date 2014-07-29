@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,10 @@ class ChangeListenerNotifyTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChangeListenerNotifyTask.class);
     private final Iterable<? extends DataChangeListenerRegistration<?>> listeners;
-    private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> event;
+    private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event;
 
     public ChangeListenerNotifyTask(final Iterable<? extends DataChangeListenerRegistration<?>> listeners,
-            final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> event) {
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event) {
         this.listeners = listeners;
         this.event = event;
     }

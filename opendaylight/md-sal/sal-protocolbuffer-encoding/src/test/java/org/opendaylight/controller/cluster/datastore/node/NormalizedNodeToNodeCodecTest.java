@@ -17,7 +17,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFa
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -39,17 +39,17 @@ public class NormalizedNodeToNodeCodecTest {
         assertNotNull("Schema context must not be null.", schemaContext);
     }
 
-    private InstanceIdentifier instanceIdentifierFromString(String s){
+    private YangInstanceIdentifier instanceIdentifierFromString(String s){
 
         String[] ids = s.split("/");
 
-        List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
+        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
         for(String nodeId : ids){
             if(!"".equals(nodeId)) {
                 pathArguments.add(NodeIdentifierFactory.getArgument(nodeId));
             }
         }
-        final InstanceIdentifier instanceIdentifier = InstanceIdentifier.create(pathArguments);
+        final YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier.create(pathArguments);
         return instanceIdentifier;
     }
 
@@ -61,7 +61,7 @@ public class NormalizedNodeToNodeCodecTest {
 
         NormalizedNodeGetter normalizedNodeGetter = new NormalizedNodeGetter(id);
         new NormalizedNodeNavigator(normalizedNodeGetter).navigate(
-            InstanceIdentifier.builder().build().toString(), documentOne);
+            YangInstanceIdentifier.builder().build().toString(), documentOne);
 
         // Validate the value of id can be retrieved from the normalized node
         NormalizedNode output = normalizedNodeGetter.getOutput();
@@ -90,14 +90,14 @@ public class NormalizedNodeToNodeCodecTest {
 
         final NormalizedNodeToNodeCodec normalizedNodeToNodeCodec = new NormalizedNodeToNodeCodec(schemaContext);
 
-        Container container = normalizedNodeToNodeCodec.encode(InstanceIdentifier.builder().build(), documentOne);
+        Container container = normalizedNodeToNodeCodec.encode(YangInstanceIdentifier.builder().build(), documentOne);
 
 
         final NormalizedNode<?, ?> decode = normalizedNodeToNodeCodec.decode(instanceIdentifierFromString("/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test"),container.getNormalizedNode());
         assertNotNull(decode != null);
 
         //let us ensure that the return decode normalized node encode returns same container
-        Container containerResult =  normalizedNodeToNodeCodec.encode(InstanceIdentifier.builder().build(), decode);
+        Container containerResult =  normalizedNodeToNodeCodec.encode(YangInstanceIdentifier.builder().build(), decode);
 
         assertEquals(container.getParentPath(),containerResult.getParentPath());
         assertEquals(container.getNormalizedNode().getChildCount(),container.getNormalizedNode().getChildCount());

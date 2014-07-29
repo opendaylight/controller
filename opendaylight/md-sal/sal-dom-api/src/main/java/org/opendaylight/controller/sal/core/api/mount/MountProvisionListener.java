@@ -9,12 +9,12 @@
 package org.opendaylight.controller.sal.core.api.mount;
 
 import java.util.EventListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public interface MountProvisionListener extends EventListener {
 
-    void onMountPointCreated(InstanceIdentifier path);
+    void onMountPointCreated(YangInstanceIdentifier path);
 
-    void onMountPointRemoved(InstanceIdentifier path);
+    void onMountPointRemoved(YangInstanceIdentifier path);
 
 }

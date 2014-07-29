@@ -28,11 +28,11 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
+public class BrokerFacade implements DataReader<YangInstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
 
     private final static BrokerFacade INSTANCE = new BrokerFacade();
@@ -62,7 +62,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         LOG.trace("Read Configuration via Restconf: {}", path);
@@ -71,7 +71,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     public CompositeNode readConfigurationDataBehindMountPoint(final MountInstance mountPoint,
-            final InstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         LOG.trace("Read Configuration via Restconf: {}", path);
@@ -80,7 +80,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         BrokerFacade.LOG.trace("Read Operational via Restconf: {}", path);
@@ -89,7 +89,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     public CompositeNode readOperationalDataBehindMountPoint(final MountInstance mountPoint,
-            final InstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         BrokerFacade.LOG.trace("Read Operational via Restconf: {}", path);
@@ -103,7 +103,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         return context.rpc(type, payload);
     }
 
-    public Future<RpcResult<TransactionStatus>> commitConfigurationDataPut(final InstanceIdentifier path,
+    public Future<RpcResult<TransactionStatus>> commitConfigurationDataPut(final YangInstanceIdentifier path,
             final CompositeNode payload) {
         this.checkPreconditions();
 
@@ -114,7 +114,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataPutBehindMountPoint(
-            final MountInstance mountPoint, final InstanceIdentifier path, final CompositeNode payload) {
+            final MountInstance mountPoint, final YangInstanceIdentifier path, final CompositeNode payload) {
         this.checkPreconditions();
 
         final DataModificationTransaction transaction = mountPoint.beginTransaction();
@@ -123,7 +123,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         return transaction.commit();
     }
 
-    public Future<RpcResult<TransactionStatus>> commitConfigurationDataPost(final InstanceIdentifier path,
+    public Future<RpcResult<TransactionStatus>> commitConfigurationDataPost(final YangInstanceIdentifier path,
             final CompositeNode payload) {
         this.checkPreconditions();
 
@@ -143,7 +143,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataPostBehindMountPoint(
-            final MountInstance mountPoint, final InstanceIdentifier path, final CompositeNode payload) {
+            final MountInstance mountPoint, final YangInstanceIdentifier path, final CompositeNode payload) {
         this.checkPreconditions();
 
         final DataModificationTransaction transaction = mountPoint.beginTransaction();
@@ -161,18 +161,18 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
         return transaction.commit();
     }
 
-    public Future<RpcResult<TransactionStatus>> commitConfigurationDataDelete(final InstanceIdentifier path) {
+    public Future<RpcResult<TransactionStatus>> commitConfigurationDataDelete(final YangInstanceIdentifier path) {
         this.checkPreconditions();
         return deleteDataAtTarget(path, dataService.beginTransaction());
     }
 
     public Future<RpcResult<TransactionStatus>> commitConfigurationDataDeleteBehindMountPoint(
-            final MountInstance mountPoint, final InstanceIdentifier path) {
+            final MountInstance mountPoint, final YangInstanceIdentifier path) {
         this.checkPreconditions();
         return deleteDataAtTarget(path, mountPoint.beginTransaction());
     }
 
-    private Future<RpcResult<TransactionStatus>> deleteDataAtTarget(final InstanceIdentifier path,
+    private Future<RpcResult<TransactionStatus>> deleteDataAtTarget(final YangInstanceIdentifier path,
             final DataModificationTransaction transaction) {
         LOG.info("Delete Configuration via Restconf: {}", path);
         CompositeNode redDataAtPath = transaction.readConfigurationData(path);
@@ -191,7 +191,7 @@ public class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNod
             return;
         }
 
-        InstanceIdentifier path = listener.getPath();
+        YangInstanceIdentifier path = listener.getPath();
         final ListenerRegistration<DataChangeListener> registration = dataService.registerDataChangeListener(path,
                 listener);
 

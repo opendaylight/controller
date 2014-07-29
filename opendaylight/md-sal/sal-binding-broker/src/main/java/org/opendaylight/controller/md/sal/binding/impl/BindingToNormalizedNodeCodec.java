@@ -29,9 +29,9 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -67,7 +67,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         this.bindingToLegacy = mappingService;
     }
 
-    public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier toNormalized(
+    public org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier toNormalized(
             final InstanceIdentifier<? extends DataObject> binding) {
 
         // Used instance-identifier codec do not support serialization of last
@@ -81,17 +81,17 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return toNormalizedImpl(binding);
     }
 
-    public Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
+    public Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
             final InstanceIdentifier<? extends DataObject> bindingPath, final DataObject bindingObject) {
         return toNormalizedNode(toBindingEntry(bindingPath, bindingObject));
 
     }
 
-    public Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
+    public Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
             final Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> binding) {
-        Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> legacyEntry = bindingToLegacy
+        Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> legacyEntry = bindingToLegacy
                 .toDataDom(binding);
-        Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> normalizedEntry = legacyToNormalized
+        Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedEntry = legacyToNormalized
                 .toNormalized(legacyEntry);
         LOG.trace("Serialization of {}, Legacy Representation: {}, Normalized Representation: {}", binding,
                 legacyEntry, normalizedEntry);
@@ -102,7 +102,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
                 if (child instanceof AugmentationNode) {
                     ImmutableList<PathArgument> childArgs = ImmutableList.<PathArgument> builder()
                             .addAll(normalizedEntry.getKey().getPathArguments()).add(child.getIdentifier()).build();
-                    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier childPath = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+                    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier childPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
                             .create(childArgs);
                     return toDOMEntry(childPath, child);
                 }
@@ -123,7 +123,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
      *
      */
     public Optional<InstanceIdentifier<? extends DataObject>> toBinding(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized)
                     throws DeserializationException {
 
         PathArgument lastArgument = Iterables.getLast(normalized.getPathArguments());
@@ -140,7 +140,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
     }
 
     private Optional<InstanceIdentifier<? extends DataObject>> toBindingAugmented(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized)
                     throws DeserializationException {
         Optional<InstanceIdentifier<? extends DataObject>> potential = toBindingImpl(normalized);
         // Shorthand check, if codec already supports deserialization
@@ -158,7 +158,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         // path.
         LOG.trace("Looking for candidates to match {}", normalized);
         for (QName child : lastArgument.getPossibleChildNames()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier childPath = normalized.node(child);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier childPath = normalized.node(child);
             try {
                 if (isNotRepresentable(childPath)) {
                     LOG.trace("Path {} is not BI-representable, skipping it", childPath);
@@ -190,9 +190,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
     }
 
     private Optional<InstanceIdentifier<? extends DataObject>> toBindingImpl(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized)
                     throws DeserializationException {
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier legacyPath;
+        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier legacyPath;
 
         try {
             if (isNotRepresentable(normalized)) {
@@ -207,7 +207,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return Optional.<InstanceIdentifier<? extends DataObject>> of(bindingToLegacy.fromDataDom(legacyPath));
     }
 
-    private boolean isNotRepresentable(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+    private boolean isNotRepresentable(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized)
             throws DataNormalizationException {
         DataNormalizationOperation<?> op = findNormalizationOperation(normalized);
         if (op.isMixin() && op.getIdentifier() instanceof NodeIdentifier) {
@@ -220,7 +220,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
     }
 
     private DataNormalizationOperation<?> findNormalizationOperation(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized)
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized)
                     throws DataNormalizationException {
         DataNormalizationOperation<?> current = legacyToNormalized.getRootOperation();
         for (PathArgument arg : normalized.getPathArguments()) {
@@ -236,9 +236,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
                 key, value);
     }
 
-    private static final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>> toDOMEntry(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier key, final NormalizedNode<?, ?> value) {
-        return new SimpleEntry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, NormalizedNode<?, ?>>(key,
+    private static final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> toDOMEntry(
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier key, final NormalizedNode<?, ?> value) {
+        return new SimpleEntry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>>(key,
                 value);
     }
 
@@ -264,7 +264,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
     }
 
     public Optional<Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
-            final Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
+            final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
                     throws DeserializationException {
         Optional<InstanceIdentifier<? extends DataObject>> potentialPath = toBinding(normalized.getKey());
         if (potentialPath.isPresent()) {
@@ -284,15 +284,15 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         legacyToNormalized = new DataNormalizer(arg0);
     }
 
-    private org.opendaylight.yangtools.yang.data.api.InstanceIdentifier toNormalizedAugmented(
+    private org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier toNormalizedAugmented(
             final InstanceIdentifier<?> augPath) {
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier processed = toNormalizedImpl(augPath);
+        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier processed = toNormalizedImpl(augPath);
         // If used instance identifier codec added supports for deserialization
         // of last AugmentationIdentifier we will just reuse it
         if (isAugmentationIdentifier(processed)) {
             return processed;
         }
-        Optional<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> additionalSerialized;
+        Optional<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> additionalSerialized;
         additionalSerialized = toNormalizedAugmentedUsingChildContainers(augPath, processed);
 
         if (additionalSerialized.isPresent()) {
@@ -325,9 +325,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
      *            Processed path
      * @return
      */
-    private Optional<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toNormalizedAugmentedUsingChildLeafs(
+    private Optional<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> toNormalizedAugmentedUsingChildLeafs(
             final InstanceIdentifier<?> augPath,
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier parentPath) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier parentPath) {
         try {
             DataNormalizationOperation<?> parentOp = legacyToNormalized.getOperation(parentPath);
             if(!parentOp.getDataSchemaNode().isPresent()) {
@@ -363,14 +363,14 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    private Optional<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toNormalizedAugmentedUsingChildContainers(
+    private Optional<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> toNormalizedAugmentedUsingChildContainers(
             final InstanceIdentifier<?> augPath,
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier parentPath) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier parentPath) {
         for (Class augChild : BindingReflections.getChildrenClasses(augPath.getTargetType())) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<?> childPath = augPath.child(augChild);
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized = toNormalizedImpl(childPath);
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier potentialDiscovered = shortenToLastAugmentation(
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized = toNormalizedImpl(childPath);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier potentialDiscovered = shortenToLastAugmentation(
                     normalized, parentPath);
             if (potentialDiscovered != null) {
                 return Optional.of(potentialDiscovered);
@@ -436,9 +436,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
                 && method.getName().startsWith("get") && method.getParameterTypes().length == 0;
     }
 
-    private org.opendaylight.yangtools.yang.data.api.InstanceIdentifier shortenToLastAugmentation(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized,
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier parentPath) {
+    private org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier shortenToLastAugmentation(
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized,
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier parentPath) {
         int parentSize = Iterables.size(parentPath.getPathArguments());
         int position = 0;
         int foundPosition = -1;
@@ -450,7 +450,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         }
         if (foundPosition > 0 && foundPosition > parentSize) {
             Iterable<PathArgument> shortened = Iterables.limit(normalized.getPathArguments(), foundPosition);
-            return org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.create(shortened);
+            return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(shortened);
         }
         return null;
     }
@@ -468,11 +468,11 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return InstanceIdentifier.create(Iterables.limit(binding.getPathArguments(), foundPosition));
     }
 
-    private org.opendaylight.yangtools.yang.data.api.InstanceIdentifier toNormalizedImpl(
+    private org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier toNormalizedImpl(
             final InstanceIdentifier<? extends DataObject> binding) {
-        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier legacyPath = bindingToLegacy
+        final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier legacyPath = bindingToLegacy
                 .toDataDom(binding);
-        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalized = legacyToNormalized
+        final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalized = legacyToNormalized
                 .toNormalized(legacyPath);
         return normalized;
     }
@@ -485,7 +485,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return Augmentation.class.isAssignableFrom(potential.getTargetType());
     }
 
-    private boolean isAugmentationIdentifier(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier processed) {
+    private boolean isAugmentationIdentifier(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier processed) {
         return Iterables.getLast(processed.getPathArguments()) instanceof AugmentationIdentifier;
     }
 
@@ -500,7 +500,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
         return count;
     }
 
-    private static int getAugmentationCount(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier potential) {
+    private static int getAugmentationCount(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier potential) {
         int count = 0;
         for (PathArgument arg : potential.getPathArguments()) {
             if (arg instanceof AugmentationIdentifier) {
@@ -553,7 +553,7 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener {
      * @param path DOM Path
      * @return Node with defaults set on.
      */
-    public NormalizedNode<?, ?> getDefaultNodeFor(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+    public NormalizedNode<?, ?> getDefaultNodeFor(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path) {
         Iterator<PathArgument> iterator = path.getPathArguments().iterator();
         DataNormalizationOperation<?> currentOp = legacyToNormalized.getRootOperation();
         while (iterator.hasNext()) {

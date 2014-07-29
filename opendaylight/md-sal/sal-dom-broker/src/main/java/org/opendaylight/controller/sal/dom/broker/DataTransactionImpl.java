@@ -13,9 +13,9 @@ import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class DataTransactionImpl extends AbstractDataTransaction<InstanceIdentifier, CompositeNode>
+public class DataTransactionImpl extends AbstractDataTransaction<YangInstanceIdentifier, CompositeNode>
     implements DataModificationTransaction {
     private final ListenerRegistry<DataTransactionListener> listeners = new ListenerRegistry<DataTransactionListener>();
 

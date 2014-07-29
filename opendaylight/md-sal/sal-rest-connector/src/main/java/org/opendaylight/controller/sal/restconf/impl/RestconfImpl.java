@@ -50,10 +50,10 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -427,12 +427,12 @@ public class RestconfImpl implements RestconfService {
                 rpc.getQName(), "path"));
         final Object pathValue = pathNode == null ? null : pathNode.getValue();
 
-        if (!(pathValue instanceof InstanceIdentifier)) {
+        if (!(pathValue instanceof YangInstanceIdentifier)) {
             throw new RestconfDocumentedException("Instance identifier was not normalized correctly.",
                     ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED);
         }
 
-        final InstanceIdentifier pathIdentifier = ((InstanceIdentifier) pathValue);
+        final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
         String streamName = null;
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
             String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
@@ -943,17 +943,17 @@ public class RestconfImpl implements RestconfService {
 
     private InstanceIdWithSchemaNode addLastIdentifierFromData(final InstanceIdWithSchemaNode identifierWithSchemaNode,
             final CompositeNode data, final DataSchemaNode schemaOfData) {
-        InstanceIdentifier instanceIdentifier = null;
+        YangInstanceIdentifier instanceIdentifier = null;
         if (identifierWithSchemaNode != null) {
             instanceIdentifier = identifierWithSchemaNode.getInstanceIdentifier();
         }
 
-        final InstanceIdentifier iiOriginal = instanceIdentifier;
+        final YangInstanceIdentifier iiOriginal = instanceIdentifier;
         InstanceIdentifierBuilder iiBuilder = null;
         if (iiOriginal == null) {
-            iiBuilder = InstanceIdentifier.builder();
+            iiBuilder = YangInstanceIdentifier.builder();
         } else {
-            iiBuilder = InstanceIdentifier.builder(iiOriginal);
+            iiBuilder = YangInstanceIdentifier.builder(iiOriginal);
         }
 
         if ((schemaOfData instanceof ListSchemaNode)) {
@@ -963,7 +963,7 @@ public class RestconfImpl implements RestconfService {
             iiBuilder.node(schemaOfData.getQName());
         }
 
-        InstanceIdentifier instance = iiBuilder.toInstance();
+        YangInstanceIdentifier instance = iiBuilder.toInstance();
         MountInstance mountPoint = null;
         if (identifierWithSchemaNode != null) {
             mountPoint = identifierWithSchemaNode.getMountPoint();

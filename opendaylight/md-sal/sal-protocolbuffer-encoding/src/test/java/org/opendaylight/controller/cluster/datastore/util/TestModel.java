@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.util;
 
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
@@ -58,11 +58,11 @@ public class TestModel {
       "/odl-datastore-test-notification.yang";
 
 
-  public static final InstanceIdentifier TEST_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier
       .of(TEST_QNAME);
-  public static final InstanceIdentifier DESC_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier DESC_PATH = YangInstanceIdentifier
       .builder(TEST_PATH).node(DESC_QNAME).build();
-  public static final InstanceIdentifier OUTER_LIST_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier
       .builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
   public static final QName TWO_QNAME = QName.create(TEST_QNAME, "two");
   public static final QName THREE_QNAME = QName.create(TEST_QNAME, "three");
@@ -92,11 +92,11 @@ public class TestModel {
   public static final QName GRAND_CHILD_NAME_QNAME = QName.create(FAMILY_QNAME,
       "grand-child-name");
 
-  public static final InstanceIdentifier FAMILY_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier FAMILY_PATH = YangInstanceIdentifier
       .of(FAMILY_QNAME);
-  public static final InstanceIdentifier FAMILY_DESC_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier FAMILY_DESC_PATH = YangInstanceIdentifier
       .builder(FAMILY_PATH).node(DESC_QNAME).build();
-  public static final InstanceIdentifier CHILDREN_PATH = InstanceIdentifier
+  public static final YangInstanceIdentifier CHILDREN_PATH = YangInstanceIdentifier
       .builder(FAMILY_PATH).node(CHILDREN_QNAME).build();
 
   private static final Integer FIRST_CHILD_ID = 1;
@@ -112,76 +112,76 @@ public class TestModel {
   private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
   // first child
-  private static final InstanceIdentifier CHILDREN_1_PATH = InstanceIdentifier
+  private static final YangInstanceIdentifier CHILDREN_1_PATH = YangInstanceIdentifier
       .builder(CHILDREN_PATH)
       .nodeWithKey(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID) //
       .build();
-  private static final InstanceIdentifier CHILDREN_1_NAME_PATH =
-      InstanceIdentifier.builder(CHILDREN_PATH)
+  private static final YangInstanceIdentifier CHILDREN_1_NAME_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_PATH)
           .nodeWithKey(CHILDREN_QNAME, CHILD_NAME_QNAME, FIRST_CHILD_NAME) //
           .build();
 
-  private static final InstanceIdentifier CHILDREN_2_PATH = InstanceIdentifier
+  private static final YangInstanceIdentifier CHILDREN_2_PATH = YangInstanceIdentifier
       .builder(CHILDREN_PATH)
       .nodeWithKey(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID) //
       .build();
-  private static final InstanceIdentifier CHILDREN_2_NAME_PATH =
-      InstanceIdentifier.builder(CHILDREN_PATH)
+  private static final YangInstanceIdentifier CHILDREN_2_NAME_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_PATH)
           .nodeWithKey(CHILDREN_QNAME, CHILD_NAME_QNAME, SECOND_CHILD_NAME) //
           .build();
 
 
-  private static final InstanceIdentifier GRAND_CHILD_1_PATH =
-      InstanceIdentifier.builder(CHILDREN_1_PATH)
+  private static final YangInstanceIdentifier GRAND_CHILD_1_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_1_PATH)
           .node(GRAND_CHILDREN_QNAME)
           //
           .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
               FIRST_GRAND_CHILD_ID) //
           .build();
 
-  private static final InstanceIdentifier GRAND_CHILD_1_NAME_PATH =
-      InstanceIdentifier.builder(CHILDREN_1_PATH)
+  private static final YangInstanceIdentifier GRAND_CHILD_1_NAME_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_1_PATH)
           .node(GRAND_CHILDREN_QNAME)
           //
           .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NAME_QNAME,
               FIRST_GRAND_CHILD_NAME) //
           .build();
 
-  private static final InstanceIdentifier GRAND_CHILD_2_PATH =
-      InstanceIdentifier.builder(CHILDREN_2_PATH)
+  private static final YangInstanceIdentifier GRAND_CHILD_2_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_2_PATH)
           .node(GRAND_CHILDREN_QNAME)
           //
           .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
               SECOND_GRAND_CHILD_ID) //
           .build();
 
-  private static final InstanceIdentifier GRAND_CHILD_2_NAME_PATH =
-      InstanceIdentifier.builder(CHILDREN_2_PATH)
+  private static final YangInstanceIdentifier GRAND_CHILD_2_NAME_PATH =
+      YangInstanceIdentifier.builder(CHILDREN_2_PATH)
           .node(GRAND_CHILDREN_QNAME)
           //
           .nodeWithKey(GRAND_CHILDREN_QNAME, GRAND_CHILD_NAME_QNAME,
               SECOND_GRAND_CHILD_NAME) //
           .build();
 
-  private static final InstanceIdentifier DESC_PATH_ID = InstanceIdentifier
+  private static final YangInstanceIdentifier DESC_PATH_ID = YangInstanceIdentifier
       .builder(DESC_PATH).build();
-  private static final InstanceIdentifier OUTER_LIST_1_PATH =
-      InstanceIdentifier.builder(OUTER_LIST_PATH)
+  private static final YangInstanceIdentifier OUTER_LIST_1_PATH =
+      YangInstanceIdentifier.builder(OUTER_LIST_PATH)
           .nodeWithKey(OUTER_LIST_QNAME, ID_QNAME, ONE_ID) //
           .build();
 
-  private static final InstanceIdentifier OUTER_LIST_2_PATH =
-      InstanceIdentifier.builder(OUTER_LIST_PATH)
+  private static final YangInstanceIdentifier OUTER_LIST_2_PATH =
+      YangInstanceIdentifier.builder(OUTER_LIST_PATH)
           .nodeWithKey(OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
           .build();
 
-  private static final InstanceIdentifier TWO_TWO_PATH = InstanceIdentifier
+  private static final YangInstanceIdentifier TWO_TWO_PATH = YangInstanceIdentifier
       .builder(OUTER_LIST_2_PATH).node(INNER_LIST_QNAME) //
       .nodeWithKey(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME) //
       .build();
 
-  private static final InstanceIdentifier TWO_TWO_VALUE_PATH =
-      InstanceIdentifier.builder(TWO_TWO_PATH).node(VALUE_QNAME) //
+  private static final YangInstanceIdentifier TWO_TWO_VALUE_PATH =
+      YangInstanceIdentifier.builder(TWO_TWO_PATH).node(VALUE_QNAME) //
           .build();
 
   private static final MapEntryNode BAR_NODE = mapEntryBuilder(
@@ -242,7 +242,7 @@ public class TestModel {
     return ImmutableContainerNodeBuilder
         .create()
         .withNodeIdentifier(
-            new InstanceIdentifier.NodeIdentifier(schemaContext.getQName()))
+            new YangInstanceIdentifier.NodeIdentifier(schemaContext.getQName()))
         .withChild(createTestContainer()).build();
 
   }
@@ -254,19 +254,19 @@ public class TestModel {
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                new InstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
                     "shoe"), "nike")).withValue("nike").build();
     final LeafSetEntryNode<Object> puma =
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                new InstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
                     "shoe"), "puma")).withValue("puma").build();
     final LeafSetNode<Object> shoes =
         ImmutableLeafSetNodeBuilder
             .create()
             .withNodeIdentifier(
-                new InstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME,
                     "shoe"))).withChild(nike).withChild(puma).build();
 
 
@@ -274,26 +274,26 @@ public class TestModel {
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                (new InstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                (new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
                     "number"), 5))).withValue(5).build();
     final LeafSetEntryNode<Object> fifteen =
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                (new InstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                (new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
                     "number"), 15))).withValue(15).build();
     final LeafSetNode<Object> numbers =
         ImmutableLeafSetNodeBuilder
             .create()
             .withNodeIdentifier(
-                new InstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME,
                     "number"))).withChild(five).withChild(fifteen).build();
 
 
     Set<QName> childAugmentations = new HashSet<>();
     childAugmentations.add(AUG_QNAME);
-    final InstanceIdentifier.AugmentationIdentifier augmentationIdentifier =
-        new InstanceIdentifier.AugmentationIdentifier(null, childAugmentations);
+    final YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier =
+        new YangInstanceIdentifier.AugmentationIdentifier(null, childAugmentations);
     final AugmentationNode augmentationNode =
         Builders.augmentationBuilder()
             .withNodeIdentifier(augmentationIdentifier)
@@ -301,7 +301,7 @@ public class TestModel {
             .build();
     return ImmutableContainerNodeBuilder
         .create()
-        .withNodeIdentifier(new InstanceIdentifier.NodeIdentifier(TEST_QNAME))
+        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
         .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC))
         .withChild(augmentationNode)
         .withChild(shoes)
@@ -315,22 +315,22 @@ public class TestModel {
 
 
   public static ContainerNode createFamily() {
-    final DataContainerNodeAttrBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder =
+    final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder =
         ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-            new InstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
+            new YangInstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
 
     final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder =
         mapNodeBuilder(CHILDREN_QNAME);
 
-    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder =
+    final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder =
         mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
-    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder =
+    final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder =
         mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
 
-    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder =
+    final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder =
         mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
             FIRST_GRAND_CHILD_ID);
-    final DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder =
+    final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder =
         mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
             SECOND_GRAND_CHILD_ID);
 

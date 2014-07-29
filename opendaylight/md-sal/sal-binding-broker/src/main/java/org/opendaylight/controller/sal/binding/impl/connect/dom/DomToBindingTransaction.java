@@ -10,18 +10,18 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 class DomToBindingTransaction implements
-    DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> {
+    DataCommitHandler.DataCommitTransaction<YangInstanceIdentifier, CompositeNode> {
 
     private final org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction backing;
-    private final DataModification<InstanceIdentifier, CompositeNode> modification;
+    private final DataModification<YangInstanceIdentifier, CompositeNode> modification;
     private final ConcurrentMap<Object, DomToBindingTransaction> bindingOpenedTransactions;
 
     public DomToBindingTransaction(
     final org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction backing,
-    final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> modification,
+    final DataModification<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> modification,
         ConcurrentMap<Object, DomToBindingTransaction> bindingOpenedTransactions) {
         super();
         this.backing = backing;
@@ -31,7 +31,7 @@ class DomToBindingTransaction implements
     }
 
     @Override
-    public DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getModification() {
+    public DataModification<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getModification() {
         return modification;
     }
 

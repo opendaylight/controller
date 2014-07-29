@@ -67,8 +67,8 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -77,9 +77,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
     private final DataProviderService dataReader;
-    private final DataReader<InstanceIdentifier,CompositeNode> readWrapper;
+    private final DataReader<YangInstanceIdentifier,CompositeNode> readWrapper;
 
-    private final InstanceIdentifier mountPath;
+    private final YangInstanceIdentifier mountPath;
     private final NotificationPublishService notificationPublishService;
     private final RpcProvisionRegistry rpcs;
 
@@ -87,7 +87,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
 
     private SchemaContext schemaContext;
 
-    public BackwardsCompatibleMountPoint(final InstanceIdentifier path, final DOMMountPointService.DOMMountPointBuilder mountPointBuilder) {
+    public BackwardsCompatibleMountPoint(final YangInstanceIdentifier path, final DOMMountPointService.DOMMountPointBuilder mountPointBuilder) {
         this.mountPath = Preconditions.checkNotNull(path);
         Preconditions.checkNotNull(mountPointBuilder);
 
@@ -105,7 +105,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         mountPointBuilder.register();
     }
 
-    public BackwardsCompatibleMountPoint(final InstanceIdentifier path, final DOMMountPoint mount) {
+    public BackwardsCompatibleMountPoint(final YangInstanceIdentifier path, final DOMMountPoint mount) {
         this.mountPath = Preconditions.checkNotNull(path);
         Preconditions.checkNotNull(mount);
 
@@ -169,29 +169,29 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     }
 
     // TODO Read wrapper is never used ... same in org.opendaylight.controller.sal.dom.broker.MountPointImpl
-    public DataReader<InstanceIdentifier, CompositeNode> getReadWrapper() {
+    public DataReader<YangInstanceIdentifier, CompositeNode> getReadWrapper() {
         return readWrapper;
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         return dataReader.readConfigurationData(path);
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         return dataReader.readOperationalData(path);
     }
 
     @Override
     public Registration registerOperationalReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerOperationalReader(path, reader);
     }
 
     @Override
     public Registration registerConfigurationReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerConfigurationReader(path, reader);
     }
 
@@ -237,14 +237,14 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     }
 
     @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier path,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final YangInstanceIdentifier path,
             final DataChangeListener listener) {
         return dataReader.registerDataChangeListener(path, listener);
     }
 
     @Override
     public Registration registerCommitHandler(
-            final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
+            final YangInstanceIdentifier path, final DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
         return dataReader.registerCommitHandler(path, commitHandler);
     }
 
@@ -280,19 +280,19 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         }
     }
 
-    class ReadWrapper implements DataReader<InstanceIdentifier, CompositeNode> {
-        private InstanceIdentifier shortenPath(final InstanceIdentifier path) {
-            InstanceIdentifier ret = null;
+    class ReadWrapper implements DataReader<YangInstanceIdentifier, CompositeNode> {
+        private YangInstanceIdentifier shortenPath(final YangInstanceIdentifier path) {
+            YangInstanceIdentifier ret = null;
             if(mountPath.contains(path)) {
                 final List<PathArgument> newArgs = path.getPath().subList(mountPath.getPath().size(), path.getPath().size());
-                ret = InstanceIdentifier.create(newArgs);
+                ret = YangInstanceIdentifier.create(newArgs);
             }
             return ret;
         }
 
         @Override
-        public CompositeNode readConfigurationData(final InstanceIdentifier path) {
-            final InstanceIdentifier newPath = shortenPath(path);
+        public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
+            final YangInstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
             }
@@ -300,8 +300,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         }
 
         @Override
-        public CompositeNode readOperationalData(final InstanceIdentifier path) {
-            final InstanceIdentifier newPath = shortenPath(path);
+        public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
+            final YangInstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
             }
@@ -310,13 +310,13 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
     }
 
     @Override
-    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            final RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            final RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return dataReader.registerCommitHandlerListener(commitHandlerListener);
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
+    public <L extends RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
             final L listener) {
         return rpcs.registerRouteChangeListener(listener);
     }
@@ -344,7 +344,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
         }
 
         @Override
-        public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store, final InstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
+        public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store, final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
             throw new UnsupportedOperationException("Register data listener not supported for mount point");
         }
 
@@ -380,7 +380,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final InstanceIdentifier path) {
+            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
 
                 CompositeNode rawData = null;
 
@@ -396,7 +396,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 }
                 Preconditions.checkNotNull(rawData, "Unable to read %s data on path %s", store, path);
 
-                final Map.Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalized = normalizer.toNormalized(path, rawData);
+                final Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = normalizer.toNormalized(path, rawData);
                 final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = Optional.<NormalizedNode<?, ?>>fromNullable(normalized.getValue());
                 return com.google.common.util.concurrent.Futures.immediateFuture(normalizedNodeOptional);
             }
@@ -424,10 +424,10 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public void put(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
                 final CompositeNode legacyData = dataNormalizer.toLegacy(path, data);
                 try {
-                    final InstanceIdentifier legacyPath = dataNormalizer.toLegacy(path);
+                    final YangInstanceIdentifier legacyPath = dataNormalizer.toLegacy(path);
 
                     switch (store) {
                         case CONFIGURATION: {
@@ -443,15 +443,15 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
                 // TODO not supported
                 throw new UnsupportedOperationException("Merge not supported for mount point");
             }
 
             @Override
-            public void delete(final LogicalDatastoreType store, final InstanceIdentifier path) {
+            public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 try {
-                    final InstanceIdentifier legacyPath = dataNormalizer.toLegacy(path);
+                    final YangInstanceIdentifier legacyPath = dataNormalizer.toLegacy(path);
 
                     switch (store) {
                         case CONFIGURATION: {
@@ -508,7 +508,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final InstanceIdentifier path) {
+            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 return new BackwardsCompatibleReadTransaction(dataReader, dataNormalizer).read(store, path);
             }
 
@@ -518,17 +518,17 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public void put(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
                 delegateWriteTx.put(store, path, data);
             }
 
             @Override
-            public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
                 delegateWriteTx.merge(store, path, data);
             }
 
             @Override
-            public void delete(final LogicalDatastoreType store, final InstanceIdentifier path) {
+            public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 delegateWriteTx.delete(store, path);
             }
 
