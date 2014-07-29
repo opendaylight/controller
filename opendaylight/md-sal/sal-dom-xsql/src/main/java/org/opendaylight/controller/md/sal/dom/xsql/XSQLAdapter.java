@@ -20,7 +20,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -130,8 +130,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         if (table.getParent().isModule()) {
             try {
                 List<Object> result = new LinkedList<Object>();
-                InstanceIdentifier instanceIdentifier =
-                    InstanceIdentifier.builder()
+                YangInstanceIdentifier instanceIdentifier =
+                    YangInstanceIdentifier.builder()
                         .node(XSQLODLUtils.getPath(table.getODLNode()).get(0))
                         .toInstance();
                 DOMDataReadTransaction t = this.domDataBroker.newReadOnlyTransaction();
