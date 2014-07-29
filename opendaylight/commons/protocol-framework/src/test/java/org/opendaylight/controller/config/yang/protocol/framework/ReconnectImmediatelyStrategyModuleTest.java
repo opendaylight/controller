@@ -78,7 +78,7 @@ public class ReconnectImmediatelyStrategyModuleTest extends AbstractConfigTest {
         final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(
                 transaction.lookupConfigBean(FACTORY_NAME, INSTANCE_NAME),
                 ReconnectImmediatelyStrategyFactoryModuleMXBean.class);
-        mxBean.setTimeout(200);
+        mxBean.setReconnectTimeout(200);
         final CommitStatus status = transaction.commit();
         assertBeanCount(1, FACTORY_NAME);
         assertStatus(status, 0, 1, 1);
@@ -99,8 +99,8 @@ public class ReconnectImmediatelyStrategyModuleTest extends AbstractConfigTest {
         final ObjectName nameCreated = transaction.createModule(FACTORY_NAME, INSTANCE_NAME);
         final ReconnectImmediatelyStrategyFactoryModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated,
                 ReconnectImmediatelyStrategyFactoryModuleMXBean.class);
-        mxBean.setTimeout(timeout);
-        mxBean.setExecutor(GlobalEventExecutorUtil.create(transaction));
+        mxBean.setReconnectTimeout(timeout);
+        mxBean.setReconnectExecutor(GlobalEventExecutorUtil.create(transaction));
         return nameCreated;
     }
 

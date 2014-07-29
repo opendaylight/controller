@@ -58,7 +58,10 @@ module opendaylight-inmemory-datastore-provider {
             case inmemory-operational-datastore-provider {
                 when "/config:modules/config:module/config:type = 'inmemory-operational-datastore-provider'";
 
-                container schema-service {
+                // Yang does not allow two cases from same namespaces with same children
+                // Schema-service dependency renamed to operational-schema-service
+                // to prevent conflict with schema-service container from inmemory-config-datastore-provider
+                container operational-schema-service {
                   uses config:service-ref {
                        refine type {
                               mandatory false;

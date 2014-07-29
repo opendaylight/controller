@@ -86,10 +86,10 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-operational-datastore-provider</type>
                     <name>operational-store-service</name>
-                    <schema-service>
+                    <operational-schema-service>
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
                         <name>yang-schema-service</name>
-                    </schema-service>
+                    </operational-schema-service>
                 </module>
                 <!--
                      Tree-based in-memory data store. This is the data store which is currently
