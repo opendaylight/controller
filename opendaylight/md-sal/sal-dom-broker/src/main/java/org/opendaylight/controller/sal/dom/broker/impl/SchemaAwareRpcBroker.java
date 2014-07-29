@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -50,7 +50,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
 
 
     private final ListenerRegistry<RpcRegistrationListener> rpcRegistrationListeners = new ListenerRegistry<>();
-    private final ListenerRegistry<RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> routeChangeListeners = new ListenerRegistry<>();
+    private final ListenerRegistry<RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> routeChangeListeners = new ListenerRegistry<>();
 
 
     private final String identifier;
@@ -216,7 +216,7 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
     }
 
     @Override
-    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final InstanceIdentifier route, final CompositeNode input) {
+    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final YangInstanceIdentifier route, final CompositeNode input) {
       checkState(defaultDelegate != null, "No implementation is available for rpc:%s path:%s", rpc, route);
       return defaultDelegate.invokeRpc(rpc, route, input);
     }
@@ -225,10 +225,10 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         implementations.remove(registration.getType(), registration);
     }
 
-    void notifyPathAnnouncement(final QName context, final QName identifier, final InstanceIdentifier path) {
+    void notifyPathAnnouncement(final QName context, final QName identifier, final YangInstanceIdentifier path) {
         RpcRoutingContext contextWrapped = RpcRoutingContext.create(context, identifier);
-        RouteChange<RpcRoutingContext, InstanceIdentifier> change = RoutingUtils.announcementChange(contextWrapped , path);
-        for(ListenerRegistration<RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> routeListener : routeChangeListeners) {
+        RouteChange<RpcRoutingContext, YangInstanceIdentifier> change = RoutingUtils.announcementChange(contextWrapped , path);
+        for(ListenerRegistration<RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> routeListener : routeChangeListeners) {
             try {
                 routeListener.getInstance().onRouteChange(change);
             } catch (Exception e) {
@@ -238,10 +238,10 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
 
     }
 
-    void notifyPathWithdrawal(final QName context,final QName identifier, final InstanceIdentifier path) {
+    void notifyPathWithdrawal(final QName context,final QName identifier, final YangInstanceIdentifier path) {
         RpcRoutingContext contextWrapped = RpcRoutingContext.create(context, identifier);
-        RouteChange<RpcRoutingContext, InstanceIdentifier> change = RoutingUtils.removalChange(contextWrapped , path);
-        for(ListenerRegistration<RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> routeListener : routeChangeListeners) {
+        RouteChange<RpcRoutingContext, YangInstanceIdentifier> change = RoutingUtils.removalChange(contextWrapped , path);
+        for(ListenerRegistration<RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> routeListener : routeChangeListeners) {
             try {
                 routeListener.getInstance().onRouteChange(change);
             } catch (Exception e) {
@@ -251,10 +251,10 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
+    public <L extends RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
             final L listener) {
         ListenerRegistration<L> reg = routeChangeListeners.registerWithType(listener);
-        RouteChange<RpcRoutingContext, InstanceIdentifier> initial = createInitialRouteChange();
+        RouteChange<RpcRoutingContext, YangInstanceIdentifier> initial = createInitialRouteChange();
         try {
         listener.onRouteChange(initial);
         } catch (Exception e) {
@@ -263,15 +263,15 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
         return reg;
     }
 
-    private RouteChange<RpcRoutingContext, InstanceIdentifier> createInitialRouteChange() {
+    private RouteChange<RpcRoutingContext, YangInstanceIdentifier> createInitialRouteChange() {
         FluentIterable<RoutedRpcSelector> rpcSelectors = FluentIterable.from(implementations.values()).filter(RoutedRpcSelector.class);
 
 
-        ImmutableMap.Builder<RpcRoutingContext, Set<InstanceIdentifier>> announcements = ImmutableMap.builder();
-        ImmutableMap.Builder<RpcRoutingContext, Set<InstanceIdentifier>> removals = ImmutableMap.builder();
+        ImmutableMap.Builder<RpcRoutingContext, Set<YangInstanceIdentifier>> announcements = ImmutableMap.builder();
+        ImmutableMap.Builder<RpcRoutingContext, Set<YangInstanceIdentifier>> removals = ImmutableMap.builder();
         for (RoutedRpcSelector routedRpcSelector : rpcSelectors) {
             final RpcRoutingContext context = routedRpcSelector.getIdentifier();
-            final Set<InstanceIdentifier> paths = ImmutableSet.copyOf(routedRpcSelector.implementations.keySet());
+            final Set<YangInstanceIdentifier> paths = ImmutableSet.copyOf(routedRpcSelector.implementations.keySet());
             announcements.put(context, paths);
         }
         return RoutingUtils.change(announcements.build(), removals.build());

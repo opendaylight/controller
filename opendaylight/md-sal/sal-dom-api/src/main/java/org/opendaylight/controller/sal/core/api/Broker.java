@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -250,6 +250,6 @@ public interface Broker {
         void close();
     }
 
-    public interface RoutedRpcRegistration extends RpcRegistration, RoutedRegistration<QName, InstanceIdentifier, RpcImplementation> {
+    public interface RoutedRpcRegistration extends RpcRegistration, RoutedRegistration<QName, YangInstanceIdentifier, RpcImplementation> {
     }
 }

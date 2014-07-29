@@ -25,9 +25,9 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.common.impl.routing.AbstractDataReadRouter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataReaderRouter extends
-AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
+AbstractDataReadRouter<YangInstanceIdentifier, CompositeNode> {
     private final static Logger LOG = LoggerFactory
             .getLogger(DataReaderRouter.class);
     private final static URI NETCONF_NAMESPACE = URI
@@ -44,7 +44,7 @@ AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
             "data");
 
     @Override
-    protected CompositeNodeTOImpl merge(final InstanceIdentifier path,
+    protected CompositeNodeTOImpl merge(final YangInstanceIdentifier path,
             final Iterable<CompositeNode> data) {
         PathArgument pathArgument = Iterables.getLast(path.getPathArguments(), null);
         boolean empty = true;
@@ -117,11 +117,11 @@ AbstractDataReadRouter<InstanceIdentifier, CompositeNode> {
     }
 
     public Map<QName, SimpleNode<?>> getKeyNodes(
-            final InstanceIdentifier.PathArgument argument,
+            final YangInstanceIdentifier.PathArgument argument,
             final CompositeNode node) {
-        if (argument instanceof InstanceIdentifier.NodeIdentifierWithPredicates) {
+        if (argument instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
             return _getKeyNodes(
-                    (InstanceIdentifier.NodeIdentifierWithPredicates) argument,
+                    (YangInstanceIdentifier.NodeIdentifierWithPredicates) argument,
                     node);
         } else if (argument != null) {
             return _getKeyNodes(argument, node);

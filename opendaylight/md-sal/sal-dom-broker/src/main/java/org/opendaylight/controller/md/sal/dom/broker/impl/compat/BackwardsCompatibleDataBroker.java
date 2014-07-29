@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
@@ -36,7 +36,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier legacyPath) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier legacyPath) {
         final BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
         try {
             return tx.readConfigurationData(legacyPath);
@@ -46,7 +46,7 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier legacyPath) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier legacyPath) {
         final BackwardsCompatibleTransaction<?> tx = BackwardsCompatibleTransaction.readOnlyTransaction(backingBroker.newReadOnlyTransaction(),normalizer);
         try {
             return tx.readOperationalData(legacyPath);
@@ -61,9 +61,9 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier legacyPath,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final YangInstanceIdentifier legacyPath,
             final DataChangeListener listener) {
-        final InstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
+        final YangInstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
 
         final TranslatingListenerInvoker translatingCfgListener =
                 TranslatingListenerInvoker.createConfig(listener, normalizer);
@@ -78,9 +78,9 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
 
     @Override
     public Registration registerCommitHandler(
-            final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
+            final YangInstanceIdentifier path, final DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
         // FIXME Do real forwarding
-        return new AbstractObjectRegistration<DataCommitHandler<InstanceIdentifier,CompositeNode>>(commitHandler) {
+        return new AbstractObjectRegistration<DataCommitHandler<YangInstanceIdentifier,CompositeNode>>(commitHandler) {
             @Override
             protected void removeRegistration() {
                 // NOOP
@@ -89,8 +89,8 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
     }
 
     @Override
-    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            final RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            final RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return null;
     }
 
@@ -118,13 +118,13 @@ public class BackwardsCompatibleDataBroker implements DataProviderService {
 
     @Override
     public Registration registerConfigurationReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         throw new UnsupportedOperationException("Data Reader contract is not supported.");
     }
 
     @Override
     public Registration registerOperationalReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         throw new UnsupportedOperationException("Data Reader contract is not supported.");
     }
 

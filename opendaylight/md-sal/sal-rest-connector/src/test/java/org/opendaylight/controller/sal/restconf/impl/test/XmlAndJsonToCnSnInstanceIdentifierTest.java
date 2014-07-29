@@ -22,10 +22,10 @@ import org.opendaylight.controller.sal.rest.impl.JsonToCompositeNodeProvider;
 import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
 public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
@@ -70,9 +70,9 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
     private void verifyLeafListPredicate(CompositeNode cnSn) throws URISyntaxException {
         SimpleNode<?> lf11 = getSnWithInstanceIdentifierWhenLeafList(cnSn);
         Object value = lf11.getValue();
-        assertTrue(value instanceof InstanceIdentifier);
+        assertTrue(value instanceof YangInstanceIdentifier);
 
-        InstanceIdentifier instanceIdentifier = (InstanceIdentifier) value;
+        YangInstanceIdentifier instanceIdentifier = (YangInstanceIdentifier) value;
         List<PathArgument> pathArguments = instanceIdentifier.getPath();
         assertEquals(3, pathArguments.size());
         String revisionDate = "2014-01-17";
@@ -91,9 +91,9 @@ public class XmlAndJsonToCnSnInstanceIdentifierTest extends YangAndXmlAndDataSch
     private void verifyListPredicate(CompositeNode cnSn) throws URISyntaxException {
         SimpleNode<?> lf111 = getSnWithInstanceIdentifierWhenList(cnSn);
         Object value = lf111.getValue();
-        assertTrue(value instanceof InstanceIdentifier);
+        assertTrue(value instanceof YangInstanceIdentifier);
 
-        InstanceIdentifier instanceIdentifier = (InstanceIdentifier) value;
+        YangInstanceIdentifier instanceIdentifier = (YangInstanceIdentifier) value;
         List<PathArgument> pathArguments = instanceIdentifier.getPath();
         assertEquals(4, pathArguments.size());
         String revisionDate = "2014-01-17";

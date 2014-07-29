@@ -11,14 +11,14 @@ import java.util.Set;
 
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public interface Connector extends RpcImplementation, NotificationListener {
 
 
 
-    Set<InstanceIdentifier> getConfigurationPrefixes();
-    Set<InstanceIdentifier> getRuntimePrefixes();
+    Set<YangInstanceIdentifier> getConfigurationPrefixes();
+    Set<YangInstanceIdentifier> getRuntimePrefixes();
 
     void registerListener(ConnectorListener listener);
     void unregisterListener(ConnectorListener listener);

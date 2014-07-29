@@ -15,14 +15,14 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Preconditions;
 
 public final class DOMImmutableDataChangeEvent implements
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
 
     private static final RemoveEventFactory REMOVE_EVENT_FACTORY = new RemoveEventFactory();
@@ -30,10 +30,10 @@ public final class DOMImmutableDataChangeEvent implements
 
     private final NormalizedNode<?, ?> original;
     private final NormalizedNode<?, ?> updated;
-    private final Map<InstanceIdentifier, NormalizedNode<?, ?>> originalData;
-    private final Map<InstanceIdentifier, NormalizedNode<?, ?>> createdData;
-    private final Map<InstanceIdentifier, NormalizedNode<?, ?>> updatedData;
-    private final Set<InstanceIdentifier> removedPaths;
+    private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> originalData;
+    private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> createdData;
+    private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> updatedData;
+    private final Set<YangInstanceIdentifier> removedPaths;
     private final DataChangeScope scope;
 
 
@@ -67,22 +67,22 @@ public final class DOMImmutableDataChangeEvent implements
     }
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
         return originalData;
     }
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
         return createdData;
     }
 
     @Override
-    public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
         return updatedData;
     }
 
     @Override
-    public Set<InstanceIdentifier> getRemovedPaths() {
+    public Set<YangInstanceIdentifier> getRemovedPaths() {
         return removedPaths;
     }
 
@@ -98,7 +98,7 @@ public final class DOMImmutableDataChangeEvent implements
      *
      */
     public interface SimpleEventFactory {
-        DOMImmutableDataChangeEvent create(InstanceIdentifier path, NormalizedNode<PathArgument,?> data);
+        DOMImmutableDataChangeEvent create(YangInstanceIdentifier path, NormalizedNode<PathArgument,?> data);
     }
 
     /**
@@ -133,10 +133,10 @@ public final class DOMImmutableDataChangeEvent implements
         private NormalizedNode<?, ?> after;
         private NormalizedNode<?, ?> before;
 
-        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> original = new HashMap<>();
-        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> created = new HashMap<>();
-        private final Map<InstanceIdentifier, NormalizedNode<?, ?>> updated = new HashMap<>();
-        private final Set<InstanceIdentifier> removed = new HashSet<>();
+        private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> original = new HashMap<>();
+        private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> created = new HashMap<>();
+        private final Map<YangInstanceIdentifier, NormalizedNode<?, ?>> updated = new HashMap<>();
+        private final Set<YangInstanceIdentifier> removed = new HashSet<>();
 
         private Builder(final DataChangeScope scope) {
             Preconditions.checkNotNull(scope, "Data change scope should not be null.");
@@ -167,18 +167,18 @@ public final class DOMImmutableDataChangeEvent implements
             return this;
         }
 
-        public Builder addCreated(final InstanceIdentifier path, final NormalizedNode<?, ?> node) {
+        public Builder addCreated(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) {
             created.put(path, node);
             return this;
         }
 
-        public Builder addRemoved(final InstanceIdentifier path, final NormalizedNode<?, ?> node) {
+        public Builder addRemoved(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) {
             original.put(path, node);
             removed.add(path);
             return this;
         }
 
-        public Builder addUpdated(final InstanceIdentifier path, final NormalizedNode<?, ?> before,
+        public Builder addUpdated(final YangInstanceIdentifier path, final NormalizedNode<?, ?> before,
                 final NormalizedNode<?, ?> after) {
             original.put(path, before);
             updated.put(path, after);
@@ -189,7 +189,7 @@ public final class DOMImmutableDataChangeEvent implements
     private static final class RemoveEventFactory implements SimpleEventFactory {
 
         @Override
-        public DOMImmutableDataChangeEvent create(final InstanceIdentifier path, final NormalizedNode<PathArgument, ?> data) {
+        public DOMImmutableDataChangeEvent create(final YangInstanceIdentifier path, final NormalizedNode<PathArgument, ?> data) {
             return builder(DataChangeScope.BASE) //
                     .setBefore(data) //
                     .addRemoved(path, data) //
@@ -201,7 +201,7 @@ public final class DOMImmutableDataChangeEvent implements
     private static final class CreateEventFactory implements SimpleEventFactory {
 
         @Override
-        public DOMImmutableDataChangeEvent create(final InstanceIdentifier path, final NormalizedNode<PathArgument, ?> data) {
+        public DOMImmutableDataChangeEvent create(final YangInstanceIdentifier path, final NormalizedNode<PathArgument, ?> data) {
             return builder(DataChangeScope.BASE) //
                     .setAfter(data) //
                     .addCreated(path, data) //

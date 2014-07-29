@@ -31,7 +31,7 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -71,12 +71,12 @@ public class RestDeleteOperationTest extends JerseyTest {
     public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
         String uri = "/config/test-interface:interfaces";
         Future<RpcResult<TransactionStatus>> dummyFuture = createFuture(TransactionStatus.COMMITED);
-        when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(dummyFuture);
         Response response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(200, response.getStatus());
 
         dummyFuture = createFuture(TransactionStatus.FAILED);
-        when(brokerFacade.commitConfigurationDataDelete(any(InstanceIdentifier.class))).thenReturn(dummyFuture);
+        when(brokerFacade.commitConfigurationDataDelete(any(YangInstanceIdentifier.class))).thenReturn(dummyFuture);
         response = target(uri).request(MediaType.APPLICATION_XML).delete();
         assertEquals(500, response.getStatus());
     }

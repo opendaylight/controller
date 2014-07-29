@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +24,7 @@ public class AugmentationIdentifierGenerator {
         return doesMatch;
     }
 
-    public InstanceIdentifier.AugmentationIdentifier getPathArgument(){
+    public YangInstanceIdentifier.AugmentationIdentifier getPathArgument(){
         Set<QName> childNames = new HashSet<QName>();
         final String childQNames = matcher.group(1);
 
@@ -36,7 +36,7 @@ public class AugmentationIdentifierGenerator {
                     .create(name.trim()));
         }
 
-        return new InstanceIdentifier.AugmentationIdentifier(null, childNames);
+        return new YangInstanceIdentifier.AugmentationIdentifier(null, childNames);
     }
 
 }

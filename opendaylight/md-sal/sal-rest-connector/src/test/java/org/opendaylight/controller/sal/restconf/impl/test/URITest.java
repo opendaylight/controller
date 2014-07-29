@@ -28,7 +28,7 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -168,6 +168,6 @@ public class URITest {
         } else {
             when(mountInstance.getSchemaContext()).thenReturn(null);
         }
-        when(mountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
     }
 }

@@ -22,34 +22,34 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DOMMountPointServiceImpl implements DOMMountPointService {
 
-    private final Map<InstanceIdentifier, DOMMountPoint> mountPoints = new HashMap<>();
+    private final Map<YangInstanceIdentifier, DOMMountPoint> mountPoints = new HashMap<>();
 
     private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
 
     @Override
-    public Optional<DOMMountPoint> getMountPoint(final InstanceIdentifier path) {
+    public Optional<DOMMountPoint> getMountPoint(final YangInstanceIdentifier path) {
         return Optional.fromNullable(mountPoints.get(path));
     }
 
     @Override
-    public DOMMountPointBuilder createMountPoint(final InstanceIdentifier path) {
+    public DOMMountPointBuilder createMountPoint(final YangInstanceIdentifier path) {
         Preconditions.checkState(!mountPoints.containsKey(path), "Mount point already exists");
         return new DOMMountPointBuilderImpl(path);
     }
 
-    public void notifyMountCreated(final InstanceIdentifier identifier) {
+    public void notifyMountCreated(final YangInstanceIdentifier identifier) {
         for (final ListenerRegistration<MountProvisionListener> listener : listeners
                 .getListeners()) {
             listener.getInstance().onMountPointCreated(identifier);
         }
     }
 
-    public void notifyMountRemoved(final InstanceIdentifier identifier) {
+    public void notifyMountRemoved(final YangInstanceIdentifier identifier) {
         for (final ListenerRegistration<MountProvisionListener> listener : listeners
                 .getListeners()) {
             listener.getInstance().onMountPointRemoved(identifier);
@@ -72,7 +72,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         return new MountRegistration(mountPoint);
     }
 
-    public void unregisterMountPoint(final InstanceIdentifier mountPointId) {
+    public void unregisterMountPoint(final YangInstanceIdentifier mountPointId) {
         synchronized (mountPoints) {
             Preconditions.checkState(mountPoints.containsKey(mountPointId), "Mount point does not exist");
             mountPoints.remove(mountPointId);
@@ -84,10 +84,10 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
         ClassToInstanceMap<DOMService> services = MutableClassToInstanceMap.create();
         private SimpleDOMMountPoint mountPoint;
-        private final InstanceIdentifier path;
+        private final YangInstanceIdentifier path;
         private SchemaContext schemaContext;
 
-        public DOMMountPointBuilderImpl(final InstanceIdentifier path) {
+        public DOMMountPointBuilderImpl(final YangInstanceIdentifier path) {
             this.path = path;
         }
 

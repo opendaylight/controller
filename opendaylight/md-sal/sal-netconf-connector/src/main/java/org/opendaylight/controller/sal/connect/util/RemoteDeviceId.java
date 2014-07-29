@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 public class RemoteDeviceId {
 
     private final String name;
-    private final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path;
+    private final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path;
     private final InstanceIdentifier<Node> bindingPath;
     private final NodeKey key;
 
@@ -40,9 +40,9 @@ public class RemoteDeviceId {
         return InstanceIdentifier.builder(Nodes.class).child(Node.class, key).build();
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.InstanceIdentifier createBIPath(final String name) {
-        final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder builder =
-                org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder();
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBIPath(final String name) {
+        final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder builder =
+                org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder();
         builder.node(Nodes.QNAME).nodeWithKey(Node.QNAME, QName.create(Node.QNAME.getNamespace(), Node.QNAME.getRevision(), "id"), name);
 
         return builder.build();
@@ -56,7 +56,7 @@ public class RemoteDeviceId {
         return bindingPath;
     }
 
-    public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier getPath() {
+    public org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier getPath() {
         return path;
     }
 

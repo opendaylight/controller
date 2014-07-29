@@ -18,11 +18,11 @@ import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.IdentityV
 import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.codec.IdentityrefCodec;
 import org.opendaylight.yangtools.yang.data.api.codec.InstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.api.codec.LeafrefCodec;
@@ -207,7 +207,7 @@ public class RestCodec {
         }
 
         @Override
-        public IdentityValuesDTO serialize(final InstanceIdentifier data) {
+        public IdentityValuesDTO serialize(final YangInstanceIdentifier data) {
             IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO();
             for (PathArgument pathArgument : data.getPathArguments()) {
                 IdentityValue identityValue = qNameToIdentityValue(pathArgument.getNodeType());
@@ -227,7 +227,7 @@ public class RestCodec {
         }
 
         @Override
-        public InstanceIdentifier deserialize(final IdentityValuesDTO data) {
+        public YangInstanceIdentifier deserialize(final IdentityValuesDTO data) {
             List<PathArgument> result = new ArrayList<PathArgument>();
             IdentityValue valueWithNamespace = data.getValuesWithNamespaces().get(0);
             Module module = getModuleByNamespace(valueWithNamespace.getNamespace(), mountPoint);
@@ -298,7 +298,7 @@ public class RestCodec {
                 }
             }
 
-            return result.isEmpty() ? null : InstanceIdentifier.create(result);
+            return result.isEmpty() ? null : YangInstanceIdentifier.create(result);
         }
 
         private List<Predicate> keyValuesToPredicateList(final Map<QName, Object> keyValues) {

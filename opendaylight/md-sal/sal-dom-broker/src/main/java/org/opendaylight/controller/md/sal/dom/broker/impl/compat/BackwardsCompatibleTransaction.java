@@ -33,8 +33,8 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,9 +90,9 @@ DataModificationTransaction, Delegator<T> {
     };
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier legacyPath) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier legacyPath) {
 
-        InstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
+        YangInstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> normalizedData = asyncTx.read(
                 LogicalDatastoreType.CONFIGURATION, normalizedPath);
@@ -105,8 +105,8 @@ DataModificationTransaction, Delegator<T> {
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier legacyPath) {
-        InstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
+    public CompositeNode readOperationalData(final YangInstanceIdentifier legacyPath) {
+        YangInstanceIdentifier normalizedPath = normalizer.toNormalized(legacyPath);
 
         ListenableFuture<Optional<NormalizedNode<?, ?>>> normalizedData = asyncTx.read(
                 LogicalDatastoreType.OPERATIONAL, normalizedPath);
@@ -124,62 +124,62 @@ DataModificationTransaction, Delegator<T> {
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getCreatedOperationalData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getCreatedOperationalData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getOriginalOperationalData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getOriginalOperationalData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Set<InstanceIdentifier> getRemovedConfigurationData() {
+    public Set<YangInstanceIdentifier> getRemovedConfigurationData() {
         return Collections.emptySet();
     }
 
     @Override
-    public Set<InstanceIdentifier> getRemovedOperationalData() {
+    public Set<YangInstanceIdentifier> getRemovedOperationalData() {
         return Collections.emptySet();
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<InstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
+    public Map<YangInstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public void putConfigurationData(final InstanceIdentifier path, final CompositeNode data) {
+    public void putConfigurationData(final YangInstanceIdentifier path, final CompositeNode data) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void putOperationalData(final InstanceIdentifier path, final CompositeNode data) {
+    public void putOperationalData(final YangInstanceIdentifier path, final CompositeNode data) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeConfigurationData(final InstanceIdentifier path) {
+    public void removeConfigurationData(final YangInstanceIdentifier path) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeOperationalData(final InstanceIdentifier path) {
+    public void removeOperationalData(final YangInstanceIdentifier path) {
         throw new UnsupportedOperationException();
     }
 
@@ -209,22 +209,22 @@ DataModificationTransaction, Delegator<T> {
         }
 
         @Override
-        public void putConfigurationData(final InstanceIdentifier legacyPath, final CompositeNode legacyData) {
+        public void putConfigurationData(final YangInstanceIdentifier legacyPath, final CompositeNode legacyData) {
             checkNotNull(legacyPath, "Path MUST NOT be null.");
             checkNotNull(legacyData, "Data for path %s MUST NOT be null",legacyData);
-            Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedData = getNormalizer().toNormalized(legacyPath, legacyData);
+            Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedData = getNormalizer().toNormalized(legacyPath, legacyData);
             putWithEnsuredParents(LogicalDatastoreType.CONFIGURATION, normalizedData.getKey(), normalizedData.getValue());
         }
 
         @Override
-        public void putOperationalData(final InstanceIdentifier legacyPath, final CompositeNode legacyData) {
+        public void putOperationalData(final YangInstanceIdentifier legacyPath, final CompositeNode legacyData) {
             checkNotNull(legacyPath, "Path MUST NOT be null.");
             checkNotNull(legacyData, "Data for path %s MUST NOT be null",legacyData);
-            Entry<InstanceIdentifier, NormalizedNode<?, ?>> normalizedData = getNormalizer().toNormalized(legacyPath, legacyData);
+            Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedData = getNormalizer().toNormalized(legacyPath, legacyData);
             putWithEnsuredParents(LogicalDatastoreType.OPERATIONAL, normalizedData.getKey(), normalizedData.getValue());
         }
 
-        private void putWithEnsuredParents(final LogicalDatastoreType store, final InstanceIdentifier normalizedPath,
+        private void putWithEnsuredParents(final LogicalDatastoreType store, final YangInstanceIdentifier normalizedPath,
                 final NormalizedNode<?, ?> normalizedData) {
 
             LOG.trace("write {}:{} ",store,normalizedPath);
@@ -240,7 +240,7 @@ DataModificationTransaction, Delegator<T> {
                         throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", normalizedPath), e);
                     }
                     currentArguments.add(currentArg);
-                    InstanceIdentifier currentPath = InstanceIdentifier.create(currentArguments);
+                    YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
                     boolean isPresent = getDelegate().read(store, currentPath).get().isPresent();
                     if(isPresent == false && iterator.hasNext()) {
                         getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
@@ -254,13 +254,13 @@ DataModificationTransaction, Delegator<T> {
         }
 
         @Override
-        public void removeConfigurationData(final InstanceIdentifier legacyPath) {
+        public void removeConfigurationData(final YangInstanceIdentifier legacyPath) {
             checkNotNull(legacyPath, "Path MUST NOT be null.");
             getDelegate().delete(LogicalDatastoreType.CONFIGURATION, getNormalizer().toNormalized(legacyPath));
         }
 
         @Override
-        public void removeOperationalData(final InstanceIdentifier legacyPath) {
+        public void removeOperationalData(final YangInstanceIdentifier legacyPath) {
             checkNotNull(legacyPath, "Path MUST NOT be null.");
             getDelegate().delete(LogicalDatastoreType.OPERATIONAL, getNormalizer().toNormalized(legacyPath));
         }

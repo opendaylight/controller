@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -127,13 +127,13 @@ public final class RuntimeMappingModule extends
         }
 
         @Override
-        public Entry<InstanceIdentifier, CompositeNode> toDataDom(
+        public Entry<YangInstanceIdentifier, CompositeNode> toDataDom(
                 Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> entry) {
             return delegate.toDataDom(entry);
         }
 
         @Override
-        public InstanceIdentifier toDataDom(
+        public YangInstanceIdentifier toDataDom(
                 org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> path) {
             return delegate.toDataDom(path);
         }
@@ -146,7 +146,7 @@ public final class RuntimeMappingModule extends
         }
 
         @Override
-        public org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> fromDataDom(InstanceIdentifier entry)
+        public org.opendaylight.yangtools.yang.binding.InstanceIdentifier<?> fromDataDom(YangInstanceIdentifier entry)
                 throws DeserializationException {
             return delegate.fromDataDom(entry);
         }

@@ -33,7 +33,7 @@ import org.opendaylight.controller.sal.dom.broker.util.YangSchemaUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
@@ -54,10 +54,10 @@ AutoCloseable {
 
     private SchemaContext schema = null;
     private boolean validationEnabled = false;
-    private final DataReader<InstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
+    private final DataReader<YangInstanceIdentifier, CompositeNode> reader = new MergeFirstLevelReader();
 
     @Override
-    public boolean containsConfigurationPath(final InstanceIdentifier path) {
+    public boolean containsConfigurationPath(final YangInstanceIdentifier path) {
         try {
             getDelegateReadLock().lock();
             return getDelegate().containsConfigurationPath(path);
@@ -68,7 +68,7 @@ AutoCloseable {
     }
 
     @Override
-    public boolean containsOperationalPath(final InstanceIdentifier path) {
+    public boolean containsOperationalPath(final YangInstanceIdentifier path) {
         try {
             getDelegateReadLock().lock();
             return getDelegate().containsOperationalPath(path);
@@ -79,7 +79,7 @@ AutoCloseable {
     }
 
     @Override
-    public Iterable<InstanceIdentifier> getStoredConfigurationPaths() {
+    public Iterable<YangInstanceIdentifier> getStoredConfigurationPaths() {
         try {
             getDelegateReadLock().lock();
             return getDelegate().getStoredConfigurationPaths();
@@ -90,7 +90,7 @@ AutoCloseable {
     }
 
     @Override
-    public Iterable<InstanceIdentifier> getStoredOperationalPaths() {
+    public Iterable<YangInstanceIdentifier> getStoredOperationalPaths() {
         try {
             getDelegateReadLock().lock();
             return getDelegate().getStoredOperationalPaths();
@@ -101,18 +101,18 @@ AutoCloseable {
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         return reader.readConfigurationData(path);
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         return reader.readOperationalData(path);
     }
 
     @Override
-    public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
-            final DataModification<InstanceIdentifier, CompositeNode> modification) {
+    public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<YangInstanceIdentifier, CompositeNode> requestCommit(
+            final DataModification<YangInstanceIdentifier, CompositeNode> modification) {
         validateAgainstSchema(modification);
         NormalizedDataModification cleanedUp = prepareMergedTransaction(modification);
         cleanedUp.status = TransactionStatus.SUBMITED;
@@ -127,7 +127,7 @@ AutoCloseable {
         this.validationEnabled = validationEnabled;
     }
 
-    private void validateAgainstSchema(final DataModification<InstanceIdentifier, CompositeNode> modification) {
+    private void validateAgainstSchema(final DataModification<YangInstanceIdentifier, CompositeNode> modification) {
         if (!validationEnabled) {
             return;
         }
@@ -153,7 +153,7 @@ AutoCloseable {
         this.schema = null;
     }
 
-    protected CompositeNode mergeData(final InstanceIdentifier path, final CompositeNode stored, final CompositeNode modified,
+    protected CompositeNode mergeData(final YangInstanceIdentifier path, final CompositeNode stored, final CompositeNode modified,
             final boolean config) {
         // long startTime = System.nanoTime();
         try {
@@ -165,13 +165,13 @@ AutoCloseable {
         }
     }
 
-    private DataSchemaNode schemaNodeFor(final InstanceIdentifier path) {
+    private DataSchemaNode schemaNodeFor(final YangInstanceIdentifier path) {
         checkState(schema != null, "YANG Schema is not available");
         return YangSchemaUtils.getSchemaNode(schema, path);
     }
 
     private NormalizedDataModification prepareMergedTransaction(
-            final DataModification<InstanceIdentifier, CompositeNode> original) {
+            final DataModification<YangInstanceIdentifier, CompositeNode> original) {
         NormalizedDataModification normalized = new NormalizedDataModification(original);
         LOG.trace("Transaction: {} Removed Configuration {}, Removed Operational {}", original.getIdentifier(),
                 original.getRemovedConfigurationData(), original.getRemovedConfigurationData());
@@ -180,40 +180,40 @@ AutoCloseable {
         LOG.trace("Transaction: {} Updated Configuration {}, Updated Operational {}", original.getIdentifier(),
                 original.getUpdatedConfigurationData().entrySet(), original.getUpdatedOperationalData().entrySet());
 
-        for (InstanceIdentifier entry : original.getRemovedConfigurationData()) {
+        for (YangInstanceIdentifier entry : original.getRemovedConfigurationData()) {
             normalized.deepRemoveConfigurationData(entry);
         }
-        for (InstanceIdentifier entry : original.getRemovedOperationalData()) {
+        for (YangInstanceIdentifier entry : original.getRemovedOperationalData()) {
             normalized.deepRemoveOperationalData(entry);
         }
-        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
+        for (Entry<YangInstanceIdentifier, CompositeNode> entry : original.getUpdatedConfigurationData().entrySet()) {
             normalized.putDeepConfigurationData(entry.getKey(), entry.getValue());
         }
-        for (Entry<InstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
+        for (Entry<YangInstanceIdentifier, CompositeNode> entry : original.getUpdatedOperationalData().entrySet()) {
             normalized.putDeepOperationalData(entry.getKey(), entry.getValue());
         }
         return normalized;
     }
 
-    private Iterable<InstanceIdentifier> getConfigurationSubpaths(final InstanceIdentifier entry) {
+    private Iterable<YangInstanceIdentifier> getConfigurationSubpaths(final YangInstanceIdentifier entry) {
         // FIXME: This should be replaced by index
-        Iterable<InstanceIdentifier> paths = getStoredConfigurationPaths();
+        Iterable<YangInstanceIdentifier> paths = getStoredConfigurationPaths();
 
         return getChildrenPaths(entry, paths);
 
     }
 
-    public Iterable<InstanceIdentifier> getOperationalSubpaths(final InstanceIdentifier entry) {
+    public Iterable<YangInstanceIdentifier> getOperationalSubpaths(final YangInstanceIdentifier entry) {
         // FIXME: This should be indexed
-        Iterable<InstanceIdentifier> paths = getStoredOperationalPaths();
+        Iterable<YangInstanceIdentifier> paths = getStoredOperationalPaths();
 
         return getChildrenPaths(entry, paths);
     }
 
-    private static final Iterable<InstanceIdentifier> getChildrenPaths(final InstanceIdentifier entry,
-            final Iterable<InstanceIdentifier> paths) {
-        ImmutableSet.Builder<InstanceIdentifier> children = ImmutableSet.builder();
-        for (InstanceIdentifier potential : paths) {
+    private static final Iterable<YangInstanceIdentifier> getChildrenPaths(final YangInstanceIdentifier entry,
+            final Iterable<YangInstanceIdentifier> paths) {
+        ImmutableSet.Builder<YangInstanceIdentifier> children = ImmutableSet.builder();
+        for (YangInstanceIdentifier potential : paths) {
             if (entry.contains(potential)) {
                 children.add(entry);
             }
@@ -221,19 +221,19 @@ AutoCloseable {
         return children.build();
     }
 
-    private final Comparator<Entry<InstanceIdentifier, CompositeNode>> preparationComparator = new Comparator<Entry<InstanceIdentifier, CompositeNode>>() {
+    private final Comparator<Entry<YangInstanceIdentifier, CompositeNode>> preparationComparator = new Comparator<Entry<YangInstanceIdentifier, CompositeNode>>() {
         @Override
-        public int compare(final Entry<InstanceIdentifier, CompositeNode> o1, final Entry<InstanceIdentifier, CompositeNode> o2) {
-            InstanceIdentifier o1Key = o1.getKey();
-            InstanceIdentifier o2Key = o2.getKey();
+        public int compare(final Entry<YangInstanceIdentifier, CompositeNode> o1, final Entry<YangInstanceIdentifier, CompositeNode> o2) {
+            YangInstanceIdentifier o1Key = o1.getKey();
+            YangInstanceIdentifier o2Key = o2.getKey();
             return Integer.compare(o1Key.getPath().size(), o2Key.getPath().size());
         }
     };
 
-    private class MergeFirstLevelReader implements DataReader<InstanceIdentifier, CompositeNode> {
+    private class MergeFirstLevelReader implements DataReader<YangInstanceIdentifier, CompositeNode> {
 
         @Override
-        public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+        public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
             getDelegateReadLock().lock();
             try {
                 if (Iterables.isEmpty(path.getPathArguments())) {
@@ -249,10 +249,10 @@ AutoCloseable {
                     qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
                 }
 
-                FluentIterable<InstanceIdentifier> directChildren = FluentIterable.from(getStoredConfigurationPaths())
-                        .filter(new Predicate<InstanceIdentifier>() {
+                FluentIterable<YangInstanceIdentifier> directChildren = FluentIterable.from(getStoredConfigurationPaths())
+                        .filter(new Predicate<YangInstanceIdentifier>() {
                             @Override
-                            public boolean apply(final InstanceIdentifier input) {
+                            public boolean apply(final YangInstanceIdentifier input) {
                                 if (path.contains(input)) {
                                     int nesting = input.getPath().size() - path.getPath().size();
                                     if (nesting == 1) {
@@ -262,7 +262,7 @@ AutoCloseable {
                                 return false;
                             }
                         });
-                for (InstanceIdentifier instanceIdentifier : directChildren) {
+                for (YangInstanceIdentifier instanceIdentifier : directChildren) {
                     childNodes.add(getDelegate().readConfigurationData(instanceIdentifier));
                 }
                 if (original == null && childNodes.isEmpty()) {
@@ -276,7 +276,7 @@ AutoCloseable {
         }
 
         @Override
-        public CompositeNode readOperationalData(final InstanceIdentifier path) {
+        public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
             getDelegateReadLock().lock();
             try {
                 if (Iterables.isEmpty(path.getPathArguments())) {
@@ -292,10 +292,10 @@ AutoCloseable {
                     qname = path.getPath().get(path.getPath().size() - 1).getNodeType();
                 }
 
-                FluentIterable<InstanceIdentifier> directChildren = FluentIterable.from(getStoredOperationalPaths())
-                        .filter(new Predicate<InstanceIdentifier>() {
+                FluentIterable<YangInstanceIdentifier> directChildren = FluentIterable.from(getStoredOperationalPaths())
+                        .filter(new Predicate<YangInstanceIdentifier>() {
                             @Override
-                            public boolean apply(final InstanceIdentifier input) {
+                            public boolean apply(final YangInstanceIdentifier input) {
                                 if (path.contains(input)) {
                                     int nesting = input.getPath().size() - path.getPath().size();
                                     if (nesting == 1) {
@@ -306,7 +306,7 @@ AutoCloseable {
                             }
                         });
 
-                for (InstanceIdentifier instanceIdentifier : directChildren) {
+                for (YangInstanceIdentifier instanceIdentifier : directChildren) {
                     childNodes.add(getDelegate().readOperationalData(instanceIdentifier));
                 }
                 if (original == null && childNodes.isEmpty()) {
@@ -320,14 +320,14 @@ AutoCloseable {
         }
     }
 
-    private class NormalizedDataModification extends AbstractDataModification<InstanceIdentifier, CompositeNode> {
+    private class NormalizedDataModification extends AbstractDataModification<YangInstanceIdentifier, CompositeNode> {
 
         private final String CONFIGURATIONAL_DATA_STORE_MARKER = "configurational";
         private final String OPERATIONAL_DATA_STORE_MARKER = "operational";
         private final Object identifier;
         private TransactionStatus status;
 
-        public NormalizedDataModification(final DataModification<InstanceIdentifier, CompositeNode> original) {
+        public NormalizedDataModification(final DataModification<YangInstanceIdentifier, CompositeNode> original) {
             super(getDelegate());
             identifier = original;
             status = TransactionStatus.NEW;
@@ -340,27 +340,27 @@ AutoCloseable {
          *
          * @param entry
          */
-        public void deepRemoveOperationalData(final InstanceIdentifier entry) {
-            Iterable<InstanceIdentifier> paths = getOperationalSubpaths(entry);
+        public void deepRemoveOperationalData(final YangInstanceIdentifier entry) {
+            Iterable<YangInstanceIdentifier> paths = getOperationalSubpaths(entry);
             removeOperationalData(entry);
-            for (InstanceIdentifier potential : paths) {
+            for (YangInstanceIdentifier potential : paths) {
                 removeOperationalData(potential);
             }
         }
 
-        public void deepRemoveConfigurationData(final InstanceIdentifier entry) {
-            Iterable<InstanceIdentifier> paths = getConfigurationSubpaths(entry);
+        public void deepRemoveConfigurationData(final YangInstanceIdentifier entry) {
+            Iterable<YangInstanceIdentifier> paths = getConfigurationSubpaths(entry);
             removeConfigurationData(entry);
-            for (InstanceIdentifier potential : paths) {
+            for (YangInstanceIdentifier potential : paths) {
                 removeConfigurationData(potential);
             }
         }
 
-        public void putDeepConfigurationData(final InstanceIdentifier entryKey, final CompositeNode entryData) {
+        public void putDeepConfigurationData(final YangInstanceIdentifier entryKey, final CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, CONFIGURATIONAL_DATA_STORE_MARKER);
         }
 
-        public void putDeepOperationalData(final InstanceIdentifier entryKey, final CompositeNode entryData) {
+        public void putDeepOperationalData(final YangInstanceIdentifier entryKey, final CompositeNode entryData) {
             this.putCompositeNodeData(entryKey, entryData, OPERATIONAL_DATA_STORE_MARKER);
         }
 
@@ -380,18 +380,18 @@ AutoCloseable {
         }
 
         @Override
-        protected CompositeNode mergeConfigurationData(final InstanceIdentifier path, final CompositeNode stored,
+        protected CompositeNode mergeConfigurationData(final YangInstanceIdentifier path, final CompositeNode stored,
                 final CompositeNode modified) {
             return mergeData(path, stored, modified, true);
         }
 
         @Override
-        protected CompositeNode mergeOperationalData(final InstanceIdentifier path, final CompositeNode stored,
+        protected CompositeNode mergeOperationalData(final YangInstanceIdentifier path, final CompositeNode stored,
                 final CompositeNode modified) {
             return mergeData(path, stored, modified, false);
         }
 
-        private void putData(final InstanceIdentifier entryKey, final CompositeNode entryData, final String dataStoreIdentifier) {
+        private void putData(final YangInstanceIdentifier entryKey, final CompositeNode entryData, final String dataStoreIdentifier) {
             if (dataStoreIdentifier != null && entryKey != null && entryData != null) {
                 switch (dataStoreIdentifier) {
                 case (CONFIGURATIONAL_DATA_STORE_MARKER):
@@ -408,29 +408,29 @@ AutoCloseable {
             }
         }
 
-        private void putCompositeNodeData(final InstanceIdentifier entryKey, final CompositeNode entryData,
+        private void putCompositeNodeData(final YangInstanceIdentifier entryKey, final CompositeNode entryData,
                 final String dataStoreIdentifier) {
             this.putData(entryKey, entryData, dataStoreIdentifier);
 
             for (Node<?> child : entryData.getValue()) {
-                InstanceIdentifier subEntryId = InstanceIdentifier.builder(entryKey).node(child.getNodeType())
+                YangInstanceIdentifier subEntryId = YangInstanceIdentifier.builder(entryKey).node(child.getNodeType())
                         .toInstance();
                 if (child instanceof CompositeNode) {
                     DataSchemaNode subSchema = schemaNodeFor(subEntryId);
                     CompositeNode compNode = (CompositeNode) child;
-                    InstanceIdentifier instanceId = null;
+                    YangInstanceIdentifier instanceId = null;
 
                     if (subSchema instanceof ListSchemaNode) {
                         ListSchemaNode listSubSchema = (ListSchemaNode) subSchema;
                         Map<QName, Object> mapOfSubValues = this.getValuesFromListSchema(listSubSchema,
                                 (CompositeNode) child);
                         if (mapOfSubValues != null) {
-                            instanceId = InstanceIdentifier.builder(entryKey)
+                            instanceId = YangInstanceIdentifier.builder(entryKey)
                                     .nodeWithKey(listSubSchema.getQName(), mapOfSubValues).toInstance();
                         }
                     } else if (subSchema instanceof ContainerSchemaNode) {
                         ContainerSchemaNode containerSchema = (ContainerSchemaNode) subSchema;
-                        instanceId = InstanceIdentifier.builder(entryKey).node(subSchema.getQName()).toInstance();
+                        instanceId = YangInstanceIdentifier.builder(entryKey).node(subSchema.getQName()).toInstance();
                     }
                     if (instanceId != null) {
                         this.putCompositeNodeData(instanceId, compNode, dataStoreIdentifier);

@@ -76,25 +76,25 @@ class BindingToDomCommitHandler implements
         DataModificationTransaction target = biDataService.beginTransaction();
         LOG.debug("Created DOM Transaction {} for {},", target.getIdentifier(), source.getIdentifier());
         for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedConfigurationData()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biEntry = mappingService.toDataDom(entry);
             target.removeConfigurationData(biEntry);
             LOG.debug("Delete of Binding Configuration Data {} is translated to {}", entry, biEntry);
         }
         for (InstanceIdentifier<? extends DataObject> entry : source.getRemovedOperationalData()) {
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biEntry = mappingService.toDataDom(entry);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biEntry = mappingService.toDataDom(entry);
             target.removeOperationalData(biEntry);
             LOG.debug("Delete of Binding Operational Data {} is translated to {}", entry, biEntry);
         }
         for (Map.Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : source.getUpdatedConfigurationData()
             .entrySet()) {
-            Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> biEntry = mappingService
+            Map.Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> biEntry = mappingService
                 .toDataDom(entry);
             target.putConfigurationData(biEntry.getKey(), biEntry.getValue());
             LOG.debug("Update of Binding Configuration Data {} is translated to {}", entry, biEntry);
         }
         for (Map.Entry<InstanceIdentifier<? extends DataObject>, DataObject> entry : source.getUpdatedOperationalData()
             .entrySet()) {
-            Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> biEntry = mappingService
+            Map.Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> biEntry = mappingService
                 .toDataDom(entry);
             target.putOperationalData(biEntry.getKey(), biEntry.getValue());
             LOG.debug("Update of Binding Operational Data {} is translated to {}", entry, biEntry);

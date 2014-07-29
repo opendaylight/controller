@@ -22,7 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -49,7 +49,7 @@ class BindingDataWriteTransactionImpl<T extends DOMDataWriteTransaction> extends
 
     @Override
     protected void ensureParentsByMerge(final LogicalDatastoreType store,
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath, final InstanceIdentifier<?> path) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalizedPath, final InstanceIdentifier<?> path) {
         List<PathArgument> currentArguments = new ArrayList<>();
         DataNormalizationOperation<?> currentOp = getCodec().getDataNormalizer().getRootOperation();
         Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
@@ -61,7 +61,7 @@ class BindingDataWriteTransactionImpl<T extends DOMDataWriteTransaction> extends
                 throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
             }
             currentArguments.add(currentArg);
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.create(
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(
                     currentArguments);
 
             getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));

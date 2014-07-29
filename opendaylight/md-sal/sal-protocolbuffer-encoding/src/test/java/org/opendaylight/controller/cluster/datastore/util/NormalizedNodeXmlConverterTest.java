@@ -16,7 +16,7 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
 import org.opendaylight.controller.protobuff.messages.common.SimpleNormalizedNodeMessage;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
@@ -136,13 +136,13 @@ public class NormalizedNodeXmlConverterTest {
         return null;
     }
 
-    public static InstanceIdentifier.NodeIdentifier getNodeIdentifier(
+    public static YangInstanceIdentifier.NodeIdentifier getNodeIdentifier(
         final String localName) {
-        return new InstanceIdentifier.NodeIdentifier(QName.create(
+        return new YangInstanceIdentifier.NodeIdentifier(QName.create(
             URI.create(NAMESPACE), revision, localName));
     }
 
-    public static InstanceIdentifier.AugmentationIdentifier getAugmentIdentifier(
+    public static YangInstanceIdentifier.AugmentationIdentifier getAugmentIdentifier(
         final String... childNames) {
         Set<QName> qn = Sets.newHashSet();
 
@@ -150,13 +150,13 @@ public class NormalizedNodeXmlConverterTest {
             qn.add(getNodeIdentifier(childName).getNodeType());
         }
 
-        return new InstanceIdentifier.AugmentationIdentifier(qn);
+        return new YangInstanceIdentifier.AugmentationIdentifier(qn);
     }
 
 
     public static ContainerNode augmentChoiceExpectedNode() {
 
-        DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> b =
+        DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> b =
             Builders.containerBuilder();
         b.withNodeIdentifier(getNodeIdentifier("container"));
 
@@ -296,7 +296,7 @@ public class NormalizedNodeXmlConverterTest {
     }
 
     private static ContainerNode listLeafListWithAttributes() {
-        DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifier, ContainerNode> b =
+        DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> b =
             Builders.containerBuilder();
         b.withNodeIdentifier(getNodeIdentifier("container"));
 
@@ -306,11 +306,11 @@ public class NormalizedNodeXmlConverterTest {
         Map<QName, Object> predicates = Maps.newHashMap();
         predicates.put(getNodeIdentifier("uint32InList").getNodeType(), 3L);
 
-        DataContainerNodeBuilder<InstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> list1Builder =
+        DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> list1Builder =
             Builders.mapEntryBuilder().withNodeIdentifier(
-                new InstanceIdentifier.NodeIdentifierWithPredicates(
+                new YangInstanceIdentifier.NodeIdentifierWithPredicates(
                     getNodeIdentifier("list").getNodeType(), predicates));
-        NormalizedNodeBuilder<InstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> uint32InListBuilder =
+        NormalizedNodeBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> uint32InListBuilder =
             Builders.leafBuilder().withNodeIdentifier(
                 getNodeIdentifier("uint32InList"));
 
@@ -319,7 +319,7 @@ public class NormalizedNodeXmlConverterTest {
         listBuilder.withChild(list1Builder.build());
         b.withChild(listBuilder.build());
 
-        NormalizedNodeBuilder<InstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> booleanBuilder =
+        NormalizedNodeBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> booleanBuilder =
             Builders.leafBuilder().withNodeIdentifier(getNodeIdentifier("boolean"));
         booleanBuilder.withValue(false);
         b.withChild(booleanBuilder.build());
@@ -328,9 +328,9 @@ public class NormalizedNodeXmlConverterTest {
             Builders.leafSetBuilder().withNodeIdentifier(
                 getNodeIdentifier("leafList"));
 
-        NormalizedNodeBuilder<InstanceIdentifier.NodeWithValue, Object, LeafSetEntryNode<Object>> leafList1Builder =
+        NormalizedNodeBuilder<YangInstanceIdentifier.NodeWithValue, Object, LeafSetEntryNode<Object>> leafList1Builder =
             Builders.leafSetEntryBuilder().withNodeIdentifier(
-                new InstanceIdentifier.NodeWithValue(getNodeIdentifier("leafList")
+                new YangInstanceIdentifier.NodeWithValue(getNodeIdentifier("leafList")
                     .getNodeType(), "a"));
 
         leafList1Builder.withValue("a");

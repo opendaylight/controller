@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
@@ -20,7 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncReadTransaction}.
  */
-public interface DOMDataReadTransaction extends AsyncReadTransaction<InstanceIdentifier, NormalizedNode<?, ?>> {
+public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     /**
      * Reads data from provided logical data store located at the provided path.
@@ -42,5 +42,5 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<InstanceIde
      *         {@link ListenbleFuture#get()} returns {@link Optional#absent()}.
      *         </ul>
      */
-    ListenableFuture<Optional<NormalizedNode<?,?>>> read(LogicalDatastoreType store,InstanceIdentifier path);
+    ListenableFuture<Optional<NormalizedNode<?,?>>> read(LogicalDatastoreType store,YangInstanceIdentifier path);
 }

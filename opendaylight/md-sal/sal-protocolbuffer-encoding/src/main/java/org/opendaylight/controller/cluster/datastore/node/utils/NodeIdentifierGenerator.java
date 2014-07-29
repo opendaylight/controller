@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class NodeIdentifierGenerator {
     private final String id;
@@ -12,7 +12,7 @@ public class NodeIdentifierGenerator {
         this.qName = QNameFactory.create(id);
     }
 
-    public InstanceIdentifier.PathArgument getArgument(){
-        return new InstanceIdentifier.NodeIdentifier(qName);
+    public YangInstanceIdentifier.PathArgument getArgument(){
+        return new YangInstanceIdentifier.NodeIdentifier(qName);
     }
 }
