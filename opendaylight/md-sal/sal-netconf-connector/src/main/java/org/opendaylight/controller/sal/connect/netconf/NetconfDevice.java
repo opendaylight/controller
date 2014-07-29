@@ -7,17 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
@@ -40,6 +34,14 @@ import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 /**
  *  This is a mediator between NetconfDeviceCommunicator and NetconfDeviceSalFacade
  */
@@ -54,11 +56,20 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
     private final MessageTransformer<NetconfMessage> messageTransformer;
     private final SchemaContextProviderFactory schemaContextProviderFactory;
     private final SchemaSourceProviderFactory<InputStream> sourceProviderFactory;
+    private final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver;
     private final NotificationHandler notificationHandler;
 
     public static NetconfDevice createNetconfDevice(final RemoteDeviceId id,
             final AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider,
             final ExecutorService executor, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
+        return createNetconfDevice(id, schemaSourceProvider, executor, salFacade, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
+    }
+
+    @VisibleForTesting
+    protected static NetconfDevice createNetconfDevice(final RemoteDeviceId id,
+            final AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider,
+            final ExecutorService executor, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
+            final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
 
         return new NetconfDevice(id, salFacade, executor, new NetconfMessageTransformer(),
                 new NetconfDeviceSchemaProviderFactory(id), new SchemaSourceProviderFactory<InputStream>() {
@@ -67,18 +78,20 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
                         return schemaSourceProvider.createInstanceFor(new NetconfRemoteSchemaSourceProvider(id,
                                 deviceRpc));
                     }
-                });
+                }, stateSchemasResolver);
     }
 
     @VisibleForTesting
     protected NetconfDevice(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
-            final ExecutorService processingExecutor, final MessageTransformer<NetconfMessage> messageTransformer,
-            final SchemaContextProviderFactory schemaContextProviderFactory,
-            final SchemaSourceProviderFactory<InputStream> sourceProviderFactory) {
+                            final ExecutorService processingExecutor, final MessageTransformer<NetconfMessage> messageTransformer,
+                            final SchemaContextProviderFactory schemaContextProviderFactory,
+                            final SchemaSourceProviderFactory<InputStream> sourceProviderFactory,
+                            final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
         this.id = id;
         this.messageTransformer = messageTransformer;
         this.salFacade = salFacade;
         this.sourceProviderFactory = sourceProviderFactory;
+        this.stateSchemasResolver = stateSchemasResolver;
         this.processingExecutor = MoreExecutors.listeningDecorator(processingExecutor);
         this.schemaContextProviderFactory = schemaContextProviderFactory;
         this.notificationHandler = new NotificationHandler(salFacade, messageTransformer, id);
@@ -98,6 +111,11 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
             @Override
             public void run() {
                 final NetconfDeviceRpc deviceRpc = setUpDeviceRpc(remoteSessionCapabilities, listener);
+
+                final NetconfStateSchemas availableSchemas = stateSchemasResolver.resolve(deviceRpc, remoteSessionCapabilities, id);
+                logger.warn("{}: Schemas exposed by ietf-netconf-monitoring: {}", id, availableSchemas.getAvailableYangSchemasQNames());
+                // TODO use this for shared schema context
+
                 final SchemaSourceProvider<InputStream> delegate = sourceProviderFactory.createSourceProvider(deviceRpc);
                 final SchemaContextProvider schemaContextProvider = setUpSchemaContext(delegate, remoteSessionCapabilities);
                 updateMessageTransformer(schemaContextProvider);
@@ -204,6 +222,6 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
             Preconditions.checkNotNull(parsedNotification);
             salFacade.onNotification(parsedNotification);
         }
-
     }
+
 }
