@@ -15,7 +15,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  *
@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
  *
  */
 @Deprecated
-public interface DataModificationTransaction extends DataModification<InstanceIdentifier, CompositeNode> {
+public interface DataModificationTransaction extends DataModification<YangInstanceIdentifier, CompositeNode> {
 
     /**
      * Returns transaction identifier

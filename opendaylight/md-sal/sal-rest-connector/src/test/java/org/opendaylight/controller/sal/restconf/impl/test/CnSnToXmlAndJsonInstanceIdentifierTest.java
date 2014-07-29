@@ -32,11 +32,11 @@ import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
 import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -189,7 +189,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
     }
 
-    private CompositeNode prepareCnSn(final InstanceIdentifier instanceIdentifier) throws URISyntaxException {
+    private CompositeNode prepareCnSn(final YangInstanceIdentifier instanceIdentifier) throws URISyntaxException {
         CompositeNodeBuilder<ImmutableCompositeNode> cont = ImmutableCompositeNode.builder();
         cont.setQName(QName.create("instance:identifier:module", "2014-01-17", "cont"));
 
@@ -207,7 +207,7 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
         return cont.toInstance();
     }
 
-    private InstanceIdentifier createInstanceIdentifier() throws URISyntaxException {
+    private YangInstanceIdentifier createInstanceIdentifier() throws URISyntaxException {
         List<PathArgument> pathArguments = new ArrayList<>();
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont")));
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont1")));
@@ -221,16 +221,16 @@ public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSch
 
         pathArguments.add(new NodeIdentifier(new QName(new URI("augment:augment:module"), "lf112")));
 
-        return InstanceIdentifier.create(pathArguments);
+        return YangInstanceIdentifier.create(pathArguments);
     }
 
-    private InstanceIdentifier createInstanceIdentifierWithLeafList() throws URISyntaxException {
+    private YangInstanceIdentifier createInstanceIdentifierWithLeafList() throws URISyntaxException {
         List<PathArgument> pathArguments = new ArrayList<>();
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont")));
         pathArguments.add(new NodeIdentifier(new QName(new URI("instance:identifier:module"), "cont1")));
         pathArguments.add(new NodeWithValue(new QName(new URI("augment:module:leaf:list"), "lflst11"), "lflst11_1"));
 
-        return InstanceIdentifier.create(pathArguments);
+        return YangInstanceIdentifier.create(pathArguments);
     }
 
 }

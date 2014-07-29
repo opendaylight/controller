@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizat
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
 
     @Override
     protected final void ensureParentsByMerge(final LogicalDatastoreType store,
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier normalizedPath,
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalizedPath,
             final InstanceIdentifier<?> path) {
         List<PathArgument> currentArguments = new ArrayList<>();
         DataNormalizationOperation<?> currentOp = getCodec().getDataNormalizer().getRootOperation();
@@ -47,7 +47,7 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
                 throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
             }
             currentArguments.add(currentArg);
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.create(
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(
                     currentArguments);
 
             final Optional<NormalizedNode<?, ?>> d;

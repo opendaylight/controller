@@ -32,13 +32,13 @@ import org.opendaylight.controller.sal.rest.doc.swagger.Operation;
 import org.opendaylight.controller.sal.rest.doc.swagger.Resource;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class MountPointSwaggerTest {
 
     private static final String HTTP_URL = "http://localhost/path";
-    private static final InstanceIdentifier instanceId = InstanceIdentifier.builder()
+    private static final YangInstanceIdentifier instanceId = YangInstanceIdentifier.builder()
             .node(QName.create("nodes"))
             .nodeWithKey(QName.create("node"), QName.create("id"), "123").build();
     private static final String INSTANCE_URL = "nodes/node/123/";

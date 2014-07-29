@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
@@ -74,15 +74,15 @@ public class NetconfMessageTransformUtil {
             .create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
     public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
-    public static Node<?> toFilterStructure(final InstanceIdentifier identifier) {
+    public static Node<?> toFilterStructure(final YangInstanceIdentifier identifier) {
         Node<?> previous = null;
         if (Iterables.isEmpty(identifier.getPathArguments())) {
             return null;
         }
 
-        for (final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument component : identifier.getReversePathArguments()) {
-            if (component instanceof InstanceIdentifier.NodeIdentifierWithPredicates) {
-                previous = toNode((InstanceIdentifier.NodeIdentifierWithPredicates)component, previous);
+        for (final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument component : identifier.getReversePathArguments()) {
+            if (component instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
+                previous = toNode((YangInstanceIdentifier.NodeIdentifierWithPredicates)component, previous);
             } else {
                 previous = toNode(component, previous);
             }
@@ -90,7 +90,7 @@ public class NetconfMessageTransformUtil {
         return filter("subtree", previous);
     }
 
-    static Node<?> toNode(final InstanceIdentifier.NodeIdentifierWithPredicates argument, final Node<?> node) {
+    static Node<?> toNode(final YangInstanceIdentifier.NodeIdentifierWithPredicates argument, final Node<?> node) {
         final List<Node<?>> list = new ArrayList<>();
         for (final Map.Entry<QName, Object> arg : argument.getKeyValues().entrySet()) {
             list.add(new SimpleNodeTOImpl(arg.getKey(), null, arg.getValue()));
@@ -195,7 +195,7 @@ public class NetconfMessageTransformUtil {
         return input;
     }
 
-    static Node<?> toNode(final InstanceIdentifier.PathArgument argument, final Node<?> node) {
+    static Node<?> toNode(final YangInstanceIdentifier.PathArgument argument, final Node<?> node) {
         if (node != null) {
             return new CompositeNodeTOImpl(argument.getNodeType(), null, Collections.<Node<?>> singletonList(node));
         } else {

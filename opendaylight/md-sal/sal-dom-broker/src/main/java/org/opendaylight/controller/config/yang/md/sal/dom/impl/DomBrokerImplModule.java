@@ -24,7 +24,7 @@ import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
@@ -81,7 +81,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
     }
 
     private DataProviderService createLegacyDataService(final DataStore legacyStore, final SchemaService schemaService) {
-        InstanceIdentifier rootPath = InstanceIdentifier.builder().toInstance();
+        YangInstanceIdentifier rootPath = YangInstanceIdentifier.builder().toInstance();
         DataBrokerImpl dataService = new DataBrokerImpl();
         SchemaAwareDataStoreAdapter wrappedStore = new SchemaAwareDataStoreAdapter();
         wrappedStore.changeDelegate(legacyStore);

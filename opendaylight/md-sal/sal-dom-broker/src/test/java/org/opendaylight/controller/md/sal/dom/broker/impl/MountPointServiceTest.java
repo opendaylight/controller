@@ -19,12 +19,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService.DOMMountPointBuilder;
 import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class MountPointServiceTest {
 
     private DOMMountPointService mountService;
-    private static final InstanceIdentifier PATH = InstanceIdentifier.of(QName.create("namespace", "12-12-2012", "top"));
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of(QName.create("namespace", "12-12-2012", "top"));
 
     @Before
     public void setup() {

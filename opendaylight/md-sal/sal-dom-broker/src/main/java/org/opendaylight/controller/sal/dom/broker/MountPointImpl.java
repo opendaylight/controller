@@ -36,8 +36,8 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -48,14 +48,14 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     private final SchemaAwareRpcBroker rpcs;
     private final DataBrokerImpl dataReader;
     private final NotificationRouter notificationRouter;
-    private final DataReader<InstanceIdentifier,CompositeNode> readWrapper;
+    private final DataReader<YangInstanceIdentifier,CompositeNode> readWrapper;
 
 
-    private final InstanceIdentifier mountPath;
+    private final YangInstanceIdentifier mountPath;
 
     private SchemaContext schemaContext;
 
-    public MountPointImpl(final InstanceIdentifier path) {
+    public MountPointImpl(final YangInstanceIdentifier path) {
         this.mountPath = path;
         rpcs = new SchemaAwareRpcBroker(path.toString(),this);
         dataReader = new DataBrokerImpl();
@@ -63,11 +63,11 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         readWrapper = new ReadWrapper();
     }
 
-    public InstanceIdentifier getMountPath() {
+    public YangInstanceIdentifier getMountPath() {
         return mountPath;
     }
 
-    public DataReader<InstanceIdentifier, CompositeNode> getReadWrapper() {
+    public DataReader<YangInstanceIdentifier, CompositeNode> getReadWrapper() {
         return readWrapper;
     }
 
@@ -82,24 +82,24 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         return dataReader.readConfigurationData(path);
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         return dataReader.readOperationalData(path);
     }
 
     @Override
     public Registration registerOperationalReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerOperationalReader(path, reader);
     }
 
     @Override
     public Registration registerConfigurationReader(
-            final InstanceIdentifier path, final DataReader<InstanceIdentifier, CompositeNode> reader) {
+            final YangInstanceIdentifier path, final DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return dataReader.registerConfigurationReader(path, reader);
     }
 
@@ -145,14 +145,14 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final InstanceIdentifier path,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(final YangInstanceIdentifier path,
             final DataChangeListener listener) {
         return dataReader.registerDataChangeListener(path, listener);
     }
 
     @Override
     public Registration registerCommitHandler(
-            final InstanceIdentifier path, final DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
+            final YangInstanceIdentifier path, final DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
         return dataReader.registerCommitHandler(path, commitHandler);
     }
 
@@ -185,19 +185,19 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         this.schemaContext = schemaContext;
     }
 
-    class ReadWrapper implements DataReader<InstanceIdentifier, CompositeNode> {
-        private InstanceIdentifier shortenPath(final InstanceIdentifier path) {
-            InstanceIdentifier ret = null;
+    class ReadWrapper implements DataReader<YangInstanceIdentifier, CompositeNode> {
+        private YangInstanceIdentifier shortenPath(final YangInstanceIdentifier path) {
+            YangInstanceIdentifier ret = null;
             if(mountPath.contains(path)) {
                 List<PathArgument> newArgs = path.getPath().subList(mountPath.getPath().size(), path.getPath().size());
-                ret = InstanceIdentifier.create(newArgs);
+                ret = YangInstanceIdentifier.create(newArgs);
             }
             return ret;
         }
 
         @Override
-        public CompositeNode readConfigurationData(final InstanceIdentifier path) {
-            InstanceIdentifier newPath = shortenPath(path);
+        public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
+            YangInstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
             }
@@ -205,8 +205,8 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
         }
 
         @Override
-        public CompositeNode readOperationalData(final InstanceIdentifier path) {
-            InstanceIdentifier newPath = shortenPath(path);
+        public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
+            YangInstanceIdentifier newPath = shortenPath(path);
             if(newPath == null) {
                 return null;
             }
@@ -215,13 +215,13 @@ public class MountPointImpl implements MountProvisionInstance, SchemaContextProv
     }
 
     @Override
-    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            final RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            final RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return dataReader.registerCommitHandlerListener(commitHandlerListener);
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
+    public <L extends RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
             final L listener) {
         return rpcs.registerRouteChangeListener(listener);
     }

@@ -9,7 +9,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
 public class DOMDataBrokerProxy extends AbstractBrokerServiceProxy<DOMDataBroker> implements DOMDataBroker {
@@ -35,7 +35,7 @@ public class DOMDataBrokerProxy extends AbstractBrokerServiceProxy<DOMDataBroker
 
     @Override
     public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-            final InstanceIdentifier path, final DOMDataChangeListener listener,
+            final YangInstanceIdentifier path, final DOMDataChangeListener listener,
             final org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope triggeringScope) {
         return getDelegate().registerDataChangeListener(store, path, listener, triggeringScope);
     }

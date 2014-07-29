@@ -51,7 +51,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -229,7 +229,7 @@ public final class TestUtils {
 
         controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
 
-        when(mockedBrokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(mockedBrokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(
                         new DummyFuture.Builder().rpcResult(
                                 new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)

@@ -9,11 +9,11 @@ package org.opendaylight.controller.sal.connector.api;
 
 import java.util.Set;
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public interface ConnectorListener {
 
-    void onPrefixesAnnounced(Set<InstanceIdentifier> prefixes);
-    void onPrefixesWithdrawn(Set<InstanceIdentifier> prefixes);
+    void onPrefixesAnnounced(Set<YangInstanceIdentifier> prefixes);
+    void onPrefixesWithdrawn(Set<YangInstanceIdentifier> prefixes);
 
 }

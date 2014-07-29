@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncWriteTransaction}.
  */
-public interface DOMDataWriteTransaction extends AsyncWriteTransaction<InstanceIdentifier, NormalizedNode<?, ?>> {
+public interface DOMDataWriteTransaction extends AsyncWriteTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     /**
      * Stores a piece of data at the specified path. This acts as an add / replace
@@ -37,7 +37,7 @@ public interface DOMDataWriteTransaction extends AsyncWriteTransaction<InstanceI
      * @throws IllegalStateException
      *             if the transaction has already been submitted
      */
-    void put(LogicalDatastoreType store, InstanceIdentifier path, NormalizedNode<?, ?> data);
+    void put(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
     /**
      * Merges a piece of data with the existing data at a specified path. Any pre-existing data
@@ -57,5 +57,5 @@ public interface DOMDataWriteTransaction extends AsyncWriteTransaction<InstanceI
      * @throws IllegalStateException
      *             if the transaction has already been submitted
      */
-    void merge(LogicalDatastoreType store, InstanceIdentifier path, NormalizedNode<?, ?> data);
+    void merge(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 }

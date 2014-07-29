@@ -12,7 +12,7 @@ import java.util.Map;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public interface RoutedRpcProcessor extends RpcImplementation {
 
@@ -20,7 +20,7 @@ public interface RoutedRpcProcessor extends RpcImplementation {
 
     QName getRpcType();
 
-    Map<InstanceIdentifier,RpcImplementation> getRoutes();
+    Map<YangInstanceIdentifier,RpcImplementation> getRoutes();
 
     RpcImplementation getDefaultRoute();
 

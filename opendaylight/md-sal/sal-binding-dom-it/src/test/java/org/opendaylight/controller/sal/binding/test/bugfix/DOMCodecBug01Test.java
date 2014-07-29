@@ -222,7 +222,7 @@ public class DOMCodecBug01Test extends AbstractDataServiceTest {
     }
 
     private void verifyDataAreStoredProperly() {
-        CompositeNode biFlows = biDataService.readConfigurationData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.of(Flows.QNAME));
+        CompositeNode biFlows = biDataService.readConfigurationData(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.of(Flows.QNAME));
         assertNotNull(biFlows);
         CompositeNode biFlow = biFlows.getFirstCompositeByName(Flow.QNAME);
         assertNotNull(biFlow);

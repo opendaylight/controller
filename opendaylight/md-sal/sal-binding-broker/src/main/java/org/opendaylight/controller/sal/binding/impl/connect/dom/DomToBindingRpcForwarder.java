@@ -58,7 +58,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     private final RpcProviderRegistry baRpcRegistry;
     private final RpcProviderRegistryImpl baRpcRegistryImpl;
 
-    private final Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> toDOMInstanceIdentifier;
+    private final Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> toDOMInstanceIdentifier;
 
     private final static Method EQUALS_METHOD;
 
@@ -75,10 +75,10 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
         this.rpcServiceType = new WeakReference<Class<? extends RpcService>>(service);
         this.supportedRpcs = mappingService.getRpcQNamesFor(service);
 
-        toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier>() {
+        toDOMInstanceIdentifier = new Function<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier>() {
 
             @Override
-            public org.opendaylight.yangtools.yang.data.api.InstanceIdentifier apply(final InstanceIdentifier<?> input) {
+            public org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier apply(final InstanceIdentifier<?> input) {
                 return mappingService.toDataDom(input);
             }
         };
@@ -162,7 +162,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void registerPaths(final Class<? extends BaseIdentity> context,
         final Class<? extends RpcService> service, final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path : FluentIterable.from(set).transform(
+        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path : FluentIterable.from(set).transform(
             toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.registerPath(ctx, path);
@@ -188,7 +188,7 @@ class DomToBindingRpcForwarder implements RpcImplementation, InvocationHandler {
     public void removePaths(final Class<? extends BaseIdentity> context, final Class<? extends RpcService> service,
         final Set<InstanceIdentifier<?>> set) {
         QName ctx = BindingReflections.findQName(context);
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path : FluentIterable.from(set).transform(
+        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path : FluentIterable.from(set).transform(
             toDOMInstanceIdentifier)) {
             for (org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration reg : registrations) {
                 reg.unregisterPath(ctx, path);

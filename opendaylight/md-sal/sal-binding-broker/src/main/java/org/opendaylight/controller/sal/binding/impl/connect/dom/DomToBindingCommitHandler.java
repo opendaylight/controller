@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 class DomToBindingCommitHandler implements //
     RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject>>, //
-    DataCommitHandler<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
+    DataCommitHandler<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> {
 
     private final Logger LOG = LoggerFactory.getLogger(DomToBindingCommitHandler.class);
 
@@ -60,8 +60,8 @@ class DomToBindingCommitHandler implements //
     }
 
     @Override
-    public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> requestCommit(
-        final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> domTransaction) {
+    public org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> requestCommit(
+        final DataModification<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> domTransaction) {
         Object identifier = domTransaction.getIdentifier();
 
         /**
@@ -82,7 +82,7 @@ class DomToBindingCommitHandler implements //
     }
 
     private org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction createDomToBindingTransaction(
-        final DataModification<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> source) {
+        final DataModification<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> source) {
         if (baDataService == null) {
             final String msg = "Binding Aware Service is not initialized correctly! DOM to Binding Transaction cannot be created for ";
             LOG.error(msg + "{}", source);
@@ -96,7 +96,7 @@ class DomToBindingCommitHandler implements //
 
         org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction target = baDataService
             .beginTransaction();
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedConfigurationData()) {
+        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier entry : source.getRemovedConfigurationData()) {
             try {
 
                 InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
@@ -105,7 +105,7 @@ class DomToBindingCommitHandler implements //
                 LOG.error("Ommiting from BA transaction: {}.", entry, e);
             }
         }
-        for (org.opendaylight.yangtools.yang.data.api.InstanceIdentifier entry : source.getRemovedOperationalData()) {
+        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier entry : source.getRemovedOperationalData()) {
             try {
 
                 InstanceIdentifier<?> baEntry = mappingService.fromDataDom(entry);
@@ -114,7 +114,7 @@ class DomToBindingCommitHandler implements //
                 LOG.error("Ommiting from BA transaction: {}.", entry, e);
             }
         }
-        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
+        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> entry : source
             .getUpdatedConfigurationData().entrySet()) {
             try {
                 InstanceIdentifier<?> baKey = mappingService.fromDataDom(entry.getKey());
@@ -124,7 +124,7 @@ class DomToBindingCommitHandler implements //
                 LOG.error("Ommiting from BA transaction: {}.", entry.getKey(), e);
             }
         }
-        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> entry : source
+        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> entry : source
             .getUpdatedOperationalData().entrySet()) {
             try {
 

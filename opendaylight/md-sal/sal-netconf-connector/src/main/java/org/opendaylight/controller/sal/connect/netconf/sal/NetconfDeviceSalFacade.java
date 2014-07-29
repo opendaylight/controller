@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionCapabilities> {
 
     private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceSalFacade.class);
-    private static final InstanceIdentifier ROOT_PATH = InstanceIdentifier.builder().toInstance();
+    private static final YangInstanceIdentifier ROOT_PATH = YangInstanceIdentifier.builder().toInstance();
 
     private final RemoteDeviceId id;
     private final NetconfDeviceSalProvider salProvider;

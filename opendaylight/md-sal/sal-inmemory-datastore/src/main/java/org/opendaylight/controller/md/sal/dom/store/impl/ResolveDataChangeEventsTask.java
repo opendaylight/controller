@@ -24,11 +24,11 @@ import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeE
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Node;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -239,7 +239,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      *            - After state of current node
      * @return Data Change Event of this node and all it's children
      */
-    private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final YangInstanceIdentifier path,
             final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode node) {
 
         if (node.getModificationType() != ModificationType.UNMODIFIED &&
@@ -274,7 +274,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         throw new IllegalStateException(String.format("Unhandled node state %s at %s", node.getModificationType(), path));
     }
 
-    private DOMImmutableDataChangeEvent resolveReplacedEvent(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveReplacedEvent(final YangInstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<?, ?> beforeData,
             final NormalizedNode<?, ?> afterData) {
 
@@ -302,7 +302,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         }
     }
 
-    private DOMImmutableDataChangeEvent resolveNodeContainerReplaced(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveNodeContainerReplaced(final YangInstanceIdentifier path,
             final Collection<Node> listeners,
             final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont,
                     final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont) {
@@ -314,7 +314,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         for (NormalizedNode<PathArgument, ?> beforeChild : beforeCont.getValue()) {
             PathArgument childId = beforeChild.getIdentifier();
             alreadyProcessed.add(childId);
-            InstanceIdentifier childPath = path.node(childId);
+            YangInstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
             Optional<NormalizedNode<PathArgument, ?>> afterChild = afterCont.getChild(childId);
             DOMImmutableDataChangeEvent childChange = resolveNodeContainerChildUpdated(childPath, childListeners,
@@ -333,7 +333,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
                 // and it was not present in previous loop, that means it is
                 // created.
                 Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
-                InstanceIdentifier childPath = path.node(childId);
+                YangInstanceIdentifier childPath = path.node(childId);
                 childChanges.add(resolveSameEventRecursivelly(childPath , childListeners, afterChild,
                         DOMImmutableDataChangeEvent.getCreateEventFactory()));
             }
@@ -355,7 +355,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return replaceEvent;
     }
 
-    private DOMImmutableDataChangeEvent resolveNodeContainerChildUpdated(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveNodeContainerChildUpdated(final YangInstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<PathArgument, ?> before,
             final Optional<NormalizedNode<PathArgument, ?>> after) {
 
@@ -379,14 +379,14 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param afterState
      * @return
      */
-    private DOMImmutableDataChangeEvent resolveCreateEvent(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveCreateEvent(final YangInstanceIdentifier path,
             final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> afterState) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
     }
 
-    private DOMImmutableDataChangeEvent resolveDeleteEvent(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveDeleteEvent(final YangInstanceIdentifier path,
             final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> beforeState) {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -394,7 +394,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getRemoveEventFactory());
     }
 
-    private DOMImmutableDataChangeEvent resolveSameEventRecursivelly(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveSameEventRecursivelly(final YangInstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<PathArgument, ?> node,
             final SimpleEventFactory eventFactory) {
         final DOMImmutableDataChangeEvent event = eventFactory.create(path, node);
@@ -427,7 +427,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return propagateEvent;
     }
 
-    private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final InstanceIdentifier path,
+    private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final YangInstanceIdentifier path,
             final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode modification) {
 
         Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", path);
@@ -442,7 +442,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         boolean oneModified = false;
         for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
             PathArgument childId = childMod.getIdentifier();
-            InstanceIdentifier childPath = path.node(childId);
+            YangInstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
 
 
