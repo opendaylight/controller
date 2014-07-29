@@ -158,7 +158,7 @@ module opendaylight-flow-types {
     
     grouping flow {
         container match {
-            uses match:match;
+            uses match:match-list;
         }
         
         container instructions {
@@ -267,7 +267,7 @@ module opendaylight-flow-types {
         }
 		
         container match {
-            uses match:match;
+            uses match:match-list;
         }
     }
 }
