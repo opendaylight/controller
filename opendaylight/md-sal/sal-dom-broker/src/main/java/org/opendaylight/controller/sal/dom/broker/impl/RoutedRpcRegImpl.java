@@ -11,7 +11,7 @@ import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 class RoutedRpcRegImpl extends AbstractObjectRegistration<RpcImplementation> implements
         RoutedRpcRegistration {
@@ -26,12 +26,12 @@ class RoutedRpcRegImpl extends AbstractObjectRegistration<RpcImplementation> imp
     }
 
     @Override
-    public void registerPath(final QName context, final InstanceIdentifier path) {
+    public void registerPath(final QName context, final YangInstanceIdentifier path) {
         router.addPath(context, path, this);
     }
 
     @Override
-    public void unregisterPath(final QName context, final InstanceIdentifier path) {
+    public void unregisterPath(final QName context, final YangInstanceIdentifier path) {
         router.removePath(context, path, this);
     }
 

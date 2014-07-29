@@ -18,11 +18,11 @@ import org.opendaylight.controller.sal.core.api.data.DataValidator;
 import org.opendaylight.controller.sal.dom.broker.impl.DataReaderRouter;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, CompositeNode, DataChangeListener> implements
+public class DataBrokerImpl extends AbstractDataBroker<YangInstanceIdentifier, CompositeNode, DataChangeListener> implements
         DataProviderService, AutoCloseable {
 
     private AtomicLong nextTransaction = new AtomicLong();
@@ -46,13 +46,13 @@ public class DataBrokerImpl extends AbstractDataBroker<InstanceIdentifier, Compo
 
     @Override
     public Registration registerConfigurationReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return getDataReadRouter().registerConfigurationReader(path, reader);
     }
 
     @Override
     public Registration registerOperationalReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return getDataReadRouter().registerOperationalReader(path, reader);
     }
 

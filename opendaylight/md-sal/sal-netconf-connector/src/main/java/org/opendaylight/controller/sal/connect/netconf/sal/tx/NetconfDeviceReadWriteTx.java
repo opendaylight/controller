@@ -18,7 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
@@ -37,17 +37,17 @@ public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegateWriteTx.put(store, path, data);
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegateWriteTx.merge(store, path, data);
     }
 
     @Override
-    public void delete(final LogicalDatastoreType store, final InstanceIdentifier path) {
+    public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         delegateWriteTx.delete(store, path);
     }
 
@@ -62,7 +62,7 @@ public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final InstanceIdentifier path) {
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         return delegateReadTx.read(store, path);
     }
 

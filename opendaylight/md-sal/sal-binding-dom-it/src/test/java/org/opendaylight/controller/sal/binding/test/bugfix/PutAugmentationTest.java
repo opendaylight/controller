@@ -68,8 +68,8 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
             .augmentation(FlowCapableNode.class) //
             .build();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
@@ -216,7 +216,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
         assertNull(node);
     }
 
-    private void assertBindingIndependentVersion(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
+    private void assertBindingIndependentVersion(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
     }

@@ -46,7 +46,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -99,11 +99,11 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
     // TODO should the edit operations be blocking ?
 
     @Override
-    public void put(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
 
         try {
-            final InstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
+            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
             final CompositeNode legacyData = normalizer.toLegacy(path, data);
             sendEditRpc(createEditConfigStructure(legacyPath, Optional.of(ModifyAction.REPLACE), Optional.fromNullable(legacyData)), Optional.of(ModifyAction.NONE));
         } catch (final ExecutionException e) {
@@ -114,11 +114,11 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
 
         try {
-            final InstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
+            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
             final CompositeNode legacyData = normalizer.toLegacy(path, data);
             sendEditRpc(
                     createEditConfigStructure(legacyPath, Optional.<ModifyAction> absent(), Optional.fromNullable(legacyData)), Optional.<ModifyAction> absent());
@@ -130,7 +130,7 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
     }
 
     @Override
-    public void delete(final LogicalDatastoreType store, final InstanceIdentifier path) {
+    public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
 
         try {
@@ -200,11 +200,11 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
         }
     }
 
-    private CompositeNode createEditConfigStructure(final InstanceIdentifier dataPath, final Optional<ModifyAction> operation,
+    private CompositeNode createEditConfigStructure(final YangInstanceIdentifier dataPath, final Optional<ModifyAction> operation,
                                                     final Optional<CompositeNode> lastChildOverride) {
         Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
 
-        List<InstanceIdentifier.PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
+        List<YangInstanceIdentifier.PathArgument> reversedPath = Lists.reverse(dataPath.getPath());
 
         // Create deepest edit element with expected edit operation
         CompositeNode previous = getDeepestEditElement(reversedPath.get(0), operation, lastChildOverride);
@@ -214,7 +214,7 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
         reversedPath.remove(0);
 
         // Create edit structure in reversed order
-        for (final InstanceIdentifier.PathArgument arg : reversedPath) {
+        for (final YangInstanceIdentifier.PathArgument arg : reversedPath) {
             final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
             builder.setQName(arg.getNodeType());
 
@@ -232,15 +232,15 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
         }
     }
 
-    private Map<QName, Object> getPredicates(final InstanceIdentifier.PathArgument arg) {
+    private Map<QName, Object> getPredicates(final YangInstanceIdentifier.PathArgument arg) {
         Map<QName, Object> predicates = Collections.emptyMap();
-        if (arg instanceof InstanceIdentifier.NodeIdentifierWithPredicates) {
-            predicates = ((InstanceIdentifier.NodeIdentifierWithPredicates) arg).getKeyValues();
+        if (arg instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
+            predicates = ((YangInstanceIdentifier.NodeIdentifierWithPredicates) arg).getKeyValues();
         }
         return predicates;
     }
 
-    private CompositeNode getDeepestEditElement(final InstanceIdentifier.PathArgument arg, final Optional<ModifyAction> operation, final Optional<CompositeNode> lastChildOverride) {
+    private CompositeNode getDeepestEditElement(final YangInstanceIdentifier.PathArgument arg, final Optional<ModifyAction> operation, final Optional<CompositeNode> lastChildOverride) {
         final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
         builder.setQName(arg.getNodeType());
 

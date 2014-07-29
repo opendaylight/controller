@@ -17,64 +17,64 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.collect.Maps;
 
 public abstract class TranslatingDataChangeEvent implements
-DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> {
+DataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> {
 
     private TranslatingDataChangeEvent() {
     }
 
-    public static DataChangeEvent<InstanceIdentifier, CompositeNode> createOperational(
-            final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change, final DataNormalizer normalizer) {
+    public static DataChangeEvent<YangInstanceIdentifier, CompositeNode> createOperational(
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change, final DataNormalizer normalizer) {
         return new OperationalChangeEvent(change, normalizer);
     }
 
-    public static DataChangeEvent<InstanceIdentifier, CompositeNode> createConfiguration(
-            final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change, final DataNormalizer normalizer) {
+    public static DataChangeEvent<YangInstanceIdentifier, CompositeNode> createConfiguration(
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change, final DataNormalizer normalizer) {
         return new ConfigurationChangeEvent(change, normalizer);
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getCreatedOperationalData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getCreatedOperationalData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> getRemovedConfigurationData() {
+    public Set<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> getRemovedConfigurationData() {
         return Collections.emptySet();
     }
 
     @Override
-    public Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> getRemovedOperationalData() {
+    public Set<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> getRemovedOperationalData() {
         return Collections.emptySet();
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getOriginalOperationalData() {
+    public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getOriginalOperationalData() {
         return Collections.emptyMap();
     }
 
@@ -100,24 +100,24 @@ DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, Com
 
     private final static class OperationalChangeEvent extends TranslatingDataChangeEvent {
 
-        private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> delegate;
+        private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> delegate;
         private final DataNormalizer normalizer;
-        private Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedCache;
+        private Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> updatedCache;
 
-        public OperationalChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change,
+        public OperationalChangeEvent(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change,
                 final DataNormalizer normalizer) {
             this.delegate = change;
             this.normalizer = normalizer;
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getCreatedOperationalData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getCreatedOperationalData() {
             return transformToLegacy(normalizer, delegate.getCreatedData());
         }
 
 
         @Override
-        public Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> getRemovedOperationalData() {
+        public Set<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> getRemovedOperationalData() {
             return delegate.getRemovedPaths();
         }
 
@@ -134,16 +134,16 @@ DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, Com
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getOriginalOperationalData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getOriginalOperationalData() {
             return transformToLegacy(normalizer, delegate.getOriginalData());
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getUpdatedOperationalData() {
             if(updatedCache == null) {
-                final Map<InstanceIdentifier, CompositeNode> updated = transformToLegacy(normalizer, delegate.getUpdatedData());
-                final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> created = getCreatedConfigurationData();
-                final HashMap<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<YangInstanceIdentifier, CompositeNode> updated = transformToLegacy(normalizer, delegate.getUpdatedData());
+                final Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> created = getCreatedConfigurationData();
+                final HashMap<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> updatedComposite = new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);
@@ -158,10 +158,10 @@ DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, Com
 
     }
 
-    private static Map<InstanceIdentifier, CompositeNode> transformToLegacy(final DataNormalizer normalizer, final Map<InstanceIdentifier, ? extends NormalizedNode<?, ?>> nodes) {
-        final Map<InstanceIdentifier, CompositeNode> legacy = Maps.newHashMap();
+    private static Map<YangInstanceIdentifier, CompositeNode> transformToLegacy(final DataNormalizer normalizer, final Map<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> nodes) {
+        final Map<YangInstanceIdentifier, CompositeNode> legacy = Maps.newHashMap();
 
-        for (final Map.Entry<InstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : nodes.entrySet()) {
+        for (final Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : nodes.entrySet()) {
             try {
                 legacy.put(normalizer.toLegacy(entry.getKey()), normalizer.toLegacy(entry.getKey(), entry.getValue()));
             } catch (final DataNormalizationException e) {
@@ -173,24 +173,24 @@ DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, Com
 
     private final static class ConfigurationChangeEvent extends TranslatingDataChangeEvent {
 
-        private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> delegate;
+        private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> delegate;
         private final DataNormalizer normalizer;
-        private Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedCache;
+        private Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> updatedCache;
 
-        public ConfigurationChangeEvent(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change,
+        public ConfigurationChangeEvent(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change,
                 final DataNormalizer normalizer) {
             this.delegate = change;
             this.normalizer = normalizer;
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getCreatedConfigurationData() {
             return transformToLegacy(normalizer, delegate.getCreatedData());
         }
 
 
         @Override
-        public Set<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> getRemovedConfigurationData() {
+        public Set<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> getRemovedConfigurationData() {
             return delegate.getRemovedPaths();
         }
 
@@ -207,16 +207,16 @@ DataChangeEvent<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, Com
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getOriginalConfigurationData() {
             return transformToLegacy(normalizer, delegate.getOriginalData());
         }
 
         @Override
-        public Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
+        public Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> getUpdatedConfigurationData() {
             if(updatedCache == null) {
-                final Map<InstanceIdentifier, CompositeNode> updated = transformToLegacy(normalizer, delegate.getUpdatedData());
-                final Map<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> created = getCreatedConfigurationData();
-                final HashMap<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<YangInstanceIdentifier, CompositeNode> updated = transformToLegacy(normalizer, delegate.getUpdatedData());
+                final Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> created = getCreatedConfigurationData();
+                final HashMap<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> updatedComposite = new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);

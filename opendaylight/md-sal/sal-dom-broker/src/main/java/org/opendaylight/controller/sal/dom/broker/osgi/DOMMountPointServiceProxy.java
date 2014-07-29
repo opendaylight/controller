@@ -12,7 +12,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
 public class DOMMountPointServiceProxy extends AbstractBrokerServiceProxy<DOMMountPointService> implements DOMMountPointService{
@@ -23,12 +23,12 @@ public class DOMMountPointServiceProxy extends AbstractBrokerServiceProxy<DOMMou
     }
 
     @Override
-    public Optional<DOMMountPoint> getMountPoint(final InstanceIdentifier path) {
+    public Optional<DOMMountPoint> getMountPoint(final YangInstanceIdentifier path) {
         return getDelegate().getMountPoint(path);
     }
 
     @Override
-    public DOMMountPointBuilder createMountPoint(final InstanceIdentifier path) {
+    public DOMMountPointBuilder createMountPoint(final YangInstanceIdentifier path) {
         return getDelegate().createMountPoint(path);
     }
 

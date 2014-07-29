@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -53,7 +53,7 @@ public class RpcProvisionRegistryProxy extends AbstractBrokerServiceProxy<RpcPro
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcRoutingContext, InstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(final L listener) {
+    public <L extends RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(final L listener) {
         return getDelegate().registerRouteChangeListener(listener);
     }
 

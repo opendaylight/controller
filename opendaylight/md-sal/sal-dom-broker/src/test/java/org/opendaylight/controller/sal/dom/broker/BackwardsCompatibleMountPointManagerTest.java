@@ -30,7 +30,7 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class BackwardsCompatibleMountPointManagerTest {
 
     private BackwardsCompatibleMountPointManager compatibleMountPointManager;
     static final QName qName = QName.create("namespace", "12-12-1212", "mount");
-    static final InstanceIdentifier id = InstanceIdentifier.builder(qName).build();
+    static final YangInstanceIdentifier id = YangInstanceIdentifier.builder(qName).build();
 
     @Before
     public void setUp() throws Exception {
@@ -81,14 +81,14 @@ public class BackwardsCompatibleMountPointManagerTest {
             public int createdMounts = 0;
 
             @Override
-            public void onMountPointCreated(final InstanceIdentifier path) {
+            public void onMountPointCreated(final YangInstanceIdentifier path) {
                 if(createdMounts++ > 1 ) {
                     fail("Only one mount point should have been created");
                 }
             }
 
             @Override
-            public void onMountPointRemoved(final InstanceIdentifier path) {}
+            public void onMountPointRemoved(final YangInstanceIdentifier path) {}
         };
 
         compatibleMountPointManager.registerProvisionListener(listener);
@@ -100,8 +100,8 @@ public class BackwardsCompatibleMountPointManagerTest {
     }
 
     private void stubMountService() {
-        doReturn(mockMountPointBuilder()).when(domMountPointService).createMountPoint(any(InstanceIdentifier.class));
-        doReturn(Optional.of(mockMountPoint())).when(domMountPointService).getMountPoint(any(InstanceIdentifier.class));
+        doReturn(mockMountPointBuilder()).when(domMountPointService).createMountPoint(any(YangInstanceIdentifier.class));
+        doReturn(Optional.of(mockMountPoint())).when(domMountPointService).getMountPoint(any(YangInstanceIdentifier.class));
     }
 
     private DOMMountPoint mockMountPoint() {

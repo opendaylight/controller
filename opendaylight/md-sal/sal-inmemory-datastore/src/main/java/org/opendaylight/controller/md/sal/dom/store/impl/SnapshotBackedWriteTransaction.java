@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     }
 
     @Override
-    public void write(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
         try {
             LOG.debug("Tx: {} Write: {}:{}", getIdentifier(), path, data);
@@ -79,7 +79,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     }
 
     @Override
-    public void merge(final InstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
         try {
             LOG.debug("Tx: {} Merge: {}:{}", getIdentifier(), path, data);
@@ -96,7 +96,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction impleme
     }
 
     @Override
-    public void delete(final InstanceIdentifier path) {
+    public void delete(final YangInstanceIdentifier path) {
         checkNotReady();
         try {
             LOG.debug("Tx: {} Delete: {}", getIdentifier(), path);

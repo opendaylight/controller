@@ -24,7 +24,7 @@ import org.opendaylight.controller.sal.connect.netconf.sal.tx.NetconfDeviceWrite
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 final class NetconfDeviceDataBroker implements DOMDataBroker {
@@ -57,7 +57,7 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     }
 
     @Override
-    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store, final InstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
+    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store, final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
         throw new UnsupportedOperationException("Data change listeners not supported for netconf mount point");
     }
 

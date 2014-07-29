@@ -25,7 +25,7 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -44,7 +44,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         this.normalizer = normalizer;
     }
 
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readConfigurationData(final InstanceIdentifier path) {
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readConfigurationData(final YangInstanceIdentifier path) {
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
                 NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, toFilterStructure(path)));
 
@@ -61,7 +61,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         });
     }
 
-    private Optional<NormalizedNode<?, ?>> transform(final InstanceIdentifier path, final CompositeNode node) {
+    private Optional<NormalizedNode<?, ?>> transform(final YangInstanceIdentifier path, final CompositeNode node) {
         if(node == null) {
             return Optional.absent();
         }
@@ -73,7 +73,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         }
     }
 
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readOperationalData(final InstanceIdentifier path) {
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> readOperationalData(final YangInstanceIdentifier path) {
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, toFilterStructure(path)));
 
         return Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
@@ -89,10 +89,10 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         });
     }
 
-    private static Node<?> findNode(final CompositeNode node, final InstanceIdentifier identifier) {
+    private static Node<?> findNode(final CompositeNode node, final YangInstanceIdentifier identifier) {
 
         Node<?> current = node;
-        for (final InstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
+        for (final YangInstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
             if (current instanceof SimpleNode<?>) {
                 return null;
             } else if (current instanceof CompositeNode) {
@@ -122,8 +122,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
     }
 
     @Override
-    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final InstanceIdentifier path) {
-        final InstanceIdentifier legacyPath = toLegacyPath(normalizer, path);
+    public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+        final YangInstanceIdentifier legacyPath = toLegacyPath(normalizer, path);
 
         switch (store) {
             case CONFIGURATION : {
@@ -137,7 +137,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         throw new IllegalArgumentException(String.format("Cannot read data %s for %s datastore, unknown datastore type", path, store));
     }
 
-    static InstanceIdentifier toLegacyPath(final DataNormalizer normalizer, final InstanceIdentifier path) {
+    static YangInstanceIdentifier toLegacyPath(final DataNormalizer normalizer, final YangInstanceIdentifier path) {
         try {
             return normalizer.toLegacy(path);
         } catch (final DataNormalizationException e) {

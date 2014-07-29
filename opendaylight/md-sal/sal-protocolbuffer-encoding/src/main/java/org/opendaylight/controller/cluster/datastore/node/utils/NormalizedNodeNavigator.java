@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
@@ -40,7 +40,7 @@ public class NormalizedNodeNavigator {
 
     String newParentPath = parentPath + "/" + dataContainerNode.getIdentifier().toString();
 
-    final Iterable<DataContainerChild<? extends InstanceIdentifier.PathArgument,?>> value = dataContainerNode.getValue();
+    final Iterable<DataContainerChild<? extends YangInstanceIdentifier.PathArgument,?>> value = dataContainerNode.getValue();
     for(NormalizedNode<?,?> node : value){
       if(node instanceof MixinNode && node instanceof NormalizedNodeContainer){
         navigateNormalizedNodeContainerMixin(level, newParentPath, (NormalizedNodeContainer<?, ?, ?>) node);

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * {@link Notificator} is responsible to create, remove and find {@link ListenerAdapter} listener.
@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 public class Notificator {
 
     private static Map<String, ListenerAdapter> listenersByStreamName = new ConcurrentHashMap<>();
-    private static Map<InstanceIdentifier, ListenerAdapter> listenersByInstanceIdentifier = new ConcurrentHashMap<>();
+    private static Map<YangInstanceIdentifier, ListenerAdapter> listenersByInstanceIdentifier = new ConcurrentHashMap<>();
     private static final Lock lock = new ReentrantLock();
 
     private Notificator() {
@@ -45,37 +45,37 @@ public class Notificator {
     }
 
     /**
-     * Gets {@link ListenerAdapter} listener specified by {@link InstanceIdentifier} path.
+     * Gets {@link ListenerAdapter} listener specified by {@link YangInstanceIdentifier} path.
      *
      * @param path
      *            Path to data in data repository.
      * @return ListenerAdapter
      */
-    public static ListenerAdapter getListenerFor(InstanceIdentifier path) {
+    public static ListenerAdapter getListenerFor(YangInstanceIdentifier path) {
         return listenersByInstanceIdentifier.get(path);
     }
 
     /**
-     * Checks if the listener specified by {@link InstanceIdentifier} path exist.
+     * Checks if the listener specified by {@link YangInstanceIdentifier} path exist.
      *
      * @param path
      *            Path to data in data repository.
      * @return True if the listener exist, false otherwise.
      */
-    public static boolean existListenerFor(InstanceIdentifier path) {
+    public static boolean existListenerFor(YangInstanceIdentifier path) {
         return listenersByInstanceIdentifier.containsKey(path);
     }
 
     /**
-     * Creates new {@link ListenerAdapter} listener from {@link InstanceIdentifier} path and stream name.
+     * Creates new {@link ListenerAdapter} listener from {@link YangInstanceIdentifier} path and stream name.
      *
      * @param path
      *            Path to data in data repository.
      * @param streamName
      *            The name of the stream.
-     * @return New {@link ListenerAdapter} listener from {@link InstanceIdentifier} path and stream name.
+     * @return New {@link ListenerAdapter} listener from {@link YangInstanceIdentifier} path and stream name.
      */
-    public static ListenerAdapter createListener(InstanceIdentifier path, String streamName) {
+    public static ListenerAdapter createListener(YangInstanceIdentifier path, String streamName) {
         ListenerAdapter listener = new ListenerAdapter(path, streamName);
         try {
             lock.lock();
@@ -88,12 +88,12 @@ public class Notificator {
     }
 
     /**
-     * Looks for listener determined by {@link InstanceIdentifier} path and removes it.
+     * Looks for listener determined by {@link YangInstanceIdentifier} path and removes it.
      *
      * @param path
      *            InstanceIdentifier
      */
-    public static void removeListener(InstanceIdentifier path) {
+    public static void removeListener(YangInstanceIdentifier path) {
         ListenerAdapter listener = listenersByInstanceIdentifier.get(path);
         deleteListener(listener);
     }

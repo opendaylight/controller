@@ -62,8 +62,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.SimpleNodeWrapper;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
@@ -164,11 +164,11 @@ public class RestGetOperationTest extends JerseyTest {
     public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException {
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
-                        any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
+                        any(YangInstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
@@ -185,7 +185,7 @@ public class RestGetOperationTest extends JerseyTest {
      * Slashes in URI behind mount point. lst1 element with key GigabitEthernet0%2F0%2F0%2F0 (GigabitEthernet0/0/0/0) is
      * requested via GET HTTP operation. It is tested whether %2F character is replaced with simple / in
      * InstanceIdentifier parameter in method
-     * {@link BrokerFacade#readConfigurationDataBehindMountPoint(MountInstance, InstanceIdentifier)} which is called in
+     * {@link BrokerFacade#readConfigurationDataBehindMountPoint(MountInstance, YangInstanceIdentifier)} which is called in
      * method {@link RestconfImpl#readConfigurationData}
      *
      *
@@ -194,14 +194,14 @@ public class RestGetOperationTest extends JerseyTest {
     @Test
     public void getDataWithSlashesBehindMountPoint() throws UnsupportedEncodingException, URISyntaxException,
             ParseException {
-        InstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
+        YangInstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
                         eq(awaitedInstanceIdentifier))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
@@ -209,7 +209,7 @@ public class RestGetOperationTest extends JerseyTest {
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
-    private InstanceIdentifier prepareInstanceIdentifierForList() throws URISyntaxException, ParseException {
+    private YangInstanceIdentifier prepareInstanceIdentifierForList() throws URISyntaxException, ParseException {
         List<PathArgument> parameters = new ArrayList<>();
 
         Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
@@ -218,21 +218,21 @@ public class RestGetOperationTest extends JerseyTest {
         QName qNameList = QName.create(uri, revision, "lst1");
         QName qNameKeyList = QName.create(uri, revision, "lf11");
 
-        parameters.add(new InstanceIdentifier.NodeIdentifier(qNameCont));
-        parameters.add(new InstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
+        parameters.add(new YangInstanceIdentifier.NodeIdentifier(qNameCont));
+        parameters.add(new YangInstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
                 "GigabitEthernet0/0/0/0"));
-        return InstanceIdentifier.create(parameters);
+        return YangInstanceIdentifier.create(parameters);
     }
 
     @Test
     public void getDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
         when(
                 brokerFacade.readConfigurationDataBehindMountPoint(any(MountInstance.class),
-                        any(InstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
+                        any(YangInstanceIdentifier.class))).thenReturn(prepareCnDataForMountPointTest());
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
@@ -364,7 +364,7 @@ public class RestGetOperationTest extends JerseyTest {
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
@@ -453,7 +453,7 @@ public class RestGetOperationTest extends JerseyTest {
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
@@ -487,7 +487,7 @@ public class RestGetOperationTest extends JerseyTest {
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextBehindMountPoint);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         controllerContext.setMountService(mockMountService);
 
@@ -644,11 +644,11 @@ public class RestGetOperationTest extends JerseyTest {
     }
 
     private void mockReadOperationalDataMethod() {
-        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(answerFromGet);
+        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(answerFromGet);
     }
 
     private void mockReadConfigurationDataMethod() {
-        when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(answerFromGet);
+        when(brokerFacade.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(answerFromGet);
     }
 
     private static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
@@ -726,7 +726,7 @@ public class RestGetOperationTest extends JerseyTest {
                         toSimpleNodeData(toNestedQName("depth3-leaf2"), "depth3-leaf2-value")),
                 toSimpleNodeData(toNestedQName("depth2-leaf1"), "depth2-leaf1-value")));
 
-        when(brokerFacade.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(depth1Cont);
+        when(brokerFacade.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(depth1Cont);
 
         // Test config with depth 1
 
@@ -852,7 +852,7 @@ public class RestGetOperationTest extends JerseyTest {
                         toSimpleNodeData(toNestedQName("depth4-leaf1"), "depth4-leaf1-value")),
                 toSimpleNodeData(toNestedQName("depth3-leaf1"), "depth3-leaf1-value")));
 
-        when(brokerFacade.readOperationalData(any(InstanceIdentifier.class))).thenReturn(depth2Cont1);
+        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(depth2Cont1);
 
         response = target("/operational/nested-module:depth1-cont/depth2-cont1").queryParam("depth", "3")
                 .request("application/xml").get();

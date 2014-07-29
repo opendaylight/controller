@@ -19,12 +19,12 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class BackwardsCompatibleMountPointManager implements MountProvisionService, MountProvisionListener {
 
     private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
-    private final ConcurrentMap<InstanceIdentifier, MountProvisionInstance> mounts = new ConcurrentHashMap<>();
+    private final ConcurrentMap<YangInstanceIdentifier, MountProvisionInstance> mounts = new ConcurrentHashMap<>();
 
     private final DOMMountPointService domMountPointService;
 
@@ -33,7 +33,7 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
     }
 
     @Override
-    public MountProvisionInstance createMountPoint(final InstanceIdentifier path) {
+    public MountProvisionInstance createMountPoint(final YangInstanceIdentifier path) {
         checkState(!mounts.containsKey(path), "Mount already created");
         // Create mount point instance, wrap instance of new API with BackwardsCompatibleMountPoint to preserve backwards comatibility
         final BackwardsCompatibleMountPoint mount = new BackwardsCompatibleMountPoint(path, domMountPointService.createMountPoint(path));
@@ -41,13 +41,13 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
         return mount;
     }
 
-    public void notifyMountCreated(final InstanceIdentifier identifier) {
+    public void notifyMountCreated(final YangInstanceIdentifier identifier) {
         for (final ListenerRegistration<MountProvisionListener> listener : listeners.getListeners()) {
             listener.getInstance().onMountPointCreated(identifier);
         }
     }
 
-    public void notifyMountRemoved(final InstanceIdentifier identifier) {
+    public void notifyMountRemoved(final YangInstanceIdentifier identifier) {
         for (final ListenerRegistration<MountProvisionListener> listener : listeners.getListeners()) {
             listener.getInstance().onMountPointRemoved(identifier);
         }
@@ -55,7 +55,7 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
 
     @Override
     public MountProvisionInstance createOrGetMountPoint(
-            final InstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         final MountProvisionInstance mount = getMountPoint(path);
         if (mount == null) {
             return createMountPoint(path);
@@ -64,7 +64,7 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
     }
 
     @Override
-    public MountProvisionInstance getMountPoint(final InstanceIdentifier path) {
+    public MountProvisionInstance getMountPoint(final YangInstanceIdentifier path) {
         // If the mount point was created here, return directly
         if(mounts.containsKey(path)) {
             return mounts.get(path);
@@ -86,12 +86,12 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
     }
 
     @Override
-    public void onMountPointCreated(final InstanceIdentifier path) {
+    public void onMountPointCreated(final YangInstanceIdentifier path) {
         notifyMountCreated(path);
     }
 
     @Override
-    public void onMountPointRemoved(final InstanceIdentifier path) {
+    public void onMountPointRemoved(final YangInstanceIdentifier path) {
             notifyMountRemoved(path);
     }
 }

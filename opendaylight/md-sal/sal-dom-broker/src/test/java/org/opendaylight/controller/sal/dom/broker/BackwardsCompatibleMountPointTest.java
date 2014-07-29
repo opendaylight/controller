@@ -33,7 +33,7 @@ import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class BackwardsCompatibleMountPointTest {
     private static final Logger log = LoggerFactory.getLogger(BackwardsCompatibleMountPointManagerTest.class);
 
-    private static final InstanceIdentifier id = BackwardsCompatibleMountPointManagerTest.id;
+    private static final YangInstanceIdentifier id = BackwardsCompatibleMountPointManagerTest.id;
     private final NormalizedNode<?, ?> normalizedNode = mockNormalizedNode();
     private final CompositeNode compositeNode = mockCompositeNode();
 
@@ -139,10 +139,10 @@ public class BackwardsCompatibleMountPointTest {
 
     private DataNormalizer mockNormalizer() throws DataNormalizationException {
         final DataNormalizer mock = mock(DataNormalizer.class);
-        doReturn(new AbstractMap.SimpleEntry<InstanceIdentifier, NormalizedNode<?, ?>>(id, normalizedNode) {})
-                .when(mock).toNormalized(any(InstanceIdentifier.class), any(CompositeNode.class));
-        doReturn(compositeNode).when(mock).toLegacy(any(InstanceIdentifier.class), any(NormalizedNode.class));
-        doReturn(id).when(mock).toLegacy(any(InstanceIdentifier.class));
+        doReturn(new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(id, normalizedNode) {})
+                .when(mock).toNormalized(any(YangInstanceIdentifier.class), any(CompositeNode.class));
+        doReturn(compositeNode).when(mock).toLegacy(any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+        doReturn(id).when(mock).toLegacy(any(YangInstanceIdentifier.class));
         return mock;
     }
 

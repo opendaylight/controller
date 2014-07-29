@@ -18,19 +18,19 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 @Deprecated
 public class MountPointManagerImpl implements MountProvisionService {
 
     private final ListenerRegistry<MountProvisionListener> listeners =
             ListenerRegistry.create();
-    private final ConcurrentMap<InstanceIdentifier, MountPointImpl> mounts =
+    private final ConcurrentMap<YangInstanceIdentifier, MountPointImpl> mounts =
             new ConcurrentHashMap<>();
     private DataProviderService dataBroker = null;
 
     @Override
-    public MountProvisionInstance createMountPoint(final InstanceIdentifier path) {
+    public MountProvisionInstance createMountPoint(final YangInstanceIdentifier path) {
         checkState(!mounts.containsKey(path), "Mount already created");
         final MountPointImpl mount = new MountPointImpl(path);
         registerMountPoint(mount);
@@ -39,7 +39,7 @@ public class MountPointManagerImpl implements MountProvisionService {
         return mount;
     }
 
-    public void notifyMountCreated(final InstanceIdentifier identifier) {
+    public void notifyMountCreated(final YangInstanceIdentifier identifier) {
         for (final ListenerRegistration<MountProvisionListener> listener : listeners
                 .getListeners()) {
             listener.getInstance().onMountPointCreated(identifier);
@@ -55,7 +55,7 @@ public class MountPointManagerImpl implements MountProvisionService {
 
     @Override
     public MountProvisionInstance createOrGetMountPoint(
-            final InstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         final MountPointImpl mount = mounts.get(path);
         if (mount == null) {
             return createMountPoint(path);
@@ -64,7 +64,7 @@ public class MountPointManagerImpl implements MountProvisionService {
     }
 
     @Override
-    public MountProvisionInstance getMountPoint(final InstanceIdentifier path) {
+    public MountProvisionInstance getMountPoint(final YangInstanceIdentifier path) {
         return mounts.get(path);
     }
 

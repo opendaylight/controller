@@ -9,7 +9,7 @@
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
@@ -23,10 +23,10 @@ import com.google.common.util.concurrent.ListenableFuture;
  * {@link LogicalDatastoreType} type parameter in:
  *
  * <ul>
- * <li>{@link #read(LogicalDatastoreType, InstanceIdentifier)}
- * <li>{@link #put(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
- * <li>{@link #delete(LogicalDatastoreType, InstanceIdentifier)}
- * <li>{@link #merge(LogicalDatastoreType, InstanceIdentifier, NormalizedNode)}
+ * <li>{@link #read(LogicalDatastoreType, YangInstanceIdentifier)}
+ * <li>{@link #put(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
+ * <li>{@link #delete(LogicalDatastoreType, YangInstanceIdentifier)}
+ * <li>{@link #merge(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
  * </ul>
  * {@link #commit()} will result in invocation of
  * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
@@ -46,7 +46,7 @@ class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMS
 
     @Override
     public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store,
-            final InstanceIdentifier path) {
+            final YangInstanceIdentifier path) {
         return getSubtransaction(store).read(path);
     }
 }

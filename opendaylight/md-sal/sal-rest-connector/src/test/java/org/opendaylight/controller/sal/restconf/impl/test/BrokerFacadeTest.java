@@ -43,7 +43,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 
 /**
@@ -72,7 +72,7 @@ public class BrokerFacadeTest {
 
     QName qname = QName.create("node");
 
-    InstanceIdentifier instanceID = InstanceIdentifier.builder().node(qname).toInstance();
+    YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).toInstance();
 
     @Before
     public void setUp() throws Exception {
@@ -188,7 +188,7 @@ public class BrokerFacadeTest {
     public void testCommitConfigurationDataPost() {
         Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
 
-        Map<InstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<InstanceIdentifier, CompositeNode>()
+        Map<YangInstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<YangInstanceIdentifier, CompositeNode>()
                 .put(instanceID, dataNode).build();
 
         when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
@@ -224,7 +224,7 @@ public class BrokerFacadeTest {
     public void testCommitConfigurationDataPostBehindMountPoint() {
         Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
 
-        Map<InstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<InstanceIdentifier, CompositeNode>()
+        Map<YangInstanceIdentifier, CompositeNode> nodeMap = new ImmutableMap.Builder<YangInstanceIdentifier, CompositeNode>()
                 .put(instanceID, dataNode).build();
 
         when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
@@ -262,7 +262,7 @@ public class BrokerFacadeTest {
         Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
 
         when(dataBroker.beginTransaction()).thenReturn(mockTransaction);
-        when(mockTransaction.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(
+        when(mockTransaction.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
                 ImmutableCompositeNode.builder().toInstance());
         mockTransaction.removeConfigurationData(instanceID);
         when(mockTransaction.commit()).thenReturn(expFuture);
@@ -282,7 +282,7 @@ public class BrokerFacadeTest {
         Future<RpcResult<TransactionStatus>> expFuture = Futures.immediateFuture(null);
 
         when(mockMountInstance.beginTransaction()).thenReturn(mockTransaction);
-        when(mockTransaction.readConfigurationData(any(InstanceIdentifier.class))).thenReturn(
+        when(mockTransaction.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
                 ImmutableCompositeNode.builder().toInstance());
         mockTransaction.removeConfigurationData(instanceID);
         when(mockTransaction.commit()).thenReturn(expFuture);

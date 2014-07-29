@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.cluster.datastore.util.NormalizedNodeXmlConverterTest;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.Iterator;
@@ -18,8 +18,8 @@ import java.util.Iterator;
  */
 public class NormalizedNodeToProtocolBufferNodeTest {
 
-  private String instanceIdentifierToString(InstanceIdentifier id){
-    Iterable<InstanceIdentifier.PathArgument> iterable = id.getPathArguments();
+  private String instanceIdentifierToString(YangInstanceIdentifier id){
+    Iterable<YangInstanceIdentifier.PathArgument> iterable = id.getPathArguments();
     Iterator iterator = iterable.iterator();
     String path="";
     while (iterator.hasNext()) {
@@ -31,7 +31,7 @@ public class NormalizedNodeToProtocolBufferNodeTest {
   @Test
   public void testNormalizedNodeToNodeSerialization (){
     NormalizedNode<?,?> nn = NormalizedNodeXmlConverterTest.augmentChoiceExpectedNode();
-    InstanceIdentifier id = InstanceIdentifier.create(
+    YangInstanceIdentifier id = YangInstanceIdentifier.create(
         Lists.newArrayList(NormalizedNodeXmlConverterTest.getNodeIdentifier("container")));
 
     NormalizedNodeToProtocolBufferNode nnn = new NormalizedNodeToProtocolBufferNode();
@@ -45,10 +45,10 @@ public class NormalizedNodeToProtocolBufferNodeTest {
     QName CH2_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:test", "2014-03-13", "ch2");
     NormalizedNode
         choice = NormalizedNodeXmlConverterTest.augmentChoiceExpectedNode()
-        .getChild(new InstanceIdentifier.NodeIdentifier(CH2_QNAME))
+        .getChild(new YangInstanceIdentifier.NodeIdentifier(CH2_QNAME))
         .get();
 
-    InstanceIdentifier id =  InstanceIdentifier.create(
+    YangInstanceIdentifier id = YangInstanceIdentifier.create(
         Lists.newArrayList(NormalizedNodeXmlConverterTest.getNodeIdentifier("ch2")));
 
     NormalizedNodeToProtocolBufferNode nnn = new NormalizedNodeToProtocolBufferNode();

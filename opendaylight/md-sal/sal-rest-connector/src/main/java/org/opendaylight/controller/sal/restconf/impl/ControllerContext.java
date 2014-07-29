@@ -42,11 +42,11 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
@@ -142,7 +142,7 @@ public class ControllerContext implements SchemaContextListener {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        InstanceIdentifierBuilder builder = InstanceIdentifier.builder();
+        InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
         Module latestModule = this.getLatestModule(globalSchema, startModule);
         InstanceIdWithSchemaNode iiWithSchemaNode = this.collectPathArguments(builder, pathArgs, latestModule, null,
                 toMountPointIdentifier);
@@ -247,7 +247,7 @@ public class ControllerContext implements SchemaContextListener {
                 module.getRevision());
     }
 
-    public DataNodeContainer getDataNodeContainerFor(final InstanceIdentifier path) {
+    public DataNodeContainer getDataNodeContainerFor(final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         final Iterable<PathArgument> elements = path.getPathArguments();
@@ -268,7 +268,7 @@ public class ControllerContext implements SchemaContextListener {
         return node;
     }
 
-    public String toFullRestconfIdentifier(final InstanceIdentifier path) {
+    public String toFullRestconfIdentifier(final YangInstanceIdentifier path) {
         this.checkPreconditions();
 
         final Iterable<PathArgument> elements = path.getPathArguments();
@@ -556,7 +556,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
                 }
 
-                final InstanceIdentifier partialPath = builder.toInstance();
+                final YangInstanceIdentifier partialPath = builder.toInstance();
                 final MountInstance mount = mountService.getMountPoint(partialPath);
                 if (mount == null) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
@@ -571,12 +571,12 @@ public class ControllerContext implements SchemaContextListener {
                 }
 
                 if (returnJustMountPoint) {
-                    InstanceIdentifier instance = InstanceIdentifier.builder().toInstance();
+                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
                     return new InstanceIdWithSchemaNode(instance, mountPointSchema, mount);
                 }
 
                 if (strings.size() == 1) {
-                    InstanceIdentifier instance = InstanceIdentifier.builder().toInstance();
+                    YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
                     return new InstanceIdWithSchemaNode(instance, mountPointSchema, mount);
                 }
 
@@ -595,7 +595,7 @@ public class ControllerContext implements SchemaContextListener {
                 }
 
                 List<String> subList = strings.subList(1, strings.size());
-                return this.collectPathArguments(InstanceIdentifier.builder(), subList, moduleBehindMountPoint, mount,
+                return this.collectPathArguments(YangInstanceIdentifier.builder(), subList, moduleBehindMountPoint, mount,
                         returnJustMountPoint);
             }
 

@@ -19,7 +19,7 @@ import org.opendaylight.controller.sal.core.api.data.DataValidator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
 public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataProviderService> implements
@@ -29,16 +29,16 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
         super(ref, delegate);
     }
 
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(InstanceIdentifier path,
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(YangInstanceIdentifier path,
             DataChangeListener listener) {
         return addRegistration(getDelegate().registerDataChangeListener(path, listener));
     }
 
-    public CompositeNode readConfigurationData(InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(YangInstanceIdentifier path) {
         return getDelegate().readConfigurationData(path);
     }
 
-    public CompositeNode readOperationalData(InstanceIdentifier path) {
+    public CompositeNode readOperationalData(YangInstanceIdentifier path) {
         return getDelegate().readOperationalData(path);
     }
 
@@ -58,19 +58,19 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
 
     @Override
     public Registration registerCommitHandler(
-            InstanceIdentifier path, DataCommitHandler<InstanceIdentifier, CompositeNode> commitHandler) {
+            YangInstanceIdentifier path, DataCommitHandler<YangInstanceIdentifier, CompositeNode> commitHandler) {
         return addRegistration(getDelegate().registerCommitHandler(path, commitHandler));
     }
 
     @Override
     public Registration registerConfigurationReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerConfigurationReader(path, reader));
     }
 
     @Override
     public Registration registerOperationalReader(
-            InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader) {
+            YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader) {
         return addRegistration(getDelegate().registerOperationalReader(path, reader));
     }
 
@@ -85,8 +85,8 @@ public class DataProviderServiceProxy extends AbstractBrokerServiceProxy<DataPro
     }
 
     @Override
-    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
-            RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier, CompositeNode>> commitHandlerListener) {
+    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>>> registerCommitHandlerListener(
+            RegistrationListener<DataCommitHandlerRegistration<YangInstanceIdentifier, CompositeNode>> commitHandlerListener) {
         return addRegistration(getDelegate().registerCommitHandlerListener(commitHandlerListener));
     }
 }

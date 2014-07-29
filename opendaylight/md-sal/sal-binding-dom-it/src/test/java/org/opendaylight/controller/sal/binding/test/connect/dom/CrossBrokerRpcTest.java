@@ -72,10 +72,10 @@ public class CrossBrokerRpcTest {
     public static final InstanceIdentifier<Node> BA_NODE_C_ID = createBANodeIdentifier(NODE_C);
     public static final InstanceIdentifier<Node> BA_NODE_D_ID = createBANodeIdentifier(NODE_D);
 
-    public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_A_ID = createBINodeIdentifier(NODE_A);
-    public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_B_ID = createBINodeIdentifier(NODE_B);
-    public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
-    public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_NODE_D_ID = createBINodeIdentifier(NODE_D);
+    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_A_ID = createBINodeIdentifier(NODE_A);
+    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_B_ID = createBINodeIdentifier(NODE_B);
+    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
+    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_D_ID = createBINodeIdentifier(NODE_D);
 
 
 
@@ -158,8 +158,8 @@ public class CrossBrokerRpcTest {
         return InstanceIdentifier.builder(Nodes.class).child(Node.class, new NodeKey(node)).toInstance();
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.InstanceIdentifier createBINodeIdentifier(NodeId node) {
-        return org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder().node(Nodes.QNAME)
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(NodeId node) {
+        return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder().node(Nodes.QNAME)
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, node.getValue()).toInstance();
     }
 

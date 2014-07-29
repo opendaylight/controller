@@ -11,7 +11,7 @@ import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
 public class MountProviderServiceProxy extends AbstractBrokerServiceProxy<MountProvisionService> implements MountProvisionService{
@@ -22,17 +22,17 @@ public class MountProviderServiceProxy extends AbstractBrokerServiceProxy<MountP
     }
 
     @Override
-    public MountProvisionInstance getMountPoint(InstanceIdentifier path) {
+    public MountProvisionInstance getMountPoint(YangInstanceIdentifier path) {
         return getDelegate().getMountPoint(path);
     }
 
     @Override
-    public MountProvisionInstance createMountPoint(InstanceIdentifier path) {
+    public MountProvisionInstance createMountPoint(YangInstanceIdentifier path) {
         return getDelegate().createMountPoint(path);
     }
 
     @Override
-    public MountProvisionInstance createOrGetMountPoint(InstanceIdentifier path) {
+    public MountProvisionInstance createOrGetMountPoint(YangInstanceIdentifier path) {
         return getDelegate().createOrGetMountPoint(path);
     }
 
