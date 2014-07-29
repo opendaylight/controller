@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_888a5e19",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/ReadFailedException.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-07-29T13:40:46Z",
+      "side": 1,
+      "message": "Ya know I always remembered what a wise, experienced engineer told me years ago: \"White space is your friend\". Cramming code together makes it less readable, especially K\u0026R style braces. Just my 2 cents.",
+      "parentUuid": "fa82b9bf_28dc7272",
+      "revId": "1a051fa3f6ff462f669e19a9d28114071d6059d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c8e4e63d",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedReadOnlyTransaction.java",
         "patchSetId": 5
