@@ -21,7 +21,8 @@ import static org.junit.Assert.assertEquals;
 public class DataChangeListenerRegistrationTest extends AbstractActorTest {
   private static ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
 
-  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor);
+  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor,
+          MoreExecutors.sameThreadExecutor());
 
   static {
     store.onGlobalContextUpdated(TestModel.createTestContext());
@@ -37,12 +38,14 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
       final ActorRef subject = getSystem().actorOf(props, "testCloseListenerRegistration");
 
       new Within(duration("1 seconds")) {
+        @Override
         protected void run() {
 
           subject.tell(new CloseDataChangeListenerRegistration().toSerializable(), getRef());
 
           final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
+            @Override
             protected String match(Object in) {
               if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.SERIALIZABLE_CLASS)) {
                 return "match";

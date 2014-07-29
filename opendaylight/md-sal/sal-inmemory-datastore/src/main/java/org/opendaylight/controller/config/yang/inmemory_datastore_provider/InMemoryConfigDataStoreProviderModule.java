@@ -1,12 +1,9 @@
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
 
-import java.util.concurrent.Executors;
-
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-
-import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 
 public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryConfigDataStoreProviderModule {
+
     public InMemoryConfigDataStoreProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -22,9 +19,7 @@ public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.cont
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-      InMemoryDOMDataStore   ids = new InMemoryDOMDataStore("DOM-CFG", MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
-      getSchemaServiceDependency().registerSchemaContextListener(ids);
-      return ids;
+        return InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
     }
 
 }
