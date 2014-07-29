@@ -63,6 +63,7 @@
 
     <!--sal-protocolbuffer-encoding-->
     <module>sal-protocolbuffer-encoding</module>
+    <module>sal-distributed-datastore</module>
 
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
