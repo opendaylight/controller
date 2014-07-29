@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUti
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -25,7 +25,7 @@ public class MergeModification extends AbstractModification {
     private final SchemaContext schemaContext;
 
 
-    public MergeModification(InstanceIdentifier path, NormalizedNode data,
+    public MergeModification(YangInstanceIdentifier path, NormalizedNode data,
         SchemaContext schemaContext) {
         super(path);
         this.data = data;
@@ -55,7 +55,7 @@ public class MergeModification extends AbstractModification {
         SchemaContext schemaContext) {
         PersistentMessages.Modification o = (PersistentMessages.Modification) serializable;
 
-        InstanceIdentifier path = InstanceIdentifierUtils.from(o.getPath());
+        YangInstanceIdentifier path = InstanceIdentifierUtils.from(o.getPath());
         NormalizedNode data = new NormalizedNodeToNodeCodec(schemaContext).decode(
             path, o.getData());
 

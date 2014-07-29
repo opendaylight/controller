@@ -9,19 +9,19 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class DataChanged {
-    private final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>>
+    private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
         change;
 
     public DataChanged(
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
         this.change = change;
     }
 
-    public AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> getChange() {
+    public AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChange() {
         return change;
     }
 }

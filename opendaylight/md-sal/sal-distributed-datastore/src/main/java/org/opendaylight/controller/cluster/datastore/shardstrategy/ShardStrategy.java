@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * The role of ShardStrategy is to figure out which Shards a given piece of data belongs to
@@ -20,5 +20,5 @@ public interface ShardStrategy {
    * @param path The location of the data in the logical tree
    * @return
    */
-  String findShard(InstanceIdentifier path);
+  String findShard(YangInstanceIdentifier path);
 }

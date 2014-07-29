@@ -8,7 +8,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.Map;
@@ -18,24 +18,24 @@ import static org.junit.Assert.assertTrue;
 
 public class DataChangeListenerTest extends AbstractActorTest {
 
-    private static class MockDataChangedEvent implements AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> {
+    private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
             throw new UnsupportedOperationException("getCreatedData");
         }
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
             throw new UnsupportedOperationException("getUpdatedData");
         }
 
-        @Override public Set<InstanceIdentifier> getRemovedPaths() {
+        @Override public Set<YangInstanceIdentifier> getRemovedPaths() {
             throw new UnsupportedOperationException("getRemovedPaths");
         }
 
         @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+        public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
             throw new UnsupportedOperationException("getOriginalData");
         }
 
@@ -48,11 +48,11 @@ public class DataChangeListenerTest extends AbstractActorTest {
         }
     }
 
-    private class MockDataChangeListener implements AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
+    private class MockDataChangeListener implements AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
         private boolean gotIt = false;
 
         @Override public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             gotIt = true;
         }
 

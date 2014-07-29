@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ public class InstanceIdentifierUtils {
     String parentPath = "";
 
     if (currentElementPath != null) {
+      // FIXME: Use a guava splitter for performance
       String[] parentPaths = currentElementPath.split("/");
       if (parentPaths.length > 2) {
         for (int i = 0; i < parentPaths.length - 1; i++) {
@@ -26,17 +27,18 @@ public class InstanceIdentifierUtils {
     return parentPath;
   }
 
-  public static InstanceIdentifier from(String path) {
+  public static YangInstanceIdentifier from(String path) {
+    // FIXME: Use a guava splitter for performance
     String[] ids = path.split("/");
 
-    List<InstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
+    List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
     for (String nodeId : ids) {
       if (!"".equals(nodeId)) {
         pathArguments.add(NodeIdentifierFactory.getArgument(nodeId));
       }
     }
-    final InstanceIdentifier instanceIdentifier =
-        new InstanceIdentifier(pathArguments);
+    final YangInstanceIdentifier instanceIdentifier =
+        YangInstanceIdentifier.create(pathArguments);
     return instanceIdentifier;
   }
 }

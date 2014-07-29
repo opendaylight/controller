@@ -10,19 +10,19 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class DeleteData implements SerializableMessage {
 
     public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.DeleteData.class;
 
-    private final InstanceIdentifier path;
+    private final YangInstanceIdentifier path;
 
-    public DeleteData(InstanceIdentifier path) {
+    public DeleteData(YangInstanceIdentifier path) {
         this.path = path;
     }
 
-    public InstanceIdentifier getPath() {
+    public YangInstanceIdentifier getPath() {
         return path;
     }
 

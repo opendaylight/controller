@@ -11,7 +11,7 @@ import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import java.util.List;
@@ -21,10 +21,10 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest{
     private ActorRef dataChangeListenerActor = getSystem().actorOf(Props.create(DoNothingActor.class));
 
     private static class MockDataChangeListener implements
-        AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> {
+        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
         @Override public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             throw new UnsupportedOperationException("onDataChanged");
         }
     }
