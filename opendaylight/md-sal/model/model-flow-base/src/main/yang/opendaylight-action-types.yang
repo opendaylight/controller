@@ -70,7 +70,7 @@ module opendaylight-action-types {
 
             case set-field-case {
                 container set-field {
-                     uses match:match;
+                     uses match:match-list;
                  }
              }
              
