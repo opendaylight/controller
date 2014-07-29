@@ -19,7 +19,8 @@ public class ShardTransactionChainTest extends AbstractActorTest {
 
   private static ListeningExecutorService storeExecutor = MoreExecutors.listeningDecorator(MoreExecutors.sameThreadExecutor());
 
-  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor);
+  private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", storeExecutor,
+          MoreExecutors.sameThreadExecutor());
 
   static {
     store.onGlobalContextUpdated(TestModel.createTestContext());
@@ -31,12 +32,14 @@ public class ShardTransactionChainTest extends AbstractActorTest {
       final ActorRef subject = getSystem().actorOf(props, "testCreateTransaction");
 
      new Within(duration("1 seconds")) {
+        @Override
         protected void run() {
 
           subject.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
+            @Override
             protected String match(Object in) {
               if (in.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
                 return CreateTransactionReply.fromSerializable(in).getTransactionPath();
@@ -66,12 +69,14 @@ public class ShardTransactionChainTest extends AbstractActorTest {
       final ActorRef subject = getSystem().actorOf(props, "testCloseTransactionChain");
 
       new Within(duration("1 seconds")) {
+        @Override
         protected void run() {
 
           subject.tell(new CloseTransactionChain().toSerializable(), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards
+            @Override
             protected String match(Object in) {
               if (in.getClass().equals(CloseTransactionChainReply.SERIALIZABLE_CLASS)) {
                 return "match";

@@ -18,12 +18,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Node;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
+import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -58,9 +61,15 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private final DataTreeCandidate candidate;
     private final ListenerTree listenerRoot;
 
-    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
+    @SuppressWarnings("rawtypes")
+    private final NotificationManager<AsyncDataChangeListener, AsyncDataChangeEvent> notificationMgr;
+
+    @SuppressWarnings("rawtypes")
+    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree,
+            final NotificationManager<AsyncDataChangeListener, AsyncDataChangeEvent> notificationMgr) {
         this.candidate = Preconditions.checkNotNull(candidate);
         this.listenerRoot = Preconditions.checkNotNull(listenerTree);
+        this.notificationMgr = Preconditions.checkNotNull(notificationMgr);
     }
 
     /**
@@ -121,7 +130,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param listeners
      * @param entries
      */
-    private static void addNotificationTask(final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder,
+    private void addNotificationTask(final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder,
             final ListenerTree.Node listeners, final Collection<DOMImmutableDataChangeEvent> entries) {
 
         if (!entries.isEmpty()) {
@@ -142,7 +151,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param listeners
      * @param event
      */
-    private static void addNotificationTaskByScope(
+    private void addNotificationTaskByScope(
             final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final ListenerTree.Node listeners,
             final DOMImmutableDataChangeEvent event) {
         DataChangeScope eventScope = event.getScope();
@@ -151,11 +160,11 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             List<DataChangeListenerRegistration<?>> listenerSet = Collections
                     .<DataChangeListenerRegistration<?>> singletonList(listenerReg);
             if (eventScope == DataChangeScope.BASE) {
-                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event));
+                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event, notificationMgr));
             } else if (eventScope == DataChangeScope.ONE && listenerScope != DataChangeScope.BASE) {
-                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event));
+                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event, notificationMgr));
             } else if (eventScope == DataChangeScope.SUBTREE && listenerScope == DataChangeScope.SUBTREE) {
-                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event));
+                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event, notificationMgr));
             }
         }
     }
@@ -173,7 +182,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param listeners
      * @param entries
      */
-    private static void addNotificationTasksAndMergeEvents(
+    private void addNotificationTasksAndMergeEvents(
             final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final ListenerTree.Node listeners,
             final Collection<DOMImmutableDataChangeEvent> entries) {
 
@@ -211,14 +220,14 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         }
     }
 
-    private static void addNotificationTaskExclusively(
+    private void addNotificationTaskExclusively(
             final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final Node listeners,
             final DOMImmutableDataChangeEvent event) {
         for (DataChangeListenerRegistration<?> listener : listeners.getListeners()) {
             if (listener.getScope() == event.getScope()) {
                 Set<DataChangeListenerRegistration<?>> listenerSet = Collections
                         .<DataChangeListenerRegistration<?>> singleton(listener);
-                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event));
+                taskListBuilder.add(new ChangeListenerNotifyTask(listenerSet, event, notificationMgr));
             }
         }
     }
@@ -515,7 +524,10 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         }
     }
 
-    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
-        return new ResolveDataChangeEventsTask(candidate, listenerTree);
+    @SuppressWarnings("rawtypes")
+    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate,
+            final ListenerTree listenerTree,
+            final NotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent> notificationMgr) {
+        return new ResolveDataChangeEventsTask(candidate, listenerTree, notificationMgr);
     }
 }
