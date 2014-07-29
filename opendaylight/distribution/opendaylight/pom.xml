@@ -1317,11 +1317,11 @@
                 </goals>
                 <phase>generate-resources</phase>
                 <configuration>
-                 <outputDirectory>${project.build.directory}/generated-resources/opendaylight/configuration</outputDirectory>
-                 <includeArtifactIds>sal-rest-connector-config</includeArtifactIds>
-                 <includes>**\/*.xml</includes>
-                 <excludeTransitive>true</excludeTransitive>
-                 <ignorePermissions>false</ignorePermissions>
+                   <outputDirectory>${project.build.directory}/configuration</outputDirectory>
+                   <includeArtifactIds>sal-rest-connector-config</includeArtifactIds>
+                   <includes>**\/*.xml</includes>
+                   <excludeTransitive>true</excludeTransitive>
+                   <ignorePermissions>false</ignorePermissions>
                 </configuration>
               </execution>
             </executions>
