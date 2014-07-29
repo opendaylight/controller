@@ -17,8 +17,6 @@ import akka.japi.Creator;
 import akka.serialization.Serialization;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -38,6 +36,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
@@ -50,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -61,9 +59,6 @@ import java.util.concurrent.Executors;
 public class Shard extends RaftActor {
 
     public static final String DEFAULT_NAME = "default";
-
-    private final ListeningExecutorService storeExecutor =
-        MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
     private final InMemoryDOMDataStore store;
 
@@ -96,7 +91,7 @@ public class Shard extends RaftActor {
 
         LOG.info("Creating shard : {} persistent : {}", name, persistent);
 
-        store = new InMemoryDOMDataStore(name, storeExecutor);
+        store = InMemoryDOMDataStoreFactory.create(name, null);
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
 

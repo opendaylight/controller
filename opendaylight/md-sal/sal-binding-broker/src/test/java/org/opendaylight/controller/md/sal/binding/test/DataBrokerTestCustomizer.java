@@ -46,13 +46,15 @@ public class DataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG",
+                MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
         schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
+        InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER",
+                MoreExecutors.sameThreadExecutor(), MoreExecutors.sameThreadExecutor());
         schemaService.registerSchemaContextListener(store);
         return store;
     }
