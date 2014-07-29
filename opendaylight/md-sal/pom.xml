@@ -69,6 +69,9 @@
     <!--sal-distributed-datastore-->
     <module>sal-distributed-datastore</module>
 
+    <!-- XSQL -->
+    <module>sal-dom-xsql</module>
+
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
   </modules>
