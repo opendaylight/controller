@@ -123,28 +123,35 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.source.hardware.address.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.target.hardware.address.ArpTargetHardwareAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.match._case.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.match._case.EthernetMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.in.port._case.InPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.Layer4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.SctpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.UdpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.vlan.match._case.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.vlan.match._case.VlanMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 
 import com.google.common.net.InetAddresses;
@@ -590,37 +597,82 @@ public class TestToSalConversionsUtils {
 
     private Match prepOdMatch(MtchType mt) {
         MatchBuilder odMatchBuilder = new MatchBuilder();
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> matches = new ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match>();
+        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
+        int i = 0;
         switch (mt) {
         case other:
-            odMatchBuilder.setInPort(new NodeConnectorId("openflow:12:345"));
-            odMatchBuilder.setEthernetMatch(prepEthernetMatch());
-            odMatchBuilder.setIpMatch(prepIpMatch());
-            odMatchBuilder.setVlanMatch(prepVlanMatch());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new InPortCaseBuilder())
+                        .setInPort(new InPortBuilder()
+                            .setInPort(new NodeConnectorId("openflow:12:345")).build()
+                         ).build()).build());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new EthernetMatchCaseBuilder())
+                        .setEthernetMatch(prepEthernetMatch()).build()).build());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new IpMatchCaseBuilder())
+                        .setIpMatch(prepIpMatch()).build()).build());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new VlanMatchCaseBuilder())
+                        .setVlanMatch(prepVlanMatch()).build()).build());
             break;
         case untagged:
-            odMatchBuilder.setEthernetMatch(prepEthernetMatch());
-            odMatchBuilder.setIpMatch(prepIpMatch());
-            odMatchBuilder.setVlanMatch(prepVlanNoneMatch());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new EthernetMatchCaseBuilder())
+                        .setEthernetMatch(prepEthernetMatch()).build()).build());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new IpMatchCaseBuilder())
+                        .setIpMatch(prepIpMatch()).build()).build());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new VlanMatchCaseBuilder())
+                        .setVlanMatch(prepVlanNoneMatch()).build()).build());
             break;
         case ipv4:
-            odMatchBuilder.setLayer3Match(prepLayer3MatchIpv4());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer3MatchCaseBuilder())
+                        .setLayer3Match(prepLayer3MatchIpv4()).build()).build());
             break;
         case ipv6:
-            odMatchBuilder.setLayer3Match(prepLayer3MatchIpv6());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer3MatchCaseBuilder())
+                        .setLayer3Match(prepLayer3MatchIpv6()).build()).build());
             break;
         case arp:
-            odMatchBuilder.setLayer3Match(prepLayer3MatchArp());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer3MatchCaseBuilder())
+                        .setLayer3Match(prepLayer3MatchArp()).build()).build());
             break;
         case sctp:
-            odMatchBuilder.setLayer4Match(prepLayer4MatchSctp());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer4MatchCaseBuilder())
+                        .setLayer4Match(prepLayer4MatchSctp()).build()).build());
             break;
         case tcp:
-            odMatchBuilder.setLayer4Match(prepLayer4MatchTcp());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer4MatchCaseBuilder())
+                        .setLayer4Match(prepLayer4MatchTcp()).build()).build());
             break;
         case udp:
-            odMatchBuilder.setLayer4Match(prepLayer4MatchUdp());
+            mb.setOrder(i++);
+            matches.add(mb.setMatch(
+                    (new Layer4MatchCaseBuilder())
+                        .setLayer4Match(prepLayer4MatchUdp()).build()).build());
             break;
         }
+        odMatchBuilder.setMatch(matches);
         return odMatchBuilder.build();
     }
 

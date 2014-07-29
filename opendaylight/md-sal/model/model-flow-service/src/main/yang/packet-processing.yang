@@ -78,7 +78,7 @@ module packet-processing {
 	   	}
         
         container match {
-        		uses match-type:match;
+        		uses match-type:match-list;
         }
         
         uses raw-packet;

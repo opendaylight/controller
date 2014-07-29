@@ -10,12 +10,14 @@ package org.opendaylight.controller.md.statistics.manager;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4Match;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,89 +102,28 @@ final class FlowComparator {
         if (storedFlow.getClass() != statsFlow.getClass()) {
             return false;
         }
-        if (storedFlow.getEthernetMatch() == null) {
-            if (statsFlow.getEthernetMatch() != null) {
+
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> storedFlowMatches = storedFlow.getMatch();
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> statsFlowMatches = statsFlow.getMatch();
+        for (org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match storedFlowMatch: storedFlowMatches) {
+            boolean foundMatch = false;
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match statsFlowMatch: statsFlowMatches) {
+                if(storedFlowMatch.getMatch() != null && statsFlowMatch.getMatch() != null) {
+                    if(storedFlowMatch.getMatch() instanceof Layer3MatchCase && statsFlowMatches instanceof Layer3MatchCase) {
+                        if(layer3MatchEquals(((Layer3MatchCase) storedFlowMatch.getMatch()).getLayer3Match(),((Layer3MatchCase) storedFlow.getMatch()).getLayer3Match())) {
+                            foundMatch=true;
+                        } else {
+                            foundMatch = storedFlowMatch.getMatch().equals(storedFlowMatch.getMatch());
+                        }
+                    }
+                    if(foundMatch==true){
+                        break;
+                    }
+                }
+            }
+            if(foundMatch == false) {
                 return false;
             }
-        } else if(!storedFlow.getEthernetMatch().equals(statsFlow.getEthernetMatch())) {
-            return false;
-        }
-        if (storedFlow.getIcmpv4Match()== null) {
-            if (statsFlow.getIcmpv4Match() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getIcmpv4Match().equals(statsFlow.getIcmpv4Match())) {
-            return false;
-        }
-        if (storedFlow.getIcmpv6Match() == null) {
-            if (statsFlow.getIcmpv6Match() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getIcmpv6Match().equals(statsFlow.getIcmpv6Match())) {
-            return false;
-        }
-        if (storedFlow.getInPhyPort() == null) {
-            if (statsFlow.getInPhyPort() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getInPhyPort().equals(statsFlow.getInPhyPort())) {
-            return false;
-        }
-        if (storedFlow.getInPort()== null) {
-            if (statsFlow.getInPort() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getInPort().equals(statsFlow.getInPort())) {
-            return false;
-        }
-        if (storedFlow.getIpMatch()== null) {
-            if (statsFlow.getIpMatch() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getIpMatch().equals(statsFlow.getIpMatch())) {
-            return false;
-        }
-        if (storedFlow.getLayer3Match()== null) {
-            if (statsFlow.getLayer3Match() != null) {
-                    return false;
-            }
-        } else if(!layer3MatchEquals(statsFlow.getLayer3Match(),storedFlow.getLayer3Match())) {
-            return false;
-        }
-        if (storedFlow.getLayer4Match()== null) {
-            if (statsFlow.getLayer4Match() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getLayer4Match().equals(statsFlow.getLayer4Match())) {
-            return false;
-        }
-        if (storedFlow.getMetadata() == null) {
-            if (statsFlow.getMetadata() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getMetadata().equals(statsFlow.getMetadata())) {
-            return false;
-        }
-        if (storedFlow.getProtocolMatchFields() == null) {
-            if (statsFlow.getProtocolMatchFields() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getProtocolMatchFields().equals(statsFlow.getProtocolMatchFields())) {
-            return false;
-        }
-        if (storedFlow.getTunnel()== null) {
-            if (statsFlow.getTunnel() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getTunnel().equals(statsFlow.getTunnel())) {
-            return false;
-        }
-        if (storedFlow.getVlanMatch()== null) {
-            if (statsFlow.getVlanMatch() != null) {
-                return false;
-            }
-        } else if(!storedFlow.getVlanMatch().equals(statsFlow.getVlanMatch())) {
-            return false;
         }
         return true;
     }
