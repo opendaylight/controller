@@ -96,6 +96,10 @@ public final class NetconfSessionCapabilities {
         return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString());
     }
 
+    public boolean isCandidateSupported() {
+        return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_CANDIDATE_URI.toString());
+    }
+
     public boolean isMonitoringSupported() {
         return containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
                 || containsNonModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());

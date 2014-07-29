@@ -52,8 +52,7 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
 
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
-        // FIXME detect if candidate is supported, true is hardcoded
-        return new NetconfDeviceWriteOnlyTx(id, rpc, normalizer, true, netconfSessionPreferences.isRollbackSupported());
+        return new NetconfDeviceWriteOnlyTx(id, rpc, normalizer, netconfSessionPreferences.isCandidateSupported(), netconfSessionPreferences.isRollbackSupported());
     }
 
     @Override
