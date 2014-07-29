@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -45,8 +46,7 @@ import org.w3c.dom.Element;
 
 public class NetconfMessageTransformUtil {
 
-    private NetconfMessageTransformUtil() {
-    }
+    private NetconfMessageTransformUtil() {}
 
     public static final QName IETF_NETCONF_MONITORING = QName.create("urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring", "2010-10-04", "ietf-netconf-monitoring");
     public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
@@ -66,13 +66,26 @@ public class NetconfMessageTransformUtil {
     public static QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
     public static QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
     public static QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
+    public static QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
     public static QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
     public static QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
     public static QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
     public static QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
+
     public static URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
             .create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
     public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
+
+    public static URI NETCONF_CANDIDATE_URI = URI
+            .create("urn:ietf:params:netconf:capability:candidate:1.0");
+
+    // Discard changes message
+    public static final CompositeNode DISCARD_CHANGES_RPC_CONTENT =
+            NodeFactory.createImmutableCompositeNode(NETCONF_DISCARD_CHANGES_QNAME, null, Collections.<Node<?>>emptyList());
+
+    // Commit changes message
+    public static final CompositeNode COMMIT_RPC_CONTENT =
+            NodeFactory.createImmutableCompositeNode(NETCONF_COMMIT_QNAME, null, Collections.<Node<?>>emptyList());
 
     public static Node<?> toFilterStructure(final YangInstanceIdentifier identifier) {
         Node<?> previous = null;
@@ -269,5 +282,4 @@ public class NetconfMessageTransformUtil {
             return it.toInstance();
         }
     }
-
 }

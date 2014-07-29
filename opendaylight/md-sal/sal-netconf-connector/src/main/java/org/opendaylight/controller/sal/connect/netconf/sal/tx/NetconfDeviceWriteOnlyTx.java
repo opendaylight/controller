@@ -8,10 +8,11 @@
 
 package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.DISCARD_CHANGES_RPC_CONTENT;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DEFAULT_OPERATION_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DISCARD_CHANGES_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_EDIT_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_ERROR_OPTION_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_OPERATION_QNAME;
@@ -26,13 +27,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -57,65 +59,81 @@ import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
+public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction, FutureCallback<RpcResult<TransactionStatus>> {
 
     private static final Logger LOG  = LoggerFactory.getLogger(NetconfDeviceWriteOnlyTx.class);
 
     private final RemoteDeviceId id;
     private final RpcImplementation rpc;
     private final DataNormalizer normalizer;
+
     private final boolean rollbackSupported;
+    private final boolean candidateSupported;
     private final CompositeNode targetNode;
+
+    // Allow commit to be called only once
+    private final AtomicBoolean finished = new AtomicBoolean(false);
 
     public NetconfDeviceWriteOnlyTx(final RemoteDeviceId id, final RpcImplementation rpc, final DataNormalizer normalizer, final boolean candidateSupported, final boolean rollbackOnErrorSupported) {
         this.id = id;
         this.rpc = rpc;
         this.normalizer = normalizer;
-        this.targetNode = getTargetNode(candidateSupported);
+
+        this.candidateSupported = candidateSupported;
+        this.targetNode = getTargetNode(this.candidateSupported);
         this.rollbackSupported = rollbackOnErrorSupported;
     }
 
-    // FIXME add logging
-
     @Override
     public boolean cancel() {
-        if(isCommitted()) {
+        if(isFinished()) {
             return false;
         }
 
         return discardChanges();
     }
 
-    private boolean isCommitted() {
-        // TODO 732
-        return true;
+    private boolean isFinished() {
+        return finished.get();
     }
 
     private boolean discardChanges() {
-        // TODO 732
+        finished.set(true);
+
+        if(candidateSupported) {
+            sendDiscardChanges();
+        }
         return true;
     }
 
     // TODO should the edit operations be blocking ?
+    // TODO should the discard-changes operations be blocking ?
 
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkNotFinished();
         Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
 
         try {
             final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
             final CompositeNode legacyData = normalizer.toLegacy(path, data);
-            sendEditRpc(createEditConfigStructure(legacyPath, Optional.of(ModifyAction.REPLACE), Optional.fromNullable(legacyData)), Optional.of(ModifyAction.NONE));
+            sendEditRpc(
+                    createEditConfigStructure(legacyPath, Optional.of(ModifyAction.REPLACE), Optional.fromNullable(legacyData)), Optional.of(ModifyAction.NONE));
         } catch (final ExecutionException e) {
-            LOG.warn("Error putting data to {}, data: {}, discarding changes", path, data, e);
+            LOG.warn("{}: Error putting data to {}, data: {}, discarding changes", id, path, data, e);
             discardChanges();
-            throw new RuntimeException("Error while replacing " + path, e);
+            throw new RuntimeException(id + ": Error while replacing " + path, e);
         }
+    }
+
+    private void checkNotFinished() {
+        Preconditions.checkState(isFinished() == false, "%s: Transaction %s already finished", id, getIdentifier());
     }
 
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
+        checkNotFinished();
+        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "%s: Can merge only configuration, not %s", id, store);
 
         try {
             final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
@@ -123,31 +141,32 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
             sendEditRpc(
                     createEditConfigStructure(legacyPath, Optional.<ModifyAction> absent(), Optional.fromNullable(legacyData)), Optional.<ModifyAction> absent());
         } catch (final ExecutionException e) {
-            LOG.warn("Error merging data to {}, data: {}, discarding changes", path, data, e);
+            LOG.warn("{}: Error merging data to {}, data: {}, discarding changes", id, path, data, e);
             discardChanges();
-            throw new RuntimeException("Error while merging " + path, e);
+            throw new RuntimeException(id + ": Error while merging " + path, e);
         }
     }
 
     @Override
     public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
+        checkNotFinished();
+        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "%s: Can merge only configuration, not %s", id, store);
 
         try {
-            sendEditRpc(createEditConfigStructure(NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path), Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
+            sendEditRpc(
+                    createEditConfigStructure(NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path), Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
         } catch (final ExecutionException e) {
-            LOG.warn("Error deleting data {}, discarding changes", path, e);
+            LOG.warn("{}: Error deleting data {}, discarding changes", id, path, e);
             discardChanges();
-            throw new RuntimeException("Error while deleting " + path, e);
+            throw new RuntimeException(id + ": Error while deleting " + path, e);
         }
     }
 
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         final ListenableFuture<Void> commmitFutureAsVoid = Futures.transform(commit(), new Function<RpcResult<TransactionStatus>, Void>() {
-            @Nullable
             @Override
-            public Void apply(@Nullable final RpcResult<TransactionStatus> input) {
+            public Void apply(final RpcResult<TransactionStatus> input) {
                 return null;
             }
         });
@@ -162,25 +181,46 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
 
     @Override
     public ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        // FIXME do not allow commit if closed or failed
+        checkNotFinished();
+        finished.set(true);
 
-        final ListenableFuture<RpcResult<CompositeNode>> rpcResult = rpc.invokeRpc(NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME, getCommitRequest());
-        return Futures.transform(rpcResult, new Function<RpcResult<CompositeNode>, RpcResult<TransactionStatus>>() {
-            @Override
-            public RpcResult<TransactionStatus> apply(@Nullable final RpcResult<CompositeNode> input) {
-                if(input.isSuccessful()) {
-                    return RpcResultBuilder.success(TransactionStatus.COMMITED).build();
-                } else {
-                    final RpcResultBuilder<TransactionStatus> failed = RpcResultBuilder.failed();
-                    for (final RpcError rpcError : input.getErrors()) {
-                        failed.withError(rpcError.getErrorType(), rpcError.getTag(), rpcError.getMessage(), rpcError.getApplicationTag(), rpcError.getInfo(), rpcError.getCause());
+        if(candidateSupported == false) {
+            return Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
+        }
+
+        final ListenableFuture<RpcResult<CompositeNode>> rpcResult = rpc.invokeRpc(
+                NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME, NetconfMessageTransformUtil.COMMIT_RPC_CONTENT);
+
+        final ListenableFuture<RpcResult<TransactionStatus>> transformed = Futures.transform(rpcResult,
+                new Function<RpcResult<CompositeNode>, RpcResult<TransactionStatus>>() {
+                    @Override
+                    public RpcResult<TransactionStatus> apply(final RpcResult<CompositeNode> input) {
+                        if (input.isSuccessful()) {
+                            return RpcResultBuilder.success(TransactionStatus.COMMITED).build();
+                        } else {
+                            final RpcResultBuilder<TransactionStatus> failed = RpcResultBuilder.failed();
+                            for (final RpcError rpcError : input.getErrors()) {
+                                failed.withError(rpcError.getErrorType(), rpcError.getTag(), rpcError.getMessage(),
+                                        rpcError.getApplicationTag(), rpcError.getInfo(), rpcError.getCause());
+                            }
+                            return failed.build();
+                        }
                     }
-                    return failed.build();
-                }
-            }
-        });
+                });
 
-        // FIXME 732 detect commit failure
+        Futures.addCallback(transformed, this);
+        return transformed;
+    }
+
+    @Override
+    public void onSuccess(final RpcResult<TransactionStatus> result) {
+        LOG.debug("{}: Write successful, transaction: {}", id, getIdentifier());
+    }
+
+    @Override
+    public void onFailure(final Throwable t) {
+        LOG.warn("{}: Write failed, transaction {}, discarding changes", id, getIdentifier(), t);
+        discardChanges();
     }
 
     private void sendEditRpc(final CompositeNode editStructure, final Optional<ModifyAction> defaultOperation) throws ExecutionException {
@@ -198,6 +238,22 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
             throw new ExecutionException(
                     String.format("%s: Pre-commit rpc failed, request: %s, errors: %s", id, editConfigRequest, rpcResult.getErrors()), null);
         }
+    }
+
+    private void sendDiscardChanges() {
+        final ListenableFuture<RpcResult<CompositeNode>> discardFuture = rpc.invokeRpc(NETCONF_DISCARD_CHANGES_QNAME, DISCARD_CHANGES_RPC_CONTENT);
+        Futures.addCallback(discardFuture, new FutureCallback<RpcResult<CompositeNode>>() {
+            @Override
+            public void onSuccess(final RpcResult<CompositeNode> result) {
+                LOG.debug("{}: Discarding transaction: {}", id, getIdentifier());
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                LOG.error("{}: Discarding changes failed, transaction: {}. Device configuration might be corrupted", id, getIdentifier(), t);
+                throw new RuntimeException(id + ": Discarding changes failed, transaction " + getIdentifier(), t);
+            }
+        });
     }
 
     private CompositeNode createEditConfigStructure(final YangInstanceIdentifier dataPath, final Optional<ModifyAction> operation,
@@ -297,13 +353,6 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
             return ImmutableCompositeNode.create(NETCONF_RUNNING_QNAME, ImmutableList.<Node<?>>of());
         }
     }
-
-    private ImmutableCompositeNode getCommitRequest() {
-        final CompositeNodeBuilder<ImmutableCompositeNode> commitInput = ImmutableCompositeNode.builder();
-        commitInput.setQName(NETCONF_COMMIT_QNAME);
-        return commitInput.toInstance();
-    }
-
 
     @Override
     public Object getIdentifier() {
