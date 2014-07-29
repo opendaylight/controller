@@ -7,12 +7,40 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -46,35 +74,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-
 //TODO: refactor
 public class JMXGeneratorTest extends AbstractGeneratorTest {
 
@@ -85,7 +84,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
     File generatedResourcesDir;
 
     private static final List<String> expectedModuleFileNames = ServiceInterfaceEntryTest
-            .toFileNames("[AbstractAsyncEventBusModule.java, AbstractAsyncEventBusModuleFactory.java, AbstractDynamicThreadPoolModule.java, AbstractDynamicThreadPoolModuleFactory.java, AbstractEventBusModule.java, AbstractEventBusModuleFactory.java, AbstractNamingThreadFactoryModule.java, AbstractNamingThreadFactoryModuleFactory.java, AbstractThreadPoolRegistryImplModule.java, AbstractThreadPoolRegistryImplModuleFactory.java, AsyncEventBusModule.java, AsyncEventBusModuleFactory.java, AsyncEventBusModuleMXBean.java, AsyncEventBusRuntimeMXBean.java, AsyncEventBusRuntimeRegistration.java, AsyncEventBusRuntimeRegistrator.java, DynamicThreadPoolModule.java, DynamicThreadPoolModuleFactory.java, DynamicThreadPoolModuleMXBean.java, DynamicThreadPoolRuntimeMXBean.java, DynamicThreadPoolRuntimeRegistration.java, DynamicThreadPoolRuntimeRegistrator.java, EventBusModule.java, EventBusModuleFactory.java, EventBusModuleMXBean.java, EventRuntimeMXBean.java, EventRuntimeRegistration.java, InnerStreamList.java, NamingThreadFactoryModule.java, NamingThreadFactoryModuleFactory.java, NamingThreadFactoryModuleMXBean.java, NamingThreadFactoryRuntimeMXBean.java, NamingThreadFactoryRuntimeRegistration.java, NamingThreadFactoryRuntimeRegistrator.java, Peer.java, StreamRuntimeMXBean.java, StreamRuntimeRegistration.java, ThreadPoolRegistryImplModule.java, ThreadPoolRegistryImplModuleFactory.java, ThreadPoolRegistryImplModuleMXBean.java, ThreadRuntimeMXBean.java, ThreadRuntimeRegistration.java, ThreadStreamRuntimeMXBean.java, ThreadStreamRuntimeRegistration.java]");
+            .toFileNames("[AbstractAsyncEventBusModule.java, AbstractAsyncEventBusModuleFactory.java, AbstractDynamicThreadPoolModule.java, AbstractDynamicThreadPoolModuleFactory.java, AbstractEventBusModule.java, AbstractEventBusModuleFactory.java, AbstractNamingThreadFactoryModule.java, AbstractNamingThreadFactoryModuleFactory.java, AbstractThreadPoolRegistryImplModule.java, AbstractThreadPoolRegistryImplModuleFactory.java, AsyncEventBusModule.java, AsyncEventBusModuleFactory.java, AsyncEventBusModuleMXBean.java, AsyncEventBusRuntimeMXBean.java, AsyncEventBusRuntimeRegistration.java, AsyncEventBusRuntimeRegistrator.java, DynamicThreadPoolModule.java, DynamicThreadPoolModuleFactory.java, DynamicThreadPoolModuleMXBean.java, DynamicThreadPoolRuntimeMXBean.java, DynamicThreadPoolRuntimeRegistration.java, DynamicThreadPoolRuntimeRegistrator.java, EventBusModule.java, EventBusModuleFactory.java, EventBusModuleMXBean.java, EventRuntimeMXBean.java, EventRuntimeRegistration.java, FromGrouping.java, InnerStreamList.java, NamingThreadFactoryModule.java, NamingThreadFactoryModuleFactory.java, NamingThreadFactoryModuleMXBean.java, NamingThreadFactoryRuntimeMXBean.java, NamingThreadFactoryRuntimeRegistration.java, NamingThreadFactoryRuntimeRegistrator.java, Peer.java, StreamRuntimeMXBean.java, StreamRuntimeRegistration.java, ThreadPoolRegistryImplModule.java, ThreadPoolRegistryImplModuleFactory.java, ThreadPoolRegistryImplModuleMXBean.java, ThreadRuntimeMXBean.java, ThreadRuntimeRegistration.java, ThreadStreamRuntimeMXBean.java, ThreadStreamRuntimeRegistration.java]");
 
     private static final List<String> expectedBGPNames = ServiceInterfaceEntryTest
             .toFileNames("[AbstractBgpListenerImplModule.java, " + "AbstractBgpListenerImplModuleFactory.java, " +
@@ -108,7 +107,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                     "NetconfTestFiles1ImplModuleMXBean.java, NetconfTestFiles1ImplRuntimeMXBean.java, " +
                     "NetconfTestFiles1ImplRuntimeRegistration.java, NetconfTestFiles1ImplRuntimeRegistrator.java, TestFileImplModule.java, TestFileImplModuleFactory.java, TestFileImplModuleMXBean.java, TestFileImplRuntimeMXBean.java, TestFileImplRuntimeRegistration.java, TestFileImplRuntimeRegistrator.java, TestFiles1ImplModule.java, TestFiles1ImplModuleFactory.java, TestFiles1ImplModuleMXBean.java, TestFiles1ImplRuntimeMXBean.java, TestFiles1ImplRuntimeRegistration.java, TestFiles1ImplRuntimeRegistrator.java]");
     private static final List<String> expectedAllFileNames = ServiceInterfaceEntryTest
-            .toFileNames("[AbstractAsyncEventBusModule.java, AbstractAsyncEventBusModuleFactory.java, AbstractBgpListenerImplModule.java, AbstractBgpListenerImplModuleFactory.java, AbstractDynamicThreadPoolModule.java, AbstractDynamicThreadPoolModuleFactory.java, AbstractEventBusModule.java, AbstractEventBusModuleFactory.java, AbstractNamingThreadFactoryModule.java, AbstractNamingThreadFactoryModuleFactory.java, AbstractNetconfTestFileImplModule.java, AbstractNetconfTestFileImplModuleFactory.java, AbstractNetconfTestFiles1ImplModule.java, AbstractNetconfTestFiles1ImplModuleFactory.java, AbstractNetconfTestImplModule.java, AbstractNetconfTestImplModuleFactory.java, AbstractTestFileImplModule.java, AbstractTestFileImplModuleFactory.java, AbstractTestFiles1ImplModule.java, AbstractTestFiles1ImplModuleFactory.java, AbstractTestImplModule.java, AbstractTestImplModuleFactory.java, AbstractThreadPoolRegistryImplModule.java, AbstractThreadPoolRegistryImplModuleFactory.java, AsyncEventBusModule.java, AsyncEventBusModuleFactory.java, AsyncEventBusModuleMXBean.java, AsyncEventBusRuntimeMXBean.java, AsyncEventBusRuntimeRegistration.java, AsyncEventBusRuntimeRegistrator.java, AutoCloseableServiceInterface.java, BgpListenerImplModule.java, BgpListenerImplModuleFactory.java, BgpListenerImplModuleMXBean.java, BgpListenerImplRuntimeMXBean.java, BgpListenerImplRuntimeRegistration.java, BgpListenerImplRuntimeRegistrator.java, ComplexDtoBInner.java, ComplexList.java, Deep.java, DtoA.java, DtoA.java, DtoA.java, DtoA1.java, DtoAInner.java, DtoAInnerInner.java, DtoB.java, DtoC.java, DynamicThreadPoolModule.java, DynamicThreadPoolModuleFactory.java, DynamicThreadPoolModuleMXBean.java, DynamicThreadPoolRuntimeMXBean.java, DynamicThreadPoolRuntimeRegistration.java, DynamicThreadPoolRuntimeRegistrator.java, EventBusModule.java, EventBusModuleFactory.java, EventBusModuleMXBean.java, EventBusServiceInterface.java, EventRuntimeMXBean.java, EventRuntimeRegistration.java, InnerStreamList.java, NamingThreadFactoryModule.java, NamingThreadFactoryModuleFactory.java, NamingThreadFactoryModuleMXBean.java, NamingThreadFactoryRuntimeMXBean.java, NamingThreadFactoryRuntimeRegistration.java, NamingThreadFactoryRuntimeRegistrator.java, NetconfTestFileImplModule.java, NetconfTestFileImplModuleFactory.java, NetconfTestFileImplModuleMXBean.java, NetconfTestFileImplRuntimeMXBean.java, NetconfTestFileImplRuntimeRegistration.java, NetconfTestFileImplRuntimeRegistrator.java, NetconfTestFiles1ImplModule.java, NetconfTestFiles1ImplModuleFactory.java, NetconfTestFiles1ImplModuleMXBean.java, NetconfTestFiles1ImplRuntimeMXBean.java, NetconfTestFiles1ImplRuntimeRegistration.java, NetconfTestFiles1ImplRuntimeRegistrator.java, NetconfTestImplModule.java, NetconfTestImplModuleFactory.java, NetconfTestImplModuleMXBean.java, NetconfTestImplRuntimeMXBean.java, NetconfTestImplRuntimeRegistration.java, NetconfTestImplRuntimeRegistrator.java, Peer.java, Peer.java, PeersRuntimeMXBean.java, PeersRuntimeRegistration.java, ScheduledThreadPoolServiceInterface.java, SimpleList.java, StreamRuntimeMXBean.java, StreamRuntimeRegistration.java, TestFileImplModule.java, TestFileImplModuleFactory.java, TestFileImplModuleMXBean.java, TestFileImplRuntimeMXBean.java, TestFileImplRuntimeRegistration.java, TestFileImplRuntimeRegistrator.java, TestFiles1ImplModule.java, TestFiles1ImplModuleFactory.java, TestFiles1ImplModuleMXBean.java, TestFiles1ImplRuntimeMXBean.java, TestFiles1ImplRuntimeRegistration.java, TestFiles1ImplRuntimeRegistrator.java, TestImplModule.java, TestImplModuleFactory.java, TestImplModuleMXBean.java, TestImplRuntimeMXBean.java, TestImplRuntimeRegistration.java, TestImplRuntimeRegistrator.java, ThreadFactoryServiceInterface.java, ThreadPoolRegistryImplModule.java, ThreadPoolRegistryImplModuleFactory.java, ThreadPoolRegistryImplModuleMXBean.java, ThreadPoolServiceInterface.java, ThreadRuntimeMXBean.java, ThreadRuntimeRegistration.java, ThreadStreamRuntimeMXBean.java, ThreadStreamRuntimeRegistration.java]");
+            .toFileNames("[AbstractAsyncEventBusModule.java, AbstractAsyncEventBusModuleFactory.java, AbstractBgpListenerImplModule.java, AbstractBgpListenerImplModuleFactory.java, AbstractDynamicThreadPoolModule.java, AbstractDynamicThreadPoolModuleFactory.java, AbstractEventBusModule.java, AbstractEventBusModuleFactory.java, AbstractNamingThreadFactoryModule.java, AbstractNamingThreadFactoryModuleFactory.java, AbstractNetconfTestFileImplModule.java, AbstractNetconfTestFileImplModuleFactory.java, AbstractNetconfTestFiles1ImplModule.java, AbstractNetconfTestFiles1ImplModuleFactory.java, AbstractNetconfTestImplModule.java, AbstractNetconfTestImplModuleFactory.java, AbstractTestFileImplModule.java, AbstractTestFileImplModuleFactory.java, AbstractTestFiles1ImplModule.java, AbstractTestFiles1ImplModuleFactory.java, AbstractTestImplModule.java, AbstractTestImplModuleFactory.java, AbstractThreadPoolRegistryImplModule.java, AbstractThreadPoolRegistryImplModuleFactory.java, AsyncEventBusModule.java, AsyncEventBusModuleFactory.java, AsyncEventBusModuleMXBean.java, AsyncEventBusRuntimeMXBean.java, AsyncEventBusRuntimeRegistration.java, AsyncEventBusRuntimeRegistrator.java, AutoCloseableServiceInterface.java, BgpListenerImplModule.java, BgpListenerImplModuleFactory.java, BgpListenerImplModuleMXBean.java, BgpListenerImplRuntimeMXBean.java, BgpListenerImplRuntimeRegistration.java, BgpListenerImplRuntimeRegistrator.java, ComplexDtoBInner.java, ComplexList.java, Deep.java, DtoA.java, DtoA.java, DtoA.java, DtoA1.java, DtoAInner.java, DtoAInnerInner.java, DtoB.java, DtoC.java, DynamicThreadPoolModule.java, DynamicThreadPoolModuleFactory.java, DynamicThreadPoolModuleMXBean.java, DynamicThreadPoolRuntimeMXBean.java, DynamicThreadPoolRuntimeRegistration.java, DynamicThreadPoolRuntimeRegistrator.java, EventBusModule.java, EventBusModuleFactory.java, EventBusModuleMXBean.java, EventBusServiceInterface.java, EventRuntimeMXBean.java, EventRuntimeRegistration.java, FromGrouping.java, InnerStreamList.java, NamingThreadFactoryModule.java, NamingThreadFactoryModuleFactory.java, NamingThreadFactoryModuleMXBean.java, NamingThreadFactoryRuntimeMXBean.java, NamingThreadFactoryRuntimeRegistration.java, NamingThreadFactoryRuntimeRegistrator.java, NetconfTestFileImplModule.java, NetconfTestFileImplModuleFactory.java, NetconfTestFileImplModuleMXBean.java, NetconfTestFileImplRuntimeMXBean.java, NetconfTestFileImplRuntimeRegistration.java, NetconfTestFileImplRuntimeRegistrator.java, NetconfTestFiles1ImplModule.java, NetconfTestFiles1ImplModuleFactory.java, NetconfTestFiles1ImplModuleMXBean.java, NetconfTestFiles1ImplRuntimeMXBean.java, NetconfTestFiles1ImplRuntimeRegistration.java, NetconfTestFiles1ImplRuntimeRegistrator.java, NetconfTestImplModule.java, NetconfTestImplModuleFactory.java, NetconfTestImplModuleMXBean.java, NetconfTestImplRuntimeMXBean.java, NetconfTestImplRuntimeRegistration.java, NetconfTestImplRuntimeRegistrator.java, Peer.java, Peer.java, PeersRuntimeMXBean.java, PeersRuntimeRegistration.java, ScheduledThreadPoolServiceInterface.java, SimpleList.java, StreamRuntimeMXBean.java, StreamRuntimeRegistration.java, TestFileImplModule.java, TestFileImplModuleFactory.java, TestFileImplModuleMXBean.java, TestFileImplRuntimeMXBean.java, TestFileImplRuntimeRegistration.java, TestFileImplRuntimeRegistrator.java, TestFiles1ImplModule.java, TestFiles1ImplModuleFactory.java, TestFiles1ImplModuleMXBean.java, TestFiles1ImplRuntimeMXBean.java, TestFiles1ImplRuntimeRegistration.java, TestFiles1ImplRuntimeRegistrator.java, TestImplModule.java, TestImplModuleFactory.java, TestImplModuleMXBean.java, TestImplRuntimeMXBean.java, TestImplRuntimeRegistration.java, TestImplRuntimeRegistrator.java, ThreadFactoryServiceInterface.java, ThreadPoolRegistryImplModule.java, ThreadPoolRegistryImplModuleFactory.java, ThreadPoolRegistryImplModuleMXBean.java, ThreadPoolServiceInterface.java, ThreadRuntimeMXBean.java, ThreadRuntimeRegistration.java, ThreadStreamRuntimeMXBean.java, ThreadStreamRuntimeRegistration.java]");
     private static final List<String> expectedGenerateMBEsListNames = ServiceInterfaceEntryTest
             .toFileNames("[AbstractBgpListenerImplModule.java, AbstractBgpListenerImplModuleFactory.java, BgpListenerImplModule.java, BgpListenerImplModuleFactory.java, BgpListenerImplModuleMXBean.java, BgpListenerImplRuntimeMXBean.java, BgpListenerImplRuntimeRegistration.java, BgpListenerImplRuntimeRegistrator.java, PeersRuntimeMXBean.java, PeersRuntimeRegistration.java]");
 
@@ -506,8 +505,9 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 + ".threads.java", visitor.packageName);
         assertEquals("AsyncEventBusModuleMXBean", visitor.type);
 
-        assertEquals("Incorrenct number of generated methods", 2,
+        assertEquals("Incorrenct number of generated methods", 4,
                 visitor.methods.size());
+
     }
 
     private void assertAbstractDynamicThreadPoolModule(MbeASTVisitor visitor) {

@@ -56,6 +56,12 @@ module config-threads-java {
         }
     }
 
+    grouping async-eventbus-config-attrs {
+        leaf cfg-attr {
+            type string;
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case async-eventbus {
             when "/config:modules/config:module/config:type = 'async-eventbus'";
@@ -65,6 +71,10 @@ module config-threads-java {
                         config:required-identity th2:threadpool;
                     }
                 }
+            }
+
+            container from-grouping {
+                uses async-eventbus-config-attrs;
             }
         }
     }
