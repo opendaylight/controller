@@ -71,14 +71,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.match._case.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.in.port._case.InPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.Layer4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.SctpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.TcpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._4.match._case.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.vlan.match._case.VlanMatch;
 
 import com.google.common.net.InetAddresses;
 
@@ -120,108 +130,239 @@ public class TestFromSalConversionsUtils {
         checkOdMatch(odNodeFlow.getMatch(), MtchType.udp);
     }
 
-    private void checkOdMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match match,
+    private void checkOdMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match m,
             MtchType mt) {
+        EthernetMatch eth = null;
+        Layer3Match l3 = null;
+        Layer4Match l4 = null;
+        VlanMatch vlan = null;
+        IpMatch proto = null;
+        InPort inPort = null;
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> matches = m.getMatch();
+
         switch (mt) {
+
         case arp:
-            assertEquals("Ether type is incorrect.", ETHERNET_ARP, (long) match.getEthernetMatch().getEthernetType()
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof Layer3MatchCase) {
+                    assertEquals("More than one Layer3Match Seen",null, l3);
+                    l3 = ((Layer3MatchCase) match.getMatch()).getLayer3Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
+            assertEquals("Ether type is incorrect.", ETHERNET_ARP, (long) eth.getEthernetType()
                     .getType().getValue());
-            Layer3Match layer3Match = match.getLayer3Match();
+
             boolean arpFound = false;
-            if (layer3Match instanceof ArpMatch) {
-                assertEquals("Source IP address is wrong.", "192.168.100.100", ((ArpMatch) layer3Match)
+            if (l3 instanceof ArpMatch) {
+                assertEquals("Source IP address is wrong.", "192.168.100.100", ((ArpMatch) l3)
                         .getArpSourceTransportAddress().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.101", ((ArpMatch) layer3Match)
+                assertEquals("Destination IP address is wrong.", "192.168.100.101", ((ArpMatch) l3)
                         .getArpTargetTransportAddress().getValue());
-                assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) layer3Match)
+                assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) l3)
                         .getArpSourceHardwareAddress().getAddress().getValue());
-                assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) layer3Match)
+                assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) l3)
                         .getArpTargetHardwareAddress().getAddress().getValue());
                 arpFound = true;
             }
             assertNotNull("Arp wasn't found", arpFound);
             break;
         case ipv4:
-            assertEquals("Ether type is incorrect.", 0xffff, (long) match.getEthernetMatch().getEthernetType()
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof Layer3MatchCase) {
+                    assertEquals("More than one Layer3Match Seen",null, l3);
+                    l3 = ((Layer3MatchCase) match.getMatch()).getLayer3Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
+            assertEquals("Ether type is incorrect.", 0xffff, (long) eth.getEthernetType()
                     .getType().getValue());
             boolean ipv4Found = false;
-            layer3Match = match.getLayer3Match();
-            if (layer3Match instanceof Ipv4Match) {
-                assertEquals("Source IP address is wrong.", "192.168.100.102", ((Ipv4Match) layer3Match)
+            if (l3 instanceof Ipv4Match) {
+                assertEquals("Source IP address is wrong.", "192.168.100.102", ((Ipv4Match) l3)
                         .getIpv4Source().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.103", ((Ipv4Match) layer3Match)
+                assertEquals("Destination IP address is wrong.", "192.168.100.103", ((Ipv4Match) l3)
                         .getIpv4Destination().getValue());
             }
             assertNotNull("Ipv4 wasn't found", ipv4Found);
             break;
         case ipv6:
-            assertEquals("Ether type is incorrect.", 0xffff, (long) match.getEthernetMatch().getEthernetType()
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof Layer3MatchCase) {
+                    assertEquals("More than one Layer3Match Seen",null, l3);
+                    l3 = ((Layer3MatchCase) match.getMatch()).getLayer3Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
+            assertEquals("Ether type is incorrect.", 0xffff, (long) eth.getEthernetType()
                     .getType().getValue());
             boolean ipv6Found = false;
-            layer3Match = match.getLayer3Match();
-            if (layer3Match instanceof Ipv6Match) {
-                assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335", ((Ipv6Match) layer3Match)
+            if (l3 instanceof Ipv6Match) {
+                assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335", ((Ipv6Match) l3)
                         .getIpv6Source().getValue());
                 assertEquals("Destination IP address is wrong.", "2001:db8:85a3::8a2e:370:7336",
-                        ((Ipv6Match) layer3Match).getIpv6Destination().getValue());
+                        ((Ipv6Match) l3).getIpv6Destination().getValue());
             }
             assertNotNull("Ipv6 wasn't found", ipv6Found);
             break;
         case other:
-            assertEquals("Incoming port is wrong.", "openflow:12345:10", match.getInPort().getValue());
-            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof VlanMatchCase) {
+                    assertEquals("More than one VlanMatch Seen",null, vlan);
+                    vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+                } else if (match.getMatch() instanceof IpMatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, proto);
+                    proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                } else if (match.getMatch() instanceof InPortCase) {
+                    assertEquals("More than one InPort Seen",null, inPort);
+                    inPort = ((InPortCase) match.getMatch()).getInPort();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
+            assertEquals("Incoming port is wrong.", "openflow:12345:10", inPort.getInPort().getValue());
+            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", eth
                     .getEthernetSource().getAddress().getValue());
-            assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+            assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", eth
                     .getEthernetDestination().getAddress().getValue());
-            assertEquals("Vlan ID is not present.", Boolean.TRUE, match.getVlanMatch().getVlanId().isVlanIdPresent());
-            assertEquals("Vlan ID is wrong.", (Integer) 0xfff, match.getVlanMatch().getVlanId().getVlanId().getValue());
-            assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) match.getVlanMatch().getVlanPcp()
+            assertEquals("Vlan ID is not present.", Boolean.TRUE, vlan.getVlanId().isVlanIdPresent());
+            assertEquals("Vlan ID is wrong.", (Integer) 0xfff, vlan.getVlanId().getVlanId().getValue());
+            assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) vlan.getVlanPcp()
                     .getValue());
-            assertEquals("DCSP is wrong.", (short) 0x3f, (short) match.getIpMatch().getIpDscp().getValue());
+            assertEquals("DCSP is wrong.", (short) 0x3f, (short) proto.getIpDscp().getValue());
             break;
         case untagged:
-            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof VlanMatchCase) {
+                    assertEquals("More than one VlanMatch Seen",null, vlan);
+                    vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+                } else if (match.getMatch() instanceof IpMatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, proto);
+                    proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                } else if (match.getMatch() instanceof InPortCase) {
+                    assertEquals("More than one InPort Seen",null, inPort);
+                    inPort = ((InPortCase) match.getMatch()).getInPort();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
+            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", eth
                     .getEthernetSource().getAddress().getValue());
-            assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
+            assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", eth
                     .getEthernetDestination().getAddress().getValue());
-            assertEquals("Vlan ID is present.", Boolean.FALSE, match.getVlanMatch().getVlanId().isVlanIdPresent());
-            assertEquals("Vlan ID is wrong.", Integer.valueOf(0), match.getVlanMatch().getVlanId().getVlanId().getValue());
-            assertEquals("DCSP is wrong.", (short) 0x3f, (short) match.getIpMatch().getIpDscp().getValue());
+            assertEquals("Vlan ID is present.", Boolean.FALSE, vlan.getVlanId().isVlanIdPresent());
+            assertEquals("Vlan ID is wrong.", Integer.valueOf(0), vlan.getVlanId().getVlanId().getValue());
+            assertEquals("DCSP is wrong.", (short) 0x3f, (short) proto.getIpDscp().getValue());
             break;
         case sctp:
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof VlanMatchCase) {
+                    assertEquals("More than one VlanMatch Seen",null, vlan);
+                    vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+                } else if (match.getMatch() instanceof IpMatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, proto);
+                    proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                } else if (match.getMatch() instanceof InPortCase) {
+                    assertEquals("More than one IpMatch Seen",null, inPort);
+                    inPort = ((InPortCase) match.getMatch()).getInPort();
+                } else if (match.getMatch() instanceof Layer4MatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, l4);
+                    l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
             boolean sctpFound = false;
-            assertEquals("Wrong protocol", CRUDP, match.getIpMatch().getIpProtocol().byteValue());
-            Layer4Match layer4Match = match.getLayer4Match();
-            if (layer4Match instanceof SctpMatch) {
-                assertEquals("Sctp source port is incorrect.", 0xffff, (int) ((SctpMatch) layer4Match)
+            assertEquals("Wrong protocol", CRUDP, proto.getIpProtocol().byteValue());
+            if (l4 instanceof SctpMatch) {
+                assertEquals("Sctp source port is incorrect.", 0xffff, (int) ((SctpMatch) l4)
                         .getSctpSourcePort().getValue());
-                assertEquals("Sctp dest port is incorrect.", 0xfffe, (int) ((SctpMatch) layer4Match)
+                assertEquals("Sctp dest port is incorrect.", 0xfffe, (int) ((SctpMatch) l4)
                         .getSctpDestinationPort().getValue());
                 sctpFound = true;
             }
             assertNotNull("Sctp wasn't found", sctpFound);
             break;
         case tcp:
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof VlanMatchCase) {
+                    assertEquals("More than one VlanMatch Seen",null, vlan);
+                    vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+                } else if (match.getMatch() instanceof IpMatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, proto);
+                    proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                } else if (match.getMatch() instanceof InPortCase) {
+                    assertEquals("More than one IpMatch Seen",null, inPort);
+                    inPort = ((InPortCase) match.getMatch()).getInPort();
+                } else if (match.getMatch() instanceof Layer4MatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, l4);
+                    l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
             boolean tcpFound = false;
-            assertEquals("Wrong protocol", TCP, match.getIpMatch().getIpProtocol().byteValue());
-            layer4Match = match.getLayer4Match();
-            if (layer4Match instanceof TcpMatch) {
-                assertEquals("Tcp source port is incorrect.", 0xabcd, (int) ((TcpMatch) layer4Match)
+            assertEquals("Wrong protocol", TCP, proto.getIpProtocol().byteValue());
+            if (l4 instanceof TcpMatch) {
+                assertEquals("Tcp source port is incorrect.", 0xabcd, (int) ((TcpMatch) l4)
                         .getTcpSourcePort().getValue());
-                assertEquals("Tcp dest port is incorrect.", 0xdcba, (int) ((TcpMatch) layer4Match)
+                assertEquals("Tcp dest port is incorrect.", 0xdcba, (int) ((TcpMatch) l4)
                         .getTcpDestinationPort().getValue());
                 sctpFound = true;
             }
             assertNotNull("Tcp wasn't found", tcpFound);
             break;
         case udp:
+            for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
+                if(match.getMatch() instanceof EthernetMatchCase) {
+                    assertEquals("More than one EthernetMatch Seen",null, eth);
+                    eth = ((EthernetMatchCase) match.getMatch()).getEthernetMatch();
+                } else if (match.getMatch() instanceof VlanMatchCase) {
+                    assertEquals("More than one VlanMatch Seen",null, vlan);
+                    vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+                } else if (match.getMatch() instanceof IpMatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, proto);
+                    proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                } else if (match.getMatch() instanceof InPortCase) {
+                    assertEquals("More than one IpMatch Seen",null, inPort);
+                    inPort = ((InPortCase) match.getMatch()).getInPort();
+                } else if (match.getMatch() instanceof Layer4MatchCase) {
+                    assertEquals("More than one IpMatch Seen",null, l4);
+                    l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
+                } else {
+                    assertTrue("Extra matches found", false);
+                }
+            }
             boolean udpFound = false;
-            assertEquals("Wrong protocol", UDP, match.getIpMatch().getIpProtocol().byteValue());
-            layer4Match = match.getLayer4Match();
-            if (layer4Match instanceof UdpMatch) {
-                assertEquals("Udp source port is incorrect.", 0xcdef, (int) ((UdpMatch) layer4Match)
+            assertEquals("Wrong protocol", UDP, proto.getIpProtocol().byteValue());
+            if (l4 instanceof UdpMatch) {
+                assertEquals("Udp source port is incorrect.", 0xcdef, (int) ((UdpMatch) l4)
                         .getUdpSourcePort().getValue());
-                assertEquals("Udp dest port is incorrect.", 0xfedc, (int) ((UdpMatch) layer4Match)
+                assertEquals("Udp dest port is incorrect.", 0xfedc, (int) ((UdpMatch) l4)
                         .getUdpDestinationPort().getValue());
                 sctpFound = true;
             }
