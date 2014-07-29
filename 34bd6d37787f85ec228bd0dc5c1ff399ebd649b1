@@ -52,6 +52,24 @@
       "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4d422869",
+        "filename": "opendaylight/md-sal/model/model-flow-statistics/src/main/yang/opendaylight-flow-statistics.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2014-07-29T10:42:28Z",
+      "side": 0,
+      "message": "It was explained through IRC: we do not throw away flow details, they are just moved one level higher (original position in model). Current statistics response looks like this:\n...\n \u003cflownode:table\u003e\n \u003cid\u003e0\u003c/id\u003e\n \u003cflowtablestat:flow-table-statistics ... \u003c/flowtablestat:flow-table-statistics\u003e\n \u003cflownode:flow\u003e\n   \u003cid\u003e1234\u003c/id\u003e\n   .. flow details\n   \u003cflowstat:flow-statistics\u003e\n       .. stats\n   \u003c/flowstat:flow-statistics\u003e\n \u003cflownode:flow\u003e\n \u003c/flownode:table\u003e\n...\n\nThe original flow is filled thanks to FlowStatsTracker.updateSingleStat(), line 69:\n FlowBuilder flow \u003d new FlowBuilder(map);",
+      "parentUuid": "fa82b9bf_f17e80ae",
+      "revId": "34bd6d37787f85ec228bd0dc5c1ff399ebd649b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
