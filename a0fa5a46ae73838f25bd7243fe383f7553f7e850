@@ -104,6 +104,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f2c2fb51",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-29T01:45:39Z",
+      "side": 1,
+      "message": "Move this class out of RaftActor. It is reusable and does not \"depend\" on RaftActor",
+      "parentUuid": "fa82b9bf_174d113e",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_374a9526",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 5
@@ -172,6 +190,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_12d3df04",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractRaftRPC.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-29T01:45:39Z",
+      "side": 1,
+      "message": "Needed for serialization to work",
+      "parentUuid": "fa82b9bf_17743166",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f7666dba",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVote.java",
         "patchSetId": 5
@@ -183,6 +219,24 @@
       "writtenOn": "2014-07-28T17:20:38Z",
       "side": 1,
       "message": "Please remove all test related setters. These variables are invariants and should not be changeable once set (that\u0027s why they were final)",
+      "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b20b138d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVote.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-29T01:45:39Z",
+      "side": 1,
+      "message": "Looks like this may be needed for serialization again.",
+      "parentUuid": "fa82b9bf_f7666dba",
       "revId": "a0fa5a46ae73838f25bd7243fe383f7553f7e850",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
