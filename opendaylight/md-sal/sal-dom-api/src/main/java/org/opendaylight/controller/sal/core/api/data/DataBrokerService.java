@@ -12,7 +12,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransa
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 
 /**
@@ -27,16 +27,16 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 @Deprecated
 public interface DataBrokerService extends
     BrokerService, //
-    DataReader<InstanceIdentifier, CompositeNode>, //
-    DataModificationTransactionFactory<InstanceIdentifier, CompositeNode>, //
-    DataChangePublisher<InstanceIdentifier, CompositeNode, DataChangeListener> {
+    DataReader<YangInstanceIdentifier, CompositeNode>, //
+    DataModificationTransactionFactory<YangInstanceIdentifier, CompositeNode>, //
+    DataChangePublisher<YangInstanceIdentifier, CompositeNode, DataChangeListener> {
 
 
     @Override
-    public CompositeNode readConfigurationData(InstanceIdentifier path);
+    public CompositeNode readConfigurationData(YangInstanceIdentifier path);
 
     @Override
-    public CompositeNode readOperationalData(InstanceIdentifier path);
+    public CompositeNode readOperationalData(YangInstanceIdentifier path);
 
     @Override
     DataModificationTransaction beginTransaction();

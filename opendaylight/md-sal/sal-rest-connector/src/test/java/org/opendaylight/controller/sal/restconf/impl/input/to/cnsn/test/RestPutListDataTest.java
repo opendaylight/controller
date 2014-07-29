@@ -34,7 +34,7 @@ import org.opendaylight.controller.sal.restconf.impl.test.DummyRpcResult;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -65,7 +65,7 @@ public class RestPutListDataTest {
         Builder<TransactionStatus> futureBuilder = new DummyFuture.Builder<TransactionStatus>();
         futureBuilder.rpcResult(new DummyRpcResult.Builder<TransactionStatus>().result(TransactionStatus.COMMITED)
                 .build());
-        when(brokerFacade.commitConfigurationDataPut(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(futureBuilder.build());
     }
 

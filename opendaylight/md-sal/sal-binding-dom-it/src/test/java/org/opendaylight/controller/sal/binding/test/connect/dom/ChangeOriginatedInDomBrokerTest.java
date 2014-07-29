@@ -93,8 +93,8 @@ public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
     private static final Map<QName, Object> TABLE_KEY_BI = //
     ImmutableMap.<QName, Object> of(TABLE_ID_QNAME, TABLE_ID);;
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier FLOW_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier FLOW_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .nodeWithKey(Table.QNAME, TABLE_KEY_BI) //

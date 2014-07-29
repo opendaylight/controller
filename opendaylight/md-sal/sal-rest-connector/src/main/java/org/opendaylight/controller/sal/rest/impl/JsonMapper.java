@@ -27,7 +27,7 @@ import org.opendaylight.controller.sal.restconf.impl.IdentityValuesDTO.Predicate
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
@@ -263,12 +263,12 @@ class JsonMapper {
                 writeStringRepresentation(writer, node, baseType, QName.class);
             }
         } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
-            if (node.getValue() instanceof InstanceIdentifier) {
+            if (node.getValue() instanceof YangInstanceIdentifier) {
                 IdentityValuesDTO valueDTO = (IdentityValuesDTO) RestCodec.from(baseType, mountPoint).serialize(
                         node.getValue());
                 writeIdentityValuesDTOToJson(writer, valueDTO);
             } else {
-                writeStringRepresentation(writer, node, baseType, InstanceIdentifier.class);
+                writeStringRepresentation(writer, node, baseType, YangInstanceIdentifier.class);
             }
         } else if (baseType instanceof DecimalTypeDefinition || baseType instanceof IntegerTypeDefinition
                 || baseType instanceof UnsignedIntegerTypeDefinition) {

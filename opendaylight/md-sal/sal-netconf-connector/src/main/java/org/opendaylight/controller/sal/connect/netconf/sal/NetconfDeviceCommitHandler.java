@@ -17,11 +17,11 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NetconfDeviceCommitHandler implements DataCommitHandler<InstanceIdentifier,CompositeNode> {
+public final class NetconfDeviceCommitHandler implements DataCommitHandler<YangInstanceIdentifier,CompositeNode> {
 
     private static final Logger logger= LoggerFactory.getLogger(NetconfDeviceCommitHandler.class);
 
@@ -36,8 +36,8 @@ public final class NetconfDeviceCommitHandler implements DataCommitHandler<Insta
     }
 
     @Override
-    public DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
-            final DataModification<InstanceIdentifier, CompositeNode> modification) {
+    public DataCommitTransaction<YangInstanceIdentifier, CompositeNode> requestCommit(
+            final DataModification<YangInstanceIdentifier, CompositeNode> modification) {
 
         final NetconfDeviceTwoPhaseCommitTransaction twoPhaseCommit = new NetconfDeviceTwoPhaseCommitTransaction(id, rpc,
                 modification, true, rollbackSupported);
@@ -57,7 +57,7 @@ public final class NetconfDeviceCommitHandler implements DataCommitHandler<Insta
     /**
      * Always fail commit transaction that rolls back delegate transaction afterwards
      */
-    private class FailingTransaction implements DataCommitTransaction<InstanceIdentifier, CompositeNode> {
+    private class FailingTransaction implements DataCommitTransaction<YangInstanceIdentifier, CompositeNode> {
         private final NetconfDeviceTwoPhaseCommitTransaction twoPhaseCommit;
         private final ExecutionException e;
 
@@ -67,7 +67,7 @@ public final class NetconfDeviceCommitHandler implements DataCommitHandler<Insta
         }
 
         @Override
-        public DataModification<InstanceIdentifier, CompositeNode> getModification() {
+        public DataModification<YangInstanceIdentifier, CompositeNode> getModification() {
             return twoPhaseCommit.getModification();
         }
 

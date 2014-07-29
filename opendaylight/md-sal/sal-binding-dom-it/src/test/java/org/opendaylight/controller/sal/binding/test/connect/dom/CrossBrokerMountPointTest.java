@@ -65,13 +65,13 @@ public class CrossBrokerMountPointTest {
     private static final QName AUGMENTED_GROUP_STATISTICS = QName.create(NodeGroupStatistics.QNAME,
             GroupStatistics.QNAME.getLocalName());
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             //
             .builder(NODE_INSTANCE_ID_BI)
             .nodeWithKey(QName.create(FlowCapableNode.QNAME, "group"), QName.create(FlowCapableNode.QNAME, "group-id"),
@@ -112,16 +112,16 @@ public class CrossBrokerMountPointTest {
         final BigInteger packetCount = BigInteger.valueOf(500L);
 
 
-        DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>() {
+        DataReader<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, CompositeNode>() {
 
             @Override
-            public CompositeNode readConfigurationData(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
+            public CompositeNode readConfigurationData(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier arg0) {
                 return null;
             }
 
 
             @Override
-            public CompositeNode readOperationalData(final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
+            public CompositeNode readOperationalData(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier arg0) {
                 if (arg0.equals(GROUP_STATISTICS_ID_BI)) {
                     ImmutableCompositeNode data = ImmutableCompositeNode
                             .builder()

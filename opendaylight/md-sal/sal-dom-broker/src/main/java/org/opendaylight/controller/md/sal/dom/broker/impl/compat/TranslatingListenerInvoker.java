@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.core.api.data.DataChangeListener;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChangeListener, Delegator<DataChangeListener> {
@@ -41,19 +41,19 @@ abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChang
     }
 
     @Override
-    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
+    public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
         delegate.onDataChanged(getLegacyEvent(normalizer, normalizedChange));
     }
 
-    abstract DataChangeEvent<InstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer,
-                                                                               final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> normalizedChange);
+    abstract DataChangeEvent<YangInstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer,
+                                                                               final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange);
 
     @Override
     public DataChangeListener getDelegate() {
         return delegate;
     }
 
-    abstract void register(final DOMDataBroker backingBroker, final InstanceIdentifier normalizedPath);
+    abstract void register(final DOMDataBroker backingBroker, final YangInstanceIdentifier normalizedPath);
 
     @Override
     public void close() {
@@ -68,12 +68,12 @@ abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChang
             super(listener, normalizer);
         }
 
-        DataChangeEvent<InstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
+        DataChangeEvent<YangInstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
             return TranslatingDataChangeEvent.createConfiguration(normalizedChange, normalizer);
         }
 
         @Override
-        void register(final DOMDataBroker backingBroker, final InstanceIdentifier normalizedPath) {
+        void register(final DOMDataBroker backingBroker, final YangInstanceIdentifier normalizedPath) {
             reg = backingBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, normalizedPath, this,
                     AsyncDataBroker.DataChangeScope.SUBTREE);
         }
@@ -85,12 +85,12 @@ abstract class TranslatingListenerInvoker implements AutoCloseable, DOMDataChang
             super(listener, normalizer);
         }
 
-        DataChangeEvent<InstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
+        DataChangeEvent<YangInstanceIdentifier, CompositeNode> getLegacyEvent(final DataNormalizer normalizer, final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> normalizedChange) {
             return TranslatingDataChangeEvent.createOperational(normalizedChange, normalizer);
         }
 
         @Override
-        void register(final DOMDataBroker backingBroker, final InstanceIdentifier normalizedPath) {
+        void register(final DOMDataBroker backingBroker, final YangInstanceIdentifier normalizedPath) {
             reg = backingBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, normalizedPath, this,
                     AsyncDataBroker.DataChangeScope.SUBTREE);
         }

@@ -11,15 +11,15 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler.DataCommitTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class HashMapDataStoreTransaction implements
-        DataCommitTransaction<InstanceIdentifier, CompositeNode> {
-    private final DataModification<InstanceIdentifier, CompositeNode> modification;
+        DataCommitTransaction<YangInstanceIdentifier, CompositeNode> {
+    private final DataModification<YangInstanceIdentifier, CompositeNode> modification;
     private final HashMapDataStore datastore;
 
     HashMapDataStoreTransaction(
-            final DataModification<InstanceIdentifier, CompositeNode> modify,
+            final DataModification<YangInstanceIdentifier, CompositeNode> modify,
             final HashMapDataStore store) {
         modification = modify;
         datastore = store;
@@ -31,7 +31,7 @@ public class HashMapDataStoreTransaction implements
     }
 
     @Override
-    public DataModification<InstanceIdentifier, CompositeNode> getModification() {
+    public DataModification<YangInstanceIdentifier, CompositeNode> getModification() {
         return this.modification;
     }
 

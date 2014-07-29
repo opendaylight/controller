@@ -10,7 +10,7 @@ package org.opendaylight.controller.sal.core.api.data;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  *
@@ -19,14 +19,14 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
  */
 @Deprecated
 public interface DataStore extends //
-    DataReader<InstanceIdentifier, CompositeNode>,
-    DataCommitHandler<InstanceIdentifier, CompositeNode> {
+    DataReader<YangInstanceIdentifier, CompositeNode>,
+    DataCommitHandler<YangInstanceIdentifier, CompositeNode> {
 
 
-    Iterable<InstanceIdentifier> getStoredConfigurationPaths();
-    Iterable<InstanceIdentifier> getStoredOperationalPaths();
+    Iterable<YangInstanceIdentifier> getStoredConfigurationPaths();
+    Iterable<YangInstanceIdentifier> getStoredOperationalPaths();
 
-    boolean containsConfigurationPath(InstanceIdentifier path);
-    boolean containsOperationalPath(InstanceIdentifier path);
+    boolean containsConfigurationPath(YangInstanceIdentifier path);
+    boolean containsOperationalPath(YangInstanceIdentifier path);
 
 }

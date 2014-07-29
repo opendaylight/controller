@@ -72,16 +72,16 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
             .toInstance();
 
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
     private static final QName SUPPORTED_ACTIONS_QNAME = QName.create(FlowCapableNode.QNAME, SupportedActions.QNAME.getLocalName());
 
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier SUPPORTED_ACTIONS_INSTANCE_ID_BI = //
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
                     .node(Nodes.QNAME) //
                     .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
                     .node(SUPPORTED_ACTIONS_QNAME) //
@@ -206,7 +206,7 @@ public class DOMCodecBug03Test extends AbstractDataServiceTest implements DataCh
     }
 
     private void assertBindingIndependentVersion(
-            final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
     }

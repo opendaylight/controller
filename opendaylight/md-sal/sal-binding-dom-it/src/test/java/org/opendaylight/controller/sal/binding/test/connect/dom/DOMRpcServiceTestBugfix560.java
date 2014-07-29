@@ -68,7 +68,7 @@ public class DOMRpcServiceTestBugfix560 {
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
 
     private static final InstanceIdentifier<Node> BA_MOUNT_ID = createBANodeIdentifier(MOUNT_NODE);
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier BI_MOUNT_ID = createBINodeIdentifier(MOUNT_NODE);
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID = createBINodeIdentifier(MOUNT_NODE);
 
     private BindingTestContext testContext;
     private MountProvisionService domMountPointService;
@@ -104,9 +104,9 @@ public class DOMRpcServiceTestBugfix560 {
         schemaContext = mountSchemaContext;
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.InstanceIdentifier createBINodeIdentifier(
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(
             final NodeId mountNode) {
-        return org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+        return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
                 .builder().node(Nodes.QNAME)
                 .nodeWithKey(Node.QNAME, NODE_ID_QNAME, mountNode.getValue())
                 .toInstance();

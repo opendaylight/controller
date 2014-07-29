@@ -21,9 +21,9 @@ import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedCon
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -39,7 +39,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 public abstract class AbstractDataChangeListenerTest {
 
-    protected static final InstanceIdentifier TOP_LEVEL = InstanceIdentifier
+    protected static final YangInstanceIdentifier TOP_LEVEL = YangInstanceIdentifier
             .of(Top.QNAME);
     private static final QName NAME_QNAME = QName.create(Top.QNAME, "name");
     protected static final String FOO = "foo";
@@ -67,14 +67,14 @@ public abstract class AbstractDataChangeListenerTest {
     }
 
 
-    public static final InstanceIdentifier path(final String topName,
+    public static final YangInstanceIdentifier path(final String topName,
             final String nestedName) {
         return path(topName).node(NestedList.QNAME).node(
                 new NodeIdentifierWithPredicates(NestedList.QNAME, NAME_QNAME,
                         nestedName));
     }
 
-    public static final InstanceIdentifier path(final String topName) {
+    public static final YangInstanceIdentifier path(final String topName) {
         return TOP_LEVEL.node(TopLevelList.QNAME).node(
                 new NodeIdentifierWithPredicates(TopLevelList.QNAME,
                         NAME_QNAME, topName));

@@ -21,11 +21,11 @@ import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 
-public final class NetconfDeviceDataReader implements DataReader<InstanceIdentifier,CompositeNode> {
+public final class NetconfDeviceDataReader implements DataReader<YangInstanceIdentifier,CompositeNode> {
 
     private final RpcImplementation rpc;
     private final RemoteDeviceId id;
@@ -36,7 +36,7 @@ public final class NetconfDeviceDataReader implements DataReader<InstanceIdentif
     }
 
     @Override
-    public CompositeNode readConfigurationData(final InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(final YangInstanceIdentifier path) {
         final RpcResult<CompositeNode> result;
         try {
             result = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
@@ -57,7 +57,7 @@ public final class NetconfDeviceDataReader implements DataReader<InstanceIdentif
     }
 
     @Override
-    public CompositeNode readOperationalData(final InstanceIdentifier path) {
+    public CompositeNode readOperationalData(final YangInstanceIdentifier path) {
         final RpcResult<CompositeNode> result;
         try {
             result = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, toFilterStructure(path))).get();
@@ -71,10 +71,10 @@ public final class NetconfDeviceDataReader implements DataReader<InstanceIdentif
         return (CompositeNode) findNode(data, path);
     }
 
-    private static Node<?> findNode(final CompositeNode node, final InstanceIdentifier identifier) {
+    private static Node<?> findNode(final CompositeNode node, final YangInstanceIdentifier identifier) {
 
         Node<?> current = node;
-        for (final InstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
+        for (final YangInstanceIdentifier.PathArgument arg : identifier.getPathArguments()) {
             if (current instanceof SimpleNode<?>) {
                 return null;
             } else if (current instanceof CompositeNode) {

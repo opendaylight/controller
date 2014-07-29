@@ -3,7 +3,7 @@ package org.opendaylight.controller.cluster.datastore.node;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -73,7 +73,7 @@ public class NormalizedNodeToProtocolBufferNode {
     builderParent.setPath(dataContainerNode.getIdentifier().toString())
         .setType(type);
 
-    final Iterable<DataContainerChild<? extends InstanceIdentifier.PathArgument, ?>> value =
+    final Iterable<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> value =
         dataContainerNode.getValue();
     for (NormalizedNode<?, ?> node : value) {
       Node.Builder builderChild = Node.newBuilder();

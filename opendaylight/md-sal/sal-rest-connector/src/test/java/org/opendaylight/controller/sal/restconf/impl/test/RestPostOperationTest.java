@@ -55,7 +55,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -174,12 +174,12 @@ public class RestPostOperationTest extends JerseyTest {
                 rpcResult).build();
         when(
                 brokerFacade.commitConfigurationDataPostBehindMountPoint(any(MountInstance.class),
-                        any(InstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
+                        any(YangInstanceIdentifier.class), any(CompositeNode.class))).thenReturn(dummyFuture);
 
         MountInstance mountInstance = mock(MountInstance.class);
         when(mountInstance.getSchemaContext()).thenReturn(schemaContextTestModule);
         MountService mockMountService = mock(MountService.class);
-        when(mockMountService.getMountPoint(any(InstanceIdentifier.class))).thenReturn(mountInstance);
+        when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(mountInstance);
 
         ControllerContext.getInstance().setMountService(mockMountService);
 
@@ -217,7 +217,7 @@ public class RestPostOperationTest extends JerseyTest {
             dummyFuture = new DummyFuture.Builder<TransactionStatus>().build();
         }
 
-        when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
     }
 
@@ -229,10 +229,10 @@ public class RestPostOperationTest extends JerseyTest {
         Future<RpcResult<TransactionStatus>> dummyFuture = new DummyFuture.Builder<TransactionStatus>().rpcResult(
                 rpcResult).build();
 
-        when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(dummyFuture);
 
-        ArgumentCaptor<InstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(InstanceIdentifier.class);
+        ArgumentCaptor<YangInstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(YangInstanceIdentifier.class);
         ArgumentCaptor<CompositeNode> compNodeCaptor = ArgumentCaptor.forClass(CompositeNode.class);
 
         String URI_1 = "/config";
@@ -253,7 +253,7 @@ public class RestPostOperationTest extends JerseyTest {
     public void createConfigurationDataNullTest() throws UnsupportedEncodingException {
         initMocking();
 
-        when(brokerFacade.commitConfigurationDataPost(any(InstanceIdentifier.class), any(CompositeNode.class)))
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(CompositeNode.class)))
                 .thenReturn(null);
 
         String URI_1 = "/config";

@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import com.google.common.base.Optional;
@@ -22,7 +22,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 
-abstract class AbstractForwardedTransaction<T extends AsyncTransaction<InstanceIdentifier, NormalizedNode<?, ?>>>
+abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>>
         implements Delegator<T>, Identifiable<Object> {
 
     private final T delegate;
@@ -45,7 +45,7 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<InstanceI
     }
 
     @SuppressWarnings("unchecked")
-    protected final <S extends AsyncTransaction<InstanceIdentifier, NormalizedNode<?, ?>>> S getDelegateChecked(final Class<S> txType) {
+    protected final <S extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>> S getDelegateChecked(final Class<S> txType) {
         Preconditions.checkState(txType.isInstance(delegate));
         return (S) delegate;
     }

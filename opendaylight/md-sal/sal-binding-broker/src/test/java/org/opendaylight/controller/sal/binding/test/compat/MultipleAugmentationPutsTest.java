@@ -64,8 +64,8 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
     private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA =
             NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
             .node(Nodes.QNAME) //
             .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
             .toInstance();
@@ -158,7 +158,7 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
         return new AugmentationVerifier<Node>(readedNode);
     }
 
-    private void assertBindingIndependentVersion(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier nodeId) {
+    private void assertBindingIndependentVersion(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier nodeId) {
         CompositeNode node = biDataService.readOperationalData(nodeId);
         assertNotNull(node);
     }

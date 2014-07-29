@@ -33,7 +33,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
     private final BindingMountPointForwardingManager bindingForwardingManager = new BindingMountPointForwardingManager();
 
     private ConcurrentMap<InstanceIdentifier<?>, BindingIndependentConnector> connectors = new ConcurrentHashMap<>();
-    private ConcurrentMap<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.InstanceIdentifier> forwarded = new ConcurrentHashMap<>();
+    private ConcurrentMap<InstanceIdentifier<?>, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> forwarded = new ConcurrentHashMap<>();
     private ListenerRegistration<MountProvisionListener> domListenerRegistration;
     private ListenerRegistration<org.opendaylight.controller.sal.binding.api.mount.MountProviderService.MountProvisionListener> baListenerRegistration;
 
@@ -89,8 +89,8 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
     }
 
     private void tryToDeployConnector(InstanceIdentifier<?> baPath,
-            org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath) {
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier previous = forwarded.putIfAbsent(baPath, biPath);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath) {
+        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier previous = forwarded.putIfAbsent(baPath, biPath);
         if (previous != null) {
             return;
         }
@@ -111,7 +111,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         return mountConnector;
     }
 
-    public synchronized void tryToDeployDomForwarder(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath) {
+    public synchronized void tryToDeployDomForwarder(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath) {
         InstanceIdentifier<?> baPath;
         try {
             baPath = connector.getMappingService().fromDataDom(domPath);
@@ -130,7 +130,7 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         if (potentialConnector != null) {
             return;
         }
-        org.opendaylight.yangtools.yang.data.api.InstanceIdentifier domPath = connector.getMappingService().toDataDom(baPath);
+        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath = connector.getMappingService().toDataDom(baPath);
         tryToDeployConnector(baPath, domPath);
     }
 
@@ -138,19 +138,19 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         // FIXME: Implement closeMountPoint
     }
 
-    public synchronized void undeployDomForwarder(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier biPath) {
+    public synchronized void undeployDomForwarder(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath) {
         // FIXME: Implement closeMountPoint
     }
 
     private class DomMountPointForwardingManager implements MountProvisionListener {
 
         @Override
-        public void onMountPointCreated(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+        public void onMountPointCreated(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path) {
             tryToDeployDomForwarder(path);
         }
 
         @Override
-        public void onMountPointRemoved(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier path) {
+        public void onMountPointRemoved(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path) {
             undeployDomForwarder(path);
         }
     }

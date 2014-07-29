@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.core.api.data.DataStore;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
 
@@ -38,7 +38,7 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
     }
 
     @Override
-    public CompositeNode readConfigurationData(InstanceIdentifier path) {
+    public CompositeNode readConfigurationData(YangInstanceIdentifier path) {
         cfgReadCount.incrementAndGet();
         final long startTime = System.nanoTime();
         try {
@@ -51,7 +51,7 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
     }
 
     @Override
-    public CompositeNode readOperationalData(InstanceIdentifier path) {
+    public CompositeNode readOperationalData(YangInstanceIdentifier path) {
         operReadCount.incrementAndGet();
         final long startTime = System.nanoTime();
         try {
@@ -63,8 +63,8 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
         }
     }
 
-    public DataCommitTransaction<InstanceIdentifier, CompositeNode> requestCommit(
-            DataModification<InstanceIdentifier, CompositeNode> modification) {
+    public DataCommitTransaction<YangInstanceIdentifier, CompositeNode> requestCommit(
+            DataModification<YangInstanceIdentifier, CompositeNode> modification) {
         requestCommitCount.incrementAndGet();
         final long startTime = System.nanoTime();
         try {
@@ -77,19 +77,19 @@ public class DataStoreStatsWrapper implements Delegator<DataStore>, DataStore {
     };
 
     @Override
-    public boolean containsConfigurationPath(InstanceIdentifier path) {
+    public boolean containsConfigurationPath(YangInstanceIdentifier path) {
         return delegate.containsConfigurationPath(path);
     }
 
-    public Iterable<InstanceIdentifier> getStoredConfigurationPaths() {
+    public Iterable<YangInstanceIdentifier> getStoredConfigurationPaths() {
         return delegate.getStoredConfigurationPaths();
     }
 
-    public Iterable<InstanceIdentifier> getStoredOperationalPaths() {
+    public Iterable<YangInstanceIdentifier> getStoredOperationalPaths() {
         return delegate.getStoredOperationalPaths();
     }
 
-    public boolean containsOperationalPath(InstanceIdentifier path) {
+    public boolean containsOperationalPath(YangInstanceIdentifier path) {
         return delegate.containsOperationalPath(path);
     }
 

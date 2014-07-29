@@ -18,7 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -40,8 +40,8 @@ public class DOMBrokerPerformanceTest {
         return ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i);
     }
 
-    private static InstanceIdentifier outerListPath(final int i) {
-        return InstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)//
+    private static YangInstanceIdentifier outerListPath(final int i) {
+        return YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)//
                 .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i) //
                 .build();
     }
@@ -141,11 +141,11 @@ public class DOMBrokerPerformanceTest {
                 int i = 0;
                 for (DOMDataReadWriteTransaction writeTx :transactions) {
                     // Writes /test/outer-list/i in writeTx
-                    InstanceIdentifier path = InstanceIdentifier.builder(outerListPath(i))
+                    YangInstanceIdentifier path = YangInstanceIdentifier.builder(outerListPath(i))
                             .node(TestModel.INNER_LIST_QNAME).build();
                     writeTx.put(OPERATIONAL, path, ImmutableNodes.mapNodeBuilder(TestModel.INNER_LIST_QNAME).build());
                     for (int j = 0; j < innerNum; j++) {
-                        InstanceIdentifier innerPath = InstanceIdentifier.builder(path)
+                        YangInstanceIdentifier innerPath = YangInstanceIdentifier.builder(path)
                                 .nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, String.valueOf(j))
                                 .build();
                         writeTx.put(
@@ -205,7 +205,7 @@ public class DOMBrokerPerformanceTest {
             public Void call() throws Exception {
                 for (int i = 0; i < txNum; i++) {
                     for (int j = 0; j < innerNum; j++) {
-                        InstanceIdentifier path = InstanceIdentifier
+                        YangInstanceIdentifier path = YangInstanceIdentifier
                                 .builder(outerListPath(i))
                                 //
                                 .node(TestModel.INNER_LIST_QNAME)

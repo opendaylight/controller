@@ -41,9 +41,9 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
@@ -56,18 +56,18 @@ import org.slf4j.LoggerFactory;
 /**
  *  Remote transaction that delegates data change to remote device using netconf messages.
  */
-final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<InstanceIdentifier, CompositeNode> {
+final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransaction<YangInstanceIdentifier, CompositeNode> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceTwoPhaseCommitTransaction.class);
 
-    private final DataModification<InstanceIdentifier, CompositeNode> modification;
+    private final DataModification<YangInstanceIdentifier, CompositeNode> modification;
     private final RpcImplementation rpc;
     private final boolean rollbackSupported;
     private final RemoteDeviceId id;
     private final CompositeNode targetNode;
 
     public NetconfDeviceTwoPhaseCommitTransaction(final RemoteDeviceId id, final RpcImplementation rpc,
-            final DataModification<InstanceIdentifier, CompositeNode> modification,
+            final DataModification<YangInstanceIdentifier, CompositeNode> modification,
             final boolean candidateSupported, final boolean rollbackOnErrorSupported) {
         this.id = id;
         this.rpc = Preconditions.checkNotNull(rpc);
@@ -82,19 +82,19 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
      * In case of failure or unexpected error response, ExecutionException is thrown
      */
     void prepare() throws InterruptedException, ExecutionException {
-        for (final InstanceIdentifier toRemove : modification.getRemovedConfigurationData()) {
+        for (final YangInstanceIdentifier toRemove : modification.getRemovedConfigurationData()) {
             sendDelete(toRemove);
         }
-        for(final Entry<InstanceIdentifier, CompositeNode> toUpdate : modification.getUpdatedConfigurationData().entrySet()) {
+        for(final Entry<YangInstanceIdentifier, CompositeNode> toUpdate : modification.getUpdatedConfigurationData().entrySet()) {
             sendMerge(toUpdate.getKey(),toUpdate.getValue());
         }
     }
 
-    private void sendMerge(final InstanceIdentifier key, final CompositeNode value) throws InterruptedException, ExecutionException {
+    private void sendMerge(final YangInstanceIdentifier key, final CompositeNode value) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditConfigStructure(key, Optional.<ModifyAction>absent(), Optional.of(value)), Optional.<ModifyAction>absent());
     }
 
-    private void sendDelete(final InstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
+    private void sendDelete(final YangInstanceIdentifier toDelete) throws InterruptedException, ExecutionException {
         sendEditRpc(createEditConfigStructure(toDelete, Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
     }
 
@@ -133,7 +133,7 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
         return ret.toInstance();
     }
 
-    private CompositeNode createEditConfigStructure(final InstanceIdentifier dataPath, final Optional<ModifyAction> operation,
+    private CompositeNode createEditConfigStructure(final YangInstanceIdentifier dataPath, final Optional<ModifyAction> operation,
             final Optional<CompositeNode> lastChildOverride) {
         Preconditions.checkArgument(Iterables.isEmpty(dataPath.getPathArguments()) == false, "Instance identifier with empty path %s", dataPath);
 
@@ -225,7 +225,7 @@ final class NetconfDeviceTwoPhaseCommitTransaction implements DataCommitTransact
     }
 
     @Override
-    public DataModification<InstanceIdentifier, CompositeNode> getModification() {
+    public DataModification<YangInstanceIdentifier, CompositeNode> getModification() {
         return this.modification;
     }
 

@@ -16,12 +16,12 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite {
 
-    private static final InstanceIdentifier TOP_LEVEL_LIST_ALL = TOP_LEVEL.node(TopLevelList.QNAME).node(
+    private static final YangInstanceIdentifier TOP_LEVEL_LIST_ALL = TOP_LEVEL.node(TopLevelList.QNAME).node(
             TopLevelList.QNAME);
 
     @Override
@@ -32,7 +32,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     @Override
     public void putTopLevelOneNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
 
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
 
         assertNotNull(change);
 
@@ -48,7 +48,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
         assertNotNull(change);
 
         assertContains(change.getCreatedData(), path(FOO, BAZ));
@@ -62,7 +62,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
         assertNotNull(change);
         assertFalse(change.getCreatedData().isEmpty());
 
@@ -92,7 +92,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     public void nestedListExistsRootDeleted(final DatastoreTestTask task) throws InterruptedException,
             ExecutionException {
 
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
 
         assertEmpty(change.getCreatedData());
         assertEmpty(change.getUpdatedData());
@@ -131,7 +131,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
 
     @Override
     protected void existingTopWriteSibling(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
-        AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent().get();
 
         assertContains(change.getCreatedData(), path(FOO_SIBLING));
         assertNotContains(change.getUpdatedData(), path(FOO), TOP_LEVEL);

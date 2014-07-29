@@ -13,7 +13,7 @@ import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  *
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 @Deprecated
 public interface DataProviderService extends
     DataBrokerService, //
-    DataProvisionService<InstanceIdentifier, CompositeNode>
+    DataProvisionService<YangInstanceIdentifier, CompositeNode>
     {
 
     /**
@@ -63,9 +63,9 @@ public interface DataProviderService extends
     void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
 
 
-    Registration registerConfigurationReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+    Registration registerConfigurationReader(YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader);
 
-    Registration registerOperationalReader(InstanceIdentifier path, DataReader<InstanceIdentifier, CompositeNode> reader);
+    Registration registerOperationalReader(YangInstanceIdentifier path, DataReader<YangInstanceIdentifier, CompositeNode> reader);
 
     public interface DataRefresher extends Provider.ProviderFunctionality {
 

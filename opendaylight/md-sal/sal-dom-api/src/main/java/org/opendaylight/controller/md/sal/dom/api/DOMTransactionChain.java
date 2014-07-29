@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * <p>
  * This interface is type capture of {@link TransactionChain} for DOM Data Contracts.
  */
-public interface DOMTransactionChain extends TransactionChain<InstanceIdentifier, NormalizedNode<?, ?>> {
+public interface DOMTransactionChain extends TransactionChain<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override
     DOMDataReadOnlyTransaction newReadOnlyTransaction();
