@@ -7,11 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -31,6 +35,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -40,12 +45,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
-
-public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker,
-        SchemaContextListener, AutoCloseable {
+public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker, SchemaContextListener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractForwardedDataBroker.class);
     // The Broker to whom we do all forwarding
@@ -91,17 +91,17 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
             final DataChangeScope triggeringScope) {
         DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
-        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath = codec.toNormalized(path);
+        YangInstanceIdentifier domPath = codec.toNormalized(path);
         ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
                 domPath, domDataChangeListener, triggeringScope);
         return new ListenerRegistrationImpl(listener, domRegistration);
     }
 
     protected Map<InstanceIdentifier<?>, DataObject> toBinding(
-            final Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
+            final Map<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
 
-        for (Map.Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : sortedEntries(normalized)) {
+        for (Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : sortedEntries(normalized)) {
             try {
                 Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(
                         entry);
@@ -116,25 +116,43 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         return newMap;
     }
 
-    private static <T> Iterable<Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier,T>> sortedEntries(final Map<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, T> map) {
-        ArrayList<Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, T>> entries = new ArrayList<>(map.entrySet());
-        Collections.sort(entries, new Comparator<Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, T>>() {
+    private static final Comparator<Entry<YangInstanceIdentifier, ?>> MAP_ENTRY_COMPARATOR = new Comparator<Entry<YangInstanceIdentifier, ?>>() {
+        @Override
+        public int compare(final Entry<YangInstanceIdentifier, ?> left,
+                final Entry<YangInstanceIdentifier, ?> right) {
+            final Iterator<?> li = left.getKey().getPathArguments().iterator();
+            final Iterator<?> ri = right.getKey().getPathArguments().iterator();
 
-            @Override
-            public int compare(final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, T> left,
-                    final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, T> right) {
-                int leftSize = Iterables.size(left.getKey().getPathArguments());
-                int rightSize = Iterables.size(right.getKey().getPathArguments());
-                return Integer.compare(leftSize, rightSize);
+            // Iterate until left is exhausted...
+            while (li.hasNext()) {
+                if (!ri.hasNext()) {
+                    // Left is deeper
+                    return 1;
+                }
+
+                li.next();
+                ri.next();
             }
-        });
-        return entries;
+
+            // Check if right is exhausted
+            return ri.hasNext() ? -1 : 0;
+        }
+    };
+
+    private static <T> Iterable<Entry<YangInstanceIdentifier,T>> sortedEntries(final Map<YangInstanceIdentifier, T> map) {
+        if (!map.isEmpty()) {
+            ArrayList<Entry<YangInstanceIdentifier, T>> entries = new ArrayList<>(map.entrySet());
+            Collections.sort(entries, MAP_ENTRY_COMPARATOR);
+            return entries;
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     protected Set<InstanceIdentifier<?>> toBinding(
-            final Set<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier> normalized) {
+            final Set<YangInstanceIdentifier> normalized) {
         Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
-        for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalizedPath : normalized) {
+        for (YangInstanceIdentifier normalizedPath : normalized) {
             try {
                 Optional<InstanceIdentifier<? extends DataObject>> potential = getCodec().toBinding(normalizedPath);
                 if (potential.isPresent()) {
@@ -176,13 +194,13 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         @Override
         public void onDataChanged(
-                final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+                final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
             bindingDataChangeListener.onDataChanged(new TranslatedDataChangeEvent(change, path));
         }
     }
 
     private class TranslatedDataChangeEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {
-        private final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> domEvent;
+        private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> domEvent;
         private final InstanceIdentifier<?> path;
 
         private Map<InstanceIdentifier<?>, DataObject> createdCache;
@@ -193,7 +211,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         private Optional<DataObject> updatedDataCache;
 
         public TranslatedDataChangeEvent(
-                final AsyncDataChangeEvent<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> change,
+                final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change,
                 final InstanceIdentifier<?> path) {
             this.domEvent = change;
             this.path = path;
