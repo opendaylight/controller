@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * The DefaultShardStrategy basically puts all data into the default Shard
@@ -22,7 +22,7 @@ public class DefaultShardStrategy implements ShardStrategy{
   public static final String DEFAULT_SHARD = "default";
 
   @Override
-  public String findShard(InstanceIdentifier path) {
+  public String findShard(YangInstanceIdentifier path) {
     return DEFAULT_SHARD;
   }
 }

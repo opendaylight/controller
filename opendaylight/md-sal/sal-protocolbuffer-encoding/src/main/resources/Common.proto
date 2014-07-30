@@ -7,17 +7,46 @@ option java_outer_classname = "NormalizedNodeMessages";
 message Attribute{
   required string name =1;
   optional string value=2;
+  optional string type=3;
+}
+
+message QName {
+    required string value=1;
+}
+
+message PathArgument {
+  required string value=1;
+  optional string type=2; //NodeIdentifier, NodeWithValue, NodeIdentifierWithPredicates
+  optional QName nodeType=3;
+  repeated Attribute attributes=4;
+
+}
+
+message InstanceIdentifier {
+  repeated PathArgument arguments=1;
 }
 
 message Node{
-  required string path = 1;
+  optional string path = 1;
   optional string type = 2;
   repeated Attribute attributes = 3;
   repeated Node child=4;
   optional string value = 5;
+  optional string valueType = 6;
+  repeated string bitsValue = 7;
+  optional InstanceIdentifier instanceIdentifierValue = 8;
 }
 
 message Container{
   required string parentPath =1 ;
   optional Node normalizedNode=2;
+}
+
+message NodeMapEntry{
+  required InstanceIdentifier instanceIdentifierPath =1;
+  optional Node normalizedNode=2;
+}
+
+message NodeMap{
+repeated NodeMapEntry mapEntries=1;
 }

@@ -7,16 +7,16 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
-import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 import static org.junit.Assert.assertEquals;
@@ -33,14 +33,14 @@ public class ShardTest extends AbstractActorTest {
             new Within(duration("1 seconds")) {
                 protected void run() {
 
-                    subject.tell(new CreateTransactionChain(), getRef());
+                    subject.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
-                            if (in instanceof CreateTransactionChainReply) {
+                            if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)){
                                 CreateTransactionChainReply reply =
-                                    (CreateTransactionChainReply) in;
+                                    CreateTransactionChainReply.fromSerializable(getSystem(),in);
                                 return reply.getTransactionChainPath()
                                     .toString();
                             } else {
@@ -118,7 +118,7 @@ public class ShardTest extends AbstractActorTest {
                         new UpdateSchemaContext(TestModel.createTestContext()),
                         getRef());
 
-                    subject.tell(new CreateTransaction("txn-1"),
+                    subject.tell(new CreateTransaction("txn-1").toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {
@@ -148,11 +148,11 @@ public class ShardTest extends AbstractActorTest {
 
 
 
-    private AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener() {
-        return new AsyncDataChangeListener<InstanceIdentifier, NormalizedNode<?, ?>>() {
+    private AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener() {
+        return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
             @Override
             public void onDataChanged(
-                AsyncDataChangeEvent<InstanceIdentifier, NormalizedNode<?, ?>> change) {
+                AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
 
             }
         };

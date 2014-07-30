@@ -13,16 +13,16 @@ import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.datastore.utils.InstanceIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class RegisterChangeListener implements SerializableMessage {
   public static final Class SERIALIZABLE_CLASS = ListenerRegistrationMessages.RegisterChangeListener.class;
-    private final InstanceIdentifier path;
+    private final YangInstanceIdentifier path;
     private final ActorPath dataChangeListenerPath;
     private final AsyncDataBroker.DataChangeScope scope;
 
 
-    public RegisterChangeListener(InstanceIdentifier path,
+    public RegisterChangeListener(YangInstanceIdentifier path,
         ActorPath dataChangeListenerPath,
         AsyncDataBroker.DataChangeScope scope) {
         this.path = path;
@@ -30,7 +30,7 @@ public class RegisterChangeListener implements SerializableMessage {
         this.scope = scope;
     }
 
-    public InstanceIdentifier getPath() {
+    public YangInstanceIdentifier getPath() {
         return path;
     }
 
@@ -47,14 +47,14 @@ public class RegisterChangeListener implements SerializableMessage {
     @Override
     public ListenerRegistrationMessages.RegisterChangeListener toSerializable() {
       return ListenerRegistrationMessages.RegisterChangeListener.newBuilder()
-          .setInstanceIdentifierPath(path.toString())
+          .setInstanceIdentifierPath(InstanceIdentifierUtils.toSerializable(path))
           .setDataChangeListenerActorPath(dataChangeListenerPath.toString())
           .setDataChangeScope(scope.ordinal()).build();
     }
 
   public static RegisterChangeListener fromSerializable(ActorSystem actorSystem,Object serializable){
     ListenerRegistrationMessages.RegisterChangeListener o = (ListenerRegistrationMessages.RegisterChangeListener) serializable;
-    return new RegisterChangeListener(InstanceIdentifierUtils.from(o.getInstanceIdentifierPath()),
+    return new RegisterChangeListener(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPath()),
                                                 actorSystem.actorFor(o.getDataChangeListenerActorPath()).path(),
                                               AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()]);
   }

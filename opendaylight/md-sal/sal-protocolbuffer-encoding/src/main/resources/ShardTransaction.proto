@@ -13,7 +13,7 @@ message CloseTransactionReply{
 }
 
 message CreateTransaction{
-
+  required string transactionId = 1;
 }
 
 message CreateTransactionReply{
@@ -31,14 +31,14 @@ required string actorPath = 1;
 }
 
 message DeleteData {
-required string instanceIdentifierPathArguments = 1;
+required InstanceIdentifier instanceIdentifierPathArguments = 1;
 }
 
 message DeleteDataReply{
 
 }
 message ReadData {
-required string instanceIdentifierPathArguments=1;
+required InstanceIdentifier instanceIdentifierPathArguments=1;
 }
 
 message ReadDataReply{
@@ -46,7 +46,7 @@ message ReadDataReply{
 }
 
 message WriteData {
- required string instanceIdentifierPathArguments = 1;
+ required InstanceIdentifier instanceIdentifierPathArguments = 1;
 required Node normalizedNode =2;
 
 }
@@ -56,7 +56,7 @@ message WriteDataReply{
 }
 
 message MergeData {
- required string instanceIdentifierPathArguments = 1;
+ required InstanceIdentifier instanceIdentifierPathArguments = 1;
 required Node normalizedNode =2;
 
 }

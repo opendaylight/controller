@@ -9,62 +9,79 @@ import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
+import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class DataChangeListenerProxyTest extends AbstractActorTest {
 
-    private static class MockDataChangeEvent implements
-        AsyncDataChangeEvent<InstanceIdentifier,NormalizedNode<?,?>> {
+  private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
+    Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
 
-        @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
-            throw new UnsupportedOperationException("getCreatedData");
-        }
 
-        @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
-            throw new UnsupportedOperationException("getUpdatedData");
-        }
 
-        @Override public Set<InstanceIdentifier> getRemovedPaths() {
-            throw new UnsupportedOperationException("getRemovedPaths");
-        }
-
-        @Override
-        public Map<InstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
-            throw new UnsupportedOperationException("getOriginalData");
-        }
-
-        @Override public NormalizedNode<?, ?> getOriginalSubtree() {
-            throw new UnsupportedOperationException("getOriginalSubtree");
-        }
-
-        @Override public NormalizedNode<?, ?> getUpdatedSubtree() {
-            throw new UnsupportedOperationException("getUpdatedSubtree");
-        }
+    @Override
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
+      createdData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
+      return createdData;
     }
 
-    @Test
+    @Override
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
+      updatedData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createTestContainer());
+      return updatedData;
+
+    }
+
+    @Override
+    public Set<YangInstanceIdentifier> getRemovedPaths() {
+      Set<YangInstanceIdentifier>ids = new HashSet();
+      ids.add( CompositeModel.TEST_PATH);
+      return ids;
+    }
+
+    @Override
+    public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
+      originalData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createFamily());
+      return originalData;
+    }
+
+    @Override public NormalizedNode<?, ?> getOriginalSubtree() {
+      return CompositeModel.createFamily() ;
+    }
+
+    @Override public NormalizedNode<?, ?> getUpdatedSubtree() {
+      return CompositeModel.createTestContainer();
+    }
+  }
+
+
+  @Test
     public void testOnDataChanged() throws Exception {
         final Props props = Props.create(MessageCollectorActor.class);
         final ActorRef actorRef = getSystem().actorOf(props);
 
         DataChangeListenerProxy dataChangeListenerProxy =
-            new DataChangeListenerProxy(
+            new DataChangeListenerProxy(TestModel.createTestContext(),
                 getSystem().actorSelection(actorRef.path()));
 
-        dataChangeListenerProxy.onDataChanged(new MockDataChangeEvent());
+        dataChangeListenerProxy.onDataChanged(new MockDataChangedEvent());
 
         //Check if it was received by the remote actor
         ActorContext
-            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockConfiguration());
+            testContext = new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), new MockConfiguration());
         Object messages = testContext
             .executeLocalOperation(actorRef, "messages",
                 ActorContext.ASK_DURATION);
@@ -77,7 +94,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0) instanceof DataChanged);
+        Assert.assertTrue(listMessages.get(0).getClass().equals(DataChanged.SERIALIZABLE_CLASS));
 
     }
 }

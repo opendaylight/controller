@@ -11,39 +11,100 @@ public final class DataChangeListenerMessages {
   public interface DataChangedOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // repeated string instanceIdentifierPathArguments = 1;
+    // optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    java.util.List<java.lang.String>
-    getInstanceIdentifierPathArgumentsList();
+    boolean hasOriginalSubTree();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    int getInstanceIdentifierPathArgumentsCount();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getOriginalSubTree();
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    java.lang.String getInstanceIdentifierPathArguments(int index);
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index);
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getOriginalSubTreeOrBuilder();
 
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
+    // optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
      */
-    boolean hasNormalizedNode();
+    boolean hasUpdatedSubTree();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getUpdatedSubTree();
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
      */
-    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder();
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getUpdatedSubTreeOrBuilder();
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    boolean hasOriginalData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getOriginalData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getOriginalDataOrBuilder();
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    boolean hasUpdatedData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getUpdatedData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getUpdatedDataOrBuilder();
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    boolean hasCreatedData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getCreatedData();
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getCreatedDataOrBuilder();
+
+    // repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier>
+        getRemovedPathsList();
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getRemovedPaths(int index);
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    int getRemovedPathsCount();
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+        getRemovedPathsOrBuilderList();
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getRemovedPathsOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.DataChanged}
@@ -97,24 +158,76 @@ public final class DataChangeListenerMessages {
               break;
             }
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = originalSubTree_.toBuilder();
               }
-              instanceIdentifierPathArguments_.add(input.readBytes());
+              originalSubTree_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(originalSubTree_);
+                originalSubTree_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
               break;
             }
             case 18: {
               org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
-                subBuilder = normalizedNode_.toBuilder();
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = updatedSubTree_.toBuilder();
               }
-              normalizedNode_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
+              updatedSubTree_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(normalizedNode_);
-                normalizedNode_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(updatedSubTree_);
+                updatedSubTree_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000002;
+              break;
+            }
+            case 26: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                subBuilder = originalData_.toBuilder();
+              }
+              originalData_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(originalData_);
+                originalData_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000004;
+              break;
+            }
+            case 34: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = updatedData_.toBuilder();
+              }
+              updatedData_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(updatedData_);
+                updatedData_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
+              break;
+            }
+            case 42: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                subBuilder = createdData_.toBuilder();
+              }
+              createdData_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(createdData_);
+                createdData_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000010;
+              break;
+            }
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                removedPaths_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              removedPaths_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.PARSER, extensionRegistry));
               break;
             }
           }
@@ -125,8 +238,8 @@ public final class DataChangeListenerMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(instanceIdentifierPathArguments_);
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+          removedPaths_ = java.util.Collections.unmodifiableList(removedPaths_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -160,74 +273,200 @@ public final class DataChangeListenerMessages {
     }
 
     private int bitField0_;
-    // repeated string instanceIdentifierPathArguments = 1;
-    public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
-    private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_;
+    // optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;
+    public static final int ORIGINALSUBTREE_FIELD_NUMBER = 1;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node originalSubTree_;
     /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    public java.util.List<java.lang.String>
-        getInstanceIdentifierPathArgumentsList() {
-      return instanceIdentifierPathArguments_;
-    }
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    public int getInstanceIdentifierPathArgumentsCount() {
-      return instanceIdentifierPathArguments_.size();
-    }
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    public java.lang.String getInstanceIdentifierPathArguments(int index) {
-      return instanceIdentifierPathArguments_.get(index);
-    }
-    /**
-     * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getInstanceIdentifierPathArgumentsBytes(int index) {
-      return instanceIdentifierPathArguments_.getByteString(index);
-    }
-
-    // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
-    public static final int NORMALIZEDNODE_FIELD_NUMBER = 2;
-    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_;
-    /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
-     */
-    public boolean hasNormalizedNode() {
+    public boolean hasOriginalSubTree() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
-      return normalizedNode_;
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getOriginalSubTree() {
+      return originalSubTree_;
     }
     /**
-     * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+     * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
      */
-    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
-      return normalizedNode_;
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getOriginalSubTreeOrBuilder() {
+      return originalSubTree_;
+    }
+
+    // optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;
+    public static final int UPDATEDSUBTREE_FIELD_NUMBER = 2;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node updatedSubTree_;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+     */
+    public boolean hasUpdatedSubTree() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getUpdatedSubTree() {
+      return updatedSubTree_;
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getUpdatedSubTreeOrBuilder() {
+      return updatedSubTree_;
+    }
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;
+    public static final int ORIGINALDATA_FIELD_NUMBER = 3;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap originalData_;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    public boolean hasOriginalData() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getOriginalData() {
+      return originalData_;
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getOriginalDataOrBuilder() {
+      return originalData_;
+    }
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;
+    public static final int UPDATEDDATA_FIELD_NUMBER = 4;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap updatedData_;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    public boolean hasUpdatedData() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getUpdatedData() {
+      return updatedData_;
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getUpdatedDataOrBuilder() {
+      return updatedData_;
+    }
+
+    // optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;
+    public static final int CREATEDDATA_FIELD_NUMBER = 5;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap createdData_;
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    public boolean hasCreatedData() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getCreatedData() {
+      return createdData_;
+    }
+    /**
+     * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getCreatedDataOrBuilder() {
+      return createdData_;
+    }
+
+    // repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;
+    public static final int REMOVEDPATHS_FIELD_NUMBER = 6;
+    private java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> removedPaths_;
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    public java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> getRemovedPathsList() {
+      return removedPaths_;
+    }
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+        getRemovedPathsOrBuilderList() {
+      return removedPaths_;
+    }
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    public int getRemovedPathsCount() {
+      return removedPaths_.size();
+    }
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getRemovedPaths(int index) {
+      return removedPaths_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getRemovedPathsOrBuilder(
+        int index) {
+      return removedPaths_.get(index);
     }
 
     private void initFields() {
-      instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      originalSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      updatedSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      originalData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      updatedData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      createdData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      removedPaths_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasNormalizedNode()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasOriginalSubTree()) {
+        if (!getOriginalSubTree().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
-      if (!getNormalizedNode().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasUpdatedSubTree()) {
+        if (!getUpdatedSubTree().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasOriginalData()) {
+        if (!getOriginalData().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasUpdatedData()) {
+        if (!getUpdatedData().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasCreatedData()) {
+        if (!getCreatedData().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getRemovedPathsCount(); i++) {
+        if (!getRemovedPaths(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -236,11 +475,23 @@ public final class DataChangeListenerMessages {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-        output.writeBytes(1, instanceIdentifierPathArguments_.getByteString(i));
-      }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(2, normalizedNode_);
+        output.writeMessage(1, originalSubTree_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeMessage(2, updatedSubTree_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeMessage(3, originalData_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(4, updatedData_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeMessage(5, createdData_);
+      }
+      for (int i = 0; i < removedPaths_.size(); i++) {
+        output.writeMessage(6, removedPaths_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -251,18 +502,29 @@ public final class DataChangeListenerMessages {
       if (size != -1) return size;
 
       size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < instanceIdentifierPathArguments_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(instanceIdentifierPathArguments_.getByteString(i));
-        }
-        size += dataSize;
-        size += 1 * getInstanceIdentifierPathArgumentsList().size();
-      }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, normalizedNode_);
+          .computeMessageSize(1, originalSubTree_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, updatedSubTree_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, originalData_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, updatedData_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, createdData_);
+      }
+      for (int i = 0; i < removedPaths_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, removedPaths_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -372,7 +634,12 @@ public final class DataChangeListenerMessages {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getNormalizedNodeFieldBuilder();
+          getOriginalSubTreeFieldBuilder();
+          getUpdatedSubTreeFieldBuilder();
+          getOriginalDataFieldBuilder();
+          getUpdatedDataFieldBuilder();
+          getCreatedDataFieldBuilder();
+          getRemovedPathsFieldBuilder();
         }
       }
       private static Builder create() {
@@ -381,14 +648,42 @@ public final class DataChangeListenerMessages {
 
       public Builder clear() {
         super.clear();
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+        if (originalSubTreeBuilder_ == null) {
+          originalSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
         } else {
-          normalizedNodeBuilder_.clear();
+          originalSubTreeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (updatedSubTreeBuilder_ == null) {
+          updatedSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+        } else {
+          updatedSubTreeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
+        if (originalDataBuilder_ == null) {
+          originalData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+        } else {
+          originalDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (updatedDataBuilder_ == null) {
+          updatedData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+        } else {
+          updatedDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        if (createdDataBuilder_ == null) {
+          createdData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+        } else {
+          createdDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        if (removedPathsBuilder_ == null) {
+          removedPaths_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000020);
+        } else {
+          removedPathsBuilder_.clear();
+        }
         return this;
       }
 
@@ -417,19 +712,54 @@ public final class DataChangeListenerMessages {
         org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages.DataChanged result = new org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages.DataChanged(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.UnmodifiableLazyStringList(
-              instanceIdentifierPathArguments_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.instanceIdentifierPathArguments_ = instanceIdentifierPathArguments_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        if (normalizedNodeBuilder_ == null) {
-          result.normalizedNode_ = normalizedNode_;
+        if (originalSubTreeBuilder_ == null) {
+          result.originalSubTree_ = originalSubTree_;
         } else {
-          result.normalizedNode_ = normalizedNodeBuilder_.build();
+          result.originalSubTree_ = originalSubTreeBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        if (updatedSubTreeBuilder_ == null) {
+          result.updatedSubTree_ = updatedSubTree_;
+        } else {
+          result.updatedSubTree_ = updatedSubTreeBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        if (originalDataBuilder_ == null) {
+          result.originalData_ = originalData_;
+        } else {
+          result.originalData_ = originalDataBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        if (updatedDataBuilder_ == null) {
+          result.updatedData_ = updatedData_;
+        } else {
+          result.updatedData_ = updatedDataBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        if (createdDataBuilder_ == null) {
+          result.createdData_ = createdData_;
+        } else {
+          result.createdData_ = createdDataBuilder_.build();
+        }
+        if (removedPathsBuilder_ == null) {
+          if (((bitField0_ & 0x00000020) == 0x00000020)) {
+            removedPaths_ = java.util.Collections.unmodifiableList(removedPaths_);
+            bitField0_ = (bitField0_ & ~0x00000020);
+          }
+          result.removedPaths_ = removedPaths_;
+        } else {
+          result.removedPaths_ = removedPathsBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -447,31 +777,87 @@ public final class DataChangeListenerMessages {
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages.DataChanged other) {
         if (other == org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages.DataChanged.getDefaultInstance()) return this;
-        if (!other.instanceIdentifierPathArguments_.isEmpty()) {
-          if (instanceIdentifierPathArguments_.isEmpty()) {
-            instanceIdentifierPathArguments_ = other.instanceIdentifierPathArguments_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureInstanceIdentifierPathArgumentsIsMutable();
-            instanceIdentifierPathArguments_.addAll(other.instanceIdentifierPathArguments_);
-          }
-          onChanged();
+        if (other.hasOriginalSubTree()) {
+          mergeOriginalSubTree(other.getOriginalSubTree());
         }
-        if (other.hasNormalizedNode()) {
-          mergeNormalizedNode(other.getNormalizedNode());
+        if (other.hasUpdatedSubTree()) {
+          mergeUpdatedSubTree(other.getUpdatedSubTree());
+        }
+        if (other.hasOriginalData()) {
+          mergeOriginalData(other.getOriginalData());
+        }
+        if (other.hasUpdatedData()) {
+          mergeUpdatedData(other.getUpdatedData());
+        }
+        if (other.hasCreatedData()) {
+          mergeCreatedData(other.getCreatedData());
+        }
+        if (removedPathsBuilder_ == null) {
+          if (!other.removedPaths_.isEmpty()) {
+            if (removedPaths_.isEmpty()) {
+              removedPaths_ = other.removedPaths_;
+              bitField0_ = (bitField0_ & ~0x00000020);
+            } else {
+              ensureRemovedPathsIsMutable();
+              removedPaths_.addAll(other.removedPaths_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.removedPaths_.isEmpty()) {
+            if (removedPathsBuilder_.isEmpty()) {
+              removedPathsBuilder_.dispose();
+              removedPathsBuilder_ = null;
+              removedPaths_ = other.removedPaths_;
+              bitField0_ = (bitField0_ & ~0x00000020);
+              removedPathsBuilder_ =
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getRemovedPathsFieldBuilder() : null;
+            } else {
+              removedPathsBuilder_.addAllMessages(other.removedPaths_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasNormalizedNode()) {
+        if (hasOriginalSubTree()) {
+          if (!getOriginalSubTree().isInitialized()) {
 
-          return false;
+            return false;
+          }
         }
-        if (!getNormalizedNode().isInitialized()) {
+        if (hasUpdatedSubTree()) {
+          if (!getUpdatedSubTree().isInitialized()) {
 
-          return false;
+            return false;
+          }
+        }
+        if (hasOriginalData()) {
+          if (!getOriginalData().isInitialized()) {
+
+            return false;
+          }
+        }
+        if (hasUpdatedData()) {
+          if (!getUpdatedData().isInitialized()) {
+
+            return false;
+          }
+        }
+        if (hasCreatedData()) {
+          if (!getCreatedData().isInitialized()) {
+
+            return false;
+          }
+        }
+        for (int i = 0; i < getRemovedPathsCount(); i++) {
+          if (!getRemovedPaths(i).isInitialized()) {
+
+            return false;
+          }
         }
         return true;
       }
@@ -495,214 +881,829 @@ public final class DataChangeListenerMessages {
       }
       private int bitField0_;
 
-      // repeated string instanceIdentifierPathArguments = 1;
-      private com.google.protobuf.LazyStringList instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureInstanceIdentifierPathArgumentsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          instanceIdentifierPathArguments_ = new com.google.protobuf.LazyStringArrayList(instanceIdentifierPathArguments_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public java.util.List<java.lang.String>
-          getInstanceIdentifierPathArgumentsList() {
-        return java.util.Collections.unmodifiableList(instanceIdentifierPathArguments_);
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public int getInstanceIdentifierPathArgumentsCount() {
-        return instanceIdentifierPathArguments_.size();
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public java.lang.String getInstanceIdentifierPathArguments(int index) {
-        return instanceIdentifierPathArguments_.get(index);
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getInstanceIdentifierPathArgumentsBytes(int index) {
-        return instanceIdentifierPathArguments_.getByteString(index);
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder setInstanceIdentifierPathArguments(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addInstanceIdentifierPathArguments(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addAllInstanceIdentifierPathArguments(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureInstanceIdentifierPathArgumentsIsMutable();
-        super.addAll(values, instanceIdentifierPathArguments_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder clearInstanceIdentifierPathArguments() {
-        instanceIdentifierPathArguments_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string instanceIdentifierPathArguments = 1;</code>
-       */
-      public Builder addInstanceIdentifierPathArgumentsBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureInstanceIdentifierPathArgumentsIsMutable();
-        instanceIdentifierPathArguments_.add(value);
-        onChanged();
-        return this;
-      }
-
-      // required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;
-      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      // optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node originalSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> normalizedNodeBuilder_;
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> originalSubTreeBuilder_;
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
-      public boolean hasNormalizedNode() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+      public boolean hasOriginalSubTree() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getNormalizedNode() {
-        if (normalizedNodeBuilder_ == null) {
-          return normalizedNode_;
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getOriginalSubTree() {
+        if (originalSubTreeBuilder_ == null) {
+          return originalSubTree_;
         } else {
-          return normalizedNodeBuilder_.getMessage();
+          return originalSubTreeBuilder_.getMessage();
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
-      public Builder setNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
-        if (normalizedNodeBuilder_ == null) {
+      public Builder setOriginalSubTree(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (originalSubTreeBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          normalizedNode_ = value;
+          originalSubTree_ = value;
           onChanged();
         } else {
-          normalizedNodeBuilder_.setMessage(value);
+          originalSubTreeBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
-      public Builder setNormalizedNode(
+      public Builder setOriginalSubTree(
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
-        if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = builderForValue.build();
+        if (originalSubTreeBuilder_ == null) {
+          originalSubTree_ = builderForValue.build();
           onChanged();
         } else {
-          normalizedNodeBuilder_.setMessage(builderForValue.build());
+          originalSubTreeBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
-      public Builder mergeNormalizedNode(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
-        if (normalizedNodeBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              normalizedNode_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
-            normalizedNode_ =
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(normalizedNode_).mergeFrom(value).buildPartial();
+      public Builder mergeOriginalSubTree(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (originalSubTreeBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              originalSubTree_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
+            originalSubTree_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(originalSubTree_).mergeFrom(value).buildPartial();
           } else {
-            normalizedNode_ = value;
+            originalSubTree_ = value;
           }
           onChanged();
         } else {
-          normalizedNodeBuilder_.mergeFrom(value);
+          originalSubTreeBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
+       */
+      public Builder clearOriginalSubTree() {
+        if (originalSubTreeBuilder_ == null) {
+          originalSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+          onChanged();
+        } else {
+          originalSubTreeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getOriginalSubTreeBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getOriginalSubTreeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getOriginalSubTreeOrBuilder() {
+        if (originalSubTreeBuilder_ != null) {
+          return originalSubTreeBuilder_.getMessageOrBuilder();
+        } else {
+          return originalSubTree_;
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          getOriginalSubTreeFieldBuilder() {
+        if (originalSubTreeBuilder_ == null) {
+          originalSubTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+                  originalSubTree_,
+                  getParentForChildren(),
+                  isClean());
+          originalSubTree_ = null;
+        }
+        return originalSubTreeBuilder_;
+      }
+
+      // optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node updatedSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> updatedSubTreeBuilder_;
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+       */
+      public boolean hasUpdatedSubTree() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node getUpdatedSubTree() {
+        if (updatedSubTreeBuilder_ == null) {
+          return updatedSubTree_;
+        } else {
+          return updatedSubTreeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+       */
+      public Builder setUpdatedSubTree(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (updatedSubTreeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          updatedSubTree_ = value;
+          onChanged();
+        } else {
+          updatedSubTreeBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
        */
-      public Builder clearNormalizedNode() {
-        if (normalizedNodeBuilder_ == null) {
-          normalizedNode_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+      public Builder setUpdatedSubTree(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder builderForValue) {
+        if (updatedSubTreeBuilder_ == null) {
+          updatedSubTree_ = builderForValue.build();
           onChanged();
         } else {
-          normalizedNodeBuilder_.clear();
+          updatedSubTreeBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+       */
+      public Builder mergeUpdatedSubTree(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node value) {
+        if (updatedSubTreeBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              updatedSubTree_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance()) {
+            updatedSubTree_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.newBuilder(updatedSubTree_).mergeFrom(value).buildPartial();
+          } else {
+            updatedSubTree_ = value;
+          }
+          onChanged();
+        } else {
+          updatedSubTreeBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
+       */
+      public Builder clearUpdatedSubTree() {
+        if (updatedSubTreeBuilder_ == null) {
+          updatedSubTree_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.getDefaultInstance();
+          onChanged();
+        } else {
+          updatedSubTreeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getNormalizedNodeBuilder() {
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder getUpdatedSubTreeBuilder() {
         bitField0_ |= 0x00000002;
         onChanged();
-        return getNormalizedNodeFieldBuilder().getBuilder();
+        return getUpdatedSubTreeFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
        */
-      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getNormalizedNodeOrBuilder() {
-        if (normalizedNodeBuilder_ != null) {
-          return normalizedNodeBuilder_.getMessageOrBuilder();
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder getUpdatedSubTreeOrBuilder() {
+        if (updatedSubTreeBuilder_ != null) {
+          return updatedSubTreeBuilder_.getMessageOrBuilder();
         } else {
-          return normalizedNode_;
+          return updatedSubTree_;
         }
       }
       /**
-       * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
+       * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
-          getNormalizedNodeFieldBuilder() {
-        if (normalizedNodeBuilder_ == null) {
-          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+          getUpdatedSubTreeFieldBuilder() {
+        if (updatedSubTreeBuilder_ == null) {
+          updatedSubTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
-                  normalizedNode_,
+                  updatedSubTree_,
                   getParentForChildren(),
                   isClean());
-          normalizedNode_ = null;
+          updatedSubTree_ = null;
         }
-        return normalizedNodeBuilder_;
+        return updatedSubTreeBuilder_;
+      }
+
+      // optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap originalData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> originalDataBuilder_;
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public boolean hasOriginalData() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getOriginalData() {
+        if (originalDataBuilder_ == null) {
+          return originalData_;
+        } else {
+          return originalDataBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public Builder setOriginalData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (originalDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          originalData_ = value;
+          onChanged();
+        } else {
+          originalDataBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public Builder setOriginalData(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder builderForValue) {
+        if (originalDataBuilder_ == null) {
+          originalData_ = builderForValue.build();
+          onChanged();
+        } else {
+          originalDataBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public Builder mergeOriginalData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (originalDataBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+              originalData_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance()) {
+            originalData_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.newBuilder(originalData_).mergeFrom(value).buildPartial();
+          } else {
+            originalData_ = value;
+          }
+          onChanged();
+        } else {
+          originalDataBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public Builder clearOriginalData() {
+        if (originalDataBuilder_ == null) {
+          originalData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+          onChanged();
+        } else {
+          originalDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder getOriginalDataBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getOriginalDataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getOriginalDataOrBuilder() {
+        if (originalDataBuilder_ != null) {
+          return originalDataBuilder_.getMessageOrBuilder();
+        } else {
+          return originalData_;
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          getOriginalDataFieldBuilder() {
+        if (originalDataBuilder_ == null) {
+          originalDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>(
+                  originalData_,
+                  getParentForChildren(),
+                  isClean());
+          originalData_ = null;
+        }
+        return originalDataBuilder_;
+      }
+
+      // optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap updatedData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> updatedDataBuilder_;
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public boolean hasUpdatedData() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getUpdatedData() {
+        if (updatedDataBuilder_ == null) {
+          return updatedData_;
+        } else {
+          return updatedDataBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public Builder setUpdatedData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (updatedDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          updatedData_ = value;
+          onChanged();
+        } else {
+          updatedDataBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public Builder setUpdatedData(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder builderForValue) {
+        if (updatedDataBuilder_ == null) {
+          updatedData_ = builderForValue.build();
+          onChanged();
+        } else {
+          updatedDataBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public Builder mergeUpdatedData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (updatedDataBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              updatedData_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance()) {
+            updatedData_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.newBuilder(updatedData_).mergeFrom(value).buildPartial();
+          } else {
+            updatedData_ = value;
+          }
+          onChanged();
+        } else {
+          updatedDataBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public Builder clearUpdatedData() {
+        if (updatedDataBuilder_ == null) {
+          updatedData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+          onChanged();
+        } else {
+          updatedDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder getUpdatedDataBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getUpdatedDataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getUpdatedDataOrBuilder() {
+        if (updatedDataBuilder_ != null) {
+          return updatedDataBuilder_.getMessageOrBuilder();
+        } else {
+          return updatedData_;
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          getUpdatedDataFieldBuilder() {
+        if (updatedDataBuilder_ == null) {
+          updatedDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>(
+                  updatedData_,
+                  getParentForChildren(),
+                  isClean());
+          updatedData_ = null;
+        }
+        return updatedDataBuilder_;
+      }
+
+      // optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap createdData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> createdDataBuilder_;
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public boolean hasCreatedData() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap getCreatedData() {
+        if (createdDataBuilder_ == null) {
+          return createdData_;
+        } else {
+          return createdDataBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public Builder setCreatedData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (createdDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          createdData_ = value;
+          onChanged();
+        } else {
+          createdDataBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public Builder setCreatedData(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder builderForValue) {
+        if (createdDataBuilder_ == null) {
+          createdData_ = builderForValue.build();
+          onChanged();
+        } else {
+          createdDataBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public Builder mergeCreatedData(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap value) {
+        if (createdDataBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) == 0x00000010) &&
+              createdData_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance()) {
+            createdData_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.newBuilder(createdData_).mergeFrom(value).buildPartial();
+          } else {
+            createdData_ = value;
+          }
+          onChanged();
+        } else {
+          createdDataBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public Builder clearCreatedData() {
+        if (createdDataBuilder_ == null) {
+          createdData_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.getDefaultInstance();
+          onChanged();
+        } else {
+          createdDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder getCreatedDataBuilder() {
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return getCreatedDataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder getCreatedDataOrBuilder() {
+        if (createdDataBuilder_ != null) {
+          return createdDataBuilder_.getMessageOrBuilder();
+        } else {
+          return createdData_;
+        }
+      }
+      /**
+       * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          getCreatedDataFieldBuilder() {
+        if (createdDataBuilder_ == null) {
+          createdDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>(
+                  createdData_,
+                  getParentForChildren(),
+                  isClean());
+          createdData_ = null;
+        }
+        return createdDataBuilder_;
+      }
+
+      // repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;
+      private java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> removedPaths_ =
+        java.util.Collections.emptyList();
+      private void ensureRemovedPathsIsMutable() {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
+          removedPaths_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier>(removedPaths_);
+          bitField0_ |= 0x00000020;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> removedPathsBuilder_;
+
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> getRemovedPathsList() {
+        if (removedPathsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(removedPaths_);
+        } else {
+          return removedPathsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public int getRemovedPathsCount() {
+        if (removedPathsBuilder_ == null) {
+          return removedPaths_.size();
+        } else {
+          return removedPathsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getRemovedPaths(int index) {
+        if (removedPathsBuilder_ == null) {
+          return removedPaths_.get(index);
+        } else {
+          return removedPathsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder setRemovedPaths(
+          int index, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (removedPathsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRemovedPathsIsMutable();
+          removedPaths_.set(index, value);
+          onChanged();
+        } else {
+          removedPathsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder setRemovedPaths(
+          int index, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (removedPathsBuilder_ == null) {
+          ensureRemovedPathsIsMutable();
+          removedPaths_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          removedPathsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder addRemovedPaths(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (removedPathsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRemovedPathsIsMutable();
+          removedPaths_.add(value);
+          onChanged();
+        } else {
+          removedPathsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder addRemovedPaths(
+          int index, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (removedPathsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureRemovedPathsIsMutable();
+          removedPaths_.add(index, value);
+          onChanged();
+        } else {
+          removedPathsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder addRemovedPaths(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (removedPathsBuilder_ == null) {
+          ensureRemovedPathsIsMutable();
+          removedPaths_.add(builderForValue.build());
+          onChanged();
+        } else {
+          removedPathsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder addRemovedPaths(
+          int index, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (removedPathsBuilder_ == null) {
+          ensureRemovedPathsIsMutable();
+          removedPaths_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          removedPathsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder addAllRemovedPaths(
+          java.lang.Iterable<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> values) {
+        if (removedPathsBuilder_ == null) {
+          ensureRemovedPathsIsMutable();
+          super.addAll(values, removedPaths_);
+          onChanged();
+        } else {
+          removedPathsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder clearRemovedPaths() {
+        if (removedPathsBuilder_ == null) {
+          removedPaths_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000020);
+          onChanged();
+        } else {
+          removedPathsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public Builder removeRemovedPaths(int index) {
+        if (removedPathsBuilder_ == null) {
+          ensureRemovedPathsIsMutable();
+          removedPaths_.remove(index);
+          onChanged();
+        } else {
+          removedPathsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getRemovedPathsBuilder(
+          int index) {
+        return getRemovedPathsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getRemovedPathsOrBuilder(
+          int index) {
+        if (removedPathsBuilder_ == null) {
+          return removedPaths_.get(index);  } else {
+          return removedPathsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+           getRemovedPathsOrBuilderList() {
+        if (removedPathsBuilder_ != null) {
+          return removedPathsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(removedPaths_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder addRemovedPathsBuilder() {
+        return getRemovedPathsFieldBuilder().addBuilder(
+            org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder addRemovedPathsBuilder(
+          int index) {
+        return getRemovedPathsFieldBuilder().addBuilder(
+            index, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
+       */
+      public java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder>
+           getRemovedPathsBuilderList() {
+        return getRemovedPathsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          getRemovedPathsFieldBuilder() {
+        if (removedPathsBuilder_ == null) {
+          removedPathsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+                  removedPaths_,
+                  ((bitField0_ & 0x00000020) == 0x00000020),
+                  getParentForChildren(),
+                  isClean());
+          removedPaths_ = null;
+        }
+        return removedPathsBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.DataChanged)
@@ -1045,13 +2046,21 @@ public final class DataChangeListenerMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\030DataChangeListener.proto\022!org.opendayl" +
-      "ight.controller.mdsal\032\014Common.proto\"w\n\013D" +
-      "ataChanged\022\'\n\037instanceIdentifierPathArgu" +
-      "ments\030\001 \003(\t\022?\n\016normalizedNode\030\002 \002(\0132\'.or" +
-      "g.opendaylight.controller.mdsal.Node\"\022\n\020" +
-      "DataChangedReplyBd\nForg.opendaylight.con" +
-      "troller.protobuff.messages.datachange.no" +
-      "tificationB\032DataChangeListenerMessages"
+      "ight.controller.mdsal\032\014Common.proto\"\241\003\n\013" +
+      "DataChanged\022@\n\017originalSubTree\030\001 \001(\0132\'.o" +
+      "rg.opendaylight.controller.mdsal.Node\022?\n" +
+      "\016updatedSubTree\030\002 \001(\0132\'.org.opendaylight" +
+      ".controller.mdsal.Node\022@\n\014originalData\030\003" +
+      " \001(\0132*.org.opendaylight.controller.mdsal" +
+      ".NodeMap\022?\n\013updatedData\030\004 \001(\0132*.org.open" +
+      "daylight.controller.mdsal.NodeMap\022?\n\013cre" +
+      "atedData\030\005 \001(\0132*.org.opendaylight.contro",
+      "ller.mdsal.NodeMap\022K\n\014removedPaths\030\006 \003(\013" +
+      "25.org.opendaylight.controller.mdsal.Ins" +
+      "tanceIdentifier\"\022\n\020DataChangedReplyBd\nFo" +
+      "rg.opendaylight.controller.protobuff.mes" +
+      "sages.datachange.notificationB\032DataChang" +
+      "eListenerMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1063,7 +2072,7 @@ public final class DataChangeListenerMessages {
           internal_static_org_opendaylight_controller_mdsal_DataChanged_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_DataChanged_descriptor,
-              new java.lang.String[] { "InstanceIdentifierPathArguments", "NormalizedNode", });
+              new java.lang.String[] { "OriginalSubTree", "UpdatedSubTree", "OriginalData", "UpdatedData", "CreatedData", "RemovedPaths", });
           internal_static_org_opendaylight_controller_mdsal_DataChangedReply_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_org_opendaylight_controller_mdsal_DataChangedReply_fieldAccessorTable = new

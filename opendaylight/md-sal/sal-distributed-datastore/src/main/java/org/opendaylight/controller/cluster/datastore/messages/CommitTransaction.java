@@ -8,5 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CommitTransaction {
+import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+
+public class CommitTransaction implements SerializableMessage {
+  public static Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CommitTransaction.class;
+
+  @Override
+  public Object toSerializable() {
+    return  ThreePhaseCommitCohortMessages.CommitTransaction.newBuilder().build();
+  }
 }
