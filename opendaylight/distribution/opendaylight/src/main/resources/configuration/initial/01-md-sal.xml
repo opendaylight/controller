@@ -72,17 +72,7 @@
                     </schema-service>
                 </module>
                 -->
-                <!-- Cluster RPC -->
-                <!-- Enable the following module if you want to use remote rpc connector
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">prefix:remote-rpc-connector</type>
-                    <name>remote-rpc-connector</name>
-                    <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
-                        <name>dom-broker</name>
-                    </dom-broker>
-                </module>
-                -->
+
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-operational-datastore-provider</type>
                     <name>operational-store-service</name>
@@ -157,6 +147,17 @@
                         </binding-mapping-service>
                     </binding-forwarded-data-broker>
                 </module>
+                <!-- Cluster RPC -->
+                <!-- Enable the following module if you want to use remote rpc connector
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">prefix:remote-rpc-connector</type>
+                    <name>remote-rpc-connector</name>
+                    <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                        <name>dom-broker</name>
+                    </dom-broker>
+                </module>
+                -->
             </modules>
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                     <service>

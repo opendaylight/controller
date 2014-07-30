@@ -9,6 +9,7 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 import java.io.Serializable;
 
@@ -16,6 +17,7 @@ public class ExecuteRpc implements Serializable {
 
   private String inputCompositeNode;
   private QName rpc;
+  private CompositeNode node;
 
   public ExecuteRpc(String inputCompositeNode, QName rpc) {
     this.inputCompositeNode = inputCompositeNode;
@@ -28,5 +30,13 @@ public class ExecuteRpc implements Serializable {
 
   public QName getRpc() {
     return rpc;
+  }
+
+  public CompositeNode getNode() {
+    return node;
+  }
+
+  public void setNode(CompositeNode node) {
+    this.node = node;
   }
 }

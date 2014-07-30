@@ -9,17 +9,17 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.io.Serializable;
 
 public class InvokeRoutedRpc implements Serializable {
 
   private QName rpc;
-  private InstanceIdentifier identifier;
+  private YangInstanceIdentifier identifier;
   private CompositeNode input;
 
-  public InvokeRoutedRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+  public InvokeRoutedRpc(QName rpc, YangInstanceIdentifier identifier, CompositeNode input) {
     this.rpc = rpc;
     this.identifier = identifier;
     this.input = input;
@@ -34,7 +34,7 @@ public class InvokeRoutedRpc implements Serializable {
     return rpc;
   }
 
-  public InstanceIdentifier getIdentifier() {
+  public YangInstanceIdentifier getIdentifier() {
     return identifier;
   }
 
