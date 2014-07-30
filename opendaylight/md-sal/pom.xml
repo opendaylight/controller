@@ -58,6 +58,8 @@
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
 
+    <module>sal-akka-raft</module>
+
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
 

@@ -8,5 +8,7 @@
 
 package org.opendaylight.controller.cluster.example.messages;
 
-public class KeyValueSaved {
+import java.io.Serializable;
+
+public class KeyValueSaved implements Serializable {
 }

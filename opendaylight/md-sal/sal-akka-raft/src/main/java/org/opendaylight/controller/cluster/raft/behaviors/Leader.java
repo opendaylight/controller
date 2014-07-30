@@ -200,8 +200,10 @@ public class Leader extends AbstractRaftActorBehavior {
         return RaftState.Leader;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object message) {
+    @Override public RaftState handleMessage(ActorRef sender, Object originalMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
+
+        Object message = fromSerializableMessage(originalMessage);
 
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
@@ -298,12 +300,9 @@ public class Leader extends AbstractRaftActorBehavior {
             }
 
             followerActor.tell(
-                new AppendEntries(currentTerm(), context.getId(),
-                    prevLogIndex(nextIndex), prevLogTerm(nextIndex),
-                    entries, context.getCommitIndex()
-                ),
-                actor()
-            );
+                new AppendEntries(currentTerm(), context.getId(), prevLogIndex(nextIndex),
+                    prevLogTerm(nextIndex), entries, context.getCommitIndex()).toSerializable(),
+                actor());
         }
     }
 

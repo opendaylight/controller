@@ -14,7 +14,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+/**
+ * This is a test driver for testing akka-raft implementation
+ * Its uses ExampleActors and threads to push content(key-vals) to these actors
+ * Each ExampleActor can have one or more ClientActors. Each ClientActor spawns
+ * a thread and starts push logs to the actor its assignged to.
+ */
 public class TestDriver {
 
     private static final ActorSystem actorSystem = ActorSystem.create();

@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-public class InstallSnapshotReply extends AbstractRaftRPC {
+import java.io.Serializable;
+
+public class InstallSnapshotReply extends AbstractRaftRPC implements Serializable {
 
     // The followerId - this will be used to figure out which follower is
     // responding

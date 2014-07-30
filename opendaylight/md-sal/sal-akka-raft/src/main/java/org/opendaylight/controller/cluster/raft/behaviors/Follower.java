@@ -214,7 +214,10 @@ public class Follower extends AbstractRaftActorBehavior {
         return RaftState.Follower;
     }
 
-    @Override public RaftState handleMessage(ActorRef sender, Object message) {
+    @Override public RaftState handleMessage(ActorRef sender, Object originalMessage) {
+
+        Object message = fromSerializableMessage(originalMessage);
+
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
             // If RPC request or response contains term T > currentTerm:
@@ -227,9 +230,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (message instanceof ElectionTimeout) {
             return RaftState.Candidate;
+
         } else if (message instanceof InstallSnapshot) {
-            InstallSnapshot snapshot = (InstallSnapshot) message;
-            actor().tell(new ApplySnapshot(snapshot), actor());
+            InstallSnapshot installSnapshot = (InstallSnapshot) message;
+            actor().tell(new ApplySnapshot(installSnapshot.getData()), actor());
         }
 
         scheduleElection(electionDuration());

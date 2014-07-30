@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-public class InstallSnapshot extends AbstractRaftRPC {
+import java.io.Serializable;
+
+public class InstallSnapshot extends AbstractRaftRPC implements Serializable {
 
     private final String leaderId;
     private final long lastIncludedIndex;
