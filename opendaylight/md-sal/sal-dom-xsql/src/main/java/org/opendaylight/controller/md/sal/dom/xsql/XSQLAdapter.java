@@ -20,7 +20,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -78,7 +78,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 synchronized (XSQLAdapter.class) {
                     if (l == null) {
                         l = new PrintStream(
-                            new FileOutputStream("/tmp/xql.log"));
+                                new FileOutputStream("/tmp/xql.log"));
                     }
                 }
             }
@@ -96,7 +96,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 synchronized (XSQLAdapter.class) {
                     if (l == null) {
                         l = new PrintStream(
-                            new FileOutputStream("/tmp/xql.log"));
+                                new FileOutputStream("/tmp/xql.log"));
                     }
                 }
             }
@@ -130,20 +130,20 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         if (table.getParent().isModule()) {
             try {
                 List<Object> result = new LinkedList<Object>();
-                InstanceIdentifier instanceIdentifier =
-                    InstanceIdentifier.builder()
+                YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
+                        .builder()
                         .node(XSQLODLUtils.getPath(table.getODLNode()).get(0))
                         .toInstance();
-                DOMDataReadTransaction t = this.domDataBroker.newReadOnlyTransaction();
-                Object node =
-                    t.read(LogicalDatastoreType.OPERATIONAL, instanceIdentifier)
-                        .get();
+                DOMDataReadTransaction t = this.domDataBroker
+                        .newReadOnlyTransaction();
+                Object node = t.read(LogicalDatastoreType.OPERATIONAL,
+                        instanceIdentifier).get();
                 node = XSQLODLUtils.get(node, "reference");
                 if (node == null) {
                     return result;
                 }
 
-                //XSQLAdapter.log(""+node);
+                // XSQLAdapter.log(""+node);
                 Map<?, ?> children = XSQLODLUtils.getChildren(node);
                 for (Object c : children.values()) {
                     Map<?, ?> sons = XSQLODLUtils.getChildren(c);
@@ -169,7 +169,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         List<NETask> tasks = new LinkedList<XSQLAdapter.NETask>();
 
         for (Object entry : roots) {
-            NETask task = new NETask(rs, entry, main,bluePrint);
+            NETask task = new NETask(rs, entry, main, bluePrint);
             rs.numberOfTasks++;
             tasks.add(task);
         }
@@ -201,7 +201,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     }
 
     protected void processCommand(StringBuffer inputString, PrintStream sout,
-        TelnetConnection tc) {
+            TelnetConnection tc) {
         if (inputString.toString().trim().equals("r")) {
             sout.println(lastInputString);
             inputString = lastInputString;
@@ -211,12 +211,13 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         if (input.startsWith("setExcel")) {
             String substr = input.substring("setExcel".length()).trim();
             if (!substr.equals("")) {
-                //excelPath01 = substr;
+                // excelPath01 = substr;
             }
-            //sout.println("Excel Path="+excelPath01);
+            // sout.println("Excel Path="+excelPath01);
         } else if (input.startsWith("list vrel")) {
             String substr = input.substring("list vrel".length()).trim();
-            XSQLBluePrintNode node = bluePrint.getBluePrintNodeByTableName(substr);
+            XSQLBluePrintNode node = bluePrint
+                    .getBluePrintNodeByTableName(substr);
             if (node == null) {
                 sout.println("Unknown Interface " + substr);
                 return;
@@ -232,7 +233,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             }
         } else if (input.startsWith("list vfields")) {
             String substr = input.substring("list vfields".length()).trim();
-            XSQLBluePrintNode node = bluePrint.getBluePrintNodeByTableName(substr);
+            XSQLBluePrintNode node = bluePrint
+                    .getBluePrintNodeByTableName(substr);
             if (node == null) {
                 sout.println("Unknown Interface " + substr);
                 return;
@@ -251,11 +253,11 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             jdbcServer.connectToClient(addr);
             sout.println("Connected To " + addr);
         } else if (input.startsWith("fetch")) {
-            //fetchSize = Integer.parseInt(input.substring(6).trim());
+            // fetchSize = Integer.parseInt(input.substring(6).trim());
         } else if (input.startsWith("list vtables")) {
 
-            String iNames[] =
-                bluePrint.getAllTableNames().toArray(new String[0]);
+            String iNames[] = bluePrint.getAllTableNames().toArray(
+                    new String[0]);
             Arrays.sort(iNames);
             sout.println();
             for (int i = 0; i < iNames.length; i++) {
@@ -281,15 +283,15 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 sout.println(s);
             }
         } else if (input.equals("help") || input.equals("?")) {
-            //sout.println(getLongDescription());
+            // sout.println(getLongDescription());
         } else if (input.equals("avmdata")) {
             try {
-                //myConnection.getManagedData();
+                // myConnection.getManagedData();
             } catch (Exception err) {
             }
         } else if (input.equals("innerjoin")) {
-            //innerJoin = !innerJoin;
-            //sout.println("Inner Join set to "+innerJoin);
+            // innerJoin = !innerJoin;
+            // sout.println("Inner Join set to "+innerJoin);
         } else if (input.equals("exit")) {
             try {
                 sout.close();
@@ -305,8 +307,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             if (toCsv) {
                 if (exportToFileName != null) {
                     try {
-                        PrintStream o =
-                            new PrintStream(new File(exportToFileName));
+                        PrintStream o = new PrintStream(new File(
+                                exportToFileName));
                         executeSql(inputString.toString(), o);
                         o.close();
                     } catch (Exception err) {
@@ -314,8 +316,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     }
                 } else {
                     try {
-                        String fName =
-                            "export-" + System.currentTimeMillis() + ".csv";
+                        String fName = "export-" + System.currentTimeMillis()
+                                + ".csv";
                         PrintStream o = new PrintStream(new File(fName));
                         executeSql(inputString.toString(), o);
                         o.close();
@@ -398,7 +400,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                         }
                     }
 
-
                     if (!toCsv) {
                         out.print("|");
                     }
@@ -415,7 +416,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     for (int i = 0; i < gap; i++) {
                         out.print(" ");
                     }
-
 
                     if (loc > 0) {
                         if (toCsv) {
@@ -437,7 +437,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         }
     }
 
-
     public static class NETask implements Runnable {
 
         private JDBCResultSet rs = null;
@@ -445,7 +444,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         private XSQLBluePrintNode main = null;
         private XSQLBluePrint bluePrint = null;
 
-        public NETask(JDBCResultSet _rs, Object _modelRoot,XSQLBluePrintNode _main,XSQLBluePrint _bluePrint) {
+        public NETask(JDBCResultSet _rs, Object _modelRoot,
+                XSQLBluePrintNode _main, XSQLBluePrint _bluePrint) {
             this.rs = _rs;
             this.modelRoot = _modelRoot;
             this.main = _main;
@@ -453,7 +453,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         }
 
         public void run() {
-            rs.addRecords(modelRoot, main, true, main.getBluePrintNodeName(),bluePrint);
+            rs.addRecords(modelRoot, main, true, main.getBluePrintNodeName(),
+                    bluePrint);
             synchronized (rs) {
                 rs.numberOfTasks--;
                 if (rs.numberOfTasks == 0) {
@@ -463,7 +464,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             }
         }
     }
-
 
     private static class NEEntry {
         private Object ne = null;
@@ -477,7 +477,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             return m.getName() + "  [" + m.getNamespace().toString() + "]";
         }
     }
-
 
     private class TelnetConnection extends Thread {
 

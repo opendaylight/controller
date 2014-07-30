@@ -1,15 +1,15 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -119,7 +119,7 @@ public class XSQLODLUtils {
     }
 
     private static void collectODL(XSQLBluePrint bluePrint,
-        XSQLBluePrintNode parent, Set<DataSchemaNode> nodes, int level) {
+        XSQLBluePrintNode parent, Collection<DataSchemaNode> nodes, int level) {
         if (nodes == null) {
             return;
         }
