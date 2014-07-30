@@ -118,6 +118,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
                 // Unable to initialize device, set as disconnected
                 logger.error("{}: Initialization failed", id, t);
                 salFacade.onDeviceDisconnected();
+                // TODO ssh connection is still open if sal initialization fails
             }
         });
     }

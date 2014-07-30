@@ -8,6 +8,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class NetconfSessionCapabilities {
+
     private static final class ParameterMatcher {
         private final Predicate<String> predicate;
         private final int skipLength;
@@ -57,10 +59,10 @@ public final class NetconfSessionCapabilities {
     };
 
     private final Set<QName> moduleBasedCaps;
-    private final Set<String> capabilities;
+    private final Set<String> nonModuleCaps;
 
-    private NetconfSessionCapabilities(final Set<String> capabilities, final Set<QName> moduleBasedCaps) {
-        this.capabilities = Preconditions.checkNotNull(capabilities);
+    private NetconfSessionCapabilities(final Set<String> nonModuleCaps, final Set<QName> moduleBasedCaps) {
+        this.nonModuleCaps = Preconditions.checkNotNull(nonModuleCaps);
         this.moduleBasedCaps = Preconditions.checkNotNull(moduleBasedCaps);
     }
 
@@ -68,30 +70,45 @@ public final class NetconfSessionCapabilities {
         return moduleBasedCaps;
     }
 
-    public boolean containsCapability(final String capability) {
-        return capabilities.contains(capability);
+    public Set<String> getNonModuleCaps() {
+        return nonModuleCaps;
     }
 
-    public boolean containsCapability(final QName capability) {
+    public boolean containsNonModuleCapability(final String capability) {
+        return nonModuleCaps.contains(capability);
+    }
+
+    public boolean containsModuleCapability(final QName capability) {
         return moduleBasedCaps.contains(capability);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("capabilities", capabilities)
+                .add("capabilities", nonModuleCaps)
+                .add("moduleBasedCapabilities", moduleBasedCaps)
                 .add("rollback", isRollbackSupported())
                 .add("monitoring", isMonitoringSupported())
                 .toString();
     }
 
     public boolean isRollbackSupported() {
-        return containsCapability(NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString());
+        return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString());
     }
 
     public boolean isMonitoringSupported() {
-        return containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
-                || containsCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
+        return containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)
+                || containsNonModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
+    }
+
+    public NetconfSessionCapabilities replaceModuleCaps(final NetconfSessionCapabilities netconfSessionModuleCapabilities) {
+        final Set<QName> moduleBasedCaps = Sets.newHashSet(netconfSessionModuleCapabilities.getModuleBasedCaps());
+
+        // Preserve monitoring module, since it indicates support for ietf-netconf-monitoring
+        if(containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)) {
+            moduleBasedCaps.add(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING);
+        }
+        return new NetconfSessionCapabilities(getNonModuleCaps(), moduleBasedCaps);
     }
 
     public static NetconfSessionCapabilities fromNetconfSession(final NetconfClientSession session) {
@@ -100,6 +117,7 @@ public final class NetconfSessionCapabilities {
 
     public static NetconfSessionCapabilities fromStrings(final Collection<String> capabilities) {
         final Set<QName> moduleBasedCaps = new HashSet<>();
+        final Set<String> nonModuleCaps = Sets.newHashSet(capabilities);
 
         for (final String capability : capabilities) {
             final int qmark = capability.indexOf('?');
@@ -117,6 +135,7 @@ public final class NetconfSessionCapabilities {
             String revision = REVISION_PARAM.from(queryParams);
             if (revision != null) {
                 moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+                nonModuleCaps.remove(capability);
                 continue;
             }
 
@@ -136,8 +155,9 @@ public final class NetconfSessionCapabilities {
 
             // FIXME: do we really want to continue here?
             moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+            nonModuleCaps.remove(capability);
         }
 
-        return new NetconfSessionCapabilities(ImmutableSet.copyOf(capabilities), ImmutableSet.copyOf(moduleBasedCaps));
+        return new NetconfSessionCapabilities(ImmutableSet.copyOf(nonModuleCaps), ImmutableSet.copyOf(moduleBasedCaps));
     }
 }

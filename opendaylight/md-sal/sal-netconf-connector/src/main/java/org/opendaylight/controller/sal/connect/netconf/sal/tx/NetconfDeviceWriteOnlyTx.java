@@ -100,10 +100,10 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
 
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
+        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can replaceModuleCaps only configuration, not %s", store);
 
         try {
-            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
+            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path, id);
             final CompositeNode legacyData = normalizer.toLegacy(path, data);
             sendEditRpc(createEditConfigStructure(legacyPath, Optional.of(ModifyAction.REPLACE), Optional.fromNullable(legacyData)), Optional.of(ModifyAction.NONE));
         } catch (final ExecutionException e) {
@@ -115,10 +115,10 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
 
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
+        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can replaceModuleCaps only configuration, not %s", store);
 
         try {
-            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path);
+            final YangInstanceIdentifier legacyPath = NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path, id);
             final CompositeNode legacyData = normalizer.toLegacy(path, data);
             sendEditRpc(
                     createEditConfigStructure(legacyPath, Optional.<ModifyAction> absent(), Optional.fromNullable(legacyData)), Optional.<ModifyAction> absent());
@@ -131,10 +131,10 @@ public class NetconfDeviceWriteOnlyTx implements DOMDataWriteTransaction {
 
     @Override
     public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can merge only configuration, not %s", store);
+        Preconditions.checkArgument(store == LogicalDatastoreType.CONFIGURATION, "Can replaceModuleCaps only configuration, not %s", store);
 
         try {
-            sendEditRpc(createEditConfigStructure(NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path), Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
+            sendEditRpc(createEditConfigStructure(NetconfDeviceReadOnlyTx.toLegacyPath(normalizer, path, id), Optional.of(ModifyAction.DELETE), Optional.<CompositeNode>absent()), Optional.of(ModifyAction.NONE));
         } catch (final ExecutionException e) {
             LOG.warn("Error deleting data {}, discarding changes", path, e);
             discardChanges();

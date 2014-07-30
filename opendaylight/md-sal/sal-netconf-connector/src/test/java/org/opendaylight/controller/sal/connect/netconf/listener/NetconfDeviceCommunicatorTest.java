@@ -8,35 +8,35 @@
 
 package org.opendaylight.controller.sal.connect.netconf.listener;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.RPC_REPLY_KEY;
+import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.RPC_REPLY_KEY;
-import static org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,10 +55,6 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class NetconfDeviceCommunicatorTest {
 
@@ -129,9 +125,9 @@ public class NetconfDeviceCommunicatorTest {
         verify( mockDevice ).onRemoteSessionUp( netconfSessionCapabilities.capture(), eq( communicator ) );
 
         NetconfSessionCapabilities actualCapabilites = netconfSessionCapabilities.getValue();
-        assertEquals( "containsCapability", true, actualCapabilites.containsCapability(
-                                NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString() ) );
-        assertEquals( "containsCapability", true, actualCapabilites.containsCapability( testCapability ) );
+        assertEquals( "containsModuleCapability", true, actualCapabilites.containsNonModuleCapability(
+                NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString()) );
+        assertEquals( "containsModuleCapability", false, actualCapabilites.containsNonModuleCapability(testCapability) );
         assertEquals( "getModuleBasedCaps", Sets.newHashSet(
                             QName.create( "urn:opendaylight:params:xml:ns:test", "2014-06-02", "test-module" )),
                       actualCapabilites.getModuleBasedCaps() );

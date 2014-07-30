@@ -15,6 +15,7 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizat
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
+import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -38,10 +40,12 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
 
     private final RpcImplementation rpc;
     private final DataNormalizer normalizer;
+    private final RemoteDeviceId id;
 
-    public NetconfDeviceReadOnlyTx(final RpcImplementation rpc, final DataNormalizer normalizer) {
+    public NetconfDeviceReadOnlyTx(final RpcImplementation rpc, final DataNormalizer normalizer, final RemoteDeviceId id) {
         this.rpc = rpc;
         this.normalizer = normalizer;
+        this.id = id;
     }
 
     public ListenableFuture<Optional<NormalizedNode<?, ?>>> readConfigurationData(final YangInstanceIdentifier path) {
@@ -51,6 +55,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         return Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
+                checkReadSuccess(result, path);
+
                 final CompositeNode data = result.getResult().getFirstCompositeByName(NETCONF_DATA_QNAME);
                 final CompositeNode node = (CompositeNode) findNode(data, path);
 
@@ -61,6 +67,11 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         });
     }
 
+    private void checkReadSuccess(final RpcResult<CompositeNode> result, final YangInstanceIdentifier path) {
+        LOG.warn("{}: Unable to read data: {}, errors: {}", id, path, result.getErrors());
+        Preconditions.checkArgument(result.isSuccessful(), "%s: Unable to read data: %s, errors: %s", id, path, result.getErrors());
+    }
+
     private Optional<NormalizedNode<?, ?>> transform(final YangInstanceIdentifier path, final CompositeNode node) {
         if(node == null) {
             return Optional.absent();
@@ -68,7 +79,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         try {
             return Optional.<NormalizedNode<?, ?>>of(normalizer.toNormalized(path, node).getValue());
         } catch (final Exception e) {
-            LOG.error("Unable to normalize data for {}, data: {}", path, node, e);
+            LOG.error("{}: Unable to normalize data for {}, data: {}", id, path, node, e);
             throw e;
         }
     }
@@ -79,6 +90,8 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         return Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
+                checkReadSuccess(result, path);
+
                 final CompositeNode data = result.getResult().getFirstCompositeByName(NETCONF_DATA_QNAME);
                 final CompositeNode node = (CompositeNode) findNode(data, path);
 
@@ -123,7 +136,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
 
     @Override
     public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        final YangInstanceIdentifier legacyPath = toLegacyPath(normalizer, path);
+        final YangInstanceIdentifier legacyPath = toLegacyPath(normalizer, path, id);
 
         switch (store) {
             case CONFIGURATION : {
@@ -134,14 +147,14 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
             }
         }
 
-        throw new IllegalArgumentException(String.format("Cannot read data %s for %s datastore, unknown datastore type", path, store));
+        throw new IllegalArgumentException(String.format("%s, Cannot read data %s for %s datastore, unknown datastore type", id, path, store));
     }
 
-    static YangInstanceIdentifier toLegacyPath(final DataNormalizer normalizer, final YangInstanceIdentifier path) {
+    static YangInstanceIdentifier toLegacyPath(final DataNormalizer normalizer, final YangInstanceIdentifier path, final RemoteDeviceId id) {
         try {
             return normalizer.toLegacy(path);
         } catch (final DataNormalizationException e) {
-            throw new IllegalArgumentException("Cannot normalize path " + path, e);
+            throw new IllegalArgumentException(id + ": Cannot normalize path " + path, e);
         }
     }
 

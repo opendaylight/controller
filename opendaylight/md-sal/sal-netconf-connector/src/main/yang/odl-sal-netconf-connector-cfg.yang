@@ -58,6 +58,14 @@ module odl-sal-netconf-connector-cfg {
                 type string;
             }
 
+            container yang-module-capabilities {
+                leaf-list capability {
+                    type string;
+                    description "Set a list of capabilities to override capabilities provided in device's hello message.
+                                 Can be used for devices that do not report any yang modules in their hello message";
+                }
+            }
+
             container dom-registry {
                 uses config:service-ref {
                     refine type {
