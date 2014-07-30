@@ -13,8 +13,10 @@ import static org.opendaylight.controller.config.api.JmxAttributeValidationExcep
 import java.io.File;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfReconnectingClientConfiguration;
@@ -24,6 +26,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
+import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -40,6 +43,8 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 /**
  *
  */
@@ -49,6 +54,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
     private BundleContext bundleContext;
+    private Optional<NetconfSessionCapabilities> userCapabilities;
 
     public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -82,9 +88,11 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             checkNotNull(getPassword(), passwordJmxAttribute);
         }
 
+        userCapabilities = getUserCapabilities();
+
     }
 
-    private boolean isHostAddressPresent(Host address) {
+    private boolean isHostAddressPresent(final Host address) {
         return address.getDomainName() != null ||
                address.getIpAddress() != null && (address.getIpAddress().getIpv4Address() != null || address.getIpAddress().getIpv6Address() != null);
     }
@@ -98,10 +106,14 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final Broker domBroker = getDomRegistryDependency();
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
-        final RemoteDeviceHandler salFacade = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
+        final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade
+                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
         final NetconfDevice device =
                 NetconfDevice.createNetconfDevice(id, getGlobalNetconfSchemaProvider(), globalProcessingExecutor, salFacade);
-        final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(id, device);
+
+        final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
+                new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
+
         final NetconfReconnectingClientConfiguration clientConfig = getClientConfig(listener);
 
         final NetconfClientDispatcher dispatcher = getClientDispatcherDependency();
@@ -114,6 +126,26 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 salFacade.close();
             }
         };
+    }
+
+    private Optional<NetconfSessionCapabilities> getUserCapabilities() {
+        if(getCapabilities() == null) {
+            return Optional.absent();
+        }
+
+        final List<String> capabilities = getCapabilities().getCapability();
+        if(capabilities == null || capabilities.isEmpty()) {
+            return Optional.absent();
+        }
+
+        final NetconfSessionCapabilities parsedOverrideCapabilities = NetconfSessionCapabilities.fromStrings(capabilities);
+        JmxAttributeValidationException.checkCondition(
+                parsedOverrideCapabilities.getNonModuleCaps().isEmpty(),
+                "Capabilities to override can only contain module based capabilities, non-module capabilities will be retrieved from the device," +
+                        " configured non-module capabilities: " + parsedOverrideCapabilities.getNonModuleCaps(),
+                capabilitiesJmxAttribute);
+
+        return Optional.of(parsedOverrideCapabilities);
     }
 
     private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider() {
@@ -175,8 +207,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         if(getAddress().getDomainName() != null) {
             return new InetSocketAddress(getAddress().getDomainName().getValue(), getPort().getValue());
         } else {
-            IpAddress ipAddress = getAddress().getIpAddress();
-            String ip = ipAddress.getIpv4Address() != null ? ipAddress.getIpv4Address().getValue() : ipAddress.getIpv6Address().getValue();
+            final IpAddress ipAddress = getAddress().getIpAddress();
+            final String ip = ipAddress.getIpv4Address() != null ? ipAddress.getIpv4Address().getValue() : ipAddress.getIpv6Address().getValue();
             return new InetSocketAddress(ip, getPort().getValue());
         }
     }

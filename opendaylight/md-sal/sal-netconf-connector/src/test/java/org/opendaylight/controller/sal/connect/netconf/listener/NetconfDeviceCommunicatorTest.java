@@ -129,9 +129,9 @@ public class NetconfDeviceCommunicatorTest {
         verify( mockDevice ).onRemoteSessionUp( netconfSessionCapabilities.capture(), eq( communicator ) );
 
         NetconfSessionCapabilities actualCapabilites = netconfSessionCapabilities.getValue();
-        assertEquals( "containsCapability", true, actualCapabilites.containsCapability(
-                                NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString() ) );
-        assertEquals( "containsCapability", true, actualCapabilites.containsCapability( testCapability ) );
+        assertEquals( "containsModuleCapability", true, actualCapabilites.containsNonModuleCapability(
+                NetconfMessageTransformUtil.NETCONF_ROLLBACK_ON_ERROR_URI.toString()) );
+        assertEquals( "containsModuleCapability", true, actualCapabilites.containsNonModuleCapability(testCapability) );
         assertEquals( "getModuleBasedCaps", Sets.newHashSet(
                             QName.create( "urn:opendaylight:params:xml:ns:test", "2014-06-02", "test-module" )),
                       actualCapabilites.getModuleBasedCaps() );
