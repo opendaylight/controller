@@ -16,7 +16,7 @@ import org.opendaylight.controller.remote.rpc.messages.AddRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.RemoveRoutedRpc;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext, InstanceIdentifier>{
+public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>{
   private static final Logger LOG = LoggerFactory.getLogger(RoutedRpcListener.class);
   private final ActorRef rpcRegistry;
   private final String actorPath;
@@ -35,11 +35,11 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
   }
 
   @Override
-  public void onRouteChange(RouteChange<RpcRoutingContext, InstanceIdentifier> routeChange) {
-    Map<RpcRoutingContext, Set<InstanceIdentifier>> announcements = routeChange.getAnnouncements();
+  public void onRouteChange(RouteChange<RpcRoutingContext, YangInstanceIdentifier> routeChange) {
+    Map<RpcRoutingContext, Set<YangInstanceIdentifier>> announcements = routeChange.getAnnouncements();
     announce(getRouteIdentifiers(announcements));
 
-    Map<RpcRoutingContext, Set<InstanceIdentifier>> removals = routeChange.getRemovals();
+    Map<RpcRoutingContext, Set<YangInstanceIdentifier>> removals = routeChange.getRemovals();
     remove(getRouteIdentifiers(removals));
   }
 
@@ -78,12 +78,12 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    * @param changes
    * @return
    */
-  private Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRouteIdentifiers(Map<RpcRoutingContext, Set<InstanceIdentifier>> changes) {
+  private Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRouteIdentifiers(Map<RpcRoutingContext, Set<YangInstanceIdentifier>> changes) {
     RouteIdentifierImpl routeId = null;
     Set<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdSet = new HashSet<>();
 
     for (RpcRoutingContext context : changes.keySet()){
-      for (InstanceIdentifier instanceId : changes.get(context)){
+      for (YangInstanceIdentifier instanceId : changes.get(context)){
         routeId = new RouteIdentifierImpl(null, context.getRpc(), instanceId);
         routeIdSet.add(routeId);
       }

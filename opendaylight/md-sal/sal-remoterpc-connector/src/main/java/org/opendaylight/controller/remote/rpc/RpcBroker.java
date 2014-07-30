@@ -20,6 +20,7 @@ import org.opendaylight.controller.remote.rpc.messages.GetRpcReply;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.controller.remote.rpc.utils.XmlUtils;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -110,7 +111,9 @@ public class RpcBroker extends AbstractUntypedActor {
         getSender().tell(new ErrorResponse(
           new IllegalStateException("No remote actor found for rpc execution.")), self());
       } else {
+
         ExecuteRpc executeMsg = new ExecuteRpc(XmlUtils.inputCompositeNodeToXml(msg.getInput(), schemaContext), msg.getRpc());
+        executeMsg.setNode(msg.getInput());
         Object operationRes = ActorUtil.executeRemoteOperation(this.context().actorSelection(remoteActorPath),
             executeMsg, ActorUtil.REMOTE_ASK_DURATION, ActorUtil.REMOTE_AWAIT_DURATION);
 
@@ -127,7 +130,6 @@ public class RpcBroker extends AbstractUntypedActor {
     try {
       Future<RpcResult<CompositeNode>> rpc = brokerSession.rpc(msg.getRpc(), XmlUtils.inputXmlToCompositeNode(msg.getRpc(), msg.getInputCompositeNode(), schemaContext));
       RpcResult<CompositeNode> rpcResult = rpc != null ? rpc.get():null;
-
       CompositeNode result = rpcResult != null ? rpcResult.getResult() : null;
       getSender().tell(new RpcResponse(XmlUtils.outputCompositeNodeToXml(result, schemaContext)), self());
     } catch (Exception e) {
