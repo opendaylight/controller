@@ -15,11 +15,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class RoutingTableData implements Serializable {
-  private Map<RpcRouter.RouteIdentifier<?, ?, ?>, String> rpcMap;
-  private Map<RpcRouter.RouteIdentifier<?, ?, ?>, LinkedHashSet<String>> routedRpcMap;
+  private final Map<RpcRouter.RouteIdentifier<?, ?, ?>, String> rpcMap;
+  private final Map<RpcRouter.RouteIdentifier<?, ?, ?>, LinkedHashSet<String>> routedRpcMap;
 
-  public RoutingTableData(Map<RpcRouter.RouteIdentifier<?, ?, ?>, String> rpcMap,
-                          Map<RpcRouter.RouteIdentifier<?, ?, ?>, LinkedHashSet<String>> routedRpcMap) {
+  public RoutingTableData(final Map<RpcRouter.RouteIdentifier<?, ?, ?>, String> rpcMap,
+                          final Map<RpcRouter.RouteIdentifier<?, ?, ?>, LinkedHashSet<String>> routedRpcMap) {
     this.rpcMap = rpcMap;
     this.routedRpcMap = routedRpcMap;
   }

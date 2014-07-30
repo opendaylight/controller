@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -72,15 +73,16 @@ public class RpcBrokerTest {
       Broker.ProviderSession brokerSession = Mockito.mock(Broker.ProviderSession.class);
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
-      QName rpc = new QName(new URI("actor1"), "actor1");
-      InvokeRpc invokeMsg = new InvokeRpc(rpc, null);
+      QName rpc = new QName(new URI("noactor1"), "noactor1");
+      CompositeNode input = new ImmutableCompositeNode(QName.create("ns", "2013-12-09", "no child"), new ArrayList<Node<?>>(), ModifyAction.REPLACE);
+      InvokeRpc invokeMsg = new InvokeRpc(rpc, input);
       rpcBroker.tell(invokeMsg, getRef());
 
       Boolean getMsg = new ExpectMsg<Boolean>("ErrorResponse") {
         protected Boolean match(Object in) {
           if (in instanceof ErrorResponse) {
             ErrorResponse reply = (ErrorResponse)in;
-            return "No remote actor found for rpc execution.".equals(reply.getException().getMessage());
+            return reply.getException().getMessage().contains("No remote actor found for rpc execution of :");
           } else {
             throw noMatch();
           }
@@ -144,7 +146,8 @@ public class RpcBrokerTest {
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
       QName rpc = new QName(new URI("actor1"), "actor1");
-      InvokeRoutedRpc invokeMsg = new InvokeRoutedRpc(rpc, null);
+      CompositeNode input = new ImmutableCompositeNode(QName.create("ns", "2013-12-09", "child1"), new ArrayList<Node<?>>(), ModifyAction.REPLACE);
+      InvokeRoutedRpc invokeMsg = new InvokeRoutedRpc(rpc, YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(rpc)), input);
       rpcBroker.tell(invokeMsg, getRef());
 
       Boolean getMsg = new ExpectMsg<Boolean>("ErrorResponse") {
@@ -176,7 +179,8 @@ public class RpcBrokerTest {
       ActorRef rpcBrokerRemote = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), "actor2");
       // Add Routed RPC in table
       QName rpc = new QName(new URI("actor2"), "actor2");
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, rpc, null);
+      YangInstanceIdentifier identifier = YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(rpc));
+      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, rpc, identifier);
       final String route = rpcBrokerRemote.path().toString();
       Set<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = new HashSet<>();
       routeIds.add(routeId);
@@ -192,7 +196,7 @@ public class RpcBrokerTest {
       RpcResult<CompositeNode> result = Rpcs.getRpcResult(true, invokeRpcResult, errors);
       Future<RpcResult<CompositeNode>> rpcResult = Futures.immediateFuture(result);
       when(brokerSession.rpc(rpc, input)).thenReturn(rpcResult);
-      InvokeRoutedRpc invokeMsg = new InvokeRoutedRpc(rpc, input);
+      InvokeRoutedRpc invokeMsg = new InvokeRoutedRpc(rpc, identifier, input);
       rpcBroker.tell(invokeMsg, getRef());
 
       //verify response msg

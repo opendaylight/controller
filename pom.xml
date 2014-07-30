@@ -117,7 +117,6 @@
 
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
-    <module>opendaylight/commons/protocol-framework</module>
     <module>opendaylight/commons/httpclient</module>
     <module>opendaylight/commons/checkstyle</module>
     <module>opendaylight/commons/opendaylight</module>

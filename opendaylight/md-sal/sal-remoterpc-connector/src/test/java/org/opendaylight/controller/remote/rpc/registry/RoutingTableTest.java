@@ -39,7 +39,8 @@ public class RoutingTableTest {
   @Test
   public void addGlobalRouteNullRouteTest() {
     try {
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, null, null);
+      QName type = new QName(new URI("actor1"), "actor1");
+      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, type, null);
       routingTable.addGlobalRoute(routeId, null);
 
       Assert.fail("Null pointer exception was not thrown.");
@@ -109,7 +110,8 @@ public class RoutingTableTest {
   @Test
   public void addRoutedRpcNullRouteTest() {
     try {
-      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, null, null);
+      QName type = new QName(new URI("actor1"), "actor1");
+      RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, type, null);
 
       routingTable.addRoutedRpc(routeId, null);
 

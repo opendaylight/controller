@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
 import java.io.Serializable;
@@ -15,10 +16,13 @@ import java.util.Set;
 
 public class RemoveRoutedRpc implements Serializable {
 
-  Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements;
-  String actorPath;
+  private final Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements;
+  private final String actorPath;
 
-  public RemoveRoutedRpc(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements, String actorPath) {
+  public RemoveRoutedRpc(final Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements, final String actorPath) {
+    Preconditions.checkNotNull(announcements, "Route identifier should not be null");
+    Preconditions.checkNotNull(actorPath, "Actor path should not be null");
+
     this.announcements = announcements;
     this.actorPath = actorPath;
   }

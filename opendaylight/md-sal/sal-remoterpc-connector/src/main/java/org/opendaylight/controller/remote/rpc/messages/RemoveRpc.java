@@ -8,15 +8,18 @@
 
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 
 import java.io.Serializable;
 
 public class RemoveRpc implements Serializable {
 
-  RouteIdentifierImpl routeId;
+  private final RouteIdentifierImpl routeId;
 
-  public RemoveRpc(RouteIdentifierImpl routeId) {
+  public RemoveRpc(final RouteIdentifierImpl routeId) {
+    Preconditions.checkNotNull(routeId, "Route Id should not be null");
+
     this.routeId = routeId;
   }
 

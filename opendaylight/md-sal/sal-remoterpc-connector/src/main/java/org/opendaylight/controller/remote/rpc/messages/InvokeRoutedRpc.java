@@ -7,26 +7,26 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 import java.io.Serializable;
 
 public class InvokeRoutedRpc implements Serializable {
 
-  private QName rpc;
-  private InstanceIdentifier identifier;
-  private CompositeNode input;
+  private final QName rpc;
+  private final YangInstanceIdentifier identifier;
+  private final CompositeNode input;
 
-  public InvokeRoutedRpc(QName rpc, InstanceIdentifier identifier, CompositeNode input) {
+  public InvokeRoutedRpc(final QName rpc, final YangInstanceIdentifier identifier, final CompositeNode input) {
+    Preconditions.checkNotNull(rpc, "rpc qname should not be null");
+    Preconditions.checkNotNull(identifier, "instance identifier of routed rpc should not be null");
+    Preconditions.checkNotNull(input, "rpc input should not be null");
+
     this.rpc = rpc;
     this.identifier = identifier;
-    this.input = input;
-  }
-
-  public InvokeRoutedRpc(QName rpc, CompositeNode input) {
-    this.rpc = rpc;
     this.input = input;
   }
 
@@ -34,7 +34,7 @@ public class InvokeRoutedRpc implements Serializable {
     return rpc;
   }
 
-  public InstanceIdentifier getIdentifier() {
+  public YangInstanceIdentifier getIdentifier() {
     return identifier;
   }
 

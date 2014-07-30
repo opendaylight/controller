@@ -7,20 +7,23 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+
 
 import java.io.Serializable;
 
-public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, InstanceIdentifier>,Serializable {
+public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, YangInstanceIdentifier>,Serializable {
   private static final long serialVersionUID = 1L;
 
-  private QName context;
-  private QName type;
-  private InstanceIdentifier route;
+  private final QName context;
+  private final QName type;
+  private final YangInstanceIdentifier route;
 
-  public RouteIdentifierImpl(QName context, QName type, InstanceIdentifier route) {
+  public RouteIdentifierImpl(final QName context, final QName type, final YangInstanceIdentifier route) {
+    Preconditions.checkNotNull(type, "Rpc type should not be null");
     this.context = context;
     this.type = type;
     this.route = route;
@@ -37,7 +40,7 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
   }
 
   @Override
-  public InstanceIdentifier getRoute() {
+  public YangInstanceIdentifier getRoute() {
     return this.route;
   }
 

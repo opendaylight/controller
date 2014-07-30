@@ -7,13 +7,16 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
+
 import java.io.Serializable;
 
 public class ErrorResponse implements Serializable {
 
-  Exception exception;
+  private final Exception exception;
 
-  public ErrorResponse(Exception e) {
+  public ErrorResponse(final Exception e) {
+    Preconditions.checkNotNull(e, "Exception should be present for error message");
     this.exception = e;
   }
 

@@ -12,9 +12,9 @@ package org.opendaylight.controller.remote.rpc.messages;
 import java.io.Serializable;
 
 public class RpcResponse implements Serializable {
-  private String resultCompositeNode;
+  private final String resultCompositeNode;
 
-  public RpcResponse(String resultCompositeNode) {
+  public RpcResponse(final String resultCompositeNode) {
     this.resultCompositeNode = resultCompositeNode;
   }
 

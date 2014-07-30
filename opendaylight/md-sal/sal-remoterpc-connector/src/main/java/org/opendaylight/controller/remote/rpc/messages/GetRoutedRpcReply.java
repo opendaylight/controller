@@ -12,9 +12,9 @@ import java.io.Serializable;
 
 public class GetRoutedRpcReply implements Serializable {
 
-  private String routePath;
+  private final String routePath;
 
-  public GetRoutedRpcReply(String routePath) {
+  public GetRoutedRpcReply(final String routePath) {
     this.routePath = routePath;
   }
 

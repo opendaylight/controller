@@ -8,16 +8,20 @@
 
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 
 import java.io.Serializable;
 
 public class AddRpc implements Serializable {
 
-  RouteIdentifierImpl routeId;
-  String actorPath;
+  private final RouteIdentifierImpl routeId;
+  private final String actorPath;
 
-  public AddRpc(RouteIdentifierImpl routeId, String actorPath) {
+  public AddRpc(final RouteIdentifierImpl routeId, final String actorPath) {
+    Preconditions.checkNotNull(routeId, "Route identifier should not be null");
+    Preconditions.checkNotNull(actorPath, "Actor path should not be null");
+
     this.routeId = routeId;
     this.actorPath = actorPath;
   }

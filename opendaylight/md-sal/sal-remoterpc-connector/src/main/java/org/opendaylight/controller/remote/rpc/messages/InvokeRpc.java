@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
@@ -14,10 +15,13 @@ import java.io.Serializable;
 
 public class InvokeRpc implements Serializable {
 
-  private QName rpc;
-  private CompositeNode input;
+  private final QName rpc;
+  private final CompositeNode input;
 
-  public InvokeRpc(QName rpc, CompositeNode input) {
+  public InvokeRpc(final QName rpc, final CompositeNode input) {
+    Preconditions.checkNotNull(rpc, "rpc qname should not be null");
+    Preconditions.checkNotNull(input, "rpc input should not be null");
+
     this.rpc = rpc;
     this.input = input;
   }
