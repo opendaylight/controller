@@ -20,6 +20,7 @@
 
         <bundle>mvn:org.opendaylight.controller/connectionmanager/${connectionmanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/connectionmanager.implementation/${connectionmanager.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/connectionmanager.shell/${connectionmanager.shell.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/containermanager/${containermanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/containermanager.implementation/${containermanager.version}</bundle>

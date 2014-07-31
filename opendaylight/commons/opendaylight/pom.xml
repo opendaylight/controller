@@ -67,6 +67,7 @@
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
+    <connectionmanager.shell.version>1.0.0-SNAPSHOT</connectionmanager.shell.version>
     <containermanager.it.version>0.5.2-SNAPSHOT</containermanager.it.version>
     <containermanager.northbound.version>0.4.2-SNAPSHOT</containermanager.northbound.version>
     <containermanager.shell.version>0.5.2-SNAPSHOT</containermanager.shell.version>
