@@ -25,7 +25,7 @@ import org.opendaylight.controller.remote.rpc.messages.InvokeRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.controller.remote.rpc.registry.ClusterWrapper;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistryOld;
 import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -69,7 +69,7 @@ public class RpcBrokerTest {
   @Test
   public void testInvokeRpcError() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(Mockito.mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(Mockito.mock(ClusterWrapper.class)));
       Broker.ProviderSession brokerSession = Mockito.mock(Broker.ProviderSession.class);
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
@@ -100,7 +100,7 @@ public class RpcBrokerTest {
   @Test
   public void testInvokeRpc() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(mock(ClusterWrapper.class)));
       Broker.ProviderSession brokerSession = mock(Broker.ProviderSession.class);
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
@@ -141,7 +141,7 @@ public class RpcBrokerTest {
   @Test
   public void testInvokeRoutedRpcError() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(Mockito.mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(Mockito.mock(ClusterWrapper.class)));
       Broker.ProviderSession brokerSession = Mockito.mock(Broker.ProviderSession.class);
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
@@ -172,7 +172,7 @@ public class RpcBrokerTest {
   @Test
   public void testInvokeRoutedRpc() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(mock(ClusterWrapper.class)));
       Broker.ProviderSession brokerSession = mock(Broker.ProviderSession.class);
       SchemaContext schemaContext = mock(SchemaContext.class);
       ActorRef rpcBroker = system.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext));
