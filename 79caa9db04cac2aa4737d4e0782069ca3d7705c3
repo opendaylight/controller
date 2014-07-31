@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4660aed",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/AbstractChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-31T19:51:04Z",
+      "side": 1,
+      "message": "errMsg is not reused, please move it directly into the LOG.error() line, without the string concat",
+      "revId": "79caa9db04cac2aa4737d4e0782069ca3d7705c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44a2fafd",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/reconil/FlowNodeReconcilListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-31T19:51:04Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull() or checkArgument() -- preferrably the former",
+      "revId": "79caa9db04cac2aa4737d4e0782069ca3d7705c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_04a872d9",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/reconil/FlowNodeReconcilListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-31T19:51:04Z",
+      "side": 1,
+      "message": "Same comment as in th eother file",
+      "revId": "79caa9db04cac2aa4737d4e0782069ca3d7705c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2486d666",
+        "filename": "opendaylight/md-sal/statistics-manager/src/main/java/org/opendaylight/controller/md/statistics/manager/FlowComparator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-07-31T19:51:04Z",
+      "side": 1,
+      "message": "} else if",
+      "revId": "79caa9db04cac2aa4737d4e0782069ca3d7705c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
