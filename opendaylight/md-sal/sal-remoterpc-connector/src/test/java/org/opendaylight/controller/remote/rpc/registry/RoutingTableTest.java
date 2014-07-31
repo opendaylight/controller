@@ -21,8 +21,8 @@ import java.util.Set;
 
 public class RoutingTableTest {
 
-  private RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable =
-      new RoutingTable<>();
+  private RoutingTableOld<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable =
+      new RoutingTableOld<>();
 
   @Test
   public void addGlobalRouteNullRouteIdTest() {

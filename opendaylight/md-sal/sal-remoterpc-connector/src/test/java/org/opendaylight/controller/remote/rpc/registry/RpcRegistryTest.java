@@ -55,7 +55,7 @@ public class RpcRegistryTest {
   @Test
   public void testGlobalRpc() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(Mockito.mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(Mockito.mock(ClusterWrapper.class)));
       QName type = new QName(new URI("actor1"), "actor1");
       RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, type, null);
       final String route = "actor1";
@@ -107,7 +107,7 @@ public class RpcRegistryTest {
   @Test
   public void testRoutedRpc() throws URISyntaxException {
     new JavaTestKit(system) {{
-      ActorRef rpcRegistry = system.actorOf(RpcRegistry.props(Mockito.mock(ClusterWrapper.class)));
+      ActorRef rpcRegistry = system.actorOf(RpcRegistryOld.props(Mockito.mock(ClusterWrapper.class)));
       QName type = new QName(new URI("actor1"), "actor1");
       RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, type, null);
       final String route = "actor1";
