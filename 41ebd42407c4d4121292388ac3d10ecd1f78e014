@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_99286f9b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Add a few lines in describe what this patch does.",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b97533cc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Looks like these fields are not modified anywhere other than in the constructor - make them final.",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_39512336",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Add PreConditions to validate input.",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_194e9f97",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RouteIdentifierImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Use a StringBuilder to construct String (it\u0027s an option in IntelliJ)",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_99614f07",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Add input validation.",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b95c534c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Enhance this log message to print the name/id of the rpc for which the remoteActorPath was not found",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_59574726",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Enhance this exception by putting in information on what rpc was not found",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_19353ff7",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "Make fields final",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_393843ee",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "validate input",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d93a77e6",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/InvokeRoutedRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "make fields final",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f93dfbdd",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/InvokeRoutedRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-07-31T19:08:00Z",
+      "side": 1,
+      "message": "validate input",
+      "revId": "41ebd42407c4d4121292388ac3d10ecd1f78e014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
