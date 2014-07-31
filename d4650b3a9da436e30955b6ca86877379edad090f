@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3367024f",
+        "filename": "features/config/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-31T02:48:04Z",
+      "side": 1,
+      "message": "Can this be also added elsewhere?",
+      "revId": "d4650b3a9da436e30955b6ca86877379edad090f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d359f68e",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-31T02:48:04Z",
+      "side": 1,
+      "message": "Yes I wanted to fix this guy here..",
+      "revId": "d4650b3a9da436e30955b6ca86877379edad090f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f35c3a7f",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-31T02:48:04Z",
+      "side": 1,
+      "message": "Not sure you need both jersey and jersey2 here as they are for two different northbound ways of doing things..",
+      "revId": "d4650b3a9da436e30955b6ca86877379edad090f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9357ee57",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-31T02:48:04Z",
+      "side": 1,
+      "message": "Why are these commented?",
+      "revId": "d4650b3a9da436e30955b6ca86877379edad090f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_13643e48",
+        "filename": "features/netconf/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-31T02:48:04Z",
+      "side": 1,
+      "message": "ok dep",
+      "revId": "d4650b3a9da436e30955b6ca86877379edad090f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
