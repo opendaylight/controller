@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.usermanager.IAAAProvider;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.usermanager.IUserManagerShell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(new String[] {
                     IUserManager.class.getName(),
+                    IUserManagerShell.class.getName(),
                     IConfigurationAware.class.getName() }, null);
 
             c.add(createServiceDependency().setService(
