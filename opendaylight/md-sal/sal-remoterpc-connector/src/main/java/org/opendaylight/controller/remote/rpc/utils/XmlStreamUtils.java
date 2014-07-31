@@ -42,206 +42,208 @@ import java.util.Map.Entry;
  */
 @Beta
 public class XmlStreamUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(XmlStreamUtils.class);
-    private final XmlCodecProvider codecProvider;
+  private static final Logger LOG = LoggerFactory.getLogger(XmlStreamUtils.class);
+  private final XmlCodecProvider codecProvider;
 
-    protected XmlStreamUtils(final XmlCodecProvider codecProvider) {
-        this.codecProvider = Preconditions.checkNotNull(codecProvider);
+  protected XmlStreamUtils(final XmlCodecProvider codecProvider) {
+    this.codecProvider = Preconditions.checkNotNull(codecProvider);
+  }
+
+  /**
+   * Create a new instance encapsulating a particular codec provider.
+   *
+   * @param codecProvider XML codec provider
+   * @return A new instance
+   */
+  public static XmlStreamUtils create(final XmlCodecProvider codecProvider) {
+    return new XmlStreamUtils(codecProvider);
+  }
+
+  /**
+   * Check if a particular data element can be emitted as an empty element, bypassing value encoding. This
+   * functionality is optional, as valid XML stream is produced even if start/end element is produced unconditionally.
+   *
+   * @param data Data node
+   * @return True if the data node will result in empty element body.
+   */
+  public static boolean isEmptyElement(final Node<?> data) {
+    if (data == null) {
+      return true;
     }
 
-    /**
-     * Create a new instance encapsulating a particular codec provider.
-     *
-     * @param codecProvider XML codec provider
-     * @return A new instance
-     */
-    public static XmlStreamUtils create(final XmlCodecProvider codecProvider) {
-        return new XmlStreamUtils(codecProvider);
+    if (data instanceof CompositeNode) {
+      return ((CompositeNode) data).getValue().isEmpty();
+    }
+    if (data instanceof SimpleNode) {
+      return data.getValue() == null;
     }
 
-    /**
-     * Check if a particular data element can be emitted as an empty element, bypassing value encoding. This
-     * functionality is optional, as valid XML stream is produced even if start/end element is produced unconditionally.
-     *
-     * @param data Data node
-     * @return True if the data node will result in empty element body.
-     */
-    public static boolean isEmptyElement(final Node<?> data) {
-        if (data == null) {
-            return true;
-        }
+    // Safe default
+    return false;
+  }
 
-        if (data instanceof CompositeNode) {
-            return ((CompositeNode) data).getValue().isEmpty();
-        }
-        if (data instanceof SimpleNode) {
-            return data.getValue() == null;
-        }
+  /**
+   * Write an InstanceIdentifier into the output stream. Calling corresponding {@link javax.xml.stream.XMLStreamWriter#writeStartElement(String)}
+   * and {@link javax.xml.stream.XMLStreamWriter#writeEndElement()} is the responsibility of the caller.
+   *
+   * @param writer XML Stream writer
+   * @param id InstanceIdentifier
+   * @throws javax.xml.stream.XMLStreamException
+   */
+  public static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull YangInstanceIdentifier id) throws XMLStreamException {
+    Preconditions.checkNotNull(writer, "Writer may not be null");
+    Preconditions.checkNotNull(id, "Variable should contain instance of instance identifier and can't be null");
+    LOG.debug("Writing Instance identifier with Random prefix");
+    final RandomPrefix prefixes = new RandomPrefix();
+    final String str = XmlUtils.encodeIdentifier(prefixes, id);
 
-        // Safe default
-        return false;
+    for (Entry<URI, String> e: prefixes.getPrefixes()) {
+      writer.writeNamespace(e.getValue(), e.getKey().toString());
+    }
+    LOG.debug("Instance identifier with Random prefix is now {}", str);
+    writer.writeCharacters(str);
+  }
+
+  /**
+   * Write a full XML document corresponding to a CompositeNode into an XML stream writer.
+   *
+   * @param writer XML Stream writer
+   * @param data data node
+   * @param schema corresponding schema node, may be null
+   * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
+   */
+  public void writeDocument(final @Nonnull XMLStreamWriter writer, final @Nonnull CompositeNode data, final @Nullable SchemaNode schema) throws XMLStreamException {
+    // final Boolean repairing = (Boolean) writer.getProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES);
+    // Preconditions.checkArgument(repairing == true, "XML Stream Writer has to be repairing namespaces");
+
+    writer.writeStartDocument();
+    writeElement(writer, data, schema);
+    writer.writeEndDocument();
+    writer.flush();
+  }
+
+
+  /**
+   * Write an element into a XML stream writer. This includes the element start/end tags and
+   * the value of the element.
+   *
+   * @param writer XML Stream writer
+   * @param data data node
+   * @param schema Schema node
+   * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
+   */
+  public void writeElement(final XMLStreamWriter writer, final @Nonnull Node<?> data, final SchemaNode schema) throws XMLStreamException {
+    final QName qname = data.getNodeType();
+    final String pfx = qname.getPrefix() != null ? qname.getPrefix() : "";
+    final String ns = qname.getNamespace() != null ? qname.getNamespace().toString() : "";
+
+    if (isEmptyElement(data)) {
+      writer.writeEmptyElement(pfx, qname.getLocalName(), ns);
+      return;
     }
 
-    /**
-     * Write an InstanceIdentifier into the output stream. Calling corresponding {@link javax.xml.stream.XMLStreamWriter#writeStartElement(String)}
-     * and {@link javax.xml.stream.XMLStreamWriter#writeEndElement()} is the responsibility of the caller.
-     *
-     * @param writer XML Stream writer
-     * @param id InstanceIdentifier
-     * @throws javax.xml.stream.XMLStreamException
-     */
-    public static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull YangInstanceIdentifier id) throws XMLStreamException {
-        Preconditions.checkNotNull(writer, "Writer may not be null");
-        Preconditions.checkNotNull(id, "Variable should contain instance of instance identifier and can't be null");
-
-        final RandomPrefix prefixes = new RandomPrefix();
-        final String str = XmlUtils.encodeIdentifier(prefixes, id);
-
-        for (Entry<URI, String> e: prefixes.getPrefixes()) {
-            writer.writeNamespace(e.getValue(), e.getKey().toString());
-        }
-        writer.writeCharacters(str);
+    writer.writeStartElement(pfx, qname.getLocalName(), ns);
+    if (data instanceof AttributesContainer && ((AttributesContainer) data).getAttributes() != null) {
+      for (Entry<QName, String> attribute : ((AttributesContainer) data).getAttributes().entrySet()) {
+        writer.writeAttribute(attribute.getKey().getNamespace().toString(), attribute.getKey().getLocalName(), attribute.getValue());
+      }
     }
 
-    /**
-     * Write a full XML document corresponding to a CompositeNode into an XML stream writer.
-     *
-     * @param writer XML Stream writer
-     * @param data data node
-     * @param schema corresponding schema node, may be null
-     * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
-     */
-    public void writeDocument(final @Nonnull XMLStreamWriter writer, final @Nonnull CompositeNode data, final @Nullable SchemaNode schema) throws XMLStreamException {
-        // final Boolean repairing = (Boolean) writer.getProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES);
-        // Preconditions.checkArgument(repairing == true, "XML Stream Writer has to be repairing namespaces");
+    if (data instanceof SimpleNode<?>) {
+      LOG.debug("writeElement : node is of type SimpleNode");
+      // Simple node
+      if (schema instanceof LeafListSchemaNode) {
+        writeValue(writer, ((LeafListSchemaNode) schema).getType(), data.getValue());
+      } else if (schema instanceof LeafSchemaNode) {
+        writeValue(writer, ((LeafSchemaNode) schema).getType(), data.getValue());
+      } else {
+        Object value = data.getValue();
+        if (value != null) {
+          writer.writeCharacters(String.valueOf(value));
+        }
+      }
+    } else {
+      LOG.debug("writeElement : node is of type CompositeNode");
+      // CompositeNode
+      for (Node<?> child : ((CompositeNode) data).getValue()) {
+        DataSchemaNode childSchema = null;
+        if (schema instanceof DataNodeContainer) {
+          childSchema = SchemaUtils.findFirstSchema(child.getNodeType(), ((DataNodeContainer) schema).getChildNodes()).orNull();
+          if (childSchema == null) {
+            LOG.debug("Probably the data node \"{}\" does not conform to schema", child == null ? "" : child.getNodeType().getLocalName());
+          }
+        }
 
-        writer.writeStartDocument();
-        writeElement(writer, data, schema);
-        writer.writeEndDocument();
-        writer.flush();
+        writeElement(writer, child, childSchema);
+      }
     }
 
+    writer.writeEndElement();
+  }
 
-    /**
-     * Write an element into a XML stream writer. This includes the element start/end tags and
-     * the value of the element.
-     *
-     * @param writer XML Stream writer
-     * @param data data node
-     * @param schema Schema node
-     * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
-     */
-    public void writeElement(final XMLStreamWriter writer, final @Nonnull Node<?> data, final SchemaNode schema) throws XMLStreamException {
-        final QName qname = data.getNodeType();
-        final String pfx = qname.getPrefix() != null ? qname.getPrefix() : "";
-        final String ns = qname.getNamespace() != null ? qname.getNamespace().toString() : "";
-
-        if (isEmptyElement(data)) {
-            writer.writeEmptyElement(pfx, qname.getLocalName(), ns);
-            return;
-        }
-
-        writer.writeStartElement(pfx, qname.getLocalName(), ns);
-        if (data instanceof AttributesContainer && ((AttributesContainer) data).getAttributes() != null) {
-            for (Entry<QName, String> attribute : ((AttributesContainer) data).getAttributes().entrySet()) {
-                writer.writeAttribute(attribute.getKey().getNamespace().toString(), attribute.getKey().getLocalName(), attribute.getValue());
-            }
-        }
-
-        if (data instanceof SimpleNode<?>) {
-            // Simple node
-            if (schema instanceof LeafListSchemaNode) {
-                writeValue(writer, ((LeafListSchemaNode) schema).getType(), data.getValue());
-            } else if (schema instanceof LeafSchemaNode) {
-                writeValue(writer, ((LeafSchemaNode) schema).getType(), data.getValue());
-            } else {
-                Object value = data.getValue();
-                if (value != null) {
-                    writer.writeCharacters(String.valueOf(value));
-                }
-            }
-        } else {
-            // CompositeNode
-            for (Node<?> child : ((CompositeNode) data).getValue()) {
-                DataSchemaNode childSchema = null;
-                if (schema instanceof DataNodeContainer) {
-                    childSchema = SchemaUtils.findFirstSchema(child.getNodeType(), ((DataNodeContainer) schema).getChildNodes()).orNull();
-                    if (LOG.isDebugEnabled()) {
-                        if (childSchema == null) {
-                            LOG.debug("Probably the data node \"{}\" does not conform to schema", child == null ? "" : child.getNodeType().getLocalName());
-                        }
-                    }
-                }
-
-                writeElement(writer, child, childSchema);
-            }
-        }
-
-        writer.writeEndElement();
+  /**
+   * Write a value into a XML stream writer. This method assumes the start and end of element is
+   * emitted by the caller.
+   *
+   * @param writer XML Stream writer
+   * @param type type definitions
+   * @param value object value
+   * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
+   */
+  public void writeValue(final @Nonnull XMLStreamWriter writer, final @Nonnull TypeDefinition<?> type, final Object value) throws XMLStreamException {
+    if (value == null) {
+      LOG.debug("Value of {}:{} is null, not encoding it", type.getQName().getNamespace(), type.getQName().getLocalName());
+      return;
     }
 
-    /**
-     * Write a value into a XML stream writer. This method assumes the start and end of element is
-     * emitted by the caller.
-     *
-     * @param writer XML Stream writer
-     * @param type type definitions
-     * @param value object value
-     * @throws javax.xml.stream.XMLStreamException if an encoding problem occurs
-     */
-    public void writeValue(final @Nonnull XMLStreamWriter writer, final @Nonnull TypeDefinition<?> type, final Object value) throws XMLStreamException {
-        if (value == null) {
-            LOG.debug("Value of {}:{} is null, not encoding it", type.getQName().getNamespace(), type.getQName().getLocalName());
-            return;
+    final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(type);
+    if (baseType instanceof IdentityrefTypeDefinition) {
+      write(writer, (IdentityrefTypeDefinition) baseType, value);
+    } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
+      write(writer, (InstanceIdentifierTypeDefinition) baseType, value);
+    } else {
+      final TypeDefinitionAwareCodec<Object, ?> codec = codecProvider.codecFor(baseType);
+      String text;
+      if (codec != null) {
+        try {
+          text = codec.serialize(value);
+        } catch (ClassCastException e) {
+          LOG.error("Provided node value {} did not have type {} required by mapping. Using stream instead.", value, baseType, e);
+          text = String.valueOf(value);
         }
-
-        final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(type);
-        if (baseType instanceof IdentityrefTypeDefinition) {
-            write(writer, (IdentityrefTypeDefinition) baseType, value);
-        } else if (baseType instanceof InstanceIdentifierTypeDefinition) {
-            write(writer, (InstanceIdentifierTypeDefinition) baseType, value);
-        } else {
-            final TypeDefinitionAwareCodec<Object, ?> codec = codecProvider.codecFor(baseType);
-            String text;
-            if (codec != null) {
-                try {
-                    text = codec.serialize(value);
-                } catch (ClassCastException e) {
-                    LOG.error("Provided node value {} did not have type {} required by mapping. Using stream instead.", value, baseType, e);
-                    text = String.valueOf(value);
-                }
-            } else {
-                LOG.error("Failed to find codec for {}, falling back to using stream", baseType);
-                text = String.valueOf(value);
-            }
-            writer.writeCharacters(text);
-        }
+      } else {
+        LOG.error("Failed to find codec for {}, falling back to using stream", baseType);
+        text = String.valueOf(value);
+      }
+      writer.writeCharacters(text);
     }
+  }
 
-    private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull IdentityrefTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
-        if (value instanceof QName) {
-            final QName qname = (QName) value;
-            final String prefix;
-            if (qname.getPrefix() != null && !qname.getPrefix().isEmpty()) {
-                prefix = qname.getPrefix();
-            } else {
-                prefix = "x";
-            }
+  private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull IdentityrefTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
+    if (value instanceof QName) {
+      final QName qname = (QName) value;
+      final String prefix;
+      if (qname.getPrefix() != null && !qname.getPrefix().isEmpty()) {
+        prefix = qname.getPrefix();
+      } else {
+        prefix = "x";
+      }
 
-            writer.writeNamespace(prefix, qname.getNamespace().toString());
-            writer.writeCharacters(prefix + ':' + qname.getLocalName());
-        } else {
-            LOG.debug("Value of {}:{} is not a QName but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
-            writer.writeCharacters(String.valueOf(value));
-        }
+      writer.writeNamespace(prefix, qname.getNamespace().toString());
+      writer.writeCharacters(prefix + ':' + qname.getLocalName());
+    } else {
+      LOG.debug("Value of {}:{} is not a QName but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
+      writer.writeCharacters(String.valueOf(value));
     }
+  }
 
-    private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull InstanceIdentifierTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
-        if (value instanceof YangInstanceIdentifier) {
-            write(writer, (YangInstanceIdentifier)value);
-        } else {
-            LOG.debug("Value of {}:{} is not an InstanceIdentifier but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
-            writer.writeCharacters(String.valueOf(value));
-        }
+  private static void write(final @Nonnull XMLStreamWriter writer, final @Nonnull InstanceIdentifierTypeDefinition type, final @Nonnull Object value) throws XMLStreamException {
+    if (value instanceof YangInstanceIdentifier) {
+      LOG.debug("Writing InstanceIdentifier object {}", value);
+      write(writer, (YangInstanceIdentifier)value);
+    } else {
+      LOG.debug("Value of {}:{} is not an InstanceIdentifier but {}", type.getQName().getNamespace(), type.getQName().getLocalName(), value.getClass());
+      writer.writeCharacters(String.valueOf(value));
     }
+  }
 }

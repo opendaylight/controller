@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -53,18 +54,19 @@ import java.util.Set;
  */
 public class XmlUtils {
 
-    public static final XmlCodecProvider DEFAULT_XML_CODEC_PROVIDER = new XmlCodecProvider() {
-        @Override
-        public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(final TypeDefinition<?> baseType) {
-            return TypeDefinitionAwareCodec.from(baseType);
-        }
-    };
-
-    private XmlUtils() {
+  public static final XmlCodecProvider DEFAULT_XML_CODEC_PROVIDER = new XmlCodecProvider() {
+    @Override
+    public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(final TypeDefinition<?> baseType) {
+      return TypeDefinitionAwareCodec.from(baseType);
     }
+  };
+
+  private XmlUtils() {
+  }
   private static final Logger LOG = LoggerFactory.getLogger(XmlUtils.class);
 
   public static String inputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
+    LOG.debug("Converting input composite node to xml {}", cNode);
     if (cNode == null) return new String();
 
     Document domTree = null;
@@ -72,8 +74,12 @@ public class XmlUtils {
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpc : rpcs) {
         if(rpc.getQName().equals(cNode.getNodeType())){
+          LOG.debug("Found the rpc definition from schema context matching with input composite node  {}", rpc.getQName());
+
           CompositeNode inputContainer = cNode.getFirstCompositeByName(QName.create(cNode.getNodeType(), "input"));
           domTree = XmlDocumentUtils.toDocument(inputContainer, rpc.getInput(), XmlDocumentUtils.defaultValueCodecProvider());
+
+          LOG.debug("input composite node to document conversion complete, document is   {}", domTree);
           break;
         }
       }
@@ -85,6 +91,7 @@ public class XmlUtils {
   }
 
   public static String outputCompositeNodeToXml(CompositeNode cNode, SchemaContext schemaContext){
+    LOG.debug("Converting output composite node to xml {}", cNode);
     if (cNode == null) return new String();
 
     Document domTree = null;
@@ -92,7 +99,12 @@ public class XmlUtils {
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpc : rpcs) {
         if(rpc.getQName().equals(cNode.getNodeType())){
-          domTree = XmlDocumentUtils.toDocument(cNode, rpc.getOutput(), XmlDocumentUtils.defaultValueCodecProvider());
+          LOG.debug("Found the rpc definition from schema context matching with output composite node  {}", rpc.getQName());
+
+          CompositeNode outputContainer = cNode.getFirstCompositeByName(QName.create(cNode.getNodeType(), "output"));
+          domTree = XmlDocumentUtils.toDocument(outputContainer, rpc.getOutput(), XmlDocumentUtils.defaultValueCodecProvider());
+
+          LOG.debug("output composite node to document conversion complete, document is   {}", domTree);
           break;
         }
       }
@@ -114,7 +126,7 @@ public class XmlUtils {
 
       LOG.error("Error during translation of Document to OutputStream", e);
     }
-    LOG.debug("compositeNodeToXml " + writer.toString());
+    LOG.debug("Document to string conversion complete, xml string is  {} ",  writer.toString());
 
     return writer.toString();
   }
@@ -141,20 +153,40 @@ public class XmlUtils {
   }
 
   public static CompositeNode inputXmlToCompositeNode(QName rpc, String xml,  SchemaContext schemaContext){
+    LOG.debug("Converting input xml to composite node {}", xml);
     if (xml==null || xml.length()==0) return null;
+
+    if(rpc == null) return null;
+
+    if(schemaContext == null) return null;
 
     CompositeNode compositeNode = null;
     try {
 
       Document doc = XmlUtil.readXmlToDocument(xml);
-      LOG.debug("xmlToCompositeNode Document is " + xml );
       Set<RpcDefinition> rpcs =  schemaContext.getOperations();
       for(RpcDefinition rpcDef : rpcs) {
         if(rpcDef.getQName().equals(rpc)){
+          LOG.debug("found the rpc definition from schema context matching rpc  {}", rpc);
+
+          if(rpcDef.getInput() == null) {
+            LOG.warn("found rpc definition's input is null");
+            return null;
+          }
+
           QName input = rpcDef.getInput().getQName();
-          Element xmlData = (Element) doc.getElementsByTagNameNS(input.getNamespace().toString(), "input").item(0);
+          NodeList nodeList = doc.getElementsByTagNameNS(input.getNamespace().toString(), "input");
+          if(nodeList == null || nodeList.getLength() < 1) {
+            LOG.warn("xml does not have input entry. {}", xml);
+            return null;
+          }
+          Element xmlData = (Element)nodeList.item(0);
+
           List<Node<?>> dataNodes = XmlDocumentUtils.toDomNodes(xmlData,
               Optional.of(rpcDef.getInput().getChildNodes()), schemaContext);
+
+          LOG.debug("Converted xml input to list of nodes  {}", dataNodes);
+
           final CompositeNodeBuilder<ImmutableCompositeNode> it = ImmutableCompositeNode.builder();
           it.setQName(input);
           it.add(ImmutableCompositeNode.create(input, dataNodes));
@@ -168,45 +200,47 @@ public class XmlUtils {
       LOG.error("Error during building data tree from XML", e);
     }
 
-    LOG.debug("xmlToCompositeNode " + compositeNode.toString());
+    LOG.debug("Xml to composite node conversion complete {} ", compositeNode);
     return compositeNode;
   }
 
-    public static TypeDefinition<?> resolveBaseTypeFrom(final @Nonnull TypeDefinition<?> type) {
-        TypeDefinition<?> superType = type;
-        while (superType.getBaseType() != null) {
-            superType = superType.getBaseType();
+  public static TypeDefinition<?> resolveBaseTypeFrom(final @Nonnull TypeDefinition<?> type) {
+    TypeDefinition<?> superType = type;
+    while (superType.getBaseType() != null) {
+      superType = superType.getBaseType();
+    }
+    return superType;
+  }
+
+  // This code is picked from yangtools and modified to add type of instance identifier
+
+  public static String encodeIdentifier(final RandomPrefix prefixes, final YangInstanceIdentifier id) {
+    StringBuilder textContent = new StringBuilder();
+    for (PathArgument pathArgument : id.getPathArguments()) {
+      textContent.append('/');
+      textContent.append(prefixes.encodeQName(pathArgument.getNodeType()));
+      if (pathArgument instanceof NodeIdentifierWithPredicates) {
+        Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
+
+        for (QName keyValue : predicates.keySet()) {
+          Object value = predicates.get(keyValue);
+          String type = value.getClass().getName();
+          String predicateValue = String.valueOf(value);
+          textContent.append('[');
+          textContent.append(prefixes.encodeQName(keyValue));
+          textContent.append("='");
+          textContent.append(predicateValue);
+          textContent.append("@");
+          textContent.append(type);
+          textContent.append("']");
         }
-        return superType;
+      } else if (pathArgument instanceof NodeWithValue) {
+        textContent.append("[.='");
+        textContent.append(((NodeWithValue) pathArgument).getValue());
+        textContent.append("']");
+      }
     }
 
-    static String encodeIdentifier(final RandomPrefix prefixes, final YangInstanceIdentifier id) {
-        StringBuilder textContent = new StringBuilder();
-        for (PathArgument pathArgument : id.getPathArguments()) {
-            textContent.append('/');
-            textContent.append(prefixes.encodeQName(pathArgument.getNodeType()));
-            if (pathArgument instanceof NodeIdentifierWithPredicates) {
-                Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
-
-                for (QName keyValue : predicates.keySet()) {
-                  Object value = predicates.get(keyValue);
-                  String type = value.getClass().getName();
-                  String predicateValue = String.valueOf(value);
-                    textContent.append('[');
-                    textContent.append(prefixes.encodeQName(keyValue));
-                    textContent.append("='");
-                    textContent.append(predicateValue);
-                    textContent.append("@");
-                    textContent.append(type);
-                    textContent.append("']");
-                }
-            } else if (pathArgument instanceof NodeWithValue) {
-                textContent.append("[.='");
-                textContent.append(((NodeWithValue) pathArgument).getValue());
-                textContent.append("']");
-            }
-        }
-
-        return textContent.toString();
-    }
+    return textContent.toString();
+  }
 }

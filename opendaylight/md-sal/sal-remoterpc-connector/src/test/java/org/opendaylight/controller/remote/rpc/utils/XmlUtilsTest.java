@@ -15,9 +15,9 @@ import com.google.common.io.ByteSource;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.*;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -27,7 +27,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class XmlUtilsTest {
@@ -65,6 +67,18 @@ public class XmlUtilsTest {
   }
 
   @Test
+  public void testNullInputXmlToComposite() {
+    CompositeNode node = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), null, schema);
+    Assert.assertNull(node);
+  }
+
+  @Test
+  public void testNullRpcXmlToComposite() {
+    CompositeNode node = XmlUtils.inputXmlToCompositeNode(null, XML_CONTENT, schema);
+    Assert.assertNull(node);
+  }
+
+  @Test
   public void testInputXmlToCompositeNode() {
     CompositeNode node = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), XML_CONTENT, schema);
     ImmutableList<SimpleNode> input = (ImmutableList)node.getValue().get(0).getValue();
@@ -85,6 +99,18 @@ public class XmlUtilsTest {
     Short value = (Short)secondPath.getKeyValues().values().iterator().next();
     Short expected = 3;
     Assert.assertEquals(expected, value);
+  }
+
+  @Test
+  public void testInputCompositeNodeToXML() {
+    CompositeNode input = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), XML_CONTENT, schema);
+    List<Node<?>> childNodes = new ArrayList();
+    childNodes.add(input);
+    QName rpcQName = schema.getOperations().iterator().next().getQName();
+    CompositeNode node = new ImmutableCompositeNode(rpcQName, childNodes, ModifyAction.REPLACE);
+    String xml = XmlUtils.inputCompositeNodeToXml(node, schema);
+    Assert.assertNotNull(xml);
+    Assert.assertTrue(xml.contains("3"));
   }
 
 
