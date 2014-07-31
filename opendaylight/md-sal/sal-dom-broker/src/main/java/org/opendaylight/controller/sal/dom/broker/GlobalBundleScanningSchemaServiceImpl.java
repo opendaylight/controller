@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver;
+import org.opendaylight.yangtools.yang.parser.repo.URLSchemaContextResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -44,7 +44,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
     private final ListenerRegistry<SchemaContextListener> listeners = new ListenerRegistry<>();
-    private final URLSchemaContextResolver contextResolver = new URLSchemaContextResolver();
+    private final URLSchemaContextResolver contextResolver = URLSchemaContextResolver.create("global-bundle");
     private final BundleScanner scanner = new BundleScanner();
     private final BundleContext context;
 
@@ -233,7 +233,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         if (starting) {
             return;
         }
-        Optional<SchemaContext> schema = contextResolver.tryToUpdateSchemaContext();
+        Optional<SchemaContext> schema = contextResolver.getSchemaContext();
         if(schema.isPresent()) {
             updateContext(schema.get());
         }
