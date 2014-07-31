@@ -40,6 +40,7 @@
 
         <bundle>mvn:org.opendaylight.controller/hosttracker/${hosttracker.api.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/hosttracker.implementation/${hosttracker.implementation.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/hosttracker.shell/${hosttracker.shell.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/forwarding.staticrouting</bundle>
 
