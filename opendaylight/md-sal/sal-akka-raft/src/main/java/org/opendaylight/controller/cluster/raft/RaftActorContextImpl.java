@@ -33,7 +33,7 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private long lastApplied;
 
-    private final ReplicatedLog replicatedLog;
+    private ReplicatedLog replicatedLog;
 
     private final Map<String, String> peerAddresses;
 
@@ -88,6 +88,10 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     @Override public void setLastApplied(long lastApplied) {
         this.lastApplied = lastApplied;
+    }
+
+    @Override public void setReplicatedLog(ReplicatedLog replicatedLog) {
+        this.replicatedLog = replicatedLog;
     }
 
     @Override public ReplicatedLog getReplicatedLog() {
