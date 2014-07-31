@@ -47,6 +47,11 @@
         <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
     </feature>
 
+    <feature name="odl-switchmanager-shell" description="Adds switchmanager commands to karaf shell" version="${project.version}">
+      <feature version="${project.version}">odl-nsf-managers</feature>
+      <bundle>mvn:org.opendaylight.controller/switchmanager.shell/${switchmanager.shell.version}</bundle>
+    </feature>
+
     <feature name="odl-adsal-northbound" description="OpenDaylight :: AD-SAL :: Northbound APIs" version="${project.version}">
         <feature version="${project.version}">base-all</feature>
         <feature version="${project.version}">odl-nsf-managers</feature>

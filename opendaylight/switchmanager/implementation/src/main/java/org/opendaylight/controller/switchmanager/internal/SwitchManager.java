@@ -54,7 +54,6 @@ import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -62,6 +61,7 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISpanAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
+import org.opendaylight.controller.switchmanager.ISwitchManagerShell;
 import org.opendaylight.controller.switchmanager.SpanConfig;
 import org.opendaylight.controller.switchmanager.Subnet;
 import org.opendaylight.controller.switchmanager.SubnetConfig;
@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  * are maintained in the default container only.
  */
 public class SwitchManager implements ISwitchManager, IConfigurationContainerAware,
-                                      IObjectReader, IListenInventoryUpdates, CommandProvider {
+                                      IObjectReader, IListenInventoryUpdates, CommandProvider, ISwitchManagerShell {
     private static Logger log = LoggerFactory.getLogger(SwitchManager.class);
     private static final String SUBNETS_FILE_NAME = "subnets.conf";
     private static final String SPAN_FILE_NAME = "spanPorts.conf";
@@ -1017,18 +1017,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 if (nodeProperties.get(ForwardingMode.name) != null) {
                     ForwardingMode mode = (ForwardingMode) nodeProperties.get(ForwardingMode.name);
                     forwardingModeChanged = mode.isProactive();
-                }
-            } else if ((conf == null) &&  !(GlobalConstants.DEFAULT.toString().equals(containerName))) {
-                ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, GlobalConstants.DEFAULT.toString(), this);
-                if (defaultSwitchManager != null) {
-                    Property defaultContainerSwitchDesc = (Description) defaultSwitchManager.getNodeProp(node, Description.propertyName);
-                    if (defaultContainerSwitchDesc != null) {
-                        Map<String, Property> descPropMap = new HashMap<String, Property>();
-                        descPropMap.put(Description.propertyName, defaultContainerSwitchDesc);
-                        conf = new SwitchConfig(nodeId, descPropMap);
-                        updateNodeConfig(conf);
-                        propMap.put(Description.propertyName, defaultContainerSwitchDesc);
-                    }
                 }
             }
         }
@@ -2177,4 +2165,84 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         return configuredNotConnectedSwitches;
     }
 
+    public List<String> pencs(String st) {
+        List<String> result = new ArrayList<String>();
+        if (st == null) {
+            result.add("Please enter node id");
+            return result;
+        }
+
+        Node node = Node.fromString(st);
+        if (node == null) {
+            result.add("Please enter node id");
+            return result;
+        }
+
+        Set<NodeConnector> nodeConnectorSet = getUpNodeConnectors(node);
+        if (nodeConnectorSet == null) {
+            return result;
+        }
+        for (NodeConnector nodeConnector : nodeConnectorSet) {
+            if (nodeConnector == null) {
+                continue;
+            }
+            result.add(nodeConnector.toString());
+        }
+        result.add("Total number of NodeConnectors: " + nodeConnectorSet.size());
+        return result;
+    }
+
+    public List<String> pdm(String st) {
+        List<String> result = new ArrayList<String>();
+        if (st == null) {
+            result.add("Please enter node id");
+            return result;
+        }
+
+        Node node = Node.fromString(st);
+        if (node == null) {
+            result.add("Please enter node id");
+            return result;
+        }
+
+        Switch sw = getSwitchByNode(node);
+
+        result.add("          NodeConnector                        Name");
+
+        Set<NodeConnector> nodeConnectorSet = sw.getNodeConnectors();
+        String nodeConnectorName;
+        if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
+            for (NodeConnector nodeConnector : nodeConnectorSet) {
+                Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
+                nodeConnectorName = (propMap == null) ? null : ((Name) propMap
+                        .get(Name.NamePropName)).getValue();
+                if (nodeConnectorName != null) {
+                    Node nd = nodeConnector.getNode();
+                    if (!nd.equals(node)) {
+                        log.debug("node not match {} {}", nd, node);
+                    }
+                    Map<String, NodeConnector> map = nodeConnectorNames
+                            .get(node);
+                    if (map != null) {
+                        NodeConnector nc = map.get(nodeConnectorName);
+                        if (nc == null) {
+                            log.debug("no nodeConnector named {}",
+                                    nodeConnectorName);
+                        } else if (!nc.equals(nodeConnector)) {
+                            log.debug("nodeConnector not match {} {}", nc,
+                                    nodeConnector);
+                        }
+                    }
+                }
+
+                result.add(nodeConnector
+                        + "            "
+                        + ((nodeConnectorName == null) ? "" : nodeConnectorName)
+                        + "(" + nodeConnector.getID() + ")");
+            }
+            result.add("Total number of NodeConnectors: "
+                    + nodeConnectorSet.size());
+        }
+        return result;
+    }
 }
