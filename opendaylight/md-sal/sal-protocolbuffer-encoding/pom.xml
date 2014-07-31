@@ -114,6 +114,13 @@
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-binding</artifactId>
       </dependency>
+
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-akka-raft</artifactId>
+          <version>1.1-SNAPSHOT</version>
+      </dependency>
+
       <dependency>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>

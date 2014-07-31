@@ -139,7 +139,7 @@ public final class ShardManagerMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -155,7 +155,7 @@ public final class ShardManagerMessages {
         getShardNameBytes() {
       java.lang.Object ref = shardName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         shardName_ = b;
@@ -377,7 +377,7 @@ public final class ShardManagerMessages {
 
       public final boolean isInitialized() {
         if (!hasShardName()) {
-
+          
           return false;
         }
         return true;
@@ -431,7 +431,7 @@ public final class ShardManagerMessages {
           getShardNameBytes() {
         java.lang.Object ref = shardName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           shardName_ = b;
@@ -618,7 +618,7 @@ public final class ShardManagerMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -634,7 +634,7 @@ public final class ShardManagerMessages {
         getPrimaryPathBytes() {
       java.lang.Object ref = primaryPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         primaryPath_ = b;
@@ -856,7 +856,7 @@ public final class ShardManagerMessages {
 
       public final boolean isInitialized() {
         if (!hasPrimaryPath()) {
-
+          
           return false;
         }
         return true;
@@ -910,7 +910,7 @@ public final class ShardManagerMessages {
           getPrimaryPathBytes() {
         java.lang.Object ref = primaryPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           primaryPath_ = b;
@@ -1097,7 +1097,7 @@ public final class ShardManagerMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1113,7 +1113,7 @@ public final class ShardManagerMessages {
         getShardNameBytes() {
       java.lang.Object ref = shardName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         shardName_ = b;
@@ -1335,7 +1335,7 @@ public final class ShardManagerMessages {
 
       public final boolean isInitialized() {
         if (!hasShardName()) {
-
+          
           return false;
         }
         return true;
@@ -1389,7 +1389,7 @@ public final class ShardManagerMessages {
           getShardNameBytes() {
         java.lang.Object ref = shardName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           shardName_ = b;

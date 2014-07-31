@@ -6,9 +6,15 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft.internal.messages;
+package org.opendaylight.controller.cluster.raft.base.messages;
 
 import java.io.Serializable;
 
-public class ElectionTimeout implements Serializable {
+/**
+ * This messages is sent to the Leader to prompt it to send a heartbeat
+ * to it's followers.
+ *
+ * Typically the Leader to itself on a schedule
+ */
+public class SendHeartBeat implements Serializable {
 }

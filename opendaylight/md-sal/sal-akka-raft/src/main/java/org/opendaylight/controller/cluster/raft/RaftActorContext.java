@@ -96,21 +96,27 @@ public interface RaftActorContext {
     ActorSystem getActorSystem();
 
     /**
+     * Get the logger to be used for logging messages
      *
      * @return
      */
     LoggingAdapter getLogger();
 
     /**
-     * Get a mapping of peer id's their addresses
+     * Get a mapping of peerId's to their addresses
+     *
      * @return
+     *
      */
     Map<String, String> getPeerAddresses();
 
     /**
+     * Get the address of the peer as a String. This is the same format in
+     * which a consumer would provide the address
      *
      * @param peerId
-     * @return
+     * @return The address of the peer or null if the address has not yet been
+     *         resolved
      */
     String getPeerAddress(String peerId);
 
@@ -126,4 +132,27 @@ public interface RaftActorContext {
      * @param name
      */
     public void removePeer(String name);
+
+    /**
+     * Given a peerId return the corresponding actor
+     * <p>
+     *
+     *
+     * @param peerId
+     * @return The actorSelection corresponding to the peer or null if the
+     *         address has not yet been resolved
+     */
+    ActorSelection getPeerActorSelection(String peerId);
+
+    /**
+     * Set Peer Address can be called at a later time to change the address of
+     * a known peer.
+     *
+     * <p>
+     * Throws an IllegalStateException if the peer is unknown
+     *
+     * @param peerId
+     * @param peerAddress
+     */
+    void setPeerAddress(String peerId, String peerAddress);
 }
