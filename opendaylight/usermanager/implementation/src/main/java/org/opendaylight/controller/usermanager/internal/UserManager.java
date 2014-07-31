@@ -48,6 +48,7 @@ import org.opendaylight.controller.usermanager.AuthorizationConfig;
 import org.opendaylight.controller.usermanager.IAAAProvider;
 import org.opendaylight.controller.usermanager.ISessionManager;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.usermanager.IUserManagerShell;
 import org.opendaylight.controller.usermanager.ServerConfig;
 import org.opendaylight.controller.usermanager.UserConfig;
 import org.opendaylight.controller.usermanager.security.SessionManager;
@@ -71,7 +72,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 /**
  * The internal implementation of the User Manager.
  */
-public class UserManager implements IUserManager, IObjectReader,
+public class UserManager implements IUserManager, IUserManagerShell, IObjectReader,
         IConfigurationAware, CommandProvider, AuthenticationProvider {
     private static final Logger logger = LoggerFactory.getLogger(UserManager.class);
     private static final String DEFAULT_ADMIN = "admin";
@@ -1186,5 +1187,20 @@ public class UserManager implements IUserManager, IObjectReader,
             }
         }
         return false;
+    }
+
+    @Override
+    public ConcurrentMap<String, ServerConfig> getRemoveServerConfigList() {
+        return this.remoteServerConfigList;
+    }
+
+    @Override
+    public void removeServer(ServerConfig AAAconf) {
+        this.removeAAAServer(AAAconf);
+    }
+
+    @Override
+    public ConcurrentMap<String, UserConfig> getLocalUserConfigList() {
+        return this.localUserConfigList;
     }
 }

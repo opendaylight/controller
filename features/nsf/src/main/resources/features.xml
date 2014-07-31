@@ -15,6 +15,7 @@
         <feature version="${sal.version}">odl-adsal-all</feature>
         <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/usermanager.shell/${usermanager.shell.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/appauth/${appauth.version}</bundle>
 
