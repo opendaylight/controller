@@ -11,37 +11,35 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.ClusterWrapper;
 import org.opendaylight.controller.remote.rpc.registry.ClusterWrapperImpl;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * This is the base class which initialize all the actors, listeners and
  * default RPc implementation so remote invocation of rpcs.
  */
-public class RemoteRpcProvider implements AutoCloseable, Provider{
+public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContextListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcProvider.class);
 
   private final ActorSystem actorSystem;
-  private ActorRef rpcBroker;
-  private ActorRef rpcRegistry;
   private final RpcProvisionRegistry rpcProvisionRegistry;
   private Broker.ProviderSession brokerSession;
-  private RpcListener rpcListener;
-  private RoutedRpcListener routeChangeListener;
-  private RemoteRpcImplementation rpcImplementation;
+  private SchemaContext schemaContext;
+  private ActorRef rpcManager;
+
+
   public RemoteRpcProvider(ActorSystem actorSystem, RpcProvisionRegistry rpcProvisionRegistry) {
     this.actorSystem = actorSystem;
     this.rpcProvisionRegistry = rpcProvisionRegistry;
@@ -50,8 +48,6 @@ public class RemoteRpcProvider implements AutoCloseable, Provider{
   @Override
   public void close() throws Exception {
     this.actorSystem.shutdown();
-    unregisterSupportedRpcs();
-    unregisterSupportedRoutedRpcs();
   }
 
   @Override
@@ -66,64 +62,22 @@ public class RemoteRpcProvider implements AutoCloseable, Provider{
   }
 
   private void start() {
-    LOG.debug("Starting all rpc listeners.");
+    LOG.info("Starting all rpc listeners and actors.");
     // Create actor to handle and sync routing table in cluster
     ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
-    rpcRegistry = actorSystem.actorOf(RpcRegistry.props(clusterWrapper), "rpc-registry");
-
-    // Create actor to invoke and execute rpc
     SchemaService schemaService = brokerSession.getService(SchemaService.class);
-    SchemaContext schemaContext = schemaService.getGlobalContext();
-    rpcBroker = actorSystem.actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), "rpc-broker");
-    String rpcBrokerPath = clusterWrapper.getAddress().toString() + "/user/rpc-broker";
-    rpcListener = new RpcListener(rpcRegistry, rpcBrokerPath);
-    routeChangeListener = new RoutedRpcListener(rpcRegistry, rpcBrokerPath);
-    rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext);
-    brokerSession.addRpcRegistrationListener(rpcListener);
-    rpcProvisionRegistry.registerRouteChangeListener(routeChangeListener);
-    rpcProvisionRegistry.setRoutedRpcDefaultDelegate(rpcImplementation);
-    announceSupportedRpcs();
-    announceSupportedRoutedRpcs();
+    schemaContext = schemaService.getGlobalContext();
 
+    rpcManager = actorSystem.actorOf(RpcManager.props(clusterWrapper, schemaContext, brokerSession, rpcProvisionRegistry), "rpc");
+
+    LOG.debug("Rpc actors are created.");
   }
 
-  /**
-   * Add all the locally registered RPCs in the clustered routing table
-   */
-  private void announceSupportedRpcs(){
-    LOG.debug("Adding all supported rpcs to routing table");
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      rpcListener.onRpcImplementationAdded(rpc);
-    }
-  }
 
-  /**
-   * Add all the locally registered Routed RPCs in the clustered routing table
-   */
-  private void announceSupportedRoutedRpcs(){
-
-    //TODO: announce all routed RPCs as well
-
-  }
-
-  /**
-   * Un-Register all the supported RPCs from clustered routing table
-   */
-  private void unregisterSupportedRpcs(){
-    LOG.debug("removing all supported rpcs to routing table");
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      rpcListener.onRpcImplementationRemoved(rpc);
-    }
-  }
-
-  /**
-   * Un-Register all the locally supported Routed RPCs from clustered routing table
-   */
-  private void unregisterSupportedRoutedRpcs(){
-
-    //TODO: remove all routed RPCs as well
+  @Override
+  public void onGlobalContextUpdated(SchemaContext schemaContext) {
+    this.schemaContext = schemaContext;
+    rpcManager.tell(new UpdateSchemaContext(schemaContext), null);
 
   }
 }

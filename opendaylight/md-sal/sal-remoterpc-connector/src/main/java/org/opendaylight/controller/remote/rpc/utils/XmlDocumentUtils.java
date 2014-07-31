@@ -56,177 +56,189 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkState;
 
 public class XmlDocumentUtils {
-    private static class ElementWithSchemaContext {
-        Element element;
-        SchemaContext schemaContext;
+  private static class ElementWithSchemaContext {
+    Element element;
+    SchemaContext schemaContext;
 
-        ElementWithSchemaContext(final Element element,final SchemaContext schemaContext) {
-            this.schemaContext = schemaContext;
-            this.element = element;
-        }
-
-        Element getElement() {
-            return element;
-        }
-
-        SchemaContext getSchemaContext() {
-            return schemaContext;
-        }
+    ElementWithSchemaContext(final Element element,final SchemaContext schemaContext) {
+      this.schemaContext = schemaContext;
+      this.element = element;
     }
 
-    public static final QName OPERATION_ATTRIBUTE_QNAME = QName.create(URI.create("urn:ietf:params:xml:ns:netconf:base:1.0"), null, "operation");
-    private static final Logger logger = LoggerFactory.getLogger(XmlDocumentUtils.class);
-    private static final XMLOutputFactory FACTORY = XMLOutputFactory.newFactory();
-
-    /**
-     * Converts Data DOM structure to XML Document for specified XML Codec Provider and corresponding
-     * Data Node Container schema. The CompositeNode data parameter enters as root of Data DOM tree and will
-     * be transformed to root in XML Document. Each element of Data DOM tree is compared against specified Data
-     * Node Container Schema and transformed accordingly.
-     *
-     * @param data Data DOM root element
-     * @param schema Data Node Container Schema
-     * @param codecProvider XML Codec Provider
-     * @return new instance of XML Document
-     * @throws javax.activation.UnsupportedDataTypeException
-     */
-    public static Document toDocument(final CompositeNode data, final DataNodeContainer schema, final XmlCodecProvider codecProvider)
-            throws UnsupportedDataTypeException {
-        Preconditions.checkNotNull(data);
-        Preconditions.checkNotNull(schema);
-
-        if (!(schema instanceof ContainerSchemaNode || schema instanceof ListSchemaNode)) {
-            throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
-        }
-
-        final DOMResult result = new DOMResult(getDocument());
-        try {
-            final XMLStreamWriter writer = FACTORY.createXMLStreamWriter(result);
-            XmlStreamUtils.create(codecProvider).writeDocument(writer, data, (SchemaNode)schema);
-            writer.close();
-            return (Document)result.getNode();
-        } catch (XMLStreamException e) {
-            logger.error("Failed to serialize data {}", data, e);
-            return null;
-        }
+    Element getElement() {
+      return element;
     }
 
-    public static Document getDocument() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        Document doc = null;
-        try {
-            DocumentBuilder bob = dbf.newDocumentBuilder();
-            doc = bob.newDocument();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        return doc;
+    SchemaContext getSchemaContext() {
+      return schemaContext;
+    }
+  }
+
+  public static final QName OPERATION_ATTRIBUTE_QNAME = QName.create(URI.create("urn:ietf:params:xml:ns:netconf:base:1.0"), null, "operation");
+  private static final Logger logger = LoggerFactory.getLogger(XmlDocumentUtils.class);
+  private static final XMLOutputFactory FACTORY = XMLOutputFactory.newFactory();
+
+  /**
+   * Converts Data DOM structure to XML Document for specified XML Codec Provider and corresponding
+   * Data Node Container schema. The CompositeNode data parameter enters as root of Data DOM tree and will
+   * be transformed to root in XML Document. Each element of Data DOM tree is compared against specified Data
+   * Node Container Schema and transformed accordingly.
+   *
+   * @param data Data DOM root element
+   * @param schema Data Node Container Schema
+   * @param codecProvider XML Codec Provider
+   * @return new instance of XML Document
+   * @throws javax.activation.UnsupportedDataTypeException
+   */
+  public static Document toDocument(final CompositeNode data, final DataNodeContainer schema, final XmlCodecProvider codecProvider)
+      throws UnsupportedDataTypeException {
+    Preconditions.checkNotNull(data);
+    Preconditions.checkNotNull(schema);
+
+    if (!(schema instanceof ContainerSchemaNode || schema instanceof ListSchemaNode)) {
+      throw new UnsupportedDataTypeException("Schema can be ContainerSchemaNode or ListSchemaNode. Other types are not supported yet.");
     }
 
+    final DOMResult result = new DOMResult(getDocument());
+    try {
+      final XMLStreamWriter writer = FACTORY.createXMLStreamWriter(result);
+      XmlStreamUtils.create(codecProvider).writeDocument(writer, data, (SchemaNode)schema);
+      writer.close();
+      return (Document)result.getNode();
+    } catch (XMLStreamException e) {
+      logger.error("Failed to serialize data {}", data, e);
+      return null;
+    }
+  }
 
-    public static QName qNameFromElement(final Element xmlElement) {
-        String namespace = xmlElement.getNamespaceURI();
-        String localName = xmlElement.getLocalName();
-        return QName.create(namespace != null ? URI.create(namespace) : null, null, localName);
+  public static Document getDocument() {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    Document doc = null;
+    try {
+      DocumentBuilder bob = dbf.newDocumentBuilder();
+      doc = bob.newDocument();
+    } catch (ParserConfigurationException e) {
+      throw new RuntimeException(e);
+    }
+    return doc;
+  }
+
+
+  public static QName qNameFromElement(final Element xmlElement) {
+    String namespace = xmlElement.getNamespaceURI();
+    String localName = xmlElement.getLocalName();
+    return QName.create(namespace != null ? URI.create(namespace) : null, null, localName);
+  }
+
+  private static Node<?> toNodeWithSchema(final Element xmlElement, final DataSchemaNode schema, final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
+    checkQName(xmlElement, schema.getQName());
+    if (schema instanceof DataNodeContainer) {
+      return toCompositeNodeWithSchema(xmlElement, schema.getQName(), (DataNodeContainer) schema, schemaCtx);
+    } else if (schema instanceof LeafSchemaNode) {
+      return toSimpleNodeWithType(xmlElement, (LeafSchemaNode) schema, codecProvider,schemaCtx);
+    } else if (schema instanceof LeafListSchemaNode) {
+      return toSimpleNodeWithType(xmlElement, (LeafListSchemaNode) schema, codecProvider,schemaCtx);
+    }
+    return null;
+  }
+
+
+
+  private static Node<?> toSimpleNodeWithType(final Element xmlElement, final LeafSchemaNode schema,
+                                              final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
+    TypeDefinitionAwareCodec<? extends Object, ? extends TypeDefinition<?>> codec = codecProvider.codecFor(schema.getType());
+    String text = xmlElement.getTextContent();
+    Object value = null;
+    if (codec != null) {
+      logger.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
+      value = codec.deserialize(text);
     }
 
-    private static Node<?> toNodeWithSchema(final Element xmlElement, final DataSchemaNode schema, final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
-        checkQName(xmlElement, schema.getQName());
-        if (schema instanceof DataNodeContainer) {
-            return toCompositeNodeWithSchema(xmlElement, schema.getQName(), (DataNodeContainer) schema, codecProvider,schemaCtx);
-        } else if (schema instanceof LeafSchemaNode) {
-            return toSimpleNodeWithType(xmlElement, (LeafSchemaNode) schema, codecProvider,schemaCtx);
-        } else if (schema instanceof LeafListSchemaNode) {
-            return toSimpleNodeWithType(xmlElement, (LeafListSchemaNode) schema, codecProvider,schemaCtx);
-        }
-        return null;
+    final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
+    if (baseType instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
+      logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
+      value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
+
+    } else if(baseType instanceof IdentityrefTypeDefinition){
+      logger.debug("toSimpleNodeWithType: base type of node is IdentityrefTypeDefinition, deserializing element", xmlElement);
+      value = InstanceIdentifierForXmlCodec.toIdentity(xmlElement.getTextContent(), xmlElement, schemaCtx);
+
     }
 
-
-
-    private static Node<?> toSimpleNodeWithType(final Element xmlElement, final LeafSchemaNode schema,
-            final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
-        TypeDefinitionAwareCodec<? extends Object, ? extends TypeDefinition<?>> codec = codecProvider.codecFor(schema.getType());
-        String text = xmlElement.getTextContent();
-        Object value = null;
-        if (codec != null) {
-            value = codec.deserialize(text);
-        }
-        final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
-        if (baseType instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
-            value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
-        } else if(baseType instanceof IdentityrefTypeDefinition){
-            value = InstanceIdentifierForXmlCodec.toIdentity(xmlElement.getTextContent(), xmlElement, schemaCtx);
-        }
-
-        if (value == null) {
-            value = xmlElement.getTextContent();
-        }
-
-        Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
-        return new SimpleNodeTOImpl<>(schema.getQName(), null, value, modifyAction.orNull());
+    if (value == null) {
+      logger.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
+      value = xmlElement.getTextContent();
     }
 
-    private static Node<?> toSimpleNodeWithType(final Element xmlElement, final LeafListSchemaNode schema,
-            final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
-        TypeDefinitionAwareCodec<? extends Object, ? extends TypeDefinition<?>> codec = codecProvider.codecFor(schema.getType());
-        String text = xmlElement.getTextContent();
-        Object value = null;
-        if (codec != null) {
-            value = codec.deserialize(text);
-        }
-        if (schema.getType() instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
-            value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
-        }
-        if (value == null) {
-            value = xmlElement.getTextContent();
-        }
+    Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
+    return new SimpleNodeTOImpl<>(schema.getQName(), null, value, modifyAction.orNull());
+  }
 
-        Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
-        return new SimpleNodeTOImpl<>(schema.getQName(), null, value, modifyAction.orNull());
+  private static Node<?> toSimpleNodeWithType(final Element xmlElement, final LeafListSchemaNode schema,
+                                              final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
+    TypeDefinitionAwareCodec<? extends Object, ? extends TypeDefinition<?>> codec = codecProvider.codecFor(schema.getType());
+    String text = xmlElement.getTextContent();
+    Object value = null;
+    if (codec != null) {
+      logger.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
+      value = codec.deserialize(text);
     }
 
-    private static Node<?> toCompositeNodeWithSchema(final Element xmlElement, final QName qName, final DataNodeContainer schema,
-            final XmlCodecProvider codecProvider,final SchemaContext schemaCtx) {
-        List<Node<?>> values = toDomNodes(xmlElement, Optional.fromNullable(schema.getChildNodes()),schemaCtx);
-        Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
-        return ImmutableCompositeNode.create(qName, values, modifyAction.orNull());
+    if (schema.getType() instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
+      logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
+      value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
     }
 
-    private static Optional<ModifyAction> getModifyOperationFromAttributes(final Element xmlElement) {
-        Attr attributeNodeNS = xmlElement.getAttributeNodeNS(OPERATION_ATTRIBUTE_QNAME.getNamespace().toString(), OPERATION_ATTRIBUTE_QNAME.getLocalName());
-        if(attributeNodeNS == null) {
-            return Optional.absent();
-        }
-
-        ModifyAction action = ModifyAction.fromXmlValue(attributeNodeNS.getValue());
-        Preconditions.checkArgument(action.isOnElementPermitted(), "Unexpected operation %s on %s", action, xmlElement);
-
-        return Optional.of(action);
+    if (value == null) {
+      logger.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
+      value = xmlElement.getTextContent();
     }
 
-    private static void checkQName(final Element xmlElement, final QName qName) {
-        checkState(Objects.equal(xmlElement.getNamespaceURI(), qName.getNamespace().toString()));
-        checkState(qName.getLocalName().equals(xmlElement.getLocalName()));
+    Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
+    return new SimpleNodeTOImpl<>(schema.getQName(), null, value, modifyAction.orNull());
+  }
+
+  private static Node<?> toCompositeNodeWithSchema(final Element xmlElement, final QName qName, final DataNodeContainer schema,
+                                                   final SchemaContext schemaCtx) {
+    List<Node<?>> values = toDomNodes(xmlElement, Optional.fromNullable(schema.getChildNodes()),schemaCtx);
+    Optional<ModifyAction> modifyAction = getModifyOperationFromAttributes(xmlElement);
+    return ImmutableCompositeNode.create(qName, values, modifyAction.orNull());
+  }
+
+  private static Optional<ModifyAction> getModifyOperationFromAttributes(final Element xmlElement) {
+    Attr attributeNodeNS = xmlElement.getAttributeNodeNS(OPERATION_ATTRIBUTE_QNAME.getNamespace().toString(), OPERATION_ATTRIBUTE_QNAME.getLocalName());
+    if(attributeNodeNS == null) {
+      return Optional.absent();
     }
 
-    public static final Optional<DataSchemaNode> findFirstSchema(final QName qname, final Collection<DataSchemaNode> dataSchemaNode) {
-        if (dataSchemaNode != null && !dataSchemaNode.isEmpty() && qname != null) {
-            for (DataSchemaNode dsn : dataSchemaNode) {
-                if (qname.isEqualWithoutRevision(dsn.getQName())) {
-                    return Optional.<DataSchemaNode> of(dsn);
-                } else if (dsn instanceof ChoiceNode) {
-                    for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
-                        Optional<DataSchemaNode> foundDsn = findFirstSchema(qname, choiceCase.getChildNodes());
-                        if (foundDsn != null && foundDsn.isPresent()) {
-                            return foundDsn;
-                        }
-                    }
-                }
+    ModifyAction action = ModifyAction.fromXmlValue(attributeNodeNS.getValue());
+    Preconditions.checkArgument(action.isOnElementPermitted(), "Unexpected operation %s on %s", action, xmlElement);
+
+    return Optional.of(action);
+  }
+
+  private static void checkQName(final Element xmlElement, final QName qName) {
+    checkState(Objects.equal(xmlElement.getNamespaceURI(), qName.getNamespace().toString()));
+    checkState(qName.getLocalName().equals(xmlElement.getLocalName()));
+  }
+
+  public static final Optional<DataSchemaNode> findFirstSchema(final QName qname, final Collection<DataSchemaNode> dataSchemaNode) {
+    if (dataSchemaNode != null && !dataSchemaNode.isEmpty() && qname != null) {
+      for (DataSchemaNode dsn : dataSchemaNode) {
+        if (qname.isEqualWithoutRevision(dsn.getQName())) {
+          return Optional.<DataSchemaNode> of(dsn);
+        } else if (dsn instanceof ChoiceNode) {
+          for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
+            Optional<DataSchemaNode> foundDsn = findFirstSchema(qname, choiceCase.getChildNodes());
+            if (foundDsn != null && foundDsn.isPresent()) {
+              return foundDsn;
             }
+          }
         }
-        return Optional.absent();
+      }
     }
+    return Optional.absent();
+  }
 
   private static Node<?> toDomNode(Element element) {
     QName qname = qNameFromElement(element);
@@ -274,26 +286,26 @@ public class XmlDocumentUtils {
 
   }
 
-    private static final <T> List<T> forEachChild(final NodeList nodes, final SchemaContext schemaContext, final Function<ElementWithSchemaContext, Optional<T>> forBody) {
-        final int l = nodes.getLength();
-        if (l == 0) {
-            return ImmutableList.of();
-        }
-
-        final List<T> list = new ArrayList<>(l);
-        for (int i = 0; i < l; i++) {
-            org.w3c.dom.Node child = nodes.item(i);
-            if (child instanceof Element) {
-                Optional<T> result = forBody.apply(new ElementWithSchemaContext((Element) child,schemaContext));
-                if (result.isPresent()) {
-                    list.add(result.get());
-                }
-            }
-        }
-        return ImmutableList.copyOf(list);
+  private static final <T> List<T> forEachChild(final NodeList nodes, final SchemaContext schemaContext, final Function<ElementWithSchemaContext, Optional<T>> forBody) {
+    final int l = nodes.getLength();
+    if (l == 0) {
+      return ImmutableList.of();
     }
 
-    public static final XmlCodecProvider defaultValueCodecProvider() {
-        return XmlUtils.DEFAULT_XML_CODEC_PROVIDER;
+    final List<T> list = new ArrayList<>(l);
+    for (int i = 0; i < l; i++) {
+      org.w3c.dom.Node child = nodes.item(i);
+      if (child instanceof Element) {
+        Optional<T> result = forBody.apply(new ElementWithSchemaContext((Element) child,schemaContext));
+        if (result.isPresent()) {
+          list.add(result.get());
+        }
+      }
     }
+    return ImmutableList.copyOf(list);
+  }
+
+  public static final XmlCodecProvider defaultValueCodecProvider() {
+    return XmlUtils.DEFAULT_XML_CODEC_PROVIDER;
+  }
 }

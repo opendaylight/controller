@@ -15,9 +15,13 @@ import com.google.common.io.ByteSource;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
+import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -27,7 +31,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class XmlUtilsTest {
@@ -46,10 +52,10 @@ public class XmlUtilsTest {
   private SchemaContext schema;
   private RpcDefinition testRpc;
 
-  public static final String XML_CONTENT = "<input xmlns=\"urn:opendaylight:controller:rpc:test\">" +
+  public static final String XML_CONTENT = "<add-flow xmlns=\"urn:opendaylight:controller:rpc:test\"><input xmlns=\"urn:opendaylight:controller:rpc:test\">" +
       "<id>flowid</id>" +
       "<flow xmlns:ltha=\"urn:opendaylight:controller:rpc:test\">/ltha:node/ltha:node1[ltha:id='3@java.lang.Short']</flow>" +
-      "</input>";
+      "</input></add-flow>";
 
   @Before
   public void setUp() throws Exception {
@@ -62,6 +68,18 @@ public class XmlUtilsTest {
     schema = new YangParserImpl().parseSources(Lists.newArrayList(byteSource));
     final Module rpcTestModule = schema.getModules().iterator().next();
     testRpc = rpcTestModule.getRpcs().iterator().next();
+  }
+
+  @Test
+  public void testNullInputXmlToComposite() {
+    CompositeNode node = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), null, schema);
+    Assert.assertNull(node);
+  }
+
+  @Test
+  public void testNullRpcXmlToComposite() {
+    CompositeNode node = XmlUtils.inputXmlToCompositeNode(null, XML_CONTENT, schema);
+    Assert.assertNull(node);
   }
 
   @Test
@@ -85,6 +103,30 @@ public class XmlUtilsTest {
     Short value = (Short)secondPath.getKeyValues().values().iterator().next();
     Short expected = 3;
     Assert.assertEquals(expected, value);
+  }
+
+  @Test
+  public void testInputCompositeNodeToXML() {
+    CompositeNode input = XmlUtils.inputXmlToCompositeNode(testRpc.getQName(), XML_CONTENT, schema);
+    List<Node<?>> childNodes = new ArrayList();
+    childNodes.add(input);
+    QName rpcQName = schema.getOperations().iterator().next().getQName();
+    CompositeNode node = new ImmutableCompositeNode(rpcQName, input.getValue(), ModifyAction.REPLACE);
+    String xml = XmlUtils.inputCompositeNodeToXml(node, schema);
+    Assert.assertNotNull(xml);
+    Assert.assertTrue(xml.contains("3@java.lang.Short"));
+  }
+
+  @Test
+  public void testNullCompositeNodeToXml(){
+    String xml = XmlUtils.inputCompositeNodeToXml(null, schema);
+    Assert.assertTrue(xml.isEmpty());
+  }
+
+  @Test
+  public void testNullSchemaCompositeNodeToXml(){
+    String xml = XmlUtils.inputCompositeNodeToXml(new ImmutableCompositeNode(QName.create("ns", "2013-12-09", "child1"), new ArrayList<Node<?>>(), ModifyAction.REPLACE), null);
+    Assert.assertTrue(xml.isEmpty());
   }
 
 

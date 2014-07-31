@@ -12,6 +12,7 @@ package org.opendaylight.controller.remote.rpc;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.remote.rpc.messages.AddRpc;
 import org.opendaylight.controller.remote.rpc.messages.RemoveRpc;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;

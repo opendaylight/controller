@@ -11,13 +11,12 @@ package org.opendaylight.controller.remote.rpc;
 
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.osgi.framework.BundleContext;
 
 public class RemoteRpcProviderFactory {
-    public static RemoteRpcProvider createInstance(final Broker broker, final BundleContext bundleContext){
+    public static RemoteRpcProvider createInstance(final Broker broker){
       RemoteRpcProvider rpcProvider =
           new RemoteRpcProvider(ActorSystemFactory.getInstance(), (RpcProvisionRegistry) broker);
-      broker.registerProvider(rpcProvider, bundleContext);
+      broker.registerProvider(rpcProvider);
       return rpcProvider;
     }
 }

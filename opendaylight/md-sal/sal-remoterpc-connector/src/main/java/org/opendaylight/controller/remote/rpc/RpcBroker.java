@@ -20,6 +20,7 @@ import org.opendaylight.controller.remote.rpc.messages.GetRpcReply;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.remote.rpc.utils.XmlUtils;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -39,7 +40,7 @@ public class RpcBroker extends AbstractUntypedActor {
   private static final Logger LOG = LoggerFactory.getLogger(RpcBroker.class);
   private final Broker.ProviderSession brokerSession;
   private final ActorRef rpcRegistry;
-  private final SchemaContext schemaContext;
+  private SchemaContext schemaContext;
 
   private RpcBroker(Broker.ProviderSession brokerSession, ActorRef rpcRegistry, SchemaContext schemaContext){
     this.brokerSession = brokerSession;
@@ -73,7 +74,7 @@ public class RpcBroker extends AbstractUntypedActor {
     try {
       RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, msg.getRpc(), msg.getIdentifier());
       GetRoutedRpc routedRpcMsg = new GetRoutedRpc(routeId);
-      GetRoutedRpcReply rpcReply = (GetRoutedRpcReply)ActorUtil.executeLocalOperation(rpcRegistry, routedRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
+      GetRoutedRpcReply rpcReply = (GetRoutedRpcReply) ActorUtil.executeLocalOperation(rpcRegistry, routedRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
 
       String remoteActorPath = rpcReply.getRoutePath();
       if(remoteActorPath == null) {
