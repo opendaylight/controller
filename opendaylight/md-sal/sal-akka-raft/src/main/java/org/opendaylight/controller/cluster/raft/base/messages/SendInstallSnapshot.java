@@ -6,12 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft.internal.messages;
+package org.opendaylight.controller.cluster.raft.base.messages;
 
 import java.io.Serializable;
 
-/**
- * Message sent to commit an entry to the log
- */
-public class CommitEntry implements Serializable {
+public class SendInstallSnapshot implements Serializable {
 }

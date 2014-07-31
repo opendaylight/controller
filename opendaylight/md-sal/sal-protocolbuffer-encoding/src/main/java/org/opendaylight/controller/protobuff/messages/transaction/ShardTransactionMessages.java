@@ -757,7 +757,7 @@ public final class ShardTransactionMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -773,7 +773,7 @@ public final class ShardTransactionMessages {
         getTransactionIdBytes() {
       java.lang.Object ref = transactionId_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         transactionId_ = b;
@@ -995,7 +995,7 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasTransactionId()) {
-
+          
           return false;
         }
         return true;
@@ -1049,7 +1049,7 @@ public final class ShardTransactionMessages {
           getTransactionIdBytes() {
         java.lang.Object ref = transactionId_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           transactionId_ = b;
@@ -1256,7 +1256,7 @@ public final class ShardTransactionMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1272,7 +1272,7 @@ public final class ShardTransactionMessages {
         getTransactionActorPathBytes() {
       java.lang.Object ref = transactionActorPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         transactionActorPath_ = b;
@@ -1299,7 +1299,7 @@ public final class ShardTransactionMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1315,7 +1315,7 @@ public final class ShardTransactionMessages {
         getTransactionIdBytes() {
       java.lang.Object ref = transactionId_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         transactionId_ = b;
@@ -1560,11 +1560,11 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasTransactionActorPath()) {
-
+          
           return false;
         }
         if (!hasTransactionId()) {
-
+          
           return false;
         }
         return true;
@@ -1618,7 +1618,7 @@ public final class ShardTransactionMessages {
           getTransactionActorPathBytes() {
         java.lang.Object ref = transactionActorPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           transactionActorPath_ = b;
@@ -1692,7 +1692,7 @@ public final class ShardTransactionMessages {
           getTransactionIdBytes() {
         java.lang.Object ref = transactionId_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           transactionId_ = b;
@@ -2188,7 +2188,7 @@ public final class ShardTransactionMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -2204,7 +2204,7 @@ public final class ShardTransactionMessages {
         getActorPathBytes() {
       java.lang.Object ref = actorPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         actorPath_ = b;
@@ -2426,7 +2426,7 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasActorPath()) {
-
+          
           return false;
         }
         return true;
@@ -2480,7 +2480,7 @@ public final class ShardTransactionMessages {
           getActorPathBytes() {
         java.lang.Object ref = actorPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           actorPath_ = b;
@@ -2902,11 +2902,11 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPathArguments()) {
-
+          
           return false;
         }
         if (!getInstanceIdentifierPathArguments().isInitialized()) {
-
+          
           return false;
         }
         return true;
@@ -3035,7 +3035,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getInstanceIdentifierPathArgumentsFieldBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
           instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -3734,11 +3734,11 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPathArguments()) {
-
+          
           return false;
         }
         if (!getInstanceIdentifierPathArguments().isInitialized()) {
-
+          
           return false;
         }
         return true;
@@ -3867,7 +3867,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getInstanceIdentifierPathArgumentsFieldBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
           instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -4256,7 +4256,7 @@ public final class ShardTransactionMessages {
       public final boolean isInitialized() {
         if (hasNormalizedNode()) {
           if (!getNormalizedNode().isInitialized()) {
-
+            
             return false;
           }
         }
@@ -4386,7 +4386,7 @@ public final class ShardTransactionMessages {
        * <code>optional .org.opendaylight.controller.mdsal.Node normalizedNode = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
           normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -4859,19 +4859,19 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPathArguments()) {
-
+          
           return false;
         }
         if (!hasNormalizedNode()) {
-
+          
           return false;
         }
         if (!getInstanceIdentifierPathArguments().isInitialized()) {
-
+          
           return false;
         }
         if (!getNormalizedNode().isInitialized()) {
-
+          
           return false;
         }
         return true;
@@ -5000,7 +5000,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getInstanceIdentifierPathArgumentsFieldBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
           instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -5117,7 +5117,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
           normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -5899,19 +5899,19 @@ public final class ShardTransactionMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPathArguments()) {
-
+          
           return false;
         }
         if (!hasNormalizedNode()) {
-
+          
           return false;
         }
         if (!getInstanceIdentifierPathArguments().isInitialized()) {
-
+          
           return false;
         }
         if (!getNormalizedNode().isInitialized()) {
-
+          
           return false;
         }
         return true;
@@ -6040,7 +6040,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getInstanceIdentifierPathArgumentsFieldBuilder() {
         if (instanceIdentifierPathArgumentsBuilder_ == null) {
           instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -6157,7 +6157,7 @@ public final class ShardTransactionMessages {
        * <code>required .org.opendaylight.controller.mdsal.Node normalizedNode = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
           normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<

@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-public interface RaftRPC {
+import java.io.Serializable;
+
+public interface RaftRPC extends Serializable {
     public long getTerm();
 }

@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-import java.io.Serializable;
-
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
-public class RequestVote extends AbstractRaftRPC implements Serializable{
+public class RequestVote extends AbstractRaftRPC {
 
     // candidate requesting vote
     private String candidateId;
@@ -62,5 +60,16 @@ public class RequestVote extends AbstractRaftRPC implements Serializable{
 
     public void setLastLogTerm(long lastLogTerm) {
         this.lastLogTerm = lastLogTerm;
+    }
+
+    @Override public String toString() {
+        final StringBuilder sb =
+            new StringBuilder("RequestVote{");
+        sb.append("term='").append(getTerm()).append('\'');
+        sb.append("candidateId='").append(candidateId).append('\'');
+        sb.append(", lastLogIndex=").append(lastLogIndex);
+        sb.append(", lastLogTerm=").append(lastLogTerm);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -652,7 +652,7 @@ public final class ThreePhaseCommitCohortMessages {
 
       public final boolean isInitialized() {
         if (!hasCanCommit()) {
-
+          
           return false;
         }
         return true;
