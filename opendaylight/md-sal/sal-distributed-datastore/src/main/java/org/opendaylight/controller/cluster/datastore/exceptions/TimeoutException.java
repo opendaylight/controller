@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 public class TimeoutException extends RuntimeException {
-    public TimeoutException(Exception e){
-        super(e);
+    public TimeoutException(String message, Exception e){
+        super(message, e);
     }
 }

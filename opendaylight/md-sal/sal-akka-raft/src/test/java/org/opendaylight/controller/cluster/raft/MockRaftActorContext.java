@@ -18,6 +18,7 @@ import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.MockPayloadMessages;
+import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -157,6 +158,19 @@ public class MockRaftActorContext implements RaftActorContext {
 
     @Override public void removePeer(String name) {
         peerAddresses.remove(name);
+    }
+
+    @Override public ActorSelection getPeerActorSelection(String peerId) {
+        String peerAddress = getPeerAddress(peerId);
+        if(peerAddress != null){
+            return actorSelection(peerAddress);
+        }
+        return null;
+    }
+
+    @Override public void setPeerAddress(String peerId, String peerAddress) {
+        Preconditions.checkState(peerAddresses.containsKey(peerId));
+        peerAddresses.put(peerId, peerAddress);
     }
 
     public void setPeerAddresses(Map<String, String> peerAddresses) {

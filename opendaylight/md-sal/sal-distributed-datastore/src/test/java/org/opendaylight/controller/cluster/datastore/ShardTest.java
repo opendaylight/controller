@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
+import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -19,6 +20,10 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -26,9 +31,17 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCreateTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config");
+            final Props props = Shard.props("config", Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
+
+
+            // Wait for Shard to become a Leader
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             new Within(duration("1 seconds")) {
                 protected void run() {
@@ -64,7 +77,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveRegisterListener() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config");
+            final Props props = Shard.props("config", Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
@@ -107,9 +120,18 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testCreateTransaction(){
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config");
+            final Props props = Shard.props("config", Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
+
+
+            // Wait for Shard to become a Leader
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
             new Within(duration("1 seconds")) {
                 protected void run() {
@@ -135,9 +157,8 @@ public class ShardTest extends AbstractActorTest {
                         }
                     }.get(); // this extracts the received message
 
-                    assertEquals("Unexpected transaction path " + out,
-                        "akka://test/user/testCreateTransaction/shard-txn-1",
-                        out);
+                    assertTrue("Unexpected transaction path " + out,
+                        out.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
                     expectNoMsg();
                 }
 
@@ -146,7 +167,29 @@ public class ShardTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testPeerAddressResolved(){
+        new JavaTestKit(getSystem()) {{
+            Map<String, String> peerAddresses = new HashMap<>();
+            peerAddresses.put("member-2", null);
+            final Props props = Shard.props("config", peerAddresses);
+            final ActorRef subject =
+                getSystem().actorOf(props, "testPeerAddressResolved");
 
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    subject.tell(
+                        new PeerAddressResolved("member-2", "akka://foobar"),
+                        getRef());
+
+                    expectNoMsg();
+                }
+
+
+            };
+        }};
+    }
 
     private AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener() {
         return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {

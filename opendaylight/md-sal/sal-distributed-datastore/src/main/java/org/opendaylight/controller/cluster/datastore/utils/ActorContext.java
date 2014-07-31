@@ -14,9 +14,6 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.util.Timeout;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -105,7 +102,7 @@ public class ActorContext {
 
             return found.getPrimaryPath();
         }
-        throw new PrimaryNotFoundException();
+        throw new PrimaryNotFoundException("Could not find primary for shardName " + shardName);
     }
 
 
@@ -125,7 +122,7 @@ public class ActorContext {
         try {
             return Await.result(future, AWAIT_DURATION);
         } catch (Exception e) {
-            throw new TimeoutException(e);
+            throw new TimeoutException("Sending message " + message.getClass().toString() + " to actor " + actor.toString() + " failed" , e);
         }
     }
 
@@ -148,7 +145,7 @@ public class ActorContext {
         try {
             return Await.result(future, AWAIT_DURATION);
         } catch (Exception e) {
-            throw new TimeoutException(e);
+            throw new TimeoutException("Sending message " + message.getClass().toString() + " to actor " + actor.toString() + " failed" , e);
         }
     }
 
@@ -178,22 +175,15 @@ public class ActorContext {
         actorSystem.shutdown();
     }
 
-    public String getRemoteActorPath(final String shardName,
-        final String localPathOfRemoteActor) {
-        final String path = findPrimaryPath(shardName);
-
-        LoadingCache<String, String> graphs = CacheBuilder.newBuilder()
-            .expireAfterAccess(2, TimeUnit.SECONDS)
-            .build(
-                new CacheLoader<String, String>() {
-                    public String load(String key) {
-                        return resolvePath(path, localPathOfRemoteActor);
-                    }
-                }
-            );
-        return graphs.getUnchecked(localPathOfRemoteActor);
-    }
-
+    /**
+     * @deprecated Need to stop using this method. There are ways to send a
+     * remote ActorRef as a string which should be used instead of this hack
+     *
+     * @param primaryPath
+     * @param localPathOfRemoteActor
+     * @return
+     */
+    @Deprecated
     public String resolvePath(final String primaryPath,
         final String localPathOfRemoteActor) {
         StringBuilder builder = new StringBuilder();

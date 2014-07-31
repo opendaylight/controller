@@ -17,6 +17,8 @@ import akka.event.LoggingAdapter;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
+
 public class RaftActorContextImpl implements RaftActorContext{
 
     private final ActorRef actor;
@@ -36,7 +38,6 @@ public class RaftActorContextImpl implements RaftActorContext{
     private final Map<String, String> peerAddresses;
 
     private final LoggingAdapter LOG;
-
 
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
@@ -110,12 +111,25 @@ public class RaftActorContextImpl implements RaftActorContext{
     }
 
     @Override public void addToPeers(String name, String address) {
-        LOG.debug("Kamal--> addToPeer for:"+name);
         peerAddresses.put(name, address);
     }
 
     @Override public void removePeer(String name) {
-        LOG.debug("Kamal--> removePeer for:"+name);
         peerAddresses.remove(name);
+    }
+
+    @Override public ActorSelection getPeerActorSelection(String peerId) {
+        String peerAddress = getPeerAddress(peerId);
+        if(peerAddress != null){
+            return actorSelection(peerAddress);
+        }
+        return null;
+    }
+
+    @Override public void setPeerAddress(String peerId, String peerAddress) {
+        LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
+        checkState(peerAddresses.containsKey(peerId), peerId + " is unknown");
+
+        peerAddresses.put(peerId, peerAddress);
     }
 }

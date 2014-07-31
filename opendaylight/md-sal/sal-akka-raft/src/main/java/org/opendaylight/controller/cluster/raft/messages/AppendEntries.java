@@ -14,7 +14,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Map;
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
-public class AppendEntries extends AbstractRaftRPC implements Serializable {
+public class AppendEntries extends AbstractRaftRPC {
 
     public static final Class SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
 
@@ -77,13 +76,16 @@ public class AppendEntries extends AbstractRaftRPC implements Serializable {
     }
 
     @Override public String toString() {
-        return "AppendEntries{" +
-            "leaderId='" + leaderId + '\'' +
-            ", prevLogIndex=" + prevLogIndex +
-            ", prevLogTerm=" + prevLogTerm +
-            ", entries=" + entries +
-            ", leaderCommit=" + leaderCommit +
-            '}';
+        final StringBuilder sb =
+            new StringBuilder("AppendEntries{");
+        sb.append("term=").append(getTerm());
+        sb.append("leaderId='").append(leaderId).append('\'');
+        sb.append(", prevLogIndex=").append(prevLogIndex);
+        sb.append(", prevLogTerm=").append(prevLogTerm);
+        sb.append(", entries=").append(entries);
+        sb.append(", leaderCommit=").append(leaderCommit);
+        sb.append('}');
+        return sb.toString();
     }
 
     public <T extends Object> Object toSerializable(){
