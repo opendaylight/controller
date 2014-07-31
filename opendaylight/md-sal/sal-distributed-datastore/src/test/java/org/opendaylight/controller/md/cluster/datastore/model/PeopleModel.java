@@ -42,14 +42,14 @@ public class PeopleModel {
         MapEntryNode jack =
             ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jack")
                 .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jack"))
-                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100))
+                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100L))
                 .build();
 
         // Create an entry for the person jill
         MapEntryNode jill =
             ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jill")
                 .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jill"))
-                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200))
+                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200L))
                 .build();
 
         cars.withChild(jack);

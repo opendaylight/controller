@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import java.math.BigInteger;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -42,14 +43,14 @@ public class CarsModel {
         MapEntryNode altima =
             ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
                 .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
-                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, 1000))
+                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, new BigInteger("1000")))
                 .build();
 
         // Create an entry for the car accord
         MapEntryNode honda =
             ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
                 .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
-                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, 2000))
+                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, new BigInteger("2000")))
                 .build();
 
         cars.withChild(altima);
