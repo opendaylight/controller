@@ -15,9 +15,41 @@ import java.util.List;
 import java.util.Map;
 
 public interface Configuration {
+
+    /**
+     * Given a memberName find all the shards that belong on that member and
+     * return the names of those shards
+     *
+     * @param memberName
+     * @return
+     */
     List<String> getMemberShardNames(String memberName);
+
+    /**
+     * Given a module namespace return the name of a module
+     * @param nameSpace
+     * @return
+     */
     Optional<String> getModuleNameFromNameSpace(String nameSpace);
+
+    /**
+     * Get a mapping of the module names to it's corresponding ShardStrategy
+     * @return
+     */
     Map<String, ShardStrategy> getModuleNameToShardStrategyMap();
+
+    /**
+     * Given a module name find all the shardNames corresponding to it
+     * @param moduleName
+     * @return
+     */
     List<String> getShardNamesFromModuleName(String moduleName);
+
+    /**
+     * Given a shardName find all the members on which it belongs
+     *
+     * @param shardName
+     * @return
+     */
     List<String> getMembersFromShardName(String shardName);
 }

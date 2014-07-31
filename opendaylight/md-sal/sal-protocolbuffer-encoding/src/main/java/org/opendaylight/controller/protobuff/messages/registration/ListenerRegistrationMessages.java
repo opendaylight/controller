@@ -837,7 +837,7 @@ public final class ListenerRegistrationMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -853,7 +853,7 @@ public final class ListenerRegistrationMessages {
         getDataChangeListenerActorPathBytes() {
       java.lang.Object ref = dataChangeListenerActorPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         dataChangeListenerActorPath_ = b;
@@ -1146,19 +1146,19 @@ public final class ListenerRegistrationMessages {
 
       public final boolean isInitialized() {
         if (!hasInstanceIdentifierPath()) {
-
+          
           return false;
         }
         if (!hasDataChangeListenerActorPath()) {
-
+          
           return false;
         }
         if (!hasDataChangeScope()) {
-
+          
           return false;
         }
         if (!getInstanceIdentifierPath().isInitialized()) {
-
+          
           return false;
         }
         return true;
@@ -1287,7 +1287,7 @@ public final class ListenerRegistrationMessages {
        * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPath = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getInstanceIdentifierPathFieldBuilder() {
         if (instanceIdentifierPathBuilder_ == null) {
           instanceIdentifierPathBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1329,7 +1329,7 @@ public final class ListenerRegistrationMessages {
           getDataChangeListenerActorPathBytes() {
         java.lang.Object ref = dataChangeListenerActorPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           dataChangeListenerActorPath_ = b;
@@ -1556,7 +1556,7 @@ public final class ListenerRegistrationMessages {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1572,7 +1572,7 @@ public final class ListenerRegistrationMessages {
         getListenerRegistrationPathBytes() {
       java.lang.Object ref = listenerRegistrationPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         listenerRegistrationPath_ = b;
@@ -1801,7 +1801,7 @@ public final class ListenerRegistrationMessages {
 
       public final boolean isInitialized() {
         if (!hasListenerRegistrationPath()) {
-
+          
           return false;
         }
         return true;
@@ -1855,7 +1855,7 @@ public final class ListenerRegistrationMessages {
           getListenerRegistrationPathBytes() {
         java.lang.Object ref = listenerRegistrationPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           listenerRegistrationPath_ = b;

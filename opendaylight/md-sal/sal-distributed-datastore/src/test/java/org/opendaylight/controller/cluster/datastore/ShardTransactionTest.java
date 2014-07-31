@@ -30,6 +30,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import java.util.Collections;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,7 +51,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
@@ -89,7 +91,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
@@ -163,7 +165,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveWriteData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
@@ -201,7 +203,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveMergeData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
             final ActorRef subject =
@@ -240,7 +242,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveDeleteData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
@@ -277,7 +279,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadyTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
@@ -313,7 +315,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCloseTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props("config"));
+            final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
                 ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =

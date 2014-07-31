@@ -6,9 +6,12 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft.internal.messages;
+package org.opendaylight.controller.cluster.raft.base.messages;
 
 import java.io.Serializable;
 
-public class SendInstallSnapshot implements Serializable {
+/**
+ * Message sent to Persist an entry into the transaction journal
+ */
+public class PersistEntry implements Serializable {
 }

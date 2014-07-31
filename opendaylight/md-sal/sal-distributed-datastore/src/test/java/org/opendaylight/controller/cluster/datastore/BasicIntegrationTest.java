@@ -33,6 +33,8 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.Collections;
+
 public class BasicIntegrationTest extends AbstractActorTest {
 
     @Test
@@ -47,16 +49,25 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
 
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config");
+            final Props props = Shard.props("config", Collections.EMPTY_MAP);
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("5 seconds")) {
                 protected void run() {
 
+
                     shard.tell(
                         new UpdateSchemaContext(TestModel.createTestContext()),
                         getRef());
 
+
+                    // Wait for Shard to become a Leader
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    // 1. Create a TransactionChain
                     shard.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final ActorSelection transactionChain =
@@ -76,6 +87,9 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(transactionChain);
 
+                    System.out.println("Successfully created transaction chain");
+
+                    // 2. Create a Transaction on the TransactionChain
                     transactionChain.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
 
                     final ActorSelection transaction =
@@ -94,9 +108,9 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(transaction);
 
-                    // Add a watch on the transaction actor so that we are notified when it dies
-                    final ActorRef transactionActorRef = watchActor(transaction);
+                    System.out.println("Successfully created transaction");
 
+                    // 3. Write some data
                     transaction.tell(new WriteData(TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
                         getRef());
@@ -112,6 +126,10 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     }.get(); // this extracts the received message
 
                     Assert.assertTrue(writeDone);
+
+                    System.out.println("Successfully wrote data");
+
+                    // 4. Ready the transaction for commit
 
                     transaction.tell(new ReadyTransaction().toSerializable(), getRef());
 
@@ -132,8 +150,9 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertNotNull(cohort);
 
-                    // Add a watch on the transaction actor so that we are notified when it dies
-                    final ActorRef cohorActorRef = watchActor(cohort);
+                    System.out.println("Successfully readied the transaction");
+
+                    // 5. PreCommit the transaction
 
                     cohort.tell(new PreCommitTransaction().toSerializable(), getRef());
 
@@ -150,10 +169,14 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Assert.assertTrue(preCommitDone);
 
+                    System.out.println("Successfully pre-committed the transaction");
+
+                    // 6. Commit the transaction
                     cohort.tell(new CommitTransaction().toSerializable(), getRef());
 
                     // FIXME : Add assertions that the commit worked and that the cohort and transaction actors were terminated
 
+                    System.out.println("TODO : Check Successfully committed the transaction");
                 }
 
 
