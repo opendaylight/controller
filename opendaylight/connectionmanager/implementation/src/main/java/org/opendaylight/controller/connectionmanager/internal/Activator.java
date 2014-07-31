@@ -19,6 +19,7 @@ import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.connectionmanager.IConnectionManagerShell;
 import org.opendaylight.controller.sal.connection.IConnectionListener;
 import org.opendaylight.controller.sal.connection.IConnectionService;
 import org.apache.felix.dm.Component;
@@ -73,6 +74,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             // export the service
             c.setInterface(new String[] { IConnectionManager.class.getName(),
+                                          IConnectionManagerShell.class.getName(),
                                           IConnectionListener.class.getName(),
                                           ICoordinatorChangeAware.class.getName(),
                                           IListenInventoryUpdates.class.getName(),
