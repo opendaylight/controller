@@ -9,4 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 public class PrimaryNotFoundException extends RuntimeException {
+    public PrimaryNotFoundException(String message){
+        super(message);
+    }
 }

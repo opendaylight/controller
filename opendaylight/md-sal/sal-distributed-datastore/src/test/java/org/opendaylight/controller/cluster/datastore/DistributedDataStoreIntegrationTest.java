@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
-import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -46,11 +45,14 @@ public class DistributedDataStoreIntegrationTest{
 
     @Test
     public void integrationTest() throws Exception {
-        ShardStrategyFactory.setConfiguration(new MockConfiguration());
+        Configuration configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        ShardStrategyFactory.setConfiguration(configuration);
         DistributedDataStore distributedDataStore =
-            new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), new MockConfiguration());
+            new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), configuration);
 
         distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
+
+        Thread.sleep(1000);
 
         DOMStoreReadWriteTransaction transaction =
             distributedDataStore.newReadWriteTransaction();
@@ -94,6 +96,8 @@ public class DistributedDataStoreIntegrationTest{
 
 
         distributedDataStore.onGlobalContextUpdated(SchemaContextHelper.full());
+
+        Thread.sleep(1000);
 
         DOMStoreReadWriteTransaction transaction =
             distributedDataStore.newReadWriteTransaction();

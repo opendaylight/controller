@@ -8,9 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-import java.io.Serializable;
-
-public class RequestVoteReply extends AbstractRaftRPC implements Serializable {
+public class RequestVoteReply extends AbstractRaftRPC {
 
     // true means candidate received vot
     private final boolean voteGranted;
