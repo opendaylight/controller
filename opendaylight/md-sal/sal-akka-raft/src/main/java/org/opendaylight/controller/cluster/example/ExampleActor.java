@@ -56,10 +56,12 @@ public class ExampleActor extends RaftActor {
             }
 
         } else if (message instanceof PrintState) {
-            LOG.debug("State of the node:"+getId() + " has = "+state.size() + " entries");
+            LOG.debug("State of the node:"+getId() + " has = "+state.size()
+                + " entries," + getReplicatedLogState());
 
         } else if (message instanceof PrintRole) {
-            LOG.debug(getId() + " = " + getRaftState());
+            LOG.debug(getId() + " = " + getRaftState() + ", Peers=" + getPeers());
+
         } else {
             super.onReceiveCommand(message);
         }
@@ -83,6 +85,7 @@ public class ExampleActor extends RaftActor {
     @Override protected void applySnapshot(Object snapshot) {
         state.clear();
         state.putAll((HashMap) snapshot);
+        LOG.debug("Snapshot applied to state :" + ((HashMap) snapshot).size());
     }
 
     @Override public void onReceiveRecover(Object message) {

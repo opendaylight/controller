@@ -11,14 +11,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is a test driver for testing akka-raft implementation
  * Its uses ExampleActors and threads to push content(key-vals) to these actors
  * Each ExampleActor can have one or more ClientActors. Each ClientActor spawns
- * a thread and starts push logs to the actor its assignged to.
+ * a thread and starts push logs to the actor its assigned to.
  */
 public class TestDriver {
 
@@ -26,7 +25,8 @@ public class TestDriver {
     private static Map<String, String> allPeers = new HashMap<>();
     private static Map<String, ActorRef> clientActorRefs  = new HashMap<String, ActorRef>();
     private static Map<String, ActorRef> actorRefs = new HashMap<String, ActorRef>();
-    private static LogGenerator logGenerator = new LogGenerator();;
+    private static LogGenerator logGenerator = new LogGenerator();
+    private int nameCounter = 0;
 
     /**
      * Create nodes, add clients and start logging.
@@ -108,8 +108,8 @@ public class TestDriver {
 
     public void createNodes(int num) {
         for (int i=0; i < num; i++)  {
-            int rand = getUnusedRandom(num);
-            allPeers.put("example-"+rand, "akka://default/user/example-"+rand);
+            nameCounter = nameCounter + 1;
+            allPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
         }
 
         for (String s : allPeers.keySet())  {
@@ -125,9 +125,9 @@ public class TestDriver {
     public void addNodes(int num) {
         Map<String, String> newPeers = new HashMap<>();
         for (int i=0; i < num; i++)  {
-            int rand = getUnusedRandom(num);
-            newPeers.put("example-"+rand, "akka://default/user/example-"+rand);
-            allPeers.put("example-"+rand, "akka://default/user/example-"+rand);
+            nameCounter = nameCounter + 1;
+            newPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
+            allPeers.put("example-"+nameCounter, "akka://default/user/example-"+nameCounter);
 
         }
         Map<String, ActorRef> newActorRefs = new HashMap<String, ActorRef>(num);
@@ -232,14 +232,6 @@ public class TestDriver {
         return null;
     }
 
-    private int getUnusedRandom(int num) {
-        int rand = -1;
-        do {
-            rand = (new Random()).nextInt(num * num);
-        } while (allPeers.keySet().contains("example-"+rand));
-
-        return rand;
-    }
 
     private static Map<String, String> withoutPeer(String peerId) {
         Map<String, String> without = new ConcurrentHashMap<>(allPeers);
