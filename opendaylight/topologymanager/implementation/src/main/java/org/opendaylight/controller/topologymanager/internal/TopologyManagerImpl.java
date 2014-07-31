@@ -57,6 +57,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
+import org.opendaylight.controller.topologymanager.ITopologyManagerShell;
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -71,6 +72,7 @@ import org.slf4j.LoggerFactory;
 public class TopologyManagerImpl implements
         ICacheUpdateAware<Object, Object>,
         ITopologyManager,
+        ITopologyManagerShell,
         IConfigurationContainerAware,
         IListenTopoUpdates,
         IObjectReader,
@@ -1010,4 +1012,82 @@ public class TopologyManagerImpl implements
             }
         }
     }
+
+    public List<String> printUserLink() {
+        List<String> result = new ArrayList<String>();
+        for (String name : this.userLinksDB.keySet()) {
+            TopologyUserLinkConfig linkConfig = userLinksDB.get(name);
+            result.add("Name : " + name);
+            result.add(linkConfig.toString());
+            result.add("Edge " + getLinkTuple(linkConfig));
+            result.add("Reverse Edge " + getReverseLinkTuple(linkConfig));
+        }
+        return result;
+    }
+
+    public List<String> addUserLink(String name, String ncStr1, String ncStr2) {
+        List<String> result = new ArrayList<String>();
+        if ((name == null)) {
+            result.add("Please enter a valid Name");
+            return result;
+        }
+
+        if (ncStr1 == null) {
+            result.add("Please enter two node connector strings");
+            return result;
+        }
+        if (ncStr2 == null) {
+            result.add("Please enter second node connector string");
+            return result;
+        }
+
+        NodeConnector nc1 = NodeConnector.fromString(ncStr1);
+        if (nc1 == null) {
+            result.add("Invalid input node connector 1 string: " + ncStr1);
+            return result;
+        }
+        NodeConnector nc2 = NodeConnector.fromString(ncStr2);
+        if (nc2 == null) {
+            result.add("Invalid input node connector 2 string: " + ncStr2);
+            return result;
+        }
+
+        TopologyUserLinkConfig config = new TopologyUserLinkConfig(name, ncStr1, ncStr2);
+        result.add(this.addUserLink(config).toString());
+        return result;
+    }
+
+    public List<String> deleteUserLinkShell(String name) {
+        List<String> result = new ArrayList<String>();
+        if ((name == null)) {
+            result.add("Please enter a valid Name");
+            return result;
+        }
+        this.deleteUserLink(name);
+        return result;
+    }
+
+    public List<String> printNodeEdges() {
+        List<String> result = new ArrayList<String>();
+        Map<Node, Set<Edge>> nodeEdges = getNodeEdges();
+        if (nodeEdges == null) {
+            return result;
+        }
+        Set<Node> nodeSet = nodeEdges.keySet();
+        if (nodeSet == null) {
+            return result;
+        }
+        result.add("        Node                                         Edge");
+        for (Node node : nodeSet) {
+            Set<Edge> edgeSet = nodeEdges.get(node);
+            if (edgeSet == null) {
+                continue;
+            }
+            for (Edge edge : edgeSet) {
+                result.add(node + "             " + edge);
+            }
+        }
+        return result;
+    }
+
 }

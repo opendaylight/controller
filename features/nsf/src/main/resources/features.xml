@@ -47,6 +47,11 @@
         <bundle>mvn:org.opendaylight.controller/routing.dijkstra_implementation</bundle>
     </feature>
 
+    <feature name="odl-topologymanager-shell" description="Adds topologymanager commands to karaf shell" version="${project.version}">
+      <feature version="${project.version}">odl-nsf-managers</feature>
+      <bundle>mvn:org.opendaylight.controller/topologymanager.shell/${topologymanager.shell.version}</bundle>
+    </feature>
+
     <feature name="odl-adsal-northbound" description="OpenDaylight :: AD-SAL :: Northbound APIs" version="${project.version}">
         <feature version="${project.version}">base-all</feature>
         <feature version="${project.version}">odl-nsf-managers</feature>
