@@ -19,10 +19,10 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RoutingTableTest {
+public class RoutingTableOldTest {
 
-  private RoutingTable<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable =
-      new RoutingTable<>();
+  private RoutingTableOld<RpcRouter.RouteIdentifier<?, ?, ?>, String> routingTable =
+      new RoutingTableOld<>();
 
   @Test
   public void addGlobalRouteNullRouteIdTest() {
