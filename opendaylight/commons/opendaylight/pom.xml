@@ -1242,6 +1242,26 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-netty-config</artifactId>
+        <version>${config.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>md-sal-config</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-config</artifactId>
+        <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-connector-config</artifactId>
+        <version>${netconf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-rest-docgen</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1494,6 +1514,11 @@
       <dependency>
         <groupId>org.opendaylight.controller.samples</groupId>
         <artifactId>sample-toaster-provider</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>toaster-config</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>

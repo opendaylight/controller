@@ -745,7 +745,7 @@
             <phase>generate-resources</phase>
             <configuration>
                <outputDirectory>${project.build.directory}/configuration</outputDirectory>
-               <includeArtifactIds>sal-rest-connector-config</includeArtifactIds>
+               <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config</includeArtifactIds>
                <includes>**\/*.xml</includes>
                <excludeTransitive>true</excludeTransitive>
                <ignorePermissions>false</ignorePermissions>
@@ -1036,6 +1036,26 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-netty-config</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>md-sal-config</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-config</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-connector-config</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>toaster-config</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-rest-docgen</artifactId>
         </dependency>
         <dependency>
@@ -1318,7 +1338,7 @@
                 <phase>generate-resources</phase>
                 <configuration>
                    <outputDirectory>${project.build.directory}/configuration</outputDirectory>
-                   <includeArtifactIds>sal-rest-connector-config</includeArtifactIds>
+                   <includeArtifactIds>sal-rest-connector-config,config-netty-config,md-sal-config,netconf-config,toaster-config,netconf-connector-config</includeArtifactIds>
                    <includes>**\/*.xml</includes>
                    <excludeTransitive>true</excludeTransitive>
                    <ignorePermissions>false</ignorePermissions>

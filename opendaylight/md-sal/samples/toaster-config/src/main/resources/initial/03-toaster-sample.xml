@@ -26,7 +26,7 @@
                         <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
                         <name>binding-data-broker</name>
                     </data-broker>
-                    
+
                     <notification-service>
                         <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
                             binding:binding-notification-service
@@ -54,7 +54,7 @@
                     </notification-service>
                 </module>
             </modules>
-            
+
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <service>
                     <type xmlns:kitchen="urn:opendaylight:params:xml:ns:yang:controller:config:kitchen-service:impl">
