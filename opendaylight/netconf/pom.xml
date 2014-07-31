@@ -20,6 +20,7 @@
   <modules>
     <module>netconf-api</module>
     <module>netconf-cli</module>
+    <module>netconf-config</module>
     <module>netconf-impl</module>
     <module>config-netconf-connector</module>
     <module>netconf-util</module>
@@ -32,6 +33,7 @@
     <module>netconf-monitoring</module>
     <module>ietf-netconf-monitoring</module>
     <module>ietf-netconf-monitoring-extension</module>
+    <module>netconf-connector-config</module>
   </modules>
 
   <dependencies>

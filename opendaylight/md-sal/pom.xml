@@ -32,6 +32,9 @@
 
     <module>sal-binding-util</module>
 
+    <!-- Configuration File -->
+    <module>md-sal-config</module>
+
     <!-- Samples -->
     <module>samples</module>
 
