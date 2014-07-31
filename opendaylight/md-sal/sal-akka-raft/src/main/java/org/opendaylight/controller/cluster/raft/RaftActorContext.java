@@ -86,6 +86,12 @@ public interface RaftActorContext {
     void setLastApplied(long lastApplied);
 
     /**
+     *
+     * @param replicatedLog
+     */
+    public void setReplicatedLog(ReplicatedLog replicatedLog);
+
+    /**
      * @return A representation of the log
      */
     ReplicatedLog getReplicatedLog();

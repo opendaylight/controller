@@ -31,7 +31,7 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private long lastApplied;
 
-    private final ReplicatedLog replicatedLog;
+    private ReplicatedLog replicatedLog;
 
     private final Map<String, String> peerAddresses;
 
@@ -89,6 +89,10 @@ public class RaftActorContextImpl implements RaftActorContext{
         this.lastApplied = lastApplied;
     }
 
+    @Override public void setReplicatedLog(ReplicatedLog replicatedLog) {
+        this.replicatedLog = replicatedLog;
+    }
+
     @Override public ReplicatedLog getReplicatedLog() {
         return replicatedLog;
     }
@@ -110,12 +114,12 @@ public class RaftActorContextImpl implements RaftActorContext{
     }
 
     @Override public void addToPeers(String name, String address) {
-        LOG.debug("Kamal--> addToPeer for:"+name);
+        LOG.debug("addToPeer for:"+name);
         peerAddresses.put(name, address);
     }
 
     @Override public void removePeer(String name) {
-        LOG.debug("Kamal--> removePeer for:"+name);
+        LOG.debug("removePeer for:"+name);
         peerAddresses.remove(name);
     }
 }
