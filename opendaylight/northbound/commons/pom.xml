@@ -91,7 +91,6 @@
               javax.ws.rs.core,
               javax.xml.bind,
               javax.xml.bind.annotation,
-              org.objectweb.asm,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.authorization,
