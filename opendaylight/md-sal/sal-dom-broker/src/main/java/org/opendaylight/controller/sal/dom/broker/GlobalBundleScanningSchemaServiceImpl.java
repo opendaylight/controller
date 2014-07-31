@@ -10,6 +10,10 @@ package org.opendaylight.controller.sal.dom.broker;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +28,7 @@ import org.opendaylight.yangtools.concepts.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
-import org.opendaylight.yangtools.yang.parser.impl.util.URLSchemaContextResolver;
+import org.opendaylight.yangtools.yang.parser.repo.URLSchemaContextResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -36,15 +40,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-
 public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService, ServiceTrackerCustomizer<SchemaServiceListener, SchemaServiceListener>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
     private final ListenerRegistry<SchemaServiceListener> listeners = new ListenerRegistry<>();
-    private final URLSchemaContextResolver contextResolver = new URLSchemaContextResolver();
+    private final URLSchemaContextResolver contextResolver = URLSchemaContextResolver.create("global-bundle");
     private final BundleScanner scanner = new BundleScanner();
     private final BundleContext context;
 
@@ -227,7 +227,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         if (starting) {
             return;
         }
-        Optional<SchemaContext> schema = contextResolver.tryToUpdateSchemaContext();
+        Optional<SchemaContext> schema = contextResolver.getSchemaContext();
         if(schema.isPresent()) {
             updateContext(schema.get());
         }
