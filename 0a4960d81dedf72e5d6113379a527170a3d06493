@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_04eab2ab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/example/ExampleActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-31T23:24:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8417a244",
+      "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_842ec28a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-31T19:42:47Z",
       "side": 1,
       "message": "Add snapShotIndex and snapShotTerm to the log statement (infact add as must context as possible to make it more useful)",
+      "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_64da9e18",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-31T23:24:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_842ec28a",
       "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_440bda8d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-31T23:24:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_44543afe",
+      "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_045ab229",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_242fb6f8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-31T23:24:27Z",
+      "side": 1,
+      "message": "well yeah just the formatting :). I had some other logs i guess, which i removed and this was left.",
+      "parentUuid": "fa82b9bf_045ab229",
+      "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2478168f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2014-07-31T19:42:47Z",
       "side": 1,
       "message": "Do one of two things. Either split the tests into multiple methods each of which test one aspect of the code (or) Add comments inline so that we can tell what the code is doing.",
+      "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4fbc677",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2014-07-31T23:24:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_2478168f",
       "revId": "0a4960d81dedf72e5d6113379a527170a3d06493",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
