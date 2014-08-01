@@ -19,10 +19,10 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.internal.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.internal.messages.Replicate;
-import org.opendaylight.controller.cluster.raft.internal.messages.SendHeartBeat;
-import org.opendaylight.controller.cluster.raft.internal.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
+import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
+import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -67,7 +68,7 @@ public class Leader extends AbstractRaftActorBehavior {
     private final Map<String, FollowerLogInformation> followerToLog =
         new HashMap();
 
-    private final Map<String, ActorSelection> followerToActor = new HashMap<>();
+    private final Set<String> followers;
 
     private Cancellable heartbeatSchedule = null;
     private Cancellable appendEntriesSchedule = null;
@@ -84,22 +85,21 @@ public class Leader extends AbstractRaftActorBehavior {
             context.setCommitIndex(lastIndex());
         }
 
-        for (String followerId : context.getPeerAddresses().keySet()) {
+        followers = context.getPeerAddresses().keySet();
+
+        for (String followerId : followers) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId,
                     new AtomicLong(lastIndex()),
                     new AtomicLong(-1));
 
-            followerToActor.put(followerId,
-                context.actorSelection(context.getPeerAddress(followerId)));
-
             followerToLog.put(followerId, followerLogInformation);
         }
 
-        context.getLogger().debug("Election:Leader has following peers:"+followerToActor.keySet());
+        context.getLogger().debug("Election:Leader has following peers:"+ followers);
 
-        if (followerToActor.size() > 0) {
-            minReplicationCount = (followerToActor.size() + 1) / 2 + 1;
+        if (followers.size() > 0) {
+            minReplicationCount = (followers.size() + 1) / 2 + 1;
         } else {
             minReplicationCount = 0;
         }
@@ -121,16 +121,29 @@ public class Leader extends AbstractRaftActorBehavior {
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
+        context.getLogger().info("Leader: Received {}", appendEntries.toString());
+
         return state();
     }
 
     @Override protected RaftState handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
 
+        if(! appendEntriesReply.isSuccess()) {
+            context.getLogger()
+                .info("Leader: Received {}", appendEntriesReply.toString());
+        }
+
         // Update the FollowerLogInformation
         String followerId = appendEntriesReply.getFollowerId();
         FollowerLogInformation followerLogInformation =
             followerToLog.get(followerId);
+
+        if(followerLogInformation == null){
+            context.getLogger().error("Unknown follower {}", followerId);
+            return state();
+        }
+
         if (appendEntriesReply.isSuccess()) {
             followerLogInformation
                 .setMatchIndex(appendEntriesReply.getLogLastIndex());
@@ -251,7 +264,7 @@ public class Leader extends AbstractRaftActorBehavior {
 
         context.getLogger().debug("Replicate message " + logIndex);
 
-        if (followerToActor.size() == 0) {
+        if (followers.size() == 0) {
             context.setCommitIndex(
                 replicate.getReplicatedLogEntry().getIndex());
 
@@ -277,32 +290,37 @@ public class Leader extends AbstractRaftActorBehavior {
 
     private void sendAppendEntries() {
         // Send an AppendEntries to all followers
-        for (String followerId : followerToActor.keySet()) {
+        for (String followerId : followers) {
             ActorSelection followerActor =
-                followerToActor.get(followerId);
+                context.getPeerActorSelection(followerId);
 
-            FollowerLogInformation followerLogInformation =
-                followerToLog.get(followerId);
+            if (followerActor != null) {
+                FollowerLogInformation followerLogInformation =
+                    followerToLog.get(followerId);
 
-            long nextIndex = followerLogInformation.getNextIndex().get();
+                long nextIndex = followerLogInformation.getNextIndex().get();
 
-            List<ReplicatedLogEntry> entries = Collections.emptyList();
+                List<ReplicatedLogEntry> entries = Collections.emptyList();
 
-            if(context.getReplicatedLog().isPresent(nextIndex)){
-                // TODO: Instead of sending all entries from nextIndex
-                // only send a fixed number of entries to each follower
-                // This is to avoid the situation where there are a lot of
-                // entries to install for a fresh follower or to a follower
-                // that has fallen too far behind with the log but yet is not
-                // eligible to receive a snapshot
-                entries =
-                    context.getReplicatedLog().getFrom(nextIndex);
+                if (context.getReplicatedLog().isPresent(nextIndex)) {
+                    // TODO: Instead of sending all entries from nextIndex
+                    // only send a fixed number of entries to each follower
+                    // This is to avoid the situation where there are a lot of
+                    // entries to install for a fresh follower or to a follower
+                    // that has fallen too far behind with the log but yet is not
+                    // eligible to receive a snapshot
+                    entries =
+                        context.getReplicatedLog().getFrom(nextIndex);
+                }
+
+                followerActor.tell(
+                    new AppendEntries(currentTerm(), context.getId(),
+                        prevLogIndex(nextIndex),
+                        prevLogTerm(nextIndex), entries,
+                        context.getCommitIndex()).toSerializable(),
+                    actor()
+                );
             }
-
-            followerActor.tell(
-                new AppendEntries(currentTerm(), context.getId(), prevLogIndex(nextIndex),
-                    prevLogTerm(nextIndex), entries, context.getCommitIndex()).toSerializable(),
-                actor());
         }
     }
 
@@ -312,30 +330,33 @@ public class Leader extends AbstractRaftActorBehavior {
      * snapshots at every heartbeat.
      */
     private void installSnapshotIfNeeded(){
-        for (String followerId : followerToActor.keySet()) {
+        for (String followerId : followers) {
             ActorSelection followerActor =
-                followerToActor.get(followerId);
+                context.getPeerActorSelection(followerId);
 
-            FollowerLogInformation followerLogInformation =
-                followerToLog.get(followerId);
+            if(followerActor != null) {
+                FollowerLogInformation followerLogInformation =
+                    followerToLog.get(followerId);
 
-            long nextIndex = followerLogInformation.getNextIndex().get();
+                long nextIndex = followerLogInformation.getNextIndex().get();
 
-            if(!context.getReplicatedLog().isPresent(nextIndex) && context.getReplicatedLog().isInSnapshot(nextIndex)){
-                followerActor.tell(
-                    new InstallSnapshot(currentTerm(), context.getId(),
-                        context.getReplicatedLog().getSnapshotIndex(),
-                        context.getReplicatedLog().getSnapshotTerm(),
-                        context.getReplicatedLog().getSnapshot()
-                    ),
-                    actor()
-                );
+                if (!context.getReplicatedLog().isPresent(nextIndex) && context
+                    .getReplicatedLog().isInSnapshot(nextIndex)) {
+                    followerActor.tell(
+                        new InstallSnapshot(currentTerm(), context.getId(),
+                            context.getReplicatedLog().getSnapshotIndex(),
+                            context.getReplicatedLog().getSnapshotTerm(),
+                            context.getReplicatedLog().getSnapshot()
+                        ),
+                        actor()
+                    );
+                }
             }
         }
     }
 
     private RaftState sendHeartBeat() {
-        if (followerToActor.size() > 0) {
+        if (followers.size() > 0) {
             sendAppendEntries();
         }
         return state();
@@ -354,7 +375,7 @@ public class Leader extends AbstractRaftActorBehavior {
     }
 
     private void scheduleHeartBeat(FiniteDuration interval) {
-        if(followerToActor.keySet().size() == 0){
+        if(followers.size() == 0){
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
             return;
@@ -376,7 +397,7 @@ public class Leader extends AbstractRaftActorBehavior {
 
 
     private void scheduleInstallSnapshotCheck(FiniteDuration interval) {
-        if(followerToActor.keySet().size() == 0){
+        if(followers.size() == 0){
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
             return;

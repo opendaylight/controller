@@ -85,7 +85,7 @@ public final class DataChangeListenerMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
      */
-    java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier>
+    java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier> 
         getRemovedPathsList();
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
@@ -98,7 +98,7 @@ public final class DataChangeListenerMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
      */
-    java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+    java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
         getRemovedPathsOrBuilderList();
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
@@ -395,7 +395,7 @@ public final class DataChangeListenerMessages {
     /**
      * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
      */
-    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+    public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
         getRemovedPathsOrBuilderList() {
       return removedPaths_;
     }
@@ -810,7 +810,7 @@ public final class DataChangeListenerMessages {
               removedPathsBuilder_ = null;
               removedPaths_ = other.removedPaths_;
               bitField0_ = (bitField0_ & ~0x00000020);
-              removedPathsBuilder_ =
+              removedPathsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getRemovedPathsFieldBuilder() : null;
             } else {
@@ -825,37 +825,37 @@ public final class DataChangeListenerMessages {
       public final boolean isInitialized() {
         if (hasOriginalSubTree()) {
           if (!getOriginalSubTree().isInitialized()) {
-
+            
             return false;
           }
         }
         if (hasUpdatedSubTree()) {
           if (!getUpdatedSubTree().isInitialized()) {
-
+            
             return false;
           }
         }
         if (hasOriginalData()) {
           if (!getOriginalData().isInitialized()) {
-
+            
             return false;
           }
         }
         if (hasUpdatedData()) {
           if (!getUpdatedData().isInitialized()) {
-
+            
             return false;
           }
         }
         if (hasCreatedData()) {
           if (!getCreatedData().isInitialized()) {
-
+            
             return false;
           }
         }
         for (int i = 0; i < getRemovedPathsCount(); i++) {
           if (!getRemovedPaths(i).isInitialized()) {
-
+            
             return false;
           }
         }
@@ -985,7 +985,7 @@ public final class DataChangeListenerMessages {
        * <code>optional .org.opendaylight.controller.mdsal.Node originalSubTree = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getOriginalSubTreeFieldBuilder() {
         if (originalSubTreeBuilder_ == null) {
           originalSubTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1102,7 +1102,7 @@ public final class DataChangeListenerMessages {
        * <code>optional .org.opendaylight.controller.mdsal.Node updatedSubTree = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder> 
           getUpdatedSubTreeFieldBuilder() {
         if (updatedSubTreeBuilder_ == null) {
           updatedSubTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1219,7 +1219,7 @@ public final class DataChangeListenerMessages {
        * <code>optional .org.opendaylight.controller.mdsal.NodeMap originalData = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> 
           getOriginalDataFieldBuilder() {
         if (originalDataBuilder_ == null) {
           originalDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1336,7 +1336,7 @@ public final class DataChangeListenerMessages {
        * <code>optional .org.opendaylight.controller.mdsal.NodeMap updatedData = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> 
           getUpdatedDataFieldBuilder() {
         if (updatedDataBuilder_ == null) {
           updatedDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1453,7 +1453,7 @@ public final class DataChangeListenerMessages {
        * <code>optional .org.opendaylight.controller.mdsal.NodeMap createdData = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMap.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapOrBuilder> 
           getCreatedDataFieldBuilder() {
         if (createdDataBuilder_ == null) {
           createdDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1661,7 +1661,7 @@ public final class DataChangeListenerMessages {
       /**
        * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
        */
-      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+      public java.util.List<? extends org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
            getRemovedPathsOrBuilderList() {
         if (removedPathsBuilder_ != null) {
           return removedPathsBuilder_.getMessageOrBuilderList();
@@ -1687,12 +1687,12 @@ public final class DataChangeListenerMessages {
       /**
        * <code>repeated .org.opendaylight.controller.mdsal.InstanceIdentifier removedPaths = 6;</code>
        */
-      public java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder>
+      public java.util.List<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder> 
            getRemovedPathsBuilderList() {
         return getRemovedPathsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
           getRemovedPathsFieldBuilder() {
         if (removedPathsBuilder_ == null) {
           removedPathsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<

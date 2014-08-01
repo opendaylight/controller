@@ -1,0 +1,11 @@
+package org.opendaylight.controller.mdsal;
+
+import "AppendEntriesMessages.proto";
+import "Common.proto";
+import "Persistent.proto";
+
+extend org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry.Payload {
+    optional CompositeModification modification=2;
+}
+
+

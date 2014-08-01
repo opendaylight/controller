@@ -9,10 +9,14 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorPath;
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.Props;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
@@ -30,6 +34,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +66,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private static final AtomicLong counter = new AtomicLong();
 
+    private static final Logger
+        LOG = LoggerFactory.getLogger(TransactionProxy.class);
+
+
     private final TransactionType transactionType;
     private final ActorContext actorContext;
     private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
@@ -72,7 +82,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         TransactionType transactionType,
         ExecutorService executor,
         SchemaContext schemaContext
-        ) {
+    ) {
 
         this.identifier = actorContext.getCurrentMemberName() + "-txn-" + counter.getAndIncrement();
         this.transactionType = transactionType;
@@ -88,33 +98,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         createTransactionIfMissing(actorContext, path);
 
-        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-
-        Callable<Optional<NormalizedNode<?,?>>> call = new Callable() {
-
-            @Override public Optional<NormalizedNode<?,?>> call() throws Exception {
-                Object response = actorContext
-                    .executeRemoteOperation(remoteTransaction, new ReadData(path).toSerializable(),
-                        ActorContext.ASK_DURATION);
-                if(response.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)){
-                    ReadDataReply reply = ReadDataReply.fromSerializable(schemaContext,path, response);
-                    if(reply.getNormalizedNode() == null){
-                        return Optional.absent();
-                    }
-                    //FIXME : A cast should not be required here ???
-                    return (Optional<NormalizedNode<?, ?>>) Optional.of(reply.getNormalizedNode());
-                }
-
-                return Optional.absent();
-            }
-        };
-
-        ListenableFutureTask<Optional<NormalizedNode<?, ?>>>
-            future = ListenableFutureTask.create(call);
-
-        executor.submit(future);
-
-        return future;
+        return transactionContext(path).readData(path);
     }
 
     @Override
@@ -122,8 +106,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         createTransactionIfMissing(actorContext, path);
 
-        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new WriteData(path, data, schemaContext).toSerializable(), null);
+        transactionContext(path).writeData(path, data);
     }
 
     @Override
@@ -131,8 +114,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         createTransactionIfMissing(actorContext, path);
 
-        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new MergeData(path, data, schemaContext).toSerializable(), null);
+        transactionContext(path).mergeData(path, data);
     }
 
     @Override
@@ -140,8 +122,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         createTransactionIfMissing(actorContext, path);
 
-        final ActorSelection remoteTransaction = remoteTransactionFromIdentifier(path);
-        remoteTransaction.tell(new DeleteData(path).toSerializable(), null);
+        transactionContext(path).deleteData(path);
     }
 
     @Override
@@ -149,10 +130,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         List<ActorPath> cohortPaths = new ArrayList<>();
 
         for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
-            Object result = actorContext.executeRemoteOperation(transactionContext.getActor(),
-                new ReadyTransaction().toSerializable(),
-                ActorContext.ASK_DURATION
-            );
+            Object result = transactionContext.readyTransaction();
 
             if(result.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)){
                 ReadyTransactionReply reply = ReadyTransactionReply.fromSerializable(actorContext.getActorSystem(),result);
@@ -173,14 +151,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     @Override
     public void close() {
         for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
-            transactionContext.getActor().tell(
-                new CloseTransaction().toSerializable(), null);
+            transactionContext.closeTransaction();
         }
     }
 
-    private ActorSelection remoteTransactionFromIdentifier(YangInstanceIdentifier path){
+    private TransactionContext transactionContext(YangInstanceIdentifier path){
         String shardName = shardNameFromIdentifier(path);
-        return remoteTransactionPaths.get(shardName).getActor();
+        return remoteTransactionPaths.get(shardName);
     }
 
     private String shardNameFromIdentifier(YangInstanceIdentifier path){
@@ -198,48 +175,186 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return;
         }
 
-        Object response = actorContext.executeShardOperation(shardName, new CreateTransaction(identifier).toSerializable(), ActorContext.ASK_DURATION);
-        if(response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)){
-            CreateTransactionReply reply = CreateTransactionReply.fromSerializable(response);
-            String transactionPath = actorContext.getRemoteActorPath(shardName, reply.getTransactionPath());
+        try {
+            Object response = actorContext.executeShardOperation(shardName,
+                new CreateTransaction(identifier).toSerializable(),
+                ActorContext.ASK_DURATION);
+            if (response.getClass()
+                .equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
+                CreateTransactionReply reply =
+                    CreateTransactionReply.fromSerializable(response);
 
-            ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
-            transactionContext = new TransactionContext(shardName, transactionPath, transactionActor);
+                String transactionPath = reply.getTransactionPath();
 
-            remoteTransactionPaths.put(shardName, transactionContext);
+                LOG.info("Received transaction path = {}"  , transactionPath );
+
+                ActorSelection transactionActor =
+                    actorContext.actorSelection(transactionPath);
+                transactionContext =
+                    new TransactionContextImpl(shardName, transactionPath,
+                        transactionActor);
+
+                remoteTransactionPaths.put(shardName, transactionContext);
+            }
+        } catch(TimeoutException e){
+            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName));
         }
     }
 
+    private interface TransactionContext {
+        String getShardName();
 
-    private class TransactionContext {
+        String getResolvedCohortPath(String cohortPath);
+
+        public void closeTransaction();
+
+        public Object readyTransaction();
+
+        void deleteData(YangInstanceIdentifier path);
+
+        void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(final YangInstanceIdentifier path);
+
+        void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    }
+
+
+    private class TransactionContextImpl implements TransactionContext{
         private final String shardName;
         private final String actorPath;
         private final ActorSelection  actor;
 
 
-        private TransactionContext(String shardName, String actorPath,
+        private TransactionContextImpl(String shardName, String actorPath,
             ActorSelection actor) {
             this.shardName = shardName;
             this.actorPath = actorPath;
             this.actor = actor;
         }
 
-
-        public String getShardName() {
+        @Override public String getShardName() {
             return shardName;
         }
 
-        public String getActorPath() {
-            return actorPath;
-        }
-
-        public ActorSelection getActor() {
+        private ActorSelection getActor() {
             return actor;
         }
 
-        public String getResolvedCohortPath(String cohortPath){
+        @Override public String getResolvedCohortPath(String cohortPath){
             return actorContext.resolvePath(actorPath, cohortPath);
         }
+
+        @Override public void closeTransaction() {
+            getActor().tell(
+                new CloseTransaction().toSerializable(), null);
+        }
+
+        @Override public Object readyTransaction() {
+            return actorContext.executeRemoteOperation(getActor(),
+                new ReadyTransaction().toSerializable(),
+                ActorContext.ASK_DURATION
+            );
+
+        }
+
+        @Override public void deleteData(YangInstanceIdentifier path) {
+            getActor().tell(new DeleteData(path).toSerializable(), null);
+        }
+
+        @Override public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data){
+            getActor().tell(new MergeData(path, data, schemaContext).toSerializable(), null);
+        }
+
+        @Override public ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(final YangInstanceIdentifier path) {
+
+            Callable<Optional<NormalizedNode<?,?>>> call = new Callable() {
+
+                @Override public Optional<NormalizedNode<?,?>> call() throws Exception {
+                    Object response = actorContext
+                        .executeRemoteOperation(getActor(), new ReadData(path).toSerializable(),
+                            ActorContext.ASK_DURATION);
+                    if(response.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)){
+                        ReadDataReply reply = ReadDataReply.fromSerializable(schemaContext,path, response);
+                        if(reply.getNormalizedNode() == null){
+                            return Optional.absent();
+                        }
+                        //FIXME : A cast should not be required here ???
+                        return (Optional<NormalizedNode<?, ?>>) Optional.of(reply.getNormalizedNode());
+                    }
+
+                    return Optional.absent();
+                }
+            };
+
+            ListenableFutureTask<Optional<NormalizedNode<?, ?>>>
+                future = ListenableFutureTask.create(call);
+
+            executor.submit(future);
+
+            return future;
+        }
+
+        @Override public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+            getActor().tell(new WriteData(path, data, schemaContext).toSerializable(), null);
+        }
+
     }
+
+    private class NoOpTransactionContext implements TransactionContext {
+
+        private final Logger
+            LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
+
+        private final String shardName;
+
+        private ActorRef cohort;
+
+        public NoOpTransactionContext(String shardName){
+            this.shardName = shardName;
+        }
+        @Override public String getShardName() {
+            return  shardName;
+
+        }
+
+        @Override public String getResolvedCohortPath(String cohortPath) {
+            return cohort.path().toString();
+        }
+
+        @Override public void closeTransaction() {
+            LOG.error("closeTransaction called");
+        }
+
+        @Override public Object readyTransaction() {
+            LOG.error("readyTransaction called");
+            cohort = actorContext.getActorSystem().actorOf(Props.create(NoOpCohort.class));
+            return new ReadyTransactionReply(cohort.path()).toSerializable();
+        }
+
+        @Override public void deleteData(YangInstanceIdentifier path) {
+            LOG.error("deleteData called path = {}", path);
+        }
+
+        @Override public void mergeData(YangInstanceIdentifier path,
+            NormalizedNode<?, ?> data) {
+            LOG.error("mergeData called path = {}", path);
+        }
+
+        @Override
+        public ListenableFuture<Optional<NormalizedNode<?, ?>>> readData(
+            YangInstanceIdentifier path) {
+            LOG.error("readData called path = {}", path);
+            return Futures.immediateFuture(
+                Optional.<NormalizedNode<?, ?>>absent());
+        }
+
+        @Override public void writeData(YangInstanceIdentifier path,
+            NormalizedNode<?, ?> data) {
+            LOG.error("writeData called path = {}", path);
+        }
+    }
+
+
 
 }
