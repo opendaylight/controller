@@ -161,4 +161,9 @@ public interface RaftActorContext {
      * @param peerAddress
      */
     void setPeerAddress(String peerId, String peerAddress);
+
+    /**
+     * @return ConfigParams
+     */
+    public ConfigParams getConfigParams();
 }

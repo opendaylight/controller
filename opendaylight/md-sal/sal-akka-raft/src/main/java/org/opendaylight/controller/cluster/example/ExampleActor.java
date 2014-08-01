@@ -11,10 +11,12 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
+import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
@@ -31,15 +33,17 @@ public class ExampleActor extends RaftActor {
     private long persistIdentifier = 1;
 
 
-    public ExampleActor(String id, Map<String, String> peerAddresses) {
-        super(id, peerAddresses);
+    public ExampleActor(String id, Map<String, String> peerAddresses,
+        Optional<ConfigParams> configParams) {
+        super(id, peerAddresses, configParams);
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses){
+    public static Props props(final String id, final Map<String, String> peerAddresses,
+        final Optional<ConfigParams> configParams){
         return Props.create(new Creator<ExampleActor>(){
 
             @Override public ExampleActor create() throws Exception {
-                return new ExampleActor(id, peerAddresses);
+                return new ExampleActor(id, peerAddresses, configParams);
             }
         });
     }

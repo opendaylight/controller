@@ -22,6 +22,7 @@ import akka.persistence.UntypedPersistentActor;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
+import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.raft.behaviors.Candidate;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -80,8 +81,6 @@ public abstract class RaftActor extends UntypedPersistentActor {
     protected final LoggingAdapter LOG =
         Logging.getLogger(getContext().system(), this);
 
-    private static final int SNAPSHOT_ENTRY_COUNT = 100000;
-
     /**
      * The current state determines the current behavior of a RaftActor
      * A Raft Actor always starts off in the Follower State
@@ -101,10 +100,17 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
 
     public RaftActor(String id, Map<String, String> peerAddresses) {
+        this(id, peerAddresses, Optional.<ConfigParams>absent());
+    }
+
+    public RaftActor(String id, Map<String, String> peerAddresses,
+         Optional<ConfigParams> configParams) {
+
         context = new RaftActorContextImpl(this.getSelf(),
-            this.getContext(),
-            id, new ElectionTermImpl(),
-            -1, -1, replicatedLog, peerAddresses, LOG);
+            this.getContext(), id, new ElectionTermImpl(),
+            -1, -1, replicatedLog, peerAddresses,
+            (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
+            LOG);
     }
 
     @Override public void onReceiveRecover(Object message) {
@@ -369,7 +375,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
         // FIXME : Not sure how exactly the SnapshotSelectionCriteria is applied
         // For now guessing that it is ANDed.
         deleteSnapshots(new SnapshotSelectionCriteria(
-            sequenceNumber - SNAPSHOT_ENTRY_COUNT, 43200000));
+            sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
 
         // Trim akka journal
         deleteMessages(sequenceNumber);
@@ -429,7 +435,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
                 new Procedure<ReplicatedLogEntry>() {
                     public void apply(ReplicatedLogEntry evt) throws Exception {
                         // FIXME : Tentatively create a snapshot every hundred thousand entries. To be tuned.
-                        if (journal.size() > SNAPSHOT_ENTRY_COUNT) {
+                        if (journal.size() > context.getConfigParams().getSnapshotBatchCount()) {
                             LOG.info("Initiating Snapshot Capture..");
                             long lastAppliedIndex = -1;
                             long lastAppliedTerm = -1;

@@ -177,7 +177,10 @@ public class MockRaftActorContext implements RaftActorContext {
         this.peerAddresses = peerAddresses;
     }
 
-
+    @Override
+    public ConfigParams getConfigParams() {
+        return new DefaultConfigParamsImpl();
+    }
 
     public static class SimpleReplicatedLog implements ReplicatedLog {
         private final List<ReplicatedLogEntry> log = new ArrayList<>();
