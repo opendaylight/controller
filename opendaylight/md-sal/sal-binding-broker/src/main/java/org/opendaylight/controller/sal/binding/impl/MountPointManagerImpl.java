@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
 
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 public class MountPointManagerImpl implements MountProviderService {
 
@@ -82,7 +84,7 @@ public class MountPointManagerImpl implements MountProviderService {
         RpcProviderRegistryImpl rpcRegistry = new RpcProviderRegistryImpl("mount");
         NotificationBrokerImpl notificationBroker = new NotificationBrokerImpl(getNotificationExecutor());
         DataBrokerImpl dataBroker = new DataBrokerImpl();
-        dataBroker.setExecutor(getDataCommitExecutor());
+        dataBroker.setExecutor(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
         BindingMountPointImpl mountInstance = new BindingMountPointImpl(path, rpcRegistry, notificationBroker,
                 dataBroker);
         mountPoints.putIfAbsent(path, mountInstance);
