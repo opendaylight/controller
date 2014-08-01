@@ -155,10 +155,23 @@ public class Shard extends RaftActor {
             modificationToCohort.remove(serialized);
         if (cohort == null) {
             LOG.error(
-                "Could not find cohort for modification : " + modification);
+                "Could not find cohort for modification : {}", modification);
             LOG.info("Writing modification using a new transaction");
-            modification.apply(store.newReadWriteTransaction());
-            return;
+            DOMStoreReadWriteTransaction transaction =
+                store.newReadWriteTransaction();
+            modification.apply(transaction);
+            DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
+            ListenableFuture<Void> future =
+                commitCohort.preCommit();
+            try {
+                future.get();
+                future = commitCohort.commit();
+                future.get();
+            } catch (InterruptedException e) {
+                LOG.error("Failed to commit", e);
+            } catch (ExecutionException e) {
+                LOG.error("Failed to commit", e);
+            }
         }
 
         final ListenableFuture<Void> future = cohort.commit();
@@ -248,7 +261,14 @@ public class Shard extends RaftActor {
         if(data instanceof CompositeModificationPayload){
             Object modification =
                 ((CompositeModificationPayload) data).getModification();
-            commit(clientActor, modification);
+
+            if(modification != null){
+                commit(clientActor, modification);
+            } else {
+                LOG.error("modification is null - this is very unexpected");
+            }
+
+
         } else {
             LOG.error("Unknown state received {}", data);
         }
