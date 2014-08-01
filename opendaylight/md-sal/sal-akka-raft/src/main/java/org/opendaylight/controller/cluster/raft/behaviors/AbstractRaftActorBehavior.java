@@ -44,27 +44,6 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected final RaftActorContext context;
 
     /**
-     * The maximum election time variance
-     */
-    private static final int ELECTION_TIME_MAX_VARIANCE = 100;
-
-    /**
-     * The interval at which a heart beat message will be sent to the remote
-     * RaftActor
-     * <p/>
-     * Since this is set to 100 milliseconds the Election timeout should be
-     * at least 200 milliseconds
-     */
-    protected static final FiniteDuration HEART_BEAT_INTERVAL =
-        new FiniteDuration(100, TimeUnit.MILLISECONDS);
-
-    /**
-     * The interval in which a new election would get triggered if no leader is found
-     */
-    private static final long ELECTION_TIME_INTERVAL =
-        HEART_BEAT_INTERVAL.toMillis() * 2;
-
-    /**
      *
      */
     private Cancellable electionCancel = null;
@@ -208,9 +187,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return
      */
     protected FiniteDuration electionDuration() {
-        long variance = new Random().nextInt(ELECTION_TIME_MAX_VARIANCE);
-        return new FiniteDuration(ELECTION_TIME_INTERVAL + variance,
-            TimeUnit.MILLISECONDS);
+        long variance = new Random().nextInt(context.getConfigParams().getElectionTimeVariance());
+        return context.getConfigParams().getElectionTimeOutInterval().$plus(
+            new FiniteDuration(variance, TimeUnit.MILLISECONDS));
     }
 
     /**

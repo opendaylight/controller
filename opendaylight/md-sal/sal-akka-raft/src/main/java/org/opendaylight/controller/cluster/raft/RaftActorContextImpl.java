@@ -19,7 +19,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public class RaftActorContextImpl implements RaftActorContext{
+public class RaftActorContextImpl implements RaftActorContext {
 
     private final ActorRef actor;
 
@@ -39,10 +39,14 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     private final LoggingAdapter LOG;
 
+    private final ConfigParams configParams;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
-        long lastApplied, ReplicatedLog replicatedLog, Map<String, String> peerAddresses, LoggingAdapter logger) {
+        long lastApplied, ReplicatedLog replicatedLog,
+        Map<String, String> peerAddresses, ConfigParams configParams,
+        LoggingAdapter logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -51,6 +55,7 @@ public class RaftActorContextImpl implements RaftActorContext{
         this.lastApplied = lastApplied;
         this.replicatedLog = replicatedLog;
         this.peerAddresses = peerAddresses;
+        this.configParams = configParams;
         this.LOG = logger;
     }
 
@@ -112,6 +117,10 @@ public class RaftActorContextImpl implements RaftActorContext{
 
     @Override public String getPeerAddress(String peerId) {
         return peerAddresses.get(peerId);
+    }
+
+    @Override public ConfigParams getConfigParams() {
+        return configParams;
     }
 
     @Override public void addToPeers(String name, String address) {

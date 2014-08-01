@@ -11,7 +11,9 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,15 +36,15 @@ public class Main {
     public static void main(String[] args) throws Exception{
         ActorRef example1Actor =
             actorSystem.actorOf(ExampleActor.props("example-1",
-                withoutPeer("example-1")), "example-1");
+                withoutPeer("example-1"), Optional.<ConfigParams>absent()), "example-1");
 
         ActorRef example2Actor =
             actorSystem.actorOf(ExampleActor.props("example-2",
-                withoutPeer("example-2")), "example-2");
+                withoutPeer("example-2"), Optional.<ConfigParams>absent()), "example-2");
 
         ActorRef example3Actor =
             actorSystem.actorOf(ExampleActor.props("example-3",
-                withoutPeer("example-3")), "example-3");
+                withoutPeer("example-3"), Optional.<ConfigParams>absent()), "example-3");
 
 
         List<ActorRef> examples = Arrays.asList(example1Actor, example2Actor, example3Actor);
@@ -74,7 +76,8 @@ public class Main {
                         String actorName = "example-" + i;
                         examples.add(i - 1,
                             actorSystem.actorOf(ExampleActor.props(actorName,
-                                withoutPeer(actorName)), actorName));
+                                withoutPeer(actorName), Optional.<ConfigParams>absent()),
+                                actorName));
                         System.out.println("Created actor : " + actorName);
                         continue;
                     }
