@@ -144,8 +144,8 @@ public class BindingTestContext implements AutoCloseable {
 
         biCompatibleBroker = new BackwardsCompatibleDataBroker(newDOMDataBroker,mockSchemaService);
 
-        mockSchemaService.registerSchemaServiceListener(configStore);
-        mockSchemaService.registerSchemaServiceListener(operStore);
+        mockSchemaService.registerSchemaContextListener(configStore);
+        mockSchemaService.registerSchemaContextListener(operStore);
         biDataLegacyBroker = biCompatibleBroker;
     }
 
@@ -246,7 +246,7 @@ public class BindingTestContext implements AutoCloseable {
     public void startBindingToDomMappingService() {
         checkState(classPool != null, "ClassPool needs to be present");
         mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
-        mockSchemaService.registerSchemaServiceListener(mappingServiceImpl);
+        mockSchemaService.registerSchemaContextListener(mappingServiceImpl);
     }
 
     private void updateYangSchema(final ImmutableSet<YangModuleInfo> moduleInfos) {

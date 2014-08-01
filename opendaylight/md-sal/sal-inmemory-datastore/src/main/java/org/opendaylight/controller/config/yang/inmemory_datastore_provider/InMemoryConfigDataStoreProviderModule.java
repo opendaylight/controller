@@ -23,7 +23,7 @@ public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.cont
     @Override
     public java.lang.AutoCloseable createInstance() {
       InMemoryDOMDataStore   ids = new InMemoryDOMDataStore("DOM-CFG", MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
-      getSchemaServiceDependency().registerSchemaServiceListener(ids);
+      getSchemaServiceDependency().registerSchemaContextListener(ids);
       return ids;
     }
 

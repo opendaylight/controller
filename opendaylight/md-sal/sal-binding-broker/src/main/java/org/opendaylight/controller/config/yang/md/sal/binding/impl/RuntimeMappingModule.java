@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
-import org.opendaylight.yangtools.yang.model.api.SchemaServiceListener;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public final class RuntimeMappingModule extends
         }
 
         final RuntimeGeneratedMappingServiceImpl service = new RuntimeGeneratedMappingServiceImpl(SingletonHolder.CLASS_POOL);
-        bundleContext.registerService(SchemaServiceListener.class, service, new Hashtable<String,String>());
+        bundleContext.registerService(SchemaContextListener.class, service, new Hashtable<String,String>());
         return service;
     }
 
