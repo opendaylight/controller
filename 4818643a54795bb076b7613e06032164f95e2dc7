@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_649e1e65",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-01T00:02:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_249fb6b6",
+      "revId": "4818643a54795bb076b7613e06032164f95e2dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_848a4262",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-31T19:52:07Z",
       "side": 1,
       "message": "I think passing a schemaContext to the RpcManager is not going to be good enough. Over time as new modules are added and such the schemaContext can change. You need to send an update to this actor with the new schema context. See how we do this in DistributedDataStore and ShardManager.",
+      "revId": "4818643a54795bb076b7613e06032164f95e2dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4936a59",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-01T00:02:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_848a4262",
       "revId": "4818643a54795bb076b7613e06032164f95e2dc7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
