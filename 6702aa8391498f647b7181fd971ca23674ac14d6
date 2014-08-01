@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_94bef1ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-01T23:24:56Z",
+      "side": 1,
+      "message": "Thus the time also need to go into Configuration?",
+      "revId": "6702aa8391498f647b7181fd971ca23674ac14d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
