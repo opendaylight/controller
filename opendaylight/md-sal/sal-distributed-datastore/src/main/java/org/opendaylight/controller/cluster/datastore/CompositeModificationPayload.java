@@ -10,7 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.cluster.example.protobuff.messages.KeyValueMessages;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.UnknownFieldSet;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
@@ -43,7 +44,28 @@ public class CompositeModificationPayload extends Payload implements
         PersistentMessages.CompositeModification modification = payload
             .getExtension(
                 org.opendaylight.controller.mdsal.CompositeModificationPayload.modification);
-        payload.getExtension(KeyValueMessages.value);
+
+
+
+        // The extension was put in the unknown field.
+        // This is because extensions need to be registered
+        // see org.opendaylight.controller.mdsal.CompositeModificationPayload.registerAllExtensions
+        // also see https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/ExtensionRegistry
+        // If that is not done then on the other end the extension shows up as an unknown field
+        // Need to figure out a better way to do this
+        if(payload.getUnknownFields().hasField(2)){
+            UnknownFieldSet.Field field =
+                payload.getUnknownFields().getField(2);
+
+            try {
+                modification =
+                    PersistentMessages.CompositeModification
+                        .parseFrom(field.getLengthDelimitedList().get(0));
+            } catch (InvalidProtocolBufferException e) {
+
+            }
+        }
+
         return new CompositeModificationPayload(modification);
     }
 
