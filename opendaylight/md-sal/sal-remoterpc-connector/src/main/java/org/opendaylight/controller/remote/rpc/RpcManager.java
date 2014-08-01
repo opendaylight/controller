@@ -72,14 +72,14 @@ public class RpcManager extends AbstractUntypedActor {
   private void createRpcActors() {
     LOG.debug("Create rpc registry and broker actors");
 
-    rpcRegistry = getContext().actorOf(RpcRegistry.props(clusterWrapper), "rpc-registry");
-    rpcBroker = getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), "rpc-broker");
+    rpcRegistry = getContext().actorOf(RpcRegistry.props(clusterWrapper), ActorConstants.RPC_REGISTRY);
+    rpcBroker = getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), ActorConstants.RPC_BROKER);
   }
 
   private void startListeners() {
     LOG.debug("Registers rpc listeners");
 
-    String rpcBrokerPath = clusterWrapper.getAddress().toString() + "/user/rpc/rpc-broker";
+    String rpcBrokerPath = clusterWrapper.getAddress().toString() + ActorConstants.RPC_BROKER_PATH;
     rpcListener = new RpcListener(rpcRegistry, rpcBrokerPath);
     routeChangeListener = new RoutedRpcListener(rpcRegistry, rpcBrokerPath);
     rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext);

@@ -68,7 +68,7 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
     SchemaService schemaService = brokerSession.getService(SchemaService.class);
     schemaContext = schemaService.getGlobalContext();
 
-    rpcManager = actorSystem.actorOf(RpcManager.props(clusterWrapper, schemaContext, brokerSession, rpcProvisionRegistry), "rpc");
+    rpcManager = actorSystem.actorOf(RpcManager.props(clusterWrapper, schemaContext, brokerSession, rpcProvisionRegistry), ActorConstants.RPC_MANAGER);
 
     LOG.debug("Rpc actors are created.");
   }
