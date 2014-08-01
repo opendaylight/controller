@@ -299,7 +299,7 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable, 
             try {
                 SubnetUtils util = new SubnetUtils(cidr);
                 SubnetInfo info = util.getInfo();
-                if (gatewayIP == null) {
+                if (gatewayIP == null || ("").equals(gatewayIP)) {
                     gatewayIP = info.getLowAddress();
                 }
                 if (allocationPools.size() < 1) {
