@@ -112,8 +112,8 @@ public class Leader extends AbstractRaftActorBehavior {
         scheduleHeartBeat(new FiniteDuration(0, TimeUnit.SECONDS));
 
         scheduleInstallSnapshotCheck(
-            new FiniteDuration(HEART_BEAT_INTERVAL.length() * 1000,
-                HEART_BEAT_INTERVAL.unit())
+            new FiniteDuration(context.getConfigParams().getHeartBeatInterval().length() * 1000,
+                context.getConfigParams().getHeartBeatInterval().unit())
         );
 
     }
@@ -241,7 +241,7 @@ public class Leader extends AbstractRaftActorBehavior {
                     (InstallSnapshotReply) message);
             }
         } finally {
-            scheduleHeartBeat(HEART_BEAT_INTERVAL);
+            scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         }
 
         return super.handleMessage(sender, message);

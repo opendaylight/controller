@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.client.messages.AddRaftPeer;
 import org.opendaylight.controller.cluster.raft.client.messages.RemoveRaftPeer;
 
@@ -27,6 +28,7 @@ public class TestDriver {
     private static Map<String, ActorRef> actorRefs = new HashMap<String, ActorRef>();
     private static LogGenerator logGenerator = new LogGenerator();
     private int nameCounter = 0;
+    private static ConfigParams configParams = new ExampleConfigParamsImpl();
 
     /**
      * Create nodes, add clients and start logging.
@@ -111,6 +113,10 @@ public class TestDriver {
         }
     }
 
+    public static ActorRef createExampleActor(String name) {
+        return actorSystem.actorOf(ExampleActor.props(name, withoutPeer(name), configParams), name);
+    }
+
     public void createNodes(int num) {
         for (int i=0; i < num; i++)  {
             nameCounter = nameCounter + 1;
@@ -118,8 +124,7 @@ public class TestDriver {
         }
 
         for (String s : allPeers.keySet())  {
-            ActorRef exampleActor = actorSystem.actorOf(
-                ExampleActor.props(s, withoutPeer(s)), s);
+            ActorRef exampleActor = createExampleActor(s);
             actorRefs.put(s, exampleActor);
             System.out.println("Created node:"+s);
 
@@ -137,8 +142,7 @@ public class TestDriver {
         }
         Map<String, ActorRef> newActorRefs = new HashMap<String, ActorRef>(num);
         for (Map.Entry<String, String> entry : newPeers.entrySet())  {
-            ActorRef exampleActor = actorSystem.actorOf(
-                ExampleActor.props(entry.getKey(), withoutPeer(entry.getKey())), entry.getKey());
+            ActorRef exampleActor = createExampleActor(entry.getKey());
             newActorRefs.put(entry.getKey(), exampleActor);
 
             //now also add these new nodes as peers from the previous nodes
@@ -200,7 +204,7 @@ public class TestDriver {
         String address = "akka://default/user/"+actorName;
         allPeers.put(actorName, address);
 
-        ActorRef exampleActor = actorSystem.actorOf(ExampleActor.props(actorName, withoutPeer(actorName)), actorName);
+        ActorRef exampleActor = createExampleActor(actorName);
 
         for (ActorRef actor : actorRefs.values()) {
             actor.tell(new AddRaftPeer(actorName, address), null);
