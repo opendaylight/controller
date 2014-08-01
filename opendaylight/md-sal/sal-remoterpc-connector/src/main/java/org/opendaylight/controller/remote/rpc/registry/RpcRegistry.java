@@ -14,6 +14,7 @@ import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.japi.Creator;
 import org.opendaylight.controller.remote.rpc.AbstractUntypedActor;
+import org.opendaylight.controller.remote.rpc.ActorConstants;
 import org.opendaylight.controller.remote.rpc.messages.AddRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.AddRpc;
 import org.opendaylight.controller.remote.rpc.messages.GetRoutedRpc;
@@ -171,7 +172,7 @@ public class RpcRegistry extends AbstractUntypedActor {
         }
         if(i == index) {
           if(!currentNodeAddress.equals(member.address())) {
-            actor = this.context().actorSelection(member.address() + "/user/rpc-registry");
+            actor = this.context().actorSelection(member.address() + ActorConstants.RPC_REGISTRY_PATH);
             break;
           } else if(index < memberSize-1){ // pick the next element in the set
             index++;
@@ -180,7 +181,7 @@ public class RpcRegistry extends AbstractUntypedActor {
         i++;
       }
       if(actor == null && previousMember != null) {
-        actor = this.context().actorSelection(previousMember.address() + "/user/rpc-registry");
+        actor = this.context().actorSelection(previousMember.address() + ActorConstants.RPC_REGISTRY_PATH);
       }
     }
     return actor;
