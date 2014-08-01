@@ -8,7 +8,7 @@
  *
  */
 
-package org.opendaylight.controller.protobuff.messages.transaction;
+package org.opendaylight.controller.protobuff.messages.persistent;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,9 +16,10 @@ import org.opendaylight.controller.protobuff.messages.AbstractMessagesTest;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 
+
 /**
  * This test case is present to ensure that if others have used proper version of protocol buffer
- * for the ShardTransaction.proto messages
+ * for the peristent.proto messages
  *
  * If a different version of protocol buffer and there is change in serializaiton format
  * this test would break as we are comparing with protocol buffer 2.5 generated
@@ -28,12 +29,12 @@ import org.opendaylight.yangtools.yang.common.QName;
  *
  */
 
-
-public class ShardTransactionMessagesTest extends AbstractMessagesTest {
+public class PersistentMessagesTest extends AbstractMessagesTest {
 
   private final String namespace = "urn:protobuff", revision = "2014-07-31",
       localName = "test";
 
+  @Override
   @Test
   public void verifySerialization() throws Exception {
     NormalizedNodeMessages.InstanceIdentifier.Builder instanceIdentifierBuilder =
@@ -45,41 +46,37 @@ public class ShardTransactionMessagesTest extends AbstractMessagesTest {
         .build());
     pathArgument.setValue("test");
     instanceIdentifierBuilder.addArguments(pathArgument.build());
-    ShardTransactionMessages.ReadData.Builder builder =
-        ShardTransactionMessages.ReadData.newBuilder();
     NormalizedNodeMessages.InstanceIdentifier expectedOne =
         instanceIdentifierBuilder.build();
-    builder.setInstanceIdentifierPathArguments(expectedOne);
+
+    PersistentMessages.Modification.Builder builder =
+        PersistentMessages.Modification.newBuilder();
+    builder.setType("test");
+    builder.setPath(expectedOne);
 
     writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
 
-    // Here we will read the same and check we got back what we had saved
-    ShardTransactionMessages.ReadData readDataNew =
-        (ShardTransactionMessages.ReadData) readFromFile(ShardTransactionMessages.ReadData.PARSER);
+    PersistentMessages.Modification modificationNew =
+        (PersistentMessages.Modification) readFromFile(PersistentMessages.Modification.PARSER);
+    Assert.assertEquals("test", modificationNew.getType());
+    Assert.assertEquals(expectedOne.getArguments(0).getValue(), modificationNew
+        .getPath().getArguments(0).getValue());
+    Assert.assertEquals(expectedOne.getArguments(0).getType(), modificationNew
+        .getPath().getArguments(0).getType());
 
+    // we will compare with the serialized data that we had shipped
+    PersistentMessages.Modification modificationOriginal =
+        (PersistentMessages.Modification) readFromTestDataFile(PersistentMessages.Modification.PARSER);
+    Assert.assertEquals(modificationOriginal.getPath().getArguments(0)
+        .getValue(), modificationNew.getPath().getArguments(0).getValue());
+    Assert.assertEquals(modificationOriginal.getPath().getArguments(0)
+        .getType(), modificationNew.getPath().getArguments(0).getType());
 
-    Assert.assertEquals(expectedOne.getArgumentsCount(), readDataNew
-        .getInstanceIdentifierPathArguments().getArgumentsCount());
-    Assert.assertEquals(expectedOne.getArguments(0), readDataNew
-        .getInstanceIdentifierPathArguments().getArguments(0));
-
-
-    // the following will compare with the version we had shipped
-    ShardTransactionMessages.ReadData readDataOriginal =
-        (ShardTransactionMessages.ReadData) readFromTestDataFile(ShardTransactionMessages.ReadData.PARSER);
-
-
-    Assert.assertEquals(readDataNew.getInstanceIdentifierPathArguments()
-        .getArguments(0), readDataOriginal.getInstanceIdentifierPathArguments()
-        .getArguments(0));
 
   }
 
   @Override
   public String getTestFileName() {
-    return ShardTransactionMessagesTest.class.getSimpleName();
+    return PersistentMessagesTest.class.getSimpleName();
   }
-
-
-
 }

@@ -24,5 +24,9 @@ machine
 
 6. !!!WARNING!!! - never edit the generated sources files of protocol buffer
 
-7. !!!NOTE!!! if you are planning to add new .proto file  option java_package should begin with
+7. !!!IMPORTANT!!! if you are planning to add new .proto file  option java_package should begin with
    org.opendaylight.controller.protobuff.messages to properly exclude from sonar.
+
+8. !!!IMPORTANT!!! for any new .proto file added you need to create corresponding version-compatibility-serialized-data
+   serialized test file under test/resources and a test case for one message in your .proto file.
+   Please follow the instruction in readme.txt in that folder
