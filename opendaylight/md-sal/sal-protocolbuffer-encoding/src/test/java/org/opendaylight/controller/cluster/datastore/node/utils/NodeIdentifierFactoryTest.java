@@ -6,15 +6,16 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class NodeIdentifierFactoryTest {
 
-    @Test
-    public void validateAugmentationIdentifier(){
-        YangInstanceIdentifier.PathArgument argument = NodeIdentifierFactory
-            .getArgument(
-                "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}");
+  @Test
+  public void validateAugmentationIdentifier() {
+    YangInstanceIdentifier.PathArgument argument =
+        NodeIdentifierFactory
+            .getArgument("AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}");
 
-        Assert.assertTrue(argument instanceof YangInstanceIdentifier.AugmentationIdentifier);
+    Assert
+        .assertTrue(argument instanceof YangInstanceIdentifier.AugmentationIdentifier);
 
 
-    }
+  }
 
 }
