@@ -201,7 +201,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 remoteTransactionPaths.put(shardName, transactionContext);
             }
         } catch(TimeoutException e){
-            LOG.warn("Timed out trying to create transaction on shard {}: {}", shardName, e);
+            LOG.error("Creating NoOpTransaction because of : {}", e.getMessage());
             remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName));
         }
     }
