@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_113e73da",
+        "filename": "features/nsf/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-01T17:48:58Z",
+      "side": 1,
+      "message": "Though i agree that having them as individual feature is useful... more useful thing would be to make these shells as default installable for the NSF mangers.\n\nIn this case, I will reverse the dependency and include the shell bundle as dependency in nsf-managers.",
+      "revId": "986ee4bbcf6a26b09a12c0940e0fd0643f12afd6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
