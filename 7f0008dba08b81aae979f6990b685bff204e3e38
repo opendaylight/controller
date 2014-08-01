@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d43f99b2",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-flow-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-08-01T18:56:50Z",
+      "side": 1,
+      "message": "Tabs!!!",
+      "revId": "7f0008dba08b81aae979f6990b685bff204e3e38",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_744a4d56",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/opendaylight-match-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-08-01T18:56:50Z",
+      "side": 1,
+      "message": "Tons of trailing whitespace.",
+      "revId": "7f0008dba08b81aae979f6990b685bff204e3e38",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_94459144",
+        "filename": "opendaylight/md-sal/model/model-flow-service/src/main/yang/packet-processing.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2014-08-01T18:56:50Z",
+      "side": 1,
+      "message": "tabs are evil!",
+      "revId": "7f0008dba08b81aae979f6990b685bff204e3e38",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
