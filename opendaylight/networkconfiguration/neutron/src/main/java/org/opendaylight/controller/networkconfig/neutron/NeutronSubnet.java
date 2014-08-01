@@ -75,7 +75,7 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable, 
      */
     List<NeutronPort> myPorts;
 
-    boolean gatewayIPAssigned;
+    Boolean gatewayIPAssigned;
 
     public NeutronSubnet() {
         myPorts = new ArrayList<NeutronPort>();
@@ -458,6 +458,10 @@ public class NeutronSubnet extends ConfigurationObject implements Serializable, 
 
     public void resetGatewayIPAllocated() {
         gatewayIPAssigned = false;
+    }
+
+    public Boolean getGatewayIPAllocated() {
+        return gatewayIPAssigned;
     }
 
     @Override
