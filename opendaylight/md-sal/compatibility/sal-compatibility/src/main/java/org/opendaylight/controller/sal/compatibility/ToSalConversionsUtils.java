@@ -102,17 +102,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.EthernetType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MacAddressFilter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.source.hardware.address.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.target.hardware.address.ArpTargetHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetDestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetSourceCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetTypeCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.match._case.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.destination._case.EthernetDestination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.source._case.EthernetSource;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatch;
@@ -407,8 +409,12 @@ public class ToSalConversionsUtils {
                 org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Match match = outermatch.getMatch();
                 if(match instanceof VlanMatchCase) {
                     fillFrom(target, ((VlanMatchCase)match).getVlanMatch());
-                } else if (match instanceof EthernetMatchCase) {
-                    fillFrom(target, ((EthernetMatchCase)match).getEthernetMatch());
+                } else if(match instanceof EthernetSourceCase) {
+                    fillFrom(target, ((EthernetSourceCase)match).getEthernetSource());
+                } else if (match instanceof EthernetDestinationCase) {
+                    fillFrom(target, ((EthernetDestinationCase)match).getEthernetDestination());
+                } else if (match instanceof EthernetTypeCase) {
+                    fillFrom(target, ((EthernetTypeCase)match).getEthernetType());
                 } else if (match instanceof Layer3MatchCase) {
                     fillFrom(target, ((Layer3MatchCase)match).getLayer3Match());
                 } else if (match instanceof Layer4MatchCase) {
@@ -629,27 +635,25 @@ public class ToSalConversionsUtils {
         }
         return null;
     }
+    private static void fillFrom(Match target, EthernetSource source) {
+        if (source != null) {
+            target.setField(DL_SRC, bytesFrom(source.getAddress()));
+        }
+    }
 
-    private static void fillFrom(Match target, EthernetMatch source) {
-        if (source == null)
-            return;
-        EthernetType ethType = source.getEthernetType();
-        if (ethType != null) {
-            EtherType ethInnerType = ethType.getType();
+    private static void fillFrom(Match target,EthernetDestination destination) {
+        if(destination != null) {
+            target.setField(DL_DST, bytesFrom(destination.getAddress()));
+        }
+    }
+
+    private static void fillFrom(Match target, EthernetType type) {
+        if (type != null) {
+            EtherType ethInnerType = type.getType();
             if (ethInnerType != null && target.getField(DL_TYPE) == null) {
                 Long value = ethInnerType.getValue();
                 target.setField(DL_TYPE, value.shortValue());
             }
-        }
-
-        MacAddressFilter ethSource = source.getEthernetSource();
-        if (ethSource != null) {
-            target.setField(DL_SRC, bytesFrom(ethSource.getAddress()));
-        }
-
-        MacAddressFilter ethDest = source.getEthernetDestination();
-        if (ethDest != null) {
-            target.setField(DL_DST, bytesFrom(ethDest.getAddress()));
         }
     }
 

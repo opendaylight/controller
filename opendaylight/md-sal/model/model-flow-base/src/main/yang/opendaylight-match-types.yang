@@ -31,17 +31,17 @@ module opendaylight-match-types {
         }
     }
 
-    grouping ethernet-source {
+    grouping ethernet-source-attributes{
         description "Ethernet source address.";
         uses mac-address-filter;
     }
     
-    grouping ethernet-destination {
+    grouping ethernet-destination-attributes {
         description "Ethernet destination address.";
         uses mac-address-filter;
     }
     
-    grouping ethernet-type {
+    grouping ethernet-type-attributes {
         description "Ethernet frame type.";
 
         leaf type {
@@ -50,18 +50,6 @@ module opendaylight-match-types {
         }
     }
     
-     /** Match Groupings **/
-    grouping "ethernet-match-fields" {
-        container ethernet-source {
-            uses ethernet-source;
-        }
-        container ethernet-destination {
-            uses ethernet-destination;
-        }
-        container ethernet-type {
-            uses ethernet-type;
-        }
-    }
     // TODO - not sure what to do about vlan-id present
     grouping "vlan-match-fields" {
         container vlan-id {
@@ -490,11 +478,24 @@ module opendaylight-match-types {
                 uses tunnel-id;
             }
             
-            case ethernet-match-case {
-                container "ethernet-match" {
-                    uses "ethernet-match-fields";
+            case ethernet-source-case {
+                container ethernet-source {
+                    uses ethernet-source-attributes;
                 }
             }
+            
+            case ethernet-destination-case {
+                container ethernet-destination {
+                    uses ethernet-destination-attributes;
+                }
+            }
+            
+            case ethernet-type-case {
+                container ethernet-type {
+                    uses ethernet-type-attributes;
+                }
+            }
+            
             
             case vlan-match-case  {
                 container "vlan-match" {
