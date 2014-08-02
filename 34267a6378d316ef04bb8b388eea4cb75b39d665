@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_67337df6",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:03:08Z",
+      "side": 1,
+      "message": "Please use the switchmanager.api.version that is already defined.",
+      "revId": "34267a6378d316ef04bb8b388eea4cb75b39d665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_872ec18a",
+        "filename": "opendaylight/switchmanager/shell/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:03:08Z",
+      "side": 1,
+      "message": "Please use switchmanager.api.version",
+      "revId": "34267a6378d316ef04bb8b388eea4cb75b39d665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2751f50e",
+        "filename": "opendaylight/switchmanager/shell/src/main/java/org/opendaylight/controller/switchmanager/shell/Pdm.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:03:08Z",
+      "side": 1,
+      "message": "Arguments are not \"st\". It must be Node Identifiers.",
+      "revId": "34267a6378d316ef04bb8b388eea4cb75b39d665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_075ab129",
+        "filename": "opendaylight/switchmanager/shell/src/main/java/org/opendaylight/controller/switchmanager/shell/Pencs.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:03:08Z",
+      "side": 1,
+      "message": "Arguments are not \"st\" they are Node identifiers.",
+      "revId": "34267a6378d316ef04bb8b388eea4cb75b39d665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
