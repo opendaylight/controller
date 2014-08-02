@@ -27,3 +27,5 @@ out/
 maven-eclipse.xml
 .DS_STORE
 .metadata
+opendaylight/md-sal/sal-distributed-datastore/journal
+
