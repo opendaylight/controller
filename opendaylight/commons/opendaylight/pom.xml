@@ -332,6 +332,11 @@
         <artifactId>akka-testkit_${scala.version}</artifactId>
         <version>${akka.version}</version>
       </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-osgi_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
@@ -1283,6 +1288,13 @@
         <artifactId>sal-distributed-datastore</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-remoterpc-connector</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+
 
       <!-- SAL Extension bundles -->
       <dependency>
