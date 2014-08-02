@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a73d05c6",
+        "filename": "features/nsf/src/main/resources/features.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T07:44:26Z",
+      "side": 1,
+      "message": "Isnt it connectionmanager.shell.version ?",
+      "revId": "6206a3866bbe7aef421477c8277f6ed03bbc7237",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
