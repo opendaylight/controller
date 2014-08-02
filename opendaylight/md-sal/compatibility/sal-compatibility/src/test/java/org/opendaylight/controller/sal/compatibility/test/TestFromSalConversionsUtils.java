@@ -71,25 +71,36 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceHardwareAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceTransportAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetHardwareAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetTransportAddressCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetDestinationCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetSourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetTypeCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.InPortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpDscpCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpProtocolCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer3MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4DestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.hardware.address._case.ArpTargetHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.transport.address._case.ArpTargetTransportAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.destination._case.EthernetDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.source._case.EthernetSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.type._case.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.in.port._case.InPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.dscp._case.IpDscp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.protocol._case.IpProtocol;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.destination._case.Ipv4Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4Source;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatch;
@@ -141,7 +152,14 @@ public class TestFromSalConversionsUtils {
         EthernetSource ethSrc = null;
         EthernetDestination ethDst = null;
         EthernetType ethType = null;
-        Layer3Match l3 = null;
+        Ipv4Source ipv4src = null;
+        Ipv4Destination ipv4dst = null;
+        Ipv6Source ipv6src = null;
+        Ipv6Destination ipv6dst = null;
+        ArpSourceTransportAddress arpSrc = null;
+        ArpTargetTransportAddress arpDst = null;
+        ArpSourceHardwareAddress arpHwSrc = null;
+        ArpTargetHardwareAddress arpHwDst = null;
         Layer4Match l4 = null;
         VlanMatch vlan = null;
         IpProtocol proto = null;
@@ -150,31 +168,52 @@ public class TestFromSalConversionsUtils {
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> matches = m.getMatch();
         for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
             if(match.getMatch() instanceof EthernetSourceCase) {
-                assertEquals("More than one EthernetMatch Seen",null, ethSrc);
+                assertEquals("More than one EthernetSourceCase Seen",null, ethSrc);
                 ethSrc = ((EthernetSourceCase) match.getMatch()).getEthernetSource();
             } else if(match.getMatch() instanceof EthernetDestinationCase) {
-                assertEquals("More than one EthernetMatch Seen",null, ethDst);
+                assertEquals("More than one EthernetDestinationCase Seen",null, ethDst);
                 ethDst = ((EthernetDestinationCase) match.getMatch()).getEthernetDestination();
             } else if(match.getMatch() instanceof EthernetTypeCase) {
-                assertEquals("More than one EthernetMatch Seen",null, ethType);
+                assertEquals("More than one EthernetTypeCase Seen",null, ethType);
                 ethType = ((EthernetTypeCase) match.getMatch()).getEthernetType();
             } else if (match.getMatch() instanceof VlanMatchCase) {
-                assertEquals("More than one Layer3Match Seen",null, vlan);
+                assertEquals("More than one VlanMatchCase Seen",null, vlan);
                 vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
-            } else if (match.getMatch() instanceof Layer3MatchCase) {
-                assertEquals("More than one Layer3Match Seen",null, l3);
-                l3 = ((Layer3MatchCase) match.getMatch()).getLayer3Match();
+            } else if (match.getMatch() instanceof Ipv4SourceCase) {
+                assertEquals("More than one Ipv4SourceCase Seen",null, ipv4src);
+                ipv4src = ((Ipv4SourceCase) match.getMatch()).getIpv4Source();
+            } else if (match.getMatch() instanceof Ipv4DestinationCase) {
+                assertEquals("More than one Ipv4DestinationCase Seen",null, ipv4dst);
+                ipv4dst = ((Ipv4DestinationCase) match.getMatch()).getIpv4Destination();
+            } else if (match.getMatch() instanceof Ipv6SourceCase) {
+                assertEquals("More than one Ipv6SourceCase Seen",null, ipv6src);
+                ipv6src = ((Ipv6SourceCase) match.getMatch()).getIpv6Source();
+            } else if (match.getMatch() instanceof Ipv6DestinationCase) {
+                assertEquals("More than one Ipv6DestinationCase Seen",null, ipv6dst);
+                ipv6dst = ((Ipv6DestinationCase) match.getMatch()).getIpv6Destination();
+            } else if (match.getMatch() instanceof ArpSourceTransportAddressCase) {
+                assertEquals("More than one ArpSourceTransportAddressCase Seen",null, arpSrc);
+                arpSrc = ((ArpSourceTransportAddressCase) match.getMatch()).getArpSourceTransportAddress();
+            } else if (match.getMatch() instanceof ArpTargetTransportAddressCase) {
+                assertEquals("More than one ArpTargetTransportAddressCase Seen",null, arpDst);
+                arpDst = ((ArpTargetTransportAddressCase) match.getMatch()).getArpTargetTransportAddress();
+            } else if (match.getMatch() instanceof ArpSourceHardwareAddressCase) {
+                assertEquals("More than one ArpSourceHardwareAddressCase Seen",null, arpHwSrc);
+                arpHwSrc = ((ArpSourceHardwareAddressCase) match.getMatch()).getArpSourceHardwareAddress();
+            } else if (match.getMatch() instanceof ArpTargetHardwareAddressCase) {
+                assertEquals("More than one ArpTargetHardwareAddressCase Seen",null, arpHwDst);
+                arpHwDst = ((ArpTargetHardwareAddressCase) match.getMatch()).getArpTargetHardwareAddress();
             } else if (match.getMatch() instanceof IpProtocolCase) {
-                assertEquals("More than one IpMatch Seen",null, proto);
+                assertEquals("More than one IpProtocolCase Seen",null, proto);
                 proto = ((IpProtocolCase) match.getMatch()).getIpProtocol();
             } else if (match.getMatch() instanceof IpDscpCase) {
-                assertEquals("More than one IpMatch Seen",null, proto);
+                assertEquals("More than one IpDscpCase Seen",null, dscp);
                 dscp = ((IpDscpCase) match.getMatch()).getIpDscp();
             } else if (match.getMatch() instanceof Layer4MatchCase) {
-                assertEquals("More than one IpMatch Seen",null, l4);
+                assertEquals("More than one Layer4MatchCase Seen",null, l4);
                 l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
             } else if (match.getMatch() instanceof InPortCase) {
-                assertEquals("More than one InPort Seen",null, inPort);
+                assertEquals("More than one InPortCase Seen",null, inPort);
                 inPort = ((InPortCase) match.getMatch()).getInPort();
             } else {
                 assertTrue("Extra matches found", false);
@@ -183,42 +222,38 @@ public class TestFromSalConversionsUtils {
         switch (mt) {
 
         case arp:
-            assertEquals("Ether type is incorrect.", ETHERNET_ARP, (long) ethType.getType().getValue());
-
             boolean arpFound = false;
-            if (l3 instanceof ArpMatch) {
-                assertEquals("Source IP address is wrong.", "192.168.100.100", ((ArpMatch) l3)
-                        .getArpSourceTransportAddress().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.101", ((ArpMatch) l3)
-                        .getArpTargetTransportAddress().getValue());
-                assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) l3)
-                        .getArpSourceHardwareAddress().getAddress().getValue());
-                assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) l3)
-                        .getArpTargetHardwareAddress().getAddress().getValue());
-                arpFound = true;
-            }
+            assertEquals("Ether type is incorrect.", ETHERNET_ARP, (long) ethType.getType().getValue());
+            assertEquals("Source IP address is wrong.", "192.168.100.100", arpSrc
+                    .getArpSourceTransportAddress().getValue());
+            assertEquals("Destination IP address is wrong.", "192.168.100.101", arpDst
+                    .getArpTargetTransportAddress().getValue());
+            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", arpHwSrc
+                    .getAddress().getValue());
+            assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", arpHwDst
+                    .getAddress().getValue());
+            arpFound = true;
+
             assertNotNull("Arp wasn't found", arpFound);
             break;
         case ipv4:
             assertEquals("Ether type is incorrect.", 0xffff, (long) ethType.getType().getValue());
             boolean ipv4Found = false;
-            if (l3 instanceof Ipv4Match) {
-                assertEquals("Source IP address is wrong.", "192.168.100.102", ((Ipv4Match) l3)
-                        .getIpv4Source().getValue());
-                assertEquals("Destination IP address is wrong.", "192.168.100.103", ((Ipv4Match) l3)
-                        .getIpv4Destination().getValue());
-            }
+            assertEquals("Source IP address is wrong.", "192.168.100.102", ipv4src
+                    .getIpv4Source().getValue());
+            assertEquals("Destination IP address is wrong.", "192.168.100.103", ipv4dst
+                    .getIpv4Destination().getValue());
+            ipv4Found = true;
             assertNotNull("Ipv4 wasn't found", ipv4Found);
             break;
         case ipv6:
             assertEquals("Ether type is incorrect.", 0xffff, (long) ethType.getType().getValue());
             boolean ipv6Found = false;
-            if (l3 instanceof Ipv6Match) {
-                assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335", ((Ipv6Match) l3)
-                        .getIpv6Source().getValue());
-                assertEquals("Destination IP address is wrong.", "2001:db8:85a3::8a2e:370:7336",
-                        ((Ipv6Match) l3).getIpv6Destination().getValue());
-            }
+            assertEquals("Source IP address is wrong.", "2001:db8:85a3::8a2e:370:7335", ipv6src
+                    .getIpv6Source().getValue());
+            assertEquals("Destination IP address is wrong.", "2001:db8:85a3::8a2e:370:7336",
+                    ipv6dst.getIpv6Destination().getValue());
+            ipv6Found = true;
             assertNotNull("Ipv6 wasn't found", ipv6Found);
             break;
         case other:

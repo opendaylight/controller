@@ -15,13 +15,10 @@ import java.util.List;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer3MatchCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4DestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Utility class for comparing flows.
@@ -109,12 +106,28 @@ final class FlowComparator {
             boolean foundMatch = false;
             for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match statsFlowMatch: statsFlowMatches) {
                 if(storedFlowMatch.getMatch() != null && statsFlowMatch.getMatch() != null) {
-                    if(storedFlowMatch.getMatch() instanceof Layer3MatchCase && statsFlowMatches instanceof Layer3MatchCase) {
-                        if(layer3MatchEquals(((Layer3MatchCase) storedFlowMatch.getMatch()).getLayer3Match(),((Layer3MatchCase) storedFlow.getMatch()).getLayer3Match())) {
-                            foundMatch=true;
-                        } else {
-                            foundMatch = storedFlowMatch.getMatch().equals(storedFlowMatch.getMatch());
-                        }
+                    if (storedFlowMatch.getMatch() instanceof Ipv4SourceCase
+                            && statsFlowMatch.getMatch() instanceof Ipv4SourceCase) {
+                                if(((Ipv4SourceCase)storedFlowMatch.getMatch()).getIpv4Source() != null
+                                        && ((Ipv4SourceCase)storedFlowMatch.getMatch()).getIpv4Source().getIpv4Source() != null
+                                        && ((Ipv4SourceCase)statsFlowMatch.getMatch()).getIpv4Source() != null
+                                        && ((Ipv4SourceCase)statsFlowMatch.getMatch()).getIpv4Source().getIpv4Source() != null
+                                        && IpAddressEquals(((Ipv4SourceCase)storedFlowMatch.getMatch()).getIpv4Source().getIpv4Source()
+                                                , ((Ipv4SourceCase)statsFlowMatch.getMatch()).getIpv4Source().getIpv4Source())) {
+                            foundMatch = true;
+                                }
+                    } else if (storedFlowMatch.getMatch() instanceof Ipv4DestinationCase
+                            && statsFlowMatch.getMatch() instanceof Ipv4DestinationCase ) {
+                            if(((Ipv4DestinationCase)storedFlowMatch.getMatch()).getIpv4Destination() != null
+                                    && ((Ipv4DestinationCase)storedFlowMatch.getMatch()).getIpv4Destination().getIpv4Destination() != null
+                                    && ((Ipv4DestinationCase)statsFlowMatch.getMatch()).getIpv4Destination() != null
+                                    && ((Ipv4DestinationCase)statsFlowMatch.getMatch()).getIpv4Destination().getIpv4Destination() != null
+                                    && IpAddressEquals(((Ipv4DestinationCase)storedFlowMatch.getMatch()).getIpv4Destination().getIpv4Destination(),
+                                            ((Ipv4DestinationCase)statsFlowMatch.getMatch()).getIpv4Destination().getIpv4Destination())) {
+                                foundMatch = true;
+                            }
+                    } else {
+                        foundMatch = storedFlowMatch.getMatch().equals(storedFlowMatch.getMatch());
                     }
                     if(foundMatch==true){
                         break;
@@ -126,33 +139,6 @@ final class FlowComparator {
             }
         }
         return true;
-    }
-
-    @VisibleForTesting
-    static boolean layer3MatchEquals(Layer3Match statsLayer3Match, Layer3Match storedLayer3Match){
-        boolean verdict = true;
-        if(statsLayer3Match instanceof Ipv4Match && storedLayer3Match instanceof Ipv4Match){
-            Ipv4Match statsIpv4Match = (Ipv4Match)statsLayer3Match;
-            Ipv4Match storedIpv4Match = (Ipv4Match)storedLayer3Match;
-
-            if (verdict) {
-                verdict = compareNullSafe(
-                        storedIpv4Match.getIpv4Destination(), statsIpv4Match.getIpv4Destination());
-            }
-            if (verdict) {
-                verdict = compareNullSafe(
-                        statsIpv4Match.getIpv4Source(), storedIpv4Match.getIpv4Source());
-            }
-        } else {
-            Boolean nullCheckOut = checkNullValues(storedLayer3Match, statsLayer3Match);
-            if (nullCheckOut != null) {
-                verdict = nullCheckOut;
-            } else {
-                verdict = storedLayer3Match.equals(statsLayer3Match);
-            }
-        }
-
-        return verdict;
     }
 
     private static boolean compareNullSafe(Ipv4Prefix statsIpv4, Ipv4Prefix storedIpv4) {
@@ -188,14 +174,16 @@ final class FlowComparator {
      * @return true if IPv4prefixes equals
      */
     private static boolean IpAddressEquals(Ipv4Prefix statsIpAddress, Ipv4Prefix storedIpAddress) {
-        IntegerIpAddress statsIpAddressInt = StrIpToIntIp(statsIpAddress.getValue());
-        IntegerIpAddress storedIpAddressInt = StrIpToIntIp(storedIpAddress.getValue());
+        if(statsIpAddress.getValue() != null && storedIpAddress.getValue() != null) {
+            IntegerIpAddress statsIpAddressInt = StrIpToIntIp(statsIpAddress.getValue());
+            IntegerIpAddress storedIpAddressInt = StrIpToIntIp(storedIpAddress.getValue());
 
-        if(IpAndMaskBasedMatch(statsIpAddressInt,storedIpAddressInt)){
-            return true;
-        }
-        if(IpBasedMatch(statsIpAddressInt,storedIpAddressInt)){
-            return true;
+            if(IpAndMaskBasedMatch(statsIpAddressInt,storedIpAddressInt)){
+                return true;
+            }
+            if(IpBasedMatch(statsIpAddressInt,storedIpAddressInt)){
+                return true;
+            }
         }
         return false;
     }

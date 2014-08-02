@@ -98,47 +98,42 @@ module opendaylight-match-types {
          }
     }
     
-    grouping ipv4-source {
+    grouping ipv4-source-attributes {
         leaf ipv4-source {
             description "IPv4 source address.";
             type inet:ipv4-prefix;
         }
     }
     
-    grouping ipv4-destination {
+    grouping ipv4-destination-attributes {
         leaf ipv4-destination {
             description "IPv4 destination address.";
             type inet:ipv4-prefix;
         }
     }
 
-    grouping "ipv4-match-fields" {
-        uses ipv4-source;
-        uses ipv4-destination;
-    }
-
-    grouping ipv6-source {
+    grouping ipv6-source-attributes {
         leaf ipv6-source {
             description "IPv6 source address.";
             type inet:ipv6-prefix;
         }
     }
     
-    grouping ipv6-destination {
+    grouping ipv6-destination-attributes {
         leaf ipv6-destination {
             description "IPv6 destination address.";
             type inet:ipv6-prefix;
         }
     }
     
-    grouping ipv6-nd-target {
+    grouping ipv6-nd-target-attributes {
         leaf ipv6-nd-target {
             description "IPv6 target address for neighbour discovery message";
             type inet:ipv6-address;
         }
     }
     
-    grouping ipv6-label {
+    grouping ipv6-label-attributes {
         leaf ipv6-flabel {
             type inet:ipv6-flow-label;
         }
@@ -148,21 +143,21 @@ module opendaylight-match-types {
         }
     }
     
-    grouping ipv6-nd-sll {
+    grouping ipv6-nd-sll-attributes {
         leaf ipv6-nd-sll {
             description "Link layer source address for neighbour discovery message";
             type yang:mac-address;
         }
     }
     
-    grouping ipv6-nd-tll {
+    grouping ipv6-nd-tll-attributes {
         leaf ipv6-nd-tll {
             description "Link layer target address for neighbour discovery message";
             type yang:mac-address;
         }
     }
     
-    grouping ipv6-ext-header {
+    grouping ipv6-ext-header-attributes {
         container "ipv6-ext-header" {
             leaf ipv6-exthdr {
                 description "IPv6 Extension Header field";
@@ -175,21 +170,6 @@ module opendaylight-match-types {
                 }
             }
         }
-    }
-    grouping "ipv6-match-fields" {
-        uses ipv6-source;
-
-        uses ipv6-destination;
-
-        uses ipv6-nd-target;
-
-        uses ipv6-label;
-
-        uses ipv6-nd-sll;
-
-        uses ipv6-nd-tll;
-
-        uses ipv6-ext-header;
     }
 
     grouping udp-source-port {
@@ -334,54 +314,36 @@ module opendaylight-match-types {
         uses icmpv6-code;
     }
     
-    grouping arp-op {
+    grouping arp-op-attributes {
         leaf arp-op {
             type uint16; // TODO make semantic
         }
     }
 
-    grouping arp-source-transport-address {
+    grouping arp-source-transport-address-attributes {
         leaf arp-source-transport-address {
             description "ARP source IPv4 address.";
             type inet:ipv4-prefix;
         }
     }
     
-    grouping arp-target-transport-address {
+    grouping arp-target-transport-address-attributes {
         leaf arp-target-transport-address {
             description "ARP target IPv4 address.";
             type inet:ipv4-prefix;
         }
     }
     
-    grouping arp-source-hardware-address {
-        container arp-source-hardware-address {
-            description "ARP source hardware address.";
-            presence "Match field is active and set";
-            uses mac-address-filter;
-        }
+    grouping arp-source-hardware-address-attributes {
+        description "ARP source hardware address.";
+        uses mac-address-filter;
     }
     
-    grouping arp-target-hardware-address {
-        container arp-target-hardware-address {
-            description "ARP target hardware address.";
-            presence "Match field is active and set";
-            uses mac-address-filter;
-        }
+    grouping arp-target-hardware-address-attributes {
+        description "ARP target hardware address.";
+        uses mac-address-filter;
     }
     
-    grouping "arp-match-fields" {
-        uses arp-op;
-
-        uses arp-source-transport-address;
-
-        uses arp-target-transport-address;
-        
-        uses arp-source-hardware-address;
-        
-        uses arp-target-hardware-address;
-    }
-
     grouping tcp-flag {
         leaf tcp-flag {
             type uint16;  // TODO For the love of God can we make this semantic
@@ -392,23 +354,18 @@ module opendaylight-match-types {
         uses tcp-flag;
     }
 
-    grouping tunnel-ipv4-source {
+    grouping tunnel-ipv4-source-attributes {
         leaf tunnel-ipv4-source {
             description "IPv4 source tunnel endpoint address.";
             type inet:ipv4-prefix;
         }
     }
     
-    grouping tunnel-ipv4-destination {
+    grouping tunnel-ipv4-destination-attributes {
         leaf tunnel-ipv4-destination {
             description "IPv4 destination tunnel endpoint address.";
             type inet:ipv4-prefix;
         }
-    }
-    
-    grouping "tunnel-ipv4-match-fields" {
-        uses tunnel-ipv4-source;
-        uses tunnel-ipv4-destination;
     }
     
     grouping in-port {
@@ -517,22 +474,102 @@ module opendaylight-match-types {
                 }
             }
             
-            case layer-3-match-case {
-                choice layer-3-match {
-                    case "ipv4-match" {
-                        uses "ipv4-match-fields";
-                    }
-                    case "ipv6-match" {
-                        uses "ipv6-match-fields";
-                    }
-                    case "arp-match" {
-                        uses "arp-match-fields";
-                    }
-                    case "tunnel-ipv4-match" {
-                        uses "tunnel-ipv4-match-fields";
-                    }
+            case ipv4-source-case {
+                container ipv4-source {
+                    uses ipv4-source-attributes;
                 }
             }
+            
+            case ipv4-destination-case {
+                container ipv4-destination {
+                    uses ipv4-destination-attributes;
+                }
+            }
+            
+            case ipv6-source-case {
+                container ipv6-source {
+                    uses ipv6-source-attributes;
+                }
+            }
+            
+            case ipv6-destination-case {
+                container ipv6-destination {
+                    uses ipv6-destination-attributes;
+                }
+            }
+            
+            case ipv6-nd-target-case {
+                container ipv6-nd-target {
+                    uses ipv6-nd-target-attributes;
+                }
+            }
+            
+            case ipv6-label-case {
+                container ipv6-label {
+                    uses ipv6-label-attributes;
+                }
+            }
+            
+            case ipv6-nd-sll-case {
+                container ipv6-nd-sll {
+                    uses ipv6-nd-sll-attributes;
+                }
+            }
+            
+            case ipv6-nd-tll-case {
+                container ipv6-nd-tll {
+                    uses ipv6-nd-tll-attributes;
+                }
+            }
+            
+            case ipv6-ext-header-case {
+                container ipv6-ext-header {
+                    uses ipv6-ext-header-attributes;
+                }
+            }
+            
+            case arp-op-case {
+                container arp-op {
+                    uses arp-op-attributes;
+                }
+            }
+            
+            case arp-source-transport-address-case {
+                container arp-source-transport-address {
+                    uses arp-source-transport-address-attributes;
+                }
+            }
+            
+            case arp-target-transport-address-case {
+                container arp-target-transport-address {
+                    uses arp-target-transport-address-attributes;
+                }
+            }
+            
+            case arp-source-hardware-address-case {
+                container arp-source-hardware-address {
+                    uses arp-source-hardware-address-attributes;
+                }
+            }
+            
+            case arp-target-hardware-address-case {
+                container arp-target-hardware-address {
+                    uses arp-target-hardware-address-attributes;
+                }
+            }
+            
+            case tunnel-ipv4-source-case {
+                container tunnel-ipv4-source {
+                    uses tunnel-ipv4-source-attributes;
+                }
+            }
+            
+            case tunnel-ipv4-destination-case {
+                container tunnel-ipv4-destination {
+                    uses tunnel-ipv4-destination-attributes;
+                }
+            }
+            
             case layer-4-match-case {
                 choice layer-4-match {
                     case "udp-match" {
