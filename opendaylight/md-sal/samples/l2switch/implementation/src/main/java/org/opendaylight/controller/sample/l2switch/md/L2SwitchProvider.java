@@ -19,6 +19,8 @@ import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
@@ -60,7 +62,8 @@ public class L2SwitchProvider extends AbstractBindingAwareConsumer
     packetHandler.setPacketProcessingService(packetProcessingService);
     packetHandler.setInventoryService(new InventoryService(dataService));
 
-    this.listenerRegistration = notificationService.registerNotificationListener(packetHandler);
+    this.listenerRegistration = notificationService.registerNotificationListener(packetHandler,
+          new BroadcastClassRoutingPolicy(), new AcceptAllNotificationListenerFilter());
     this.topologyLinkDataChangeHandler = new TopologyLinkDataChangeHandler(dataService, networkGraphService);
     topologyLinkDataChangeHandler.registerAsDataChangeListener();
   }

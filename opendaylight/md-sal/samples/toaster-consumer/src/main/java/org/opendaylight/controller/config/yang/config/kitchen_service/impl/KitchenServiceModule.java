@@ -11,6 +11,8 @@ package org.opendaylight.controller.config.yang.config.kitchen_service.impl;
 
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.impl.KitchenServiceImpl;
@@ -51,7 +53,8 @@ public final class KitchenServiceModule extends AbstractKitchenServiceModule {
         final KitchenServiceImpl kitchenService = new KitchenServiceImpl(toasterService);
 
         final ListenerRegistration<NotificationListener> toasterListenerReg =
-                getNotificationServiceDependency().registerNotificationListener( kitchenService );
+                getNotificationServiceDependency().registerNotificationListener( kitchenService,
+                new BroadcastClassRoutingPolicy(), new AcceptAllNotificationListenerFilter() );
 
         final KitchenServiceRuntimeRegistration runtimeReg =
                 getRootRuntimeBeanRegistratorWrapper().register( kitchenService );

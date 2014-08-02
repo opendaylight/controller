@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.controller.sal.binding.api.ClassRoutingPolicy;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.controller.sal.binding.api.NotificationListenerFilter;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.restconf.broker.listeners.RemoteNotificationListener;
 import org.opendaylight.controller.sal.restconf.broker.tools.RemoteStreamTools;
@@ -33,7 +35,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(Class<T> notificationType, NotificationListener<T> listener) {
+    public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
+                Class<T> notificationType, NotificationListener<T> listener,
+                ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter) {
         //TODO implementation using sal-remote
         List<QName> notifications = new ArrayList<QName>();
         notifications.add(new QName(notificationType.toString()));
@@ -53,7 +57,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
+            org.opendaylight.yangtools.yang.binding.NotificationListener listener,
+            ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter) {
         //TODO implementation using sal-remote
         String notificationStreamName = RemoteStreamTools.createNotificationStream(salRemoteService, null);
         final Map<String,EventStreamInfo> desiredEventStream = RemoteStreamTools.createEventStream(restconfClientContext, notificationStreamName);

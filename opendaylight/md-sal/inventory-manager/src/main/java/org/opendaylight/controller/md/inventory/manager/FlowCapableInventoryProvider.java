@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
@@ -40,7 +42,8 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
 
     void start() {
         final NodeChangeCommiter changeCommiter = new NodeChangeCommiter(FlowCapableInventoryProvider.this);
-        this.listenerRegistration = this.notificationService.registerNotificationListener(changeCommiter);
+        this.listenerRegistration = this.notificationService.registerNotificationListener(changeCommiter,
+                new BroadcastClassRoutingPolicy(), new AcceptAllNotificationListenerFilter());
 
         thread = new Thread(this);
         thread.setDaemon(true);

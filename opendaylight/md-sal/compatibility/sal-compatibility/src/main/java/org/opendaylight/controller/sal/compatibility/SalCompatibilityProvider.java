@@ -16,6 +16,8 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.controller.sal.compatibility.adsal.DataPacketServiceAdapter;
 import org.opendaylight.controller.sal.compatibility.topology.TopologyAdapter;
 import org.opendaylight.controller.sal.compatibility.topology.TopologyProvider;
@@ -59,7 +61,8 @@ class SalCompatibilityProvider implements BindingAwareProvider {
         flow.setDelegate(session.getRpcService(SalFlowService.class));
         flow.setDataBrokerService(session.getSALService(DataBrokerService.class));
         // FIXME: remember registration for clean shutdown
-        subscribe.registerNotificationListener(flow);
+        subscribe.registerNotificationListener(flow, new BroadcastClassRoutingPolicy(),
+                new AcceptAllNotificationListenerFilter());
 
         final InventoryAndReadAdapter inv = activator.getInventory();
         inv.setDataService(session.getSALService(DataBrokerService.class));
@@ -69,7 +72,8 @@ class SalCompatibilityProvider implements BindingAwareProvider {
         inv.setTopologyDiscovery(session.getRpcService(FlowTopologyDiscoveryService.class));
         inv.setDataProviderService(session.getSALService(DataProviderService.class));
         // FIXME: remember registration for clean shutdown
-        subscribe.registerNotificationListener(inv);
+        subscribe.registerNotificationListener(inv, new BroadcastClassRoutingPolicy(),
+                new AcceptAllNotificationListenerFilter());
 
         final DataPacketServiceAdapter dps = activator.getDataPacketService();
         dps.setDelegate(session.getRpcService(PacketProcessingService.class));
@@ -83,6 +87,7 @@ class SalCompatibilityProvider implements BindingAwareProvider {
         inv.startAdapter();
         tpp.startAdapter();
 
-        subscribe.registerNotificationListener(activator.getDataPacket());
+        subscribe.registerNotificationListener(activator.getDataPacket(), new BroadcastClassRoutingPolicy(),
+                new AcceptAllNotificationListenerFilter());
     }
 }

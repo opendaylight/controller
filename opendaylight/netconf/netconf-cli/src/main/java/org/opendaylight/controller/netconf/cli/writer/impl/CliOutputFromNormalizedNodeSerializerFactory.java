@@ -102,7 +102,6 @@ public final class CliOutputFromNormalizedNodeSerializerFactory implements FromN
         return mapNodeSerializer;
     }
 
-    @Override
     public FromNormalizedNodeSerializer<String, AnyXmlNode, AnyXmlSchemaNode> getAnyXmlNodeSerializer() {
         throw new UnsupportedOperationException();
     }

@@ -14,6 +14,8 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -50,7 +52,8 @@ public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider im
 
         final OperationProcessor processor = new OperationProcessor(dataService);
         final FlowCapableTopologyExporter listener = new FlowCapableTopologyExporter(processor, path);
-        this.listenerRegistration = notificationService.registerNotificationListener(listener);
+        this.listenerRegistration = notificationService.registerNotificationListener(listener,
+                new BroadcastClassRoutingPolicy(), new AcceptAllNotificationListenerFilter());
 
         final DataModificationTransaction tx = dataService.beginTransaction();
         tx.putOperationalData(path, new TopologyBuilder().setKey(key).build());

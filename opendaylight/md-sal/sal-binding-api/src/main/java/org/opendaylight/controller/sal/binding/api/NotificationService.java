@@ -98,11 +98,13 @@ public interface NotificationService extends BindingAwareService {
      *
      * @param notificationType the YANG-generated interface of the notification type.
      * @param listener the listener implementation that will receive notifications.
+     * @param routingPolicy bla bla bla
      * @return a {@link ListenerRegistration} instance that should be used to unregister the listener
      *         by invoking the {@link ListenerRegistration#close()} method when no longer needed.
      */
     <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
-            Class<T> notificationType, NotificationListener<T> listener);
+            Class<T> notificationType, NotificationListener<T> listener,
+            ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter);
 
     /**
      * Registers a listener which implements a YANG-generated notification interface derived from
@@ -114,5 +116,6 @@ public interface NotificationService extends BindingAwareService {
      *         by invoking the {@link ListenerRegistration#close()} method when no longer needed.
      */
     ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
-            org.opendaylight.yangtools.yang.binding.NotificationListener listener);
+            org.opendaylight.yangtools.yang.binding.NotificationListener listener,
+            ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter);
 }

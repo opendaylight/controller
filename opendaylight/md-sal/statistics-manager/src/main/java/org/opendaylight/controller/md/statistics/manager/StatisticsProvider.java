@@ -16,6 +16,8 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.sal.binding.impl.AcceptAllNotificationListenerFilter;
+import org.opendaylight.controller.sal.binding.impl.BroadcastClassRoutingPolicy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
@@ -91,7 +93,8 @@ public class StatisticsProvider implements AutoCloseable {
         this.srScheduler.start();
 
         // Start receiving notifications
-        this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter);
+        this.listenerRegistration = nps.registerNotificationListener(this.updateCommiter,
+                new BroadcastClassRoutingPolicy(), new AcceptAllNotificationListenerFilter());
 
         // Register for switch connect/disconnect notifications
         final InstanceIdentifier<FlowCapableNode> fcnId = InstanceIdentifier.builder(Nodes.class)

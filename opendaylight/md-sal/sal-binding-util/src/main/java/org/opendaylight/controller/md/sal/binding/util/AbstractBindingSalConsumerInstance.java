@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.util;
 
+import org.opendaylight.controller.sal.binding.api.ClassRoutingPolicy;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.controller.sal.binding.api.NotificationListenerFilter;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
@@ -72,14 +74,17 @@ public abstract class AbstractBindingSalConsumerInstance<D extends DataBrokerSer
 
     @Override
     public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
-            Class<T> notificationType, NotificationListener<T> listener) {
-        return getNotificationBrokerChecked().registerNotificationListener(notificationType, listener);
+            Class<T> notificationType, NotificationListener<T> listener,
+            ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter) {
+        return getNotificationBrokerChecked().registerNotificationListener(notificationType, listener, routingPolicy,
+                instanceFilter);
     }
 
     @Override
     public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
-            org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        return getNotificationBrokerChecked().registerNotificationListener(listener);
+            org.opendaylight.yangtools.yang.binding.NotificationListener listener,
+            ClassRoutingPolicy routingPolicy, NotificationListenerFilter instanceFilter) {
+        return getNotificationBrokerChecked().registerNotificationListener(listener, routingPolicy, instanceFilter);
     }
 
     @Override

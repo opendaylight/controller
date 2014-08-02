@@ -13,7 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import org.opendaylight.controller.sal.binding.api.ClassRoutingPolicy;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.controller.sal.binding.api.NotificationListenerFilter;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
@@ -107,7 +109,11 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
     }
 
     @Override
-    public <T extends Notification> NotificationListenerRegistration<T> registerNotificationListener(final Class<T> notificationType, final NotificationListener<T> listener) {
+    public <T extends Notification> NotificationListenerRegistration<T> registerNotificationListener(
+                final Class<T> notificationType,
+                final NotificationListener<T> listener,
+                final ClassRoutingPolicy routingPolicy,
+                final NotificationListenerFilter instanceFilter) {
         final NotificationListenerRegistration<T> reg = new AbstractNotificationListenerRegistration<T>(notificationType, listener) {
             @Override
             protected void removeRegistration() {
@@ -120,7 +126,10 @@ public class NotificationBrokerImpl implements NotificationProviderService, Auto
     }
 
     @Override
-    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(final org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
+                final org.opendaylight.yangtools.yang.binding.NotificationListener listener,
+                final ClassRoutingPolicy routingPolicy,
+                final NotificationListenerFilter instanceFilter) {
         final NotificationInvoker invoker = SingletonHolder.INVOKER_FACTORY.invokerFor(listener);
         final Set<Class<? extends Notification>> types = invoker.getSupportedNotifications();
         final NotificationListenerRegistration<?>[] regs = new NotificationListenerRegistration<?>[types.size()];
