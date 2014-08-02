@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d4aeb92d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-02T03:59:40Z",
+      "side": 1,
+      "message": "Couple of things (1) Remove the hard coded version (2) Add the artifact to commons",
+      "revId": "534e28b8ba67536c108bd3b52e95dee8dedf851e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
