@@ -108,14 +108,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetSourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetTypeCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpDscpCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpProtocolCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.destination._case.EthernetDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.source._case.EthernetSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.dscp._case.IpDscp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.protocol._case.IpProtocol;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4Match;
@@ -419,8 +421,10 @@ public class ToSalConversionsUtils {
                     fillFrom(target, ((Layer3MatchCase)match).getLayer3Match());
                 } else if (match instanceof Layer4MatchCase) {
                     fillFrom(target, ((Layer4MatchCase)match).getLayer4Match());
-                } else if (match instanceof IpMatchCase) {
-                    fillFrom(target, ((IpMatchCase)match).getIpMatch());
+                } else if (match instanceof IpProtocolCase) {
+                    fillFrom(target, ((IpProtocolCase)match).getIpProtocol());
+                } else if (match instanceof IpDscpCase) {
+                    fillFrom(target, ((IpDscpCase)match).getIpDscp());
                 } else if (match instanceof InPortCase) {
                     fillFrom(target, ((InPortCase)match).getInPort().getInPort());
                 }
@@ -474,19 +478,23 @@ public class ToSalConversionsUtils {
         }
     }
 
-    private static void fillFrom(Match target, IpMatch ipMatch) {
-        if (ipMatch != null) {
-            Short ipProtocol = ipMatch.getIpProtocol();
-
-            if (ipProtocol != null && target.getField(NW_PROTO) == null) {
-                target.setField(NW_PROTO, ipProtocol.byteValue());
-            }
-            Dscp dscp = ipMatch.getIpDscp();
+    private static void fillFrom(Match target, IpDscp ipDscp) {
+        if(ipDscp != null) {
+            Dscp dscp = ipDscp.getIpDscp();
             if (dscp != null) {
                 Short dscpValue = dscp.getValue();
                 if (dscpValue != null) {
                     target.setField(NW_TOS, dscpValue.byteValue());
                 }
+            }
+        }
+    }
+
+    private static void fillFrom(Match target, IpProtocol ipProtocol) {
+        if(ipProtocol != null) {
+            Short ipProto = ipProtocol.getIpProtocol();
+            if (ipProtocol != null && target.getField(NW_PROTO) == null) {
+                target.setField(NW_PROTO, ipProto.byteValue());
             }
         }
     }

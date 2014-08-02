@@ -46,8 +46,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetSourceCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetTypeCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpDscpCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpProtocolCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCaseBuilder;
@@ -57,7 +57,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.source._case.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetTypeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.in.port._case.InPortBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.dscp._case.IpDscpBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.protocol._case.IpProtocolBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4MatchBuilder;
@@ -101,12 +102,9 @@ public class FromSalConversionsUtils {
             addMatch(matches,ethernetSource(sourceMatch));
             addMatch(matches,ethernetDestination(sourceMatch));
             addMatch(matches,ethernetType(sourceMatch));
+            addMatch(matches,ipProto(sourceMatch));
+            addMatch(matches,ipDscp(sourceMatch));
 
-            org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder ip = ipMatch(sourceMatch);
-            if(ip != null) {
-                ip.setOrder(i++);
-                matches.add(ip.build());
-            }
             org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder vlan = vlanMatch(sourceMatch);
             if(vlan != null) {
                 vlan.setOrder(i++);
@@ -265,29 +263,32 @@ public class FromSalConversionsUtils {
         }
         return null;
     }
-
-    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder ipMatch(final Match sourceMatch) {
-        IpMatchBuilder targetIpMatchBuild = new IpMatchBuilder();
+    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder ipDscp(
+            Match sourceMatch) {
         MatchField networkTos = sourceMatch.getField(MatchType.NW_TOS);
+        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = null;
         if (networkTos != null && networkTos.getValue() != null) {
             Dscp dscp = new Dscp(
                     (short) (NetUtils.getUnsignedByte((Byte) networkTos
                             .getValue())));
-            targetIpMatchBuild.setIpDscp(dscp);
+            mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
+            IpDscpBuilder ipDscp = new IpDscpBuilder().setIpDscp(dscp);
+            mb.setMatch(new IpDscpCaseBuilder().setIpDscp(ipDscp.build()).build());
         }
+        return mb;
+    }
 
+    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder ipProto(
+            Match sourceMatch) {
         MatchField protocol = sourceMatch.getField(MatchType.NW_PROTO);
+        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = null;
         if (protocol != null && protocol.getValue() != null) {
-            targetIpMatchBuild.setIpProtocol((short) ((byte) protocol
+            mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
+            IpProtocolBuilder ipProto = new IpProtocolBuilder().setIpProtocol((short) ((byte) protocol
                     .getValue()));
+            mb.setMatch(new IpProtocolCaseBuilder().setIpProtocol(ipProto.build()).build());
         }
-        if((networkTos != null && networkTos.getValue() != null) || (protocol != null && protocol.getValue() != null)) {
-            IpMatchCase ip = new IpMatchCaseBuilder().setIpMatch(targetIpMatchBuild.build()).build();
-            org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
-            mb.setMatch(ip);
-            return mb;
-        }
-        return null;
+        return mb;
     }
 
     private static void addMatch(List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> matches,org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder match) {

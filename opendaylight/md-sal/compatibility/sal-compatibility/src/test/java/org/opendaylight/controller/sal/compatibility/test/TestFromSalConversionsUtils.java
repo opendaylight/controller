@@ -75,7 +75,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetSourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetTypeCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpDscpCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpProtocolCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCase;
@@ -83,7 +84,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.source._case.EthernetSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.in.port._case.InPort;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.dscp._case.IpDscp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.protocol._case.IpProtocol;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4Match;
@@ -142,7 +144,8 @@ public class TestFromSalConversionsUtils {
         Layer3Match l3 = null;
         Layer4Match l4 = null;
         VlanMatch vlan = null;
-        IpMatch proto = null;
+        IpProtocol proto = null;
+        IpDscp dscp = null;
         InPort inPort = null;
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match> matches = m.getMatch();
         for(org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.Match match : matches) {
@@ -161,9 +164,12 @@ public class TestFromSalConversionsUtils {
             } else if (match.getMatch() instanceof Layer3MatchCase) {
                 assertEquals("More than one Layer3Match Seen",null, l3);
                 l3 = ((Layer3MatchCase) match.getMatch()).getLayer3Match();
-            } else if (match.getMatch() instanceof IpMatchCase) {
+            } else if (match.getMatch() instanceof IpProtocolCase) {
                 assertEquals("More than one IpMatch Seen",null, proto);
-                proto = ((IpMatchCase) match.getMatch()).getIpMatch();
+                proto = ((IpProtocolCase) match.getMatch()).getIpProtocol();
+            } else if (match.getMatch() instanceof IpDscpCase) {
+                assertEquals("More than one IpMatch Seen",null, proto);
+                dscp = ((IpDscpCase) match.getMatch()).getIpDscp();
             } else if (match.getMatch() instanceof Layer4MatchCase) {
                 assertEquals("More than one IpMatch Seen",null, l4);
                 l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
@@ -223,14 +229,14 @@ public class TestFromSalConversionsUtils {
             assertEquals("Vlan ID is wrong.", (Integer) 0xfff, vlan.getVlanId().getVlanId().getValue());
             assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) vlan.getVlanPcp()
                     .getValue());
-            assertEquals("DCSP is wrong.", (short) 0x3f, (short) proto.getIpDscp().getValue());
+            assertEquals("DCSP is wrong.", (short) 0x3f, (short) dscp.getIpDscp().getValue());
             break;
         case untagged:
             assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethSrc.getAddress().getValue());
             assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethDst.getAddress().getValue());
             assertEquals("Vlan ID is present.", Boolean.FALSE, vlan.getVlanId().isVlanIdPresent());
             assertEquals("Vlan ID is wrong.", Integer.valueOf(0), vlan.getVlanId().getVlanId().getValue());
-            assertEquals("DCSP is wrong.", (short) 0x3f, (short) proto.getIpDscp().getValue());
+            assertEquals("DCSP is wrong.", (short) 0x3f, (short) dscp.getIpDscp().getValue());
             break;
         case sctp:
             boolean sctpFound = false;

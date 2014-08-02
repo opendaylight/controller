@@ -70,42 +70,32 @@ module opendaylight-match-types {
         }
     }
 
-    grouping ip-protocol {
+    grouping ip-protocol-attributes {
         leaf ip-protocol {
             description "IP protocol.";
             type uint8;
         }   
     }
     
-    grouping ip-dscp {
+    grouping ip-dscp-attributes {
         leaf ip-dscp {
             description "IP DSCP (6 bits in ToS field).";
             type inet:dscp;
         }
     }
     
-    grouping ip-ecn {
+    grouping ip-ecn-attributes {
         leaf ip-ecn {
             description "IP ECN (2 bits in ToS field).";
             type uint8;
         }
     }
     
-    grouping ip-version {
+    grouping ip-version-attributes {
         leaf ip-version {
             description "IP Proto (IPv4 or IPv6 Protocol Number).";
             type inet:ip-version;
          }
-    }
-    
-    grouping "ip-match-fields" {
-        uses ip-protocol;
-
-        uses ip-dscp;
-
-        uses ip-ecn;
-
-        uses ip-version;
     }
     
     grouping ipv4-source {
@@ -502,10 +492,28 @@ module opendaylight-match-types {
                     uses "vlan-match-fields";
                 }
             }
-            // Do we need this?
-            case ip-match-case {
-                container "ip-match" {
-                    uses "ip-match-fields";
+            
+            case ip-protocol-case {
+                container ip-protocol {
+                    uses ip-protocol-attributes;
+                }
+            }
+            
+            case ip-dscp-case {
+                container ip-dscp {
+                    uses ip-dscp-attributes;
+                }
+            }
+            
+            case ip-ecn-case {
+                container ip-ecn {
+                    uses ip-ecn-attributes;
+                }
+            }
+            
+            case ip-version-case {
+                container ip-version {
+                    uses ip-version-attributes;
                 }
             }
             
