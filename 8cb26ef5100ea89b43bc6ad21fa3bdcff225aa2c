@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_875c811a",
+        "filename": "features/base/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:49:37Z",
+      "side": 1,
+      "message": "Can you please add an explanation on why we need gensen dependency ? \nWe are using jackson-jaxrs-json-provider today as the jaxrs json  provider.",
+      "revId": "8cb26ef5100ea89b43bc6ad21fa3bdcff225aa2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
