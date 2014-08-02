@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_47a2f9fd",
+        "filename": "opendaylight/northbound/featuresservice/src/main/java/org/opendaylight/controller/featuresservice/northbound/FeaturesServiceNorthbound.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:56:51Z",
+      "side": 1,
+      "message": "Will the install/uninstall be allowed without any user auth ?",
+      "revId": "1f02bc8a84f8bb3ad0a8b12d4efccf4660973b6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
