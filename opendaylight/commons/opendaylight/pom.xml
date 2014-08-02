@@ -1275,6 +1275,12 @@
         <artifactId>sal-test-model</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-remoterpc-connector</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+
 
       <!-- SAL Extension bundles -->
       <dependency>
