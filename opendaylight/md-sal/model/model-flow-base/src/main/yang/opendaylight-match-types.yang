@@ -442,11 +442,11 @@ module opendaylight-match-types {
             leaf order {
                 type int32;
             }
-            uses match;
+            uses match-attributes;
         }
     }
     
-    grouping match {
+    grouping match-attributes {
         choice match {
             case in-port-case {
                 container in-port {
