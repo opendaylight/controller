@@ -122,10 +122,19 @@ module flow-node-inventory {
             uses meter:meter;
         }
     }
-    
-    
-    grouping flow-node {
 
+    grouping identifiers {
+        leaf datapath-id {
+            description "Datapath ID of a flow capable node.";
+            type uint64;
+        }
+        leaf ip-address {
+            description "IP address of a flow capable node.";
+            type inet:ip-address;
+        }
+    }
+
+    grouping flow-node {
         leaf manufacturer {
             type string;
         }
@@ -145,6 +154,7 @@ module flow-node-inventory {
         uses tables;
         uses group:groups;
         uses meters;
+        uses identifiers;
         // TODO: ports
         
         container supported-match-types {
@@ -197,7 +207,16 @@ module flow-node-inventory {
             
         }
     }
-    
+
+    rpc get-node-identifiers {
+        input {
+            uses "inv:node-context-ref";
+        }
+        output {
+            uses identifiers;
+        }
+    }
+
     grouping flow-node-connector {
 
         uses port:flow-capable-port;
