@@ -123,17 +123,30 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.source.hardware.address.ArpSourceHardwareAddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.target.hardware.address.ArpTargetHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceHardwareAddressCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceTransportAddressCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetHardwareAddressCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetTransportAddressCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetDestinationCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetSourceCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetTypeCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.InPortCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpDscpCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpProtocolCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer3MatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4DestinationCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.hardware.address._case.ArpTargetHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.hardware.address._case.ArpTargetHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.transport.address._case.ArpTargetTransportAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.transport.address._case.ArpTargetTransportAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.destination._case.EthernetDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.destination._case.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.source._case.EthernetSource;
@@ -145,10 +158,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.dscp._case.IpDscpBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.protocol._case.IpProtocol;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.protocol._case.IpProtocolBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.ArpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv4MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.destination._case.Ipv4Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.destination._case.Ipv4DestinationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4Source;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4SourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6DestinationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6SourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatchBuilder;
@@ -519,12 +536,12 @@ public class TestToSalConversionsUtils {
     private void prepareActionSetNwSrc(List<Action> odActions) {
         // test case for IPv4
         SetNwSrcActionBuilder setNwSrcActionBuilderIpv4 = new SetNwSrcActionBuilder();
-        setNwSrcActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.102"));
+        setNwSrcActionBuilderIpv4.setAddress(prepareIpv4Address("192.168.100.102"));
         odActions.add(new ActionBuilder().setAction(new SetNwSrcActionCaseBuilder().setSetNwSrcAction(setNwSrcActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNwSrcActionBuilder setNwSrcActionBuilderIpv6 = new SetNwSrcActionBuilder();
-        setNwSrcActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7336"));
+        setNwSrcActionBuilderIpv6.setAddress(prepareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7336"));
         odActions.add(new ActionBuilder().setAction(new SetNwSrcActionCaseBuilder().setSetNwSrcAction(setNwSrcActionBuilderIpv6.build()).build()).build());
     }
 
@@ -532,34 +549,34 @@ public class TestToSalConversionsUtils {
         // test case for IPv4
 
         SetNwDstActionBuilder setNwDstActionBuilderIpv4 = new SetNwDstActionBuilder();
-        setNwDstActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.101"));
+        setNwDstActionBuilderIpv4.setAddress(prepareIpv4Address("192.168.100.101"));
         odActions.add(new ActionBuilder().setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNwDstActionBuilder setNwDstActionBuilderIpv6 = new SetNwDstActionBuilder();
-        setNwDstActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7335"));
+        setNwDstActionBuilderIpv6.setAddress(prepareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7335"));
         odActions.add(new ActionBuilder().setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilderIpv6.build()).build()).build());
     }
 
     private void prepareActionNextHop(List<Action> odActions) {
         // test case for IPv4
         SetNextHopActionBuilder setNextHopActionBuilderIpv4 = new SetNextHopActionBuilder();
-        setNextHopActionBuilderIpv4.setAddress(prapareIpv4Address("192.168.100.100"));
+        setNextHopActionBuilderIpv4.setAddress(prepareIpv4Address("192.168.100.100"));
         odActions.add(new ActionBuilder().setAction(new SetNextHopActionCaseBuilder().setSetNextHopAction(setNextHopActionBuilderIpv4.build()).build()).build());
 
         // test case for IPv6
         SetNextHopActionBuilder setNextHopActionBuilderIpv6 = new SetNextHopActionBuilder();
-        setNextHopActionBuilderIpv6.setAddress(prapareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
+        setNextHopActionBuilderIpv6.setAddress(prepareIpv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
         odActions.add(new ActionBuilder().setAction(new SetNextHopActionCaseBuilder().setSetNextHopAction(setNextHopActionBuilderIpv6.build()).build()).build());
     }
 
-    private Address prapareIpv4Address(String ipv4Address) {
+    private Address prepareIpv4Address(String ipv4Address) {
         Ipv4Builder ipv4Builder = new Ipv4Builder();
         ipv4Builder.setIpv4Address(new Ipv4Prefix(ipv4Address));
         return ipv4Builder.build();
     }
 
-    private Address prapareIpv6Address(String ipv6Address) {
+    private Address prepareIpv6Address(String ipv6Address) {
         Ipv6Builder ipv6Builder = new Ipv6Builder();
         ipv6Builder.setIpv6Address(new Ipv6Prefix(ipv6Address));
         return ipv6Builder.build();
@@ -651,18 +668,33 @@ public class TestToSalConversionsUtils {
             break;
         case ipv4:
             addMatch(matches,mb.setMatch(
-                    (new Layer3MatchCaseBuilder())
-                        .setLayer3Match(prepLayer3MatchIpv4()).build()));
+                    (new Ipv4SourceCaseBuilder())
+                        .setIpv4Source(prepareIpv4Source()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new Ipv4DestinationCaseBuilder())
+                        .setIpv4Destination(prepareIpv4Destination()).build()));
             break;
         case ipv6:
             addMatch(matches,mb.setMatch(
-                    (new Layer3MatchCaseBuilder())
-                        .setLayer3Match(prepLayer3MatchIpv6()).build()));
+                    (new Ipv6SourceCaseBuilder())
+                        .setIpv6Source(prepareIpv6Source()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new Ipv6DestinationCaseBuilder())
+                        .setIpv6Destination(prepareIpv6Destination()).build()));
             break;
         case arp:
             addMatch(matches,mb.setMatch(
-                    (new Layer3MatchCaseBuilder())
-                        .setLayer3Match(prepLayer3MatchArp()).build()));
+                    (new ArpSourceTransportAddressCaseBuilder())
+                        .setArpSourceTransportAddress(prepareArpSourceTransportAddress()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new ArpTargetTransportAddressCaseBuilder())
+                        .setArpTargetTransportAddress(prepareArpTargetTransportAddress()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new ArpSourceHardwareAddressCaseBuilder())
+                        .setArpSourceHardwareAddress(prepareArpSourceHardwareAddress()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new ArpTargetHardwareAddressCaseBuilder())
+                        .setArpTargetHardwareAddress(prepareArpTargetHardwareAddress()).build()));
             break;
         case sctp:
             addMatch(matches,mb.setMatch(
@@ -711,33 +743,36 @@ public class TestToSalConversionsUtils {
         return sctpMatchBuilder.build();
     }
 
-    private Layer3Match prepLayer3MatchIpv4() {
-        Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
-        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix("192.168.1.104"));
-        ipv4MatchBuilder.setIpv4Destination(new Ipv4Prefix("192.168.1.105"));
-        return ipv4MatchBuilder.build();
+    private Ipv4Source prepareIpv4Source() {
+        return new Ipv4SourceBuilder().setIpv4Source(new Ipv4Prefix("192.168.1.104")).build();
     }
 
-    private Layer3Match prepLayer3MatchIpv6() {
-        Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
-        ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7334"));
-        ipv6MatchBuilder.setIpv6Destination(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7335"));
-        return ipv6MatchBuilder.build();
+    private Ipv4Destination prepareIpv4Destination() {
+        return new Ipv4DestinationBuilder().setIpv4Destination(new Ipv4Prefix("192.168.1.105")).build();
     }
 
-    private Layer3Match prepLayer3MatchArp() {
-        ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
-        arpMatchBuilder.setArpSourceTransportAddress(new Ipv4Prefix("192.168.1.101"));
-        arpMatchBuilder.setArpTargetTransportAddress(new Ipv4Prefix("192.168.1.102"));
+    private Ipv6Source prepareIpv6Source() {
+        return new Ipv6SourceBuilder().setIpv6Source(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7334")).build();
+    }
 
-        ArpSourceHardwareAddressBuilder arpSourAddressBuild = new ArpSourceHardwareAddressBuilder();
-        arpSourAddressBuild.setAddress(new MacAddress("22:44:66:88:AA:CC"));
-        arpMatchBuilder.setArpSourceHardwareAddress(arpSourAddressBuild.build());
+    private Ipv6Destination prepareIpv6Destination() {
+        return new Ipv6DestinationBuilder().setIpv6Destination(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7335")).build();
+    }
 
-        ArpTargetHardwareAddressBuilder arpTarAddressBuild = new ArpTargetHardwareAddressBuilder();
-        arpTarAddressBuild.setAddress(new MacAddress("11:33:55:77:BB:DD"));
-        arpMatchBuilder.setArpTargetHardwareAddress(arpTarAddressBuild.build());
-        return arpMatchBuilder.build();
+    private ArpSourceTransportAddress prepareArpSourceTransportAddress() {
+        return new ArpSourceTransportAddressBuilder().setArpSourceTransportAddress(new Ipv4Prefix("192.168.1.101")).build();
+    }
+
+    private ArpTargetTransportAddress prepareArpTargetTransportAddress() {
+        return new ArpTargetTransportAddressBuilder().setArpTargetTransportAddress(new Ipv4Prefix("192.168.1.102")).build();
+    }
+
+    private ArpSourceHardwareAddress prepareArpSourceHardwareAddress() {
+        return new ArpSourceHardwareAddressBuilder().setAddress(new MacAddress("22:44:66:88:AA:CC")).build();
+    }
+
+    private ArpTargetHardwareAddress prepareArpTargetHardwareAddress() {
+        return new ArpTargetHardwareAddressBuilder().setAddress(new MacAddress("11:33:55:77:BB:DD")).build();
     }
 
     private VlanMatch prepVlanMatch() {

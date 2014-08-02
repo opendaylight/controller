@@ -103,26 +103,35 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MatchAttributes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.source.hardware.address.ArpSourceHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.target.hardware.address.ArpTargetHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceHardwareAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceTransportAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetHardwareAddressCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpTargetTransportAddressCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetDestinationCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetSourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.EthernetTypeCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.InPortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpDscpCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.IpProtocolCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer3MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4DestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.hardware.address._case.ArpTargetHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.transport.address._case.ArpTargetTransportAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.destination._case.EthernetDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.source._case.EthernetSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ethernet.type._case.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.dscp._case.IpDscp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ip.protocol._case.IpProtocol;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._3.match._case.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.destination._case.Ipv4Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4Source;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6Destination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatch;
@@ -418,8 +427,22 @@ public class ToSalConversionsUtils {
                     fillFrom(target, ((EthernetDestinationCase)match).getEthernetDestination());
                 } else if (match instanceof EthernetTypeCase) {
                     fillFrom(target, ((EthernetTypeCase)match).getEthernetType());
-                } else if (match instanceof Layer3MatchCase) {
-                    fillFrom(target, ((Layer3MatchCase)match).getLayer3Match());
+                } else if (match instanceof Ipv4SourceCase) {
+                    fillFrom(target, ((Ipv4SourceCase)match).getIpv4Source());
+                } else if (match instanceof Ipv4DestinationCase) {
+                    fillFrom(target, ((Ipv4DestinationCase)match).getIpv4Destination());
+                } else if (match instanceof Ipv6SourceCase) {
+                    fillFrom(target, ((Ipv6SourceCase)match).getIpv6Source());
+                } else if (match instanceof Ipv6DestinationCase) {
+                    fillFrom(target, ((Ipv6DestinationCase)match).getIpv6Destination());
+                } else if (match instanceof ArpSourceTransportAddressCase) {
+                    fillFrom(target, ((ArpSourceTransportAddressCase)match).getArpSourceTransportAddress());
+                } else if (match instanceof ArpTargetTransportAddressCase) {
+                    fillFrom(target, ((ArpTargetTransportAddressCase)match).getArpTargetTransportAddress());
+                } else if (match instanceof ArpSourceHardwareAddressCase) {
+                    fillFrom(target, ((ArpSourceHardwareAddressCase)match).getArpSourceHardwareAddress());
+                } else if (match instanceof ArpTargetHardwareAddressCase) {
+                    fillFrom(target, ((ArpTargetHardwareAddressCase)match).getArpTargetHardwareAddress());
                 } else if (match instanceof Layer4MatchCase) {
                     fillFrom(target, ((Layer4MatchCase)match).getLayer4Match());
                 } else if (match instanceof IpProtocolCase) {
@@ -573,57 +596,59 @@ public class ToSalConversionsUtils {
 
     }
 
-    private static void fillFrom(Match target, Layer3Match source) {
-        if (source == null)
-            return;
-        if (source instanceof Ipv4Match) {
-            fillFromIpv4(target, (Ipv4Match) source);
-        } else if (source instanceof Ipv6Match) {
-            fillFromIpv6(target, (Ipv6Match) source);
-        } else if (source instanceof ArpMatch) {
-            fillFromArp(target, (ArpMatch) source);
+    private static void fillFrom(Match target, ArpSourceTransportAddress source) {
+        Ipv4Prefix address = source.getArpSourceTransportAddress();
+        if(address != null) {
+            target.setField(NW_SRC, inetAddressFrom(address), null);
+            target.setField(DL_TYPE, new Short(ETHERNET_ARP));
         }
     }
 
-    private static void fillFromArp(Match target, ArpMatch source) {
-        Ipv4Prefix sourceAddress = source.getArpSourceTransportAddress();
-        if (sourceAddress != null) {
-            target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
-        }
+    private static void fillFrom(Match target, ArpTargetTransportAddress source) {
         Ipv4Prefix destAddress = source.getArpTargetTransportAddress();
-        if (destAddress != null) {
+        if(destAddress != null) {
             target.setField(NW_DST, inetAddressFrom(destAddress), null);
+            target.setField(DL_TYPE, new Short(ETHERNET_ARP));
         }
-        ArpSourceHardwareAddress sourceHwAddress = source.getArpSourceHardwareAddress();
-        if (sourceHwAddress != null) {
-            target.setField(DL_SRC, bytesFrom(sourceHwAddress.getAddress()));
-        }
-        ArpTargetHardwareAddress targetHwAddress = source.getArpTargetHardwareAddress();
-        if (targetHwAddress != null) {
-            target.setField(DL_DST, bytesFrom(targetHwAddress.getAddress()));
-        }
-
-        target.setField(DL_TYPE, new Short(ETHERNET_ARP));
-
     }
 
-    private static void fillFromIpv6(Match target, Ipv6Match source) {
+    private static void fillFrom(Match target, ArpSourceHardwareAddress source) {
+        if(source != null) {
+            target.setField(DL_SRC, bytesFrom(source.getAddress()));
+            target.setField(DL_TYPE, new Short(ETHERNET_ARP));
+        }
+    }
+
+    private static void fillFrom(Match target, ArpTargetHardwareAddress source) {
+        if(source != null) {
+            target.setField(DL_DST, bytesFrom(source.getAddress()));
+            target.setField(DL_TYPE, new Short(ETHERNET_ARP));
+        }
+    }
+
+    private static void fillFrom(Match target, Ipv6Source source) {
         Ipv6Prefix sourceAddress = source.getIpv6Source();
         if (sourceAddress != null) {
             target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
-        Ipv6Prefix destAddress = source.getIpv6Destination();
+    }
+
+    private static void fillFrom(Match target, Ipv6Destination dest) {
+        Ipv6Prefix destAddress = dest.getIpv6Destination();
         if (destAddress != null) {
             target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
     }
 
-    private static void fillFromIpv4(Match target, Ipv4Match source) {
+    private static void fillFrom(Match target, Ipv4Source source) {
         Ipv4Prefix sourceAddress = source.getIpv4Source();
         if (sourceAddress != null) {
             target.setField(NW_SRC, inetAddressFrom(sourceAddress), null);
         }
-        Ipv4Prefix destAddress = source.getIpv4Destination();
+    }
+
+    private static void fillFrom(Match target, Ipv4Destination dest) {
+        Ipv4Prefix destAddress = dest.getIpv4Destination();
         if (destAddress != null) {
             target.setField(NW_DST, inetAddressFrom(destAddress), null);
         }
