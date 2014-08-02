@@ -129,7 +129,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetSourceCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.EthernetTypeCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.InPortCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpDscpCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.IpProtocolCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer3MatchCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.Layer4MatchCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.VlanMatchCaseBuilder;
@@ -140,8 +141,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ethernet.type._case.EthernetTypeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.in.port._case.InPortBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.match._case.IpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.dscp._case.IpDscp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.dscp._case.IpDscpBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.protocol._case.IpProtocol;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.ip.protocol._case.IpProtocolBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.match.layer._3.match._case.layer._3.match.Ipv4MatchBuilder;
@@ -620,11 +623,11 @@ public class TestToSalConversionsUtils {
             addMatch(matches,mb.setMatch(
                     (new EthernetTypeCaseBuilder().setEthernetType(prepEthType()).build())));
             addMatch(matches,mb.setMatch(
-                    (new IpMatchCaseBuilder())
-                        .setIpMatch(prepIpMatch()).build()));
+                    (new IpProtocolCaseBuilder())
+                        .setIpProtocol(prepIpProtocolMatch()).build()));
             addMatch(matches,mb.setMatch(
-                    (new IpMatchCaseBuilder())
-                    .setIpMatch(prepIpMatch()).build()));
+                    (new IpDscpCaseBuilder())
+                        .setIpDscp(prepIpDscpMatch()).build()));
             addMatch(matches,mb.setMatch(
                     (new VlanMatchCaseBuilder())
                         .setVlanMatch(prepVlanMatch()).build()));
@@ -637,8 +640,11 @@ public class TestToSalConversionsUtils {
             addMatch(matches,mb.setMatch(
                     (new EthernetTypeCaseBuilder().setEthernetType(prepEthType()).build())));
             addMatch(matches,mb.setMatch(
-                    (new IpMatchCaseBuilder())
-                    .setIpMatch(prepIpMatch()).build()));
+                    (new IpProtocolCaseBuilder())
+                        .setIpProtocol(prepIpProtocolMatch()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new IpDscpCaseBuilder())
+                        .setIpDscp(prepIpDscpMatch()).build()));
             addMatch(matches,mb.setMatch(
                     (new VlanMatchCaseBuilder())
                     .setVlanMatch(prepVlanNoneMatch()).build()));
@@ -754,11 +760,12 @@ public class TestToSalConversionsUtils {
         return vlanMatchBuilder.build();
     }
 
-    private IpMatch prepIpMatch() {
-        IpMatchBuilder ipMatchBuilder = new IpMatchBuilder();
-        ipMatchBuilder.setIpDscp(new Dscp((short) 0x33));
-        ipMatchBuilder.setIpProtocol((short) 0x3f);
-        return ipMatchBuilder.build();
+    private IpDscp prepIpDscpMatch() {
+        return new IpDscpBuilder().setIpDscp(new Dscp((short) 0x33)).build();
+    }
+
+    private IpProtocol prepIpProtocolMatch() {
+        return new IpProtocolBuilder().setIpProtocol((short) 0x3f).build();
     }
 
     private EthernetType prepEthType() {
