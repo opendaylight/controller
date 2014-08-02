@@ -34,6 +34,7 @@
         <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation/${forwardingrulesmanager.implementation.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/topologymanager/${topologymanager.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/topologymanager.shell/${topologymanager.shell.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/networkconfig.neutron/${networkconfig.neutron.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/networkconfig.neutron.implementation/${networkconfig.neutron.implementation.version}</bundle>
