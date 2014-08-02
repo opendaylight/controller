@@ -9,25 +9,39 @@
 package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorSystem;
-import akka.actor.Props;
-import com.google.common.base.Function;
+import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.ConfigFactory;
+import org.osgi.framework.BundleContext;
 
-import javax.annotation.Nullable;
 
 public class ActorSystemFactory {
-    private static final ActorSystem actorSystem = (new Function<Void, ActorSystem>(){
+ private static volatile ActorSystem actorSystem = null;
 
-        @Nullable @Override public ActorSystem apply(@Nullable Void aVoid) {
-                ActorSystem system =
-                    ActorSystem.create("opendaylight-rpc", ConfigFactory
-                        .load().getConfig("odl-cluster"));
-                system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-                return system;
+  public static final ActorSystem getInstance(){
+     return actorSystem;
+  }
+
+  /**
+   * This method should be called only once during initialization
+   *
+   * @param bundleContext
+   */
+  public static final void createInstance(final BundleContext bundleContext) {
+
+    if(actorSystem == null) {
+      // Create an OSGi bundle classloader for actor system
+      BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
+          Thread.currentThread().getContextClassLoader());
+      synchronized (ActorSystemFactory.class) {
+        // Double check
+        if (actorSystem == null) {
+          ActorSystem system = ActorSystem.create("opendaylight-rpc",
+              ConfigFactory.load().getConfig("odl-cluster"), classLoader);
+          actorSystem = system;
         }
-    }).apply(null);
-
-    public static final ActorSystem getInstance(){
-        return actorSystem;
+      }
+    } else {
+      throw new IllegalStateException("Actor system should be created only once. Use getInstance method to access existing actor system");
     }
+  }
 }
