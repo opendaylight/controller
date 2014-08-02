@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c73fe9b2",
+        "filename": "opendaylight/usermanager/shell/src/main/java/org/opendaylight/controller/usermanager/shell/AddAAAServer.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:08:36Z",
+      "side": 1,
+      "message": "I think required\u003dtrue is valid here and for the other 2 arguments as well.\nAlso make the name and description appropriate to the actual parameters, in this case, \"server\". (AAA Server).\n\nAnd for the below 2 arguments, they are \n2. \"secret\" (Server Secret)\n3. \"protocol\" (AAA protocol to use)",
+      "revId": "d2d92a37a50cf914d07216a64f1ebb6c7aae1ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_674a9d56",
+        "filename": "opendaylight/usermanager/shell/src/main/java/org/opendaylight/controller/usermanager/shell/RemoveAAAServer.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:08:36Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "d2d92a37a50cf914d07216a64f1ebb6c7aae1ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_87456144",
+        "filename": "opendaylight/usermanager/shell/src/main/java/org/opendaylight/controller/usermanager/shell/UmAddUser.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T08:08:36Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "d2d92a37a50cf914d07216a64f1ebb6c7aae1ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
