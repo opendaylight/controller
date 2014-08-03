@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
+import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -92,6 +94,19 @@ public class ShardTest extends AbstractActorTest {
                         getRef().path(), AsyncDataBroker.DataChangeScope.BASE).toSerializable(),
                         getRef());
 
+                    final Boolean notificationEnabled = new ExpectMsg<Boolean>("enable notification") {
+                        // do not put code outside this method, will run afterwards
+                        protected Boolean match(Object in) {
+                            if(in instanceof EnableNotification){
+                                return ((EnableNotification) in).isEnabled();
+                            } else {
+                                throw noMatch();
+                            }
+                        }
+                    }.get(); // this extracts the received message
+
+                    assertFalse(notificationEnabled);
+
                     final String out = new ExpectMsg<String>("match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
@@ -108,8 +123,6 @@ public class ShardTest extends AbstractActorTest {
 
                     assertTrue(out.matches(
                         "akka:\\/\\/test\\/user\\/testRegisterChangeListener\\/\\$.*"));
-                    // Will wait for the rest of the 3 seconds
-                    expectNoMsg();
                 }
 
 

@@ -82,15 +82,27 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
 
-        Object result = actorContext.executeShardOperation(shardName,
+        Object result = actorContext.executeLocalShardOperation(shardName,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
                 scope).toSerializable(),
             ActorContext.ASK_DURATION
         );
 
-        RegisterChangeListenerReply reply = RegisterChangeListenerReply.fromSerializable(actorContext.getActorSystem(),result);
-        return new DataChangeListenerRegistrationProxy(actorContext.actorSelection(reply.getListenerRegistrationPath()), listener, dataChangeListenerActor);
+        if (result != null) {
+            RegisterChangeListenerReply reply = RegisterChangeListenerReply
+                .fromSerializable(actorContext.getActorSystem(), result);
+            return new DataChangeListenerRegistrationProxy(actorContext
+                .actorSelection(reply.getListenerRegistrationPath()), listener,
+                dataChangeListenerActor);
+        }
+
+        LOG.debug(
+            "No local shard for shardName {} was found so returning a noop registration",
+            shardName);
+        return new NoOpDataChangeListenerRegistration(listener);
     }
+
+
 
 
 

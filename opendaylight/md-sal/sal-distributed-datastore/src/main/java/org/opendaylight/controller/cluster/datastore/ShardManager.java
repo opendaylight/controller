@@ -18,7 +18,10 @@ import akka.cluster.ClusterEvent;
 import akka.japi.Creator;
 import akka.japi.Function;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
+import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
+import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
@@ -31,35 +34,27 @@ import java.util.Map;
 
 /**
  * The ShardManager has the following jobs,
- * <p>
+ * <ul>
  * <li> Create all the local shard replicas that belong on this cluster member
+ * <li> Find the address of the local shard
  * <li> Find the primary replica for any given shard
- * <li> Engage in shard replica elections which decide which replica should be the primary
- * </p>
- * <p/>
- * <h3>>Creation of Shard replicas</h3
- * <p>
- * When the ShardManager is constructed it reads the cluster configuration to find out which shard replicas
- * belong on this member. It finds out the name of the current cluster member from the Akka Clustering Service.
- * </p>
- * <p/>
- * <h3> Replica Elections </h3>
- * <p/>
- * <p>
- * The Shard Manager uses multiple cues to initiate election.
- * <li> When a member of the cluster dies
- * <li> When a local shard replica dies
- * <li> When a local shard replica comes alive
- * </p>
+ * <li> Monitor the cluster members and store their addresses
+ * <ul>
  */
 public class ShardManager extends AbstractUntypedActor {
 
     // Stores a mapping between a member name and the address of the member
+    // Member names look like "member-1", "member-2" etc and are as specified
+    // in configuration
     private final Map<String, Address> memberNameToAddress = new HashMap<>();
 
+    // Stores a mapping between a shard name and it's corresponding information
+    // Shard names look like inventory, topology etc and are as specified in
+    // configuration
     private final Map<String, ShardInformation> localShards = new HashMap<>();
 
-
+    // The type of a ShardManager reflects the type of the datastore itself
+    // A data store could be of type config/operational
     private final String type;
 
     private final ClusterWrapper cluster;
@@ -102,7 +97,8 @@ public class ShardManager extends AbstractUntypedActor {
         if (message.getClass().equals(FindPrimary.SERIALIZABLE_CLASS)) {
             findPrimary(
                 FindPrimary.fromSerializable(message));
-
+        } else if(message instanceof FindLocalShard){
+            findLocalShard((FindLocalShard) message);
         } else if (message instanceof UpdateSchemaContext) {
             updateSchemaContext(message);
         } else if (message instanceof ClusterEvent.MemberUp){
@@ -115,6 +111,18 @@ public class ShardManager extends AbstractUntypedActor {
           throw new Exception ("Not recognized message received, message="+message);
         }
 
+    }
+
+    private void findLocalShard(FindLocalShard message) {
+        ShardInformation shardInformation =
+            localShards.get(message.getShardName());
+
+        if(shardInformation != null){
+            getSender().tell(new LocalShardFound(shardInformation.getActor()), getSelf());
+            return;
+        }
+
+        getSender().tell(new LocalShardNotFound(message.getShardName()), getSelf());
     }
 
     private void ignoreMessage(Object message){
@@ -137,6 +145,11 @@ public class ShardManager extends AbstractUntypedActor {
         }
     }
 
+    /**
+     * Notifies all the local shards of a change in the schema context
+     *
+     * @param message
+     */
     private void updateSchemaContext(Object message) {
         for(ShardInformation info : localShards.values()){
             info.getActor().tell(message,getSelf());
@@ -180,10 +193,7 @@ public class ShardManager extends AbstractUntypedActor {
         getSender().tell(new PrimaryNotFound(shardName).toSerializable(), getSelf());
     }
 
-    private String
-
-
-    getShardActorPath(String shardName, String memberName) {
+    private String getShardActorPath(String shardName, String memberName) {
         Address address = memberNameToAddress.get(memberName);
         if(address != null) {
             return address.toString() + "/user/shardmanager-" + this.type + "/"
@@ -193,11 +203,23 @@ public class ShardManager extends AbstractUntypedActor {
         return null;
     }
 
+    /**
+     * Construct the name of the shard actor given the name of the member on
+     * which the shard resides and the name of the shard
+     *
+     * @param memberName
+     * @param shardName
+     * @return
+     */
     private String getShardActorName(String memberName, String shardName){
         return memberName + "-shard-" + shardName + "-" + this.type;
     }
 
-    // Create the shards that are local to this member
+    /**
+     * Create shards that are local to the member on which the ShardManager
+     * runs
+     *
+     */
     private void createLocalShards() {
         String memberName = this.cluster.getCurrentMemberName();
         List<String> memberShardNames =
@@ -214,6 +236,12 @@ public class ShardManager extends AbstractUntypedActor {
 
     }
 
+    /**
+     * Given the name of the shard find the addresses of all it's peers
+     *
+     * @param shardName
+     * @return
+     */
     private Map<String, String> getPeerAddresses(String shardName){
 
         Map<String, String> peerAddresses = new HashMap<>();

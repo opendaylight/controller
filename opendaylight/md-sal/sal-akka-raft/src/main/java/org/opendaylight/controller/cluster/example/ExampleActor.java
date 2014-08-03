@@ -92,6 +92,10 @@ public class ExampleActor extends RaftActor {
         LOG.debug("Snapshot applied to state :" + ((HashMap) snapshot).size());
     }
 
+    @Override protected void onStateChanged() {
+
+    }
+
     @Override public void onReceiveRecover(Object message) {
         super.onReceiveRecover(message);
     }

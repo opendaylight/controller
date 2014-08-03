@@ -6,6 +6,7 @@ import akka.testkit.JavaTestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
+import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -86,24 +87,28 @@ public class DataChangeListenerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testDataChanged(){
+    public void testDataChangedWhenNotificationsAreEnabled(){
         new JavaTestKit(getSystem()) {{
             final MockDataChangeListener listener = new MockDataChangeListener();
             final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener,CompositeModel.FAMILY_PATH );
             final ActorRef subject =
-                getSystem().actorOf(props, "testDataChanged");
+                getSystem().actorOf(props, "testDataChangedNotificationsEnabled");
 
             new Within(duration("1 seconds")) {
                 protected void run() {
+
+                    // Let the DataChangeListener know that notifications should
+                    // be enabled
+                    subject.tell(new EnableNotification(true), getRef());
 
                     subject.tell(
                         new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()).toSerializable(),
                         getRef());
 
-                    final Boolean out = new ExpectMsg<Boolean>("dataChanged") {
+                    final Boolean out = new ExpectMsg<Boolean>(duration("800 millis"), "dataChanged") {
                         // do not put code outside this method, will run afterwards
                         protected Boolean match(Object in) {
-                            if (in.getClass().equals(DataChangedReply.SERIALIZABLE_CLASS)) {
+                            if (in != null && in.getClass().equals(DataChangedReply.SERIALIZABLE_CLASS)) {
 
                                 return true;
                             } else {
@@ -115,7 +120,30 @@ public class DataChangeListenerTest extends AbstractActorTest {
                     assertTrue(out);
                     assertTrue(listener.gotIt());
                     assertNotNull(listener.getChange().getCreatedData());
-                    // Will wait for the rest of the 3 seconds
+
+                    expectNoMsg();
+                }
+
+
+            };
+        }};
+    }
+
+    @Test
+    public void testDataChangedWhenNotificationsAreDisabled(){
+        new JavaTestKit(getSystem()) {{
+            final MockDataChangeListener listener = new MockDataChangeListener();
+            final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener,CompositeModel.FAMILY_PATH );
+            final ActorRef subject =
+                getSystem().actorOf(props, "testDataChangedNotificationsDisabled");
+
+            new Within(duration("1 seconds")) {
+                protected void run() {
+
+                    subject.tell(
+                        new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()).toSerializable(),
+                        getRef());
+
                     expectNoMsg();
                 }
 
