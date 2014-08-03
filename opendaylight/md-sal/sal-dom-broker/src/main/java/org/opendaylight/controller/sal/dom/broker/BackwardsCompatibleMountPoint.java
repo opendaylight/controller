@@ -15,16 +15,20 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.annotation.Nullable;
+
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -380,7 +384,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+            public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+                    final LogicalDatastoreType store, final YangInstanceIdentifier path) {
 
                 CompositeNode rawData = null;
 
@@ -398,7 +403,7 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
 
                 final Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = normalizer.toNormalized(path, rawData);
                 final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = Optional.<NormalizedNode<?, ?>>fromNullable(normalized.getValue());
-                return com.google.common.util.concurrent.Futures.immediateFuture(normalizedNodeOptional);
+                return Futures.immediateCheckedFuture(normalizedNodeOptional);
             }
         }
 
@@ -508,7 +513,8 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             }
 
             @Override
-            public ListenableFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+            public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+                    final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 return new BackwardsCompatibleReadTransaction(dataReader, dataNormalizer).read(store, path);
             }
 

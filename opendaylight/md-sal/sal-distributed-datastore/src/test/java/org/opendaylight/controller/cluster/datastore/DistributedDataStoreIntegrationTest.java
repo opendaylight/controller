@@ -2,8 +2,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +21,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -52,7 +56,9 @@ public class DistributedDataStoreIntegrationTest{
 
         distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
-        Thread.sleep(1000);
+        // This sleep is fragile - test can fail intermittently if all Shards aren't updated with
+        // the SchemaContext in time. Is there any way we can make this deterministic?
+        Thread.sleep(2000);
 
         DOMStoreReadWriteTransaction transaction =
             distributedDataStore.newReadWriteTransaction();
@@ -72,22 +78,21 @@ public class DistributedDataStoreIntegrationTest{
 
         ListenableFuture<Boolean> canCommit = ready.canCommit();
 
-        assertTrue(canCommit.get());
+        assertTrue(canCommit.get(5, TimeUnit.SECONDS));
 
         ListenableFuture<Void> preCommit = ready.preCommit();
 
-        preCommit.get();
+        preCommit.get(5, TimeUnit.SECONDS);
 
         ListenableFuture<Void> commit = ready.commit();
 
-        commit.get();
-
+        commit.get(5, TimeUnit.SECONDS);
     }
 
 
     @Test
     public void integrationTestWithMultiShardConfiguration()
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, TimeoutException {
         Configuration configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
 
         ShardStrategyFactory.setConfiguration(configuration);
@@ -97,7 +102,9 @@ public class DistributedDataStoreIntegrationTest{
 
         distributedDataStore.onGlobalContextUpdated(SchemaContextHelper.full());
 
-        Thread.sleep(1000);
+        // This sleep is fragile - test can fail intermittently if all Shards aren't updated with
+        // the SchemaContext in time. Is there any way we can make this deterministic?
+        Thread.sleep(2000);
 
         DOMStoreReadWriteTransaction transaction =
             distributedDataStore.newReadWriteTransaction();
@@ -109,16 +116,15 @@ public class DistributedDataStoreIntegrationTest{
 
         ListenableFuture<Boolean> canCommit = ready.canCommit();
 
-        assertTrue(canCommit.get());
+        assertTrue(canCommit.get(5, TimeUnit.SECONDS));
 
         ListenableFuture<Void> preCommit = ready.preCommit();
 
-        preCommit.get();
+        preCommit.get(5, TimeUnit.SECONDS);
 
         ListenableFuture<Void> commit = ready.commit();
 
-        commit.get();
-
+        commit.get(5, TimeUnit.SECONDS);
     }
 
 }

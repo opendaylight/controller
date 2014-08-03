@@ -2,8 +2,14 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import junit.framework.Assert;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -14,7 +20,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
 
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertNotNull;
@@ -25,7 +30,8 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     private Props props;
     private ActorRef actorRef;
     private MockActorContext actorContext;
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(
+                        Executors.newSingleThreadExecutor());
 
     @Before
     public void setUp(){
@@ -37,6 +43,11 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
             new ThreePhaseCommitCohortProxy(actorContext,
                 Arrays.asList(actorRef.path()), "txn-1", executor);
 
+    }
+
+    @After
+    public void tearDown() {
+        executor.shutdownNow();
     }
 
     @Test

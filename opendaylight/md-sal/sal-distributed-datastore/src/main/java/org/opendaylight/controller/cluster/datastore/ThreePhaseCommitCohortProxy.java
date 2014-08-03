@@ -10,8 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
+
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
+import com.google.common.util.concurrent.ListeningExecutorService;
+
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -29,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
@@ -42,14 +43,14 @@ public class ThreePhaseCommitCohortProxy implements
 
     private final ActorContext actorContext;
     private final List<ActorPath> cohortPaths;
-    private final ExecutorService executor;
+    private final ListeningExecutorService executor;
     private final String transactionId;
 
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
         List<ActorPath> cohortPaths,
         String transactionId,
-        ExecutorService executor) {
+        ListeningExecutorService executor) {
 
         this.actorContext = actorContext;
         this.cohortPaths = cohortPaths;
@@ -58,42 +59,38 @@ public class ThreePhaseCommitCohortProxy implements
     }
 
     @Override public ListenableFuture<Boolean> canCommit() {
-        Callable<Boolean> call = new Callable() {
+        Callable<Boolean> call = new Callable<Boolean>() {
 
-            @Override public Boolean call() throws Exception {
-            for(ActorPath actorPath : cohortPaths){
-                ActorSelection cohort = actorContext.actorSelection(actorPath);
+            @Override
+            public Boolean call() throws Exception {
+                for(ActorPath actorPath : cohortPaths){
+                    ActorSelection cohort = actorContext.actorSelection(actorPath);
 
-                try {
-                    Object response =
-                        actorContext.executeRemoteOperation(cohort,
-                            new CanCommitTransaction().toSerializable(),
-                            ActorContext.ASK_DURATION);
+                    try {
+                        Object response =
+                                actorContext.executeRemoteOperation(cohort,
+                                        new CanCommitTransaction().toSerializable(),
+                                        ActorContext.ASK_DURATION);
 
-                    if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                        CanCommitTransactionReply reply =
-                            CanCommitTransactionReply.fromSerializable(response);
-                        if (!reply.getCanCommit()) {
-                            return false;
+                        if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
+                            CanCommitTransactionReply reply =
+                                    CanCommitTransactionReply.fromSerializable(response);
+                            if (!reply.getCanCommit()) {
+                                System.out.println("**TOM - failed: false");
+                                return false;
+                            }
                         }
+                    } catch(RuntimeException e){
+                        LOG.error("Unexpected Exception", e);
+                        return false;
                     }
-                } catch(RuntimeException e){
-                    LOG.error("Unexpected Exception", e);
-                    return false;
                 }
 
-
-            }
-            return true;
+                return true;
             }
         };
 
-        ListenableFutureTask<Boolean>
-            future = ListenableFutureTask.create(call);
-
-        executor.submit(future);
-
-        return future;
+        return executor.submit(call);
     }
 
     @Override public ListenableFuture<Void> preCommit() {
@@ -138,13 +135,7 @@ public class ThreePhaseCommitCohortProxy implements
             }
         };
 
-        ListenableFutureTask<Void>
-            future = ListenableFutureTask.create(call);
-
-        executor.submit(future);
-
-        return future;
-
+        return executor.submit(call);
     }
 
     public List<ActorPath> getCohortPaths() {
