@@ -172,24 +172,18 @@ module opendaylight-match-types {
         }
     }
 
-    grouping udp-source-port {
+    grouping udp-source-port-attributes {
         leaf udp-source-port {
             description "UDP source port.";
             type inet:port-number;
         }
     }
     
-    grouping udp-destination-port {
+    grouping udp-destination-port-attributes {
         leaf udp-destination-port {
             description "UDP destination port.";
                 type inet:port-number;
         }
-    }
-    
-    
-    grouping "udp-match-fields" {
-        uses udp-source-port;
-        uses udp-destination-port;
     }
 
     grouping mpls-label {
@@ -237,42 +231,32 @@ module opendaylight-match-types {
         uses pbb;
     }
 
-    grouping tcp-source-port {
+    grouping tcp-source-port-attributes {
         leaf tcp-source-port {
             description "TCP source port.";
             type inet:port-number;
         }
     }
     
-    grouping tcp-destination-port {
+    grouping tcp-destination-port-attributes {
         leaf tcp-destination-port {
             description "TCP destination port.";
             type inet:port-number;
         }
     }
-    
-    grouping tcp-match-fields {
-        uses tcp-source-port;
-        uses tcp-destination-port;
-    }
 
-    grouping sctp-source-port {
+    grouping sctp-source-port-attributes {
         leaf sctp-source-port {
             description "SCTP source port.";
             type inet:port-number;
         }
     }
     
-    grouping sctp-destination-port {
+    grouping sctp-destination-port-attributes {
         leaf sctp-destination-port {
             description "SCTP destination port.";
             type inet:port-number;
         }
-    }
-    
-    grouping "sctp-match-fields" {
-        uses sctp-source-port;
-        uses sctp-destination-port;
     }
     
     grouping icmpv4-type {
@@ -344,14 +328,10 @@ module opendaylight-match-types {
         uses mac-address-filter;
     }
     
-    grouping tcp-flag {
+    grouping tcp-flags-attributes {
         leaf tcp-flag {
             type uint16;  // TODO For the love of God can we make this semantic
         }
-    }
-    
-    grouping "tcp-flag-match-fields" {
-        uses tcp-flag;
     }
 
     grouping tunnel-ipv4-source-attributes {
@@ -570,19 +550,48 @@ module opendaylight-match-types {
                 }
             }
             
-            case layer-4-match-case {
-                choice layer-4-match {
-                    case "udp-match" {
-                        uses "udp-match-fields";
-                    }
-                    case "tcp-match" {
-                        uses "tcp-match-fields";
-                    }
-                    case "sctp-match" {
-                        uses "sctp-match-fields";
-                    }
+            case tcp-source-port-case {
+                container tcp-source-port {
+                    uses tcp-source-port-attributes;
                 }
             }
+            
+            case tcp-destination-port-case {
+                container tcp-destination-port {
+                    uses tcp-destination-port-attributes;
+                }
+            }
+            
+            case udp-source-port-case {
+                container udp-source-port {
+                    uses udp-source-port-attributes;
+                }
+            }
+            
+            case udp-destination-port-case {
+                container udp-destination-port {
+                    uses udp-destination-port-attributes;
+                }
+            }
+            
+            case sctp-source-port-case {
+                container sctp-source-port-port {
+                    uses sctp-source-port-attributes;
+                }
+            }
+            
+            case sctp-destination-port-case {
+                container sctp-destination-port {
+                    uses sctp-destination-port-attributes;
+                }
+            }
+            
+            case tcp-flags-case {
+                container tcp-flags {
+                    uses "tcp-flags-attributes";
+                }
+            }
+            
             case icmpv4-match {
                 container "icmpv4-match" {
                     uses "icmpv4-match-fields";
@@ -594,12 +603,6 @@ module opendaylight-match-types {
             case protocol-match-fields-case {
                 container "protocol-match-fields" {
                     uses "protocol-match-fields";
-                }
-            }
-            
-            case tcp-flag-match-case {
-                container tcp-flag-match {
-                    uses "tcp-flag-match-fields";
                 }
             }
         }

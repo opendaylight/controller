@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.compatibility.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
@@ -85,7 +84,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpDestinationPortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpSourcePortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpDestinationPortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
@@ -101,17 +103,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4Source;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6Destination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.destination.port._case.TcpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.source.port._case.TcpSourcePort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatch;
 
 import com.google.common.net.InetAddresses;
 
 public class TestFromSalConversionsUtils {
     private enum MtchType {
-        other, untagged, ipv4, ipv6, arp, sctp, tcp, udp
+        other, untagged, ipv4, ipv6, arp, tcp, udp
     }
 
     @Test
@@ -137,9 +139,6 @@ public class TestFromSalConversionsUtils {
         odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.ipv6));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.ipv6);
 
-        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.sctp));
-        checkOdMatch(odNodeFlow.getMatch(), MtchType.sctp);
-
         odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.tcp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.tcp);
 
@@ -160,7 +159,10 @@ public class TestFromSalConversionsUtils {
         ArpTargetTransportAddress arpDst = null;
         ArpSourceHardwareAddress arpHwSrc = null;
         ArpTargetHardwareAddress arpHwDst = null;
-        Layer4Match l4 = null;
+        TcpSourcePort tcpSrc = null;
+        TcpDestinationPort tcpDst = null;
+        UdpSourcePort udpSrc = null;
+        UdpDestinationPort udpDst = null;
         VlanMatch vlan = null;
         IpProtocol proto = null;
         IpDscp dscp = null;
@@ -203,15 +205,24 @@ public class TestFromSalConversionsUtils {
             } else if (match.getMatch() instanceof ArpTargetHardwareAddressCase) {
                 assertEquals("More than one ArpTargetHardwareAddressCase Seen",null, arpHwDst);
                 arpHwDst = ((ArpTargetHardwareAddressCase) match.getMatch()).getArpTargetHardwareAddress();
+            } else if (match.getMatch() instanceof TcpSourcePortCase) {
+                assertEquals("More than one TcpSourcePortCase Seen",null, tcpSrc);
+                tcpSrc = ((TcpSourcePortCase) match.getMatch()).getTcpSourcePort();
+            } else if (match.getMatch() instanceof TcpDestinationPortCase) {
+                assertEquals("More than one TcpDestinationPortCase Seen",null, tcpDst);
+                tcpDst = ((TcpDestinationPortCase) match.getMatch()).getTcpDestinationPort();
+            } else if (match.getMatch() instanceof UdpSourcePortCase) {
+                assertEquals("More than one UdpSourcePortCase Seen",null, udpSrc);
+                udpSrc = ((UdpSourcePortCase) match.getMatch()).getUdpSourcePort();
+            } else if (match.getMatch() instanceof UdpDestinationPortCase) {
+                assertEquals("More than one TcpDestinationPortCase Seen",null, udpDst);
+                udpDst = ((UdpDestinationPortCase) match.getMatch()).getUdpDestinationPort();
             } else if (match.getMatch() instanceof IpProtocolCase) {
                 assertEquals("More than one IpProtocolCase Seen",null, proto);
                 proto = ((IpProtocolCase) match.getMatch()).getIpProtocol();
             } else if (match.getMatch() instanceof IpDscpCase) {
                 assertEquals("More than one IpDscpCase Seen",null, dscp);
                 dscp = ((IpDscpCase) match.getMatch()).getIpDscp();
-            } else if (match.getMatch() instanceof Layer4MatchCase) {
-                assertEquals("More than one Layer4MatchCase Seen",null, l4);
-                l4 = ((Layer4MatchCase) match.getMatch()).getLayer4Match();
             } else if (match.getMatch() instanceof InPortCase) {
                 assertEquals("More than one InPortCase Seen",null, inPort);
                 inPort = ((InPortCase) match.getMatch()).getInPort();
@@ -273,41 +284,19 @@ public class TestFromSalConversionsUtils {
             assertEquals("Vlan ID is wrong.", Integer.valueOf(0), vlan.getVlanId().getVlanId().getValue());
             assertEquals("DCSP is wrong.", (short) 0x3f, (short) dscp.getIpDscp().getValue());
             break;
-        case sctp:
-            boolean sctpFound = false;
-            assertEquals("Wrong protocol", CRUDP, proto.getIpProtocol().byteValue());
-            if (l4 instanceof SctpMatch) {
-                assertEquals("Sctp source port is incorrect.", 0xffff, (int) ((SctpMatch) l4)
-                        .getSctpSourcePort().getValue());
-                assertEquals("Sctp dest port is incorrect.", 0xfffe, (int) ((SctpMatch) l4)
-                        .getSctpDestinationPort().getValue());
-                sctpFound = true;
-            }
-            assertNotNull("Sctp wasn't found", sctpFound);
-            break;
         case tcp:
-            boolean tcpFound = false;
             assertEquals("Wrong protocol", TCP, proto.getIpProtocol().byteValue());
-            if (l4 instanceof TcpMatch) {
-                assertEquals("Tcp source port is incorrect.", 0xabcd, (int) ((TcpMatch) l4)
-                        .getTcpSourcePort().getValue());
-                assertEquals("Tcp dest port is incorrect.", 0xdcba, (int) ((TcpMatch) l4)
-                        .getTcpDestinationPort().getValue());
-                sctpFound = true;
-            }
-            assertNotNull("Tcp wasn't found", tcpFound);
+            assertEquals("Tcp source port is incorrect.", 0xabcd, (int) tcpSrc
+                    .getTcpSourcePort().getValue());
+            assertEquals("Tcp dest port is incorrect.", 0xdcba, (int) tcpDst
+                    .getTcpDestinationPort().getValue());
             break;
         case udp:
-            boolean udpFound = false;
             assertEquals("Wrong protocol", UDP, proto.getIpProtocol().byteValue());
-            if (l4 instanceof UdpMatch) {
-                assertEquals("Udp source port is incorrect.", 0xcdef, (int) ((UdpMatch) l4)
-                        .getUdpSourcePort().getValue());
-                assertEquals("Udp dest port is incorrect.", 0xfedc, (int) ((UdpMatch) l4)
-                        .getUdpDestinationPort().getValue());
-                sctpFound = true;
-            }
-            assertNotNull("Udp wasn't found", udpFound);
+            assertEquals("Udp source port is incorrect.", 0xcdef, (int) udpSrc
+                    .getUdpSourcePort().getValue());
+            assertEquals("Udp dest port is incorrect.", 0xfedc, (int) udpDst
+                    .getUdpDestinationPort().getValue());
             break;
         }
 
@@ -469,11 +458,6 @@ public class TestFromSalConversionsUtils {
             salMatch.setField(MatchType.DL_DST, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
             salMatch.setField(MatchType.DL_VLAN, MatchType.DL_VLAN_NONE);
             salMatch.setField(MatchType.NW_TOS, (byte) 0x3f);
-            break;
-        case sctp:
-            salMatch.setField(MatchType.NW_PROTO, CRUDP);
-            salMatch.setField(MatchType.TP_SRC, (short) 0xffff);
-            salMatch.setField(MatchType.TP_DST, (short) 0xfffe);
             break;
         case tcp:
             salMatch.setField(MatchType.NW_PROTO, TCP);

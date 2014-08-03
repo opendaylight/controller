@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.compatibility;
 
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
@@ -117,7 +116,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpDestinationPortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpSourcePortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpDestinationPortCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
@@ -132,10 +134,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv4.source._case.Ipv4Source;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6Destination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.destination.port._case.TcpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.source.port._case.TcpSourcePort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanId;
 import org.slf4j.Logger;
@@ -443,8 +445,14 @@ public class ToSalConversionsUtils {
                     fillFrom(target, ((ArpSourceHardwareAddressCase)match).getArpSourceHardwareAddress());
                 } else if (match instanceof ArpTargetHardwareAddressCase) {
                     fillFrom(target, ((ArpTargetHardwareAddressCase)match).getArpTargetHardwareAddress());
-                } else if (match instanceof Layer4MatchCase) {
-                    fillFrom(target, ((Layer4MatchCase)match).getLayer4Match());
+                } else if (match instanceof TcpSourcePortCase) {
+                    fillFrom(target, ((TcpSourcePortCase)match).getTcpSourcePort());
+                } else if (match instanceof TcpDestinationPortCase) {
+                    fillFrom(target, ((TcpDestinationPortCase)match).getTcpDestinationPort());
+                } else if (match instanceof UdpSourcePortCase) {
+                    fillFrom(target, ((UdpSourcePortCase)match).getUdpSourcePort());
+                } else if (match instanceof UdpDestinationPortCase) {
+                    fillFrom(target, ((UdpDestinationPortCase)match).getUdpDestinationPort());
                 } else if (match instanceof IpProtocolCase) {
                     fillFrom(target, ((IpProtocolCase)match).getIpProtocol());
                 } else if (match instanceof IpDscpCase) {
@@ -523,77 +531,40 @@ public class ToSalConversionsUtils {
         }
     }
 
-    private static void fillFrom(Match target, Layer4Match layer4Match) {
-        if (layer4Match == null) {
-            return;
-        }
-        if (layer4Match instanceof SctpMatch) {
-            fillTransportLayer(target, (SctpMatch) layer4Match);
-        } else if (layer4Match instanceof TcpMatch) {
-            fillTransportLayer(target, (TcpMatch) layer4Match);
-        } else if (layer4Match instanceof UdpMatch) {
-            fillTransportLayer(target, (UdpMatch) layer4Match);
+    private static void fillFrom(Match target,TcpSourcePort source) {
+        if(source != null
+                && source.getTcpSourcePort() != null
+                && source.getTcpSourcePort().getValue() != null) {
+                    target.setField(TP_SRC, source.getTcpSourcePort().getValue().shortValue());
+                    target.setField(NW_PROTO, TCP);
         }
     }
 
-    private static void fillTransportLayer(Match target, UdpMatch source) {
-        PortNumber udpSourcePort = source.getUdpSourcePort();
-        if (udpSourcePort != null) {
-            Integer udpSourcePortValue = udpSourcePort.getValue();
-            if (udpSourcePortValue != null) {
-                target.setField(TP_SRC, udpSourcePortValue.shortValue());
-            }
+    private static void fillFrom(Match target,TcpDestinationPort source) {
+        if(source != null
+                && source.getTcpDestinationPort() != null
+                && source.getTcpDestinationPort().getValue() != null) {
+                    target.setField(TP_DST, source.getTcpDestinationPort().getValue().shortValue());
+                    target.setField(NW_PROTO, TCP);
         }
-
-        PortNumber udpDestPort = source.getUdpDestinationPort();
-        if (udpDestPort != null) {
-            Integer udpDestPortValue = udpDestPort.getValue();
-            if (udpDestPortValue != null) {
-                target.setField(TP_DST, udpDestPortValue.shortValue());
-            }
-        }
-
-        target.setField(NW_PROTO, UDP);
     }
 
-    private static void fillTransportLayer(Match target, TcpMatch source) {
-        PortNumber tcpSourcePort = source.getTcpSourcePort();
-        if (tcpSourcePort != null) {
-            Integer tcpSourcePortValue = tcpSourcePort.getValue();
-            if (tcpSourcePortValue != null) {
-                target.setField(TP_SRC, tcpSourcePortValue.shortValue());
-            }
+    private static void fillFrom(Match target,UdpSourcePort source) {
+        if(source != null
+                && source.getUdpSourcePort() != null
+                && source.getUdpSourcePort().getValue() != null) {
+                    target.setField(TP_SRC, source.getUdpSourcePort().getValue().shortValue());
+                    target.setField(NW_PROTO, UDP);
         }
-
-        PortNumber tcpDestPort = source.getTcpDestinationPort();
-        if (tcpDestPort != null) {
-            Integer tcpDestPortValue = tcpDestPort.getValue();
-            if (tcpDestPortValue != null) {
-                target.setField(TP_DST, tcpDestPortValue.shortValue());
-            }
-        }
-
-        target.setField(NW_PROTO, TCP);
     }
 
-    private static void fillTransportLayer(Match target, SctpMatch source) {
-        PortNumber sctpSourcePort = source.getSctpSourcePort();
-        if (sctpSourcePort != null) {
-            Integer sctpSourcePortValue = sctpSourcePort.getValue();
-            if (sctpSourcePortValue != null) {
-                target.setField(TP_SRC, sctpSourcePortValue.shortValue());
-            }
+    private static void fillFrom(Match target,UdpDestinationPort source) {
+        if(source != null
+                && source.getUdpDestinationPort() != null
+                && source.getUdpDestinationPort().getValue() != null) {
+                    target.setField(TP_DST, source.getUdpDestinationPort().getValue().shortValue());
+                    target.setField(NW_PROTO, UDP);
         }
-        PortNumber sctpDestPort = source.getSctpDestinationPort();
-        if (sctpDestPort != null) {
-            Integer sctpDestPortValue = sctpDestPort.getValue();
-            if (sctpDestPortValue != null) {
-                target.setField(TP_DST, sctpDestPortValue.shortValue());
-            }
-        }
-
-        target.setField(NW_PROTO, CRUDP);
-
     }
 
     private static void fillFrom(Match target, ArpSourceTransportAddress source) {
