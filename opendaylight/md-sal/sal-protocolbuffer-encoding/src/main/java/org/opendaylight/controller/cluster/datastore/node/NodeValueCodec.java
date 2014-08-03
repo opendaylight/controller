@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.IdentityrefType;
-import org.opendaylight.yangtools.yang.model.util.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.model.util.InstanceIdentifierType;
 import org.opendaylight.yangtools.yang.model.util.Leafref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class NodeValueCodec {
                 return value;
             } else if(baseType instanceof IdentityrefType) {
                 return QNameFactory.create(value);
-            } else if(baseType instanceof InstanceIdentifier) {
+            } else if(baseType instanceof InstanceIdentifierType) {
                 return InstanceIdentifierUtils.fromSerializable(node.getInstanceIdentifierValue());
             } else {
                 logger.error("Could not figure out how to transform value " + value +  " for schemaType " + type);
