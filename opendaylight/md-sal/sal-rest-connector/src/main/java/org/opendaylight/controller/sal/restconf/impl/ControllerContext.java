@@ -364,6 +364,13 @@ public class ControllerContext implements SchemaContextListener {
         return findModuleByNameAndRevision(Draft02.RestConfModule.IETF_RESTCONF_QNAME);
     }
 
+    private static final Predicate<GroupingDefinition> ERRORS_GROUPING_FILTER = new Predicate<GroupingDefinition>() {
+        @Override
+        public boolean apply(final GroupingDefinition g) {
+            return Draft02.RestConfModule.ERRORS_GROUPING_SCHEMA_NODE.equals(g.getQName().getLocalName());
+        }
+    };
+
     public DataSchemaNode getRestconfModuleErrorsSchemaNode() {
         Module restconfModule = getRestconfModule();
         if (restconfModule == null) {
@@ -372,14 +379,7 @@ public class ControllerContext implements SchemaContextListener {
 
         Set<GroupingDefinition> groupings = restconfModule.getGroupings();
 
-        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
-            @Override
-            public boolean apply(final GroupingDefinition g) {
-                return Objects.equal(g.getQName().getLocalName(), Draft02.RestConfModule.ERRORS_GROUPING_SCHEMA_NODE);
-            }
-        };
-
-        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, ERRORS_GROUPING_FILTER);
 
         final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
 
@@ -387,6 +387,13 @@ public class ControllerContext implements SchemaContextListener {
                 Draft02.RestConfModule.ERRORS_CONTAINER_SCHEMA_NODE);
         return Iterables.getFirst(instanceDataChildrenByName, null);
     }
+
+    private static final Predicate<GroupingDefinition> GROUPING_FILTER = new Predicate<GroupingDefinition>() {
+        @Override
+        public boolean apply(final GroupingDefinition g) {
+            return Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE.equals(g.getQName().getLocalName());
+        }
+    };
 
     public DataSchemaNode getRestconfModuleRestConfSchemaNode(final Module inRestconfModule, final String schemaNodeName) {
         Module restconfModule = inRestconfModule;
@@ -399,16 +406,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         Set<GroupingDefinition> groupings = restconfModule.getGroupings();
-
-        final Predicate<GroupingDefinition> filter = new Predicate<GroupingDefinition>() {
-            @Override
-            public boolean apply(final GroupingDefinition g) {
-                return Objects.equal(g.getQName().getLocalName(), Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE);
-            }
-        };
-
-        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, filter);
-
+        Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, GROUPING_FILTER);
         final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
 
         List<DataSchemaNode> instanceDataChildrenByName = this.findInstanceDataChildrenByName(restconfGrouping,
@@ -700,6 +698,13 @@ public class ControllerContext implements SchemaContextListener {
         return instantiatedDataNodeContainers;
     }
 
+    private static final Function<ChoiceNode, Set<ChoiceCaseNode>> CHOICE_FUNCTION = new Function<ChoiceNode, Set<ChoiceCaseNode>>() {
+        @Override
+        public Set<ChoiceCaseNode> apply(final ChoiceNode node) {
+            return node.getCases();
+        }
+    };
+
     private void collectInstanceDataNodeContainers(final List<DataSchemaNode> potentialSchemaNodes,
             final DataNodeContainer container, final String name) {
 
@@ -720,17 +725,8 @@ public class ControllerContext implements SchemaContextListener {
             }
         }
 
-        Iterable<ChoiceNode> choiceNodes = Iterables.<ChoiceNode> filter(container.getChildNodes(), ChoiceNode.class);
-
-        final Function<ChoiceNode, Set<ChoiceCaseNode>> choiceFunction = new Function<ChoiceNode, Set<ChoiceCaseNode>>() {
-            @Override
-            public Set<ChoiceCaseNode> apply(final ChoiceNode node) {
-                return node.getCases();
-            }
-        };
-
-        Iterable<Set<ChoiceCaseNode>> map = Iterables.<ChoiceNode, Set<ChoiceCaseNode>> transform(choiceNodes,
-                choiceFunction);
+        Iterable<ChoiceNode> choiceNodes = Iterables.filter(container.getChildNodes(), ChoiceNode.class);
+        Iterable<Set<ChoiceCaseNode>> map = Iterables.transform(choiceNodes, CHOICE_FUNCTION);
 
         final Iterable<ChoiceCaseNode> allCases = Iterables.<ChoiceCaseNode> concat(map);
         for (final ChoiceCaseNode caze : allCases) {
