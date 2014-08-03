@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.InstanceIdentifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
@@ -155,7 +156,7 @@ public class XmlDocumentUtils {
     }
 
     final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
-    if (baseType instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
+    if (baseType instanceof InstanceIdentifierType) {
       logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
 
@@ -184,7 +185,7 @@ public class XmlDocumentUtils {
       value = codec.deserialize(text);
     }
 
-    if (schema.getType() instanceof org.opendaylight.yangtools.yang.model.util.InstanceIdentifier) {
+    if (schema.getType() instanceof InstanceIdentifierType) {
       logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
     }

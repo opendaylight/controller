@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.Future;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -32,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
@@ -75,7 +75,7 @@ public class BrokerFacadeTest {
     CompositeNode dataNode;
 
     NormalizedNode<?, ?> dummyNode = createDummyNode("dummy:namespace", "2014-07-01", "dummy local name");
-    ListenableFuture<Optional<NormalizedNode<?, ?>>> dummyNodeInFuture = wrapDummyNode(dummyNode);
+    CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> dummyNodeInFuture = wrapDummyNode(dummyNode);
 
     QName qname = QName.create("node");
 
@@ -104,14 +104,14 @@ public class BrokerFacadeTest {
 
     }
 
-    private ListenableFuture<Optional<NormalizedNode<?, ?>>> wrapDummyNode(NormalizedNode<?, ?> dummyNode) {
-        return Futures.<Optional<NormalizedNode<?, ?>>> immediateFuture(Optional.<NormalizedNode<?, ?>> of(dummyNode));
+    private CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> wrapDummyNode(final NormalizedNode<?, ?> dummyNode) {
+        return  Futures.immediateCheckedFuture(Optional.<NormalizedNode<?, ?>> of(dummyNode));
     }
 
     /**
      * Value of this node shouldn't be important for testing purposes
      */
-    private NormalizedNode<?, ?> createDummyNode(String namespace, String date, String localName) {
+    private NormalizedNode<?, ?> createDummyNode(final String namespace, final String date, final String localName) {
         return Builders.containerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(namespace, date, localName))).build();
     }
