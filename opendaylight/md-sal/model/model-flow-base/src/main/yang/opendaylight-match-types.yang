@@ -50,23 +50,60 @@ module opendaylight-match-types {
         }
     }
     
-    // TODO - not sure what to do about vlan-id present
-    grouping "vlan-match-fields" {
-        container vlan-id {
-            description "VLAN id.";
-            presence "Match field is active and set";
-
-            leaf vlan-id-present {
-                type boolean;
-            }
-
-            leaf vlan-id {
-                type l2t:vlan-id;
+    identity vlan-id-special {
+        description 
+           "Base type for indicating special vlans like ANY or NONE";
+    }
+    
+    identity vlan-id-none {
+        description "No vlan header present";
+        base vlan-id-special;
+    }
+    
+    identity vlan-id-any {
+        description "Vlan header present with any vlan-id";
+        base vlan-id-special;
+    }
+    
+    typedef vlan-id-special-type {
+        type identityref {
+            base vlan-id-special;
+        }
+    }
+    
+    grouping vlan-id-attributes {
+        leaf vlan-id-or-vlan-present {
+           type  union {
+               type vlan-id-special-type;
+               type l2t:vlan-id;
             }
         }
-        leaf vlan-pcp {
+    }
+    
+    identity vlan-pcp-special {
+        description 
+           "Base type for indicating special vlans like ANY or NONE";
+    }
+    
+    identity vlan-pcp-none {
+        description "No vlan header present";
+        base vlan-pcp-special;
+    }
+    
+    identity vlan-pcp-any {
+        description "Vlan header present with any vlan-id";
+        base vlan-pcp-special;
+    }
+    
+    grouping vlan-pcp-attributes {
+        leaf vlan-pcp-or-pcp-present {
             description "VLAN priority.";
-            type l2t:vlan-pcp;
+            type union {
+               type l2t:vlan-pcp;
+               type identityref {
+                   base vlan-pcp-special;
+               }
+            }
         }
     }
 
@@ -418,10 +455,15 @@ module opendaylight-match-types {
                 }
             }
             
+            case vlan-id-case {
+                container vlan-id {
+                    uses vlan-id-attributes;
+                }
+            }
             
-            case vlan-match-case  {
-                container "vlan-match" {
-                    uses "vlan-match-fields";
+            case vlan-pcp-case {
+                container vlan-pcp {
+                    uses vlan-pcp-attributes;
                 }
             }
             

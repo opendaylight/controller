@@ -39,6 +39,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.VlanIdAttributes.VlanIdOrVlanPresent;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.VlanIdNone;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.VlanPcpAttributes.VlanPcpOrPcpPresent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceHardwareAddressCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceHardwareAddressCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ArpSourceTransportAddressCase;
@@ -69,8 +72,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpDestinationPortCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanIdCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanPcpCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
@@ -101,8 +104,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPortBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePortBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.id._case.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.pcp._case.VlanPcpBuilder;
 
 import com.google.common.net.InetAddresses;
 
@@ -136,6 +139,8 @@ public class FromSalConversionsUtils {
             addMatch(matches,ethernetSource(sourceMatch));
             addMatch(matches,ethernetDestination(sourceMatch));
             addMatch(matches,ethernetType(sourceMatch));
+            addMatch(matches,vlanIdMatch(sourceMatch));
+            addMatch(matches,vlanPcpMatch(sourceMatch));
             addMatch(matches,ipProto(sourceMatch));
             addMatch(matches,ipDscp(sourceMatch));
             addMatch(matches,ipV4SourceMatch(sourceMatch));
@@ -150,22 +155,11 @@ public class FromSalConversionsUtils {
             addMatch(matches,tcpDestinationPortMatch(sourceMatch));
             addMatch(matches,udpSourcePortMatch(sourceMatch));
             addMatch(matches,udpDestinationPortMatch(sourceMatch));
-
-            org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder vlan = vlanMatch(sourceMatch);
-            if(vlan != null) {
-                vlan.setOrder(matches.size());
-                matches.add(vlan.build());
-            }
-            org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder inPort = inPortMatch(sourceMatch);
-            if(inPort != null) {
-                inPort.setOrder(matches.size());
-                matches.add(inPort.build());
-            }
+            addMatch(matches,inPortMatch(sourceMatch));
             targetBuilder.setMatch(matches);
             return targetBuilder.build();
         }
         return null;
-
     }
 
     private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder inPortMatch(Match sourceMatch) {
@@ -262,31 +256,35 @@ public class FromSalConversionsUtils {
         return null;
     }
 
-    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder vlanMatch(final Match sourceMatch) {
-        VlanMatchBuilder vlanMatchBuild = new VlanMatchBuilder();
-        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
-        MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
-        if (vlan != null && vlan.getValue() != null) {
-            VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
-            short vid = (short)vlan.getValue();
-            boolean present = (vid != MatchType.DL_VLAN_NONE);
-            vlanIDBuilder.setVlanId(new VlanId((NetUtils
-                    .getUnsignedShort(vid))));
-            vlanIDBuilder.setVlanIdPresent(present);
-            vlanMatchBuild.setVlanId(vlanIDBuilder.build());
+    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder vlanIdMatch(final Match sourceMatch) {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = null;
+        if(sourceMatch != null && sourceMatch.getField(MatchType.DL_VLAN) != null) {
+            short vid = (short)sourceMatch.getField(MatchType.DL_VLAN).getValue();
+            VlanIdOrVlanPresent vlanId = null;
+            if(vid != MatchType.DL_VLAN_NONE) {
+                vlanId = new VlanIdOrVlanPresent(new VlanId(NetUtils
+                        .getUnsignedShort(vid)));
+            } else {
+                vlanId = new VlanIdOrVlanPresent(new VlanIdNone());
+            }
+            VlanIdBuilder vlanIdb = new VlanIdBuilder().setVlanIdOrVlanPresent(vlanId);
+            mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
+            mb.setMatch(new VlanIdCaseBuilder().setVlanId(vlanIdb.build()).build());
         }
-
-        MatchField vlanPriority = sourceMatch.getField(MatchType.DL_VLAN_PR);
-        if (vlanPriority != null && vlanPriority.getValue() != null) {
-            vlanMatchBuild.setVlanPcp(new VlanPcp((short) ((byte) vlanPriority
-                    .getValue())));
-        }
-        if((vlan != null && vlan.getValue() != null) || (vlanPriority != null && vlanPriority.getValue() != null)) {
-            VlanMatchCase vlanCase =  new VlanMatchCaseBuilder().setVlanMatch(vlanMatchBuild.build()).build();
-            return mb.setMatch(vlanCase);
-        }
-        return null;
+        return mb;
     }
+
+    private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder vlanPcpMatch(final Match sourceMatch) {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder mb = null;
+        if(sourceMatch != null && sourceMatch.getField(MatchType.DL_VLAN_PR) != null) {
+            short pcp = (short)((byte)sourceMatch.getField(MatchType.DL_VLAN_PR).getValue());
+            VlanPcpBuilder pcpb = new VlanPcpBuilder().setVlanPcpOrPcpPresent(new VlanPcpOrPcpPresent(new VlanPcp(pcp)));
+            mb = new org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder();
+            mb.setMatch(new VlanPcpCaseBuilder().setVlanPcp(pcpb.build()).build());
+        }
+        return mb;
+    }
+
     private static org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.list.MatchBuilder ipDscp(
             Match sourceMatch) {
         MatchField networkTos = sourceMatch.getField(MatchType.NW_TOS);
