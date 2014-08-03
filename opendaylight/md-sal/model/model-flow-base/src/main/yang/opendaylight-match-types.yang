@@ -11,7 +11,7 @@ module opendaylight-match-types {
         description "Initial revision of match types";
     }
 
-    grouping "mac-address-filter" {
+    grouping "mac-address-filter-attributes" {
         leaf address {
             mandatory true;
             type yang:mac-address;
@@ -21,7 +21,7 @@ module opendaylight-match-types {
         }
     }
 
-    grouping "of-metadata" {
+    grouping "metadata-attributes" {
         leaf metadata {
             type uint64;
         }
@@ -33,12 +33,12 @@ module opendaylight-match-types {
 
     grouping ethernet-source-attributes{
         description "Ethernet source address.";
-        uses mac-address-filter;
+        uses mac-address-filter-attributes;
     }
     
     grouping ethernet-destination-attributes {
         description "Ethernet destination address.";
-        uses mac-address-filter;
+        uses mac-address-filter-attributes;
     }
     
     grouping ethernet-type-attributes {
@@ -158,16 +158,14 @@ module opendaylight-match-types {
     }
     
     grouping ipv6-ext-header-attributes {
-        container "ipv6-ext-header" {
-            leaf ipv6-exthdr {
-                description "IPv6 Extension Header field";
-                type uint16;
-            }
+        leaf ipv6-exthdr {
+            description "IPv6 Extension Header field";
+            type uint16;
+        }
 
-            leaf ipv6-exthdr-mask {
-                type uint16 {
-                  range "0..512";
-                }
+        leaf ipv6-exthdr-mask {
+            type uint16 {
+              range "0..512";
             }
         }
     }
@@ -186,49 +184,37 @@ module opendaylight-match-types {
         }
     }
 
-    grouping mpls-label {
+    grouping mpls-label-attributes {
         leaf mpls-label {
             description "Label in the first MPLS shim header";
             type uint32;
         }
     }
     
-    grouping mpls-tc {
+    grouping mpls-tc-attributes {
         leaf mpls-tc {
             description "TC in the first MPLS shim header";
             type uint8;
         }
     }
-    grouping mpls-bos {
+    grouping mpls-bos-attributes {
         leaf mpls-bos {
             description "BoS bit in the first MPLS shim header";
             type uint8;
         }
     }
     
-    grouping pbb {
-        container "pbb" {
-            leaf pbb-isid {
-                description "I-SID in the first PBB service instance tag";
-                type uint32;
-            }
+    grouping pbb-attributes {
+        leaf pbb-isid {
+            description "I-SID in the first PBB service instance tag";
+            type uint32;
+        }
 
-            leaf pbb-mask {
-                type uint32 {
-                  range "0..16777216";
-                }
+        leaf pbb-mask {
+            type uint32 {
+              range "0..16777216";
             }
         }
-    }
-    
-    grouping "protocol-match-fields" {
-        uses mpls-label;
-
-        uses mpls-tc;
-
-        uses mpls-bos;
-
-        uses pbb;
     }
 
     grouping tcp-source-port-attributes {
@@ -259,23 +245,32 @@ module opendaylight-match-types {
         }
     }
     
-    grouping icmpv4-type {
+    grouping icmpv4-type-attributes {
         leaf icmpv4-type {
             description "ICMP type.";
-            type uint8; // Define ICMP Type
+            type uint8; // TODO Make this semantic
         }
     }
     
-    grouping icmpv4-code {
+    grouping icmpv4-code-attributes {
         leaf icmpv4-code {
             description "ICMP code.";
-            type uint8; // Define ICMP Code
+            type uint8; // TODO Make this semantic
         }
     }
-
-    grouping "icmpv4-match-fields" {
-        uses icmpv4-type;
-        uses icmpv4-code;
+    
+    grouping icmpv6-type-attributes {
+        leaf icmpv6-type {
+            description "ICMP type.";
+            type uint8; // TODO Make this semantic
+        }
+    }
+    
+    grouping icmpv6-code-attributes {
+        leaf icmpv6-code {
+            description "ICMP code.";
+            type uint8; // TODO Make this semantic
+        }
     }
     
     grouping icmpv6-type {
@@ -320,12 +315,12 @@ module opendaylight-match-types {
     
     grouping arp-source-hardware-address-attributes {
         description "ARP source hardware address.";
-        uses mac-address-filter;
+        uses mac-address-filter-attributes;
     }
     
     grouping arp-target-hardware-address-attributes {
         description "ARP target hardware address.";
-        uses mac-address-filter;
+        uses mac-address-filter-attributes;
     }
     
     grouping tcp-flags-attributes {
@@ -348,28 +343,26 @@ module opendaylight-match-types {
         }
     }
     
-    grouping in-port {
+    grouping in-port-attributes {
         leaf in-port {
             type inv:node-connector-id;
         }
     }
     
-    grouping in-phys-port {
+    grouping in-phys-port-attributes {
         leaf in-phys-port {
             type inv:node-connector-id;
         }
     }
     
-    grouping tunnel-id {
-        container "tunnel" {
-            leaf tunnel-id {
-                description "Metadata associated in the logical port";
-                type uint64;
-            }
+    grouping tunnel-id-attributes {
+        leaf tunnel-id {
+            description "Metadata associated in the logical port";
+            type uint64;
+        }
 
-            leaf tunnel-mask {
-                type uint64;
-            }
+        leaf tunnel-mask {
+            type uint64;
         }
     }
 
@@ -387,22 +380,24 @@ module opendaylight-match-types {
         choice match {
             case in-port-case {
                 container in-port {
-                    uses in-port;
+                    uses in-port-attributes;
                 }
             }
             case in-phys-port-case {
                 container in-phys-port {
-                    uses in-phys-port;
+                    uses in-phys-port-attributes;
                 }
             }
             case metadata-case {
                 container "metadata" {
-                    uses of-metadata;
+                    uses metadata-attributes;
                 }
             }
             
             case tunnel-case {
-                uses tunnel-id;
+                container tunnel-id {
+                    uses tunnel-id-attributes;
+                }
             }
             
             case ethernet-source-case {
@@ -592,17 +587,51 @@ module opendaylight-match-types {
                 }
             }
             
-            case icmpv4-match {
-                container "icmpv4-match" {
-                    uses "icmpv4-match-fields";
+            
+            case icmpv4-type-case {
+                container icmpv4-type {
+                    uses icmpv4-type-attributes;
                 }
             }
-            case icmpv6-match-case {
-                
+            
+            case icmpv4-code-case {
+                container icmpv4-code {
+                    uses icmpv4-code-attributes;
+                }
             }
-            case protocol-match-fields-case {
-                container "protocol-match-fields" {
-                    uses "protocol-match-fields";
+            
+            case icmpv6-type-case {
+                container icmpv6-type {
+                    uses icmpv6-type-attributes;
+                }
+            }
+            
+            case icmpv6-code-case {
+                container icmpv6-code {
+                    uses icmpv6-code-attributes;
+                }
+            }
+            
+            case mpls-label-case {
+                container mpls-label {
+                    uses mpls-label-attributes;
+                }
+            }
+            
+            case mpls-tc-case {
+                container mpls-tc {
+                    uses mpls-tc-attributes;
+                }
+            }
+            
+            case mpls-bos-case {
+                container mpls-bos {
+                    uses mpls-bos-attributes;
+                }
+            }
+            case pbb-case {
+                container pbb {
+                    uses pbb-attributes;
                 }
             }
         }
