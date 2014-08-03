@@ -9,12 +9,11 @@ package org.opendaylight.controller.sal.rest.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.mount.MountService;
 import org.opendaylight.controller.sal.rest.api.RestConnector;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
@@ -37,15 +36,15 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public void onSessionInitiated(ProviderSession session) {
-        DataBrokerService dataService = session.getService(DataBrokerService.class);
+        final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
 
         BrokerFacade.getInstance().setContext(session);
-        BrokerFacade.getInstance().setDataService(dataService);
+        BrokerFacade.getInstance().setDomDataBroker( domDataBroker);
 
         SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
-        ControllerContext.getInstance().setMountService(session.getService(MountService.class));
+        ControllerContext.getInstance().setMountService(session.getService(DOMMountPointService.class));
 
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
         webSocketServerThread.setName("Web socket server on port " + port);

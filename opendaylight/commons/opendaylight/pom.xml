@@ -1600,6 +1600,11 @@
         <artifactId>util</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-data-composite-node</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
 
       <!-- yangtools dependencies -->
       <dependency>
