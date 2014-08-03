@@ -88,7 +88,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpSourcePortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpDestinationPortCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanIdCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanPcpCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.transport.address._case.ArpSourceTransportAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.target.hardware.address._case.ArpTargetHardwareAddress;
@@ -107,7 +108,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.source.port._case.TcpSourcePort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePort;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.id._case.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.pcp._case.VlanPcp;
 
 import com.google.common.net.InetAddresses;
 
@@ -163,7 +165,8 @@ public class TestFromSalConversionsUtils {
         TcpDestinationPort tcpDst = null;
         UdpSourcePort udpSrc = null;
         UdpDestinationPort udpDst = null;
-        VlanMatch vlan = null;
+        VlanId vlanId = null;
+        VlanPcp vlanPcp = null;
         IpProtocol proto = null;
         IpDscp dscp = null;
         InPort inPort = null;
@@ -178,9 +181,12 @@ public class TestFromSalConversionsUtils {
             } else if(match.getMatch() instanceof EthernetTypeCase) {
                 assertEquals("More than one EthernetTypeCase Seen",null, ethType);
                 ethType = ((EthernetTypeCase) match.getMatch()).getEthernetType();
-            } else if (match.getMatch() instanceof VlanMatchCase) {
-                assertEquals("More than one VlanMatchCase Seen",null, vlan);
-                vlan = ((VlanMatchCase) match.getMatch()).getVlanMatch();
+            } else if (match.getMatch() instanceof VlanIdCase) {
+                assertEquals("More than one VlanIdCase Seen",null, vlanId);
+                vlanId = ((VlanIdCase) match.getMatch()).getVlanId();
+            } else if (match.getMatch() instanceof VlanPcpCase) {
+                assertEquals("More than one VlanPcpCase Seen",null, vlanPcp);
+                vlanPcp = ((VlanPcpCase) match.getMatch()).getVlanPcp();
             } else if (match.getMatch() instanceof Ipv4SourceCase) {
                 assertEquals("More than one Ipv4SourceCase Seen",null, ipv4src);
                 ipv4src = ((Ipv4SourceCase) match.getMatch()).getIpv4Source();
@@ -271,17 +277,17 @@ public class TestFromSalConversionsUtils {
             assertEquals("Incoming port is wrong.", "openflow:12345:10", inPort.getInPort().getValue());
             assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethSrc.getAddress().getValue());
             assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethDst.getAddress().getValue());
-            assertEquals("Vlan ID is not present.", Boolean.TRUE, vlan.getVlanId().isVlanIdPresent());
-            assertEquals("Vlan ID is wrong.", (Integer) 0xfff, vlan.getVlanId().getVlanId().getValue());
-            assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) vlan.getVlanPcp()
+            assertEquals("Vlan ID is not present.", Boolean.TRUE, vlanId.getVlanIdOrVlanPresent().getVlanId() != null);
+            assertEquals("Vlan ID is wrong.", (Integer) 0xfff, vlanId.getVlanIdOrVlanPresent().getVlanId().getValue());
+            assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) vlanPcp.getVlanPcpOrPcpPresent().getVlanPcp()
                     .getValue());
             assertEquals("DCSP is wrong.", (short) 0x3f, (short) dscp.getIpDscp().getValue());
             break;
         case untagged:
             assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethSrc.getAddress().getValue());
             assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ethDst.getAddress().getValue());
-            assertEquals("Vlan ID is present.", Boolean.FALSE, vlan.getVlanId().isVlanIdPresent());
-            assertEquals("Vlan ID is wrong.", Integer.valueOf(0), vlan.getVlanId().getVlanId().getValue());
+            assertEquals("Vlan ID is present.", Boolean.FALSE, vlanId.getVlanIdOrVlanPresent().getVlanId() != null);
+            // assertEquals("Vlan ID is wrong.", Integer.valueOf(0), vlan.getVlanId().getVlanId().getValue());
             assertEquals("DCSP is wrong.", (short) 0x3f, (short) dscp.getIpDscp().getValue());
             break;
         case tcp:
