@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.compatibility.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.CRUDP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.TCP;
 import static org.opendaylight.controller.sal.compatibility.ProtocolConstants.UDP;
@@ -137,7 +136,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv4SourceCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6DestinationCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Ipv6SourceCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.Layer4MatchCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpDestinationPortCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.TcpSourcePortCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpDestinationPortCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.UdpSourcePortCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.VlanMatchCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.arp.source.hardware.address._case.ArpSourceHardwareAddressBuilder;
@@ -166,10 +168,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.destination._case.Ipv6DestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6Source;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.ipv6.source._case.Ipv6SourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.SctpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.TcpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.layer._4.match._case.layer._4.match.UdpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.destination.port._case.TcpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.destination.port._case.TcpDestinationPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.source.port._case.TcpSourcePort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.tcp.source.port._case.TcpSourcePortBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.destination.port._case.UdpDestinationPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.udp.source.port._case.UdpSourcePortBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.attributes.match.vlan.match._case.VlanMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
@@ -180,7 +186,7 @@ public class TestToSalConversionsUtils {
     // prefix:
     // od|Od = Open Daylight
     private enum MtchType {
-        other, untagged, ipv4, ipv6, arp, sctp, tcp, udp
+        other, untagged, ipv4, ipv6, arp, tcp, udp
     }
 
     @Test
@@ -204,9 +210,6 @@ public class TestToSalConversionsUtils {
 
         salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.arp), node);
         checkSalMatch(salFlow.getMatch(), MtchType.arp);
-
-        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.sctp), node);
-        checkSalMatch(salFlow.getMatch(), MtchType.sctp);
 
         salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.tcp), node);
         checkSalMatch(salFlow.getMatch(), MtchType.tcp);
@@ -275,11 +278,6 @@ public class TestToSalConversionsUtils {
                     InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_SRC).getValue()));
             assertEquals("NW_DST isn't equal.", "3001:db8:85a3::8a2e:370:7335",
                     InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_DST).getValue()));
-            break;
-        case sctp:
-            assertEquals("TP_SRC isn't equal.", 31, (short) match.getField(MatchType.TP_SRC).getValue());
-            assertEquals("TP_DST isn't equal.", 32, (short) match.getField(MatchType.TP_DST).getValue());
-            assertEquals("NW_PROTO isn't equal.", CRUDP, (byte) match.getField(MatchType.NW_PROTO).getValue());
             break;
         case tcp:
             assertEquals("TP_SRC isn't equal.", 21, (short) match.getField(MatchType.TP_SRC).getValue());
@@ -696,51 +694,45 @@ public class TestToSalConversionsUtils {
                     (new ArpTargetHardwareAddressCaseBuilder())
                         .setArpTargetHardwareAddress(prepareArpTargetHardwareAddress()).build()));
             break;
-        case sctp:
-            addMatch(matches,mb.setMatch(
-                    (new Layer4MatchCaseBuilder())
-                        .setLayer4Match(prepLayer4MatchSctp()).build()));
-            break;
         case tcp:
             addMatch(matches,mb.setMatch(
-                    (new Layer4MatchCaseBuilder())
-                        .setLayer4Match(prepLayer4MatchTcp()).build()));
+                    (new TcpSourcePortCaseBuilder())
+                        .setTcpSourcePort(prepTcpSourcePort()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new TcpDestinationPortCaseBuilder())
+                        .setTcpDestinationPort(prepTcpDestinationPort()).build()));
             break;
         case udp:
             addMatch(matches,mb.setMatch(
-                    (new Layer4MatchCaseBuilder())
-                        .setLayer4Match(prepLayer4MatchUdp()).build()));
+                    (new UdpSourcePortCaseBuilder())
+                        .setUdpSourcePort(prepUdpSourcePort()).build()));
+            addMatch(matches,mb.setMatch(
+                    (new UdpDestinationPortCaseBuilder())
+                        .setUdpDestinationPort(prepUdpDestinationPort()).build()));
             break;
         }
         odMatchBuilder.setMatch(matches);
         return odMatchBuilder.build();
     }
 
-    private Layer4Match prepLayer4MatchUdp() {
-        UdpMatchBuilder udpMatchBuilder = new UdpMatchBuilder();
-
-        udpMatchBuilder.setUdpSourcePort(new PortNumber(11));
-        udpMatchBuilder.setUdpDestinationPort(new PortNumber(12));
-
-        return udpMatchBuilder.build();
+    private UdpSourcePort prepUdpSourcePort() {
+        return new UdpSourcePortBuilder()
+                    .setUdpSourcePort(new PortNumber(11)).build();
     }
 
-    private Layer4Match prepLayer4MatchTcp() {
-        TcpMatchBuilder tcpMatchBuilder = new TcpMatchBuilder();
-
-        tcpMatchBuilder.setTcpSourcePort(new PortNumber(21));
-        tcpMatchBuilder.setTcpDestinationPort(new PortNumber(22));
-
-        return tcpMatchBuilder.build();
+    private UdpDestinationPort prepUdpDestinationPort() {
+        return new UdpDestinationPortBuilder()
+                    .setUdpDestinationPort(new PortNumber(12)).build();
     }
 
-    private Layer4Match prepLayer4MatchSctp() {
-        SctpMatchBuilder sctpMatchBuilder = new SctpMatchBuilder();
+    private TcpSourcePort prepTcpSourcePort() {
+        return new TcpSourcePortBuilder()
+                    .setTcpSourcePort(new PortNumber(21)).build();
+    }
 
-        sctpMatchBuilder.setSctpSourcePort(new PortNumber(31));
-        sctpMatchBuilder.setSctpDestinationPort(new PortNumber(32));
-
-        return sctpMatchBuilder.build();
+    private TcpDestinationPort prepTcpDestinationPort() {
+        return new TcpDestinationPortBuilder()
+                    .setTcpDestinationPort(new PortNumber(22)).build();
     }
 
     private Ipv4Source prepareIpv4Source() {
