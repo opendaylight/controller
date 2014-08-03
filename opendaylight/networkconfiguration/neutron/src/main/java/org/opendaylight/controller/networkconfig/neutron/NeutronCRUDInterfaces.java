@@ -46,4 +46,19 @@ public class NeutronCRUDInterfaces {
         INeutronSecurityRuleCRUD answer = (INeutronSecurityRuleCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityRuleCRUD.class, o);
         return answer;
     }
+
+    public static INeutronFirewallCRUD getINeutronFirewallCRUD(Object o) {
+        INeutronFirewallCRUD answer = (INeutronFirewallCRUD) ServiceHelper.getGlobalInstance(INeutronFirewallCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronFirewallPolicyCRUD getINeutronFirewallPolicyCRUD(Object o) {
+        INeutronFirewallPolicyCRUD answer = (INeutronFirewallPolicyCRUD) ServiceHelper.getGlobalInstance(INeutronFirewallPolicyCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronFirewallRuleCRUD getINeutronFirewallRuleCRUD(Object o) {
+        INeutronFirewallRuleCRUD answer = (INeutronFirewallRuleCRUD) ServiceHelper.getGlobalInstance(INeutronFirewallRuleCRUD.class, o);
+        return answer;
+    }
 }

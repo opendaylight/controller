@@ -8,23 +8,26 @@
 
 package org.opendaylight.controller.networkconfig.neutron.implementation;
 
-import java.util.Hashtable;
-import java.util.Dictionary;
-
 import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.configuration.IConfigurationContainerService;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -68,7 +71,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                 NeutronSubnetInterface.class,
                 NeutronNetworkInterface.class,
                 NeutronSecurityGroupInterface.class,
-                NeutronSecurityRuleInterface.class};
+                NeutronSecurityRuleInterface.class,
+                NeutronFirewallInterface.class,
+                NeutronFirewallPolicyInterface.class,
+                NeutronFirewallRuleInterface.class};
         return res;
     }
 
@@ -198,6 +204,54 @@ public class Activator extends ComponentActivatorAbstractBase {
                 IConfigurationContainerService.class).setCallbacks(
                 "setConfigurationContainerService",
                 "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronFirewallInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronFirewallCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronFirewallPolicyInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronFirewallPolicyCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronFirewallRuleInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronFirewallRuleCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
         }
     }
 }
