@@ -13,6 +13,8 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
@@ -32,9 +34,16 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.List;
 import java.util.concurrent.Executors;
+
+import static junit.framework.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TransactionProxyTest extends AbstractActorTest {
 
@@ -120,6 +129,68 @@ public class TransactionProxyTest extends AbstractActorTest {
 
         Assert.assertFalse(normalizedNodeOptional.isPresent());
     }
+
+    @Test
+    public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
+        final ActorContext actorContext = mock(ActorContext.class);
+
+        when(actorContext.executeShardOperation(anyString(), any(), any(
+            FiniteDuration.class))).thenThrow(new PrimaryNotFoundException("test"));
+
+        TransactionProxy transactionProxy =
+            new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+
+
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+            transactionProxy.read(TestModel.TEST_PATH);
+
+        Assert.assertFalse(read.get().isPresent());
+
+    }
+
+
+    @Test
+    public void testReadWhenATimeoutExceptionIsThrown() throws Exception {
+        final ActorContext actorContext = mock(ActorContext.class);
+
+        when(actorContext.executeShardOperation(anyString(), any(), any(
+            FiniteDuration.class))).thenThrow(new TimeoutException("test", new Exception("reason")));
+
+        TransactionProxy transactionProxy =
+            new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+
+
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+            transactionProxy.read(TestModel.TEST_PATH);
+
+        Assert.assertFalse(read.get().isPresent());
+
+    }
+
+    @Test
+    public void testReadWhenAAnyOtherExceptionIsThrown() throws Exception {
+        final ActorContext actorContext = mock(ActorContext.class);
+
+        when(actorContext.executeShardOperation(anyString(), any(), any(
+            FiniteDuration.class))).thenThrow(new NullPointerException());
+
+        TransactionProxy transactionProxy =
+            new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+
+
+        try {
+            ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+                transactionProxy.read(TestModel.TEST_PATH);
+            fail("A null pointer exception was expected");
+        } catch(NullPointerException e){
+
+        }
+    }
+
+
 
     @Test
     public void testWrite() throws Exception {

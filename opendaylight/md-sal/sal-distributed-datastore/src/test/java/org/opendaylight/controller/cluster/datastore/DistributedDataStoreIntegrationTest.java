@@ -5,7 +5,7 @@ import akka.testkit.JavaTestKit;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
-
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,9 +56,7 @@ public class DistributedDataStoreIntegrationTest{
 
         distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
-        // This sleep is fragile - test can fail intermittently if all Shards aren't updated with
-        // the SchemaContext in time. Is there any way we can make this deterministic?
-        Thread.sleep(2000);
+        Thread.sleep(1500);
 
         DOMStoreReadWriteTransaction transaction =
             distributedDataStore.newReadWriteTransaction();
@@ -69,6 +67,8 @@ public class DistributedDataStoreIntegrationTest{
             transaction.read(TestModel.TEST_PATH);
 
         Optional<NormalizedNode<?, ?>> optional = future.get();
+
+        Assert.assertTrue(optional.isPresent());
 
         NormalizedNode<?, ?> normalizedNode = optional.get();
 

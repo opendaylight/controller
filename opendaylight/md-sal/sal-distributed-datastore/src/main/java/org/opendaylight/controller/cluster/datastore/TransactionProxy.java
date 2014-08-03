@@ -12,12 +12,11 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
-
+import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -200,9 +199,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             }
-        } catch(TimeoutException e){
+        } catch(TimeoutException | PrimaryNotFoundException e){
             LOG.error("Creating NoOpTransaction because of : {}", e.getMessage());
-            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName));
+            remoteTransactionPaths.put(shardName,
+                new NoOpTransactionContext(shardName));
         }
     }
 
