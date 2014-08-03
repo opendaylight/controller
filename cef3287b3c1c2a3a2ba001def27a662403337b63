@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_07ae3198",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFirewallPolicyNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-08-03T06:17:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e708ed29",
+      "revId": "cef3287b3c1c2a3a2ba001def27a662403337b63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_671cdd6a",
         "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFirewallPolicyNorthbound.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e7aa2d84",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFirewallPolicyNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-08-03T06:17:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_671cdd6a",
+      "revId": "cef3287b3c1c2a3a2ba001def27a662403337b63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_070cf139",
         "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFirewallPolicyNorthbound.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-02T07:31:22Z",
       "side": 1,
       "message": "Shouldnt this be querySecurityPolicyFirewallRules.size() \u003d\u003d 0 ?",
+      "revId": "cef3287b3c1c2a3a2ba001def27a662403337b63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_47a8b98c",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFirewallPolicyNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-08-03T06:17:42Z",
+      "side": 1,
+      "message": "Thanks much, good catch bro.",
+      "parentUuid": "fa82b9bf_070cf139",
       "revId": "cef3287b3c1c2a3a2ba001def27a662403337b63",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
