@@ -12,6 +12,7 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
+import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -22,6 +23,7 @@ public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private final SchemaContext schemaContext;
     private final YangInstanceIdentifier pathId;
+    private boolean notificationsEnabled = false;
 
     public DataChangeListener(SchemaContext schemaContext,
                               AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, YangInstanceIdentifier pathId) {
@@ -32,15 +34,30 @@ public class DataChangeListener extends AbstractUntypedActor {
 
     @Override public void handleReceive(Object message) throws Exception {
         if(message.getClass().equals(DataChanged.SERIALIZABLE_CLASS)){
-            DataChanged reply = DataChanged.fromSerialize(schemaContext,message, pathId);
-            AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
-                change = reply.getChange();
-            this.listener.onDataChanged(change);
+            dataChanged(message);
+        } else if(message instanceof EnableNotification){
+            enableNotification((EnableNotification) message);
+        }
+    }
 
-            if(getSender() != null){
-                getSender().tell(new DataChangedReply().toSerializable(), getSelf());
-            }
+    private void enableNotification(EnableNotification message) {
+        notificationsEnabled = message.isEnabled();
+    }
 
+    public void dataChanged(Object message) {
+
+        // Do nothing if notifications are not enabled
+        if(!notificationsEnabled){
+            return;
+        }
+
+        DataChanged reply = DataChanged.fromSerialize(schemaContext,message, pathId);
+        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
+            change = reply.getChange();
+        this.listener.onDataChanged(change);
+
+        if(getSender() != null){
+            getSender().tell(new DataChangedReply().toSerializable(), getSelf());
         }
     }
 

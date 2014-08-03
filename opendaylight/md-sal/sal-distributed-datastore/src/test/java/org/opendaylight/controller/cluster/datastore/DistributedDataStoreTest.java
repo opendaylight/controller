@@ -54,8 +54,8 @@ public class DistributedDataStoreTest extends AbstractActorTest{
     }
 
     @org.junit.Test
-    public void testRegisterChangeListener() throws Exception {
-        mockActorContext.setExecuteShardOperationResponse(new RegisterChangeListenerReply(doNothingActorRef.path()).toSerializable());
+    public void testRegisterChangeListenerWhenShardIsNotLocal() throws Exception {
+
         ListenerRegistration registration =
                 distributedDataStore.registerChangeListener(TestModel.TEST_PATH, new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
             @Override
@@ -64,8 +64,30 @@ public class DistributedDataStoreTest extends AbstractActorTest{
             }
         }, AsyncDataBroker.DataChangeScope.BASE);
 
+        // Since we do not expect the shard to be local registration will return a NoOpRegistration
+        Assert.assertTrue(registration instanceof NoOpDataChangeListenerRegistration);
+
         Assert.assertNotNull(registration);
     }
+
+    @org.junit.Test
+    public void testRegisterChangeListenerWhenShardIsLocal() throws Exception {
+
+        mockActorContext.setExecuteLocalShardOperationResponse(new RegisterChangeListenerReply(doNothingActorRef.path()).toSerializable());
+
+        ListenerRegistration registration =
+            distributedDataStore.registerChangeListener(TestModel.TEST_PATH, new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
+                @Override
+                public void onDataChanged(AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+                    throw new UnsupportedOperationException("onDataChanged");
+                }
+            }, AsyncDataBroker.DataChangeScope.BASE);
+
+        Assert.assertTrue(registration instanceof DataChangeListenerRegistrationProxy);
+
+        Assert.assertNotNull(registration);
+    }
+
 
     @org.junit.Test
     public void testCreateTransactionChain() throws Exception {

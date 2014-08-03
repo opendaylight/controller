@@ -341,6 +341,13 @@ public abstract class RaftActor extends UntypedPersistentActor {
      */
     protected abstract void applySnapshot(Object snapshot);
 
+    /**
+     * This method will be called by the RaftActor when the state of the
+     * RaftActor changes. The derived actor can then use methods like
+     * isLeader or getLeader to do something useful
+     */
+    protected abstract void onStateChanged();
+
     private RaftActorBehavior switchBehavior(RaftState state) {
         if (currentBehavior != null) {
             if (currentBehavior.state() == state) {
@@ -367,6 +374,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
         } else {
             behavior = new Leader(context);
         }
+
+        onStateChanged();
+
         return behavior;
     }
 

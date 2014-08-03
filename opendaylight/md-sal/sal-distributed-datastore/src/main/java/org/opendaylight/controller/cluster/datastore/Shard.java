@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
@@ -44,7 +45,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -79,6 +82,8 @@ public class Shard extends RaftActor {
     private volatile SchemaContext schemaContext;
 
     private final ShardStats shardMBean;
+
+    private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
     private Shard(String name, Map<String, String> peerAddresses) {
         super(name, peerAddresses);
@@ -228,6 +233,16 @@ public class Shard extends RaftActor {
             .system().actorSelection(
                 registerChangeListener.getDataChangeListenerPath());
 
+
+        // Notify the listener if notifications should be enabled or not
+        // If this shard is the leader then it will enable notifications else
+        // it will not
+        dataChangeListenerPath.tell(new EnableNotification(isLeader()), getSelf());
+
+        // Now store a reference to the data change listener so it can be notified
+        // at a later point if notifications should be enabled or disabled
+        dataChangeListeners.add(dataChangeListenerPath);
+
         AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>
             listener = new DataChangeListenerProxy(schemaContext,dataChangeListenerPath);
 
@@ -283,6 +298,12 @@ public class Shard extends RaftActor {
 
     @Override protected void applySnapshot(Object snapshot) {
         throw new UnsupportedOperationException("applySnapshot");
+    }
+
+    @Override protected void onStateChanged() {
+        for(ActorSelection dataChangeListener : dataChangeListeners){
+            dataChangeListener.tell(new EnableNotification(isLeader()), getSelf());
+        }
     }
 
     @Override public String persistenceId() {
