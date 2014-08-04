@@ -200,7 +200,7 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <includes>
-            <include>org.opendaylight.controller.*</include>
+            <include>org/opendaylight/controller/cluster/**/*</include>
           </includes>
           <check>false</check>
         </configuration>
