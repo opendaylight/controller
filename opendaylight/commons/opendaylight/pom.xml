@@ -177,7 +177,7 @@
     <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
     <switchmanager.implementation.version>0.4.2-SNAPSHOT</switchmanager.implementation.version>
     <switchmanager.northbound.version>0.4.2-SNAPSHOT</switchmanager.northbound.version>
-    <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
+    <testvm.argLine>${argLine} -Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
     <topology.northbound.version>0.4.2-SNAPSHOT</topology.northbound.version>
     <topology.web.version>0.4.2-SNAPSHOT</topology.web.version>
     <topologymanager.version>0.4.2-SNAPSHOT</topologymanager.version>
