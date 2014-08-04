@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
@@ -22,13 +22,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
 public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDataReadWriteTransaction> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReadWriteTransaction.class);
 
-    public AbstractReadWriteTransaction(final DOMDataReadWriteTransaction delegate, final BindingToNormalizedNodeCodec codec) {
+    public AbstractReadWriteTransaction(final DOMDataReadWriteTransaction delegate,
+            final BindingToNormalizedNodeCodec codec) {
         super(delegate, codec);
     }
 
@@ -47,8 +46,8 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
                 throw new IllegalArgumentException(String.format("Invalid child encountered in path %s", path), e);
             }
             currentArguments.add(currentArg);
-            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(
-                    currentArguments);
+            org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
+                    .create(currentArguments);
 
             final Optional<NormalizedNode<?, ?>> d;
             try {
@@ -63,6 +62,5 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
             }
         }
     }
-
 
 }
