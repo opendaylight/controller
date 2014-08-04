@@ -22,9 +22,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -76,9 +76,9 @@ public class BrokerFacadeTest {
     CompositeNode dataNode;
 
     NormalizedNode<?, ?> dummyNode = createDummyNode("test:module", "2014-01-09", "interfaces");
-    CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> dummyNodeInFuture = wrapDummyNode(dummyNode);
+    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> dummyNodeInFuture = wrapDummyNode(dummyNode);
 
-    QName qname = TestUtils.buildQName("interfaces","test:module", "2014-01-09");
+    QName qname = TestUtils.buildQName("interfaces", "test:module", "2014-01-09");
 
     YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).toInstance();
 
@@ -107,8 +107,9 @@ public class BrokerFacadeTest {
 
     }
 
-    private CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> wrapDummyNode(final NormalizedNode<?, ?> dummyNode) {
-        return  Futures.immediateCheckedFuture(Optional.<NormalizedNode<?, ?>> of(dummyNode));
+    private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> wrapDummyNode(
+            final NormalizedNode<?, ?> dummyNode) {
+        return Futures.immediateCheckedFuture(Optional.<NormalizedNode<?, ?>> of(dummyNode));
     }
 
     /**
@@ -167,21 +168,29 @@ public class BrokerFacadeTest {
         brokerFacade.invokeRpc(qname, dataNode);
     }
 
-    @Ignore
     @Test
-    public void testCommitConfigurationDataPut() {
+    public void testCommitConfigurationDataPut() throws InterruptedException, ExecutionException {
         CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
-        when(wTransaction.submit()).thenReturn(expFuture);
+        when(rwTransaction.submit()).thenReturn(expFuture);
+
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> immediateCheckedFuture = mock(CheckedFuture.class);
+        Optional<NormalizedNode<?, ?>> mockedOptional = mock(Optional.class);
+        when(immediateCheckedFuture.get()).thenReturn(mockedOptional);
+        when(mockedOptional.isPresent()).thenReturn(true);
+
+        when(rwTransaction.read(any(LogicalDatastoreType.class), any(YangInstanceIdentifier.class))).thenReturn(
+                immediateCheckedFuture);
 
         Future<Void> actualFuture = brokerFacade.commitConfigurationDataPut(instanceID, dummyNode);
 
         assertSame("commitConfigurationDataPut", expFuture, actualFuture);
 
-        InOrder inOrder = inOrder(domDataBroker, wTransaction);
-        inOrder.verify(domDataBroker).newWriteOnlyTransaction();
-        inOrder.verify(wTransaction).put(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
-        inOrder.verify(wTransaction).submit();
+        InOrder inOrder = inOrder(domDataBroker, rwTransaction);
+        inOrder.verify(domDataBroker).newReadWriteTransaction();
+        inOrder.verify(rwTransaction).read(any(LogicalDatastoreType.class), any(YangInstanceIdentifier.class));
+        inOrder.verify(rwTransaction).put(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
+        inOrder.verify(rwTransaction).submit();
     }
 
     @Test
