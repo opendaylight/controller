@@ -51,8 +51,10 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private final RemoteDeviceId id;
     private final Lock sessionLock = new ReentrantLock();
 
+    // TODO implement concurrent message limit
     private final Queue<Request> requests = new ArrayDeque<>();
     private NetconfClientSession session;
+    private Future<?> initFuture;
 
     public NetconfDeviceCommunicator(final RemoteDeviceId id, final RemoteDevice<NetconfSessionCapabilities, NetconfMessage> remoteDevice,
             final NetconfSessionCapabilities netconfSessionCapabilities) {
@@ -97,9 +99,9 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     public void initializeRemoteConnection(final NetconfClientDispatcher dispatch,
                                            final NetconfClientConfiguration config) {
         if(config instanceof NetconfReconnectingClientConfiguration) {
-            dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
+            initFuture = dispatch.createReconnectingClient((NetconfReconnectingClientConfiguration) config);
         } else {
-            dispatch.createClient(config);
+            initFuture = dispatch.createClient(config);
         }
     }
 
@@ -172,7 +174,15 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     @Override
     public void close() {
-        tearDown( String.format( "The netconf session to %1$s has been closed", id.getName() ) );
+        // Cancel reconnect if in progress
+        if(initFuture != null) {
+            initFuture.cancel(false);
+        }
+        // Disconnect from device
+        if(session != null) {
+            session.close();
+        }
+        tearDown(id + ": Netconf session closed");
     }
 
     @Override
@@ -191,12 +201,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private void processMessage(final NetconfMessage message) {
         Request request = null;
         sessionLock.lock();
+
         try {
             request = requests.peek();
-            if (request.future.isUncancellable()) {
+            if (request != null && request.future.isUncancellable()) {
                 requests.poll();
-            }
-            else {
+            } else {
                 request = null;
                 logger.warn("{}: Ignoring unsolicited message {}", id, msgToS(message));
             }
