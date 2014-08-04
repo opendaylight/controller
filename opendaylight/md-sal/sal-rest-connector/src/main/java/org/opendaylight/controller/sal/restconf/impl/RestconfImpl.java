@@ -24,16 +24,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -64,7 +63,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.serializer.CnSnFromNormalizedNodeSerializerFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
@@ -475,7 +473,8 @@ public class RestconfImpl implements RestconfService {
         if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
             String fullRestconfIdentifier = this.controllerContext.toFullRestconfIdentifier(pathIdentifier);
 
-            LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class, DATASTORE_PARAM_NAME);
+            LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
+                    DATASTORE_PARAM_NAME);
             datastore = datastore == null ? DEFAULT_DATASTORE : datastore;
 
             DataChangeScope scope = parseEnumTypeParameter(value, DataChangeScope.class, SCOPE_PARAM_NAME);
@@ -628,20 +627,21 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData readConfigurationData(final String identifier, final UriInfo uriInfo) {
-        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(
-                this.controllerContext.toInstanceIdentifier(identifier), true);
+        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final YangInstanceIdentifier normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         if (mountPoint != null) {
-            data = broker.readConfigurationData(mountPoint, iiWithData.getInstanceIdentifier());
+            data = broker.readConfigurationData(mountPoint, normalizedII);
         } else {
-            data = broker.readConfigurationData(iiWithData.getInstanceIdentifier());
+            data = broker.readConfigurationData(normalizedII);
         }
-        CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
 
-        compositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(uriInfo));
-        boolean prettyPrintMode = parsePrettyPrintParameter(uriInfo);
-        return new StructuredData(compositeNode, iiWithData.getSchemaNode(), iiWithData.getMountPoint(), prettyPrintMode);
+        final CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
+        final CompositeNode prunedCompositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(uriInfo));
+
+        final boolean prettyPrintMode = parsePrettyPrintParameter(uriInfo);
+        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
     }
 
     @SuppressWarnings("unchecked")
@@ -688,21 +688,21 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public StructuredData readOperationalData(final String identifier, final UriInfo info) {
-        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(
-                this.controllerContext.toInstanceIdentifier(identifier), true);
-        NormalizedNode<?, ?> data = null;
-
+        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final YangInstanceIdentifier normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        NormalizedNode<?, ?> data = null;
         if (mountPoint != null) {
-            data = broker.readOperationalData(mountPoint, iiWithData.getInstanceIdentifier());
+            data = broker.readOperationalData(mountPoint, normalizedII);
         } else {
-            data = broker.readOperationalData(iiWithData.getInstanceIdentifier());
+            data = broker.readOperationalData(normalizedII);
         }
 
         final CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
         final CompositeNode prunedCompositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(info));
+
         final boolean prettyPrintMode = parsePrettyPrintParameter(info);
-        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint,prettyPrintMode);
+        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
     }
 
     private boolean parsePrettyPrintParameter(UriInfo info) {
@@ -712,24 +712,22 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response updateConfigurationData(final String identifier, final Node<?> payload) {
-        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.controllerContext
-                .toInstanceIdentifier(identifier));
+        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
 
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         final CompositeNode value = this.normalizeNode(payload, iiWithData.getSchemaNode(), mountPoint);
         validateListKeysEqualityInPayloadAndUri(iiWithData, value);
-        final NormalizedNode<?, ?> datastoreNormalizedNode = compositeNodeToDatastoreNormalizedNode(value,
-                iiWithData.getSchemaNode());
+
+        Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = controllerContext.toNormalized(
+                iiWithData.getInstanceIdentifier(), value);
 
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataPut(mountPoint, iiWithData.getInstanceIdentifier(),
-                        datastoreNormalizedNode).get();
+                broker.commitConfigurationDataPut(mountPoint, normalized.getKey(), normalized.getValue()).get();
             } else {
-                broker.commitConfigurationDataPut(iiWithData.getInstanceIdentifier(), datastoreNormalizedNode)
-                        .get();
+                broker.commitConfigurationDataPut(normalized.getKey(), normalized.getValue()).get();
             }
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error updating data", e);
@@ -827,20 +825,18 @@ public class RestconfImpl implements RestconfService {
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
 
-            iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.addLastIdentifierFromData(
-                    incompleteInstIdWithData, value, schemaNode));
+            iiWithData = addLastIdentifierFromData(incompleteInstIdWithData, value, schemaNode);
         }
 
-        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value,
-                iiWithData.getSchemaNode());
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = controllerContext.toNormalized(
+                iiWithData.getInstanceIdentifier(), value);
+
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataPost(mountPoint,
-                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
+                broker.commitConfigurationDataPost(mountPoint, normalized.getKey(), normalized.getValue());
             } else {
-                broker.commitConfigurationDataPost(
-                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
+                broker.commitConfigurationDataPost(normalized.getKey(), normalized.getValue());
             }
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
@@ -874,17 +870,16 @@ public class RestconfImpl implements RestconfService {
                 payloadName, module.getNamespace());
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
         final InstanceIdWithSchemaNode iiWithData = this.addLastIdentifierFromData(null, value, schemaNode);
-        RpcResult<TransactionStatus> status = null;
-        final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value, schemaNode);
+
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = controllerContext.toNormalized(
+                iiWithData.getInstanceIdentifier(), value);
 
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataPost(mountPoint,
-                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
+                broker.commitConfigurationDataPost(mountPoint, normalized.getKey(), normalized.getValue());
             } else {
-                broker.commitConfigurationDataPost(
-                        iiWithData.getInstanceIdentifier(), datastoreNormalizedData);
+                broker.commitConfigurationDataPost(normalized.getKey(), normalized.getValue());
             }
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
@@ -895,16 +890,15 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdWithSchemaNode iiWithData = normalizeInstanceIdentifierWithSchemaNode(this.controllerContext
-                .toInstanceIdentifier(identifier));
-        RpcResult<TransactionStatus> status = null;
+        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        final YangInstanceIdentifier normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
 
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataDelete(mountPoint, iiWithData.getInstanceIdentifier()).get();
+                broker.commitConfigurationDataDelete(mountPoint, normalizedII);
             } else {
-                broker.commitConfigurationDataDelete(iiWithData.getInstanceIdentifier()).get();
+                broker.commitConfigurationDataDelete(normalizedII).get();
             }
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
@@ -914,14 +908,11 @@ public class RestconfImpl implements RestconfService {
     }
 
     /**
-     * Subscribes to some path in schema context (stream) to listen on changes
-     * on this stream.
+     * Subscribes to some path in schema context (stream) to listen on changes on this stream.
      *
-     * Additional parameters for subscribing to stream are loaded via rpc input
-     * parameters:
+     * Additional parameters for subscribing to stream are loaded via rpc input parameters:
      * <ul>
-     * <li>datastore</li> - default CONFIGURATION (other values of
-     * {@link LogicalDatastoreType} enum type)
+     * <li>datastore</li> - default CONFIGURATION (other values of {@link LogicalDatastoreType} enum type)
      * <li>scope</li> - default BASE (other values of {@link DataChangeScope})
      * </ul>
      */
@@ -971,8 +962,7 @@ public class RestconfImpl implements RestconfService {
      *
      * @param compNode
      *            contains value
-     * @return enum object if its string value is equal to {@code paramName}. In
-     *         other cases null.
+     * @return enum object if its string value is equal to {@code paramName}. In other cases null.
      */
     private <T> T parseEnumTypeParameter(final CompositeNode compNode, final Class<T> classDescriptor,
             final String paramName) {
@@ -991,11 +981,10 @@ public class RestconfImpl implements RestconfService {
     }
 
     /**
-     * Checks whether {@code value} is one of the string representation of
-     * enumeration {@code classDescriptor}
+     * Checks whether {@code value} is one of the string representation of enumeration {@code classDescriptor}
      *
-     * @return enum object if string value of {@code classDescriptor}
-     *         enumeration is equal to {@code value}. Other cases null.
+     * @return enum object if string value of {@code classDescriptor} enumeration is equal to {@code value}. Other cases
+     *         null.
      */
     private <T> T parserURIEnumParameter(final Class<T> classDescriptor, final String value) {
         if (Strings.isNullOrEmpty(value)) {
@@ -1088,34 +1077,6 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new InstanceIdWithSchemaNode(instance, schemaOfData, mountPoint);
-    }
-
-    private HashMap<QName, Object> resolveKeysFromData(final ListSchemaNode listNode, final CompositeNode dataNode) {
-        final HashMap<QName, Object> keyValues = new HashMap<QName, Object>();
-        List<QName> _keyDefinition = listNode.getKeyDefinition();
-        for (final QName key : _keyDefinition) {
-            SimpleNode<? extends Object> head = null;
-            String localName = key.getLocalName();
-            List<SimpleNode<? extends Object>> simpleNodesByName = dataNode.getSimpleNodesByName(localName);
-            if (simpleNodesByName != null) {
-                head = Iterables.getFirst(simpleNodesByName, null);
-            }
-
-            Object dataNodeKeyValueObject = null;
-            if (head != null) {
-                dataNodeKeyValueObject = head.getValue();
-            }
-
-            if (dataNodeKeyValueObject == null) {
-                throw new RestconfDocumentedException("Data contains list \"" + dataNode.getNodeType().getLocalName()
-                        + "\" which does not contain key: \"" + key.getLocalName() + "\"", ErrorType.PROTOCOL,
-                        ErrorTag.INVALID_VALUE);
-            }
-
-            keyValues.put(key, dataNodeKeyValueObject);
-        }
-
-        return keyValues;
     }
 
     private boolean endsWithMountPoint(final String identifier) {
@@ -1463,49 +1424,6 @@ public class RestconfImpl implements RestconfService {
 
         throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
                 "It wasn't possible to correctly interpret data."));
-    }
-
-    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(CompositeNode compNode, DataSchemaNode schema) {
-        List<Node<?>> lst = new ArrayList<Node<?>>();
-        lst.add(compNode);
-        if (schema instanceof ContainerSchemaNode) {
-            return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
-                    .parse(lst, (ContainerSchemaNode) schema);
-        } else if (schema instanceof ListSchemaNode) {
-            return CnSnToNormalizedNodeParserFactory.getInstance().getMapNodeParser()
-                    .parse(lst, (ListSchemaNode) schema);
-        }
-
-        LOG.error("Top level isn't of type container, list, leaf schema node but " + schema.getClass().getSimpleName());
-
-        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
-                "It wasn't possible to translate specified data to datastore readable form."));
-    }
-
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(InstanceIdWithSchemaNode iiWithSchemaNode) {
-        return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
-    }
-
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
-            InstanceIdWithSchemaNode iiWithSchemaNode, boolean unwrapLastListNode) {
-        return new InstanceIdWithSchemaNode(instanceIdentifierToReadableFormForNormalizeNode(
-                iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
-                iiWithSchemaNode.getMountPoint());
-    }
-
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(YangInstanceIdentifier instIdentifier,
-            boolean unwrapLastListNode) {
-        Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
-        final List<PathArgument> result = new ArrayList<PathArgument>();
-        final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
-        while (iter.hasNext()) {
-            final PathArgument pathArgument = iter.next();
-            if (pathArgument instanceof NodeIdentifierWithPredicates && (iter.hasNext() || unwrapLastListNode)) {
-                result.add(new YangInstanceIdentifier.NodeIdentifier(pathArgument.getNodeType()));
-            }
-            result.add(pathArgument);
-        }
-        return YangInstanceIdentifier.create(result);
     }
 
     private CompositeNodeWrapper topLevelElementAsCompositeNodeWrapper(final NodeWrapper<?> node,
