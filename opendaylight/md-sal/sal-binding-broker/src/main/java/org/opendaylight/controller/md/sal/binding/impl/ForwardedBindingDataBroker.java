@@ -16,7 +16,6 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 
 /**
  * The DataBrokerImpl simply defers to the DOMDataBroker for all its operations.
@@ -30,8 +29,8 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
  */
 public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker implements DataBroker {
 
-    public ForwardedBindingDataBroker(final DOMDataBroker domDataBroker, final BindingIndependentMappingService mappingService, final SchemaService schemaService) {
-        super(domDataBroker, mappingService,schemaService);
+    public ForwardedBindingDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec, final SchemaService schemaService) {
+        super(domDataBroker, codec,schemaService);
     }
 
     @Override

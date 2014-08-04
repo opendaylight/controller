@@ -18,22 +18,14 @@ module opendaylight-sal-binding-broker-impl {
 
     identity binding-dom-mapping-service {
         base config:service-type;
-        config:java-class "org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService";
+        config:java-class "org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec";
     }
-
 
     identity binding-broker-impl {
         base config:module-type;
         config:provided-service sal:binding-broker-osgi-registry;
         config:provided-service sal:binding-rpc-registry;
         config:java-name-prefix BindingBrokerImpl;
-    }
-
-    identity binding-data-broker {
-        base config:module-type;
-        config:provided-service sal:binding-data-broker;
-        config:provided-service sal:binding-data-consumer-broker;
-        config:java-name-prefix DataBrokerImpl;
     }
 
     identity binding-data-compatible-broker {
@@ -132,29 +124,6 @@ module opendaylight-sal-binding-broker-impl {
     }
 
     augment "/config:modules/config:module/config:configuration" {
-        case binding-data-broker {
-            when "/config:modules/config:module/config:type = 'binding-data-broker'";
-            container dom-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity dom:dom-broker-osgi-registry;
-                    }
-                }
-            }
-
-            container mapping-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity binding-dom-mapping-service;
-                    }
-                }
-            }
-        }
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
         case binding-data-compatible-broker {
             when "/config:modules/config:module/config:type = 'binding-data-compatible-broker'";
 
@@ -178,14 +147,6 @@ module opendaylight-sal-binding-broker-impl {
         }
     }
 
-    augment "/config:modules/config:module/config:state" {
-        case binding-data-broker {
-            when "/config:modules/config:module/config:type = 'binding-data-broker'";
-            container data {
-                uses common:data-state;
-            }
-        }
-    }
     augment "/config:modules/config:module/config:state" {
         case binding-rpc-broker {
             when "/config:modules/config:module/config:type = 'binding-rpc-broker'";
