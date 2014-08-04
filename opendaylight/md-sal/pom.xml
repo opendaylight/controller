@@ -66,6 +66,9 @@
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
 
+    <!-- sal clustering configuration -->
+    <module>sal-clustering-config</module>
+
     <!--sal-protocolbuffer-encoding-->
     <module>sal-protocolbuffer-encoding</module>
 
