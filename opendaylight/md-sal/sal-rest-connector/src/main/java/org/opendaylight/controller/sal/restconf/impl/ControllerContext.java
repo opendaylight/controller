@@ -29,9 +29,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.Response.Status;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
+import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
@@ -40,11 +43,13 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
@@ -91,8 +96,11 @@ public class ControllerContext implements SchemaContextListener {
     private volatile SchemaContext globalSchema;
     private volatile DOMMountPointService mountService;
 
+    private DataNormalizer dataNormalizer;
+
     public void setGlobalSchema(final SchemaContext globalSchema) {
         this.globalSchema = globalSchema;
+        this.dataNormalizer = new DataNormalizer(globalSchema);
     }
 
     public void setMountService(final DOMMountPointService mountService) {
@@ -924,4 +932,35 @@ public class ControllerContext implements SchemaContextListener {
                     + Arrays.<Object> asList(container, name).toString());
         }
     }
+
+    public Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalized(final YangInstanceIdentifier legacy,
+            final CompositeNode compositeNode) {
+        try {
+            return dataNormalizer.toNormalized(legacy, compositeNode);
+        } catch (NullPointerException e) {
+            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
+        }
+    }
+
+    public YangInstanceIdentifier toNormalized(final YangInstanceIdentifier legacy) {
+        try {
+            return dataNormalizer.toNormalized(legacy);
+        } catch (NullPointerException e) {
+            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
+        }
+    }
+
+    public CompositeNode toLegacy(final YangInstanceIdentifier instanceIdentifier,
+            final NormalizedNode<?,?> normalizedNode) {
+        try {
+            return dataNormalizer.toLegacy(instanceIdentifier, normalizedNode);
+        } catch (NullPointerException e) {
+            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
+        }
+    }
+
+    public DataNormalizationOperation<?> getRootOperation() {
+        return dataNormalizer.getRootOperation();
+    }
+
 }
