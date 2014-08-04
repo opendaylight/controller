@@ -16,6 +16,10 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerHealthMonitorCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerListenerCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
@@ -74,7 +78,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                 NeutronSecurityRuleInterface.class,
                 NeutronFirewallInterface.class,
                 NeutronFirewallPolicyInterface.class,
-                NeutronFirewallRuleInterface.class};
+                NeutronFirewallRuleInterface.class,
+                NeutronLoadBalancerInterface.class,
+                NeutronLoadBalancerPoolInterface.class,
+                NeutronLoadBalancerListenerInterface.class,
+                NeutronLoadBalancerHealthMonitorInterface.class};
         return res;
     }
 
@@ -241,6 +249,70 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(
                     new String[] { INeutronFirewallRuleCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronLoadBalancerInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronLoadBalancerCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronLoadBalancerListenerInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronLoadBalancerListenerCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronLoadBalancerPoolInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronLoadBalancerPoolCRUD.class.getName(),
+                            IConfigurationContainerAware.class.getName()}, null);
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "neutron");
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService",
+                            "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IConfigurationContainerService.class).setCallbacks(
+                    "setConfigurationContainerService",
+                    "unsetConfigurationContainerService").setRequired(true));
+        }
+        if (imp.equals(NeutronLoadBalancerHealthMonitorInterface.class)) {
+            // export the service
+            c.setInterface(
+                    new String[] { INeutronLoadBalancerHealthMonitorCRUD.class.getName(),
                             IConfigurationContainerAware.class.getName()}, null);
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "neutron");
