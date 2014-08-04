@@ -30,9 +30,9 @@ import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +75,12 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
     }
 
     private void checkReadSuccess(final RpcResult<CompositeNode> result, final YangInstanceIdentifier path) {
-        LOG.warn("{}: Unable to read data: {}, errors: {}", id, path, result.getErrors());
-        Preconditions.checkArgument(result.isSuccessful(), "%s: Unable to read data: %s, errors: %s", id, path, result.getErrors());
+        try {
+            Preconditions.checkArgument(result.isSuccessful(), "%s: Unable to read data: %s, errors: %s", id, path, result.getErrors());
+        } catch (IllegalArgumentException e) {
+            LOG.warn("{}: Unable to read data: {}, errors: {}", id, path, result.getErrors());
+            throw e;
+        }
     }
 
     private Optional<NormalizedNode<?, ?>> transform(final YangInstanceIdentifier path, final CompositeNode node) {
