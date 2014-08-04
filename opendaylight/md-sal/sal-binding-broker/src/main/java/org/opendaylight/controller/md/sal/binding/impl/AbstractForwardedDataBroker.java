@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,7 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -37,7 +35,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -50,9 +47,6 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     // The Broker to whom we do all forwarding
     private final DOMDataBroker domDataBroker;
 
-    // Mapper to convert from Binding Independent objects to Binding Aware
-    // objects
-    private final BindingIndependentMappingService mappingService;
 
     private final BindingToNormalizedNodeCodec codec;
     private BindingIndependentConnector connector;
@@ -60,19 +54,14 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private final ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
 
     protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker,
-            final BindingIndependentMappingService mappingService,final SchemaService schemaService) {
+            final BindingToNormalizedNodeCodec codec,final SchemaService schemaService) {
         this.domDataBroker = domDataBroker;
-        this.mappingService = mappingService;
-        this.codec = new BindingToNormalizedNodeCodec(mappingService);
+        this.codec = codec;
         this.schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
     }
 
     protected BindingToNormalizedNodeCodec getCodec() {
         return codec;
-    }
-
-    protected BindingIndependentMappingService getMappingService() {
-        return mappingService;
     }
 
     @Override
@@ -82,7 +71,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     @Override
     public void onGlobalContextUpdated(final SchemaContext ctx) {
-        codec.onGlobalContextUpdated(ctx);
+        // NOOP
     }
 
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
