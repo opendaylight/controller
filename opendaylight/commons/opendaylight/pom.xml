@@ -1575,6 +1575,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>binding-data-codec</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>binding-generator-spi</artifactId>
         <version>${yangtools.version}</version>
       </dependency>
