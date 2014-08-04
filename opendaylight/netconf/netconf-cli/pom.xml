@@ -52,12 +52,10 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
-      <!--        <version>0.6.2-SNAPSHOT</version>-->
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-json</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
+      <artifactId>yang-data-composite-node</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
