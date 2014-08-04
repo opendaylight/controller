@@ -93,7 +93,7 @@ public final class NetconfStateSchemas {
      */
     private static NetconfStateSchemas create(final NetconfDeviceRpc deviceRpc, final NetconfSessionCapabilities remoteSessionCapabilities, final RemoteDeviceId id) {
         if(remoteSessionCapabilities.isMonitoringSupported() == false) {
-            logger.warn("{}: Netconf monitoring not supported on device, cannot detect available schemas");
+            logger.warn("{}: Netconf monitoring not supported on device, cannot detect provided schemas");
             return EMPTY;
         }
 

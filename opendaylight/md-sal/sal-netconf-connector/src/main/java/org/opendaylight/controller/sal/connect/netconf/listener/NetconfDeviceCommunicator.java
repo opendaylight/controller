@@ -51,6 +51,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private final RemoteDeviceId id;
     private final Lock sessionLock = new ReentrantLock();
 
+    // TODO implement concurrent message limit
     private final Queue<Request> requests = new ArrayDeque<>();
     private NetconfClientSession session;
 
@@ -191,12 +192,14 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     private void processMessage(final NetconfMessage message) {
         Request request = null;
         sessionLock.lock();
+
+        // FIXME, what if replies do not come in order ?
+
         try {
             request = requests.peek();
-            if (request.future.isUncancellable()) {
+            if (request != null && request.future.isUncancellable()) {
                 requests.poll();
-            }
-            else {
+            } else {
                 request = null;
                 logger.warn("{}: Ignoring unsolicited message {}", id, msgToS(message));
             }

@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * Implementation of RemoteDeviceHandler. Integrates cli with
@@ -41,7 +41,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
     }
 
     @Override
-    public synchronized void onDeviceConnected(final SchemaContextProvider contextProvider,
+    public synchronized void onDeviceConnected(final SchemaContext context,
             final NetconfSessionCapabilities capabilities, final RpcImplementation rpcImplementation) {
         console.enterRootContext(new ConsoleContext() {
 
@@ -60,8 +60,8 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
         // possible
         // TODO detect netconf base version
         // TODO detect inet types version
-        commandDispatcher.addRemoteCommands(rpcImplementation, contextProvider.getSchemaContext());
-        schemaContextRegistry.setRemoteSchemaContext(contextProvider.getSchemaContext());
+        commandDispatcher.addRemoteCommands(rpcImplementation, context);
+        schemaContextRegistry.setRemoteSchemaContext(context);
         up = true;
         this.notify();
     }

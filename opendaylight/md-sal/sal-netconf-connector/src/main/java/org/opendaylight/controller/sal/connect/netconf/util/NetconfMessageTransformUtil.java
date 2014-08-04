@@ -49,6 +49,8 @@ import org.w3c.dom.Element;
 
 public class NetconfMessageTransformUtil {
 
+    public static final String MESSAGE_ID_ATTR = "message-id";
+
     private NetconfMessageTransformUtil() {}
 
     public static final QName IETF_NETCONF_MONITORING = QName.create(NetconfState.QNAME, "ietf-netconf-monitoring");
@@ -125,8 +127,8 @@ public class NetconfMessageTransformUtil {
 
     public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
             throws NetconfDocumentedException {
-        final String inputMsgId = input.getDocument().getDocumentElement().getAttribute("message-id");
-        final String outputMsgId = output.getDocument().getDocumentElement().getAttribute("message-id");
+        final String inputMsgId = input.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
+        final String outputMsgId = output.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
 
         if(inputMsgId.equals(outputMsgId) == false) {
             Map<String,String> errorInfo = ImmutableMap.<String,String>builder()
