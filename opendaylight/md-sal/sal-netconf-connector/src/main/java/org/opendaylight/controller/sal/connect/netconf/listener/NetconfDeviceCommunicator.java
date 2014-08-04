@@ -193,10 +193,9 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
         sessionLock.lock();
         try {
             request = requests.peek();
-            if (request.future.isUncancellable()) {
+            if (request != null && request.future.isUncancellable()) {
                 requests.poll();
-            }
-            else {
+            } else {
                 request = null;
                 logger.warn("{}: Ignoring unsolicited message {}", id, msgToS(message));
             }

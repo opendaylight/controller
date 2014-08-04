@@ -9,11 +9,11 @@ package org.opendaylight.controller.sal.connect.api;
 
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public interface RemoteDeviceHandler<PREF> extends AutoCloseable {
 
-    void onDeviceConnected(SchemaContextProvider remoteSchemaContextProvider,
+    void onDeviceConnected(SchemaContext remoteSchemaContext,
                            PREF netconfSessionPreferences, RpcImplementation deviceRpc);
 
     void onDeviceDisconnected();
