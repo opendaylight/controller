@@ -19,7 +19,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-features</artifactId>
-      <version>${config.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
