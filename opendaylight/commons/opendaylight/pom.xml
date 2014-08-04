@@ -1290,6 +1290,11 @@
             <artifactId>sal-clustering-commons</artifactId>
             <version>${mdsal.version}</version>
         </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-clustering-config</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

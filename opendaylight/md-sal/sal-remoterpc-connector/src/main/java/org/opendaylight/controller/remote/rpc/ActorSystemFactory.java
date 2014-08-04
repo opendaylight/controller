@@ -27,7 +27,6 @@ public class ActorSystemFactory {
    * @param bundleContext
    */
   public static final void createInstance(final BundleContext bundleContext) {
-
     if(actorSystem == null) {
       // Create an OSGi bundle classloader for actor system
       BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
@@ -35,8 +34,8 @@ public class ActorSystemFactory {
       synchronized (ActorSystemFactory.class) {
         // Double check
         if (actorSystem == null) {
-          ActorSystem system = ActorSystem.create("opendaylight-rpc",
-              ConfigFactory.load().getConfig("odl-cluster"), classLoader);
+          ActorSystem system = ActorSystem.create("opendaylight-cluster-rpc",
+              ConfigFactory.load().getConfig("odl-cluster-rpc"), classLoader);
           actorSystem = system;
         }
       }
