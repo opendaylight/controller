@@ -2,14 +2,13 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 
 public class BindingAsyncDataBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModule implements
@@ -36,7 +35,7 @@ public class BindingAsyncDataBrokerImplModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         Broker domBroker = getDomAsyncBrokerDependency();
-        BindingIndependentMappingService mappingService = getBindingMappingServiceDependency();
+        BindingToNormalizedNodeCodec mappingService = getBindingMappingServiceDependency();
 
         // FIXME: Switch this to DOM Broker registration which would not require
         // BundleContext when API are updated.
