@@ -95,7 +95,7 @@ public class RestconfImpl implements RestconfService {
 
         private String uriParameterName;
 
-        UriParameters(String uriParameterName) {
+        UriParameters(final String uriParameterName) {
             this.uriParameterName = uriParameterName;
         }
 
@@ -282,7 +282,7 @@ public class RestconfImpl implements RestconfService {
     }
 
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
-            final DOMMountPoint mountPoint, boolean prettyPrint) {
+            final DOMMountPoint mountPoint, final boolean prettyPrint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
         Module restconfModule = this.getRestconfModule();
         final DataSchemaNode operationsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
@@ -576,7 +576,7 @@ public class RestconfImpl implements RestconfService {
         return null;
     }
 
-    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, boolean prettyPrint) {
+    private StructuredData callRpc(final RpcExecutor rpcExecutor, final CompositeNode payload, final boolean prettyPrint) {
         if (rpcExecutor == null) {
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
         }
@@ -711,7 +711,7 @@ public class RestconfImpl implements RestconfService {
         return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
     }
 
-    private boolean parsePrettyPrintParameter(UriInfo info) {
+    private boolean parsePrettyPrintParameter(final UriInfo info) {
         String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
         return Boolean.parseBoolean(param);
     }
@@ -1009,7 +1009,7 @@ public class RestconfImpl implements RestconfService {
         return resolveAsEnum(classDescriptor, value);
     }
 
-    private <T> T resolveAsEnum(Class<T> classDescriptor, String value) {
+    private <T> T resolveAsEnum(final Class<T> classDescriptor, final String value) {
         T[] enumConstants = classDescriptor.getEnumConstants();
         if (enumConstants != null) {
             for (T enm : classDescriptor.getEnumConstants()) {
@@ -1021,7 +1021,7 @@ public class RestconfImpl implements RestconfService {
         return null;
     }
 
-    private Map<String, String> resolveValuesFromUri(String uri) {
+    private Map<String, String> resolveValuesFromUri(final String uri) {
         Map<String, String> result = new HashMap<>();
         String[] tokens = uri.split("/");
         for (int i = 1; i < tokens.length; i++) {
@@ -1410,7 +1410,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private CompositeNode datastoreNormalizedNodeToCompositeNode(NormalizedNode<?, ?> dataNode, DataSchemaNode schema) {
+    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode, final DataSchemaNode schema) {
         Iterable<Node<?>> nodes = null;
         if (dataNode == null) {
             throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
@@ -1442,14 +1442,14 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to correctly interpret data."));
     }
 
-    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(CompositeNode compNode, DataSchemaNode schema) {
+    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode, final DataSchemaNode schema) {
         List<Node<?>> lst = new ArrayList<Node<?>>();
         lst.add(compNode);
         if (schema instanceof ContainerSchemaNode) {
             return CnSnToNormalizedNodeParserFactory.getInstance().getContainerNodeParser()
                     .parse(lst, (ContainerSchemaNode) schema);
         } else if (schema instanceof ListSchemaNode) {
-            return CnSnToNormalizedNodeParserFactory.getInstance().getMapNodeParser()
+            return CnSnToNormalizedNodeParserFactory.getInstance().getMapEntryNodeParser()
                     .parse(lst, (ListSchemaNode) schema);
         }
 
@@ -1459,19 +1459,19 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to translate specified data to datastore readable form."));
     }
 
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(InstanceIdWithSchemaNode iiWithSchemaNode) {
+    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(final InstanceIdWithSchemaNode iiWithSchemaNode) {
         return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
     }
 
     private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
-            InstanceIdWithSchemaNode iiWithSchemaNode, boolean unwrapLastListNode) {
+            final InstanceIdWithSchemaNode iiWithSchemaNode, final boolean unwrapLastListNode) {
         return new InstanceIdWithSchemaNode(instanceIdentifierToReadableFormForNormalizeNode(
                 iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
                 iiWithSchemaNode.getMountPoint());
     }
 
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(YangInstanceIdentifier instIdentifier,
-            boolean unwrapLastListNode) {
+    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(final YangInstanceIdentifier instIdentifier,
+            final boolean unwrapLastListNode) {
         Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
         final List<PathArgument> result = new ArrayList<PathArgument>();
         final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
