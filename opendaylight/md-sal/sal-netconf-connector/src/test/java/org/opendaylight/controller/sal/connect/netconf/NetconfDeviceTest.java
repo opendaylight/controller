@@ -11,6 +11,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,7 +34,6 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.api.SchemaContextProviderFactory;
 import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
@@ -46,7 +46,10 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
+import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistration;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
@@ -83,10 +86,18 @@ public class NetconfDeviceTest {
         final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), getMessageTransformer(), getSchemaContextProviderFactory(), getSourceProviderFactory(), stateSchemasResolver);
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), getMessageTransformer(), getSchemaRegistry(), getSchemaFactory(), stateSchemasResolver);
         device.onRemoteSessionUp(getSessionCaps(false, Collections.<String>emptyList()), listener);
 
         Mockito.verify(facade, Mockito.timeout(5000)).onDeviceDisconnected();
+    }
+
+    private SchemaSourceRegistry getSchemaRegistry() {
+        final SchemaSourceRegistry mock = mock(SchemaSourceRegistry.class);
+        final SchemaSourceRegistration mockReg = mock(SchemaSourceRegistration.class);
+        doNothing().when(mockReg).close();
+        doReturn(mockReg).when(mock).registerSchemaSource(any(org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider.class), any(PotentialSchemaSource.class));
+        return mock;
     }
 
     @Test
@@ -95,7 +106,7 @@ public class NetconfDeviceTest {
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaContextProviderFactory(), getSourceProviderFactory(), stateSchemasResolver);
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaRegistry(), getSchemaFactory(), stateSchemasResolver);
 
         device.onNotification(netconfMessage);
         device.onNotification(netconfMessage);
@@ -120,40 +131,32 @@ public class NetconfDeviceTest {
         final RemoteDeviceHandler<NetconfSessionCapabilities> facade = getFacade();
         final RemoteDeviceCommunicator<NetconfMessage> listener = getListener();
 
-        final SchemaContextProviderFactory schemaContextProviderFactory = getSchemaContextProviderFactory();
-        final SchemaSourceProviderFactory<InputStream> sourceProviderFactory = getSourceProviderFactory();
+        final SchemaContextFactory schemaContextProviderFactory = getSchemaFactory();
         final MessageTransformer<NetconfMessage> messageTransformer = getMessageTransformer();
 
-        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, schemaContextProviderFactory, sourceProviderFactory, stateSchemasResolver);
+        final NetconfDevice device = new NetconfDevice(getId(), facade, getExecutor(), messageTransformer, getSchemaRegistry(), schemaContextProviderFactory, stateSchemasResolver);
         final NetconfSessionCapabilities sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_NAMESPACE + "?module=" + TEST_MODULE + "&amp;revision=" + TEST_REVISION));
         device.onRemoteSessionUp(sessionCaps, listener);
 
-        verify(sourceProviderFactory, timeout(5000)).createSourceProvider(any(RpcImplementation.class));
-        verify(schemaContextProviderFactory, timeout(5000)).createContextProvider(any(Collection.class), any(SchemaSourceProvider.class));
+        verify(schemaContextProviderFactory, timeout(5000)).createSchemaContext(any(Collection.class));
         verify(messageTransformer, timeout(5000)).onGlobalContextUpdated(any(SchemaContext.class));
-        verify(facade, timeout(5000)).onDeviceConnected(any(SchemaContextProvider.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        verify(facade, timeout(5000)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
 
         device.onRemoteSessionDown();
         verify(facade, timeout(5000)).onDeviceDisconnected();
 
         device.onRemoteSessionUp(sessionCaps, listener);
 
-        verify(sourceProviderFactory, timeout(5000).times(2)).createSourceProvider(any(RpcImplementation.class));
-        verify(schemaContextProviderFactory, timeout(5000).times(2)).createContextProvider(any(Collection.class), any(SchemaSourceProvider.class));
+        verify(schemaContextProviderFactory, timeout(5000).times(2)).createSchemaContext(any(Collection.class));
         verify(messageTransformer, timeout(5000).times(2)).onGlobalContextUpdated(any(SchemaContext.class));
-        verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContextProvider.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
     }
 
-    private SchemaContextProviderFactory getSchemaContextProviderFactory() {
-        final SchemaContextProviderFactory schemaContextProviderFactory = mockClass(SchemaContextProviderFactory.class);
-        doReturn(new SchemaContextProvider() {
-            @Override
-            public SchemaContext getSchemaContext() {
-                return getSchema();
-            }
-        }).when(schemaContextProviderFactory).createContextProvider(any(Collection.class), any(SchemaSourceProvider.class));
-        return schemaContextProviderFactory;
+    private SchemaContextFactory getSchemaFactory() {
+        final SchemaContextFactory schemaFactory = mockClass(SchemaContextFactory.class);
+        doReturn(Futures.immediateCheckedFuture(getSchema())).when(schemaFactory).createSchemaContext(any(Collection.class));
+        return schemaFactory;
     }
 
     public static SchemaContext getSchema() {
@@ -167,7 +170,7 @@ public class NetconfDeviceTest {
 
     private RemoteDeviceHandler<NetconfSessionCapabilities> getFacade() throws Exception {
         final RemoteDeviceHandler<NetconfSessionCapabilities> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
-        doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContextProvider.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
+        doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionCapabilities.class), any(RpcImplementation.class));
         doNothing().when(remoteDeviceHandler).onDeviceDisconnected();
         doNothing().when(remoteDeviceHandler).onNotification(any(CompositeNode.class));
         return remoteDeviceHandler;
@@ -190,7 +193,7 @@ public class NetconfDeviceTest {
     }
 
     private static <T> T mockClass(final Class<T> remoteDeviceHandlerClass) {
-        final T mock = Mockito.mock(remoteDeviceHandlerClass);
+        final T mock = mock(remoteDeviceHandlerClass);
         Mockito.doReturn(remoteDeviceHandlerClass.getSimpleName()).when(mock).toString();
         return mock;
     }

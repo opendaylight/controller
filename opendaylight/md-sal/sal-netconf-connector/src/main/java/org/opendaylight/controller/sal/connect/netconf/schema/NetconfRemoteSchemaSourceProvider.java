@@ -7,6 +7,16 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema;
 
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
@@ -16,21 +26,29 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
+import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
+import org.opendaylight.yangtools.yang.parser.util.ASTSchemaSource;
+import org.opendaylight.yangtools.yang.parser.util.TextToASTTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+public final class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<ASTSchemaSource> {
 
-public final class NetconfRemoteSchemaSourceProvider implements SchemaSourceProvider<String> {
-
-    public static final QName GET_SCHEMA_QNAME = QName.create(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING,
-            "get-schema");
-    public static final QName GET_DATA_QNAME = QName
-            .create(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING, "data");
+    public static final QName GET_SCHEMA_QNAME = QName.create(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING,"get-schema");
+    public static final QName GET_DATA_QNAME = QName.create(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING, "data");
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfRemoteSchemaSourceProvider.class);
+
+    private static final Function<Exception, SchemaSourceException> MAPPER = new Function<Exception, SchemaSourceException>() {
+        @Override
+        public SchemaSourceException apply(final Exception e) {
+            return new SchemaSourceException("Cannot retrieve schema", e);
+        }
+    };
 
     private final RpcImplementation rpc;
     private final RemoteDeviceId id;
@@ -38,33 +56,6 @@ public final class NetconfRemoteSchemaSourceProvider implements SchemaSourceProv
     public NetconfRemoteSchemaSourceProvider(final RemoteDeviceId id, final RpcImplementation rpc) {
         this.id = id;
         this.rpc = Preconditions.checkNotNull(rpc);
-    }
-
-    @Override
-    public Optional<String> getSchemaSource(final String moduleName, final Optional<String> revision) {
-        final ImmutableCompositeNode getSchemaRequest = createGetSchemaRequest(moduleName, revision);
-
-        logger.trace("{}: Loading YANG schema source for {}:{}", id, moduleName, revision);
-        try {
-            final RpcResult<CompositeNode> schemaReply = rpc.invokeRpc(GET_SCHEMA_QNAME, getSchemaRequest).get();
-            if (schemaReply.isSuccessful()) {
-                final Optional<String> schemaBody = getSchemaFromRpc(id, schemaReply.getResult());
-                if (schemaBody.isPresent()) {
-                    logger.debug("{}: YANG Schema successfully retrieved for {}:{}", id, moduleName, revision);
-                    return schemaBody;
-                }
-            } else {
-                logger.warn("{}: YANG schema was not successfully retrieved for {}:{}. Errors: {}", id, moduleName,
-                        revision, schemaReply.getErrors());
-            }
-            return Optional.absent();
-        } catch (final InterruptedException e){
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(e);
-        } catch (final Exception e) {
-            logger.error("{}: YANG schema was not successfully retrieved for {}:{}", id, moduleName, revision, e);
-            throw new IllegalStateException(e);
-        }
     }
 
     private ImmutableCompositeNode createGetSchemaRequest(final String moduleName, final Optional<String> revision) {
@@ -84,10 +75,92 @@ public final class NetconfRemoteSchemaSourceProvider implements SchemaSourceProv
         final SimpleNode<?> simpleNode = result.getFirstSimpleByName(GET_DATA_QNAME.withoutRevision());
 
         Preconditions.checkNotNull(simpleNode,
-                "%s Unexpected response to get-schema, expected response with one child %s, but was %s",
-                id, GET_DATA_QNAME.withoutRevision(), result);
+                "%s Unexpected response to get-schema, expected response with one child %s, but was %s", id,
+                GET_DATA_QNAME.withoutRevision(), result);
 
         final Object potential = simpleNode.getValue();
-        return potential instanceof String ? Optional.of((String) potential) : Optional.<String>absent();
+        return potential instanceof String ? Optional.of((String) potential) : Optional.<String> absent();
+    }
+
+    @Override
+    public CheckedFuture<ASTSchemaSource, SchemaSourceException> getSource(final SourceIdentifier sourceIdentifier) {
+        final String moduleName = sourceIdentifier.getName();
+        final Optional<String> revision = Optional.fromNullable(sourceIdentifier.getRevision());
+        final ImmutableCompositeNode getSchemaRequest = createGetSchemaRequest(moduleName, revision);
+
+        logger.trace("{}: Loading YANG schema source for {}:{}", id, moduleName, revision);
+
+        final ListenableFuture<ASTSchemaSource> transformed = Futures.transform(
+                rpc.invokeRpc(GET_SCHEMA_QNAME, getSchemaRequest),
+                new ResultToYangSourceTransformer(id, sourceIdentifier, moduleName, revision));
+
+        return Futures.makeChecked(transformed, MAPPER);
+    }
+
+    /**
+     * Transform composite node to string schema representation and then to ASTSchemaSource
+     */
+    private static final class ResultToYangSourceTransformer implements
+            Function<RpcResult<CompositeNode>, ASTSchemaSource> {
+
+        private final RemoteDeviceId id;
+        private final SourceIdentifier sourceIdentifier;
+        private final String moduleName;
+        private final Optional<String> revision;
+
+        public ResultToYangSourceTransformer(final RemoteDeviceId id, final SourceIdentifier sourceIdentifier,
+                final String moduleName, final Optional<String> revision) {
+            this.id = id;
+            this.sourceIdentifier = sourceIdentifier;
+            this.moduleName = moduleName;
+            this.revision = revision;
+        }
+
+        @Override
+        public ASTSchemaSource apply(final RpcResult<CompositeNode> input) {
+
+            if (input.isSuccessful()) {
+
+                final Optional<String> schemaString = getSchemaFromRpc(id, input.getResult());
+
+                Preconditions.checkState(schemaString.isPresent(),
+                        "%s: Unexpected response to get-schema, schema not present in message for: %s", id, sourceIdentifier);
+
+                logger.debug("{}: YANG Schema successfully retrieved for {}:{}", id, moduleName, revision);
+
+
+                // FIXME need to parse yang source to AST since shared schema factory does not support any other representation
+                try {
+                    return TextToASTTransformer.TRANSFORMING_FUNCTION.apply(new YangTextSchemaSource(sourceIdentifier) {
+                        @Override
+                        protected Objects.ToStringHelper addToStringAttributes(final Objects.ToStringHelper toStringHelper) {
+                            return toStringHelper.add("device", id);
+                        }
+
+                        @Override
+                        public InputStream openStream() throws IOException {
+                            return IOUtils.toInputStream(schemaString.get());
+                        }
+                    });
+                // FIXME TextToASTTransformer.TRANSFORMATION returns future and we are already in a future, get has to be performed
+                } catch (final IOException e) {
+                    // Should not fail to open stream since we constructed the stream from string
+                    throw new IllegalStateException(String.format(
+                            "%s: YANG schema cannot be read %s", id, sourceIdentifier), e);
+                } catch (final YangSyntaxErrorException e) {
+                    logger.warn("{}: YANG schema was not successfully parsed for {}", id, sourceIdentifier, e);
+                    throw new IllegalStateException(String.format(
+                            "%s: YANG schema was not successfully parsed for %s", id, sourceIdentifier), e);
+                }
+            }
+
+            logger.warn("{}: YANG schema was not successfully retrieved for {}. Errors: {}", id, sourceIdentifier,
+                    input.getErrors());
+
+            throw new IllegalStateException(String.format(
+                    "%s: YANG schema was not successfully retrieved for %s. Errors: %s", id, sourceIdentifier,
+                    input.getErrors()));
+
+        }
     }
 }
