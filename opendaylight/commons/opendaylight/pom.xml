@@ -91,6 +91,7 @@
     <forwarding.staticrouting.northbound.version>0.4.2-SNAPSHOT</forwarding.staticrouting.northbound.version>
     <forwardingrulesmanager.implementation.version>0.4.2-SNAPSHOT</forwardingrulesmanager.implementation.version>
     <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
+    <featuresservice.northbound.version>1.0.0-SNAPSHOT</featuresservice.northbound.version>
     <ganymed.version>1.1-SNAPSHOT</ganymed.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
