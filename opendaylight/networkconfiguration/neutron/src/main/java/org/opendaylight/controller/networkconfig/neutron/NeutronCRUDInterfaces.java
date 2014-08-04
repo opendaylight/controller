@@ -61,4 +61,24 @@ public class NeutronCRUDInterfaces {
         INeutronFirewallRuleCRUD answer = (INeutronFirewallRuleCRUD) ServiceHelper.getGlobalInstance(INeutronFirewallRuleCRUD.class, o);
         return answer;
     }
+
+    public static INeutronLoadBalancerCRUD getINeutronLoadBalancerCRUD(Object o) {
+        INeutronLoadBalancerCRUD answer = (INeutronLoadBalancerCRUD) ServiceHelper.getGlobalInstance(INeutronLoadBalancerCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronLoadBalancerPoolCRUD getINeutronLoadBalancerPoolCRUD(Object o) {
+        INeutronLoadBalancerPoolCRUD answer = (INeutronLoadBalancerPoolCRUD) ServiceHelper.getGlobalInstance(INeutronLoadBalancerPoolCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronLoadBalancerListenerCRUD getINeutronLoadBalancerListenerCRUD(Object o) {
+        INeutronLoadBalancerListenerCRUD answer = (INeutronLoadBalancerListenerCRUD) ServiceHelper.getGlobalInstance(INeutronLoadBalancerListenerCRUD.class, o);
+        return answer;
+    }
+
+    public static INeutronLoadBalancerHealthMonitorCRUD getINeutronLoadBalancerHealthMonitorCRUD(Object o) {
+        INeutronLoadBalancerHealthMonitorCRUD answer = (INeutronLoadBalancerHealthMonitorCRUD) ServiceHelper.getGlobalInstance(INeutronLoadBalancerHealthMonitorCRUD.class, o);
+        return answer;
+    }
 }
