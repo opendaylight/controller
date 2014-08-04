@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.sal.connect.netconf;
 
-import java.io.InputStream;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -18,24 +20,31 @@ import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.api.SchemaContextProviderFactory;
-import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
-import org.opendaylight.controller.sal.connect.netconf.schema.NetconfDeviceSchemaProviderFactory;
-import org.opendaylight.controller.sal.connect.netconf.schema.NetconfRemoteSchemaSourceProvider;
-import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
+import org.opendaylight.controller.sal.connect.netconf.schema.NetconfRemoteSchemaYangSourceProvider;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaResolutionException;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistration;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -49,51 +58,33 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfDevice.class);
 
+    public static final Function<QName, SourceIdentifier> QNAME_TO_SOURCE_ID_FUNCTION = new Function<QName, SourceIdentifier>() {
+        @Override
+        public SourceIdentifier apply(final QName input) {
+            return new SourceIdentifier(input.getLocalName(), Optional.fromNullable(input.getFormattedRevision()));
+        }
+    };
+
     private final RemoteDeviceId id;
 
+    private final SchemaContextFactory schemaContextFactory;
     private final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade;
     private final ListeningExecutorService processingExecutor;
+    private final SchemaSourceRegistry schemaRegistry;
     private final MessageTransformer<NetconfMessage> messageTransformer;
-    private final SchemaContextProviderFactory schemaContextProviderFactory;
-    private final SchemaSourceProviderFactory<InputStream> sourceProviderFactory;
     private final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver;
     private final NotificationHandler notificationHandler;
+    private final List<SchemaSourceRegistration<? extends SchemaSourceRepresentation>> sourceRegistrations = Lists.newArrayList();
 
-    public static NetconfDevice createNetconfDevice(final RemoteDeviceId id,
-            final AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider,
-            final ExecutorService executor, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade) {
-        return createNetconfDevice(id, schemaSourceProvider, executor, salFacade, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
-    }
-
-    @VisibleForTesting
-    protected static NetconfDevice createNetconfDevice(final RemoteDeviceId id,
-            final AbstractCachingSchemaSourceProvider<String, InputStream> schemaSourceProvider,
-            final ExecutorService executor, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
-            final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
-
-        return new NetconfDevice(id, salFacade, executor, new NetconfMessageTransformer(),
-                new NetconfDeviceSchemaProviderFactory(id), new SchemaSourceProviderFactory<InputStream>() {
-                    @Override
-                    public SchemaSourceProvider<InputStream> createSourceProvider(final RpcImplementation deviceRpc) {
-                        return schemaSourceProvider.createInstanceFor(new NetconfRemoteSchemaSourceProvider(id,
-                                deviceRpc));
-                    }
-                }, stateSchemasResolver);
-    }
-
-    @VisibleForTesting
-    protected NetconfDevice(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
-                            final ExecutorService processingExecutor, final MessageTransformer<NetconfMessage> messageTransformer,
-                            final SchemaContextProviderFactory schemaContextProviderFactory,
-                            final SchemaSourceProviderFactory<InputStream> sourceProviderFactory,
-                            final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
+    public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade,
+                         final ExecutorService globalProcessingExecutor, final MessageTransformer<NetconfMessage> messageTransformer) {
         this.id = id;
+        this.schemaRegistry = schemaResourcesDTO.getSchemaRegistry();
         this.messageTransformer = messageTransformer;
+        this.schemaContextFactory = schemaResourcesDTO.getSchemaContextFactory();
         this.salFacade = salFacade;
-        this.sourceProviderFactory = sourceProviderFactory;
-        this.stateSchemasResolver = stateSchemasResolver;
-        this.processingExecutor = MoreExecutors.listeningDecorator(processingExecutor);
-        this.schemaContextProviderFactory = schemaContextProviderFactory;
+        this.stateSchemasResolver = schemaResourcesDTO.getStateSchemasResolver();
+        this.processingExecutor = MoreExecutors.listeningDecorator(globalProcessingExecutor);
         this.notificationHandler = new NotificationHandler(salFacade, messageTransformer, id);
     }
 
@@ -107,60 +98,97 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         // http://netty.io/wiki/thread-model.html
         logger.debug("{}: Session to remote device established with {}", id, remoteSessionCapabilities);
 
-        final ListenableFuture<?> salInitializationFuture = processingExecutor.submit(new Runnable() {
+        final NetconfDeviceRpc deviceRpc = setUpDeviceRpc(listener);
+        final ListenableFuture<CheckedFuture<SchemaContext, SchemaResolutionException>> schemaParsingFuture = processingExecutor.submit(new Callable<CheckedFuture<SchemaContext, SchemaResolutionException>>() {
             @Override
-            public void run() {
-                final NetconfDeviceRpc deviceRpc = setUpDeviceRpc(remoteSessionCapabilities, listener);
+            public CheckedFuture<SchemaContext, SchemaResolutionException> call() throws Exception {
+                Preconditions.checkArgument(remoteSessionCapabilities.isMonitoringSupported(),
+                        "%s: Netconf device does not support netconf monitoring, yang schemas cannot be acquired. Netconf device capabilities", remoteSessionCapabilities);
 
                 final NetconfStateSchemas availableSchemas = stateSchemasResolver.resolve(deviceRpc, remoteSessionCapabilities, id);
-                logger.warn("{}: Schemas exposed by ietf-netconf-monitoring: {}", id, availableSchemas.getAvailableYangSchemasQNames());
-                // TODO use this for shared schema context
+                logger.debug("{}: Schemas exposed by ietf-netconf-monitoring: {}", id, availableSchemas.getAvailableYangSchemasQNames());
 
-                final SchemaSourceProvider<InputStream> delegate = sourceProviderFactory.createSourceProvider(deviceRpc);
-                final SchemaContextProvider schemaContextProvider = setUpSchemaContext(delegate, remoteSessionCapabilities);
-                updateMessageTransformer(schemaContextProvider);
-                salFacade.onDeviceConnected(schemaContextProvider, remoteSessionCapabilities, deviceRpc);
-                notificationHandler.onRemoteSchemaUp();
+                final Collection<SourceIdentifier> requiredSources = Collections2.transform(remoteSessionCapabilities.getModuleBasedCaps(), QNAME_TO_SOURCE_ID_FUNCTION);
+                final Collection<SourceIdentifier> providedSources = Collections2.transform(availableSchemas.getAvailableYangSchemasQNames(), QNAME_TO_SOURCE_ID_FUNCTION);
+
+                addSourcesToSchemaRegistry(deviceRpc, providedSources);
+
+                final Set<QName> requiredSourcesNotProvided = Sets.difference(remoteSessionCapabilities.getModuleBasedCaps(), availableSchemas.getAvailableYangSchemasQNames());
+                if (!requiredSourcesNotProvided.isEmpty()) {
+                    logger.warn("{}: Netconf device does not provide all yang models reported in hello message capabilities, required but not provided: {}", id, requiredSourcesNotProvided);
+                    logger.warn("{}: Building schema context from provided sources", id);
+                    return schemaContextFactory.createSchemaContext(providedSources);
+                }
+
+                return schemaContextFactory.createSchemaContext(requiredSources);
             }
         });
 
-        Futures.addCallback(salInitializationFuture, new FutureCallback<Object>() {
+        Futures.addCallback(schemaParsingFuture, new FutureCallback<CheckedFuture<SchemaContext, SchemaResolutionException>>() {
             @Override
-            public void onSuccess(final Object result) {
-                logger.debug("{}: Initialization in sal successful", id);
-                logger.info("{}: Netconf connector initialized successfully", id);
+            public void onSuccess(final CheckedFuture<SchemaContext, SchemaResolutionException> futureSchemaContext) {
+
+                Futures.addCallback(futureSchemaContext, new FutureCallback<SchemaContext>() {
+                    @Override
+                    public void onSuccess(final SchemaContext result) {
+                        handleSalInitializationSuccess(result, remoteSessionCapabilities, deviceRpc);
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        handleSalInitializationFailure(t, listener);
+                    }
+                });
             }
 
             @Override
             public void onFailure(final Throwable t) {
-                // Unable to initialize device, set as disconnected
-                logger.error("{}: Initialization failed", id, t);
-                salFacade.onDeviceDisconnected();
-                // TODO ssh connection is still open if sal initialization fails
+                handleSalInitializationFailure(t, listener);
             }
         });
     }
 
+    private void handleSalInitializationSuccess(final SchemaContext result, final NetconfSessionCapabilities remoteSessionCapabilities, final NetconfDeviceRpc deviceRpc) {
+        updateMessageTransformer(result);
+        salFacade.onDeviceConnected(result, remoteSessionCapabilities, deviceRpc);
+        notificationHandler.onRemoteSchemaUp();
+
+        logger.debug("{}: Initialization in sal successful", id);
+        logger.info("{}: Netconf connector initialized successfully", id);
+    }
+
+    private void handleSalInitializationFailure(final Throwable t, final RemoteDeviceCommunicator<NetconfMessage> listener) {
+        logger.error("{}: Initialization in sal failed", id, t);
+        listener.close();
+        salFacade.onDeviceDisconnected();
+    }
+
     /**
      * Update initial message transformer to use retrieved schema
+     * @param currentSchemaContext
      */
-    private void updateMessageTransformer(final SchemaContextProvider schemaContextProvider) {
-        messageTransformer.onGlobalContextUpdated(schemaContextProvider.getSchemaContext());
+    private void updateMessageTransformer(final SchemaContext currentSchemaContext) {
+        messageTransformer.onGlobalContextUpdated(currentSchemaContext);
     }
 
-    private SchemaContextProvider setUpSchemaContext(final SchemaSourceProvider<InputStream> sourceProvider, final NetconfSessionCapabilities capabilities) {
-        return schemaContextProviderFactory.createContextProvider(capabilities.getModuleBasedCaps(), sourceProvider);
+    private void addSourcesToSchemaRegistry(final NetconfDeviceRpc deviceRpc, final Collection<SourceIdentifier> sourceIds) {
+        final NetconfRemoteSchemaYangSourceProvider yangProvider = new NetconfRemoteSchemaYangSourceProvider(id, deviceRpc);
+        for (final SourceIdentifier sourceId : sourceIds) {
+            sourceRegistrations.add(schemaRegistry.registerSchemaSource(yangProvider,
+                    PotentialSchemaSource.create(sourceId, YangTextSchemaSource.class, PotentialSchemaSource.Costs.REMOTE_IO.getValue())));
+        }
     }
 
-    private NetconfDeviceRpc setUpDeviceRpc(final NetconfSessionCapabilities capHolder, final RemoteDeviceCommunicator<NetconfMessage> listener) {
-        Preconditions.checkArgument(capHolder.isMonitoringSupported(),
-                "%s: Netconf device does not support netconf monitoring, yang schemas cannot be acquired. Netconf device capabilities", capHolder);
-        return new NetconfDeviceRpc(listener, messageTransformer);
+    private NetconfDeviceRpc setUpDeviceRpc(final RemoteDeviceCommunicator<NetconfMessage> listener) {
+       return new NetconfDeviceRpc(listener, messageTransformer);
     }
 
     @Override
     public void onRemoteSessionDown() {
         salFacade.onDeviceDisconnected();
+        for (final SchemaSourceRegistration<? extends SchemaSourceRepresentation> sourceRegistration : sourceRegistrations) {
+            sourceRegistration.close();
+        }
     }
 
     @Override
@@ -224,4 +252,30 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionCapabilit
         }
     }
 
+    /**
+     * Just a transfer object containing schema related dependencies. Injected in constructor.
+     */
+    public static class SchemaResourcesDTO {
+        private final SchemaSourceRegistry schemaRegistry;
+        private final SchemaContextFactory schemaContextFactory;
+        private final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver;
+
+        public SchemaResourcesDTO(final SchemaSourceRegistry schemaRegistry, final SchemaContextFactory schemaContextFactory, final NetconfStateSchemas.NetconfStateSchemasResolver stateSchemasResolver) {
+            this.schemaRegistry = Preconditions.checkNotNull(schemaRegistry);
+            this.schemaContextFactory = Preconditions.checkNotNull(schemaContextFactory);
+            this.stateSchemasResolver = Preconditions.checkNotNull(stateSchemasResolver);
+        }
+
+        public SchemaSourceRegistry getSchemaRegistry() {
+            return schemaRegistry;
+        }
+
+        public SchemaContextFactory getSchemaContextFactory() {
+            return schemaContextFactory;
+        }
+
+        public NetconfStateSchemas.NetconfStateSchemasResolver getStateSchemasResolver() {
+            return stateSchemasResolver;
+        }
+    }
 }

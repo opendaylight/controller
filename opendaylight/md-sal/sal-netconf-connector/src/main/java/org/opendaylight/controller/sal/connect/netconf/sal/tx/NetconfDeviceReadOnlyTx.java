@@ -55,7 +55,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_CONFIG_QNAME,
                 NetconfMessageTransformUtil.wrap(NETCONF_GET_CONFIG_QNAME, CONFIG_SOURCE_RUNNING, toFilterStructure(path)));
 
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
@@ -97,7 +97,7 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
             final YangInstanceIdentifier path) {
         final ListenableFuture<RpcResult<CompositeNode>> future = rpc.invokeRpc(NETCONF_GET_QNAME, NetconfMessageTransformUtil.wrap(NETCONF_GET_QNAME, toFilterStructure(path)));
 
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> transformedFuture = Futures.transform(future, new Function<RpcResult<CompositeNode>, Optional<NormalizedNode<?, ?>>>() {
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final RpcResult<CompositeNode> result) {
                 checkReadSuccess(result, path);
