@@ -3,7 +3,7 @@
     yang-version 1;
 
     namespace
-      "http://netconfcentral.org/ns/toaster";
+      "http://netconfcentral.org/ns/toaster2";
 
     prefix toast;
 
