@@ -20,8 +20,8 @@ public class ActorSystemFactory {
 
         @Nullable @Override public ActorSystem apply(@Nullable Void aVoid) {
                 ActorSystem system =
-                    ActorSystem.create("opendaylight-rpc", ConfigFactory
-                        .load().getConfig("odl-cluster"));
+                    ActorSystem.create("opendaylight-cluster-rpc", ConfigFactory
+                        .load().getConfig("odl-cluster-rpc"));
                 system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
                 return system;
         }
