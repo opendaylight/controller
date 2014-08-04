@@ -38,7 +38,7 @@
       <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.1-SNAPSHOT</bundle>
    </feature>
    <feature name="base-jersey" description="Jersey" version="${jersey.version}">
-      <feature>base-gemini-web</feature>
+      <feature>base-tomcat</feature>
       <bundle>mvn:org.opendaylight.controller.thirdparty/com.sun.jersey.jersey-servlet/${jersey.version}</bundle>
       <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
       <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
@@ -61,6 +61,7 @@
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+      <bundle start="true" start-level="35">mvn:javax.ws.rs/javax.ws.rs-api/2.0</bundle>
    </feature>
    <feature name="base-slf4j" description="SLF4J Logging" version="${slf4j.version}">
       <bundle start-level="35">mvn:org.slf4j/slf4j-jdk14/1.7.2</bundle>
@@ -114,13 +115,14 @@
       <feature>base-gemini-web</feature>
       <feature>base-eclipselink-persistence</feature>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina/7.0.32.v201211201336</bundle>
+      <bundle start-level="35">mvn:org.opendaylight.controller.thirdparty/org.apache.catalina.filters.CorsFilter/${corsfilter.version}</bundle>
       <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.ha/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.tribes/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.coyote/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.el/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.jasper/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
+      <bundle start="true" start-level="36">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.api/7.0.32.v201211081135</bundle>
       <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.util/7.0.32.v201211201952</bundle>
       <bundle start="true" start-level="35">wrap:mvn:virgomirror/org.eclipse.jdt.core.compiler.batch/3.8.0.I20120518-2145</bundle>

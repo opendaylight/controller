@@ -17,7 +17,7 @@
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
-        <filter>
+<!--        <filter>
           <filter-name>CorsFilter</filter-name>
           <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
           <init-param>
@@ -49,7 +49,7 @@
           <filter-name>CorsFilter</filter-name>
           <url-pattern>/*</url-pattern>
         </filter-mapping>
-
+-->
         <security-constraint>
           <web-resource-collection>
             <web-resource-name>NB api</web-resource-name>

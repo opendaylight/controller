@@ -11,7 +11,9 @@
     </feature>
 
     <feature name="odl-nsf-managers" description="OpenDaylight :: AD-SAL :: Network Service Functions" version="${project.version}">
-        <feature version="${project.version}">base-all</feature>
+       <!-- <feature version="${project.version}">base-all</feature> -->
+        <feature version="${spring-security.version}">base-spring-security</feature>
+        <feature version="${jackson.version}">base-jackson</feature>
         <feature version="${sal.version}">odl-adsal-all</feature>
         <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
@@ -50,7 +52,7 @@
     </feature>
 
     <feature name="odl-adsal-northbound" description="OpenDaylight :: AD-SAL :: Northbound APIs" version="${project.version}">
-        <feature version="${project.version}">base-all</feature>
+        <feature version="${jersey.version}">base-jersey</feature>
         <feature version="${project.version}">odl-nsf-managers</feature>
         <bundle start-level="35">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
         <!--
