@@ -1,0 +1,61 @@
+module sal-role {
+    namespace "urn:opendaylight:role:config";
+    prefix role-cfg;
+
+    import opendaylight-inventory {prefix inv;revision-date "2013-08-19";}
+    import flow-capable-transaction {prefix tr;}
+
+    revision "2014-06-26" {
+        description "Initial revision of sal role service";
+    }
+
+    typedef controller-role-types {
+        type enumeration {
+            enum MASTER {
+                  value 2;
+                  description "Full access, at most one master.";
+            }
+            enum SLAVE {
+                  value 3;
+                  description "Read-only access.";
+            }
+        }
+    }
+
+    grouping controller-role-input {
+        uses inv:node-context-ref;
+
+        leaf controller-role {
+            type controller-role-types;
+        }
+        leaf generation-id {
+            type uint64;
+        }
+    }
+
+    grouping controller-role-output {
+        uses inv:node-context-ref;
+
+        leaf controller-role {
+            type controller-role-types;
+        }
+        leaf rpc-status {
+            type boolean;
+        }
+        leaf generation-id {
+            type uint64;
+        }
+    }
+
+    rpc update-controller-role {
+        input {
+            uses tr:transaction-metadata;
+            uses controller-role-input;
+        }
+        output {
+            uses tr:transaction-aware;
+            uses controller-role-output;
+        }
+    }
+
+}
