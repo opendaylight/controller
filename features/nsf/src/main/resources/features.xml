@@ -29,6 +29,7 @@
 
         <bundle>mvn:org.opendaylight.controller/switchmanager/${switchmanager.api.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/switchmanager.implementation/${switchmanager.implementation.version}</bundle>
+	<bundle>mvn:org.opendaylight.controller/switchmanager.shell/${switchmanager.shell.version}</bundle>
 
         <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager/${forwardingrulesmanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/forwardingrulesmanager.implementation/${forwardingrulesmanager.implementation.version}</bundle>
