@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.codegen.impl;
 
+import com.google.common.util.concurrent.ForwardingBlockingQueue;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,24 +20,19 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import javassist.ClassPool;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
+import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.ForwardingBlockingQueue;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class SingletonHolder {
     private static final Logger logger = LoggerFactory.getLogger(SingletonHolder.class);
 
     public static final ClassPool CLASS_POOL = ClassPool.getDefault();
+    public static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(CLASS_POOL);
     public static final org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator RPC_GENERATOR_IMPL = new org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator(
             CLASS_POOL);
     public static final RuntimeCodeGenerator RPC_GENERATOR = RPC_GENERATOR_IMPL;
