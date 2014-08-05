@@ -46,7 +46,7 @@ public class GossiperTest {
     @BeforeClass
     public static void setup() throws InterruptedException {
         Thread.sleep(1000);//give some time for previous test to stop the system. Netty port conflict arises otherwise.
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
+        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 
         gossiper = createGossiper();

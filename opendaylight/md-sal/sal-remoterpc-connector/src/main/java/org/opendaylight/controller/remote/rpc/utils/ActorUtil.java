@@ -9,7 +9,6 @@
 package org.opendaylight.controller.remote.rpc.utils;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -36,27 +35,13 @@ public class ActorUtil {
    * @param awaitDuration
    * @return The response of the operation
    */
-  public static Object executeLocalOperation(ActorRef actor, Object message,
-                                      FiniteDuration askDuration, FiniteDuration awaitDuration) throws Exception{
+  public static Object executeOperation(ActorRef actor, Object message,
+                                        FiniteDuration askDuration, FiniteDuration awaitDuration) throws Exception{
     Future<Object> future =
         ask(actor, message, new Timeout(askDuration));
 
       return Await.result(future, awaitDuration);
   }
 
-  /**
-   * Execute an operation on a remote actor and wait for it's response
-   * @param actor
-   * @param message
-   * @param askDuration
-   * @param awaitDuration
-   * @return
-   */
-  public static Object executeRemoteOperation(ActorSelection actor, Object message,
-                                              FiniteDuration askDuration, FiniteDuration awaitDuration) throws Exception{
-    Future<Object> future =
-        ask(actor, message, new Timeout(askDuration));
-      return Await.result(future, awaitDuration);
-  }
 
 }
