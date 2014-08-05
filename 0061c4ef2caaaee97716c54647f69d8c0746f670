@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d666b9ec",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-08-05T11:07:59Z",
+      "side": 1,
+      "message": "just question\nwhat is wrong with \" quotation mark?",
+      "revId": "0061c4ef2caaaee97716c54647f69d8c0746f670",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
