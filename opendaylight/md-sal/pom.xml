@@ -66,8 +66,8 @@
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
 
-    <!--sal-protocolbuffer-encoding-->
-    <module>sal-protocolbuffer-encoding</module>
+    <!--sal-protocolbuffer-encoding is now part of sal-clutering-commons-->
+    <module>sal-clustering-commons</module>
 
     <!-- sal-distributed-datastore -->
     <module>sal-distributed-datastore</module>
