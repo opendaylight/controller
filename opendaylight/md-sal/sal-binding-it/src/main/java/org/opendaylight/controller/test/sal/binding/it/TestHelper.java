@@ -30,6 +30,8 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "util").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-binding").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS, "object-cache-api").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS, "object-cache-guava").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), // //
