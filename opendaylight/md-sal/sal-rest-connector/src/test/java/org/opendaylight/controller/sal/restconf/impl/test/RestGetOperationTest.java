@@ -61,6 +61,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -905,6 +906,9 @@ public class RestGetOperationTest extends JerseyTest {
                         expectLeaf("depth3-leaf1", "depth3-leaf1-value")));
     }
 
+    /**
+     * Tests behavior when invalid value of depth URI parameter
+     */
     @Test
     public void getDataWithInvalidDepthParameterTest() {
 
@@ -931,6 +935,10 @@ public class RestGetOperationTest extends JerseyTest {
 
     private void getDataWithInvalidDepthParameterTest(final UriInfo uriInfo) {
         try {
+            QName qNameDepth1Cont = QName.create("urn:nested:module", "2014-06-3", "depth1-cont");
+            YangInstanceIdentifier ii = YangInstanceIdentifier.builder().node(qNameDepth1Cont).build();
+            NormalizedNode value = (NormalizedNode<?,?>)(Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(qNameDepth1Cont)).build());
+            when(brokerFacade.readConfigurationData(eq(ii))).thenReturn(value);
             restconfImpl.readConfigurationData("nested-module:depth1-cont", uriInfo);
             fail("Expected RestconfDocumentedException");
         } catch (RestconfDocumentedException e) {
