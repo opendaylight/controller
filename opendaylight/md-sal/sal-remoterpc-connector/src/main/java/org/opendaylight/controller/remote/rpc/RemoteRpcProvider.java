@@ -12,8 +12,6 @@ package org.opendaylight.controller.remote.rpc;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
-import org.opendaylight.controller.remote.rpc.registry.ClusterWrapper;
-import org.opendaylight.controller.remote.rpc.registry.ClusterWrapperImpl;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
@@ -64,11 +62,10 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
   private void start() {
     LOG.info("Starting all rpc listeners and actors.");
     // Create actor to handle and sync routing table in cluster
-    ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
     SchemaService schemaService = brokerSession.getService(SchemaService.class);
     schemaContext = schemaService.getGlobalContext();
 
-    rpcManager = actorSystem.actorOf(RpcManager.props(clusterWrapper, schemaContext, brokerSession, rpcProvisionRegistry), ActorConstants.RPC_MANAGER);
+    rpcManager = actorSystem.actorOf(RpcManager.props(schemaContext, brokerSession, rpcProvisionRegistry), ActorConstants.RPC_MANAGER);
 
     LOG.debug("Rpc actors are created.");
   }
