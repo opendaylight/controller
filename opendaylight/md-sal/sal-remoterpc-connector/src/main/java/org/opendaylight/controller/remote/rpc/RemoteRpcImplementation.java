@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.remote.rpc.messages.ErrorResponse;
-import org.opendaylight.controller.remote.rpc.messages.InvokeRoutedRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
@@ -36,7 +35,7 @@ public class RemoteRpcImplementation implements RpcImplementation,
 
   @Override
   public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, YangInstanceIdentifier identifier, CompositeNode input) {
-    InvokeRoutedRpc rpcMsg = new InvokeRoutedRpc(rpc, identifier, input);
+    InvokeRpc rpcMsg = new InvokeRpc(rpc, identifier, input);
 
     return executeMsg(rpcMsg);
   }
@@ -49,7 +48,7 @@ public class RemoteRpcImplementation implements RpcImplementation,
 
   @Override
   public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
-    InvokeRpc rpcMsg = new InvokeRpc(rpc, input);
+    InvokeRpc rpcMsg = new InvokeRpc(rpc, null, input);
     return executeMsg(rpcMsg);
   }
 
@@ -57,7 +56,7 @@ public class RemoteRpcImplementation implements RpcImplementation,
     ListenableFuture<RpcResult<CompositeNode>> listenableFuture = null;
 
     try {
-      Object response = ActorUtil.executeLocalOperation(rpcBroker, rpcMsg, ActorUtil.ASK_DURATION, ActorUtil.AWAIT_DURATION);
+      Object response = ActorUtil.executeOperation(rpcBroker, rpcMsg, ActorUtil.ASK_DURATION, ActorUtil.AWAIT_DURATION);
       if(response instanceof RpcResponse) {
 
         RpcResponse rpcResponse = (RpcResponse) response;
@@ -74,7 +73,7 @@ public class RemoteRpcImplementation implements RpcImplementation,
 
       }
     } catch (Exception e) {
-      LOG.error("Error occurred while invoking RPC actor {}", e.toString());
+      LOG.error("Error occurred while invoking RPC actor {}", e);
 
       final RpcResultBuilder<CompositeNode> failed = RpcResultBuilder.failed();
       failed.withError(null, null, e.getMessage(), null, null, e.getCause());

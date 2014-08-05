@@ -34,7 +34,7 @@ public class BucketStoreTest {
     @BeforeClass
     public static void setup() {
 
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
+        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 
         store = createStore();
