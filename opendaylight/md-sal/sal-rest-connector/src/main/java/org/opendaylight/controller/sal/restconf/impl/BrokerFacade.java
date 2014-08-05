@@ -13,11 +13,15 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
@@ -165,23 +169,15 @@ public class BrokerFacade {
     private NormalizedNode<?, ?> readDataViaTransaction(final DOMDataReadTransaction transaction,
             LogicalDatastoreType datastore, YangInstanceIdentifier path) {
         LOG.trace("Read " + datastore.name() + " via Restconf: {}", path);
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> listenableFuture = transaction.read(datastore, path);
-        if (listenableFuture != null) {
-            Optional<NormalizedNode<?, ?>> optional;
-            try {
-                LOG.debug("Reading result data from transaction.");
-                optional = listenableFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RestconfDocumentedException("Problem to get data from transaction.", e.getCause());
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> listenableFuture =
+                                                                 transaction.read(datastore, path);
 
-            }
-            if (optional != null) {
-                if (optional.isPresent()) {
-                    return optional.get();
-                }
-            }
+        try {
+            Optional<NormalizedNode<?, ?>> optional = listenableFuture.checkedGet();
+            return optional.isPresent() ? optional.get() : null;
+        } catch(ReadFailedException e) {
+            throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
         }
-        return null;
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(

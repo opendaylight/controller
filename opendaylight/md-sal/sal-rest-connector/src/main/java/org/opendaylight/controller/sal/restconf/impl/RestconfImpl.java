@@ -15,12 +15,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,14 +28,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
@@ -50,7 +53,6 @@ import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
@@ -610,19 +612,8 @@ public class RestconfImpl implements RestconfService {
     private void checkRpcSuccessAndThrowException(final RpcResult<CompositeNode> rpcResult) {
         if (rpcResult.isSuccessful() == false) {
 
-            Collection<RpcError> rpcErrors = rpcResult.getErrors();
-            if (rpcErrors == null || rpcErrors.isEmpty()) {
-                throw new RestconfDocumentedException(
-                        "The operation was not successful and there were no RPC errors returned", ErrorType.RPC,
-                        ErrorTag.OPERATION_FAILED);
-            }
-
-            List<RestconfError> errorList = Lists.newArrayList();
-            for (RpcError rpcError : rpcErrors) {
-                errorList.add(new RestconfError(rpcError));
-            }
-
-            throw new RestconfDocumentedException(errorList);
+            throw new RestconfDocumentedException("The operation was not successful", null,
+                    rpcResult.getErrors());
         }
     }
 
@@ -726,13 +717,13 @@ public class RestconfImpl implements RestconfService {
         try {
             if (mountPoint != null) {
                 broker.commitConfigurationDataPut(mountPoint, iiWithData.getInstanceIdentifier(),
-                        datastoreNormalizedNode).get();
+                        datastoreNormalizedNode).checkedGet();
             } else {
                 broker.commitConfigurationDataPut(iiWithData.getInstanceIdentifier(), datastoreNormalizedNode)
-                        .get();
+                        .checkedGet();
             }
-        } catch (Exception e) {
-            throw new RestconfDocumentedException("Error updating data", e);
+        } catch (TransactionCommitFailedException e) {
+            throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
         }
 
         return Response.status(Status.OK).build();
