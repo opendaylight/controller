@@ -16,8 +16,7 @@ import akka.actor.SupervisorStrategy;
 import akka.japi.Creator;
 import akka.japi.Function;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
-import org.opendaylight.controller.remote.rpc.registry.ClusterWrapper;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistryOld;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -38,7 +37,6 @@ public class RpcManager extends AbstractUntypedActor {
   private static final Logger LOG = LoggerFactory.getLogger(RpcManager.class);
 
   private SchemaContext schemaContext;
-  private final ClusterWrapper clusterWrapper;
   private ActorRef rpcBroker;
   private ActorRef rpcRegistry;
   private final Broker.ProviderSession brokerSession;
@@ -47,9 +45,8 @@ public class RpcManager extends AbstractUntypedActor {
   private RemoteRpcImplementation rpcImplementation;
   private final RpcProvisionRegistry rpcProvisionRegistry;
 
-  private RpcManager(ClusterWrapper clusterWrapper, SchemaContext schemaContext,
+  private RpcManager(SchemaContext schemaContext,
                      Broker.ProviderSession brokerSession, RpcProvisionRegistry rpcProvisionRegistry) {
-    this.clusterWrapper = clusterWrapper;
     this.schemaContext = schemaContext;
     this.brokerSession = brokerSession;
     this.rpcProvisionRegistry = rpcProvisionRegistry;
@@ -59,12 +56,12 @@ public class RpcManager extends AbstractUntypedActor {
   }
 
 
-  public static Props props(final ClusterWrapper clusterWrapper, final SchemaContext schemaContext,
+  public static Props props(final SchemaContext schemaContext,
                             final Broker.ProviderSession brokerSession, final RpcProvisionRegistry rpcProvisionRegistry) {
     return Props.create(new Creator<RpcManager>() {
       @Override
       public RpcManager create() throws Exception {
-        return new RpcManager(clusterWrapper, schemaContext, brokerSession, rpcProvisionRegistry);
+        return new RpcManager(schemaContext, brokerSession, rpcProvisionRegistry);
       }
     });
   }
@@ -72,16 +69,19 @@ public class RpcManager extends AbstractUntypedActor {
   private void createRpcActors() {
     LOG.debug("Create rpc registry and broker actors");
 
-    rpcRegistry = getContext().actorOf(RpcRegistryOld.props(clusterWrapper), ActorConstants.RPC_REGISTRY);
+
+    rpcRegistry = getContext().actorOf(Props.create(RpcRegistry.class), ActorConstants.RPC_REGISTRY);
+
     rpcBroker = getContext().actorOf(RpcBroker.props(brokerSession, rpcRegistry, schemaContext), ActorConstants.RPC_BROKER);
+    RpcRegistry.Messages.SetLocalRouter localRouter = new RpcRegistry.Messages.SetLocalRouter(rpcBroker);
+    rpcRegistry.tell(localRouter, self());
   }
 
   private void startListeners() {
     LOG.debug("Registers rpc listeners");
 
-    String rpcBrokerPath = clusterWrapper.getAddress().toString() + ActorConstants.RPC_BROKER_PATH;
-    rpcListener = new RpcListener(rpcRegistry, rpcBrokerPath);
-    routeChangeListener = new RoutedRpcListener(rpcRegistry, rpcBrokerPath);
+    rpcListener = new RpcListener(rpcRegistry);
+    routeChangeListener = new RoutedRpcListener(rpcRegistry);
     rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext);
 
     brokerSession.addRpcRegistrationListener(rpcListener);

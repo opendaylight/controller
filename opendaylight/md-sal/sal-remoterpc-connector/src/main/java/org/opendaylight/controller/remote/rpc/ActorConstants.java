@@ -16,4 +16,5 @@ public class ActorConstants {
 
   public static final String RPC_BROKER_PATH= "/user/rpc/rpc-broker";
   public static final String RPC_REGISTRY_PATH = "/user/rpc/rpc-registry";
+  public static final String RPC_MANAGER_PATH = "/user/rpc";
 }

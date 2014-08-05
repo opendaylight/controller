@@ -10,36 +10,39 @@ package org.opendaylight.controller.remote.rpc;
 
 
 import akka.actor.ActorRef;
-import org.opendaylight.controller.remote.rpc.messages.AddRpc;
-import org.opendaylight.controller.remote.rpc.messages.RemoveRpc;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
+import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RpcListener implements RpcRegistrationListener{
 
   private static final Logger LOG = LoggerFactory.getLogger(RpcListener.class);
   private final ActorRef rpcRegistry;
-  private final String actorPath;
 
-  public RpcListener(ActorRef rpcRegistry, String actorPath) {
+  public RpcListener(ActorRef rpcRegistry) {
     this.rpcRegistry = rpcRegistry;
-    this.actorPath = actorPath;
   }
 
   @Override
   public void onRpcImplementationAdded(QName rpc) {
     LOG.debug("Adding registration for [{}]", rpc);
-    RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, rpc, null);
-    AddRpc addRpcMsg = new AddRpc(routeId, actorPath);
+    RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc, null);
+    List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
+    routeIds.add(routeId);
+    RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(routeIds);
     try {
-      ActorUtil.executeLocalOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
-      LOG.debug("Route added [{}-{}]", routeId, this.actorPath);
+      ActorUtil.executeOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
+      LOG.debug("Route added [{}]", routeId);
     } catch (Exception e) {
       // Just logging it because Akka API throws this exception
-      LOG.error(e.toString());
+      LOG.error("onRpcImplementationAdded: {}", e);
     }
 
   }
@@ -47,13 +50,15 @@ public class RpcListener implements RpcRegistrationListener{
   @Override
   public void onRpcImplementationRemoved(QName rpc) {
     LOG.debug("Removing registration for [{}]", rpc);
-    RouteIdentifierImpl routeId = new RouteIdentifierImpl(null, rpc, null);
-    RemoveRpc removeRpcMsg = new RemoveRpc(routeId);
+    RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc, null);
+    List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
+    routeIds.add(routeId);
+    RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(routeIds);
     try {
-      ActorUtil.executeLocalOperation(rpcRegistry, removeRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
+      ActorUtil.executeOperation(rpcRegistry, removeRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
     } catch (Exception e) {
       // Just logging it because Akka API throws this exception
-      LOG.error(e.toString());
+      LOG.error("onRpcImplementationRemoved: {}", e);
     }
   }
 }

@@ -6,15 +6,11 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.remote.rpc.registry;
+package org.opendaylight.controller.remote.rpc.utils;
 
+import akka.actor.ActorRef;
 
-import akka.actor.Address;
-import akka.cluster.ClusterEvent;
+public interface RoutingLogic {
 
-public interface ClusterWrapper {
-
-  ClusterEvent.CurrentClusterState getState();
-
-  Address getAddress();
+  ActorRef select();
 }
