@@ -30,6 +30,6 @@ public class DataChangeListenerProxy implements AsyncDataChangeListener<YangInst
 
     @Override public void onDataChanged(
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        dataChangeListenerActor.tell(new DataChanged(schemaContext,change).toSerializable(), null);
+        dataChangeListenerActor.tell(new DataChanged(schemaContext,change), null);
     }
 }

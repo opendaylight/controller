@@ -123,8 +123,8 @@ public class Shard extends RaftActor {
             } else if(getLeader() != null){
                 getLeader().forward(message, getContext());
             }
-        } else if (message.getClass().equals(RegisterChangeListener.SERIALIZABLE_CLASS)) {
-            registerChangeListener(RegisterChangeListener.fromSerializable(getContext().system(), message));
+        } else if (message instanceof RegisterChangeListener) {
+            registerChangeListener((RegisterChangeListener) message);
         } else if (message instanceof UpdateSchemaContext) {
             updateSchemaContext((UpdateSchemaContext) message);
         } else if (message instanceof ForwardedCommitTransaction) {
@@ -257,7 +257,7 @@ public class Shard extends RaftActor {
         LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = " + listenerRegistration.path().toString());
 
         getSender()
-            .tell(new RegisterChangeListenerReply(listenerRegistration.path()).toSerializable(),
+            .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
                 getSelf());
     }
 
