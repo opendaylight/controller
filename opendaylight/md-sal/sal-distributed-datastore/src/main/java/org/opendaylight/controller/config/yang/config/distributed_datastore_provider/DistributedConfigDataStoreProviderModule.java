@@ -26,7 +26,7 @@ public class DistributedConfigDataStoreProviderModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         return DistributedDataStoreFactory
-            .createInstance("config", getSchemaServiceDependency());
+            .createInstance("config", getConfigSchemaServiceDependency());
     }
 
 }
