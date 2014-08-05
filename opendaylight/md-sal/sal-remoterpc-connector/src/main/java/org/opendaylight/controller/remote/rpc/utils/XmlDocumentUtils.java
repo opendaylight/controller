@@ -185,7 +185,8 @@ public class XmlDocumentUtils {
       value = codec.deserialize(text);
     }
 
-    if (schema.getType() instanceof InstanceIdentifierType) {
+    final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
+    if (baseType instanceof InstanceIdentifierType) {
       logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
     }
