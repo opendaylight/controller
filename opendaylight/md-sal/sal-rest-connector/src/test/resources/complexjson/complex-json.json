@@ -1,0 +1,41 @@
+{
+    "complexjson:cont1": {
+        "lf12-any":[
+            {
+                "anyxml-in-data":"foo"
+            }
+        ],
+        
+        "lf13-any":{
+            "anyxml-in-data":"foo"
+        },
+        
+        "lf14-any":"anyxml data",
+       
+        "lflst11":["lflst11 value1","lflst11 value2"],
+        
+        "lst11":[
+            {            
+                "key111":"key111 value",
+                "lf112":"/complexjson:cont1/complexjson:lflst11",
+                "lf113":"lf113 value",
+                "lf111":"lf111 value"
+            }
+        ],        
+        "lf11" : "453",
+        "lf12_1" : "lf12 value",
+        "lf13" : "lf13 value",        
+        "complexjson-augmentation:lf15_11" : "lf15_11 value from augmentation",
+        "complexjson-augmentation:lf15_12" : "lf15_12 value from augmentation",
+        "lf15_11" : "one two",
+        "lf15_12" : "complexjson:lf11",
+        "lf15_21" : "lf15_21 value",
+        "lf17" : "lf17 value",        
+        
+        "lst12":[
+            {
+                "lf121":"lf121 value"
+            }
+        ]
+    }
+}
