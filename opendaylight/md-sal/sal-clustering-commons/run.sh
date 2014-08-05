@@ -30,7 +30,7 @@
 #   org.opendaylight.controller.protobuff.messages to properly exclude from sonar.
 ########################################################################################################
 
-protoc --proto_path=src/main/resources --java_out=src/main/java src/main/resources/*.proto
+protoc --proto_path=src/main/resources --proto_path=../sal-akka-raft/src/main/resources --java_out=src/main/java src/main/resources/*.proto
 
 echo "Done generating Java source files."
 
