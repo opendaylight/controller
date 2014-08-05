@@ -33,7 +33,7 @@ public class DataChangeListener extends AbstractUntypedActor {
     }
 
     @Override public void handleReceive(Object message) throws Exception {
-        if(message.getClass().equals(DataChanged.SERIALIZABLE_CLASS)){
+        if(message instanceof DataChanged){
             dataChanged(message);
         } else if(message instanceof EnableNotification){
             enableNotification((EnableNotification) message);
@@ -51,13 +51,13 @@ public class DataChangeListener extends AbstractUntypedActor {
             return;
         }
 
-        DataChanged reply = DataChanged.fromSerialize(schemaContext,message, pathId);
+        DataChanged reply = (DataChanged) message;
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>
             change = reply.getChange();
         this.listener.onDataChanged(change);
 
         if(getSender() != null){
-            getSender().tell(new DataChangedReply().toSerializable(), getSelf());
+            getSender().tell(new DataChangedReply(), getSelf());
         }
     }
 

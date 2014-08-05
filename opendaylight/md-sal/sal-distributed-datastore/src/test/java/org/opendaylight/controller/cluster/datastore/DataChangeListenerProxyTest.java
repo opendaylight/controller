@@ -94,7 +94,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
         Assert.assertEquals(1, listMessages.size());
 
-        Assert.assertTrue(listMessages.get(0).getClass().equals(DataChanged.SERIALIZABLE_CLASS));
+        Assert.assertTrue(listMessages.get(0).getClass().equals(DataChanged.class));
 
     }
 }
