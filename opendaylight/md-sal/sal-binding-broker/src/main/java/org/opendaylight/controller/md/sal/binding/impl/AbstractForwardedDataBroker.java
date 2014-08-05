@@ -97,6 +97,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     protected Map<InstanceIdentifier<?>, DataObject> toBinding(
+            InstanceIdentifier<?> path,
             final Map<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
         Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
 
@@ -107,6 +108,11 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
                 if (potential.isPresent()) {
                     Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
                     newMap.put(binding.getKey(), binding.getValue());
+                } else if (entry.getKey().getLastPathArgument() instanceof YangInstanceIdentifier.AugmentationIdentifier) {
+                    DataObject bindingDataObject = getCodec().toBinding(path, entry.getValue());
+                    if (bindingDataObject != null) {
+                        newMap.put(path, bindingDataObject);
+                    }
                 }
             } catch (DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", entry, e);
@@ -148,7 +154,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         }
     }
 
-    protected Set<InstanceIdentifier<?>> toBinding(
+    protected Set<InstanceIdentifier<?>> toBinding(InstanceIdentifier<?> path,
             final Set<YangInstanceIdentifier> normalized) {
         Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
         for (YangInstanceIdentifier normalizedPath : normalized) {
@@ -157,6 +163,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
                 if (potential.isPresent()) {
                     InstanceIdentifier<? extends DataObject> binding = potential.get();
                     hashSet.add(binding);
+                } else if (normalizedPath.getLastPathArgument() instanceof YangInstanceIdentifier.AugmentationIdentifier) {
+                    hashSet.add(path);
                 }
             } catch (DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", normalizedPath, e);
@@ -219,7 +227,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
             if (createdCache == null) {
-                createdCache = Collections.unmodifiableMap(toBinding(domEvent.getCreatedData()));
+                createdCache = Collections.unmodifiableMap(toBinding(path, domEvent.getCreatedData()));
             }
             return createdCache;
         }
@@ -227,7 +235,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
             if (updatedCache == null) {
-                updatedCache = Collections.unmodifiableMap(toBinding(domEvent.getUpdatedData()));
+                updatedCache = Collections.unmodifiableMap(toBinding(path, domEvent.getUpdatedData()));
             }
             return updatedCache;
 
@@ -236,7 +244,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public Set<InstanceIdentifier<?>> getRemovedPaths() {
             if (removedCache == null) {
-                removedCache = Collections.unmodifiableSet(toBinding(domEvent.getRemovedPaths()));
+                removedCache = Collections.unmodifiableSet(toBinding(path, domEvent.getRemovedPaths()));
             }
             return removedCache;
         }
@@ -244,7 +252,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
             if (originalCache == null) {
-                originalCache = Collections.unmodifiableMap(toBinding(domEvent.getOriginalData()));
+                originalCache = Collections.unmodifiableMap(toBinding(path, domEvent.getOriginalData()));
             }
             return originalCache;
 
