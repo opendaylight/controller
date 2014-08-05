@@ -13,8 +13,7 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
-import org.opendaylight.controller.remote.rpc.messages.AddRoutedRpc;
-import org.opendaylight.controller.remote.rpc.messages.RemoveRoutedRpc;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
@@ -29,23 +28,24 @@ import java.util.Set;
 public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>{
   private static final Logger LOG = LoggerFactory.getLogger(RoutedRpcListener.class);
   private final ActorRef rpcRegistry;
-  private final String actorPath;
 
-  public RoutedRpcListener(ActorRef rpcRegistry, String actorPath) {
+  public RoutedRpcListener(ActorRef rpcRegistry) {
     Preconditions.checkNotNull(rpcRegistry, "rpc registry actor should not be null");
-    Preconditions.checkNotNull(actorPath, "actor path of rpc broker on current node should not be null");
 
     this.rpcRegistry = rpcRegistry;
-    this.actorPath = actorPath;
   }
 
   @Override
   public void onRouteChange(RouteChange<RpcRoutingContext, YangInstanceIdentifier> routeChange) {
     Map<RpcRoutingContext, Set<YangInstanceIdentifier>> announcements = routeChange.getAnnouncements();
-    announce(getRouteIdentifiers(announcements));
+    if(announcements != null && announcements.size() > 0){
+      announce(getRouteIdentifiers(announcements));
+    }
 
     Map<RpcRoutingContext, Set<YangInstanceIdentifier>> removals = routeChange.getRemovals();
-    remove(getRouteIdentifiers(removals));
+    if(removals != null && removals.size() > 0 ) {
+      remove(getRouteIdentifiers(removals));
+    }
   }
 
   /**
@@ -54,9 +54,9 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    */
   private void announce(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements) {
     LOG.debug("Announcing [{}]", announcements);
-    AddRoutedRpc addRpcMsg = new AddRoutedRpc(announcements, actorPath);
+    RpcRegistry.Messages.AddOrUpdateRoute addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoute(announcements.iterator().next());
     try {
-      ActorUtil.executeLocalOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
+      ActorUtil.executeOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
     } catch (Exception e) {
       // Just logging it because Akka API throws this exception
       LOG.error(e.toString());
@@ -69,9 +69,9 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
    */
   private void remove(Set<RpcRouter.RouteIdentifier<?, ?, ?>> removals){
     LOG.debug("Removing [{}]", removals);
-    RemoveRoutedRpc removeRpcMsg = new RemoveRoutedRpc(removals, actorPath);
+    RpcRegistry.Messages.RemoveRoute removeRpcMsg = new RpcRegistry.Messages.RemoveRoute(removals.iterator().next());
     try {
-      ActorUtil.executeLocalOperation(rpcRegistry, removeRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
+      ActorUtil.executeOperation(rpcRegistry, removeRpcMsg, ActorUtil.ASK_DURATION, ActorUtil.AWAIT_DURATION);
     } catch (Exception e) {
       // Just logging it because Akka API throws this exception
       LOG.error(e.toString());
