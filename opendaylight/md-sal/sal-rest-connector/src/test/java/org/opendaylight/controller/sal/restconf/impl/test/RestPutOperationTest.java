@@ -16,19 +16,23 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -156,6 +160,36 @@ public class RestPutOperationTest extends JerseyTest {
 
         String uri = "/config/ietf-interfaces:interfaces/yang-ext:mount";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData3));
+    }
+
+    @Test
+    public void putWithOptimisticLockFailedException() throws UnsupportedEncodingException {
+
+        String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
+
+        doThrow(OptimisticLockFailedException.class).
+            when(brokerFacade).commitConfigurationDataPut(
+                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+
+        assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
+
+        doThrow(OptimisticLockFailedException.class).doReturn(mock(CheckedFuture.class)).
+            when(brokerFacade).commitConfigurationDataPut(
+                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+
+        assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
+    }
+
+    @Test
+    public void putWithTransactionCommitFailedException() throws UnsupportedEncodingException {
+
+        String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
+
+        doThrow(TransactionCommitFailedException.class).
+            when(brokerFacade).commitConfigurationDataPut(
+                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+
+        assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
 
     private int put(String uri, String mediaType, String data) throws UnsupportedEncodingException {
