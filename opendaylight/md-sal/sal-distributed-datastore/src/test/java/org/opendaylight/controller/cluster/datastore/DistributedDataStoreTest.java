@@ -73,7 +73,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
     @org.junit.Test
     public void testRegisterChangeListenerWhenShardIsLocal() throws Exception {
 
-        mockActorContext.setExecuteLocalShardOperationResponse(new RegisterChangeListenerReply(doNothingActorRef.path()).toSerializable());
+        mockActorContext.setExecuteLocalShardOperationResponse(new RegisterChangeListenerReply(doNothingActorRef.path()));
 
         ListenerRegistration registration =
             distributedDataStore.registerChangeListener(TestModel.TEST_PATH, new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {

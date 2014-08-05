@@ -8,11 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.concurrent.Executors;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -33,8 +32,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.Executors;
 
 /**
  *
@@ -88,13 +86,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
         Object result = actorContext.executeLocalShardOperation(shardName,
             new RegisterChangeListener(path, dataChangeListenerActor.path(),
-                scope).toSerializable(),
+                scope),
             ActorContext.ASK_DURATION
         );
 
         if (result != null) {
-            RegisterChangeListenerReply reply = RegisterChangeListenerReply
-                .fromSerializable(actorContext.getActorSystem(), result);
+            RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
             return new DataChangeListenerRegistrationProxy(actorContext
                 .actorSelection(reply.getListenerRegistrationPath()), listener,
                 dataChangeListenerActor);

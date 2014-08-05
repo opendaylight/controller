@@ -102,13 +102,13 @@ public class DataChangeListenerTest extends AbstractActorTest {
                     subject.tell(new EnableNotification(true), getRef());
 
                     subject.tell(
-                        new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()).toSerializable(),
+                        new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()),
                         getRef());
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("800 millis"), "dataChanged") {
                         // do not put code outside this method, will run afterwards
                         protected Boolean match(Object in) {
-                            if (in != null && in.getClass().equals(DataChangedReply.SERIALIZABLE_CLASS)) {
+                            if (in != null && in.getClass().equals(DataChangedReply.class)) {
 
                                 return true;
                             } else {
@@ -141,7 +141,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(
-                        new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()).toSerializable(),
+                        new DataChanged(CompositeModel.createTestContext(),new MockDataChangedEvent()),
                         getRef());
 
                     expectNoMsg();
