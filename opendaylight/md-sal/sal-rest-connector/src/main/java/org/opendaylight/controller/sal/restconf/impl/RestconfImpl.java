@@ -634,7 +634,8 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                    .getInstanceIdentifier());
             data = broker.readConfigurationData(mountPoint, normalizedII);
         } else {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -697,7 +698,8 @@ public class RestconfImpl implements RestconfService {
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                    .getInstanceIdentifier());
             data = broker.readOperationalData(mountPoint, normalizedII);
         } else {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -732,7 +734,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPut(mountPoint, normalizedII, datastoreNormalizedNode).get();
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -844,7 +847,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -888,7 +892,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
 
             } else {
@@ -910,7 +915,8 @@ public class RestconfImpl implements RestconfService {
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData.getInstanceIdentifier());
+                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
+                        .getInstanceIdentifier());
                 broker.commitConfigurationDataDelete(mountPoint, normalizedII);
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
@@ -1084,7 +1090,12 @@ public class RestconfImpl implements RestconfService {
             iiBuilder = YangInstanceIdentifier.builder(iiOriginal);
         }
 
-        iiBuilder.node(schemaOfData.getQName());
+        if ((schemaOfData instanceof ListSchemaNode)) {
+            HashMap<QName, Object> keys = this.resolveKeysFromData(((ListSchemaNode) schemaOfData), data);
+            iiBuilder.nodeWithKey(schemaOfData.getQName(), keys);
+        } else {
+            iiBuilder.node(schemaOfData.getQName());
+        }
 
         YangInstanceIdentifier instance = iiBuilder.toInstance();
         DOMMountPoint mountPoint = null;
@@ -1093,6 +1104,34 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new InstanceIdWithSchemaNode(instance, schemaOfData, mountPoint);
+    }
+
+    private HashMap<QName, Object> resolveKeysFromData(final ListSchemaNode listNode, final CompositeNode dataNode) {
+        final HashMap<QName, Object> keyValues = new HashMap<QName, Object>();
+        List<QName> _keyDefinition = listNode.getKeyDefinition();
+        for (final QName key : _keyDefinition) {
+            SimpleNode<? extends Object> head = null;
+            String localName = key.getLocalName();
+            List<SimpleNode<? extends Object>> simpleNodesByName = dataNode.getSimpleNodesByName(localName);
+            if (simpleNodesByName != null) {
+                head = Iterables.getFirst(simpleNodesByName, null);
+            }
+
+            Object dataNodeKeyValueObject = null;
+            if (head != null) {
+                dataNodeKeyValueObject = head.getValue();
+            }
+
+            if (dataNodeKeyValueObject == null) {
+                throw new RestconfDocumentedException("Data contains list \"" + dataNode.getNodeType().getLocalName()
+                        + "\" which does not contain key: \"" + key.getLocalName() + "\"", ErrorType.PROTOCOL,
+                        ErrorTag.INVALID_VALUE);
+            }
+
+            keyValues.put(key, dataNodeKeyValueObject);
+        }
+
+        return keyValues;
     }
 
     private boolean endsWithMountPoint(final String identifier) {
@@ -1410,7 +1449,8 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode, final DataSchemaNode schema) {
+    private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode,
+            final DataSchemaNode schema) {
         Iterable<Node<?>> nodes = null;
         if (dataNode == null) {
             throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
@@ -1442,7 +1482,8 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to correctly interpret data."));
     }
 
-    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode, final DataSchemaNode schema) {
+    private NormalizedNode<?, ?> compositeNodeToDatastoreNormalizedNode(final CompositeNode compNode,
+            final DataSchemaNode schema) {
         List<Node<?>> lst = new ArrayList<Node<?>>();
         lst.add(compNode);
         if (schema instanceof ContainerSchemaNode) {
@@ -1459,7 +1500,8 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to translate specified data to datastore readable form."));
     }
 
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(final InstanceIdWithSchemaNode iiWithSchemaNode) {
+    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
+            final InstanceIdWithSchemaNode iiWithSchemaNode) {
         return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
     }
 
@@ -1470,8 +1512,8 @@ public class RestconfImpl implements RestconfService {
                 iiWithSchemaNode.getMountPoint());
     }
 
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(final YangInstanceIdentifier instIdentifier,
-            final boolean unwrapLastListNode) {
+    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(
+            final YangInstanceIdentifier instIdentifier, final boolean unwrapLastListNode) {
         Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
         final List<PathArgument> result = new ArrayList<PathArgument>();
         final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
