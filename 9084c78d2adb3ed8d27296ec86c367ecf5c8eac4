@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d898271e",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/BindingTransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-05T21:43:45Z",
+      "side": 1,
+      "message": "I am afraid that ship has sailed (sorry for missing this). We can make the preparatory change for post-Helium change, though.",
+      "parentUuid": "fa82b9bf_4c39eaf1",
+      "revId": "9084c78d2adb3ed8d27296ec86c367ecf5c8eac4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0e3997d6",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/TransactionChain.java",
         "patchSetId": 1
