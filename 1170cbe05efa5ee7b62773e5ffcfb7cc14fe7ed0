@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_76480dcc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/XmlDocumentUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-05T14:54:59Z",
+      "side": 1,
+      "message": "Let\u0027s try to avoid making unrelated changes in commits.",
+      "revId": "1170cbe05efa5ee7b62773e5ffcfb7cc14fe7ed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
