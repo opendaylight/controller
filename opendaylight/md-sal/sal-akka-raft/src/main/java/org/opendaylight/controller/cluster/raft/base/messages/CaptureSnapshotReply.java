@@ -5,24 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import org.opendaylight.controller.cluster.raft.Snapshot;
+import com.google.protobuf.ByteString;
 
-import java.io.Serializable;
+public class CaptureSnapshotReply {
+    private ByteString snapshot;
 
-/**
- * Internal message, issued by follower to its actor
- */
-public class ApplySnapshot implements Serializable {
-    private final Snapshot snapshot;
-
-    public ApplySnapshot(Snapshot snapshot) {
+    public CaptureSnapshotReply(ByteString snapshot) {
         this.snapshot = snapshot;
     }
 
-    public Snapshot getSnapshot() {
+    public ByteString getSnapshot() {
         return snapshot;
+    }
+
+    public void setSnapshot(ByteString snapshot) {
+        this.snapshot = snapshot;
     }
 }
