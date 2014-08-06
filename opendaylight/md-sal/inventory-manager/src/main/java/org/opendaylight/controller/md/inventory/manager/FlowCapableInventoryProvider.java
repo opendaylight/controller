@@ -7,20 +7,18 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
+import com.google.common.base.Preconditions;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(FlowCapableInventoryProvider.class);
@@ -29,12 +27,13 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
 
     private final BlockingQueue<InventoryOperation> queue = new LinkedBlockingDeque<>(QUEUE_DEPTH);
     private final NotificationProviderService notificationService;
-    private final DataProviderService dataService;
+
+    private final DataBroker dataBroker;
     private ListenerRegistration<?> listenerRegistration;
     private Thread thread;
 
-    FlowCapableInventoryProvider(final DataProviderService dataService, final NotificationProviderService notificationService) {
-        this.dataService = Preconditions.checkNotNull(dataService);
+    FlowCapableInventoryProvider(final DataBroker dataBroker, final NotificationProviderService notificationService) {
+        this.dataBroker = Preconditions.checkNotNull(dataBroker);
         this.notificationService = Preconditions.checkNotNull(notificationService);
     }
 
@@ -82,10 +81,10 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
     @Override
     public void run() {
         try {
-            for (;;) {
+            for (; ; ) {
                 InventoryOperation op = queue.take();
 
-                final DataModificationTransaction tx = dataService.beginTransaction();
+                final ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
                 LOG.debug("New operations available, starting transaction {}", tx.getIdentifier());
 
                 int ops = 0;
@@ -104,7 +103,7 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
 
                 try {
                     final RpcResult<TransactionStatus> result = tx.commit().get();
-                    if(!result.isSuccessful()) {
+                    if (!result.isSuccessful()) {
                         LOG.error("Transaction {} failed", tx.getIdentifier());
                     }
                 } catch (ExecutionException e) {

@@ -7,7 +7,12 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorUpdated;
@@ -30,8 +35,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdenti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 class NodeChangeCommiter implements OpendaylightInventoryListener {
     private static final Logger LOG = LoggerFactory.getLogger(NodeChangeCommiter.class);
 
@@ -43,21 +46,35 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
 
     @Override
     public synchronized void onNodeConnectorRemoved(final NodeConnectorRemoved connector) {
+        LOG.debug("Node connector removed notification received.");
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(final DataModificationTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final NodeConnectorRef ref = connector.getNodeConnectorRef();
                 LOG.debug("removing node connector {} ", ref.getValue());
-                tx.removeOperationalData(ref.getValue());
+                tx.delete(LogicalDatastoreType.OPERATIONAL, ref.getValue());
+                CheckedFuture deleteFuture = tx.submit();
+                Futures.addCallback(deleteFuture, new FutureCallback() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        LOG.debug("deletion of node connector {} successful", ref.getValue());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        LOG.error("deletion of node connector {} failed", ref.getValue(), throwable);
+                    }
+                });
             }
         });
     }
 
     @Override
     public synchronized void onNodeConnectorUpdated(final NodeConnectorUpdated connector) {
+        LOG.debug("Node connector updated notification received.");
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(final DataModificationTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final NodeConnectorRef ref = connector.getNodeConnectorRef();
                 final NodeConnectorBuilder data = new NodeConnectorBuilder(connector);
                 data.setKey(new NodeConnectorKey(connector.getId()));
@@ -68,22 +85,50 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                     final FlowCapableNodeConnector augment = InventoryMapping.toInventoryAugment(flowConnector);
                     data.addAugmentation(FlowCapableNodeConnector.class, augment);
                 }
-                InstanceIdentifier<? extends Object> value = ref.getValue();
+
+
+                InstanceIdentifier<NodeConnector> value = (InstanceIdentifier<NodeConnector>) ref.getValue();
+
                 LOG.debug("updating node connector : {}.", value);
                 NodeConnector build = data.build();
-                tx.putOperationalData(value, build);
+                tx.put(LogicalDatastoreType.OPERATIONAL, value, build);
+                CheckedFuture updateFuture = tx.submit();
+                Futures.addCallback(updateFuture, new FutureCallback() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        LOG.debug("update of node connector {} successful", ref.getValue());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        LOG.debug("update of node connector {} unsuccessful", ref.getValue(), throwable);
+                    }
+                });
             }
         });
     }
 
     @Override
     public synchronized void onNodeRemoved(final NodeRemoved node) {
+        LOG.debug("Node removed notification received.");
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(final DataModificationTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final NodeRef ref = node.getNodeRef();
                 LOG.debug("removing node : {}", ref.getValue());
-                tx.removeOperationalData((ref.getValue()));
+                tx.delete(LogicalDatastoreType.OPERATIONAL, ref.getValue());
+                CheckedFuture deleteFuture = tx.submit();
+                Futures.addCallback(deleteFuture, new FutureCallback() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        LOG.debug("successfully removed node : {}", ref.getValue());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        LOG.error("node : {} removal unsuccessful", ref.getValue(), throwable);
+                    }
+                });
             }
         });
     }
@@ -94,10 +139,10 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         if (flowNode == null) {
             return;
         }
-
+        LOG.debug("Node updated notification received.");
         manager.enqueue(new InventoryOperation() {
             @Override
-            public void applyOperation(final DataModificationTransaction tx) {
+            public void applyOperation(final ReadWriteTransaction tx) {
                 final NodeRef ref = node.getNodeRef();
                 final NodeBuilder nodeBuilder = new NodeBuilder(node);
                 nodeBuilder.setKey(new NodeKey(node.getId()));
@@ -110,7 +155,19 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                 InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
                 final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
                 LOG.debug("updating node :{} ", path);
-                tx.putOperationalData(path, augment);
+                tx.put(LogicalDatastoreType.OPERATIONAL, path, augment);
+                CheckedFuture updateFuture = tx.submit();
+                Futures.addCallback(updateFuture, new FutureCallback() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        LOG.debug("successfully updated node :{} ", path);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        LOG.error("updating node :{} failed ", path, throwable);
+                    }
+                });
             }
         });
     }
