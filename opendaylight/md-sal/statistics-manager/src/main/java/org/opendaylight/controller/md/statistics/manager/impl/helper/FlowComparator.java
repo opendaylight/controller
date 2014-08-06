@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.statistics.manager;
+package org.opendaylight.controller.md.statistics.manager.impl.helper;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -27,14 +27,14 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * Utility class for comparing flows.
  */
-final class FlowComparator {
-    private final static Logger logger = LoggerFactory.getLogger(FlowComparator.class);
+public final class FlowComparator {
+    private final static Logger LOG = LoggerFactory.getLogger(FlowComparator.class);
 
     private FlowComparator() {
-
+        throw new UnsupportedOperationException("Utilities class should not be instantiated");
     }
 
-    public static boolean flowEquals(Flow statsFlow, Flow storedFlow) {
+    public static boolean flowEquals(final Flow statsFlow, final Flow storedFlow) {
         if (statsFlow == null || storedFlow == null) {
             return false;
         }
@@ -93,7 +93,7 @@ final class FlowComparator {
      * @param storedFlow
      * @return
      */
-    public static boolean matchEquals(Match statsFlow, Match storedFlow) {
+    public static boolean matchEquals(final Match statsFlow, final Match storedFlow) {
         if (statsFlow == storedFlow) {
             return true;
         }
@@ -194,9 +194,9 @@ final class FlowComparator {
      * statistic data, openflow driver library returns AA:BB:CC:DD:EE:FF and default eqauls fails here.
      */
     @VisibleForTesting
-    static boolean ethernetMatchEquals(EthernetMatch statsEthernetMatch, EthernetMatch storedEthernetMatch){
+    static boolean ethernetMatchEquals(final EthernetMatch statsEthernetMatch, final EthernetMatch storedEthernetMatch){
         boolean verdict = true;
-        Boolean checkNullValues = checkNullValues(statsEthernetMatch, storedEthernetMatch);
+        final Boolean checkNullValues = checkNullValues(statsEthernetMatch, storedEthernetMatch);
         if (checkNullValues != null) {
             verdict = checkNullValues;
         } else {
@@ -219,10 +219,10 @@ final class FlowComparator {
         return verdict;
     }
 
-    private static boolean ethernetMatchFieldsEquals(MacAddressFilter statsEthernetMatchFields,
-                                                        MacAddressFilter storedEthernetMatchFields){
+    private static boolean ethernetMatchFieldsEquals(final MacAddressFilter statsEthernetMatchFields,
+                                                        final MacAddressFilter storedEthernetMatchFields){
         boolean verdict = true;
-        Boolean checkNullValues = checkNullValues(statsEthernetMatchFields, storedEthernetMatchFields);
+        final Boolean checkNullValues = checkNullValues(statsEthernetMatchFields, storedEthernetMatchFields);
         if (checkNullValues != null) {
             verdict = checkNullValues;
         } else {
@@ -236,9 +236,9 @@ final class FlowComparator {
         return verdict;
     }
 
-    private static boolean macAddressEquals(MacAddress statsMacAddress, MacAddress storedMacAddress){
+    private static boolean macAddressEquals(final MacAddress statsMacAddress, final MacAddress storedMacAddress){
         boolean verdict = true;
-        Boolean checkNullValues = checkNullValues(statsMacAddress, storedMacAddress);
+        final Boolean checkNullValues = checkNullValues(statsMacAddress, storedMacAddress);
         if (checkNullValues != null) {
             verdict = checkNullValues;
         } else {
@@ -248,11 +248,11 @@ final class FlowComparator {
     }
 
     @VisibleForTesting
-    static boolean layer3MatchEquals(Layer3Match statsLayer3Match, Layer3Match storedLayer3Match){
+    static boolean layer3MatchEquals(final Layer3Match statsLayer3Match, final Layer3Match storedLayer3Match){
         boolean verdict = true;
         if(statsLayer3Match instanceof Ipv4Match && storedLayer3Match instanceof Ipv4Match){
-            Ipv4Match statsIpv4Match = (Ipv4Match)statsLayer3Match;
-            Ipv4Match storedIpv4Match = (Ipv4Match)storedLayer3Match;
+            final Ipv4Match statsIpv4Match = (Ipv4Match)statsLayer3Match;
+            final Ipv4Match storedIpv4Match = (Ipv4Match)storedLayer3Match;
 
             if (verdict) {
                 verdict = compareNullSafe(
@@ -263,7 +263,7 @@ final class FlowComparator {
                         statsIpv4Match.getIpv4Source(), storedIpv4Match.getIpv4Source());
             }
         } else {
-            Boolean nullCheckOut = checkNullValues(storedLayer3Match, statsLayer3Match);
+            final Boolean nullCheckOut = checkNullValues(storedLayer3Match, statsLayer3Match);
             if (nullCheckOut != null) {
                 verdict = nullCheckOut;
             } else {
@@ -274,9 +274,9 @@ final class FlowComparator {
         return verdict;
     }
 
-    private static boolean compareNullSafe(Ipv4Prefix statsIpv4, Ipv4Prefix storedIpv4) {
+    private static boolean compareNullSafe(final Ipv4Prefix statsIpv4, final Ipv4Prefix storedIpv4) {
         boolean verdict = true;
-        Boolean checkDestNullValuesOut = checkNullValues(storedIpv4, statsIpv4);
+        final Boolean checkDestNullValuesOut = checkNullValues(storedIpv4, statsIpv4);
         if (checkDestNullValuesOut != null) {
             verdict = checkDestNullValuesOut;
         } else if(!IpAddressEquals(statsIpv4, storedIpv4)){
@@ -286,7 +286,7 @@ final class FlowComparator {
         return verdict;
     }
 
-    private static Boolean checkNullValues(Object v1, Object v2) {
+    private static Boolean checkNullValues(final Object v1, final Object v2) {
         Boolean verdict = null;
         if (v1 == null && v2 != null) {
             verdict = Boolean.FALSE;
@@ -306,9 +306,9 @@ final class FlowComparator {
      * @param storedIpAddress
      * @return true if IPv4prefixes equals
      */
-    private static boolean IpAddressEquals(Ipv4Prefix statsIpAddress, Ipv4Prefix storedIpAddress) {
-        IntegerIpAddress statsIpAddressInt = StrIpToIntIp(statsIpAddress.getValue());
-        IntegerIpAddress storedIpAddressInt = StrIpToIntIp(storedIpAddress.getValue());
+    private static boolean IpAddressEquals(final Ipv4Prefix statsIpAddress, final Ipv4Prefix storedIpAddress) {
+        final IntegerIpAddress statsIpAddressInt = StrIpToIntIp(statsIpAddress.getValue());
+        final IntegerIpAddress storedIpAddressInt = StrIpToIntIp(storedIpAddress.getValue());
 
         if(IpAndMaskBasedMatch(statsIpAddressInt,storedIpAddressInt)){
             return true;
@@ -319,11 +319,11 @@ final class FlowComparator {
         return false;
     }
 
-    private static boolean IpAndMaskBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
+    private static boolean IpAndMaskBasedMatch(final IntegerIpAddress statsIpAddressInt,final IntegerIpAddress storedIpAddressInt){
         return ((statsIpAddressInt.getIp() & statsIpAddressInt.getMask()) ==  (storedIpAddressInt.getIp() & storedIpAddressInt.getMask()));
     }
 
-    private static boolean IpBasedMatch(IntegerIpAddress statsIpAddressInt,IntegerIpAddress storedIpAddressInt){
+    private static boolean IpBasedMatch(final IntegerIpAddress statsIpAddressInt,final IntegerIpAddress storedIpAddressInt){
         return (statsIpAddressInt.getIp() == storedIpAddressInt.getIp());
     }
 
@@ -331,10 +331,10 @@ final class FlowComparator {
      * Method return integer version of ip address. Converted int will be mask if
      * mask specified
      */
-    private static IntegerIpAddress StrIpToIntIp(String ipAddresss){
+    private static IntegerIpAddress StrIpToIntIp(final String ipAddresss){
 
-        String[] parts = ipAddresss.split("/");
-        String ip = parts[0];
+        final String[] parts = ipAddresss.split("/");
+        final String ip = parts[0];
         int prefix;
 
         if (parts.length < 2) {
@@ -345,18 +345,18 @@ final class FlowComparator {
 
         IntegerIpAddress integerIpAddress = null;
         try {
-            Inet4Address addr = (Inet4Address) InetAddress.getByName(ip);
-            byte[] addrBytes = addr.getAddress();
-            int ipInt = ((addrBytes[0] & 0xFF) << 24) |
+            final Inet4Address addr = (Inet4Address) InetAddress.getByName(ip);
+            final byte[] addrBytes = addr.getAddress();
+            final int ipInt = ((addrBytes[0] & 0xFF) << 24) |
                     ((addrBytes[1] & 0xFF) << 16) |
                     ((addrBytes[2] & 0xFF) << 8)  |
                     ((addrBytes[3] & 0xFF) << 0);
 
-            int mask = 0xffffffff << 32 - prefix;
+            final int mask = 0xffffffff << 32 - prefix;
 
             integerIpAddress = new IntegerIpAddress(ipInt, mask);
-        } catch (UnknownHostException e){
-            logger.error("Failed to determine host IP address by name: {}", e.getMessage(), e);
+        } catch (final UnknownHostException e){
+            LOG.error("Failed to determine host IP address by name: {}", e.getMessage(), e);
         }
 
         return integerIpAddress;
@@ -365,7 +365,7 @@ final class FlowComparator {
     private static class IntegerIpAddress{
         int ip;
         int mask;
-        public IntegerIpAddress(int ip, int mask) {
+        public IntegerIpAddress(final int ip, final int mask) {
             this.ip = ip;
             this.mask = mask;
         }

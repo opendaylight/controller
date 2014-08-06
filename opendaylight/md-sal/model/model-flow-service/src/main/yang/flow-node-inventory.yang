@@ -236,13 +236,17 @@ module flow-node-inventory {
     }
 
     augment "/inv:nodes/inv:node/table" {
-        ext:augment-identifier "flow-cookie-mapping";
-        list flow-cookie-map {
-            key "cookie";
-            leaf cookie {
-                type flow:flow-cookie;
+        ext:augment-identifier "flow-hash-id-mapping";
+    description "Flow is identified by match and priority on device. So Operational/DS
+        has to simulate that behavior and contract between FlowId and match+priority
+        identification should represent Flow hashCode. Flow has to contain only
+        match priority and flowCookie for create a hashCode";
+        list flow-hash-id-map {
+            key "hash";
+            leaf hash {
+                type string;
             }
-            leaf-list flow-ids {
+            leaf flow-id {
                 type flow-id;
             }
         }
