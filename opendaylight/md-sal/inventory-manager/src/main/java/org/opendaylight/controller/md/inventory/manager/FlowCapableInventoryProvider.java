@@ -103,9 +103,10 @@ class FlowCapableInventoryProvider implements AutoCloseable, Runnable {
                 LOG.debug("Processed {} operations, submitting transaction {}", ops, tx.getIdentifier());
 
                 final CheckedFuture<Void, TransactionCommitFailedException> result = tx.submit();
-                Futures.addCallback(result, new FutureCallback<Object>() {
+                Futures.addCallback(result, new FutureCallback<Void>() {
                     @Override
-                    public void onSuccess(Object o) {
+                    public void onSuccess(Void aVoid) {
+                        //NOOP
                     }
 
                     @Override
