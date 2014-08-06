@@ -12,9 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCookieMapping;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -46,12 +47,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatisticsMapList, FlowStatsEntry> {
+
     private static final Logger LOG = LoggerFactory.getLogger(FlowStatsTracker.class);
     private static final String ALIEN_SYSTEM_FLOW_ID = "#UF$TABLE*";
     private final OpendaylightFlowStatisticsService flowStatsService;
     private FlowTableStatsTracker flowTableStats;
     private int unaccountedFlowsCounter = 1;
-
 
     FlowStatsTracker(final OpendaylightFlowStatisticsService flowStatsService, final FlowCapableContext context) {
         super(context);
@@ -63,16 +64,16 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     @Override
-    protected void cleanupSingleStat(final DataModificationTransaction trans, final FlowStatsEntry item) {
+    protected void cleanupSingleStat(final ReadWriteTransaction trans, final FlowStatsEntry item) {
         KeyedInstanceIdentifier<Flow, FlowKey> flowRef = getNodeIdentifier()
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(item.getTableId()))
                 .child(Flow.class, item.getFlow().getKey());
-        trans.removeOperationalData(flowRef);
+        trans.delete(LogicalDatastoreType.OPERATIONAL, flowRef);
     }
 
     @Override
-    protected FlowStatsEntry updateSingleStat(final DataModificationTransaction trans, final FlowAndStatisticsMapList map) {
+    protected FlowStatsEntry updateSingleStat(final ReadWriteTransaction trans, final FlowAndStatisticsMapList map) {
         short tableId = map.getTableId();
 
         FlowStatisticsDataBuilder flowStatisticsData = new FlowStatisticsDataBuilder();
@@ -106,9 +107,9 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         LOG.debug("Flow : {}",flowRule.toString());
         LOG.debug("Statistics to augment : {}",flowStatistics.build().toString());
 
-        InstanceIdentifier<Table> tableRef = getNodeIdentifierBuilder()
+        InstanceIdentifier<Table> tableRef = getNodeIdentifier()
                 .augmentation(FlowCapableNode.class)
-                .child(Table.class, new TableKey(tableId)).toInstance();
+                .child(Table.class, new TableKey(tableId));
 
         final FlowCookie flowCookie = flowRule.getCookie() != null
                 ? flowRule.getCookie() : new FlowCookie(BigInteger.ZERO);
@@ -116,7 +117,13 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                 .augmentation(FlowCookieMapping.class)
                 .child(FlowCookieMap.class, new FlowCookieMapKey(flowCookie));
 
-        FlowCookieMap cookieMap = (FlowCookieMap) trans.readOperationalData(flowCookieRef);
+        Optional<FlowCookieMap> cookieMap = Optional.absent();
+        try {
+            cookieMap = trans.read(LogicalDatastoreType.OPERATIONAL, flowCookieRef).get();
+        }
+        catch (Exception e) {
+            LOG.error("Read Operational FlowCookieMap {} fail!", flowCookieRef, e);
+        }
 
         /* find flowKey in FlowCookieMap from DataStore/OPERATIONAL */
         Optional<FlowKey> flowKey = this.getExistFlowKey(flowRule, tableRef, trans, cookieMap);
@@ -128,26 +135,26 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                 flowKey = this.makeAlienFlowKey(flowRule);
             }
             cookieMap = applyNewFlowKey(cookieMap, flowKey, flowCookie);
-            trans.putOperationalData(flowCookieRef, cookieMap);
+            trans.merge(LogicalDatastoreType.OPERATIONAL, flowCookieRef, cookieMap.get(), true);
         }
 
-        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
+        InstanceIdentifier<Flow> flowRef = getNodeIdentifier()
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(tableId))
-                .child(Flow.class, flowKey.get()).toInstance();
+                .child(Flow.class, flowKey.get());
         flowBuilder.setKey(flowKey.get());
         flowBuilder.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
 
         // Update entry with timestamp of latest response
         flowBuilder.setKey(flowKey.get());
         FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId, flowBuilder.build());
-        trans.putOperationalData(flowRef, flowBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, flowRef, flowBuilder.build(), true);
         return flowStatsEntry;
     }
 
     @Override
     protected InstanceIdentifier<?> listenPath() {
-        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Table.class).child(Flow.class).build();
+        return getNodeIdentifier().augmentation(FlowCapableNode.class).child(Table.class).child(Flow.class);
     }
 
     @Override
@@ -200,8 +207,8 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     @Override
-    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
+    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedData().entrySet()) {
             if (Flow.class.equals(e.getKey().getTargetType())) {
                 final Flow flow = (Flow) e.getValue();
                 LOG.debug("Key {} triggered request for flow {}", e.getKey(), flow);
@@ -211,20 +218,20 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
             }
         }
 
-        final DataModificationTransaction trans = startTransaction();
-        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+        final ReadWriteTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedPaths()) {
             if (Flow.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 final InstanceIdentifier<Flow> flow = (InstanceIdentifier<Flow>)key;
                 LOG.debug("Key {} triggered remove of Flow from operational space.", key);
-                trans.removeOperationalData(flow);
+                trans.delete(LogicalDatastoreType.OPERATIONAL, flow);
             }
         }
-        trans.commit();
+        trans.submit();
     }
 
     @Override
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dbs) {
         if (flowStatsService == null) {
             LOG.debug("No Flow Statistics service, not subscribing to flows on node {}", getNodeIdentifier());
             return;
@@ -236,21 +243,33 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     /* Returns Exist FlowKey from exist FlowCookieMap identified by cookie
      * and by switch flow identification (priority and match)*/
     private Optional<FlowKey> getExistFlowKey(final Flow flowRule, final InstanceIdentifier<Table> tableRef,
-            final DataModificationTransaction trans, final FlowCookieMap cookieMap) {
+            final ReadWriteTransaction trans, final Optional<FlowCookieMap> cookieMap) {
 
-        if (cookieMap != null) {
-            for (FlowId flowId : cookieMap.getFlowIds()) {
+        if (cookieMap.isPresent()) {
+            for (FlowId flowId : cookieMap.get().getFlowIds()) {
                 InstanceIdentifier<Flow> flowIdent = tableRef.child(Flow.class, new FlowKey(flowId));
                 if (flowId.getValue().startsWith(ALIEN_SYSTEM_FLOW_ID)) {
                     LOG.debug("Search for flow in the operational datastore by flowID: {} ", flowIdent);
-                    Flow readedFlow = (Flow) trans.readOperationalData(flowIdent);
-                    if (FlowComparator.flowEquals(flowRule, readedFlow)) {
+                    Optional<Flow> readedFlow = Optional.absent();
+                    try {
+                        readedFlow = trans.read(LogicalDatastoreType.OPERATIONAL, flowIdent).get();
+                    }
+                    catch (Exception e) {
+                        LOG.error("Read Operational flow {} fail!", flowIdent, e);
+                    }
+                    if (readedFlow.isPresent() && FlowComparator.flowEquals(flowRule, readedFlow.get())) {
                         return Optional.<FlowKey> of(new FlowKey(flowId));
                     }
                 } else {
                     LOG.debug("Search for flow in the configuration datastore by flowID: {} ", flowIdent);
-                    Flow readedFlow = (Flow) trans.readConfigurationData(flowIdent);
-                    if (FlowComparator.flowEquals(flowRule, readedFlow)) {
+                    Optional<Flow> readedFlow = Optional.absent();
+                    try {
+                        readedFlow = trans.read(LogicalDatastoreType.CONFIGURATION, flowIdent).get();
+                    }
+                    catch (Exception e) {
+                        LOG.error("Read Config flow {} fail!", flowIdent, e);
+                    }
+                    if (readedFlow.isPresent() && FlowComparator.flowEquals(flowRule, readedFlow.get())) {
                         return Optional.<FlowKey> of(new FlowKey(flowId));
                     }
                 }
@@ -263,12 +282,18 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     /* Returns FlowKey from existing Flow in DataStore/CONFIGURATIONAL which is identified by cookie
      * and by switch flow identification (priority and match) */
     private Optional<FlowKey> getFlowKeyFromExistFlow(final Flow flowRule, final InstanceIdentifier<Table> tableRef,
-            final DataModificationTransaction trans) {
+            final ReadWriteTransaction trans) {
 
         /* Try to find it in DataSotre/CONFIG */
-        Table table= (Table)trans.readConfigurationData(tableRef);
-        if(table != null) {
-            for(Flow existingFlow : table.getFlow()) {
+        Optional<Table> table = Optional.absent();
+        try {
+            table = trans.read(LogicalDatastoreType.CONFIGURATION, tableRef).get();
+        }
+        catch (Exception e) {
+            LOG.error("Read Config table {} fail!", tableRef, e);
+        }
+        if(table.isPresent()) {
+            for(Flow existingFlow : table.get().getFlow()) {
                 LOG.debug("Existing flow in data store : {}",existingFlow.toString());
                 if(FlowComparator.flowEquals(flowRule,existingFlow)){
                     return Optional.<FlowKey> of(new FlowKey(existingFlow.getId()));
@@ -289,15 +314,15 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
     }
 
     /* Build new whole FlowCookieMap or add new flowKey */
-    private FlowCookieMap applyNewFlowKey(FlowCookieMap flowCookieMap, final Optional<FlowKey> flowKey,
-            final FlowCookie flowCookie) {
-        if (flowCookieMap != null) {
-            flowCookieMap.getFlowIds().add(flowKey.get().getId());
+    private Optional<FlowCookieMap> applyNewFlowKey(Optional<FlowCookieMap> flowCookieMap,
+            final Optional<FlowKey> flowKey, final FlowCookie flowCookie) {
+        if (flowCookieMap.isPresent()) {
+            flowCookieMap.get().getFlowIds().add(flowKey.get().getId());
         } else {
             final FlowCookieMapBuilder flowCookieMapBuilder = new FlowCookieMapBuilder();
             flowCookieMapBuilder.setCookie(flowCookie);
             flowCookieMapBuilder.setFlowIds(Collections.singletonList(flowKey.get().getId()));
-            flowCookieMap = flowCookieMapBuilder.build();
+            flowCookieMap = Optional.<FlowCookieMap> of(flowCookieMapBuilder.build());
         }
         return flowCookieMap;
     }

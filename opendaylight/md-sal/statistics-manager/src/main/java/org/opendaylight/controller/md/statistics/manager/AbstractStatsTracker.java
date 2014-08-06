@@ -14,13 +14,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionAware;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.transaction.rev131103.TransactionId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 
 abstract class AbstractStatsTracker<I, K> {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractStatsTracker.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractStatsTracker.class);
 
     private static final int WAIT_FOR_REQUEST_CYCLE = 2;
 
@@ -49,7 +49,7 @@ abstract class AbstractStatsTracker<I, K> {
                     context.registerTransaction(id);
                 }
             } else {
-                logger.debug("Statistics request failed: {}", result.getErrors());
+                LOG.debug("Statistics request failed: {}", result.getErrors());
 
                 final Throwable t = new RPCFailedException("Failed to send statistics request", result.getErrors());
                 t.fillInStackTrace();
@@ -59,7 +59,7 @@ abstract class AbstractStatsTracker<I, K> {
 
         @Override
         public void onFailure(Throwable t) {
-            logger.debug("Failed to send statistics request", t);
+            LOG.debug("Failed to send statistics request", t);
         }
     };
 
@@ -70,10 +70,6 @@ abstract class AbstractStatsTracker<I, K> {
     protected AbstractStatsTracker(final FlowCapableContext context) {
         this.context = Preconditions.checkNotNull(context);
         this.requestCounter = 0;
-    }
-
-    protected final InstanceIdentifierBuilder<Node> getNodeIdentifierBuilder() {
-        return getNodeIdentifier().builder();
     }
 
     protected final NodeRef getNodeRef() {
@@ -88,33 +84,33 @@ abstract class AbstractStatsTracker<I, K> {
         Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future), callback);
     }
 
-    protected final DataModificationTransaction startTransaction() {
+    protected final ReadWriteTransaction startTransaction() {
         return context.startDataModification();
     }
 
     public final synchronized void increaseRequestCounter(){
         this.requestCounter++;
     }
-    protected abstract void cleanupSingleStat(DataModificationTransaction trans, K item);
-    protected abstract K updateSingleStat(DataModificationTransaction trans, I item);
+    protected abstract void cleanupSingleStat(ReadWriteTransaction trans, K item);
+    protected abstract K updateSingleStat(ReadWriteTransaction trans, I item);
     public abstract void request();
 
     public final synchronized void updateStats(List<I> list) {
 
-        final DataModificationTransaction trans = startTransaction();
+        final ReadWriteTransaction trans = startTransaction();
 
         for (final I item : list) {
             trackedItems.put(updateSingleStat(trans, item), requestCounter);
         }
 
-        trans.commit();
+        trans.submit();
     }
 
     /**
      * Statistics will be cleaned up if not update in last two request cycles.
      * @param trans
      */
-    public final synchronized void cleanup(final DataModificationTransaction trans) {
+    public final synchronized void cleanup(final ReadWriteTransaction trans) {
         for (Iterator<Entry<K, Long>> it = trackedItems.entrySet().iterator();it.hasNext();){
             Entry<K, Long> e = it.next();
             if (requestCounter >= e.getValue()+WAIT_FOR_REQUEST_CYCLE) {

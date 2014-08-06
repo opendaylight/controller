@@ -8,29 +8,55 @@
 
 package org.opendaylight.controller.md.statistics.manager;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Statistics Manager Activator
+ *
+ * OSGi bundle activator
+ *
+ */
 public class StatisticsManagerActivator extends AbstractBindingAwareProvider {
+
+    private final static Logger LOG = LoggerFactory.getLogger(StatisticsManagerActivator.class);
     private StatisticsProvider statsProvider;
 
     @Override
-    public void onSessionInitiated(ProviderContext session) {
-        final DataProviderService dps = session.getSALService(DataProviderService.class);
-        final NotificationProviderService nps = session.getSALService(NotificationProviderService.class);
+    public void onSessionInitiated(final ProviderContext session) {
+        LOG.info("StatisticsManagerActivator initialization.");
+        try {
+            final DataBroker statistService = session.getSALService(DataBroker.class);
+            final NotificationProviderService notifService =
+                    session.getSALService(NotificationProviderService.class);
+            this.statsProvider = new StatisticsProvider(statistService);
+            this.statsProvider.start(notifService, session);
 
-        statsProvider = new StatisticsProvider(dps);
-        statsProvider.start(nps, session);
+            LOG.info("StatisticsManagerActivator started successfully.");
+        }
+        catch (Exception e) {
+            LOG.error("Unexpected error by initialization of StatisticsManagerActivator", e);
+        }
     }
 
     @Override
     protected void stopImpl(BundleContext context) {
         if (statsProvider != null) {
-            statsProvider.close();
-            statsProvider = null;
+            try {
+                statsProvider.close();
+            }
+            catch (Exception e) {
+                LOG.error("Unexpected error by stopping StatisticsManagerActivator", e);
+            }
+            finally {
+                statsProvider = null;
+            }
         }
+        LOG.info("StatisticsManagerActivator stoped successfully.");
     }
 }

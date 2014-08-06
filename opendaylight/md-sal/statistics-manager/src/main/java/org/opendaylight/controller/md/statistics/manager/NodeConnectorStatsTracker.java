@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnectorStatisticsAndPortNumberMap, NodeConnectorStatisticsAndPortNumberMap> {
-    private static final Logger logger = LoggerFactory.getLogger(NodeConnectorStatsTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeConnectorStatsTracker.class);
     private final OpendaylightPortStatisticsService portStatsService;
 
     NodeConnectorStatsTracker(final OpendaylightPortStatisticsService portStatsService, final FlowCapableContext context) {
@@ -31,12 +32,12 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
     }
 
     @Override
-    protected void cleanupSingleStat(final DataModificationTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
+    protected void cleanupSingleStat(final ReadWriteTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected NodeConnectorStatisticsAndPortNumberMap updateSingleStat(final DataModificationTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
+    protected NodeConnectorStatisticsAndPortNumberMap updateSingleStat(final ReadWriteTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
         FlowCapableNodeConnectorStatisticsBuilder statisticsBuilder
                                         = new FlowCapableNodeConnectorStatisticsBuilder();
         statisticsBuilder.setBytes(item.getBytes());
@@ -60,16 +61,22 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
         final NodeConnectorKey key = new NodeConnectorKey(item.getNodeConnectorId());
         final InstanceIdentifier<NodeConnector> nodeConnectorRef = getNodeIdentifier().child(NodeConnector.class, key);
 
-        // FIXME: can we bypass this read?
-        NodeConnector nodeConnector = (NodeConnector)trans.readOperationalData(nodeConnectorRef);
-        if(nodeConnector != null){
+//        Optional<NodeConnector> nodeConnector = Optional.absent();
+//        // FIXME: can we bypass this read?
+//        try {
+//            nodeConnector = trans.read(LogicalDatastoreType.OPERATIONAL, nodeConnectorRef).get();
+//        }
+//        catch (Exception e) {
+//            LOG.error("Read Operational NodeConnector {} fail!", nodeConnectorRef, e);
+//        }
+//        if(nodeConnector.isPresent()){
             final FlowCapableNodeConnectorStatisticsData stats = statisticsDataBuilder.build();
-            logger.debug("Augmenting port statistics {} to port {}",stats,nodeConnectorRef.toString());
+            LOG.debug("Augmenting port statistics {} to port {}",stats,nodeConnectorRef.toString());
             NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder()
                 .setKey(key).setId(item.getNodeConnectorId())
                 .addAugmentation(FlowCapableNodeConnectorStatisticsData.class, stats);
-            trans.putOperationalData(nodeConnectorRef, nodeConnectorBuilder.build());
-        }
+            trans.merge(LogicalDatastoreType.OPERATIONAL, nodeConnectorRef, nodeConnectorBuilder.build(), true);
+//        }
 
         return item;
     }

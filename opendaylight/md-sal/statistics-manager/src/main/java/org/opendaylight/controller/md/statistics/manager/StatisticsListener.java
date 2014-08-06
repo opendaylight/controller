@@ -42,7 +42,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
         OpendaylightFlowTableStatisticsListener,
         OpendaylightQueueStatisticsListener{
 
-    private final static Logger sucLogger = LoggerFactory.getLogger(StatisticsListener.class);
+    private final static Logger LOG = LoggerFactory.getLogger(StatisticsListener.class);
     private final StatisticsProvider statisticsManager;
 
     /**
@@ -62,7 +62,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onMeterStatisticsUpdated(MeterStatisticsUpdated notification) {
+    public void onMeterStatisticsUpdated(final MeterStatisticsUpdated notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateMeterStats(notification, notification.getMeterStats());
@@ -70,7 +70,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onGroupDescStatsUpdated(GroupDescStatsUpdated notification) {
+    public void onGroupDescStatsUpdated(final GroupDescStatsUpdated notification) {
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateGroupDescStats(notification, notification.getGroupDescStats());
@@ -78,7 +78,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onGroupStatisticsUpdated(GroupStatisticsUpdated notification) {
+    public void onGroupStatisticsUpdated(final GroupStatisticsUpdated notification) {
         final NodeStatisticsHandler handler = statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateGroupStats(notification, notification.getGroupStats());
@@ -86,7 +86,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onMeterFeaturesUpdated(MeterFeaturesUpdated notification) {
+    public void onMeterFeaturesUpdated(final MeterFeaturesUpdated notification) {
         final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateMeterFeatures(notification);
@@ -94,7 +94,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onGroupFeaturesUpdated(GroupFeaturesUpdated notification) {
+    public void onGroupFeaturesUpdated(final GroupFeaturesUpdated notification) {
         final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateGroupFeatures(notification);
@@ -103,7 +103,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
 
     @Override
     public void onFlowsStatisticsUpdate(final FlowsStatisticsUpdate notification) {
-        sucLogger.debug("Received flow stats update : {}",notification.toString());
+        LOG.debug("Received flow stats update : {}",notification.toString());
         final NodeStatisticsHandler sna = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (sna != null) {
             sna.updateFlowStats(notification, notification.getFlowAndStatisticsMapList());
@@ -111,7 +111,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onAggregateFlowStatisticsUpdate(AggregateFlowStatisticsUpdate notification) {
+    public void onAggregateFlowStatisticsUpdate(final AggregateFlowStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateAggregateFlowStats(notification, notification);
@@ -119,7 +119,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onNodeConnectorStatisticsUpdate(NodeConnectorStatisticsUpdate notification) {
+    public void onNodeConnectorStatisticsUpdate(final NodeConnectorStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateNodeConnectorStats(notification, notification.getNodeConnectorStatisticsAndPortNumberMap());
@@ -127,7 +127,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onFlowTableStatisticsUpdate(FlowTableStatisticsUpdate notification) {
+    public void onFlowTableStatisticsUpdate(final FlowTableStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateFlowTableStats(notification, notification.getFlowTableAndStatisticsMap());
@@ -135,7 +135,7 @@ public class StatisticsListener implements OpendaylightGroupStatisticsListener,
     }
 
     @Override
-    public void onQueueStatisticsUpdate(QueueStatisticsUpdate notification) {
+    public void onQueueStatisticsUpdate(final QueueStatisticsUpdate notification) {
         final NodeStatisticsHandler handler = this.statisticsManager.getStatisticsHandler(notification.getId());
         if (handler != null) {
             handler.updateQueueStats(notification, notification.getQueueIdAndStatisticsMap());

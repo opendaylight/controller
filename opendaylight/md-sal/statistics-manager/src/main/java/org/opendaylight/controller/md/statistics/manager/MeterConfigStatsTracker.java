@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
@@ -26,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterConfigStats, MeterConfigStats> {
-    private static final Logger logger = LoggerFactory.getLogger(MeterConfigStatsTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MeterConfigStatsTracker.class);
     private final OpendaylightMeterStatisticsService meterStatsService;
 
     protected MeterConfigStatsTracker(OpendaylightMeterStatisticsService meterStatsService, final FlowCapableContext context) {
@@ -35,22 +36,22 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, MeterConfigStats item) {
-        InstanceIdentifier<NodeMeterConfigStats> meterRef = getNodeIdentifierBuilder()
+    protected void cleanupSingleStat(ReadWriteTransaction trans, MeterConfigStats item) {
+        InstanceIdentifier<NodeMeterConfigStats> meterRef = getNodeIdentifier()
                             .augmentation(FlowCapableNode.class)
                             .child(Meter.class, new MeterKey(item.getMeterId()))
-                            .augmentation(NodeMeterConfigStats.class).build();
-        trans.removeOperationalData(meterRef);
+                            .augmentation(NodeMeterConfigStats.class);
+        trans.delete(LogicalDatastoreType.OPERATIONAL, meterRef);
     }
 
     @Override
-    protected MeterConfigStats updateSingleStat(DataModificationTransaction trans, MeterConfigStats item) {
+    protected MeterConfigStats updateSingleStat(ReadWriteTransaction trans, MeterConfigStats item) {
         MeterBuilder meterBuilder = new MeterBuilder();
         MeterKey meterKey = new MeterKey(item.getMeterId());
         meterBuilder.setKey(meterKey);
 
-        InstanceIdentifier<Meter> meterRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                .child(Meter.class,meterKey).toInstance();
+        InstanceIdentifier<Meter> meterRef = getNodeIdentifier().augmentation(FlowCapableNode.class)
+                .child(Meter.class,meterKey);
 
         NodeMeterConfigStatsBuilder meterConfig = new NodeMeterConfigStatsBuilder();
         meterConfig.setMeterConfigStats(new MeterConfigStatsBuilder(item).build());
@@ -58,7 +59,7 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
         //Update augmented data
         meterBuilder.addAugmentation(NodeMeterConfigStats.class, meterConfig.build());
 
-        trans.putOperationalData(meterRef, meterBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, meterRef, meterBuilder.build(), true);
         return item;
     }
 
@@ -73,26 +74,25 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        final DataModificationTransaction trans = startTransaction();
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        final ReadWriteTransaction trans = startTransaction();
 
-        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+        for (InstanceIdentifier<?> key : change.getRemovedPaths()) {
             if (Meter.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Meter> meter = (InstanceIdentifier<Meter>)key;
 
                 InstanceIdentifier<?> nodeMeterStatisticsAugmentation =
                         meter.augmentation(NodeMeterConfigStats.class);
-                trans.removeOperationalData(nodeMeterStatisticsAugmentation);
+                trans.delete(LogicalDatastoreType.OPERATIONAL, nodeMeterStatisticsAugmentation);
             }
         }
-
-        trans.commit();
+        trans.submit();
     }
 
     @Override
     protected InstanceIdentifier<?> listenPath() {
-        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Meter.class).build();
+        return getNodeIdentifier().augmentation(FlowCapableNode.class).child(Meter.class);
     }
 
     @Override
@@ -101,9 +101,9 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
     }
 
     @Override
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dbs) {
         if (meterStatsService == null) {
-            logger.debug("No Meter Statistics service, not subscribing to meter on node {}", getNodeIdentifier());
+            LOG.debug("No Meter Statistics service, not subscribing to meter on node {}", getNodeIdentifier());
             return;
         }
 

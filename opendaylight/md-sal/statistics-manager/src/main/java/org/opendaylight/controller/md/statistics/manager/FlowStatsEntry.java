@@ -9,6 +9,12 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 
+/**
+ * Internal Input/Output object used in FlowStatTracker
+ * for identification correct Flow in multi table
+ * Statistic processing
+ *
+ */
 final class FlowStatsEntry {
     private final Short tableId;
     private final Flow flow;

@@ -9,9 +9,10 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.Queue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.queues.QueueBuilder;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndStatisticsMap, QueueStatsEntry> {
-    private static final Logger logger = LoggerFactory.getLogger(QueueStatsTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QueueStatsTracker.class);
     private final OpendaylightQueueStatisticsService queueStatsService;
 
     QueueStatsTracker(OpendaylightQueueStatisticsService queueStatsService, final FlowCapableContext context) {
@@ -42,17 +43,17 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, QueueStatsEntry item) {
-        InstanceIdentifier<?> queueRef
-                            = getNodeIdentifierBuilder().child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
-                                                .augmentation(FlowCapableNodeConnector.class)
-                                                .child(Queue.class, new QueueKey(item.getQueueId()))
-                                                .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class).build();
-        trans.removeOperationalData(queueRef);
+    protected void cleanupSingleStat(ReadWriteTransaction trans, QueueStatsEntry item) {
+        InstanceIdentifier<?> queueRef = getNodeIdentifier()
+                .child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
+                .augmentation(FlowCapableNodeConnector.class)
+                .child(Queue.class, new QueueKey(item.getQueueId()))
+                .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
+        trans.delete(LogicalDatastoreType.OPERATIONAL, queueRef);
     }
 
     @Override
-    protected QueueStatsEntry updateSingleStat(DataModificationTransaction trans, QueueIdAndStatisticsMap item) {
+    protected QueueStatsEntry updateSingleStat(ReadWriteTransaction trans, QueueIdAndStatisticsMap item) {
 
         QueueStatsEntry queueEntry = new QueueStatsEntry(item.getNodeConnectorId(), item.getQueueId());
 
@@ -64,21 +65,22 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
 
         queueStatisticsDataBuilder.setFlowCapableNodeConnectorQueueStatistics(queueStatisticsBuilder.build());
 
-        InstanceIdentifier<Queue> queueRef = getNodeIdentifierBuilder().child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
-                                    .augmentation(FlowCapableNodeConnector.class)
-                                    .child(Queue.class, new QueueKey(item.getQueueId())).toInstance();
+        InstanceIdentifier<Queue> queueRef = getNodeIdentifier()
+                .child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId()))
+                .augmentation(FlowCapableNodeConnector.class)
+                .child(Queue.class, new QueueKey(item.getQueueId()));
 
         QueueBuilder queueBuilder = new QueueBuilder();
         FlowCapableNodeConnectorQueueStatisticsData qsd = queueStatisticsDataBuilder.build();
         queueBuilder.addAugmentation(FlowCapableNodeConnectorQueueStatisticsData.class, qsd);
         queueBuilder.setKey(new QueueKey(item.getQueueId()));
 
-        logger.debug("Augmenting queue statistics {} of queue {} to port {}",
+        LOG.debug("Augmenting queue statistics {} of queue {} to port {}",
                                     qsd,
                                     item.getQueueId(),
                                     item.getNodeConnectorId());
 
-        trans.putOperationalData(queueRef, queueBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, queueRef, queueBuilder.build(), true);
         return queueEntry;
     }
 
@@ -105,37 +107,37 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedConfigurationData().entrySet()) {
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        for (Entry<InstanceIdentifier<?>, DataObject> e : change.getCreatedData().entrySet()) {
             if (Queue.class.equals(e.getKey().getTargetType())) {
                 final Queue queue = (Queue) e.getValue();
                 final NodeConnectorKey key = e.getKey().firstKeyOf(NodeConnector.class, NodeConnectorKey.class);
-                logger.debug("Key {} triggered request for connector {} queue {}", key.getId(), queue.getQueueId());
+                LOG.debug("Key {} triggered request for connector {} queue {}", key.getId(), queue.getQueueId());
                 request(key.getId(), queue.getQueueId());
             } else {
-                logger.debug("Ignoring key {}", e.getKey());
+                LOG.debug("Ignoring key {}", e.getKey());
             }
         }
 
-        final DataModificationTransaction trans = startTransaction();
-        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+        final ReadWriteTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedPaths()) {
             if (Queue.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 final InstanceIdentifier<Queue> queue = (InstanceIdentifier<Queue>)key;
                 final InstanceIdentifier<?> del = queue
                         .augmentation(FlowCapableNodeConnectorQueueStatisticsData.class);
-                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+                LOG.debug("Key {} triggered remove of augmentation {}", key, del);
 
-                trans.removeOperationalData(del);
+                trans.delete(LogicalDatastoreType.OPERATIONAL, del);
             }
         }
-        trans.commit();
+        trans.submit();
     }
 
     @Override
     protected InstanceIdentifier<?> listenPath() {
-        return getNodeIdentifierBuilder().child(NodeConnector.class)
-                .augmentation(FlowCapableNodeConnector.class).child(Queue.class).build();
+        return getNodeIdentifier().child(NodeConnector.class)
+                .augmentation(FlowCapableNodeConnector.class).child(Queue.class);
     }
 
     @Override
@@ -144,9 +146,9 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
     }
 
     @Override
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dbs) {
         if (queueStatsService == null) {
-            logger.debug("No Queue Statistics service, not subscribing to queues on node {}", getNodeIdentifier());
+            LOG.debug("No Queue Statistics service, not subscribing to queues on node {}", getNodeIdentifier());
             return;
         }
 

@@ -9,8 +9,8 @@ package org.opendaylight.controller.md.statistics.manager;
 
 import java.util.Collection;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
  * NodeStatisticsHandler for a particular switch.
  */
 final class FlowCapableTracker implements DataChangeListener {
-    private static final Logger logger = LoggerFactory.getLogger(FlowCapableTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlowCapableTracker.class);
 
     private final InstanceIdentifier<FlowCapableNode> root;
     private final StatisticsProvider stats;
@@ -48,11 +48,11 @@ final class FlowCapableTracker implements DataChangeListener {
              * on the depth of their identifier.
              */
             if (root.getPath().size() < input.getPath().size()) {
-                logger.debug("Ignoring notification for descendant {}", input);
+                LOG.debug("Ignoring notification for descendant {}", input);
                 return false;
             }
 
-            logger.debug("Including notification for {}", input);
+            LOG.debug("Including notification for {}", input);
             return true;
         }
     };
@@ -67,8 +67,8 @@ final class FlowCapableTracker implements DataChangeListener {
      * from the datastore. Competing add/remove could be problematic otherwise.
      */
     @Override
-    public synchronized void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        logger.debug("Tracker at root {} processing notification", root);
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        LOG.debug("Tracker at root {} processing notification", root);
 
         /*
          * First process all the identifiers which were removed, trying to figure out
@@ -76,14 +76,14 @@ final class FlowCapableTracker implements DataChangeListener {
          */
         final Collection<NodeKey> removedNodes =
             Collections2.filter(Collections2.transform(
-                Sets.filter(change.getRemovedOperationalData(), filterIdentifiers),
+                    Sets.filter(change.getRemovedPaths(), filterIdentifiers),
                 new Function<InstanceIdentifier<?>, NodeKey>() {
                     @Override
                     public NodeKey apply(final InstanceIdentifier<?> input) {
                         final NodeKey key = input.firstKeyOf(Node.class, NodeKey.class);
                         if (key == null) {
                             // FIXME: do we have a backup plan?
-                            logger.info("Failed to extract node key from {}", input);
+                            LOG.info("Failed to extract node key from {}", input);
                         }
                         return key;
                     }
@@ -92,20 +92,20 @@ final class FlowCapableTracker implements DataChangeListener {
 
         final Collection<NodeKey> addedNodes =
             Collections2.filter(Collections2.transform(
-                Sets.filter(change.getCreatedOperationalData().keySet(), filterIdentifiers),
+                Sets.filter(change.getCreatedData().keySet(), filterIdentifiers),
                 new Function<InstanceIdentifier<?>, NodeKey>() {
                     @Override
                     public NodeKey apply(final InstanceIdentifier<?> input) {
                         final NodeKey key = input.firstKeyOf(Node.class, NodeKey.class);
                         if (key == null) {
                             // FIXME: do we have a backup plan?
-                            logger.info("Failed to extract node key from {}", input);
+                            LOG.info("Failed to extract node key from {}", input);
                     }
                     return key;
                 }
             }), Predicates.notNull());
         stats.startNodeHandlers(addedNodes);
 
-        logger.debug("Tracker at root {} finished processing notification", root);
+        LOG.debug("Tracker at root {} finished processing notification", root);
     }
 }

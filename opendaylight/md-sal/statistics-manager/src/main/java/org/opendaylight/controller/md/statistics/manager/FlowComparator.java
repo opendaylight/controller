@@ -28,10 +28,10 @@ import com.google.common.annotations.VisibleForTesting;
  * Utility class for comparing flows.
  */
 final class FlowComparator {
-    private final static Logger logger = LoggerFactory.getLogger(FlowComparator.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FlowComparator.class);
 
     private FlowComparator() {
-
+        throw new UnsupportedOperationException("Utilities class should not be instantiated");
     }
 
     public static boolean flowEquals(Flow statsFlow, Flow storedFlow) {
@@ -356,7 +356,7 @@ final class FlowComparator {
 
             integerIpAddress = new IntegerIpAddress(ipInt, mask);
         } catch (UnknownHostException e){
-            logger.error("Failed to determine host IP address by name: {}", e.getMessage(), e);
+            LOG.error("Failed to determine host IP address by name: {}", e.getMessage(), e);
         }
 
         return integerIpAddress;

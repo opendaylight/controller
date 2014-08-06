@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetGroupDescriptionInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupDescStats;
@@ -26,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDescStats, GroupDescStats> {
-    private static final Logger logger = LoggerFactory.getLogger(GroupDescStatsTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupDescStatsTracker.class);
     private final OpendaylightGroupStatisticsService groupStatsService;
 
     public GroupDescStatsTracker(OpendaylightGroupStatisticsService groupStatsService, final FlowCapableContext context) {
@@ -35,13 +36,13 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
     }
 
     @Override
-    protected GroupDescStats updateSingleStat(DataModificationTransaction trans, GroupDescStats item) {
+    protected GroupDescStats updateSingleStat(ReadWriteTransaction trans, GroupDescStats item) {
         GroupBuilder groupBuilder = new GroupBuilder();
         GroupKey groupKey = new GroupKey(item.getGroupId());
         groupBuilder.setKey(groupKey);
 
-        InstanceIdentifier<Group> groupRef = getNodeIdentifierBuilder()
-                .augmentation(FlowCapableNode.class).child(Group.class,groupKey).build();
+        InstanceIdentifier<Group> groupRef = getNodeIdentifier()
+                .augmentation(FlowCapableNode.class).child(Group.class,groupKey);
 
         NodeGroupDescStatsBuilder groupDesc= new NodeGroupDescStatsBuilder();
         groupDesc.setGroupDesc(new GroupDescBuilder(item).build());
@@ -49,20 +50,20 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
         //Update augmented data
         groupBuilder.addAugmentation(NodeGroupDescStats.class, groupDesc.build());
 
-        trans.putOperationalData(groupRef, groupBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, groupRef, groupBuilder.build(), true);
         return item;
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, GroupDescStats item) {
-        InstanceIdentifier<NodeGroupDescStats> groupRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                .child(Group.class, new GroupKey(item.getGroupId())).augmentation(NodeGroupDescStats.class).build();
-        trans.removeOperationalData(groupRef);
+    protected void cleanupSingleStat(ReadWriteTransaction trans, GroupDescStats item) {
+        InstanceIdentifier<NodeGroupDescStats> groupRef = getNodeIdentifier().augmentation(FlowCapableNode.class)
+                .child(Group.class, new GroupKey(item.getGroupId())).augmentation(NodeGroupDescStats.class);
+        trans.delete(LogicalDatastoreType.OPERATIONAL, groupRef);
     }
 
     @Override
     protected InstanceIdentifier<?> listenPath() {
-        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Group.class).build();
+        return getNodeIdentifier().augmentation(FlowCapableNode.class).child(Group.class);
     }
 
     @Override
@@ -81,34 +82,34 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        for (InstanceIdentifier<?> key : change.getCreatedConfigurationData().keySet()) {
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        for (InstanceIdentifier<?> key : change.getCreatedData().keySet()) {
             if (Group.class.equals(key.getTargetType())) {
-                logger.debug("Key {} triggered request", key);
+                LOG.debug("Key {} triggered request", key);
                 request();
             } else {
-                logger.debug("Ignoring key {}", key);
+                LOG.debug("Ignoring key {}", key);
             }
         }
 
-        final DataModificationTransaction trans = startTransaction();
-        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+        final ReadWriteTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedPaths()) {
             if (Group.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Group> group = (InstanceIdentifier<Group>)key;
                 InstanceIdentifier<?> del = group.augmentation(NodeGroupDescStats.class);
-                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+                LOG.debug("Key {} triggered remove of augmentation {}", key, del);
 
-                trans.removeOperationalData(del);
+                trans.delete(LogicalDatastoreType.OPERATIONAL, del);
             }
         }
-        trans.commit();
+        trans.submit();
     }
 
     @Override
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dbs) {
         if (groupStatsService == null) {
-            logger.debug("No Group Statistics service, not subscribing to groups on node {}", getNodeIdentifier());
+            LOG.debug("No Group Statistics service, not subscribing to groups on node {}", getNodeIdentifier());
             return;
         }
 
