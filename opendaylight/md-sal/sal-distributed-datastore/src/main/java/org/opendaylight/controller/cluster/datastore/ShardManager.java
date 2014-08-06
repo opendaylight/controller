@@ -17,7 +17,9 @@ import akka.actor.SupervisorStrategy;
 import akka.cluster.ClusterEvent;
 import akka.japi.Creator;
 import akka.japi.Function;
+
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
@@ -61,15 +63,19 @@ public class ShardManager extends AbstractUntypedActor {
 
     private final Configuration configuration;
 
+    private final String mxBeanType;
+
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
      *             configuration or operational
      */
-    private ShardManager(String type, ClusterWrapper cluster, Configuration configuration) {
+    private ShardManager(String type, ClusterWrapper cluster, Configuration configuration,
+            String mxBeanType) {
 
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
+        this.mxBeanType = mxBeanType;
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -81,16 +87,17 @@ public class ShardManager extends AbstractUntypedActor {
 
     public static Props props(final String type,
         final ClusterWrapper cluster,
-        final Configuration configuration) {
+        final Configuration configuration,
+        final String mxBeanType) {
+
         return Props.create(new Creator<ShardManager>() {
 
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(type, cluster, configuration);
+                return new ShardManager(type, cluster, configuration, mxBeanType);
             }
         });
     }
-
 
     @Override
     public void handleReceive(Object message) throws Exception {
@@ -229,7 +236,7 @@ public class ShardManager extends AbstractUntypedActor {
             String shardActorName = getShardActorName(memberName, shardName);
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
-                .actorOf(Shard.props(shardActorName, peerAddresses),
+                .actorOf(Shard.props(shardActorName, peerAddresses, mxBeanType),
                     shardActorName);
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));
         }
