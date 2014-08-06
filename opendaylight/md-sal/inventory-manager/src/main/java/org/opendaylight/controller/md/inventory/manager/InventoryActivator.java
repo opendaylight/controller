@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +21,11 @@ public class InventoryActivator extends AbstractBindingAwareProvider {
 
     @Override
     public void onSessionInitiated(final ProviderContext session) {
-        DataProviderService salDataService = session.getSALService(DataProviderService.class);
+        DataBroker dataBroker = session.getSALService(DataBroker.class);
         NotificationProviderService salNotifiService =
                 session.getSALService(NotificationProviderService.class);
 
-        provider = new FlowCapableInventoryProvider(salDataService, salNotifiService);
+        provider = new FlowCapableInventoryProvider(dataBroker, salNotifiService);
         provider.start();
     }
 
