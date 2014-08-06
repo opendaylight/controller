@@ -8,6 +8,7 @@ module opendaylight-sal-dom-broker-impl {
  	import opendaylight-md-sal-common {prefix common;}
  	import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
  	import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+ 	import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     description
         "Service definition for Binding Aware MD-SAL.
@@ -129,6 +130,55 @@ module opendaylight-sal-dom-broker-impl {
             container data {
                 uses common:data-state;
             } 
+        }
+    }
+
+    identity clear-commit-stats-rpc;
+
+    rpc clear-commit-stats  {
+        description
+          "JMX call to clear the commit stats.";
+
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance clear-commit-stats-rpc;
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-inmemory-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-inmemory-data-broker'";
+
+            container commit-executor-stats {
+                uses common:thread-executor-stats;
+            }
+
+            container commit-future-executor-stats {
+                uses common:thread-executor-stats;
+            }
+
+            container commit-stats {
+                leaf total-commits {
+                    type uint32;
+                }
+
+                leaf longest-commit-time {
+                    type string;
+                }
+
+                leaf average-commit-time {
+                    type string;
+                }
+
+                leaf shortest-commit-time {
+                    type string;
+                }
+            }
+
+            rpcx:rpc-context-instance "clear-commit-stats-rpc";
         }
     }
 }
