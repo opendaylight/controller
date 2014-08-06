@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
+import org.opendaylight.controller.sal.core.api.jmx.AbstractMXBean;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -17,10 +17,10 @@ public class ShardStatsTest {
   @Before
   public void setUp() throws Exception {
 
-    shardStats = new ShardStats("shard-1");
+    shardStats = new ShardStats("shard-1", "DataStore");
     shardStats.registerMBean();
     mbeanServer= shardStats.getMBeanServer();
-    String objectName = AbstractBaseMBean.BASE_JMX_PREFIX + "type="+shardStats.getMBeanType()+",Category="+
+    String objectName = AbstractMXBean.BASE_JMX_PREFIX + "type="+shardStats.getMBeanType()+",Category="+
         shardStats.getMBeanCategory() + ",name="+
         shardStats.getMBeanName();
     testMBeanName = new ObjectName(objectName);
@@ -35,7 +35,7 @@ public class ShardStatsTest {
   public void testGetShardName() throws Exception {
 
     Object attribute = mbeanServer.getAttribute(testMBeanName,"ShardName");
-    Assert.assertEquals((String) attribute, "shard-1");
+    Assert.assertEquals(attribute, "shard-1");
 
   }
 
@@ -48,7 +48,7 @@ public class ShardStatsTest {
 
     //now let us get from MBeanServer what is the transaction count.
     Object attribute = mbeanServer.getAttribute(testMBeanName,"CommittedTransactionsCount");
-    Assert.assertEquals((Long) attribute, (Long)3L);
+    Assert.assertEquals(attribute, 3L);
 
 
   }

@@ -1,6 +1,8 @@
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreStats;
 
 public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryOperationalDataStoreProviderModule {
 
@@ -19,7 +21,15 @@ public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return InMemoryDOMDataStoreFactory.create("DOM-OPER", getOperationalSchemaServiceDependency());
+
+        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryOperationalDataStore");
+
+        InMemoryDOMDataStore dataStore = InMemoryDOMDataStoreFactory.create(
+                "DOM-OPER", getOperationalSchemaServiceDependency(), statsBean);
+
+        dataStore.setCloseable(statsBean);
+
+        return dataStore;
     }
 
 }

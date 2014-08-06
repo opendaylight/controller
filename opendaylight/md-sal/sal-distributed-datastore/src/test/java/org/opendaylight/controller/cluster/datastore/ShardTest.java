@@ -35,7 +35,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCreateTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
@@ -87,7 +87,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveRegisterListener() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
@@ -141,7 +141,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testCreateTransaction(){
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
 
@@ -198,7 +198,7 @@ public class ShardTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put("member-2", null);
-            final Props props = Shard.props("config", peerAddresses);
+            final Props props = Shard.props("config", peerAddresses, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testPeerAddressResolved");
 
