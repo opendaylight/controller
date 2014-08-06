@@ -65,9 +65,11 @@ public class ConfigPusher {
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> result = new LinkedHashMap<>();
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder : configs) {
-            EditAndCommitResponse editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
-            logger.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
-            result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
+            if(configSnapshotHolder != null) {
+                EditAndCommitResponse editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
+                logger.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
+                result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
+            }
         }
         logger.debug("All configuration snapshots have been pushed successfully.");
         return result;
