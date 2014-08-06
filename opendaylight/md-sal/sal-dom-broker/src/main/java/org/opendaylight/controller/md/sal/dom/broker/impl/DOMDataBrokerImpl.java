@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendaylight.controller.config.yang.md.sal.dom.statistics.CommitStatTracker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -40,11 +41,33 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
     private final DOMDataCommitCoordinatorImpl coordinator;
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
+    private volatile AutoCloseable closeable;
 
     public DOMDataBrokerImpl(final ImmutableMap<LogicalDatastoreType, DOMStore> datastores,
             final ListeningExecutorService executor) {
         super(datastores);
         this.coordinator = new DOMDataCommitCoordinatorImpl(executor);
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
+    }
+
+    public void setCommitStatTracker(CommitStatTracker commitStatTracker) {
+        coordinator.setCommitStatTracker(commitStatTracker);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch(Exception e) {
+                LOG.debug("Error closing instance", e);
+            }
+        }
     }
 
     @Override
@@ -82,5 +105,4 @@ public class DOMDataBrokerImpl extends AbstractDOMForwardedTransactionFactory<DO
         LOG.debug("Transaction: {} submitted with cohorts {}.", transaction.getIdentifier(), cohorts);
         return coordinator.submit(transaction, cohorts, Optional.<DOMDataCommitErrorListener> absent());
     }
-
 }
