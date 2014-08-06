@@ -34,9 +34,11 @@ import org.opendaylight.controller.cluster.datastore.modification.ImmutableCompo
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -67,168 +69,168 @@ import java.util.concurrent.ExecutionException;
  */
 public class ShardTransaction extends AbstractUntypedActor {
 
-    private final ActorRef shardActor;
-    private final SchemaContext schemaContext;
+  private final ActorRef shardActor;
+  private final SchemaContext schemaContext;
 
-    // FIXME : see below
-    // If transactionChain is not null then this transaction is part of a
-    // transactionChain. Not really clear as to what that buys us
-    private final DOMStoreTransactionChain transactionChain;
+  // FIXME : see below
+  // If transactionChain is not null then this transaction is part of a
+  // transactionChain. Not really clear as to what that buys us
+  private final DOMStoreTransactionChain transactionChain;
 
-    private final DOMStoreReadWriteTransaction transaction;
+  private final DOMStoreTransaction transaction;
 
-    private final MutableCompositeModification modification =
-        new MutableCompositeModification();
+  private final MutableCompositeModification modification =
+      new MutableCompositeModification();
 
-    private final LoggingAdapter log =
-        Logging.getLogger(getContext().system(), this);
+  private final LoggingAdapter log =
+      Logging.getLogger(getContext().system(), this);
 
-    public ShardTransaction(DOMStoreReadWriteTransaction transaction,
-        ActorRef shardActor, SchemaContext schemaContext) {
-        this(null, transaction, shardActor, schemaContext);
+  public ShardTransaction(DOMStoreTransaction transaction,
+                          ActorRef shardActor, SchemaContext schemaContext) {
+    this(null, transaction, shardActor, schemaContext);
+  }
+
+  public ShardTransaction(DOMStoreTransactionChain transactionChain, DOMStoreTransaction transaction,
+                          ActorRef shardActor, SchemaContext schemaContext) {
+    this.transactionChain = transactionChain;
+    this.transaction = transaction;
+    this.shardActor = shardActor;
+    this.schemaContext = schemaContext;
+  }
+
+
+
+  public static Props props(final DOMStoreTransaction transaction,
+                            final ActorRef shardActor, final SchemaContext schemaContext) {
+    return Props.create(new Creator<ShardTransaction>() {
+
+      @Override
+      public ShardTransaction create() throws Exception {
+        return new ShardTransaction(transaction, shardActor, schemaContext);
+      }
+    });
+  }
+
+  public static Props props(final DOMStoreTransactionChain transactionChain, final DOMStoreTransaction transaction,
+                            final ActorRef shardActor, final SchemaContext schemaContext) {
+    return Props.create(new Creator<ShardTransaction>() {
+
+      @Override
+      public ShardTransaction create() throws Exception {
+        return new ShardTransaction(transactionChain, transaction, shardActor, schemaContext);
+      }
+    });
+  }
+
+
+  @Override
+  public void handleReceive(Object message) throws Exception {
+    if (ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+      readData(ReadData.fromSerializable(message));
+    } else if (WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+      writeData(WriteData.fromSerializable(message, schemaContext));
+    } else if (MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+      mergeData(MergeData.fromSerializable(message, schemaContext));
+    } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
+      deleteData(DeleteData.fromSerizalizable(message));
+    } else if (ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
+      readyTransaction(new ReadyTransaction());
+    } else if (message.getClass().equals(CloseTransaction.SERIALIZABLE_CLASS)) {
+      closeTransaction(new CloseTransaction());
+    } else if (message instanceof GetCompositedModification) {
+      // This is here for testing only
+      getSender().tell(new GetCompositeModificationReply(
+          new ImmutableCompositeModification(modification)), getSelf());
+    }else{
+      throw new Exception ("Shard:handleRecieve received an unknown message"+message);
     }
+  }
 
-    public ShardTransaction(DOMStoreTransactionChain transactionChain, DOMStoreReadWriteTransaction transaction,
-        ActorRef shardActor, SchemaContext schemaContext) {
-        this.transactionChain = transactionChain;
-        this.transaction = transaction;
-        this.shardActor = shardActor;
-        this.schemaContext = schemaContext;
-    }
+  private void readData(ReadData message) {
+    final ActorRef sender = getSender();
+    final ActorRef self = getSelf();
+    final YangInstanceIdentifier path = message.getPath();
+    final ListenableFuture<Optional<NormalizedNode<?, ?>>> future =
+        ((DOMStoreReadTransaction)transaction).read(path);
 
-
-
-    public static Props props(final DOMStoreReadWriteTransaction transaction,
-        final ActorRef shardActor, final SchemaContext schemaContext) {
-        return Props.create(new Creator<ShardTransaction>() {
-
-            @Override
-            public ShardTransaction create() throws Exception {
-                return new ShardTransaction(transaction, shardActor, schemaContext);
-            }
-        });
-    }
-
-    public static Props props(final DOMStoreTransactionChain transactionChain, final DOMStoreReadWriteTransaction transaction,
-        final ActorRef shardActor, final SchemaContext schemaContext) {
-        return Props.create(new Creator<ShardTransaction>() {
-
-            @Override
-            public ShardTransaction create() throws Exception {
-                return new ShardTransaction(transactionChain, transaction, shardActor, schemaContext);
-            }
-        });
-    }
-
-
-    @Override
-    public void handleReceive(Object message) throws Exception {
-        if (ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readData(ReadData.fromSerializable(message));
-        } else if (WriteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            writeData(WriteData.fromSerializable(message, schemaContext));
-        } else if (MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            mergeData(MergeData.fromSerializable(message, schemaContext));
-        } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            deleteData(DeleteData.fromSerizalizable(message));
-        } else if (ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(new ReadyTransaction());
-        } else if (message.getClass().equals(CloseTransaction.SERIALIZABLE_CLASS)) {
-            closeTransaction(new CloseTransaction());
-        } else if (message instanceof GetCompositedModification) {
-            // This is here for testing only
-            getSender().tell(new GetCompositeModificationReply(
-                new ImmutableCompositeModification(modification)), getSelf());
-        }else{
-          throw new Exception ("Shard:handleRecieve received an unknown message"+message);
-        }
-    }
-
-    private void readData(ReadData message) {
-        final ActorRef sender = getSender();
-        final ActorRef self = getSelf();
-        final YangInstanceIdentifier path = message.getPath();
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> future =
-            transaction.read(path);
-
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Optional<NormalizedNode<?, ?>> optional = future.get();
-                    if (optional.isPresent()) {
-                        sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
-                    } else {
-                        sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e,
-                        "An exception happened when reading data from path : "
-                            + path.toString());
-                }
-
-            }
-        }, getContext().dispatcher());
-    }
-
-
-    private void writeData(WriteData message) {
-        modification.addModification(
-            new WriteModification(message.getPath(), message.getData(),schemaContext));
-        LOG.debug("writeData at path : " + message.getPath().toString());
-        transaction.write(message.getPath(), message.getData());
-        getSender().tell(new WriteDataReply().toSerializable(), getSelf());
-    }
-
-    private void mergeData(MergeData message) {
-        modification.addModification(
-            new MergeModification(message.getPath(), message.getData(), schemaContext));
-        LOG.debug("mergeData at path : " + message.getPath().toString());
-        transaction.merge(message.getPath(), message.getData());
-        getSender().tell(new MergeDataReply().toSerializable(), getSelf());
-    }
-
-    private void deleteData(DeleteData message) {
-        modification.addModification(new DeleteModification(message.getPath()));
-        transaction.delete(message.getPath());
-        getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
-    }
-
-    private void readyTransaction(ReadyTransaction message) {
-        DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
-        ActorRef cohortActor = getContext().actorOf(
-            ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
-        getSender()
-            .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
-
-    }
-
-    private void closeTransaction(CloseTransaction message) {
-        transaction.close();
-        getSender().tell(new CloseTransactionReply().toSerializable(), getSelf());
-        getSelf().tell(PoisonPill.getInstance(), getSelf());
-    }
-
-
-    // These classes are in here for test purposes only
-
-
-    static class GetCompositedModification {
-
-    }
-
-
-    static class GetCompositeModificationReply {
-        private final CompositeModification modification;
-
-
-        GetCompositeModificationReply(CompositeModification modification) {
-            this.modification = modification;
+    future.addListener(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Optional<NormalizedNode<?, ?>> optional = future.get();
+          if (optional.isPresent()) {
+            sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
+          } else {
+            sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
+          }
+        } catch (InterruptedException | ExecutionException e) {
+          log.error(e,
+              "An exception happened when reading data from path : "
+                  + path.toString());
         }
 
+      }
+    }, getContext().dispatcher());
+  }
 
-        public CompositeModification getModification() {
-            return modification;
-        }
+
+  private void writeData(WriteData message) {
+    modification.addModification(
+        new WriteModification(message.getPath(), message.getData(),schemaContext));
+    LOG.debug("writeData at path : " + message.getPath().toString());
+    ((DOMStoreWriteTransaction)transaction).write(message.getPath(), message.getData());
+    getSender().tell(new WriteDataReply().toSerializable(), getSelf());
+  }
+
+  private void mergeData(MergeData message) {
+    modification.addModification(
+        new MergeModification(message.getPath(), message.getData(), schemaContext));
+    LOG.debug("mergeData at path : " + message.getPath().toString());
+    ((DOMStoreWriteTransaction)transaction).merge(message.getPath(), message.getData());
+    getSender().tell(new MergeDataReply().toSerializable(), getSelf());
+  }
+
+  private void deleteData(DeleteData message) {
+    modification.addModification(new DeleteModification(message.getPath()));
+    ((DOMStoreWriteTransaction)transaction).delete(message.getPath());
+    getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
+  }
+
+  private void readyTransaction(ReadyTransaction message) {
+    DOMStoreThreePhaseCommitCohort cohort =  ((DOMStoreWriteTransaction)transaction).ready();
+    ActorRef cohortActor = getContext().actorOf(
+        ThreePhaseCommitCohort.props(cohort, shardActor, modification), "cohort");
+    getSender()
+        .tell(new ReadyTransactionReply(cohortActor.path()).toSerializable(), getSelf());
+
+  }
+
+  private void closeTransaction(CloseTransaction message) {
+    transaction.close();
+    getSender().tell(new CloseTransactionReply().toSerializable(), getSelf());
+    getSelf().tell(PoisonPill.getInstance(), getSelf());
+  }
+
+
+  // These classes are in here for test purposes only
+
+
+  static class GetCompositedModification {
+
+  }
+
+
+  static class GetCompositeModificationReply {
+    private final CompositeModification modification;
+
+
+    GetCompositeModificationReply(CompositeModification modification) {
+      this.modification = modification;
     }
+
+
+    public CompositeModification getModification() {
+      return modification;
+    }
+  }
 }

@@ -153,7 +153,7 @@ public class ShardTest extends AbstractActorTest {
                         new UpdateSchemaContext(TestModel.createTestContext()),
                         getRef());
 
-                    subject.tell(new CreateTransaction("txn-1").toSerializable(),
+                    subject.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(),
                         getRef());
 
                     final String out = new ExpectMsg<String>("match hint") {

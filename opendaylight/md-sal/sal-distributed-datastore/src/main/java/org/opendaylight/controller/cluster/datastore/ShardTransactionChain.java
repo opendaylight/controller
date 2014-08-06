@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionCh
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -45,9 +45,21 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         }
     }
 
+  private DOMStoreTransaction createTypedTransaction(CreateTransaction createTransaction){
+    if(createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_ONLY.ordinal()){
+      return chain.newReadOnlyTransaction();
+    }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_WRITE.ordinal()){
+      return chain.newReadWriteTransaction();
+    }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.WRITE_ONLY.ordinal()){
+      return chain.newWriteOnlyTransaction();
+    }else{
+      throw new IllegalArgumentException ("ShardTransactionChain:CreateTransaction message has unidentified transaction type="+createTransaction.getTransactionType()) ;
+    }
+  }
+
     private void createTransaction(CreateTransaction createTransaction) {
-        DOMStoreReadWriteTransaction transaction =
-            chain.newReadWriteTransaction();
+        DOMStoreTransaction transaction =
+            createTypedTransaction(createTransaction);
         ActorRef transactionActor = getContext().actorOf(ShardTransaction
             .props(chain, transaction, getContext().parent(), schemaContext), "shard-" + createTransaction.getTransactionId());
         getSender()

@@ -33,7 +33,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
      new Within(duration("1 seconds")) {
         protected void run() {
 
-          subject.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
+          subject.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
 
           final String out = new ExpectMsg<String>("match hint") {
             // do not put code outside this method, will run afterwards

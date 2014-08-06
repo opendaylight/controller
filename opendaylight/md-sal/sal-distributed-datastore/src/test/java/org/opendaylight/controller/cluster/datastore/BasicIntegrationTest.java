@@ -90,7 +90,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     System.out.println("Successfully created transaction chain");
 
                     // 2. Create a Transaction on the TransactionChain
-                    transactionChain.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
+                    transactionChain.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal() ).toSerializable(), getRef());
 
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>("CreateTransactionReply") {
