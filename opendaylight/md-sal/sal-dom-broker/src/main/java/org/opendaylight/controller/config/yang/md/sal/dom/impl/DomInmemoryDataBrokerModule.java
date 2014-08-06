@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+
+import org.opendaylight.controller.config.yang.md.sal.dom.statistics.CommitStatsTracker;
+import org.opendaylight.controller.config.yang.md.sal.dom.statistics.DomInmemoryDataBrokerRuntimeMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMDataBrokerImpl;
@@ -93,7 +95,7 @@ public final class DomInmemoryDataBrokerModule extends
          * nothing on success. The executor queue capacity is bounded and, if the capacity is
          * reached, subsequent submitted tasks will block the caller.
          */
-        Executor listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
+        ExecutorService listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
                 PropertyUtils.getIntSystemProperty(
                         FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE_PROP,
                         DEFAULT_FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE),
@@ -105,6 +107,15 @@ public final class DomInmemoryDataBrokerModule extends
                 new DeadlockDetectingListeningExecutorService(commitExecutor,
                     TransactionCommitDeadlockException.DEADLOCK_EXECUTOR_FUNCTION,
                     listenableFutureExecutor));
+
+        CommitStatsTracker commitStatTracker = new CommitStatsTracker();
+
+        DomInmemoryDataBrokerRuntimeRegistration statsMXBeanReg =
+                getRootRuntimeBeanRegistratorWrapper().register(
+                        new DomInmemoryDataBrokerRuntimeMXBeanImpl(commitExecutor,
+                                listenableFutureExecutor, commitStatTracker));
+        newDataBroker.setCloseable(statsMXBeanReg);
+        newDataBroker.setCommitStatTracker(commitStatTracker);
 
         return newDataBroker;
     }
