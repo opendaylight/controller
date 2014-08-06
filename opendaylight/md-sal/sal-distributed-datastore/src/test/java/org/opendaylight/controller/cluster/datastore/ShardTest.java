@@ -35,7 +35,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCreateTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
@@ -44,6 +44,7 @@ public class ShardTest extends AbstractActorTest {
             final boolean result =
                 new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                 ) {
+                    @Override
                     protected Boolean run() {
                         return true;
                     }
@@ -54,12 +55,14 @@ public class ShardTest extends AbstractActorTest {
             Assert.assertEquals(true, result);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)){
                                 CreateTransactionChainReply reply =
@@ -87,11 +90,12 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveRegisterListener() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(
@@ -104,6 +108,7 @@ public class ShardTest extends AbstractActorTest {
 
                     final Boolean notificationEnabled = new ExpectMsg<Boolean>("enable notification") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if(in instanceof EnableNotification){
                                 return ((EnableNotification) in).isEnabled();
@@ -117,6 +122,7 @@ public class ShardTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in.getClass().equals(RegisterChangeListenerReply.class)) {
                                 RegisterChangeListenerReply reply =
@@ -141,7 +147,7 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testCreateTransaction(){
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
 
@@ -150,6 +156,7 @@ public class ShardTest extends AbstractActorTest {
             final boolean result =
                 new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                 ) {
+                    @Override
                     protected Boolean run() {
                         return true;
                     }
@@ -160,6 +167,7 @@ public class ShardTest extends AbstractActorTest {
             Assert.assertEquals(true, result);
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(
@@ -171,6 +179,7 @@ public class ShardTest extends AbstractActorTest {
 
                     final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected String match(Object in) {
                             if (in instanceof CreateTransactionReply) {
                                 CreateTransactionReply reply =
@@ -198,11 +207,12 @@ public class ShardTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             Map<String, String> peerAddresses = new HashMap<>();
             peerAddresses.put("member-2", null);
-            final Props props = Shard.props("config", peerAddresses, null);
+            final Props props = Shard.props("config", peerAddresses, null, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testPeerAddressResolved");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(

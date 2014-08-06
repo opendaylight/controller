@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
+import org.opendaylight.yangtools.util.jmx.AbstractMXBean;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -19,11 +19,11 @@ public class ShardStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        shardStats = new ShardStats("shard-1");
+        shardStats = new ShardStats("shard-1", "DataStore");
         shardStats.registerMBean();
         mbeanServer = shardStats.getMBeanServer();
         String objectName =
-            AbstractBaseMBean.BASE_JMX_PREFIX + "type=" + shardStats
+            AbstractMXBean.BASE_JMX_PREFIX + "type=" + shardStats
                 .getMBeanType() + ",Category=" +
                 shardStats.getMBeanCategory() + ",name=" +
                 shardStats.getMBeanName();
@@ -39,8 +39,7 @@ public class ShardStatsTest {
     public void testGetShardName() throws Exception {
 
         Object attribute = mbeanServer.getAttribute(testMBeanName, "ShardName");
-        Assert.assertEquals((String) attribute, "shard-1");
-
+        Assert.assertEquals(attribute, "shard-1");
     }
 
     @Test
@@ -53,9 +52,7 @@ public class ShardStatsTest {
         //now let us get from MBeanServer what is the transaction count.
         Object attribute = mbeanServer.getAttribute(testMBeanName,
             "CommittedTransactionsCount");
-        Assert.assertEquals((Long) attribute, (Long) 3L);
-
-
+        Assert.assertEquals(attribute, 3L);
     }
 
     @Test
@@ -64,13 +61,13 @@ public class ShardStatsTest {
         Assert.assertEquals(shardStats.getLastCommittedTransactionTime(),
             sdf.format(new Date(0L)));
         long millis = System.currentTimeMillis();
-        shardStats.setLastCommittedTransactionTime(new Date(millis));
+        shardStats.setLastCommittedTransactionTime(millis);
 
         //now let us get from MBeanServer what is the transaction count.
         Object attribute = mbeanServer.getAttribute(testMBeanName,
             "LastCommittedTransactionTime");
-        Assert.assertEquals((String) attribute, sdf.format(new Date(millis)));
-        Assert.assertNotEquals((String) attribute,
+        Assert.assertEquals(attribute, sdf.format(new Date(millis)));
+        Assert.assertNotEquals(attribute,
             sdf.format(new Date(millis - 1)));
 
     }
@@ -81,13 +78,9 @@ public class ShardStatsTest {
         shardStats.incrementFailedTransactionsCount();
         shardStats.incrementFailedTransactionsCount();
 
-
         //now let us get from MBeanServer what is the transaction count.
         Object attribute =
             mbeanServer.getAttribute(testMBeanName, "FailedTransactionsCount");
-        Assert.assertEquals((Long) attribute, (Long) 2L);
-
-
-
+        Assert.assertEquals(attribute, 2L);
     }
 }

@@ -29,7 +29,8 @@ public class DistributedConfigDataStoreProviderModule extends
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
                 InMemoryDOMDataStoreConfigProperties.create(getMaxShardDataChangeExecutorPoolSize(),
                         getMaxShardDataChangeExecutorQueueSize(),
-                        getMaxShardDataChangeListenerQueueSize()));
+                        getMaxShardDataChangeListenerQueueSize(),
+                        getMaxShardDataStoreExecutorQueueSize()));
     }
 
 }

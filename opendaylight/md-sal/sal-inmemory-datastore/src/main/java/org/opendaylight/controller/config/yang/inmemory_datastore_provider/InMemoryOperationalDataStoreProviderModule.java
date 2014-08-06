@@ -1,7 +1,9 @@
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
 
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreStats;
 
 public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryOperationalDataStoreProviderModule {
 
@@ -20,9 +22,19 @@ public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return InMemoryDOMDataStoreFactory.create("DOM-OPER", getOperationalSchemaServiceDependency(),
-                InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
-                        getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize()));
-    }
 
+        InMemoryDOMDataStore dataStore = InMemoryDOMDataStoreFactory.create(
+                "DOM-OPER", getOperationalSchemaServiceDependency(),
+                InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
+                        getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize(),
+                        getMaxDataStoreExecutorQueueSize()));
+
+
+        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryOperationalDataStore",
+                dataStore.getDataChangeListenerNotificationManager(), dataStore.getDomStoreExecutor());
+
+        dataStore.setCloseable(statsBean);
+
+        return dataStore;
+    }
 }

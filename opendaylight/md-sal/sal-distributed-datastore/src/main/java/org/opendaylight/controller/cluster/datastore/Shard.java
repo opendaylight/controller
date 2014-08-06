@@ -17,6 +17,8 @@ import akka.japi.Creator;
 import akka.serialization.Serialization;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -52,7 +54,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,8 @@ public class Shard extends RaftActor {
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
     private Shard(String name, Map<String, String> peerAddresses,
-            InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
+            InMemoryDOMDataStoreConfigProperties dataStoreProperties,
+            String mxBeanType) {
         super(name, peerAddresses, Optional.of(configParams));
 
         this.name = name;
@@ -105,23 +107,23 @@ public class Shard extends RaftActor {
 
         store = InMemoryDOMDataStoreFactory.create(name, null, dataStoreProperties);
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
-
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name, mxBeanType);
+        shardMBean.setDataStoreExecutor(store.getDomStoreExecutor());
+        shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
     }
 
     public static Props props(final String name,
         final Map<String, String> peerAddresses,
-        final InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
-        return Props.create(new Creator<Shard>() {
+        final InMemoryDOMDataStoreConfigProperties dataStoreProperties,
+        final String mxBeanType) {
 
+        return Props.create(new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
-                return new Shard(name, peerAddresses, dataStoreProperties);
+                return new Shard(name, peerAddresses, dataStoreProperties, mxBeanType);
             }
-
         });
     }
-
 
     @Override public void onReceiveCommand(Object message) {
         LOG.debug("Received message {} from {}", message.getClass().toString(),
@@ -233,21 +235,19 @@ public class Shard extends RaftActor {
 
         final ListenableFuture<Void> future = cohort.commit();
         final ActorRef self = getSelf();
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.get();
-                        sender
-                            .tell(new CommitTransactionReply().toSerializable(),
-                                self);
-                        shardMBean.incrementCommittedTransactionCount();
-                        shardMBean.setLastCommittedTransactionTime(new Date());
 
-                } catch (InterruptedException | ExecutionException e) {
-                    shardMBean.incrementFailedTransactionsCount();
-                    sender.tell(new akka.actor.Status.Failure(e),self);
-                }
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                sender.tell(new CommitTransactionReply().toSerializable(), self);
+                shardMBean.incrementCommittedTransactionCount();
+                shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                shardMBean.incrementFailedTransactionsCount();
+                sender.tell(new akka.actor.Status.Failure(e),self);
             }
         }, getContext().dispatcher());
     }

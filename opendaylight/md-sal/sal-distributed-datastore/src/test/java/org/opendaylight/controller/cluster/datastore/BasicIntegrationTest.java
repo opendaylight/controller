@@ -52,10 +52,11 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
 
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null, null);
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("5 seconds")) {
+                @Override
                 protected void run() {
 
 
@@ -68,6 +69,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     final boolean result =
                         new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                         ) {
+                            @Override
                             protected Boolean run() {
                                 return true;
                             }
@@ -82,6 +84,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     final ActorSelection transactionChain =
                         new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionChainReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)) {
                                     ActorPath transactionChainPath =
@@ -104,6 +107,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     final ActorSelection transaction =
                         new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(in.getClass())) {
                                     CreateTransactionReply reply = CreateTransactionReply.fromSerializable(in);
@@ -126,6 +130,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                         getRef());
 
                     Boolean writeDone = new ExpectMsg<Boolean>(duration("1 seconds"), "WriteDataReply") {
+                        @Override
                         protected Boolean match(Object in) {
                             if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return true;
@@ -145,6 +150,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     final ActorSelection cohort =
                         new ExpectMsg<ActorSelection>(duration("1 seconds"), "ReadyTransactionReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                     ActorPath cohortPath =
@@ -168,6 +174,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     Boolean preCommitDone =
                         new ExpectMsg<Boolean>(duration("1 seconds"), "PreCommitTransactionReply") {
+                            @Override
                             protected Boolean match(Object in) {
                                 if (in.getClass().equals(PreCommitTransactionReply.SERIALIZABLE_CLASS)) {
                                     return true;
