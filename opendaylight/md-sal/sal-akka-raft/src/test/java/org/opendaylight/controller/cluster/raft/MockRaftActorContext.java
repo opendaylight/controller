@@ -14,11 +14,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.MockPayloadMessages;
-import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -281,7 +282,7 @@ public class MockRaftActorContext implements RaftActorContext {
             return false;
         }
 
-        @Override public Object getSnapshot() {
+        @Override public ByteString getSnapshot() {
             return null;
         }
 
@@ -291,6 +292,23 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public long getSnapshotTerm() {
             return -1;
+        }
+
+        @Override
+        public void setSnapshotTerm(long snapshotTerm) {
+        }
+
+        @Override
+        public void setSnapshot(ByteString snapshot) {
+        }
+
+        @Override
+        public void clear(int startIndex, int endIndex) {
+            log.subList(startIndex, endIndex).clear();
+        }
+
+        @Override
+        public void setSnapshotIndex(long snapshotIndex) {
         }
     }
 
