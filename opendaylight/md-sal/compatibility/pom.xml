@@ -12,8 +12,6 @@
 
   <modules>
     <module>sal-compatibility</module>
-    <module>inventory-topology-compatibility</module>
-    <module>flow-management-compatibility</module>
   </modules>
 
   <dependencies>

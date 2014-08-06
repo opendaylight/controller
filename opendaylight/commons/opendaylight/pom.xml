@@ -928,11 +928,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>flow-management-compatibility</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>flowprogrammer.northbound</artifactId>
         <version>${flowprogrammer.northbound.version}</version>
       </dependency>
@@ -1497,11 +1492,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
-        <artifactId>model-flow-management</artifactId>
-        <version>${mdsal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.model</groupId>
         <artifactId>model-flow-service</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1806,6 +1796,62 @@
         <artifactId>mockito-configuration</artifactId>
         <version>${yangtools.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-features</artifactId>
+        <version>${config.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>features-odl-protocol-framework</artifactId>
+        <version>${protocol-framework.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-features</artifactId>
+        <version>${netconf.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-persister-features</artifactId>
+        <version>${config.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-netty-features</artifactId>
+        <version>${config.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>features-adsal</artifactId>
+        <version>${sal.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-features</artifactId>
+        <version>${mdsal.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

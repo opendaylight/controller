@@ -15,7 +15,7 @@
         <capability>urn:opendaylight:params:xml:ns:yang:controller:netty:timer?module=netty-timer&amp;revision=2013-11-19</capability>
     </required-capabilities>
     <configuration>
-    
+
         <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
             <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <module>
@@ -35,7 +35,7 @@
                     <name>singleton</name>
                 </module>
             </modules>
-            
+
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                 <service>
                     <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty">netty:netty-threadgroup</type>
