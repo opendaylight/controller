@@ -9,16 +9,24 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import com.google.protobuf.ByteString;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
 
 /**
  * The behavior of a RaftActor in the Follower state
@@ -31,6 +39,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
+    private ByteString snapshotChunksCollected = ByteString.EMPTY;
+
     public Follower(RaftActorContext context) {
         super(context);
 
@@ -106,6 +116,9 @@ public class Follower extends AbstractRaftActorBehavior {
         if (outOfSync) {
             // We found that the log was out of sync so just send a negative
             // reply and return
+            context.getLogger().debug("Follower is out-of-sync, " +
+                "so sending negative reply, lastIndex():{}, lastTerm():{}",
+                lastIndex(), lastTerm());
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
@@ -191,7 +204,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
         // If commitIndex > lastApplied: increment lastApplied, apply
         // log[lastApplied] to state machine (§5.3)
-        if (appendEntries.getLeaderCommit() > context.getLastApplied()) {
+        if (appendEntries.getLeaderCommit() > context.getLastApplied()
+            && context.getLastApplied() < lastIndex()) {
             applyLogToStateMachine(appendEntries.getLeaderCommit());
         }
 
@@ -233,13 +247,76 @@ public class Follower extends AbstractRaftActorBehavior {
             return RaftState.Candidate;
 
         } else if (message instanceof InstallSnapshot) {
+            /*
+            When a follower receives an InstallSnapshot, then we do the following
+            1. Apply the snapshot and repair its state
+            2. Clear the its in-mem log to get latest from Leader
+            3. Send the reply to Leader for it to set its follower nextIndex
+            */
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
-            actor().tell(new ApplySnapshot(installSnapshot.getData()), actor());
+
+            context.getLogger().debug("InstallSnapshot received by follower " +
+                "datasize:{} , Chunk:{}/{}", installSnapshot.getData().size(),
+                installSnapshot.getChunkIndex(), installSnapshot.getTotalChunks());
+
+            try {
+                if (installSnapshot.getChunkIndex() == installSnapshot.getTotalChunks()) {
+                    // this is the last chunk, create a snapshot object and apply
+
+                    snapshotChunksCollected = snapshotChunksCollected.concat(installSnapshot.getData());
+                    context.getLogger().debug("Last chunk received: snapshotChunksCollected.size:{}",snapshotChunksCollected.size());
+
+                    Object state = toObject(snapshotChunksCollected);
+
+                    Snapshot snapshot = Snapshot.create(state, new ArrayList<ReplicatedLogEntry>(),
+                        installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
+                        installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm());
+
+                    //applying the snapshot might take time,
+                    // send the installsnapshot-reply to avoid being sent again.
+                    actor().tell(new ApplySnapshot(snapshot), actor());
+
+                } else {
+                    // we have more to go
+                    snapshotChunksCollected = snapshotChunksCollected.concat(installSnapshot.getData());
+                    context.getLogger().debug("Chunk={},snapshotChunksCollected.size:{}",
+                        installSnapshot.getChunkIndex(), snapshotChunksCollected.size());
+                }
+
+                sender.tell(new InstallSnapshotReply(
+                    currentTerm(), context.getId(), installSnapshot.getChunkIndex(),
+                    true), actor());
+
+            } catch (Exception e) {
+               context.getLogger().error("Exception in InstallSnapshot of follower", e);
+                //send reply with success as false
+               sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
+                   installSnapshot.getChunkIndex(), false), actor());
+            }
         }
 
         scheduleElection(electionDuration());
 
         return super.handleMessage(sender, message);
+    }
+
+    private Object toObject(ByteString bs) throws ClassNotFoundException, IOException {
+        Object obj = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bis = new ByteArrayInputStream(bs.toByteArray());
+            ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
+        } finally {
+            if (bis != null) {
+                bis.close();
+            }
+            if (ois != null) {
+                ois.close();
+            }
+        }
+        return obj;
     }
 
     @Override public void close() throws Exception {
