@@ -52,7 +52,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
 
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final Props props = Shard.props("config", Collections.EMPTY_MAP, null);
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("5 seconds")) {

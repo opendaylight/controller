@@ -42,7 +42,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -66,7 +66,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -89,7 +89,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -124,7 +124,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", mockClusterWrapper,
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -158,7 +158,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
@@ -196,7 +196,7 @@ public class ShardManagerTest {
         new JavaTestKit(system) {{
             final Props props = ShardManager
                 .props("config", new MockClusterWrapper(),
-                    new MockConfiguration());
+                    new MockConfiguration(), null);
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
