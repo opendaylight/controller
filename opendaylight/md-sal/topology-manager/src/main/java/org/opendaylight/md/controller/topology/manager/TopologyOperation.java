@@ -7,7 +7,7 @@
  */
 package org.opendaylight.md.controller.topology.manager;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 
 /**
  * Internal interface for submitted operations. Implementations of this
@@ -19,5 +19,5 @@ interface TopologyOperation {
      *
      * @param transaction Datastore transaction
      */
-    void applyOperation(DataModificationTransaction transaction);
+    void applyOperation(ReadWriteTransaction transaction);
 }
