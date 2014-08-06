@@ -15,6 +15,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -33,6 +34,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
+import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -42,6 +45,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A Shard represents a portion of the logical data tree <br/>
@@ -57,6 +62,8 @@ import java.util.concurrent.Executors;
  * </p>
  */
 public class Shard extends RaftActor {
+
+    private static final ConfigParams configParams = new ShardConfigParams();
 
     public static final String DEFAULT_NAME = "default";
 
@@ -84,7 +91,7 @@ public class Shard extends RaftActor {
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
     private Shard(String name, Map<String, String> peerAddresses) {
-        super(name, peerAddresses);
+        super(name, peerAddresses, Optional.of(configParams));
 
         this.name = name;
 
@@ -322,5 +329,15 @@ public class Shard extends RaftActor {
 
     @Override public String persistenceId() {
         return this.name;
+    }
+
+
+    private static class ShardConfigParams extends DefaultConfigParamsImpl {
+        public static final FiniteDuration HEART_BEAT_INTERVAL =
+            new FiniteDuration(500, TimeUnit.MILLISECONDS);
+
+        @Override public FiniteDuration getHeartBeatInterval() {
+            return HEART_BEAT_INTERVAL;
+        }
     }
 }

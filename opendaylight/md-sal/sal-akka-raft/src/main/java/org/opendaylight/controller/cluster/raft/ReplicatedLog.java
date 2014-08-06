@@ -84,6 +84,11 @@ public interface ReplicatedLog {
      */
     List<ReplicatedLogEntry> getFrom(long index);
 
+    /**
+     *
+     * @param index the index of the log entry
+     */
+    List<ReplicatedLogEntry> getFrom(long index, int max);
 
     /**
      *
