@@ -9,9 +9,15 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.builder;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -36,13 +42,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 
 /**
  * Resolve Data Change Events based on modifications and listeners
@@ -278,6 +277,11 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             final Collection<Node> listeners, final NormalizedNode<?, ?> beforeData,
             final NormalizedNode<?, ?> afterData) {
 
+        // FIXME: BUG-1493: check the listeners to prune unneeded changes:
+        //                  for subtrees, we have to do all
+        //                  for one, we need to expand children
+        //                  for base, we just report replacement
+
         if (beforeData instanceof NormalizedNodeContainer<?, ?, ?>) {
             // Node is container (contains child) and we have interested
             // listeners registered for it, that means we need to do
@@ -306,14 +310,12 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             final Collection<Node> listeners,
             final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont,
                     final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont) {
-        final Set<PathArgument> alreadyProcessed = new HashSet<>();
         final List<DOMImmutableDataChangeEvent> childChanges = new LinkedList<>();
 
-        DataChangeScope potentialScope = DataChangeScope.BASE;
         // We look at all children from before and compare it with after state.
         for (NormalizedNode<PathArgument, ?> beforeChild : beforeCont.getValue()) {
-            PathArgument childId = beforeChild.getIdentifier();
-            alreadyProcessed.add(childId);
+            final PathArgument childId = beforeChild.getIdentifier();
+
             YangInstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
             Optional<NormalizedNode<PathArgument, ?>> afterChild = afterCont.getChild(childId);
@@ -323,15 +325,17 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             if (childChange != NO_CHANGE) {
                 childChanges.add(childChange);
             }
-
         }
 
         for (NormalizedNode<PathArgument, ?> afterChild : afterCont.getValue()) {
-            PathArgument childId = afterChild.getIdentifier();
-            if (!alreadyProcessed.contains(childId)) {
-                // We did not processed that child already
-                // and it was not present in previous loop, that means it is
-                // created.
+            final PathArgument childId = afterChild.getIdentifier();
+
+            /*
+             * We have already iterated of the before-children, so have already
+             * emitted modify/delete events. This means the child has been
+             * created.
+             */
+            if (!beforeCont.getChild(childId).isPresent()) {
                 Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
                 YangInstanceIdentifier childPath = path.node(childId);
                 childChanges.add(resolveSameEventRecursivelly(childPath , childListeners, afterChild,
@@ -342,7 +346,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             return NO_CHANGE;
         }
 
-        Builder eventBuilder = builder(potentialScope) //
+        Builder eventBuilder = builder(DataChangeScope.BASE) //
                 .setBefore(beforeCont) //
                 .setAfter(afterCont)
                 .addUpdated(path, beforeCont, afterCont);
