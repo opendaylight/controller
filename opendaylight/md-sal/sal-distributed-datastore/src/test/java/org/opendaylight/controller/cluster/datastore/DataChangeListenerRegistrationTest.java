@@ -41,7 +41,7 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
 
           subject.tell(new CloseDataChangeListenerRegistration().toSerializable(), getRef());
 
-          final String out = new ExpectMsg<String>("match hint") {
+          final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
               if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.SERIALIZABLE_CLASS)) {

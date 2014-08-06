@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,12 @@ public class AbstractReplicatedLogImplTest {
     @Before
     public void setUp() {
         replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        // create a set of initial entries in the in-memory log
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 3, new MockPayload("D")));
+
     }
 
     @After
@@ -43,11 +50,6 @@ public class AbstractReplicatedLogImplTest {
 
     @Test
     public void testIndexOperations() {
-        // create a set of initial entries in the in-memory log
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 3, new MockPayload("D")));
 
         // check if the values returned are correct, with snapshotIndex = -1
         assertEquals("B", replicatedLogImpl.get(1).getData().toString());
@@ -109,6 +111,22 @@ public class AbstractReplicatedLogImplTest {
         assertTrue(replicatedLogImpl.isInSnapshot(7));
         assertEquals(0, replicatedLogImpl.getFrom(7).size());
         assertEquals(0, replicatedLogImpl.getFrom(6).size());
+
+    }
+
+    @Test
+    public void testGetFromWithMax(){
+        List<ReplicatedLogEntry> from = replicatedLogImpl.getFrom(0, 1);
+        Assert.assertEquals(1, from.size());
+        Assert.assertEquals(1, from.get(0).getTerm());
+
+        from = replicatedLogImpl.getFrom(0, 20);
+        Assert.assertEquals(4, from.size());
+        Assert.assertEquals(2, from.get(3).getTerm());
+
+        from = replicatedLogImpl.getFrom(1, 2);
+        Assert.assertEquals(2, from.size());
+        Assert.assertEquals(1, from.get(1).getTerm());
 
     }
 
