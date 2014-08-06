@@ -15,8 +15,10 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -44,6 +46,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
@@ -85,7 +88,7 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private Shard(String name, Map<String, String> peerAddresses) {
+    private Shard(String name, Map<String, String> peerAddresses, String mxBeanType) {
         super(name, peerAddresses, Optional.of(configParams));
 
         this.name = name;
@@ -96,23 +99,21 @@ public class Shard extends RaftActor {
 
         LOG.info("Creating shard : {} persistent : {}", name, persistent);
 
-        store = InMemoryDOMDataStoreFactory.create(name, null);
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name, mxBeanType);
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
-
+        store = InMemoryDOMDataStoreFactory.create(name, null, shardMBean);
     }
 
-    public static Props props(final String name, final Map<String, String> peerAddresses) {
-        return Props.create(new Creator<Shard>() {
+    public static Props props(final String name, final Map<String, String> peerAddresses,
+            final String mxBeanType) {
 
+        return Props.create(new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
-                return new Shard(name, peerAddresses);
+                return new Shard(name, peerAddresses, mxBeanType);
             }
-
         });
     }
-
 
     @Override public void onReceiveCommand(Object message){
         LOG.debug("Received message {} from {}", message.getClass().toString(), getSender());
