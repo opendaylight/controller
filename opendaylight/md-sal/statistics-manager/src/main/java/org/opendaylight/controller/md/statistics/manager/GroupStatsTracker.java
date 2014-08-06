@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.GetAllGroupStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, GroupStats> {
-    private static final Logger logger = LoggerFactory.getLogger(GroupStatsTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupStatsTracker.class);
     private final OpendaylightGroupStatisticsService groupStatsService;
 
     GroupStatsTracker(OpendaylightGroupStatisticsService groupStatsService, FlowCapableContext context) {
@@ -37,34 +38,33 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, GroupStats item) {
-        InstanceIdentifier<NodeGroupStatistics> groupRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                .child(Group.class, new GroupKey(item.getGroupId())).augmentation(NodeGroupStatistics.class).build();
-        trans.removeOperationalData(groupRef);
+    protected void cleanupSingleStat(ReadWriteTransaction trans, GroupStats item) {
+        InstanceIdentifier<NodeGroupStatistics> groupRef = getNodeIdentifier().augmentation(FlowCapableNode.class)
+                .child(Group.class, new GroupKey(item.getGroupId())).augmentation(NodeGroupStatistics.class);
+        trans.delete(LogicalDatastoreType.OPERATIONAL, groupRef);
     }
 
     @Override
-    protected GroupStats updateSingleStat(DataModificationTransaction trans,
-            GroupStats item) {
+    protected GroupStats updateSingleStat(ReadWriteTransaction trans, GroupStats item) {
         GroupBuilder groupBuilder = new GroupBuilder();
         GroupKey groupKey = new GroupKey(item.getGroupId());
         groupBuilder.setKey(groupKey);
 
-        InstanceIdentifier<Group> groupRef = getNodeIdentifierBuilder().augmentation(FlowCapableNode.class)
-                .child(Group.class,groupKey).build();
+        InstanceIdentifier<Group> groupRef = getNodeIdentifier()
+                .augmentation(FlowCapableNode.class).child(Group.class,groupKey);
 
         NodeGroupStatisticsBuilder groupStatisticsBuilder= new NodeGroupStatisticsBuilder();
         groupStatisticsBuilder.setGroupStatistics(new GroupStatisticsBuilder(item).build());
 
         //Update augmented data
         groupBuilder.addAugmentation(NodeGroupStatistics.class, groupStatisticsBuilder.build());
-        trans.putOperationalData(groupRef, groupBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, groupRef, groupBuilder.build(), true);
         return item;
     }
 
     @Override
     protected InstanceIdentifier<?> listenPath() {
-        return getNodeIdentifierBuilder().augmentation(FlowCapableNode.class).child(Group.class).build();
+        return getNodeIdentifier().augmentation(FlowCapableNode.class).child(Group.class);
     }
 
     @Override
@@ -81,25 +81,25 @@ final class GroupStatsTracker extends AbstractListeningStatsTracker<GroupStats, 
     }
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-        final DataModificationTransaction trans = startTransaction();
-        for (InstanceIdentifier<?> key : change.getRemovedConfigurationData()) {
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        final ReadWriteTransaction trans = startTransaction();
+        for (InstanceIdentifier<?> key : change.getRemovedPaths()) {
             if (Group.class.equals(key.getTargetType())) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Group> group = (InstanceIdentifier<Group>)key;
                 InstanceIdentifier<?> del = group.augmentation(NodeGroupStatistics.class);
-                logger.debug("Key {} triggered remove of augmentation {}", key, del);
+                LOG.debug("Key {} triggered remove of augmentation {}", key, del);
 
-                trans.removeOperationalData(del);
+                trans.delete(LogicalDatastoreType.OPERATIONAL, del);
             }
         }
-        trans.commit();
+        trans.submit();
     }
 
     @Override
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dbs) {
         if (groupStatsService == null) {
-            logger.debug("No Group Statistics service, not subscribing to groups on node {}", getNodeIdentifier());
+            LOG.debug("No Group Statistics service, not subscribing to groups on node {}", getNodeIdentifier());
             return;
         }
 

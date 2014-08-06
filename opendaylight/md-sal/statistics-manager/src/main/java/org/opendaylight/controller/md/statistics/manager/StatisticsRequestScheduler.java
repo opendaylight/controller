@@ -15,12 +15,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction.DataTransactionListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.FutureCallback;
 
 /**
  * Main responsibility of the class is to check the MD-SAL data store read/write
@@ -29,21 +32,21 @@ import org.slf4j.LoggerFactory;
  * @author avishnoi@in.ibm.com
  *
  */
-@SuppressWarnings("rawtypes")
-public class StatisticsRequestScheduler implements DataTransactionListener {
+public class StatisticsRequestScheduler {
 
-    private static final Logger srsLogger = LoggerFactory.getLogger(StatisticsRequestScheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StatisticsRequestScheduler.class);
+    private static final long REQUEST_MONITOR_INTERVAL = 1000;
+
     private final Timer timer = new Timer("request-monitor", true);
+//    private BindingTransactionChain txChain;
 
     // We need ordered retrieval, and O(1) contains operation
-    private final Map<AbstractStatsTracker,Integer> requestQueue =
-            Collections.synchronizedMap(new LinkedHashMap<AbstractStatsTracker,Integer>());
+    private final Map<AbstractStatsTracker<?, ?>,Integer> requestQueue =
+            Collections.synchronizedMap(new LinkedHashMap<AbstractStatsTracker<?, ?>,Integer>());
 
     private Long PendingTransactions;
 
     private long lastRequestTime = System.nanoTime();
-
-    private static final long REQUEST_MONITOR_INTERVAL = 1000;
 
     private final TimerTask task = new TimerTask() {
         @Override
@@ -54,23 +57,27 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
                     requestStatistics();
                 }
             }catch (IllegalArgumentException | IllegalStateException | NullPointerException e){
-                srsLogger.warn("Exception occured while sending statistics request : {}",e);
+                LOG.warn("Exception occured while sending statistics request : {}",e);
             }
         }
     };
+
+    public StatisticsRequestScheduler (DataBroker dataBroker) {
+
+    }
 
     public StatisticsRequestScheduler(){
         PendingTransactions = (long) 0;
     }
 
-    public void addRequestToSchedulerQueue(AbstractStatsTracker statsRequest){
+    public void addRequestToSchedulerQueue(AbstractStatsTracker<?, ?> statsRequest){
         requestQueue.put(statsRequest, null);
     }
 
     public void removeRequestsFromSchedulerQueue(NodeRef node){
-        AbstractStatsTracker stats = null;
+        AbstractStatsTracker<?, ?> stats = null;
         synchronized(requestQueue){
-            Iterator<Map.Entry<AbstractStatsTracker, Integer>> nodesItr = requestQueue.entrySet().iterator();
+            Iterator<Map.Entry<AbstractStatsTracker<?, ?>, Integer>> nodesItr = requestQueue.entrySet().iterator();
             while(nodesItr.hasNext()){
                 stats = nodesItr.next().getKey();
                 if(stats.getNodeRef().equals(node)){
@@ -80,14 +87,14 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
         }
 
     }
-    public AbstractStatsTracker getNextRequestFromSchedulerQueue(){
+    public AbstractStatsTracker<?, ?> getNextRequestFromSchedulerQueue(){
         //Remove first element
-        AbstractStatsTracker stats = null;
+        AbstractStatsTracker<?, ?> stats = null;
         synchronized(requestQueue){
-            Iterator<Map.Entry<AbstractStatsTracker, Integer>> nodesItr = requestQueue.entrySet().iterator();
+            Iterator<Map.Entry<AbstractStatsTracker<?, ?>, Integer>> nodesItr = requestQueue.entrySet().iterator();
             if(nodesItr.hasNext()){
                 stats = nodesItr.next().getKey();
-                srsLogger.debug("{} chosen up for execution",stats.getNodeRef());
+                LOG.debug("{} chosen up for execution",stats.getNodeRef());
                 nodesItr.remove();
                 return stats;
             }
@@ -96,13 +103,12 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
     }
 
     private void requestStatistics(){
-        AbstractStatsTracker stats = this.getNextRequestFromSchedulerQueue();
+        AbstractStatsTracker<?, ?> stats = this.getNextRequestFromSchedulerQueue();
         sendStatsRequest(stats);
     }
-    @Override
-    public void onStatusUpdated(DataModificationTransaction transaction, TransactionStatus status) {
 
-        AbstractStatsTracker stats = null;
+    void statusUpdated(final TransactionStatus status) {
+        AbstractStatsTracker<?, ?> stats = null;
         synchronized(PendingTransactions){
             switch(status){
             case SUBMITED:
@@ -115,7 +121,7 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
                     lastRequestTime = System.nanoTime();
                     stats = this.getNextRequestFromSchedulerQueue();
                 }
-                srsLogger.debug("Pending MD-SAL transactions : {} & Scheduler queue size : {}",this.PendingTransactions,this.requestQueue.size());
+                LOG.debug("Pending MD-SAL transactions : {} & Scheduler queue size : {}",this.PendingTransactions,this.requestQueue.size());
                 break;
             default:
                 break;
@@ -124,17 +130,37 @@ public class StatisticsRequestScheduler implements DataTransactionListener {
         sendStatsRequest(stats);
     }
 
-    private void sendStatsRequest(AbstractStatsTracker stats){
+    private void sendStatsRequest(AbstractStatsTracker<?, ?> stats){
         if(stats != null){
             try{
                 stats.request();
                 stats.increaseRequestCounter();
             }catch(Exception e){
-                srsLogger.warn("Statistics request was not sent successfully. Reason : {}",e.getMessage());
+                LOG.warn("Statistics request was not sent successfully. Reason : {}",e.getMessage());
             }
         }
     }
     public void start(){
         timer.schedule(task, 0, REQUEST_MONITOR_INTERVAL);
+
     }
 }
+
+    class StatChangeListener implements FutureCallback<Optional<? extends DataObject>> {
+
+        StatisticsRequestScheduler scheduler;
+
+        StatChangeListener (final StatisticsRequestScheduler scheduler) {
+            this.scheduler = scheduler;
+        }
+
+        @Override
+        public void onSuccess(Optional<? extends DataObject> result) {
+            scheduler.statusUpdated(TransactionStatus.SUBMITED);
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            scheduler.statusUpdated(TransactionStatus.FAILED);
+        }
+    }

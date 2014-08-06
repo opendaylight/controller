@@ -12,8 +12,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
@@ -56,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
 
 /**
  * This class handles the lifecycle of per-node statistics. It receives data
@@ -65,7 +68,7 @@ import com.google.common.base.Preconditions;
  * @author avishnoi@in.ibm.com
  */
 public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableContext {
-    private static final Logger logger = LoggerFactory.getLogger(NodeStatisticsHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeStatisticsHandler.class);
 
     private static final long STATS_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(15);
     private static final long FIRST_COLLECTION_MILLIS = TimeUnit.SECONDS.toMillis(5);
@@ -82,7 +85,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     private final MeterStatsTracker meterStats;
     private final NodeConnectorStatsTracker nodeConnectorStats;
     private final QueueStatsTracker queueStats;
-    private final DataProviderService dps;
+    private final DataBroker dataBroker;
     private final NodeRef targetNodeRef;
     private final NodeKey targetNodeKey;
     private final TimerTask task = new TimerTask() {
@@ -92,12 +95,12 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
                 requestPeriodicStatistics();
                 cleanStaleStatistics();
             }catch(Exception e){
-                logger.warn("Exception occured while sending statistics request : {}",e);
+                LOG.warn("Exception occured while sending statistics request : {}",e);
             }
         }
     };
 
-    public NodeStatisticsHandler(final DataProviderService dps, final NodeKey nodeKey,
+    public NodeStatisticsHandler(final DataBroker dataServiceBroker, final NodeKey nodeKey,
             final OpendaylightFlowStatisticsService flowStatsService,
             final OpendaylightFlowTableStatisticsService flowTableStatsService,
             final OpendaylightGroupStatisticsService groupStatsService,
@@ -105,7 +108,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
             final OpendaylightPortStatisticsService portStatsService,
             final OpendaylightQueueStatisticsService queueStatsService,
             final StatisticsRequestScheduler srScheduler) {
-        this.dps = Preconditions.checkNotNull(dps);
+        this.dataBroker = Preconditions.checkNotNull(dataServiceBroker);
         this.targetNodeKey = Preconditions.checkNotNull(nodeKey);
         this.srScheduler = Preconditions.checkNotNull(srScheduler);
         this.targetNodeIdentifier = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey).build();
@@ -139,10 +142,16 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     @Override
-    public DataModificationTransaction startDataModification() {
-        DataModificationTransaction dmt = dps.beginTransaction();
-        dmt.registerListener(this.srScheduler);
-        return dmt;
+    public ReadWriteTransaction startDataModification() {
+        ReadWriteTransaction trans = dataBroker.newReadWriteTransaction();
+        return trans;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void submitDataModification(ReadWriteTransaction trans) {
+        CheckedFuture readWriteFuture = trans.submit();
+        Futures.addCallback(readWriteFuture, new StatChangeListener(this.srScheduler));
+
     }
 
     public synchronized void updateGroupDescStats(TransactionAware transaction, List<GroupDescStats> list) {
@@ -190,7 +199,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     public synchronized void updateAggregateFlowStats(TransactionAware transaction, AggregateFlowStatistics flowStats) {
         final Short tableId = msgManager.isExpectedTableTransaction(transaction);
         if (tableId != null) {
-            final DataModificationTransaction trans = this.startDataModification();
+            final ReadWriteTransaction trans = this.startDataModification();
             InstanceIdentifier<Table> tableRef = InstanceIdentifier.builder(Nodes.class).child(Node.class, targetNodeKey)
                     .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(tableId)).toInstance();
 
@@ -199,15 +208,14 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
             aggregateFlowStatisticsDataBuilder.setAggregateFlowStatistics(aggregateFlowStatisticsBuilder.build());
 
-            logger.debug("Augment aggregate statistics: {} for table {} on Node {}",
+            LOG.debug("Augment aggregate statistics: {} for table {} on Node {}",
                     aggregateFlowStatisticsBuilder.build().toString(),tableId,targetNodeKey);
 
             TableBuilder tableBuilder = new TableBuilder();
             tableBuilder.setKey(new TableKey(tableId));
             tableBuilder.addAugmentation(AggregateFlowStatisticsData.class, aggregateFlowStatisticsDataBuilder.build());
-            trans.putOperationalData(tableRef, tableBuilder.build());
-
-            trans.commit();
+            trans.merge(LogicalDatastoreType.OPERATIONAL, tableRef, tableBuilder.build(), true);
+            submitDataModification(trans);
         }
     }
 
@@ -218,7 +226,7 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     public synchronized void updateGroupFeatures(GroupFeatures notification) {
-        final DataModificationTransaction trans = this.startDataModification();
+        final ReadWriteTransaction trans = this.startDataModification();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -229,14 +237,14 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
         //Update augmented data
         nodeData.addAugmentation(NodeGroupFeatures.class, nodeGroupFeatures.build());
-        trans.putOperationalData(targetNodeIdentifier, nodeData.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, targetNodeIdentifier, nodeData.build(), true);
 
         // FIXME: should we be tracking this data?
-        trans.commit();
+        submitDataModification(trans);
     }
 
     public synchronized void updateMeterFeatures(MeterFeatures features) {
-        final DataModificationTransaction trans = this.startDataModification();
+        final ReadWriteTransaction trans = this.startDataModification();
 
         final NodeBuilder nodeData = new NodeBuilder();
         nodeData.setKey(targetNodeKey);
@@ -247,14 +255,14 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
 
         //Update augmented data
         nodeData.addAugmentation(NodeMeterFeatures.class, nodeMeterFeatures.build());
-        trans.putOperationalData(targetNodeIdentifier, nodeData.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, targetNodeIdentifier, nodeData.build(), true);
 
         // FIXME: should we be tracking this data?
-        trans.commit();
+        submitDataModification(trans);
     }
 
     public synchronized void cleanStaleStatistics() {
-        final DataModificationTransaction trans = this.startDataModification();
+        final ReadWriteTransaction trans = this.startDataModification();
 
         flowStats.cleanup(trans);
         groupDescStats.cleanup(trans);
@@ -265,11 +273,11 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         queueStats.cleanup(trans);
         msgManager.cleanStaleTransactionIds();
 
-        trans.commit();
+        submitDataModification(trans);
     }
 
     public synchronized void requestPeriodicStatistics() {
-        logger.debug("Send requests for statistics collection to node : {}", targetNodeKey);
+        LOG.debug("Send requests for statistics collection to node : {}", targetNodeKey);
 
         this.srScheduler.addRequestToSchedulerQueue(flowTableStats);
 
@@ -289,16 +297,16 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
     }
 
     public synchronized void start(final Timer timer) {
-        flowStats.start(dps);
-        groupDescStats.start(dps);
-        groupStats.start(dps);
-        meterConfigStats.start(dps);
-        meterStats.start(dps);
-        queueStats.start(dps);
+        flowStats.start(dataBroker);
+        groupDescStats.start(dataBroker);
+        groupStats.start(dataBroker);
+        meterConfigStats.start(dataBroker);
+        meterStats.start(dataBroker);
+        queueStats.start(dataBroker);
 
         timer.schedule(task, (long) (Math.random() * FIRST_COLLECTION_MILLIS), STATS_COLLECTION_MILLIS);
 
-        logger.debug("Statistics handler for node started with base interval {}ms", STATS_COLLECTION_MILLIS);
+        LOG.debug("Statistics handler for node started with base interval {}ms", STATS_COLLECTION_MILLIS);
 
         requestPeriodicStatistics();
     }
@@ -316,18 +324,18 @@ public final class NodeStatisticsHandler implements AutoCloseable, FlowCapableCo
         //Clean up queued statistics request from scheduler queue
         srScheduler.removeRequestsFromSchedulerQueue(this.getNodeRef());
 
-        logger.debug("Statistics handler for {} shut down", targetNodeKey.getId());
+        LOG.debug("Statistics handler for {} shut down", targetNodeKey.getId());
     }
 
     @Override
     public void registerTransaction(TransactionId id) {
         msgManager.recordExpectedTransaction(id);
-        logger.debug("Transaction {} for node {} sent successfully", id, targetNodeKey);
+        LOG.debug("Transaction {} for node {} sent successfully", id, targetNodeKey);
     }
 
     @Override
     public void registerTableTransaction(final TransactionId id, final Short table) {
         msgManager.recordExpectedTableTransaction(id, table);
-        logger.debug("Transaction {} for node {} table {} sent successfully", id, targetNodeKey, table);
+        LOG.debug("Transaction {} for node {} table {} sent successfully", id, targetNodeKey, table);
     }
 }

@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.md.statistics.manager;
 
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -17,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 abstract class AbstractListeningStatsTracker<I, K> extends AbstractStatsTracker<I, K> implements AutoCloseable, DataChangeListener {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractListeningStatsTracker.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractListeningStatsTracker.class);
+
     private ListenerRegistration<?> reg;
 
     protected AbstractListeningStatsTracker(FlowCapableContext context) {
@@ -27,11 +31,11 @@ abstract class AbstractListeningStatsTracker<I, K> extends AbstractStatsTracker<
     protected abstract InstanceIdentifier<?> listenPath();
     protected abstract String statName();
 
-    public void start(final DataBrokerService dbs) {
+    public void start(final DataBroker dataBroker) {
+        Preconditions.checkNotNull(dataBroker, "DataBroker can not be null!");
         Preconditions.checkState(reg == null);
-
-        reg = dbs.registerDataChangeListener(listenPath(), this);
-        logger.debug("{} Statistics tracker for node {} started", statName(), getNodeIdentifier());
+        reg = dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, listenPath(), this, DataChangeScope.BASE);
+        LOG.debug("{} Statistics tracker for node {} started", statName(), getNodeIdentifier());
     }
 
     @Override
@@ -40,7 +44,7 @@ abstract class AbstractListeningStatsTracker<I, K> extends AbstractStatsTracker<
             try {
                 reg.close();
             } catch (Exception e) {
-                logger.warn("Failed to stop {} Statistics tracker for node {}", statName(), getNodeIdentifier(), e);
+                LOG.warn("Failed to stop {} Statistics tracker for node {}", statName(), getNodeIdentifier(), e);
             }
             reg = null;
         }

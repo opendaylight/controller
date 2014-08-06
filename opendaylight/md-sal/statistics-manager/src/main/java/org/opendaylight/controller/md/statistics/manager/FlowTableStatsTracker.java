@@ -11,7 +11,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableBuilder;
@@ -40,15 +41,15 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, FlowTableAndStatisticsMap item) {
+    protected void cleanupSingleStat(ReadWriteTransaction trans, FlowTableAndStatisticsMap item) {
         // TODO: do we want to do this?
     }
 
     @Override
-    protected FlowTableAndStatisticsMap updateSingleStat(DataModificationTransaction trans, FlowTableAndStatisticsMap item) {
+    protected FlowTableAndStatisticsMap updateSingleStat(ReadWriteTransaction trans, FlowTableAndStatisticsMap item) {
 
-        InstanceIdentifier<Table> tableRef = getNodeIdentifierBuilder()
-                .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(item.getTableId().getValue())).build();
+        InstanceIdentifier<Table> tableRef = getNodeIdentifier()
+                .augmentation(FlowCapableNode.class).child(Table.class, new TableKey(item.getTableId().getValue()));
 
         FlowTableStatisticsDataBuilder statisticsDataBuilder = new FlowTableStatisticsDataBuilder();
         final FlowTableStatistics stats = new FlowTableStatisticsBuilder(item).build();
@@ -57,7 +58,7 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
         TableBuilder tableBuilder = new TableBuilder();
         tableBuilder.setKey(new TableKey(item.getTableId().getValue()));
         tableBuilder.addAugmentation(FlowTableStatisticsData.class, statisticsDataBuilder.build());
-        trans.putOperationalData(tableRef, tableBuilder.build());
+        trans.merge(LogicalDatastoreType.OPERATIONAL, tableRef, tableBuilder.build(), true);
         return item;
     }
 
