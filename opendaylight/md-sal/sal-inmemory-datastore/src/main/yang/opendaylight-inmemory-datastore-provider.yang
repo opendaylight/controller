@@ -10,6 +10,7 @@ module opendaylight-inmemory-datastore-provider {
  	import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
  	import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
     import opendaylight-md-sal-dom {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
 
     description
         "InMemory datastore provider implementation for config & operational datastore";
@@ -71,4 +72,32 @@ module opendaylight-inmemory-datastore-provider {
                 }
             }
         }
+
+    augment "/config:modules/config:module/config:state" {
+        case inmemory-config-datastore-provider {
+            when "/config:modules/config:module/config:type = 'inmemory-config-datastore-provider'";
+
+            container config-store-notification-executor-stats {
+                uses common:thread-executor-stats;
+            }
+
+            container config-store-executor-stats {
+                uses common:thread-executor-stats;
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case inmemory-operational-datastore-provider {
+            when "/config:modules/config:module/config:type = 'inmemory-operational-datastore-provider'";
+
+            container operational-store-notification-executor-stats {
+                uses common:thread-executor-stats;
+            }
+
+            container operational-store-executor-stats {
+                uses common:thread-executor-stats;
+            }
+        }
+    }
 }
