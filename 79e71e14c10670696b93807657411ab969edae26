@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_db2ee1fa",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/impl/test/Bug1418AugmentationTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-06T07:11:52Z",
+      "side": 1,
+      "message": "missing copyright header",
+      "revId": "79e71e14c10670696b93807657411ab969edae26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9b34d94a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/impl/test/Bug1418AugmentationTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-06T07:11:52Z",
+      "side": 1,
+      "message": "please order your imports",
+      "revId": "79e71e14c10670696b93807657411ab969edae26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7b3d552a",
+        "filename": "opendaylight/md-sal/sal-test-model/src/main/java/org/opendaylight/controller/md/sal/test/model/util/ListsBindingUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-06T07:11:52Z",
+      "side": 1,
+      "message": "since we\u0027re here -- make this class final",
+      "revId": "79e71e14c10670696b93807657411ab969edae26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5b42d1ae",
+        "filename": "opendaylight/md-sal/sal-test-model/src/main/java/org/opendaylight/controller/md/sal/test/model/util/ListsBindingUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-06T07:11:52Z",
+      "side": 1,
+      "message": "add javadocs, please",
+      "revId": "79e71e14c10670696b93807657411ab969edae26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
