@@ -4,8 +4,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
@@ -53,7 +55,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
+                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
@@ -93,7 +95,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
+                ShardTransaction.props( store.newReadOnlyTransaction(), shard, testSchemaContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
@@ -167,7 +169,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+                ShardTransaction.props(store.newWriteOnlyTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testWriteData");
 
@@ -244,7 +246,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+                ShardTransaction.props( store.newWriteOnlyTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testDeleteData");
 
@@ -281,7 +283,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
             final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+                ShardTransaction.props( store.newReadWriteTransaction(), shard, TestModel.createTestContext());
             final ActorRef subject =
                 getSystem().actorOf(props, "testReadyTransaction");
 
@@ -361,4 +363,24 @@ public class ShardTransactionTest extends AbstractActorTest {
         }};
 
     }
+
+
+  @Test
+  public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
+    try {
+
+        final ActorRef shard = getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+        final Props props =
+            ShardTransaction.props(store.newReadOnlyTransaction(), shard, TestModel.createTestContext());
+         final TestActorRef subject = TestActorRef.apply(props,getSystem());
+
+        subject.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
+        Assert.assertFalse(true);
+
+
+    } catch (Exception cs) {
+      assertEquals(cs.getClass().getSimpleName(), Exception.class.getSimpleName());
+      assertTrue(cs.getMessage().startsWith("ShardTransaction:handleRecieve received an unknown message"));
+    }
+  }
 }

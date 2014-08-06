@@ -15,7 +15,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionCh
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -45,11 +44,27 @@ public class ShardTransactionChain extends AbstractUntypedActor {
         }
     }
 
+  private ActorRef createTypedTransactionActor(CreateTransaction createTransaction,String transactionId){
+    if(createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_ONLY.ordinal()){
+      return getContext().actorOf(
+          ShardTransaction.props( chain.newReadOnlyTransaction(), getSelf(), schemaContext), transactionId);
+
+    }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_WRITE.ordinal()){
+      return getContext().actorOf(
+          ShardTransaction.props( chain.newReadWriteTransaction(), getSelf(), schemaContext), transactionId);
+
+
+    }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.WRITE_ONLY.ordinal()){
+      return getContext().actorOf(
+          ShardTransaction.props( chain.newWriteOnlyTransaction(), getSelf(), schemaContext), transactionId);
+    }else{
+      throw new IllegalArgumentException ("CreateTransaction message has unidentified transaction type="+createTransaction.getTransactionType()) ;
+    }
+  }
+
     private void createTransaction(CreateTransaction createTransaction) {
-        DOMStoreReadWriteTransaction transaction =
-            chain.newReadWriteTransaction();
-        ActorRef transactionActor = getContext().actorOf(ShardTransaction
-            .props(chain, transaction, getContext().parent(), schemaContext), "shard-" + createTransaction.getTransactionId());
+
+        ActorRef transactionActor = createTypedTransactionActor(createTransaction, "shard-" + createTransaction.getTransactionId());
         getSender()
             .tell(new CreateTransactionReply(transactionActor.path().toString(),createTransaction.getTransactionId()).toSerializable(),
                 getSelf());

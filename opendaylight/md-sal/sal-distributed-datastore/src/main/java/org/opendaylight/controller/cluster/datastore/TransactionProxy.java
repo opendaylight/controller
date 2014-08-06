@@ -180,7 +180,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         try {
             Object response = actorContext.executeShardOperation(shardName,
-                new CreateTransaction(identifier).toSerializable(),
+                new CreateTransaction(identifier,this.transactionType.ordinal() ).toSerializable(),
                 ActorContext.ASK_DURATION);
             if (response.getClass()
                 .equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {

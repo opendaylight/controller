@@ -15,11 +15,9 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -143,13 +141,29 @@ public class Shard extends RaftActor {
         }
     }
 
+   private ActorRef createTypedTransactionActor(CreateTransaction createTransaction,String transactionId){
+      if(createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_ONLY.ordinal()){
+        return getContext().actorOf(
+            ShardTransaction.props( store.newReadOnlyTransaction(), getSelf(), schemaContext), transactionId);
+
+      }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_WRITE.ordinal()){
+        return getContext().actorOf(
+            ShardTransaction.props( store.newReadWriteTransaction(), getSelf(), schemaContext), transactionId);
+
+
+      }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.WRITE_ONLY.ordinal()){
+        return getContext().actorOf(
+            ShardTransaction.props( store.newWriteOnlyTransaction(), getSelf(), schemaContext), transactionId);
+      }else{
+        throw new IllegalArgumentException ("CreateTransaction message has unidentified transaction type="+createTransaction.getTransactionType()) ;
+      }
+   }
+
     private void createTransaction(CreateTransaction createTransaction) {
-        DOMStoreReadWriteTransaction transaction =
-            store.newReadWriteTransaction();
+
         String transactionId = "shard-" + createTransaction.getTransactionId();
         LOG.info("Creating transaction : {} " , transactionId);
-        ActorRef transactionActor = getContext().actorOf(
-            ShardTransaction.props(transaction, getSelf(), schemaContext), transactionId);
+        ActorRef transactionActor = createTypedTransactionActor(createTransaction,transactionId);
 
         getSender()
             .tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor), createTransaction.getTransactionId()).toSerializable(),

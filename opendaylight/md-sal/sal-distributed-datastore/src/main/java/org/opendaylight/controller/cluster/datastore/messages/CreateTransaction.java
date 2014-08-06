@@ -15,23 +15,28 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 public class CreateTransaction implements SerializableMessage {
   public static Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
   private final String transactionId;
+  private final int transactionType;
 
-  public CreateTransaction(String transactionId){
+  public CreateTransaction(String transactionId, int transactionType){
 
     this.transactionId = transactionId;
+    this.transactionType = transactionType;
   }
 
   public String getTransactionId() {
     return transactionId;
   }
 
+  public int getTransactionType() { return transactionType;}
+
   @Override
   public Object toSerializable() {
-    return  ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId).build();
+    return  ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId).setTransactionType(transactionType).build();
   }
 
   public static CreateTransaction fromSerializable(Object message){
-    return new CreateTransaction(((ShardTransactionMessages.CreateTransaction)message).getTransactionId());
+    ShardTransactionMessages.CreateTransaction createTransaction = (ShardTransactionMessages.CreateTransaction)message;
+    return new CreateTransaction(createTransaction.getTransactionId(),createTransaction.getTransactionType() );
   }
 
 }
