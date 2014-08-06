@@ -102,6 +102,8 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     private final String name;
 
+    private volatile AutoCloseable closeable;
+
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
             final ExecutorService dataChangeListenerExecutor) {
         this.name = Preconditions.checkNotNull(name);
@@ -115,6 +117,10 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         dataChangeListenerNotificationManager =
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
                         DCL_NOTIFICATION_MGR_INVOKER, maxDCLQueueSize, "DataChangeListenerQueueMgr");
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
     }
 
     @Override
@@ -151,6 +157,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     public void close() {
         ExecutorServiceUtil.tryGracefulShutdown(listeningExecutor, 30, TimeUnit.SECONDS);
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
+
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch(Exception e) {
+                LOG.debug("Error closing instance", e);
+            }
+        }
     }
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(

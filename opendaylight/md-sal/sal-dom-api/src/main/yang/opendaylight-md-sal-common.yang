@@ -68,4 +68,38 @@ module opendaylight-md-sal-common {
             }
         }
     }
+    
+    grouping thread-executor-stats {
+        leaf current-thread-pool-size {
+            type uint32;
+        }
+        
+        leaf largest-thread-pool-size {
+            type uint32;
+        }
+        
+        leaf max-thread-pool-size {
+            type uint32;
+        }
+        
+        leaf current-queue-size {
+            type uint32;
+        }
+        
+        leaf max-queue-size {
+            type uint32;
+        }
+        
+        leaf active-thread-count {
+            type uint32;
+        }
+        
+        leaf completed-task-count {
+            type uint32;
+        }
+        
+        leaf total-task-count {
+            type uint32;
+        }
+    }
 }
