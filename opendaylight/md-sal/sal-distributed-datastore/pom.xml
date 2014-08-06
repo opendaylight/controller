@@ -120,7 +120,7 @@
 
     <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-protocolbuffer-encoding</artifactId>
+        <artifactId>sal-clustering-commons</artifactId>
         <version>1.1-SNAPSHOT</version>
     </dependency>
 
@@ -165,7 +165,7 @@
             <Private-Package></Private-Package>
             <Import-Package>!*snappy;!org.jboss.*;*</Import-Package>
             <Embed-Dependency>
-                sal-protocolbuffer-encoding;
+                sal-clustering-commons;
                 sal-akka-raft;
                 !sal*;
                 !*config-api*;
