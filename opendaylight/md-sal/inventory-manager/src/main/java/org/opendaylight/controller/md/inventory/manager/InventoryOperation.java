@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.md.inventory.manager;
 
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 
 interface InventoryOperation {
 
-    void applyOperation(DataModificationTransaction tx);
+    void applyOperation(ReadWriteTransaction tx);
 
 }
