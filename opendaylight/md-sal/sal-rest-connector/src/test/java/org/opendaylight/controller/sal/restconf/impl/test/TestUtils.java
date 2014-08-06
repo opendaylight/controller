@@ -62,15 +62,12 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -407,9 +404,7 @@ public final class TestUtils {
 
     static NormalizedNode prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
         String ietfInterfacesDate = "2013-07-04";
-        CollectionNodeBuilder<MapEntryNode, MapNode> intface = ImmutableMapNodeBuilder.create();
         String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
-        intface.withNodeIdentifier(getNodeIdentifier("interface", namespace, ietfInterfacesDate));
         DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder.create();
 
         Map<String, Object> predicates = new HashMap<>();
@@ -431,8 +426,6 @@ public final class TestUtils {
                 .withNodeIdentifier(getNodeIdentifier("description", namespace, ietfInterfacesDate))
                 .withValue("some interface").build());
 
-        intface.withChild(mapEntryNode.build());
-
-        return intface.build();
+        return mapEntryNode.build();
     }
 }

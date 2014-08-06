@@ -62,12 +62,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
-import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.serializer.CnSnFromNormalizedNodeSerializerFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
@@ -1414,25 +1410,15 @@ public class RestconfImpl implements RestconfService {
     }
 
     private CompositeNode datastoreNormalizedNodeToCompositeNode(final NormalizedNode<?, ?> dataNode, final DataSchemaNode schema) {
-        Iterable<Node<?>> nodes = null;
+        Node<?> nodes = null;
         if (dataNode == null) {
             throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.DATA_MISSING,
                     "No data was found."));
         }
-        if (schema instanceof ContainerSchemaNode && dataNode instanceof ContainerNode) {
-            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getContainerNodeSerializer()
-                    .serialize((ContainerSchemaNode) schema, (ContainerNode) dataNode);
-        } else if (schema instanceof ListSchemaNode && dataNode instanceof MapNode) {
-            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getMapNodeSerializer()
-                    .serialize((ListSchemaNode) schema, (MapNode) dataNode);
-        } else if (schema instanceof ListSchemaNode && dataNode instanceof MapEntryNode) {
-            nodes = CnSnFromNormalizedNodeSerializerFactory.getInstance().getMapEntryNodeSerializer()
-                    .serialize((ListSchemaNode) schema, (MapEntryNode) dataNode);
-        }
+        nodes = DataNormalizer.toLegacy(dataNode);
         if (nodes != null) {
-            if (nodes.iterator().hasNext()) {
-                Node<?> nodeOldStruct = nodes.iterator().next();
-                return (CompositeNode) nodeOldStruct;
+            if (nodes instanceof CompositeNode) {
+                return (CompositeNode) nodes;
             } else {
                 LOG.error("The node " + dataNode.getNodeType() + " couldn't be transformed to compositenode.");
             }

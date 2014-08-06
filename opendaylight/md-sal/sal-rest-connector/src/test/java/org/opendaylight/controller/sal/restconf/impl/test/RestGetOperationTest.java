@@ -64,15 +64,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -675,9 +671,7 @@ public class RestGetOperationTest extends JerseyTest {
     }
 
     private NormalizedNode prepareCnDataForSlashesBehindMountPointTest() throws ParseException {
-        CollectionNodeBuilder<MapEntryNode, MapNode> lst1 = ImmutableMapNodeBuilder.create();
-        lst1.withNodeIdentifier(TestUtils.getNodeIdentifier("lst1", "test:module", "2014-01-09"));
-        lst1.withChild(ImmutableMapEntryNodeBuilder
+        return ImmutableMapEntryNodeBuilder
                 .create()
                 .withNodeIdentifier(
                         TestUtils.getNodeIdentifierPredicate("lst1", "test:module", "2014-01-09", "lf11",
@@ -685,9 +679,8 @@ public class RestGetOperationTest extends JerseyTest {
                 .withChild(
                         ImmutableLeafNodeBuilder.create()
                                 .withNodeIdentifier(TestUtils.getNodeIdentifier("lf11", "test:module", "2014-01-09"))
-                                .withValue("GigabitEthernet0/0/0/0").build()).build());
+                                .withValue("GigabitEthernet0/0/0/0").build()).build();
 
-        return lst1.build();
     }
 
     /**
