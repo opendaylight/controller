@@ -25,6 +25,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      */
     private static final int ELECTION_TIME_MAX_VARIANCE = 100;
 
+    private final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
+
 
     /**
      * The interval at which a heart beat message will be sent to the remote
@@ -57,5 +59,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getElectionTimeVariance() {
         return ELECTION_TIME_MAX_VARIANCE;
+    }
+
+    @Override
+    public int getSnapshotChunkSize() {
+        return SNAPSHOT_CHUNK_SIZE;
     }
 }
