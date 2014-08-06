@@ -33,7 +33,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      * Since this is set to 100 milliseconds the Election timeout should be
      * at least 200 milliseconds
      */
-    protected static final FiniteDuration HEART_BEAT_INTERVAL =
+    public static final FiniteDuration HEART_BEAT_INTERVAL =
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
 
@@ -51,7 +51,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
         // returns 2 times the heart beat interval
-        return HEART_BEAT_INTERVAL.$times(2);
+        return getHeartBeatInterval().$times(2);
     }
 
     @Override

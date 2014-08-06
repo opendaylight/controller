@@ -76,7 +76,6 @@ public class ThreePhaseCommitCohortProxy implements
                             CanCommitTransactionReply reply =
                                     CanCommitTransactionReply.fromSerializable(response);
                             if (!reply.getCanCommit()) {
-                                System.out.println("**TOM - failed: false");
                                 return false;
                             }
                         }

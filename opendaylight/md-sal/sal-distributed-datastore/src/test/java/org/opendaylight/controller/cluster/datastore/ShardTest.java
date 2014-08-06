@@ -2,7 +2,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.event.Logging;
 import akka.testkit.JavaTestKit;
+import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
@@ -38,19 +40,25 @@ public class ShardTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
 
-            // Wait for Shard to become a Leader
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            // Wait for a specific log message to show up
+            final boolean result =
+                new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
+                ) {
+                    protected Boolean run() {
+                        return true;
+                    }
+                }.from(subject.path().toString())
+                    .message("Switching from state Candidate to Leader")
+                    .occurrences(1).exec();
+
+            Assert.assertEquals(true, result);
 
             new Within(duration("1 seconds")) {
                 protected void run() {
 
                     subject.tell(new CreateTransactionChain().toSerializable(), getRef());
 
-                    final String out = new ExpectMsg<String>("match hint") {
+                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)){
@@ -107,7 +115,7 @@ public class ShardTest extends AbstractActorTest {
 
                     assertFalse(notificationEnabled);
 
-                    final String out = new ExpectMsg<String>("match hint") {
+                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in.getClass().equals(RegisterChangeListenerReply.class)) {
@@ -138,13 +146,18 @@ public class ShardTest extends AbstractActorTest {
                 getSystem().actorOf(props, "testCreateTransaction");
 
 
-            // Wait for Shard to become a Leader
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            // Wait for a specific log message to show up
+            final boolean result =
+                new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
+                ) {
+                    protected Boolean run() {
+                        return true;
+                    }
+                }.from(subject.path().toString())
+                    .message("Switching from state Candidate to Leader")
+                    .occurrences(1).exec();
 
+            Assert.assertEquals(true, result);
 
             new Within(duration("1 seconds")) {
                 protected void run() {
@@ -156,7 +169,7 @@ public class ShardTest extends AbstractActorTest {
                     subject.tell(new CreateTransaction("txn-1").toSerializable(),
                         getRef());
 
-                    final String out = new ExpectMsg<String>("match hint") {
+                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in instanceof CreateTransactionReply) {

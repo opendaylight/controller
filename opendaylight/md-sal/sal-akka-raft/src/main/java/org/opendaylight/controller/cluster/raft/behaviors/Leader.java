@@ -310,7 +310,7 @@ public class Leader extends AbstractRaftActorBehavior {
                     // that has fallen too far behind with the log but yet is not
                     // eligible to receive a snapshot
                     entries =
-                        context.getReplicatedLog().getFrom(nextIndex);
+                        context.getReplicatedLog().getFrom(nextIndex, 1);
                 }
 
                 followerActor.tell(

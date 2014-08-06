@@ -12,6 +12,7 @@ import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
+import akka.event.Logging;
 import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -34,6 +35,8 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Collections;
+
+import static junit.framework.Assert.assertEquals;
 
 public class BasicIntegrationTest extends AbstractActorTest {
 
@@ -61,17 +64,24 @@ public class BasicIntegrationTest extends AbstractActorTest {
                         getRef());
 
 
-                    // Wait for Shard to become a Leader
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    // Wait for a specific log message to show up
+                    final boolean result =
+                        new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
+                        ) {
+                            protected Boolean run() {
+                                return true;
+                            }
+                        }.from(shard.path().toString())
+                            .message("Switching from state Candidate to Leader")
+                            .occurrences(1).exec();
+
+                    assertEquals(true, result);
+
                     // 1. Create a TransactionChain
                     shard.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final ActorSelection transactionChain =
-                        new ExpectMsg<ActorSelection>("CreateTransactionChainReply") {
+                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionChainReply") {
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)) {
                                     ActorPath transactionChainPath =
@@ -93,7 +103,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transactionChain.tell(new CreateTransaction("txn-1").toSerializable(), getRef());
 
                     final ActorSelection transaction =
-                        new ExpectMsg<ActorSelection>("CreateTransactionReply") {
+                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionReply") {
                             protected ActorSelection match(Object in) {
                                 if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(in.getClass())) {
                                     CreateTransactionReply reply = CreateTransactionReply.fromSerializable(in);
@@ -115,7 +125,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
                         getRef());
 
-                    Boolean writeDone = new ExpectMsg<Boolean>("WriteDataReply") {
+                    Boolean writeDone = new ExpectMsg<Boolean>(duration("1 seconds"), "WriteDataReply") {
                         protected Boolean match(Object in) {
                             if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return true;
@@ -134,7 +144,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transaction.tell(new ReadyTransaction().toSerializable(), getRef());
 
                     final ActorSelection cohort =
-                        new ExpectMsg<ActorSelection>("ReadyTransactionReply") {
+                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "ReadyTransactionReply") {
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                     ActorPath cohortPath =
@@ -157,7 +167,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     cohort.tell(new PreCommitTransaction().toSerializable(), getRef());
 
                     Boolean preCommitDone =
-                        new ExpectMsg<Boolean>("PreCommitTransactionReply") {
+                        new ExpectMsg<Boolean>(duration("1 seconds"), "PreCommitTransactionReply") {
                             protected Boolean match(Object in) {
                                 if (in.getClass().equals(PreCommitTransactionReply.SERIALIZABLE_CLASS)) {
                                     return true;

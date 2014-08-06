@@ -248,6 +248,23 @@ public class MockRaftActorContext implements RaftActorContext {
             return entries;
         }
 
+        @Override public List<ReplicatedLogEntry> getFrom(long index, int max) {
+            if(index >= log.size() || index < 0){
+                return Collections.EMPTY_LIST;
+            }
+            List<ReplicatedLogEntry> entries = new ArrayList<>();
+            int maxIndex = (int) index + max;
+            if(maxIndex > log.size()){
+                maxIndex = log.size();
+            }
+
+            for(int i=(int) index ; i < maxIndex ; i++) {
+                entries.add(get(i));
+            }
+            return entries;
+
+        }
+
         @Override public long size() {
             return log.size();
         }
