@@ -8,12 +8,6 @@
   </parent>
   <artifactId>sal-binding-it</artifactId>
 
-  <properties>
-    <sonar.jacoco.itReportPath>../sal-binding-broker/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <!-- Sonar jacoco plugin to get integration test coverage info -->
-    <sonar.jacoco.reportPath>../sal-binding-broker/target/jacoco.exec</sonar.jacoco.reportPath>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -169,65 +163,9 @@
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco.version}</version>
-          <configuration>
-            <destFile>../sal-binding-broker/target/jacoco-it.exec</destFile>
-            <includes>
-              <include>org.opendaylight.controller.*</include>
-            </includes>
-          </configuration>
-          <executions>
-            <execution>
-              <id>pre-test</id>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>post-test</id>
-              <configuration>
-                <skip>true</skip>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <reuseForks>false</reuseForks>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <phase>test</phase>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>maven-paxexam-plugin</artifactId>
