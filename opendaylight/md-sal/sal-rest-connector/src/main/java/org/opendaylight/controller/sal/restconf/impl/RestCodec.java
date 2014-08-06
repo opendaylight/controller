@@ -244,7 +244,7 @@ public class RestCodec {
             for (int i = 0; i < identities.size(); i++) {
                 IdentityValue identityValue = identities.get(i);
                 URI validNamespace = resolveValidNamespace(identityValue.getNamespace(), mountPoint);
-                DataSchemaNode node = ControllerContext.getInstance().findInstanceDataChildByNameAndNamespace(
+                DataSchemaNode node = ControllerContext.findInstanceDataChildByNameAndNamespace(
                         parentContainer, identityValue.getValue(), validNamespace);
                 if (node == null) {
                     logger.info("'{}' node was not found in {}", identityValue, parentContainer.getChildNodes());
@@ -271,7 +271,7 @@ public class RestCodec {
                         Map<QName, Object> predicatesMap = new HashMap<>();
                         for (Predicate predicate : identityValue.getPredicates()) {
                             validNamespace = resolveValidNamespace(predicate.getName().getNamespace(), mountPoint);
-                            DataSchemaNode listKey = ControllerContext.getInstance()
+                            DataSchemaNode listKey = ControllerContext
                                     .findInstanceDataChildByNameAndNamespace(listNode, predicate.getName().getValue(),
                                             validNamespace);
                             predicatesMap.put(listKey.getQName(), predicate.getValue());
@@ -286,7 +286,7 @@ public class RestCodec {
                 }
                 result.add(pathArgument);
                 if (i < identities.size() - 1) { // last element in instance-identifier can be other than
-                                                 // DataNodeContainer
+                    // DataNodeContainer
                     if (node instanceof DataNodeContainer) {
                         parentContainer = (DataNodeContainer) node;
                     } else {
