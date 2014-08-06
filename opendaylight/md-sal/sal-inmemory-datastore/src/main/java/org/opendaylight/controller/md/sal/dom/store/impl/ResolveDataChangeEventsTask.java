@@ -50,6 +50,27 @@ import org.slf4j.LoggerFactory;
  * tree.
  */
 final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListenerNotifyTask>> {
+    /**
+     * Internal enumeration of what resolution is required by listeners who
+     * are attached on parent nodes of the current subtree.
+     */
+    private static enum RequiredResolution {
+        /**
+         * No upstream listeners, prune the walk unless there are listeners attached.
+         */
+        NONE,
+        /**
+         * Listeners require the changes to be resolved at this scope, but unless it
+         * there are {@value DataChangeScope#ONE} or {@value DataChangeScope#SUBTREE}
+         * listeners attached.
+         */
+        BASE,
+        /**
+         * Full resolution is required by upstream listeners.
+         */
+        ALL,
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
     private static final DOMImmutableDataChangeEvent NO_CHANGE = builder(DataChangeScope.BASE).build();
 
@@ -74,7 +95,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     @Override
     public Iterable<ChangeListenerNotifyTask> call() {
         try (final Walker w = listenerRoot.getWalker()) {
-            resolveAnyChangeEvent(candidate.getRootPath(), Collections.singleton(w.getRootNode()), candidate.getRootNode());
+            resolveAnyChangeEvent(candidate.getRootPath(), Collections.singleton(w.getRootNode()), candidate.getRootNode(), RequiredResolution.NONE);
             return createNotificationTasks();
         }
     }
@@ -223,6 +244,52 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     }
 
     /**
+     * Calculate required resolution based on the current requirements
+     * and the list of listeners. The rules are simple:
+     * - if current is ALL, so is child resolution,
+     * - if there are any listeners, ONE -> BASE, SUBTREE -> ALL,
+     * - default to NONE.
+     *
+     * @param current Current inherited required resolution
+     * @param listeners List of current listeners
+     * @return Required child resolution.
+     */
+    private static RequiredResolution calculateResolution(final RequiredResolution current, final Iterable<ListenerTree.Node> listeners) {
+        // Fast check: ALL is always retained
+        if (current == RequiredResolution.ALL) {
+            return current;
+        }
+
+        LOG.trace("Calculating required resolution from {}", current);
+        RequiredResolution lsnr = RequiredResolution.NONE;
+        iter: {
+            for (Node l : listeners) {
+                final DataChangeScope scope = l.getDeepestScope();
+                if (scope != null) {
+                    switch (scope) {
+                    case BASE:
+                        // No change
+                        break;
+                    case ONE:
+                        if (lsnr == RequiredResolution.NONE) {
+                            lsnr = RequiredResolution.BASE;
+                        }
+                        break;
+                    case SUBTREE:
+                        // Forces a full resolution, so we do not need to take anything
+                        // else into consideration
+                        lsnr = RequiredResolution.ALL;
+                        break iter;
+                    }
+                }
+            }
+        }
+
+        LOG.trace("New required resolution is {}", lsnr);
+        return lsnr;
+    }
+
+    /**
      * Resolves data change event for supplied node
      *
      * @param path
@@ -230,6 +297,8 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param listeners
      *            Collection of Listener registration nodes interested in
      *            subtree
+     * @param res
+     *            Required resolution inherited from parent listeners.
      * @param modification
      *            Modification of current node
      * @param before
@@ -239,8 +308,17 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @return Data Change Event of this node and all it's children
      */
     private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode node) {
+            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode node, final RequiredResolution res) {
+        /*
+         * If parent listeners do not require us to perform resolution and
+         * we have no further listeners, we can stop right here.
+         */
+        if (res == RequiredResolution.NONE && listeners.isEmpty()) {
+            LOG.debug("Resolution stopped at {}", path);
+            return NO_CHANGE;
+        }
 
+        // consistency check: no before and after state is present
         if (node.getModificationType() != ModificationType.UNMODIFIED &&
                 !node.getDataAfter().isPresent() && !node.getDataBefore().isPresent()) {
             LOG.debug("Modification at {} has type {}, but no before- and after-data. Assuming unchanged.",
@@ -248,24 +326,25 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             return NO_CHANGE;
         }
 
-        // no before and after state is present
+        // Calculate required child resolution
+        final RequiredResolution childRes = calculateResolution(res, listeners);
 
         switch (node.getModificationType()) {
         case SUBTREE_MODIFIED:
-            return resolveSubtreeChangeEvent(path, listeners, node);
+            return resolveSubtreeChangeEvent(path, listeners, node, childRes);
         case MERGE:
         case WRITE:
             Preconditions.checkArgument(node.getDataAfter().isPresent(),
                     "Modification at {} has type {} but no after-data", path, node.getModificationType());
             if (node.getDataBefore().isPresent()) {
-                return resolveReplacedEvent(path, listeners, node.getDataBefore().get(), node.getDataAfter().get());
+                return resolveReplacedEvent(path, listeners, node.getDataBefore().get(), node.getDataAfter().get(), childRes);
             } else {
-                return resolveCreateEvent(path, listeners, node.getDataAfter().get());
+                return resolveCreateEvent(path, listeners, node.getDataAfter().get(), childRes);
             }
         case DELETE:
             Preconditions.checkArgument(node.getDataBefore().isPresent(),
                     "Modification at {} has type {} but no before-data", path, node.getModificationType());
-            return resolveDeleteEvent(path, listeners, node.getDataBefore().get());
+            return resolveDeleteEvent(path, listeners, node.getDataBefore().get(), childRes);
         case UNMODIFIED:
             return NO_CHANGE;
         }
@@ -275,12 +354,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
 
     private DOMImmutableDataChangeEvent resolveReplacedEvent(final YangInstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<?, ?> beforeData,
-            final NormalizedNode<?, ?> afterData) {
-
-        // FIXME: BUG-1493: check the listeners to prune unneeded changes:
-        //                  for subtrees, we have to do all
-        //                  for one, we need to expand children
-        //                  for base, we just report replacement
+            final NormalizedNode<?, ?> afterData, final RequiredResolution res) {
 
         if (beforeData instanceof NormalizedNodeContainer<?, ?, ?>) {
             // Node is container (contains child) and we have interested
@@ -292,7 +366,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) beforeData;
             @SuppressWarnings("unchecked")
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) afterData;
-            return resolveNodeContainerReplaced(path, listeners, beforeCont, afterCont);
+            return resolveNodeContainerReplaced(path, listeners, beforeCont, afterCont, res);
         } else if (!beforeData.equals(afterData)) {
             // Node is Leaf type (does not contain child nodes)
             // so normal equals method is sufficient for determining change.
@@ -309,7 +383,8 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private DOMImmutableDataChangeEvent resolveNodeContainerReplaced(final YangInstanceIdentifier path,
             final Collection<Node> listeners,
             final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont,
-                    final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont) {
+                    final NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont,
+                            final RequiredResolution res) {
         final List<DOMImmutableDataChangeEvent> childChanges = new LinkedList<>();
 
         // We look at all children from before and compare it with after state.
@@ -320,7 +395,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
             Optional<NormalizedNode<PathArgument, ?>> afterChild = afterCont.getChild(childId);
             DOMImmutableDataChangeEvent childChange = resolveNodeContainerChildUpdated(childPath, childListeners,
-                    beforeChild, afterChild);
+                    beforeChild, afterChild, res);
             // If change is empty (equals to NO_CHANGE)
             if (childChange != NO_CHANGE) {
                 childChanges.add(childChange);
@@ -361,11 +436,11 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
 
     private DOMImmutableDataChangeEvent resolveNodeContainerChildUpdated(final YangInstanceIdentifier path,
             final Collection<Node> listeners, final NormalizedNode<PathArgument, ?> before,
-            final Optional<NormalizedNode<PathArgument, ?>> after) {
+            final Optional<NormalizedNode<PathArgument, ?>> after, final RequiredResolution res) {
 
         if (after.isPresent()) {
             // REPLACE or SUBTREE Modified
-            return resolveReplacedEvent(path, listeners, before, after.get());
+            return resolveReplacedEvent(path, listeners, before, after.get(), res);
 
         } else {
             // AFTER state is not present - child was deleted.
@@ -381,17 +456,18 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param path
      * @param listeners
      * @param afterState
+     * @param res
      * @return
      */
     private DOMImmutableDataChangeEvent resolveCreateEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> afterState) {
+            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> afterState, final RequiredResolution res) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
     }
 
     private DOMImmutableDataChangeEvent resolveDeleteEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> beforeState) {
+            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> beforeState, final RequiredResolution res) {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState;
@@ -432,7 +508,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode modification) {
+            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode modification, final RequiredResolution res) {
 
         Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", path);
         Preconditions.checkArgument(modification.getDataAfter().isPresent(), "Subtree change with after-data not present at path %s", path);
@@ -449,16 +525,15 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             YangInstanceIdentifier childPath = path.node(childId);
             Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
 
-
             switch (childMod.getModificationType()) {
             case WRITE:
             case MERGE:
             case DELETE:
-                one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod));
+                one.merge(resolveAnyChangeEvent(childPath, childListeners, childMod, res));
                 oneModified = true;
                 break;
             case SUBTREE_MODIFIED:
-                subtree.merge(resolveSubtreeChangeEvent(childPath, childListeners, childMod));
+                subtree.merge(resolveSubtreeChangeEvent(childPath, childListeners, childMod, res));
                 break;
             case UNMODIFIED:
                 // no-op
