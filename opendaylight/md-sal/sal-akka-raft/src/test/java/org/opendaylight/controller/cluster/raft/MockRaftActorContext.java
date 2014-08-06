@@ -14,11 +14,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.AppendEntriesMessages;
 import org.opendaylight.controller.cluster.raft.protobuff.messages.MockPayloadMessages;
-import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -182,14 +183,25 @@ public class MockRaftActorContext implements RaftActorContext {
         return new DefaultConfigParamsImpl();
     }
 
+    //TODO: we should extend AbstractReplicatedLogImpl and let it handle all the logic
     public static class SimpleReplicatedLog implements ReplicatedLog {
         private final List<ReplicatedLogEntry> log = new ArrayList<>();
+        private long snapshotIndex = -1;
 
-        @Override public ReplicatedLogEntry get(long index) {
-            if(index >= log.size() || index < 0){
+        protected int adjustedIndex(long logEntryIndex) {
+            if(snapshotIndex < 0){
+                return (int) logEntryIndex;
+            }
+            return (int) (logEntryIndex - (snapshotIndex + 1));
+        }
+
+        @Override public ReplicatedLogEntry get(long logEntryIndex) {
+            long adjustedIndex = adjustedIndex(logEntryIndex);
+
+            if(adjustedIndex >= log.size() || adjustedIndex < 0){
                 return null;
             }
-            return log.get((int) index);
+            return log.get((int) adjustedIndex);
         }
 
         @Override public ReplicatedLogEntry last() {
@@ -248,40 +260,40 @@ public class MockRaftActorContext implements RaftActorContext {
             return entries;
         }
 
-        @Override public List<ReplicatedLogEntry> getFrom(long index, int max) {
-            if(index >= log.size() || index < 0){
-                return Collections.EMPTY_LIST;
-            }
-            List<ReplicatedLogEntry> entries = new ArrayList<>();
-            int maxIndex = (int) index + max;
-            if(maxIndex > log.size()){
-                maxIndex = log.size();
-            }
-
-            for(int i=(int) index ; i < maxIndex ; i++) {
-                entries.add(get(i));
+        @Override
+        public List<ReplicatedLogEntry> getFrom(long logEntryIndex, int max) {
+            int adjustedIndex = adjustedIndex(logEntryIndex);
+            int size = log.size();
+            List<ReplicatedLogEntry> entries = new ArrayList<>(100);
+            if (adjustedIndex >= 0 && adjustedIndex < size) {
+                // physical index should be less than list size and >= 0
+                int maxIndex = adjustedIndex + max;
+                if(maxIndex > size){
+                    maxIndex = size;
+                }
+                entries.addAll(log.subList(adjustedIndex, maxIndex));
             }
             return entries;
-
         }
 
         @Override public long size() {
             return log.size();
         }
 
-        @Override public boolean isPresent(long index) {
-            if(index >= log.size() || index < 0){
+        @Override  public boolean isPresent(long logEntryIndex) {
+            if (logEntryIndex > lastIndex()) {
+                // if the request logical index is less than the last present in the list
                 return false;
             }
-
-            return true;
+            int adjustedIndex = adjustedIndex(logEntryIndex);
+            return (adjustedIndex >= 0);
         }
 
         @Override public boolean isInSnapshot(long index) {
             return false;
         }
 
-        @Override public Object getSnapshot() {
+        @Override public ByteString getSnapshot() {
             return null;
         }
 
@@ -291,6 +303,24 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public long getSnapshotTerm() {
             return -1;
+        }
+
+        @Override
+        public void setSnapshotTerm(long snapshotTerm) {
+        }
+
+        @Override
+        public void setSnapshot(ByteString snapshot) {
+        }
+
+        @Override
+        public void clear(int startIndex, int endIndex) {
+            log.subList(startIndex, endIndex).clear();
+        }
+
+        @Override
+        public void setSnapshotIndex(long snapshotIndex) {
+            this.snapshotIndex = snapshotIndex;
         }
     }
 
