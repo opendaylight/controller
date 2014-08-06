@@ -75,7 +75,7 @@ public class ShardManagerTest {
 
                     subject.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
 
-                    expectMsgClass(PrimaryFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("1 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
 
                     expectNoMsg();
                 }
@@ -170,7 +170,7 @@ public class ShardManagerTest {
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    final String out = new ExpectMsg<String>("primary found") {
+                    final String out = new ExpectMsg<String>(duration("1 seconds"), "primary found") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
@@ -208,13 +208,13 @@ public class ShardManagerTest {
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    expectMsgClass(PrimaryFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("1 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
 
                     MockClusterWrapper.sendMemberRemoved(subject, "member-2", getRef().path().toString());
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    expectMsgClass(PrimaryNotFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("1 seconds"), PrimaryNotFound.SERIALIZABLE_CLASS);
 
                     expectNoMsg();
                 }

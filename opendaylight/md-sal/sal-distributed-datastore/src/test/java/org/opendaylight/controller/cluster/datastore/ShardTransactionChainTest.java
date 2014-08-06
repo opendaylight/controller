@@ -35,7 +35,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
 
           subject.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
 
-          final String out = new ExpectMsg<String>("match hint") {
+          final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
               if (in.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
@@ -70,7 +70,7 @@ public class ShardTransactionChainTest extends AbstractActorTest {
 
           subject.tell(new CloseTransactionChain().toSerializable(), getRef());
 
-          final String out = new ExpectMsg<String>("match hint") {
+          final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
             protected String match(Object in) {
               if (in.getClass().equals(CloseTransactionChainReply.SERIALIZABLE_CLASS)) {
