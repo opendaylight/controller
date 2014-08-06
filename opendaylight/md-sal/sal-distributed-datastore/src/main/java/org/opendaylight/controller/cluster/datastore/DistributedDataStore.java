@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import java.util.concurrent.ExecutorService;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
+import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -27,6 +32,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.PropertyUtils;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
+import org.opendaylight.yangtools.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -53,7 +59,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private final String type;
     private final ActorContext actorContext;
 
-    private SchemaContext schemaContext;
+    private ThreadExecutorStatsMXBeanImpl executorMXBean;
+
+    private volatile SchemaContext schemaContext;
 
     /**
      * Executor used to run FutureTask's
@@ -61,27 +69,36 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
      * This is typically used when we need to make a request to an actor and
      * wait for it's response and the consumer needs to be provided a Future.
      */
-    private final ListeningExecutorService executor =
-            MoreExecutors.listeningDecorator(
-                    SpecialExecutors.newBlockingBoundedFastThreadPool(
-                            PropertyUtils.getIntSystemProperty(
-                                    EXECUTOR_MAX_POOL_SIZE_PROP,
-                                    DEFAULT_EXECUTOR_MAX_POOL_SIZE),
-                            PropertyUtils.getIntSystemProperty(
-                                    EXECUTOR_MAX_QUEUE_SIZE_PROP,
-                                    DEFAULT_EXECUTOR_MAX_QUEUE_SIZE), "DistDataStore"));
+    private final ExecutorService backingExecutor;
+    private final ListeningExecutorService executor;
 
-    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
+    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
+            Configuration configuration, String mxBeanType) {
         this(new ActorContext(actorSystem, actorSystem
-            .actorOf(ShardManager.props(type, cluster, configuration),
+            .actorOf(ShardManager.props(type, cluster, configuration, mxBeanType),
                 "shardmanager-" + type), cluster, configuration), type);
+
+        if(mxBeanType != null) {
+            executorMXBean = new ThreadExecutorStatsMXBeanImpl(backingExecutor,
+                    "data-store-executor", mxBeanType, null);
+            executorMXBean.registerMBean();
+        }
     }
 
     public DistributedDataStore(ActorContext actorContext, String type) {
         this.type = type;
         this.actorContext = actorContext;
-    }
 
+        backingExecutor =
+                SpecialExecutors.newBlockingBoundedFastThreadPool(
+                    PropertyUtils.getIntSystemProperty(
+                        EXECUTOR_MAX_POOL_SIZE_PROP, DEFAULT_EXECUTOR_MAX_POOL_SIZE),
+                    PropertyUtils.getIntSystemProperty(
+                        EXECUTOR_MAX_QUEUE_SIZE_PROP, DEFAULT_EXECUTOR_MAX_QUEUE_SIZE),
+                StringUtils.capitalize(type) + "DistStore");
+
+        executor = MoreExecutors.listeningDecorator(backingExecutor);
+    }
 
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
@@ -139,14 +156,19 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
             executor, schemaContext);
     }
 
-    @Override public void onGlobalContextUpdated(SchemaContext schemaContext) {
+    @Override
+    public void onGlobalContextUpdated(SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
         actorContext.getShardManager().tell(
             new UpdateSchemaContext(schemaContext), null);
     }
 
-    @Override public void close() throws Exception {
+    @Override
+    public void close() throws Exception {
         actorContext.shutdown();
 
+        if(executorMXBean != null) {
+            executorMXBean.unregisterMBean();
+        }
     }
 }
