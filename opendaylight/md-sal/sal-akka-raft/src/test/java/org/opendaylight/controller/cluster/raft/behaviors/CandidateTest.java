@@ -6,6 +6,7 @@ import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -80,12 +81,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     public void testThatAnElectionTimeoutIsTriggered(){
         new JavaTestKit(getSystem()) {{
 
-            new Within(duration("1 seconds")) {
+            new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
                 protected void run() {
 
                     Candidate candidate = new Candidate(createActorContext(getTestActor()));
 
-                    final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "ElectionTimeout") {
+                    final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
