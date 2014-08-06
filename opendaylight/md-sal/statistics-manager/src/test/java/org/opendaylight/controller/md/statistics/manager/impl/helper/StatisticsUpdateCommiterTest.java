@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.md.statistics.manager;
+package org.opendaylight.controller.md.statistics.manager.impl.helper;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class StatisticsUpdateCommiterTest {
      */
     @Test
     public void testLayer3MatchEquals() {
-        String[][][] matchSeeds = new String[][][] {
+        final String[][][] matchSeeds = new String[][][] {
                 {{"10.1.2.0/24", "10.1.2.0/24"}, {"10.1.2.0/24", "10.1.2.0/24"}},
                 {{"10.1.2.0/24", "10.1.2.0/24"}, {"10.1.2.0/24", "10.1.1.0/24"}},
                 {{"10.1.1.0/24", "10.1.2.0/24"}, {"10.1.2.0/24", "10.1.2.0/24"}},
@@ -55,7 +55,7 @@ public class StatisticsUpdateCommiterTest {
                 {{null, null}, {null, null}},
         };
 
-        boolean[] matches = new boolean[] {
+        final boolean[] matches = new boolean[] {
                 true,
                 false,
                 false,
@@ -91,23 +91,23 @@ public class StatisticsUpdateCommiterTest {
      * @param matches expected match output
      *
      */
-    private static void checkComparisonOfL3Match(String m1Source, String m1Destination,
-            String m2Source, String msDestination, boolean matches) {
-        Ipv4Match m1Layer3 = prepareIPv4Match(m1Source, m1Destination);
-        Ipv4Match m2Layer3 = prepareIPv4Match(m2Source, msDestination);
+    private static void checkComparisonOfL3Match(final String m1Source, final String m1Destination,
+            final String m2Source, final String msDestination, final boolean matches) {
+        final Ipv4Match m1Layer3 = prepareIPv4Match(m1Source, m1Destination);
+        final Ipv4Match m2Layer3 = prepareIPv4Match(m2Source, msDestination);
         boolean comparisonResult;
         try {
             comparisonResult = FlowComparator.layer3MatchEquals(m1Layer3, m2Layer3);
             Assert.assertEquals("failed to compare: "+m1Layer3+" vs. "+m2Layer3,
                     matches, comparisonResult);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("failed to compare: {} vs. {}", m1Layer3, m2Layer3, e);
             Assert.fail(e.getMessage());
         }
     }
 
-    private static Ipv4Match prepareIPv4Match(String source, String destination) {
-        Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
+    private static Ipv4Match prepareIPv4Match(final String source, final String destination) {
+        final Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
         if (source != null) {
             ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix(source));
         }
@@ -118,11 +118,11 @@ public class StatisticsUpdateCommiterTest {
         return ipv4MatchBuilder.build();
     }
     /**
-     * Test method for {@link org.opendaylight.controller.md.statistics.manager.FlowComparator#ethernetMatchEquals(EthernetMatch, EthernetMatch)
+     * Test method for {@link org.opendaylight.controller.md.statistics.manager.impl.helper.FlowComparator#ethernetMatchEquals(EthernetMatch, EthernetMatch)
      */
     @Test
     public void testEthernetMatchEquals() {
-        String[][][] ethernetMatchSeeds = new String[][][] {
+        final String[][][] ethernetMatchSeeds = new String[][][] {
                 {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}},
                 {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"aa:bb:bc:cd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}},
                 {{"aa:bb:cc:dd:ee:ff", "ff:ff:ff:ff:ff:ff","0800"}, {"AA:BB:CC:DD:EE:FF", "ff:ff:ff:ff:ff:ff","0800"}},
@@ -143,7 +143,7 @@ public class StatisticsUpdateCommiterTest {
                 {{null, null,null}, {null, null,null}},
         };
 
-        boolean[] matches = new boolean[] {
+        final boolean[] matches = new boolean[] {
                 true,
                 false,
                 true,
@@ -176,24 +176,24 @@ public class StatisticsUpdateCommiterTest {
      * @param ethernetMatch1
      * @param ethernetMatch2
      */
-    private static void checkComparisonOfEthernetMatch(String macAddress1, String macAddressMask1,String etherType1,
-            String macAddress2, String macAddressMask2,String etherType2, boolean expectedResult) {
-        EthernetMatch ethernetMatch1 = prepareEthernetMatch(macAddress1, macAddressMask1,etherType1);
-        EthernetMatch ethernetMatch2 = prepareEthernetMatch(macAddress2, macAddressMask2,etherType2);
+    private static void checkComparisonOfEthernetMatch(final String macAddress1, final String macAddressMask1,final String etherType1,
+            final String macAddress2, final String macAddressMask2,final String etherType2, final boolean expectedResult) {
+        final EthernetMatch ethernetMatch1 = prepareEthernetMatch(macAddress1, macAddressMask1,etherType1);
+        final EthernetMatch ethernetMatch2 = prepareEthernetMatch(macAddress2, macAddressMask2,etherType2);
         boolean comparisonResult;
         try {
             comparisonResult = FlowComparator.ethernetMatchEquals(ethernetMatch1, ethernetMatch2);
             Assert.assertEquals("failed to compare: "+ethernetMatch1+" vs. "+ethernetMatch2,
                     expectedResult, comparisonResult);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("failed to compare: {} vs. {}", ethernetMatch1, ethernetMatch2, e);
             Assert.fail(e.getMessage());
         }
     }
 
-    private static EthernetMatch prepareEthernetMatch(String macAddress, String macAddressMask, String etherType) {
-        EthernetMatchBuilder ethernetMatchBuilder = new EthernetMatchBuilder();
-        EthernetSourceBuilder ethernetSourceBuilder =  new EthernetSourceBuilder();
+    private static EthernetMatch prepareEthernetMatch(final String macAddress, final String macAddressMask, final String etherType) {
+        final EthernetMatchBuilder ethernetMatchBuilder = new EthernetMatchBuilder();
+        final EthernetSourceBuilder ethernetSourceBuilder =  new EthernetSourceBuilder();
         if (macAddress != null) {
             ethernetSourceBuilder.setAddress(new MacAddress(macAddress));
         }
@@ -201,7 +201,7 @@ public class StatisticsUpdateCommiterTest {
             ethernetSourceBuilder.setMask(new MacAddress(macAddressMask));
         }
         if(etherType != null){
-            EthernetTypeBuilder ethernetType = new EthernetTypeBuilder();
+            final EthernetTypeBuilder ethernetType = new EthernetTypeBuilder();
             ethernetType.setType(new EtherType(Long.parseLong(etherType,16)));
             ethernetMatchBuilder.setEthernetType(ethernetType.build());
         }
