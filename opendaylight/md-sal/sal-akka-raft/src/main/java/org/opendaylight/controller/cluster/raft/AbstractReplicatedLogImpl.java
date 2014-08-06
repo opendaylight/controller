@@ -17,7 +17,7 @@ import java.util.List;
 public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     protected final List<ReplicatedLogEntry> journal;
-    protected final Object snapshot;
+    protected Object snapshot;
     protected long snapshotIndex = -1;
     protected long snapshotTerm = -1;
 
@@ -127,7 +127,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public boolean isInSnapshot(long logEntryIndex) {
-        return logEntryIndex <= snapshotIndex;
+        return logEntryIndex <= snapshotIndex && snapshotIndex != -1;
     }
 
     @Override

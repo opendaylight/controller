@@ -291,32 +291,44 @@ public class Leader extends AbstractRaftActorBehavior {
     private void sendAppendEntries() {
         // Send an AppendEntries to all followers
         for (String followerId : followers) {
-            ActorSelection followerActor =
-                context.getPeerActorSelection(followerId);
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
 
             if (followerActor != null) {
                 FollowerLogInformation followerLogInformation =
                     followerToLog.get(followerId);
 
-                long nextIndex = followerLogInformation.getNextIndex().get();
+                long followerNextIndex = followerLogInformation.getNextIndex().get();
 
                 List<ReplicatedLogEntry> entries = Collections.emptyList();
 
-                if (context.getReplicatedLog().isPresent(nextIndex)) {
+                if (context.getReplicatedLog().isPresent(followerNextIndex)) {
                     // TODO: Instead of sending all entries from nextIndex
                     // only send a fixed number of entries to each follower
                     // This is to avoid the situation where there are a lot of
                     // entries to install for a fresh follower or to a follower
                     // that has fallen too far behind with the log but yet is not
                     // eligible to receive a snapshot
-                    entries =
-                        context.getReplicatedLog().getFrom(nextIndex);
+                    entries = context.getReplicatedLog().getFrom(followerNextIndex);
+
+                } else {
+                    // if the followers next index is not present in the leaders log, then snapshot should be sent
+                    long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
+                    long leaderLastIndex = context.getReplicatedLog().lastIndex();
+                    if (followerNextIndex >= 0 && leaderLastIndex >= followerNextIndex ) {
+                        // if the follower is just not starting and leader's index is more than followers index
+                        context.getLogger().debug("SendInstallSnapshot " +
+                            "follower-nextIndex:{}, leader-snapshot-index:{},  " +
+                            "leader-last-index:{}",
+                            followerNextIndex, leaderSnapShotIndex, leaderLastIndex);
+
+                        actor().tell(new SendInstallSnapshot(), actor());
+                    }
                 }
 
                 followerActor.tell(
                     new AppendEntries(currentTerm(), context.getId(),
-                        prevLogIndex(nextIndex),
-                        prevLogTerm(nextIndex), entries,
+                        prevLogIndex(followerNextIndex),
+                        prevLogTerm(followerNextIndex), entries,
                         context.getCommitIndex()).toSerializable(),
                     actor()
                 );
@@ -340,8 +352,8 @@ public class Leader extends AbstractRaftActorBehavior {
 
                 long nextIndex = followerLogInformation.getNextIndex().get();
 
-                if (!context.getReplicatedLog().isPresent(nextIndex) && context
-                    .getReplicatedLog().isInSnapshot(nextIndex)) {
+                if (!context.getReplicatedLog().isPresent(nextIndex) &&
+                    context.getReplicatedLog().isInSnapshot(nextIndex)) {
                     followerActor.tell(
                         new InstallSnapshot(currentTerm(), context.getId(),
                             context.getReplicatedLog().getSnapshotIndex(),
@@ -350,6 +362,8 @@ public class Leader extends AbstractRaftActorBehavior {
                         ),
                         actor()
                     );
+                    context.getLogger().debug("InstallSnapshot sent to follower:{}",
+                        followerActor.path());
                 }
             }
         }

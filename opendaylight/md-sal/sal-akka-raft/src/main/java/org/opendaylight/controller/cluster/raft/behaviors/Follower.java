@@ -12,13 +12,17 @@ import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+
+import java.util.ArrayList;
 
 /**
  * The behavior of a RaftActor in the Follower state
@@ -106,6 +110,9 @@ public class Follower extends AbstractRaftActorBehavior {
         if (outOfSync) {
             // We found that the log was out of sync so just send a negative
             // reply and return
+            context.getLogger().debug("Follower is out-of-sync, " +
+                "so sending negative reply, lastIndex():{}, lastTerm():{}",
+                lastIndex(), lastTerm());
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
                     lastIndex(), lastTerm()), actor()
@@ -191,7 +198,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
         // If commitIndex > lastApplied: increment lastApplied, apply
         // log[lastApplied] to state machine (§5.3)
-        if (appendEntries.getLeaderCommit() > context.getLastApplied()) {
+        if (appendEntries.getLeaderCommit() > context.getLastApplied()
+            && context.getLastApplied() < lastIndex()) {
             applyLogToStateMachine(appendEntries.getLeaderCommit());
         }
 
@@ -233,8 +241,23 @@ public class Follower extends AbstractRaftActorBehavior {
             return RaftState.Candidate;
 
         } else if (message instanceof InstallSnapshot) {
+            context.getLogger().debug("InstallSnapshot received by follower:");
+
+            /*
+            When a follower receives an InstallSnapshot, then we do the following
+            1. Apply the snapshot and repair its state
+            2. Clear the its in-mem log to get latest from Leader
+            3. Send the reply to Leader for it to set its follower nextIndex
+            */
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
-            actor().tell(new ApplySnapshot(installSnapshot.getData()), actor());
+
+            Snapshot snapshot = Snapshot.create(installSnapshot.getData(), new ArrayList<ReplicatedLogEntry>(),
+                installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
+                installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm());
+
+            //applying the snapshot might take time, send the installsnapshot-reply to avoid being sent again.
+            actor().tell(new ApplySnapshot(snapshot), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId()), actor());
         }
 
         scheduleElection(electionDuration());

@@ -14,7 +14,7 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
     // responding
     private final String followerId;
 
-    protected InstallSnapshotReply(long term, String followerId) {
+    public InstallSnapshotReply(long term, String followerId) {
         super(term);
         this.followerId = followerId;
     }
