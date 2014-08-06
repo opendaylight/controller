@@ -15,8 +15,12 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
+
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -45,10 +49,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +91,7 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private Shard(String name, Map<String, String> peerAddresses) {
+    private Shard(String name, Map<String, String> peerAddresses, String mxBeanType) {
         super(name, peerAddresses, Optional.of(configParams));
 
         this.name = name;
@@ -98,24 +102,21 @@ public class Shard extends RaftActor {
 
         LOG.info("Creating shard : {} persistent : {}", name, persistent);
 
-        store = InMemoryDOMDataStoreFactory.create(name, null);
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name, mxBeanType);
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
-
+        store = InMemoryDOMDataStoreFactory.create(name, null, shardMBean);
     }
 
-    public static Props props(final String name,
-        final Map<String, String> peerAddresses) {
+    @SuppressWarnings("serial")
+    public static Props props(final String name, final Map<String, String> peerAddresses,
+            final String mxBeanType) {
         return Props.create(new Creator<Shard>() {
-
             @Override
             public Shard create() throws Exception {
-                return new Shard(name, peerAddresses);
+                return new Shard(name, peerAddresses, mxBeanType);
             }
-
         });
     }
-
 
     @Override public void onReceiveCommand(Object message) {
         LOG.debug("Received message {} from {}", message.getClass().toString(),
@@ -227,22 +228,20 @@ public class Shard extends RaftActor {
 
         final ListenableFuture<Void> future = cohort.commit();
         final ActorRef self = getSelf();
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.get();
-                        sender
-                            .tell(new CommitTransactionReply().toSerializable(),
-                                self);
-                        shardMBean.incrementCommittedTransactionCount();
-                        shardMBean.setLastCommittedTransactionTime(new Date());
 
-                } catch (InterruptedException | ExecutionException e) {
-                    shardMBean.incrementFailedTransactionsCount();
-                    // FIXME : Handle this properly
-                    LOG.error(e, "An exception happened when committing");
-                }
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                sender.tell(new CommitTransactionReply().toSerializable(), self);
+                shardMBean.incrementCommittedTransactionCount();
+                shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                shardMBean.incrementFailedTransactionsCount();
+                // FIXME : Handle this properly
+                LOG.error(e, "An exception happened when committing");
             }
         }, getContext().dispatcher());
     }

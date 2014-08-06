@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.util.ExecutorServiceUtil;
 import org.opendaylight.yangtools.util.PropertyUtils;
-import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -96,11 +95,13 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     private final ListeningExecutorService listeningExecutor;
 
     @SuppressWarnings("rawtypes")
-    private final NotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent>
+    private final QueuedNotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent>
                                                               dataChangeListenerNotificationManager;
     private final ExecutorService dataChangeListenerExecutor;
 
     private final String name;
+
+    private volatile AutoCloseable closeable;
 
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
             final ExecutorService dataChangeListenerExecutor) {
@@ -115,6 +116,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
         dataChangeListenerNotificationManager =
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
                         DCL_NOTIFICATION_MGR_INVOKER, maxDCLQueueSize, "DataChangeListenerQueueMgr");
+    }
+
+    public void setCloseable(AutoCloseable closeable) {
+        this.closeable = closeable;
+    }
+
+    public QueuedNotificationManager<?, ?> getDataChangeListenerNotificationManager() {
+        return dataChangeListenerNotificationManager;
     }
 
     @Override
@@ -151,6 +160,14 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
     public void close() {
         ExecutorServiceUtil.tryGracefulShutdown(listeningExecutor, 30, TimeUnit.SECONDS);
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
+
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch(Exception e) {
+                LOG.debug("Error closing instance", e);
+            }
+        }
     }
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
