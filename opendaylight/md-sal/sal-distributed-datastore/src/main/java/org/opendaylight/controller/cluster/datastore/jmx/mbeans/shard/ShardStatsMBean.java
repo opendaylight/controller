@@ -7,5 +7,6 @@ public interface ShardStatsMBean {
    String getShardName();
    Long getCommittedTransactionsCount();
    Long getJournalMessagesCount();
-
+   String getLeader();
+   String getRaftState();
 }

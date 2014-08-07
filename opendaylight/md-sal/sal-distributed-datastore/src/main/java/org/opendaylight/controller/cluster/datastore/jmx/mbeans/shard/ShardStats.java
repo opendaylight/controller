@@ -9,6 +9,8 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
   private  Long committedTransactionsCount;
   private Long journalMessagesCount;
   final private String shardName;
+  private String leader;
+  private String raftState;
 
   ShardStats(String shardName){
     this.shardName = shardName;
@@ -33,6 +35,13 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
     return journalMessagesCount;
   }
 
+  @Override public String getLeader() {
+    return leader;
+  }
+
+  @Override public String getRaftState() {
+    return raftState;
+  }
 
   public Long incrementCommittedTransactionCount() {
     return committedTransactionsCount++;
@@ -49,6 +58,13 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
 
   }
 
+  public void setLeader(String leader){
+    this.leader = leader;
+  }
+
+  public void setRaftState(String raftState){
+    this.raftState = raftState;
+  }
 
 
   @Override

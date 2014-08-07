@@ -148,6 +148,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
                 replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
                 replicatedLog.snapshotTerm, replicatedLog.size());
             currentBehavior = switchBehavior(RaftState.Follower);
+            onStateChanged();
         }
     }
 
@@ -206,7 +207,11 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
             RaftState state =
                 currentBehavior.handleMessage(getSender(), message);
+            RaftActorBehavior oldBehavior = currentBehavior;
             currentBehavior = switchBehavior(state);
+            if(oldBehavior != currentBehavior){
+                onStateChanged();
+            }
         }
     }
 
@@ -271,7 +276,19 @@ public abstract class RaftActor extends UntypedPersistentActor {
         String peerAddress = context.getPeerAddress(leaderId);
         LOG.debug("getLeader leaderId = " + leaderId + " peerAddress = "
             + peerAddress);
+
+        if(peerAddress == null){
+            return null;
+        }
         return context.actorSelection(peerAddress);
+    }
+
+    /**
+     *
+     * @return the current leader's id
+     */
+    protected String getLeaderId(){
+        return currentBehavior.getLeaderId();
     }
 
     protected RaftState getRaftState() {
@@ -375,7 +392,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
             behavior = new Leader(context);
         }
 
-        onStateChanged();
+
 
         return behavior;
     }
