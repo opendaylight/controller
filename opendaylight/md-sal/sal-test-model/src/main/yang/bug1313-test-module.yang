@@ -1,0 +1,37 @@
+module bug1313-test-module {
+
+  namespace "urn:opendaylight:params:xml:ns:yang:controller:bug1313-test-module";
+
+  prefix test-module;
+
+  description
+    "This module contains a collection of YANG definitions for
+     testing of BUG 1313.";
+
+  revision 2014-08-06;
+
+  container a {
+    list list-of-b {
+      key name;
+      leaf name {
+        type string;
+      }
+      container b {
+        leaf b1 {
+          type int32;
+        }
+        leaf b2 {
+          type string;
+        }
+        container c-container {
+          leaf c1 {
+            type string;
+          }
+        }
+      }
+      }
+    } 
+  }
+
+
+}
