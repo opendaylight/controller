@@ -229,7 +229,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             try {
                 NetconfMessageTransformUtil.checkSuccessReply(message);
             }
-            catch( NetconfDocumentedException e ) {
+            catch(final NetconfDocumentedException e) {
                 logger.warn( "{}: Error reply from remote device, request: {}, response: {}", id,
                              msgToS( request.request ), msgToS( message ), e );
 
