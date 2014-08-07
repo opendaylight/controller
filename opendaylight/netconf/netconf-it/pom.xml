@@ -144,34 +144,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <forkCount>1</forkCount>
-          <reuseForks>false</reuseForks>
-          <perCoreThreadCount>false</perCoreThreadCount>
-        </configuration>
-        <executions>
-          <execution>
-            <id>default-test</id>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </execution>
-          <execution>
-            <id>integration-tests</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <phase>integration-test</phase>
-            <configuration>
-              <skip>false</skip>
-              <argLine>-Dlogback.configurationFile=${maven.test.dest}/logback.xml</argLine>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>maven-paxexam-plugin</artifactId>
         <executions>
