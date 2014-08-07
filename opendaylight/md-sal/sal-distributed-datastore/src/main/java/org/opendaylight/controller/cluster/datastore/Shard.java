@@ -325,6 +325,12 @@ public class Shard extends RaftActor {
         for(ActorSelection dataChangeListener : dataChangeListeners){
             dataChangeListener.tell(new EnableNotification(isLeader()), getSelf());
         }
+
+        if(getLeaderId() != null){
+            shardMBean.setLeader(getLeaderId());
+        }
+
+        shardMBean.setRaftState(getRaftState().name());
     }
 
     @Override public String persistenceId() {
