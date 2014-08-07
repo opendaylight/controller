@@ -40,7 +40,7 @@ module distributed-datastore-provider {
     augment "/config:modules/config:module/config:configuration" {
         case distributed-config-datastore-provider {
             when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
-            container schema-service {
+            container config-schema-service {
                           uses config:service-ref {
                                refine type {
                                       mandatory false;
@@ -55,7 +55,7 @@ module distributed-datastore-provider {
         augment "/config:modules/config:module/config:configuration" {
             case distributed-operational-datastore-provider {
                 when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
-                container schema-service {
+                container operational-schema-service {
                               uses config:service-ref {
                                    refine type {
                                           mandatory false;

@@ -26,7 +26,7 @@ public class DistributedOperationalDataStoreProviderModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         return DistributedDataStoreFactory
-            .createInstance("operational", getSchemaServiceDependency());
+            .createInstance("operational", getOperationalSchemaServiceDependency());
     }
 
 }
