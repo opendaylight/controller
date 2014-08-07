@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -264,26 +263,18 @@ public class Leader extends AbstractRaftActorBehavior {
 
         context.getLogger().debug("Replicate message " + logIndex);
 
+        // Create a tracker entry we will use this later to notify the
+        // client actor
+        trackerList.add(
+            new ClientRequestTrackerImpl(replicate.getClientActor(),
+                replicate.getIdentifier(),
+                logIndex)
+        );
+
         if (followers.size() == 0) {
-            context.setCommitIndex(
-                replicate.getReplicatedLogEntry().getIndex());
-
-            context.getActor()
-                .tell(new ApplyState(replicate.getClientActor(),
-                        replicate.getIdentifier(),
-                        replicate.getReplicatedLogEntry()),
-                    context.getActor()
-                );
+            context.setCommitIndex(logIndex);
+            applyLogToStateMachine(logIndex);
         } else {
-
-            // Create a tracker entry we will use this later to notify the
-            // client actor
-            trackerList.add(
-                new ClientRequestTrackerImpl(replicate.getClientActor(),
-                    replicate.getIdentifier(),
-                    logIndex)
-            );
-
             sendAppendEntries();
         }
     }
