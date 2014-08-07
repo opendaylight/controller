@@ -8,7 +8,9 @@
 package org.opendaylight.controller.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +24,8 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 class RoutedRpcSelector implements RpcImplementation, AutoCloseable, Identifiable<RpcRoutingContext> {
 
@@ -81,9 +80,9 @@ class RoutedRpcSelector implements RpcImplementation, AutoCloseable, Identifiabl
         }
         if (potential == null) {
             return router.invokeRpc(rpc, (YangInstanceIdentifier) route, input);
+        } else {
+            return potential.invokeRpc(rpc, input);
         }
-        checkState(potential != null, "No implementation is available for rpc:%s path:%s", rpc, route);
-        return potential.invokeRpc(rpc, input);
     }
 
     public void addPath(final QName context, final YangInstanceIdentifier path, final RoutedRpcRegImpl routedRpcRegImpl) {
