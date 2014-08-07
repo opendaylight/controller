@@ -301,7 +301,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param index a log index that is known to be committed
      */
-    protected void applyLogToStateMachine(long index) {
+    protected void applyLogToStateMachine(final long index) {
         // Now maybe we apply to the state machine
         for (long i = context.getLastApplied() + 1;
              i < index + 1; i++) {
@@ -326,6 +326,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
         // Send a local message to the local RaftActor (it's derived class to be
         // specific to apply the log to it's index)
+        context.getLogger().info("Setting last applied to {}", index);
         context.setLastApplied(index);
     }
 

@@ -295,6 +295,22 @@ public abstract class RaftActor extends UntypedPersistentActor {
         return currentBehavior.state();
     }
 
+    protected ReplicatedLogEntry getLastLogEntry() {
+        return replicatedLog.last();
+    }
+
+    protected Long getCurrentTerm(){
+        return context.getTermInformation().getCurrentTerm();
+    }
+
+    protected Long getCommitIndex(){
+        return context.getCommitIndex();
+    }
+
+    protected Long getLastApplied(){
+        return context.getLastApplied();
+    }
+
     /**
      * setPeerAddress sets the address of a known peer at a later time.
      * <p>
