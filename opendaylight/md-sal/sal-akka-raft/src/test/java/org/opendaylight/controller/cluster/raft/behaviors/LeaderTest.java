@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -154,18 +155,25 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     MockRaftActorContext actorContext =
                         new MockRaftActorContext("test", getSystem(), raftActor);
 
+                    actorContext.getReplicatedLog().removeFrom(0);
+
+                    actorContext.getReplicatedLog().append(new ReplicatedLogImplEntry(0, 1,
+                        new MockRaftActorContext.MockPayload("foo")));
+
+                    ReplicatedLogImplEntry entry =
+                        new ReplicatedLogImplEntry(1, 1,
+                            new MockRaftActorContext.MockPayload("foo"));
+
+                    actorContext.getReplicatedLog().append(entry);
+
                     Leader leader = new Leader(actorContext);
                     RaftState raftState = leader
-                        .handleMessage(senderActor, new Replicate(null, "state-id",
-                            new MockRaftActorContext.MockReplicatedLogEntry(1,
-                                100,
-                                new MockRaftActorContext.MockPayload("foo"))
-                        ));
+                        .handleMessage(senderActor, new Replicate(null, "state-id",entry));
 
                     // State should not change
                     assertEquals(RaftState.Leader, raftState);
 
-                    assertEquals(100, actorContext.getCommitIndex());
+                    assertEquals(1, actorContext.getCommitIndex());
 
                     final String out =
                         new ExpectMsg<String>(duration("1 seconds"),
