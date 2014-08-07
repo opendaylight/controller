@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.f
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.statistics.types.rev130925.GenericStatistics;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +53,10 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
 
     @Override
     protected void cleanupSingleStat(final DataModificationTransaction trans, final FlowStatsEntry item) {
-        InstanceIdentifier<?> flowRef = getNodeIdentifierBuilder()
-                            .augmentation(FlowCapableNode.class)
-                            .child(Table.class, new TableKey(item.getTableId()))
-                            .child(Flow.class,item.getFlow().getKey())
-                            .augmentation(FlowStatisticsData.class).toInstance();
+        KeyedInstanceIdentifier<Flow, FlowKey> flowRef = getNodeIdentifier()
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(item.getTableId()))
+                .child(Flow.class, item.getFlow().getKey());
         trans.removeOperationalData(flowRef);
     }
 
