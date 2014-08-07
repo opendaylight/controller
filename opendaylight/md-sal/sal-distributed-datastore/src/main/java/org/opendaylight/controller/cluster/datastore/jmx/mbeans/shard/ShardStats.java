@@ -6,81 +6,144 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBea
  * @author: syedbahm
  */
 public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
-  private  Long committedTransactionsCount;
-  private Long journalMessagesCount;
-  final private String shardName;
-  private String leader;
-  private String raftState;
 
-  ShardStats(String shardName){
-    this.shardName = shardName;
-    committedTransactionsCount =0L;
-    journalMessagesCount = 0L;
-  };
+    private final String shardName;
 
+    private Long committedTransactionsCount = 0L;
 
-  @Override
-  public String getShardName() {
-    return shardName;
-  }
+    private Long readOnlyTransactionCount = 0L;
 
-  @Override
-  public Long getCommittedTransactionsCount() {
-    return committedTransactionsCount;
-  }
+    private Long writeOnlyTransactionCount = 0L;
 
-  @Override
-  public Long getJournalMessagesCount() {
-    //FIXME: this will be populated once after integration with Raft stuff
-    return journalMessagesCount;
-  }
+    private Long readWriteTransactionCount = 0L;
 
-  @Override public String getLeader() {
-    return leader;
-  }
+    private String leader;
 
-  @Override public String getRaftState() {
-    return raftState;
-  }
+    private String raftState;
 
-  public Long incrementCommittedTransactionCount() {
-    return committedTransactionsCount++;
-  }
+    private Long lastLogTerm = -1L;
+
+    private Long lastLogIndex = -1L;
+
+    private Long currentTerm = -1L;
+
+    private Long commitIndex = -1L;
+
+    private Long lastApplied = -1L;
+
+    ShardStats(String shardName) {
+        this.shardName = shardName;
+    }
 
 
-  public void updateCommittedTransactionsCount(long currentCount){
-     committedTransactionsCount = currentCount;
+    @Override
+    public String getShardName() {
+        return shardName;
+    }
 
-  }
+    @Override
+    public Long getCommittedTransactionsCount() {
+        return committedTransactionsCount;
+    }
 
-  public void updateJournalMessagesCount(long currentCount){
-    journalMessagesCount  = currentCount;
+    @Override public String getLeader() {
+        return leader;
+    }
 
-  }
+    @Override public String getRaftState() {
+        return raftState;
+    }
 
-  public void setLeader(String leader){
-    this.leader = leader;
-  }
+    @Override public Long getReadOnlyTransactionCount() {
+        return readOnlyTransactionCount;
+    }
 
-  public void setRaftState(String raftState){
-    this.raftState = raftState;
-  }
+    @Override public Long getWriteOnlyTransactionCount() {
+        return writeOnlyTransactionCount;
+    }
 
+    @Override public Long getReadWriteTransactionCount() {
+        return readWriteTransactionCount;
+    }
 
-  @Override
-  protected String getMBeanName() {
-    return  shardName;
-  }
+    @Override public Long getLastLogIndex() {
+        return lastLogIndex;
+    }
 
-  @Override
-  protected String getMBeanType() {
-    return JMX_TYPE_DISTRIBUTED_DATASTORE;
-  }
+    @Override public Long getLastLogTerm() {
+        return lastLogTerm;
+    }
 
-  @Override
-  protected String getMBeanCategory() {
-    return JMX_CATEGORY_SHARD;
-  }
+    @Override public Long getCurrentTerm() {
+        return currentTerm;
+    }
+
+    @Override public Long getCommitIndex() {
+        return commitIndex;
+    }
+
+    @Override public Long getLastApplied() {
+        return lastApplied;
+    }
+
+    public Long incrementCommittedTransactionCount() {
+        return committedTransactionsCount++;
+    }
+
+    public Long incrementReadOnlyTransactionCount() {
+        return readOnlyTransactionCount++;
+    }
+
+    public Long incrementWriteOnlyTransactionCount() {
+        return writeOnlyTransactionCount++;
+    }
+
+    public Long incrementReadWriteTransactionCount() {
+        return readWriteTransactionCount++;
+    }
+
+    public void setLeader(String leader) {
+        this.leader = leader;
+    }
+
+    public void setRaftState(String raftState) {
+        this.raftState = raftState;
+    }
+
+    public void setLastLogTerm(Long lastLogTerm) {
+        this.lastLogTerm = lastLogTerm;
+    }
+
+    public void setLastLogIndex(Long lastLogIndex) {
+        this.lastLogIndex = lastLogIndex;
+    }
+
+    public void setCurrentTerm(Long currentTerm) {
+        this.currentTerm = currentTerm;
+    }
+
+    public void setCommitIndex(Long commitIndex) {
+        this.commitIndex = commitIndex;
+    }
+
+    public void setLastApplied(Long lastApplied) {
+        this.lastApplied = lastApplied;
+    }
+
+    @Override
+    protected String getMBeanName() {
+        return shardName;
+    }
+
+    @Override
+    protected String getMBeanType() {
+        return JMX_TYPE_DISTRIBUTED_DATASTORE;
+    }
+
+    @Override
+    protected String getMBeanCategory() {
+        return JMX_CATEGORY_SHARD;
+    }
 
 
 }
