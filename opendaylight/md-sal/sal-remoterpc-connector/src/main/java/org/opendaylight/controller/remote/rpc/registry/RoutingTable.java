@@ -14,7 +14,6 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Copier;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
     @Override
     public RoutingTable copy() {
         RoutingTable copy = new RoutingTable();
-        copy.setTable(Collections.unmodifiableMap(table));
+        copy.setTable(new HashMap<>(table));
         copy.setRouter(this.getRouter());
 
         return copy;
