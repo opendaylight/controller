@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a7117a05",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/ApiDocGenerator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-08T13:05:19Z",
+      "side": 1,
+      "message": "This is a concurrency concern. Before your change we passed the current schemaContext in to each read which means concurrent reads would always use the latest schema context. This guarantees that we are always using the latest and greatest schemaContext. What was the intent behind moving this to a class scoped variable?",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2ef421c",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/BaseYangSwaggerGenerator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-08T13:05:19Z",
+      "side": 1,
+      "message": "This is a concurrency concern. Please see the note in the API class note about the setSchemaContext method. Basically, what happens if two different threads call this method at the same time, or better yet, what happens if one thread calls this method while another is accessing hte schema context?",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_92f27604",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/util/RestDocgenUtil.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-08T13:05:19Z",
+      "side": 1,
+      "message": "This is a concurrency concern. Imagine two threads accessing this at the same time - the puts and gets would have issues. We need to synchronize or use concurrent hash maps etc if we are going to maintain a mapping here. Since you have nested maps it may be easiest to synchronize when accessing the objects, but I\u0027ll leave that up to you.",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_32b84a10",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/ApiDocGeneratorTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-08T13:05:19Z",
+      "side": 1,
+      "message": "Question - does restconf work with fully qualified augmentations in the path like this? I tried quickly and didn\u0027t seem to get it to work. Can you provide the sample input that is needed for the toaster2 - that is I deployed the toaster_augmented.yang and toaster_short.yang in a live running system and then tried to put this slot info URL and it didn\u0027t work. If you can provide that sample input that would help to validate.",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
