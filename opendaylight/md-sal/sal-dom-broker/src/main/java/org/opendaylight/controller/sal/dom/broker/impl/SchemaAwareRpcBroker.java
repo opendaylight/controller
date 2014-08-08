@@ -10,6 +10,13 @@ package org.opendaylight.controller.sal.dom.broker.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,6 +29,7 @@ import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
+import org.opendaylight.controller.sal.core.api.RpcImplementationUnavailableException;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter;
@@ -38,12 +46,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
-
+/**
+ * RPC broker responsible for routing requests to remote systems.
+ */
 public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, RoutedRpcDefaultImplementation {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaAwareRpcBroker.class);
@@ -217,8 +222,12 @@ public class SchemaAwareRpcBroker implements RpcRouter, Identifiable<String>, Ro
 
     @Override
     public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(final QName rpc, final YangInstanceIdentifier route, final CompositeNode input) {
-      checkState(defaultDelegate != null, "No implementation is available for rpc:%s path:%s", rpc, route);
-      return defaultDelegate.invokeRpc(rpc, route, input);
+        if (defaultDelegate == null) {
+            return Futures.immediateFailedCheckedFuture(new RpcImplementationUnavailableException("No RPC implementation found"));
+        }
+
+        LOG.debug("Forwarding RPC {} path {} to delegate {}", rpc, route);
+        return defaultDelegate.invokeRpc(rpc, route, input);
     }
 
     void remove(final GlobalRpcRegistration registration) {
