@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a785facf",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "braces would be nice",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4770ae0a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "Isn\u0027t this checking for msg  \u003d\u003d null redundant?",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_676b721e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "extra semi-colon",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_07762606",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "This reinit does not make sense - what\u0027s the use case?",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2771ea0b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be named getBucketsByMembers instead of getGetBuckets..?",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8759d68f",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-08T00:16:48Z",
+      "side": 1,
+      "message": "How could one possibly get a member down for self?",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
