@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_32dfead7",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-08T16:38:21Z",
+      "side": 1,
+      "message": "Good idea, this makes my crawler work better... Will show you next Tuesday..",
+      "revId": "2742c76f4bcee3c4c5a3426f365482ec59849a10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d2f1de6b",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-08T16:38:21Z",
+      "side": 1,
+      "message": "Great idea but would it make sense to do a \"folder-wide\" attachment? for example anything is src/main/config? (just a thought..)",
+      "revId": "2742c76f4bcee3c4c5a3426f365482ec59849a10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
