@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
+import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRoutersReply;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
@@ -84,13 +85,14 @@ public class RpcRegistryTest {
 
     /**
      * One node cluster.
-     * Register rpc. Ensure router can be found
+     * 1. Register rpc, ensure router can be found
+     * 2. Then remove rpc, ensure its deleted
      *
      * @throws URISyntaxException
      * @throws InterruptedException
      */
     @Test
-    public void testWhenRpcAddedOneNodeShouldAppearOnSameNode() throws URISyntaxException, InterruptedException {
+    public void testAddRemoveRpcOnSameNode() throws URISyntaxException, InterruptedException {
 
         final JavaTestKit mockBroker = new JavaTestKit(node1);
 
@@ -106,17 +108,28 @@ public class RpcRegistryTest {
         List<Pair<ActorRef, Long>> pairs = message.getRouterWithUpdateTime();
 
         validateRouterReceived(pairs, mockBroker.getRef());
+
+        //Now remove rpc
+        registry1.tell(getRemoveRouteMessage(), mockBroker.getRef());
+        Thread.sleep(1000);
+        //find the route on node 1's registry
+        registry1.tell(new FindRouters(createRouteId()), mockBroker.getRef());
+        message = mockBroker.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
+        pairs = message.getRouterWithUpdateTime();
+
+        Assert.assertTrue(pairs.isEmpty());
     }
 
     /**
      * Three node cluster.
-     * Register rpc on 1 node. Ensure its router can be found on other 2.
+     * 1. Register rpc on 1 node, ensure its router can be found on other 2.
+     * 2. Remove rpc on 1 node, ensure its removed on other 2.
      *
      * @throws URISyntaxException
      * @throws InterruptedException
      */
     @Test
-    public void testWhenRpcAddedOneNodeShouldAppearOnAnother() throws URISyntaxException, InterruptedException {
+    public void testRpcAddRemoveInCluster() throws URISyntaxException, InterruptedException {
 
         validateSystemStartup();
 
@@ -128,22 +141,25 @@ public class RpcRegistryTest {
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
         registry1.tell(getAddRouteMessage(), mockBroker1.getRef());
 
-        Thread.sleep(5000);// give some time for bucket store data sync
+        Thread.sleep(1000);// give some time for bucket store data sync
 
         //find the route in node 2's registry
-        registry2.tell(new FindRouters(createRouteId()), mockBroker2.getRef());
-        FindRoutersReply message = mockBroker2.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
-        List<Pair<ActorRef, Long>> pairs = message.getRouterWithUpdateTime();
-
+        List<Pair<ActorRef, Long>> pairs = findRouters(registry2, mockBroker2);
         validateRouterReceived(pairs, mockBroker1.getRef());
 
         //find the route in node 3's registry
-        registry3.tell(new FindRouters(createRouteId()), mockBroker3.getRef());
-        message = mockBroker3.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
-        pairs = message.getRouterWithUpdateTime();
-
+        pairs = findRouters(registry3, mockBroker3);
         validateRouterReceived(pairs, mockBroker1.getRef());
 
+        //Now remove
+        registry1.tell(getRemoveRouteMessage(), mockBroker1.getRef());
+        Thread.sleep(1000);// give some time for bucket store data sync
+
+        pairs = findRouters(registry2, mockBroker2);
+        Assert.assertTrue(pairs.isEmpty());
+
+        pairs = findRouters(registry3, mockBroker3);
+        Assert.assertTrue(pairs.isEmpty());
     }
 
     /**
@@ -172,7 +188,7 @@ public class RpcRegistryTest {
         registry2.tell(getAddRouteMessage(), mockBroker2.getRef());
 
         registry3.tell(new SetLocalRouter(mockBroker3.getRef()), mockBroker3.getRef());
-        Thread.sleep(5000);// give some time for bucket store data sync
+        Thread.sleep(1000);// give some time for bucket store data sync
 
         //find the route in node 3's registry
         registry3.tell(new FindRouters(createRouteId()), mockBroker3.getRef());
@@ -181,6 +197,12 @@ public class RpcRegistryTest {
 
         validateMultiRouterReceived(pairs, mockBroker1.getRef(), mockBroker2.getRef());
 
+    }
+
+    private List<Pair<ActorRef, Long>> findRouters(ActorRef registry, JavaTestKit receivingActor) throws URISyntaxException {
+        registry.tell(new FindRouters(createRouteId()), receivingActor.getRef());
+        FindRoutersReply message = receivingActor.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
+        return message.getRouterWithUpdateTime();
     }
 
     private void validateMultiRouterReceived(List<Pair<ActorRef, Long>> actual, ActorRef... expected) {
@@ -240,6 +262,10 @@ public class RpcRegistryTest {
 
     private AddOrUpdateRoutes getAddRouteMessage() throws URISyntaxException {
         return new AddOrUpdateRoutes(createRouteIds());
+    }
+
+    private RemoveRoutes getRemoveRouteMessage() throws URISyntaxException {
+        return new RemoveRoutes(createRouteIds());
     }
 
     private List<RpcRouter.RouteIdentifier<?,?,?>> createRouteIds() throws URISyntaxException {

@@ -26,7 +26,7 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
     @Override
     public RoutingTable copy() {
         RoutingTable copy = new RoutingTable();
-        copy.setTable(Collections.unmodifiableMap(table));
+        copy.setTable(new HashMap<>(table));
         copy.setRouter(this.getRouter());
 
         return copy;
