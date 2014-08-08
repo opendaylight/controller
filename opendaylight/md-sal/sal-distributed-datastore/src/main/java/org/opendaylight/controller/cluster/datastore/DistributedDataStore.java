@@ -10,8 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -50,7 +52,6 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
             "mdsal.dist-datastore-executor-queue.size";
     private static final int DEFAULT_EXECUTOR_MAX_QUEUE_SIZE = 5000;
 
-    private final String type;
     private final ActorContext actorContext;
 
     private SchemaContext schemaContext;
@@ -72,14 +73,23 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                                     DEFAULT_EXECUTOR_MAX_QUEUE_SIZE), "DistDataStore"));
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
-        this(new ActorContext(actorSystem, actorSystem
+        Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
+        Preconditions.checkNotNull(type, "type should not be null");
+        Preconditions.checkNotNull(cluster, "cluster should not be null");
+        Preconditions.checkNotNull(configuration, "configuration should not be null");
+
+
+        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
+
+        LOG.info("Creating ShardManager : {}", shardManagerId);
+
+        this.actorContext = new ActorContext(actorSystem, actorSystem
             .actorOf(ShardManager.props(type, cluster, configuration),
-                "shardmanager-" + type), cluster, configuration), type);
+                shardManagerId ), cluster, configuration);
     }
 
-    public DistributedDataStore(ActorContext actorContext, String type) {
-        this.type = type;
-        this.actorContext = actorContext;
+    public DistributedDataStore(ActorContext actorContext) {
+        this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
     }
 
 
@@ -87,6 +97,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
         YangInstanceIdentifier path, L listener,
         AsyncDataBroker.DataChangeScope scope) {
+
+        Preconditions.checkNotNull(path, "path should not be null");
+        Preconditions.checkNotNull(listener, "listener should not be null");
+
+
+        LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
 
         ActorRef dataChangeListenerActor = actorContext.getActorSystem().actorOf(
             DataChangeListener.props(schemaContext,listener,path ));
