@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.Monitor;
 
 public abstract class AbstractUntypedActor extends UntypedActor {
@@ -33,4 +34,12 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     }
 
     protected abstract void handleReceive(Object message) throws Exception;
+
+    protected void ignoreMessage(Object message){
+        LOG.debug("Unhandled message {} ", message);
+    }
+
+    protected void unknownMessage(Object message) throws Exception{
+        throw new UnknownMessageException(message);
+    }
 }

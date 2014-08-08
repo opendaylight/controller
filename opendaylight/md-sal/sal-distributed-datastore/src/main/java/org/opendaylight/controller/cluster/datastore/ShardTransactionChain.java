@@ -40,7 +40,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
             chain.close();
             getSender().tell(new CloseTransactionChainReply().toSerializable(), getSelf());
         }else{
-          throw new Exception("Not recognized message recieved="+message);
+            unknownMessage(message);
         }
     }
 

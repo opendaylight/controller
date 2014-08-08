@@ -80,6 +80,7 @@ public class ThreePhaseCommitCohortProxy implements
                             }
                         }
                     } catch(RuntimeException e){
+                        // FIXME : Need to properly handle this
                         LOG.error("Unexpected Exception", e);
                         return false;
                     }

@@ -1,8 +1,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
-import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
@@ -21,13 +24,20 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 public class DistributedDataStoreTest extends AbstractActorTest{
 
     private DistributedDataStore distributedDataStore;
     private MockActorContext mockActorContext;
     private ActorRef doNothingActorRef;
 
-    @org.junit.Before
+    @Before
     public void setUp() throws Exception {
         ShardStrategyFactory.setConfiguration(new MockConfiguration());
         final Props props = Props.create(DoNothingActor.class);
@@ -35,7 +45,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         doNothingActorRef = getSystem().actorOf(props);
 
         mockActorContext = new MockActorContext(getSystem(), doNothingActorRef);
-        distributedDataStore = new DistributedDataStore(mockActorContext, "config");
+        distributedDataStore = new DistributedDataStore(mockActorContext);
         distributedDataStore.onGlobalContextUpdated(
             TestModel.createTestContext());
 
@@ -48,12 +58,22 @@ public class DistributedDataStoreTest extends AbstractActorTest{
                 .build());
     }
 
-    @org.junit.After
+    @After
     public void tearDown() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
+    public void testConstructor(){
+        ActorSystem actorSystem = mock(ActorSystem.class);
+
+        new DistributedDataStore(actorSystem, "config",
+            mock(ClusterWrapper.class), mock(Configuration.class));
+
+        verify(actorSystem).actorOf(any(Props.class), eq("shardmanager-config"));
+    }
+
+    @Test
     public void testRegisterChangeListenerWhenShardIsNotLocal() throws Exception {
 
         ListenerRegistration registration =
@@ -65,12 +85,12 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         }, AsyncDataBroker.DataChangeScope.BASE);
 
         // Since we do not expect the shard to be local registration will return a NoOpRegistration
-        Assert.assertTrue(registration instanceof NoOpDataChangeListenerRegistration);
+        assertTrue(registration instanceof NoOpDataChangeListenerRegistration);
 
-        Assert.assertNotNull(registration);
+        assertNotNull(registration);
     }
 
-    @org.junit.Test
+    @Test
     public void testRegisterChangeListenerWhenShardIsLocal() throws Exception {
 
         mockActorContext.setExecuteLocalShardOperationResponse(new RegisterChangeListenerReply(doNothingActorRef.path()));
@@ -83,33 +103,33 @@ public class DistributedDataStoreTest extends AbstractActorTest{
                 }
             }, AsyncDataBroker.DataChangeScope.BASE);
 
-        Assert.assertTrue(registration instanceof DataChangeListenerRegistrationProxy);
+        assertTrue(registration instanceof DataChangeListenerRegistrationProxy);
 
-        Assert.assertNotNull(registration);
+        assertNotNull(registration);
     }
 
 
-    @org.junit.Test
+    @Test
     public void testCreateTransactionChain() throws Exception {
         final DOMStoreTransactionChain transactionChain = distributedDataStore.createTransactionChain();
-        Assert.assertNotNull(transactionChain);
+        assertNotNull(transactionChain);
     }
 
-    @org.junit.Test
+    @Test
     public void testNewReadOnlyTransaction() throws Exception {
         final DOMStoreReadTransaction transaction = distributedDataStore.newReadOnlyTransaction();
-        Assert.assertNotNull(transaction);
+        assertNotNull(transaction);
     }
 
-    @org.junit.Test
+    @Test
     public void testNewWriteOnlyTransaction() throws Exception {
         final DOMStoreWriteTransaction transaction = distributedDataStore.newWriteOnlyTransaction();
-        Assert.assertNotNull(transaction);
+        assertNotNull(transaction);
     }
 
-    @org.junit.Test
+    @Test
     public void testNewReadWriteTransaction() throws Exception {
         final DOMStoreReadWriteTransaction transaction = distributedDataStore.newReadWriteTransaction();
-        Assert.assertNotNull(transaction);
+        assertNotNull(transaction);
     }
 }

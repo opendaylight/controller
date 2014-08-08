@@ -34,6 +34,7 @@ public abstract class AbstractBaseMBean {
   public static String BASE_JMX_PREFIX = "org.opendaylight.controller:";
   public static String JMX_TYPE_DISTRIBUTED_DATASTORE = "DistributedDatastore";
   public static String JMX_CATEGORY_SHARD = "Shard";
+  public static String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";
 
   private static final Logger LOG = LoggerFactory
       .getLogger(AbstractBaseMBean.class);
