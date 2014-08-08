@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
 import akka.japi.Creator;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
@@ -27,9 +28,10 @@ public class DataChangeListener extends AbstractUntypedActor {
 
     public DataChangeListener(SchemaContext schemaContext,
                               AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, YangInstanceIdentifier pathId) {
-        this.listener = listener;
-        this.schemaContext = schemaContext;
-        this.pathId  = pathId;
+
+        this.schemaContext = Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+        this.listener = Preconditions.checkNotNull(listener, "listener should not be null");
+        this.pathId  = Preconditions.checkNotNull(pathId, "pathId should not be null");
     }
 
     @Override public void handleReceive(Object message) throws Exception {
@@ -44,7 +46,7 @@ public class DataChangeListener extends AbstractUntypedActor {
         notificationsEnabled = message.isEnabled();
     }
 
-    public void dataChanged(Object message) {
+    private void dataChanged(Object message) {
 
         // Do nothing if notifications are not enabled
         if(!notificationsEnabled){

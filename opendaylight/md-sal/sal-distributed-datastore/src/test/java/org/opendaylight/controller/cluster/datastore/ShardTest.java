@@ -6,6 +6,7 @@ import akka.event.Logging;
 import akka.testkit.JavaTestKit;
 import junit.framework.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChainReply;
@@ -35,7 +36,11 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCreateTransactionChain() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
@@ -87,7 +92,11 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testOnReceiveRegisterListener() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
@@ -141,7 +150,11 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testCreateTransaction(){
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
 
@@ -196,9 +209,14 @@ public class ShardTest extends AbstractActorTest {
     @Test
     public void testPeerAddressResolved(){
         new JavaTestKit(getSystem()) {{
-            Map<String, String> peerAddresses = new HashMap<>();
-            peerAddresses.put("member-2", null);
-            final Props props = Shard.props("config", peerAddresses);
+            Map<ShardIdentifier, String> peerAddresses = new HashMap<>();
+
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            peerAddresses.put(identifier, null);
+            final Props props = Shard.props(identifier, peerAddresses);
             final ActorRef subject =
                 getSystem().actorOf(props, "testPeerAddressResolved");
 
@@ -206,7 +224,7 @@ public class ShardTest extends AbstractActorTest {
                 protected void run() {
 
                     subject.tell(
-                        new PeerAddressResolved("member-2", "akka://foobar"),
+                        new PeerAddressResolved(identifier, "akka://foobar"),
                         getRef());
 
                     expectNoMsg();
