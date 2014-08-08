@@ -17,6 +17,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBuckets;
+
+
 /**
  * These messages are used by {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore} and
  * {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper} actors.
@@ -107,7 +111,8 @@ public class Messages {
             Map<Address, Long> versions;
 
             public ContainsBucketVersions(Map<Address, Long> versions) {
-                Preconditions.checkArgument(versions != null, "versions can not be null");
+                Preconditions.checkArgument(versions != null, "versions can not be null or empty");
+
                 this.versions = versions;
             }
 
@@ -135,7 +140,7 @@ public class Messages {
 
         public static final class GossipTick extends Tick {}
 
-        public static final class GossipStatus extends BucketStoreMessages.ContainsBucketVersions implements Serializable{
+        public static final class GossipStatus extends ContainsBucketVersions implements Serializable{
             private Address from;
 
             public GossipStatus(Address from, Map<Address, Long> versions) {
@@ -148,12 +153,13 @@ public class Messages {
             }
         }
 
-        public static final class GossipEnvelope extends BucketStoreMessages.ContainsBuckets implements Serializable {
+        public static final class GossipEnvelope extends ContainsBuckets implements Serializable {
             private final Address from;
             private final Address to;
 
             public GossipEnvelope(Address from, Address to, Map<Address, Bucket> buckets) {
                 super(buckets);
+                Preconditions.checkArgument(to != null, "Recipient of message must not be null");
                 this.to = to;
                 this.from = from;
             }

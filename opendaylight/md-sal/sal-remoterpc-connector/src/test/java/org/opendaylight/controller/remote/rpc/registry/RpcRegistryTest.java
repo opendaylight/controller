@@ -24,10 +24,11 @@ import scala.concurrent.duration.FiniteDuration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoute;
+import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRoutersReply;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
@@ -237,8 +238,15 @@ public class RpcRegistryTest {
         return resolved;
     }
 
-    private AddOrUpdateRoute getAddRouteMessage() throws URISyntaxException {
-        return new AddOrUpdateRoute(createRouteId());
+    private AddOrUpdateRoutes getAddRouteMessage() throws URISyntaxException {
+        return new AddOrUpdateRoutes(createRouteIds());
+    }
+
+    private List<RpcRouter.RouteIdentifier<?,?,?>> createRouteIds() throws URISyntaxException {
+        QName type = new QName(new URI("/mockrpc"), "mockrpc");
+        List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
+        routeIds.add(new RouteIdentifierImpl(null, type, null));
+        return routeIds;
     }
 
     private RpcRouter.RouteIdentifier<?,?,?> createRouteId() throws URISyntaxException {
