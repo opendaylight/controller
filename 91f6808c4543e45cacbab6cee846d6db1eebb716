@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_32eccaba",
+        "filename": "opendaylight/md-sal/forwardingrules-manager/src/main/java/org/opendaylight/controller/frm/FlowCookieProducer.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-08T15:10:23Z",
+      "side": 1,
+      "message": "This will only produce unique cookies locally... how will this work in a clustered environment?",
+      "revId": "91f6808c4543e45cacbab6cee846d6db1eebb716",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
