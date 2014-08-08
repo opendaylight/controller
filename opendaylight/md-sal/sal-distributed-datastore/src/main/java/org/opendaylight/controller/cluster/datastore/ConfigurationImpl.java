@@ -34,6 +34,14 @@ public class ConfigurationImpl implements Configuration {
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
+    // Look up maps to speed things up
+
+    // key = memberName, value = list of shardNames
+    private Map<String, List<String>> memberShardNames = new HashMap<>();
+
+    // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
+    private Map<String, List<String>> shardReplicaNames = new HashMap<>();
+
 
     public ConfigurationImpl(String moduleShardsConfigPath,
 
@@ -66,6 +74,10 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override public List<String> getMemberShardNames(String memberName){
+        if(memberShardNames.containsKey(memberName)){
+            return memberShardNames.get(memberName);
+        }
+
         List<String> shards = new ArrayList();
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()){
@@ -76,6 +88,9 @@ public class ConfigurationImpl implements Configuration {
                 }
             }
         }
+
+        memberShardNames.put(memberName, shards);
+
         return shards;
 
     }
@@ -112,14 +127,20 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override public List<String> getMembersFromShardName(String shardName) {
-        List<String> shards = new ArrayList();
+        if(shardReplicaNames.containsKey(shardName)){
+            return shardReplicaNames.get(shardName);
+        }
+
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()) {
                 if(s.getName().equals(shardName)){
-                    return s.getReplicas();
+                    List<String> replicas = s.getReplicas();
+                    shardReplicaNames.put(shardName, replicas);
+                    return replicas;
                 }
             }
         }
+        shardReplicaNames.put(shardName, Collections.EMPTY_LIST);
         return Collections.EMPTY_LIST;
     }
 

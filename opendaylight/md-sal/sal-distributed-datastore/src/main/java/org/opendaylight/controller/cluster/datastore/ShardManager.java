@@ -18,6 +18,8 @@ import akka.cluster.ClusterEvent;
 import akka.japi.Creator;
 import akka.japi.Function;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
@@ -28,6 +30,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import scala.concurrent.duration.Duration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,8 @@ public class ShardManager extends AbstractUntypedActor {
     private final ClusterWrapper cluster;
 
     private final Configuration configuration;
+
+    private ShardManagerInfoMBean mBean;
 
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
@@ -159,9 +164,6 @@ public class ShardManager extends AbstractUntypedActor {
     private void findPrimary(FindPrimary message) {
         String shardName = message.getShardName();
 
-        List<String> members =
-            configuration.getMembersFromShardName(shardName);
-
         // First see if the there is a local replica for the shard
         ShardInformation info = localShards.get(shardName);
         if(info != null) {
@@ -174,6 +176,9 @@ public class ShardManager extends AbstractUntypedActor {
                 return;
             }
         }
+
+        List<String> members =
+            configuration.getMembersFromShardName(shardName);
 
         if(cluster.getCurrentMemberName() != null) {
             members.remove(cluster.getCurrentMemberName());
@@ -225,14 +230,19 @@ public class ShardManager extends AbstractUntypedActor {
         List<String> memberShardNames =
             this.configuration.getMemberShardNames(memberName);
 
+        List<String> localShardActorNames = new ArrayList<>();
         for(String shardName : memberShardNames){
             String shardActorName = getShardActorName(memberName, shardName);
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
                 .actorOf(Shard.props(shardActorName, peerAddresses),
                     shardActorName);
+            localShardActorNames.add(shardActorName);
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));
         }
+
+        mBean = ShardManagerInfo
+            .createShardManagerMBean("shard-manager-" + this.type, localShardActorNames);
 
     }
 
@@ -321,3 +331,6 @@ public class ShardManager extends AbstractUntypedActor {
         }
     }
 }
+
+
+
