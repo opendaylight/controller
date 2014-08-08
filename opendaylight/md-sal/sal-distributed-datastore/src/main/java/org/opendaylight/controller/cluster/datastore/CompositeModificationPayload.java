@@ -29,7 +29,7 @@ public class CompositeModificationPayload extends Payload implements
         modification = null;
     }
     public CompositeModificationPayload(Object modification){
-        this.modification = (PersistentMessages.CompositeModification) modification;
+        this.modification = (PersistentMessages.CompositeModification) Preconditions.checkNotNull(modification, "modification should not be null");
     }
 
     @Override public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {

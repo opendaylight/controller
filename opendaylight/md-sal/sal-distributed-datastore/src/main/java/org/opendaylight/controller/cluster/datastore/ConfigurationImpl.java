@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -34,10 +35,22 @@ public class ConfigurationImpl implements Configuration {
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
+    // Look up maps to speed things up
+
+    // key = memberName, value = list of shardNames
+    private Map<String, List<String>> memberShardNames = new HashMap<>();
+
+    // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
+    private Map<String, List<String>> shardReplicaNames = new HashMap<>();
+
 
     public ConfigurationImpl(String moduleShardsConfigPath,
 
         String modulesConfigPath){
+
+        Preconditions.checkNotNull(moduleShardsConfigPath, "moduleShardsConfigPath should not be null");
+        Preconditions.checkNotNull(modulesConfigPath, "modulesConfigPath should not be null");
+
 
         File moduleShardsFile = new File("./configuration/initial/" + moduleShardsConfigPath);
         File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
@@ -66,6 +79,13 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override public List<String> getMemberShardNames(String memberName){
+
+        Preconditions.checkNotNull(memberName, "memberName should not be null");
+
+        if(memberShardNames.containsKey(memberName)){
+            return memberShardNames.get(memberName);
+        }
+
         List<String> shards = new ArrayList();
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()){
@@ -76,11 +96,17 @@ public class ConfigurationImpl implements Configuration {
                 }
             }
         }
+
+        memberShardNames.put(memberName, shards);
+
         return shards;
 
     }
 
     @Override public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
+
+        Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
+
         for(Module m : modules){
             if(m.getNameSpace().equals(nameSpace)){
                 return Optional.of(m.getName());
@@ -98,6 +124,9 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override public List<String> getShardNamesFromModuleName(String moduleName) {
+
+        Preconditions.checkNotNull(moduleName, "moduleName should not be null");
+
         for(ModuleShard m : moduleShards){
             if(m.getModuleName().equals(moduleName)){
                 List<String> l = new ArrayList<>();
@@ -112,14 +141,23 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override public List<String> getMembersFromShardName(String shardName) {
-        List<String> shards = new ArrayList();
+
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
+
+        if(shardReplicaNames.containsKey(shardName)){
+            return shardReplicaNames.get(shardName);
+        }
+
         for(ModuleShard ms : moduleShards){
             for(Shard s : ms.getShards()) {
                 if(s.getName().equals(shardName)){
-                    return s.getReplicas();
+                    List<String> replicas = s.getReplicas();
+                    shardReplicaNames.put(shardName, replicas);
+                    return replicas;
                 }
             }
         }
+        shardReplicaNames.put(shardName, Collections.EMPTY_LIST);
         return Collections.EMPTY_LIST;
     }
 

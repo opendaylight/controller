@@ -12,18 +12,31 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
+import com.google.common.base.Preconditions;
 
 public class ClusterWrapperImpl implements ClusterWrapper {
     private final Cluster cluster;
     private final String currentMemberName;
 
     public ClusterWrapperImpl(ActorSystem actorSystem){
+        Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
+
         cluster = Cluster.get(actorSystem);
+
+        Preconditions.checkState(cluster.getSelfRoles().size() > 0,
+            "No akka roles were specified\n" +
+                "One way to specify the member name is to pass a property on the command line like so\n" +
+                "   -Dakka.cluster.roles.0=member-3\n" +
+                "member-3 here would be the name of the member"
+        );
+
         currentMemberName = (String) cluster.getSelfRoles().toArray()[0];
 
     }
 
     public void subscribeToMemberEvents(ActorRef actorRef){
+        Preconditions.checkNotNull(actorRef, "actorRef should not be null");
+
         cluster.subscribe(actorRef, ClusterEvent.initialStateAsEvents(),
             ClusterEvent.MemberEvent.class,
             ClusterEvent.UnreachableMember.class);

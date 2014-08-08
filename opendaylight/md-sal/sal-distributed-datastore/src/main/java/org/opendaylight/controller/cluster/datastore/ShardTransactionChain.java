@@ -40,23 +40,27 @@ public class ShardTransactionChain extends AbstractUntypedActor {
             chain.close();
             getSender().tell(new CloseTransactionChainReply().toSerializable(), getSelf());
         }else{
-          throw new Exception("Not recognized message recieved="+message);
+            unknownMessage(message);
         }
+    }
+
+    private ActorRef getShardActor(){
+        return getContext().parent();
     }
 
   private ActorRef createTypedTransactionActor(CreateTransaction createTransaction,String transactionId){
     if(createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_ONLY.ordinal()){
       return getContext().actorOf(
-          ShardTransaction.props( chain.newReadOnlyTransaction(), getSelf(), schemaContext), transactionId);
+          ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(), schemaContext), transactionId);
 
     }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.READ_WRITE.ordinal()){
       return getContext().actorOf(
-          ShardTransaction.props( chain.newReadWriteTransaction(), getSelf(), schemaContext), transactionId);
+          ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(), schemaContext), transactionId);
 
 
     }else if (createTransaction.getTransactionType()== TransactionProxy.TransactionType.WRITE_ONLY.ordinal()){
       return getContext().actorOf(
-          ShardTransaction.props( chain.newWriteOnlyTransaction(), getSelf(), schemaContext), transactionId);
+          ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(), schemaContext), transactionId);
     }else{
       throw new IllegalArgumentException ("CreateTransaction message has unidentified transaction type="+createTransaction.getTransactionType()) ;
     }
