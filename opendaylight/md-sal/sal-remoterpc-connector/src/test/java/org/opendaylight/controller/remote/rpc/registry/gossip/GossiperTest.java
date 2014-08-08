@@ -115,17 +115,6 @@ public class GossiperTest {
         verify(mockGossiper, times(0)).updateRemoteBuckets(anyMap());
     }
 
-    @Test
-    public void testUpdateRemoteBuckets_WhenNoBucketShouldIgnore(){
-
-        mockGossiper.updateRemoteBuckets(null);
-        verify(mockGossiper, times(0)).getContext();
-
-        Map<Address, Bucket> empty = Collections.emptyMap();
-        mockGossiper.updateRemoteBuckets(empty);
-        verify(mockGossiper, times(0)).getContext();
-    }
-
     /**
      * Create Gossiper actor and return the underlying instance of Gossiper class.
      *
