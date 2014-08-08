@@ -33,4 +33,12 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     }
 
     protected abstract void handleReceive(Object message) throws Exception;
+
+    protected void ignoreMessage(Object message){
+        LOG.debug("Unhandled message {} ", message);
+    }
+
+    protected void unknownMessage(Object message) throws Exception{
+        unhandled(message);
+    }
 }

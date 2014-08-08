@@ -16,7 +16,10 @@ import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.serialization.Serialization;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -66,6 +69,7 @@ public class Shard extends RaftActor {
 
     public static final String DEFAULT_NAME = "default";
 
+    // The state of this Shard
     private final InMemoryDOMDataStore store;
 
     private final Map<Object, DOMStoreThreePhaseCommitCohort>
@@ -75,10 +79,11 @@ public class Shard extends RaftActor {
         Logging.getLogger(getContext().system(), this);
 
     // By default persistent will be true and can be turned off using the system
-    // property persistent
+    // property shard.persistent
     private final boolean persistent;
 
-    private final String name;
+    /// The name of this shard
+    private final ShardIdentifier name;
 
     private volatile SchemaContext schemaContext;
 
@@ -86,8 +91,8 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private Shard(String name, Map<String, String> peerAddresses) {
-        super(name, peerAddresses, Optional.of(configParams));
+    private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses) {
+        super(name.toString(), mapPeerAddresses(peerAddresses), Optional.of(configParams));
 
         this.name = name;
 
@@ -95,16 +100,32 @@ public class Shard extends RaftActor {
 
         this.persistent = !"false".equals(setting);
 
-        LOG.info("Creating shard : {} persistent : {}", name, persistent);
+        LOG.info("Shard created : {} persistent : {}", name, persistent);
 
-        store = InMemoryDOMDataStoreFactory.create(name, null);
+        store = InMemoryDOMDataStoreFactory.create(name.toString(), null);
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name);
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
 
     }
 
-    public static Props props(final String name,
-        final Map<String, String> peerAddresses) {
+    private static Map<String, String> mapPeerAddresses(Map<ShardIdentifier, String> peerAddresses){
+        Map<String , String> map = new HashMap<>();
+
+        for(Map.Entry<ShardIdentifier, String> entry : peerAddresses.entrySet()){
+            map.put(entry.getKey().toString(), entry.getValue());
+        }
+
+        return map;
+    }
+
+
+
+
+    public static Props props(final ShardIdentifier name,
+        final Map<ShardIdentifier, String> peerAddresses) {
+        Preconditions.checkNotNull(name, "name should not be null");
+        Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
+
         return Props.create(new Creator<Shard>() {
 
             @Override
@@ -142,39 +163,46 @@ public class Shard extends RaftActor {
             }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
-            setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
+            setPeerAddress(resolved.getPeerId().toString(), resolved.getPeerAddress());
         } else {
             super.onReceiveCommand(message);
         }
     }
 
     private ActorRef createTypedTransactionActor(
-        CreateTransaction createTransaction, String transactionId) {
+        CreateTransaction createTransaction, ShardTransactionIdentifier transactionId) {
         if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
+
             shardMBean.incrementReadOnlyTransactionCount();
+
             return getContext().actorOf(
                 ShardTransaction
                     .props(store.newReadOnlyTransaction(), getSelf(),
-                        schemaContext), transactionId);
+                        schemaContext), transactionId.toString());
 
         } else if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
+
             shardMBean.incrementReadWriteTransactionCount();
+
             return getContext().actorOf(
                 ShardTransaction
                     .props(store.newReadWriteTransaction(), getSelf(),
-                        schemaContext), transactionId);
+                        schemaContext), transactionId.toString());
 
 
         } else if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
+
             shardMBean.incrementWriteOnlyTransactionCount();
+
             return getContext().actorOf(
                 ShardTransaction
                     .props(store.newWriteOnlyTransaction(), getSelf(),
-                        schemaContext), transactionId);
+                        schemaContext), transactionId.toString());
         } else {
+            // FIXME: This does not seem right
             throw new IllegalArgumentException(
                 "CreateTransaction message has unidentified transaction type="
                     + createTransaction.getTransactionType());
@@ -183,8 +211,8 @@ public class Shard extends RaftActor {
 
     private void createTransaction(CreateTransaction createTransaction) {
 
-        String transactionId = "shard-" + createTransaction.getTransactionId();
-        LOG.info("Creating transaction : {} ", transactionId);
+        ShardTransactionIdentifier transactionId = ShardTransactionIdentifier.builder().remoteTransactionId(createTransaction.getTransactionId()).build();
+        LOG.debug("Creating transaction : {} ", transactionId);
         ActorRef transactionActor =
             createTypedTransactionActor(createTransaction, transactionId);
 
@@ -203,9 +231,9 @@ public class Shard extends RaftActor {
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
-            LOG.error(
-                "Could not find cohort for modification : {}", modification);
-            LOG.info("Writing modification using a new transaction");
+            LOG.debug(
+                "Could not find cohort for modification : {}. Writing modification using a new transaction",
+                modification);
             DOMStoreReadWriteTransaction transaction =
                 store.newReadWriteTransaction();
             modification.apply(transaction);
@@ -237,7 +265,7 @@ public class Shard extends RaftActor {
                             .tell(new CommitTransactionReply().toSerializable(),
                                 self);
                     } else {
-                        LOG.error("sender is null ???");
+                        LOG.warning("sender is null ???");
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     // FIXME : Handle this properly
@@ -270,7 +298,7 @@ public class Shard extends RaftActor {
     private void registerChangeListener(
         RegisterChangeListener registerChangeListener) {
 
-        LOG.debug("registerDataChangeListener for " + registerChangeListener
+        LOG.debug("registerDataChangeListener for {}", registerChangeListener
             .getPath());
 
 
@@ -302,8 +330,8 @@ public class Shard extends RaftActor {
                 DataChangeListenerRegistration.props(registration));
 
         LOG.debug(
-            "registerDataChangeListener sending reply, listenerRegistrationPath = "
-                + listenerRegistration.path().toString());
+            "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
+                , listenerRegistration.path().toString());
 
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
@@ -332,7 +360,9 @@ public class Shard extends RaftActor {
             if (modification != null) {
                 commit(clientActor, modification);
             } else {
-                LOG.error("modification is null - this is very unexpected");
+                LOG.error(
+                    "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
+                    identifier, clientActor.path().toString());
             }
 
 
@@ -340,6 +370,7 @@ public class Shard extends RaftActor {
             LOG.error("Unknown state received {}", data);
         }
 
+        // Update stats
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
 
         if(lastLogEntry != null){
@@ -375,7 +406,7 @@ public class Shard extends RaftActor {
     }
 
     @Override public String persistenceId() {
-        return this.name;
+        return this.name.toString();
     }
 
 

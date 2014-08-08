@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -24,7 +25,7 @@ public class DataChangeListenerProxy implements AsyncDataChangeListener<YangInst
     private final SchemaContext schemaContext;
 
     public DataChangeListenerProxy(SchemaContext schemaContext,ActorSelection dataChangeListenerActor) {
-        this.dataChangeListenerActor = dataChangeListenerActor;
+        this.dataChangeListenerActor = Preconditions.checkNotNull(dataChangeListenerActor, "dataChangeListenerActor should not be null");
         this.schemaContext = schemaContext;
     }
 
