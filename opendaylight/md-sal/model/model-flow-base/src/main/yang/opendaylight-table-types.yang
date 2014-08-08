@@ -343,9 +343,7 @@ module opendaylight-table-types {
             container table-properties {
                 list table-feature-properties {
                      key "order";
-                     leaf order {
-                         type int32;
-                     }
+                     uses action:ordered;
                      uses table-feature-prop-type;
                 }
             }

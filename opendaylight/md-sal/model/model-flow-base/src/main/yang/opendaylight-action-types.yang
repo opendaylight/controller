@@ -33,13 +33,17 @@ module opendaylight-action-types {
     container action-types {	
        uses action-list;
     }
+
+    grouping ordered {
+        leaf order {
+          type int32;
+        }
+    }
     
     grouping action-list {
         list action {
             key "order";
-            leaf order {
-                type int32;
-            }
+            uses ordered;
             uses action;
         }
     }

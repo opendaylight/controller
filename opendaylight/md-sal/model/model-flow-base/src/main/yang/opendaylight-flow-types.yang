@@ -58,9 +58,7 @@ module opendaylight-flow-types {
     grouping instruction-list {
         list instruction {
             key "order";
-            leaf order {
-                type int32;
-            }
+            uses action:ordered;
             uses instruction;
         }
     }
