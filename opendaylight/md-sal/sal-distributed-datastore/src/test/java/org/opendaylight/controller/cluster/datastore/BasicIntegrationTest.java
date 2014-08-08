@@ -14,8 +14,8 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.testkit.JavaTestKit;
-import junit.framework.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionChain;
@@ -37,6 +37,8 @@ import scala.concurrent.duration.FiniteDuration;
 import java.util.Collections;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 public class BasicIntegrationTest extends AbstractActorTest {
 
@@ -52,7 +54,11 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
 
         new JavaTestKit(getSystem()) {{
-            final Props props = Shard.props("config", Collections.EMPTY_MAP);
+            final ShardIdentifier identifier =
+                ShardIdentifier.builder().memberName("member-1")
+                    .shardName("inventory").type("config").build();
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("5 seconds")) {
@@ -95,7 +101,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                             }
                         }.get(); // this extracts the received message
 
-                    Assert.assertNotNull(transactionChain);
+                    assertNotNull(transactionChain);
 
                     System.out.println("Successfully created transaction chain");
 
@@ -116,7 +122,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                             }
                         }.get(); // this extracts the received message
 
-                    Assert.assertNotNull(transaction);
+                    assertNotNull(transaction);
 
                     System.out.println("Successfully created transaction");
 
@@ -135,7 +141,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                         }
                     }.get(); // this extracts the received message
 
-                    Assert.assertTrue(writeDone);
+                    assertTrue(writeDone);
 
                     System.out.println("Successfully wrote data");
 
@@ -158,7 +164,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                             }
                         }.get(); // this extracts the received message
 
-                    Assert.assertNotNull(cohort);
+                    assertNotNull(cohort);
 
                     System.out.println("Successfully readied the transaction");
 
@@ -177,7 +183,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                             }
                         }.get(); // this extracts the received message
 
-                    Assert.assertTrue(preCommitDone);
+                    assertTrue(preCommitDone);
 
                     System.out.println("Successfully pre-committed the transaction");
 

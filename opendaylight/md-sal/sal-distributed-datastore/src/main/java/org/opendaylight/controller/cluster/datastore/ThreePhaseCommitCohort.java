@@ -67,7 +67,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         } else if (message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
             abort(new AbortTransaction());
         } else {
-          throw new Exception ("Not recognized message received,message="+message);
+            unknownMessage(message);
         }
     }
 

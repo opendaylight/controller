@@ -120,7 +120,7 @@ public class Leader extends AbstractRaftActorBehavior {
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
-        context.getLogger().info("Leader: Received {}", appendEntries.toString());
+        context.getLogger().debug(appendEntries.toString());
 
         return state();
     }
@@ -130,7 +130,7 @@ public class Leader extends AbstractRaftActorBehavior {
 
         if(! appendEntriesReply.isSuccess()) {
             context.getLogger()
-                .info("Leader: Received {}", appendEntriesReply.toString());
+                .debug(appendEntriesReply.toString());
         }
 
         // Update the FollowerLogInformation
@@ -294,12 +294,7 @@ public class Leader extends AbstractRaftActorBehavior {
                 List<ReplicatedLogEntry> entries = Collections.emptyList();
 
                 if (context.getReplicatedLog().isPresent(nextIndex)) {
-                    // TODO: Instead of sending all entries from nextIndex
-                    // only send a fixed number of entries to each follower
-                    // This is to avoid the situation where there are a lot of
-                    // entries to install for a fresh follower or to a follower
-                    // that has fallen too far behind with the log but yet is not
-                    // eligible to receive a snapshot
+                    // FIXME : Sending one entry at a time
                     entries =
                         context.getReplicatedLog().getFrom(nextIndex, 1);
                 }
