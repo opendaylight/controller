@@ -53,6 +53,9 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
         return table.containsKey(routeId);
     }
 
+    public Boolean isEmpty(){
+        return table.isEmpty();
+    }
     ///
     /// Getter, Setters
     ///
