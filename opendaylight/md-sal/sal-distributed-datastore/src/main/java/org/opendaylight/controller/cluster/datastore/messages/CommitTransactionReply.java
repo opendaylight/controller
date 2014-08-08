@@ -12,7 +12,7 @@ import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommit
 
 public class CommitTransactionReply implements SerializableMessage {
 
-  public static Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CommitTransactionReply.class;
+  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CommitTransactionReply.class;
 
   @Override
   public Object toSerializable() {

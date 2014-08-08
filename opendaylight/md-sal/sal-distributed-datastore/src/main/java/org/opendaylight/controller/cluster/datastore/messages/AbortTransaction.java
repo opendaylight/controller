@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class AbortTransaction implements SerializableMessage {
-  public static Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.AbortTransaction.class;
+  public static final Class SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.AbortTransaction.class;
 
   @Override
   public Object toSerializable() {

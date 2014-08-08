@@ -78,8 +78,12 @@ public class NormalizedNodeToNodeCodecTest {
 
     NormalizedNodeToNodeCodec codec =
         new NormalizedNodeToNodeCodec(schemaContext);
+    long start = System.currentTimeMillis();
     Container container =
         codec.encode(instanceIdentifierFromString(id), output);
+    long end = System.currentTimeMillis();
+
+    System.out.println("Timetaken to encode :"+(end-start));
 
     assertNotNull(container);
     assertEquals(id, container.getParentPath() + "/"
@@ -89,8 +93,12 @@ public class NormalizedNodeToNodeCodecTest {
     // first get the node representation of normalized node
     final Node node = container.getNormalizedNode();
 
+    start = System.currentTimeMillis();
     NormalizedNode<?, ?> normalizedNode =
         codec.decode(instanceIdentifierFromString(id), node);
+    end = System.currentTimeMillis();
+
+    System.out.println("Timetaken to decode :"+(end-start));
 
     assertEquals(normalizedNode.getValue().toString(), output.getValue()
         .toString());
