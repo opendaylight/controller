@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_67529268",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-08T00:48:08Z",
+      "side": 1,
+      "message": "agreed",
+      "parentUuid": "fa82b9bf_4770ae0a",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_676b721e",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
         "patchSetId": 10
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c7ca7e1a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-08T00:48:08Z",
+      "side": 1,
+      "message": "My initial thought was this would serve as deleting the bucket. \nBut I dont allow null bucket to be sent in the message, so this is redundant and will remove it.",
+      "parentUuid": "fa82b9bf_07762606",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2771ea0b",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
         "patchSetId": 10
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e7cd4232",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-08T00:48:08Z",
+      "side": 1,
+      "message": "yep. I stammered I think!",
+      "parentUuid": "fa82b9bf_2771ea0b",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8759d68f",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
         "patchSetId": 10
@@ -98,6 +152,24 @@
       "writtenOn": "2014-08-08T00:16:48Z",
       "side": 1,
       "message": "How could one possibly get a member down for self?",
+      "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_87d0f6c9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-08T00:48:08Z",
+      "side": 1,
+      "message": "The method name needs to be changed to receiveMemberRemoved which is what the event is.\nIn member removed, the system will still be up and may still be connected to the cluster. \nCheck: http://doc.akka.io/docs/akka/snapshot/scala/cluster-usage.html",
+      "parentUuid": "fa82b9bf_8759d68f",
       "revId": "6c6e6891fbb8ccfece16b665bb9cb7ddbde86478",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
