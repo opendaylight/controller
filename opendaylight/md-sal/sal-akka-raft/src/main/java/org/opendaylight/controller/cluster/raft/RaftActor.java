@@ -618,7 +618,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
         }
 
         @Override public void update(long currentTerm, String votedFor) {
-            LOG.info("Set currentTerm={}, votedFor={}", currentTerm, votedFor);
+            LOG.debug("Set currentTerm={}, votedFor={}", currentTerm, votedFor);
 
             this.currentTerm = currentTerm;
             this.votedFor = votedFor;

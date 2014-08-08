@@ -42,7 +42,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if(appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
             context.getLogger()
-                .info("Follower: Received {}", appendEntries.toString());
+                .debug(appendEntries.toString());
         }
 
         // TODO : Refactor this method into a bunch of smaller methods
