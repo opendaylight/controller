@@ -15,9 +15,8 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -30,7 +29,6 @@ import scala.concurrent.duration.Duration;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -48,45 +46,21 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final SchemaContext testSchemaContext =
         TestModel.createTestContext();
 
+    private static final ShardIdentifier SHARD_IDENTIFIER =
+        ShardIdentifier.builder().memberName("member-1")
+            .shardName("inventory").type("config").build();
+
     static {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
-
-    @Test
-    public void testNegativePerformingWriteOperationOnReadTransaction()
-        throws Exception {
-        try {
-
-            final ActorRef
-                shard = getSystem()
-                .actorOf(Shard.props("config", Collections.EMPTY_MAP));
-            final Props props =
-                ShardTransaction
-                    .props(store.newReadOnlyTransaction(), shard, TestModel
-                        .createTestContext());
-            final TestActorRef subject = TestActorRef.apply(props, getSystem());
-
-            subject
-                .receive(new DeleteData(TestModel.TEST_PATH).toSerializable(),
-                    ActorRef.noSender());
-            Assert.assertFalse(true);
-
-
-        } catch (Exception cs) {
-            assertEquals(cs.getClass().getSimpleName(),
-                Exception.class.getSimpleName());
-            assertTrue(cs.getMessage().startsWith(
-                "ShardTransaction:handleRecieve received an unknown message"));
-        }
-    }
 
     @Test(expected = ReadFailedException.class)
     public void testNegativeReadWithReadOnlyTransactionClosed()
         throws Throwable {
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newReadOnlyTransaction(), shard,
                 TestModel.createTestContext());
@@ -121,7 +95,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -150,13 +124,12 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     }
 
-
     @Test(expected = IllegalStateException.class)
     public void testNegativeWriteWithTransactionReady() throws Exception {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
                 TestModel.createTestContext());
@@ -195,7 +168,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -233,7 +206,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -271,7 +244,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -300,4 +273,6 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
     }
+
+
 }

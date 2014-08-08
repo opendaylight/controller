@@ -15,6 +15,7 @@ import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
@@ -89,7 +90,6 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
   protected ShardTransaction(DOMStoreTransactionChain transactionChain,
                           ActorRef shardActor, SchemaContext schemaContext) {
     this.transactionChain = transactionChain;
-    //this.transaction = transaction;
     this.shardActor = shardActor;
     this.schemaContext = schemaContext;
   }
@@ -173,7 +173,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
       getSender().tell(new GetCompositeModificationReply(
           new ImmutableCompositeModification(modification)), getSelf());
     }else{
-      throw new Exception ("ShardTransaction:handleRecieve received an unknown message"+message);
+         throw new UnknownMessageException(message);
     }
   }
 
@@ -232,6 +232,7 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
   }
 
   protected void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
+    LOG.debug("deleteData at path : " + message.getPath().toString());
     modification.addModification(new DeleteModification(message.getPath()));
     try {
         transaction.delete(message.getPath());

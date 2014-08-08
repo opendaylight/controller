@@ -2,7 +2,7 @@
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} [%thread] %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>
     </encoder>
   </appender>
   <appender name="opendaylight.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -75,6 +75,10 @@
   <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
   <!-- Web modules -->
   <logger name="org.opendaylight.controller.web" level="INFO"/>
+
+  <!-- Clustering -->
+  <logger name="org.opendaylight.controller.cluster" level="INFO"/>
+  <logger name="org.opendaylight.controller.cluster.datastore.node" level="INFO"/>
 
   <!--
        Unsynchronized controller startup causes models to crop up in random
