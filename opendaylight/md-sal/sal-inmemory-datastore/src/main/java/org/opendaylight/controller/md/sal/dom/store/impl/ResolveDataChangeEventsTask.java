@@ -74,7 +74,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
     private static final DOMImmutableDataChangeEvent NO_CHANGE = builder(DataChangeScope.BASE).build();
 
-    private final Multimap<ListenerTree.Node, DOMImmutableDataChangeEvent> events = HashMultimap.create();
+    private final Multimap<Node, DOMImmutableDataChangeEvent> events = HashMultimap.create();
     private final DataTreeCandidate candidate;
     private final ListenerTree listenerRoot;
 
@@ -120,7 +120,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      */
     private Collection<ChangeListenerNotifyTask> createNotificationTasks() {
         ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder = ImmutableList.builder();
-        for (Entry<ListenerTree.Node, Collection<DOMImmutableDataChangeEvent>> entry : events.asMap().entrySet()) {
+        for (Entry<Node, Collection<DOMImmutableDataChangeEvent>> entry : events.asMap().entrySet()) {
             addNotificationTask(taskListBuilder, entry.getKey(), entry.getValue());
         }
         return taskListBuilder.build();
@@ -142,7 +142,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param entries
      */
     private static void addNotificationTask(final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder,
-            final ListenerTree.Node listeners, final Collection<DOMImmutableDataChangeEvent> entries) {
+            final Node listeners, final Collection<DOMImmutableDataChangeEvent> entries) {
 
         if (!entries.isEmpty()) {
             if (entries.size() == 1) {
@@ -163,7 +163,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param event
      */
     private static void addNotificationTaskByScope(
-            final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final ListenerTree.Node listeners,
+            final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final Node listeners,
             final DOMImmutableDataChangeEvent event) {
         DataChangeScope eventScope = event.getScope();
         for (DataChangeListenerRegistration<?> listenerReg : listeners.getListeners()) {
@@ -194,7 +194,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param entries
      */
     private static void addNotificationTasksAndMergeEvents(
-            final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final ListenerTree.Node listeners,
+            final ImmutableList.Builder<ChangeListenerNotifyTask> taskListBuilder, final Node listeners,
             final Collection<DOMImmutableDataChangeEvent> entries) {
 
         final Builder baseBuilder = builder(DataChangeScope.BASE);
@@ -254,7 +254,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @param listeners List of current listeners
      * @return Required child resolution.
      */
-    private static RequiredResolution calculateResolution(final RequiredResolution current, final Iterable<ListenerTree.Node> listeners) {
+    private static RequiredResolution calculateResolution(final RequiredResolution current, final Iterable<Node> listeners) {
         // Fast check: ALL is always retained
         if (current == RequiredResolution.ALL) {
             return current;
@@ -308,7 +308,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @return Data Change Event of this node and all it's children
      */
     private DOMImmutableDataChangeEvent resolveAnyChangeEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode node, final RequiredResolution res) {
+            final Collection<Node> listeners, final DataTreeCandidateNode node, final RequiredResolution res) {
         /*
          * If parent listeners do not require us to perform resolution and
          * we have no further listeners, we can stop right here.
@@ -392,7 +392,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
             final PathArgument childId = beforeChild.getIdentifier();
 
             YangInstanceIdentifier childPath = path.node(childId);
-            Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
+            Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
             Optional<NormalizedNode<PathArgument, ?>> afterChild = afterCont.getChild(childId);
             DOMImmutableDataChangeEvent childChange = resolveNodeContainerChildUpdated(childPath, childListeners,
                     beforeChild, afterChild, res);
@@ -411,7 +411,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
              * created.
              */
             if (!beforeCont.getChild(childId).isPresent()) {
-                Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
+                Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
                 YangInstanceIdentifier childPath = path.node(childId);
                 childChanges.add(resolveSameEventRecursivelly(childPath , childListeners, afterChild,
                         DOMImmutableDataChangeEvent.getCreateEventFactory()));
@@ -460,14 +460,14 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
      * @return
      */
     private DOMImmutableDataChangeEvent resolveCreateEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> afterState, final RequiredResolution res) {
+            final Collection<Node> listeners, final NormalizedNode<?, ?> afterState, final RequiredResolution res) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
         return resolveSameEventRecursivelly(path, listeners, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
     }
 
     private DOMImmutableDataChangeEvent resolveDeleteEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final NormalizedNode<?, ?> beforeState, final RequiredResolution res) {
+            final Collection<Node> listeners, final NormalizedNode<?, ?> beforeState, final RequiredResolution res) {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState;
@@ -508,7 +508,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
     }
 
     private DOMImmutableDataChangeEvent resolveSubtreeChangeEvent(final YangInstanceIdentifier path,
-            final Collection<ListenerTree.Node> listeners, final DataTreeCandidateNode modification, final RequiredResolution res) {
+            final Collection<Node> listeners, final DataTreeCandidateNode modification, final RequiredResolution res) {
 
         Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", path);
         Preconditions.checkArgument(modification.getDataAfter().isPresent(), "Subtree change with after-data not present at path %s", path);
@@ -523,7 +523,7 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
             PathArgument childId = childMod.getIdentifier();
             YangInstanceIdentifier childPath = path.node(childId);
-            Collection<ListenerTree.Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
+            Collection<Node> childListeners = getListenerChildrenWildcarded(listeners, childId);
 
             switch (childMod.getModificationType()) {
             case WRITE:
@@ -559,9 +559,8 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return subtreeEvent;
     }
 
-    private DOMImmutableDataChangeEvent addPartialTask(final Collection<ListenerTree.Node> listeners,
-            final DOMImmutableDataChangeEvent event) {
-        for (ListenerTree.Node listenerNode : listeners) {
+    private DOMImmutableDataChangeEvent addPartialTask(final Collection<Node> listeners, final DOMImmutableDataChangeEvent event) {
+        for (Node listenerNode : listeners) {
             if (!listenerNode.getListeners().isEmpty()) {
                 LOG.trace("Adding event {} for listeners {}",event,listenerNode);
                 events.put(listenerNode, event);
@@ -570,12 +569,11 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return event;
     }
 
-    private static Collection<ListenerTree.Node> getListenerChildrenWildcarded(final Collection<ListenerTree.Node> parentNodes,
-            final PathArgument child) {
+    private static Collection<Node> getListenerChildrenWildcarded(final Collection<Node> parentNodes, final PathArgument child) {
         if (parentNodes.isEmpty()) {
             return Collections.emptyList();
         }
-        com.google.common.collect.ImmutableList.Builder<ListenerTree.Node> result = ImmutableList.builder();
+        com.google.common.collect.ImmutableList.Builder<Node> result = ImmutableList.builder();
         if (child instanceof NodeWithValue || child instanceof NodeIdentifierWithPredicates) {
             NodeIdentifier wildcardedIdentifier = new NodeIdentifier(child.getNodeType());
             addChildrenNodesToBuilder(result, parentNodes, wildcardedIdentifier);
@@ -584,10 +582,10 @@ final class ResolveDataChangeEventsTask implements Callable<Iterable<ChangeListe
         return result.build();
     }
 
-    private static void addChildrenNodesToBuilder(final ImmutableList.Builder<ListenerTree.Node> result,
-            final Collection<ListenerTree.Node> parentNodes, final PathArgument childIdentifier) {
-        for (ListenerTree.Node node : parentNodes) {
-            Optional<ListenerTree.Node> child = node.getChild(childIdentifier);
+    private static void addChildrenNodesToBuilder(final ImmutableList.Builder<Node> result,
+            final Collection<Node> parentNodes, final PathArgument childIdentifier) {
+        for (Node node : parentNodes) {
+            Optional<Node> child = node.getChild(childIdentifier);
             if (child.isPresent()) {
                 result.add(child.get());
             }
