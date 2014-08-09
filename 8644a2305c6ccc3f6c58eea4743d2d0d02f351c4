@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_2d48ebb1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "Calling toString() is unnecessary. Its implicitly called.",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cdca9f1a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "toString() call is unnecessary.",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_edcd2332",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractUntypedActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "Do you care about unknown messages? Why not just call unhandled(message) and let it go to EventStream of ActorSystem?",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8dd017ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "I dont see any reason to handle unknown message. Just let it go to event stream",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_add39bd3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "Who will handle this?",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4dde8fde",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-09T05:32:58Z",
+      "side": 1,
+      "message": "Same question as Basheer. Applies to other Builders as well.",
+      "parentUuid": "fa82b9bf_ed31a35a",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
