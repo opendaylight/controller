@@ -13,7 +13,7 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 
 
 public class CreateTransaction implements SerializableMessage {
-  public static Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
+  public static final Class SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransaction.class;
   private final String transactionId;
   private final int transactionType;
 

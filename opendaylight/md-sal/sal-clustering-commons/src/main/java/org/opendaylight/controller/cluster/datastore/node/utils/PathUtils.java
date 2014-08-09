@@ -12,18 +12,19 @@ package org.opendaylight.controller.cluster.datastore.node.utils;
 
 public class PathUtils {
     public static String getParentPath(String currentElementPath){
-        String parentPath = "";
+        StringBuilder parentPath = new StringBuilder();
 
         if(currentElementPath != null){
             String[] parentPaths = currentElementPath.split("/");
             if(parentPaths.length > 2){
                 for(int i=0;i<parentPaths.length-1;i++){
                     if(parentPaths[i].length() > 0){
-                        parentPath += "/" + parentPaths[i];
+                        parentPath.append("/");
+                        parentPath.append(parentPaths[i]);
                     }
                 }
             }
         }
-        return parentPath;
+        return parentPath.toString();
     }
 }
