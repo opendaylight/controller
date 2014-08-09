@@ -14,6 +14,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -25,7 +26,6 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
-import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -179,9 +179,11 @@ public final class ListenerTree  {
      */
     public static final class Node implements StoreTreeNode<Node>, Identifiable<PathArgument> {
         private final Collection<DataChangeListenerRegistration<?>> listeners = new ArrayList<>();
+        private final Collection<DataChangeListenerRegistration<?>> publicListeners = Collections.unmodifiableCollection(listeners);
         private final Map<PathArgument, Node> children = new HashMap<>();
         private final PathArgument identifier;
         private final Reference<Node> parent;
+        private DataChangeScope deepestScope;
 
         private Node(final Node parent, final PathArgument identifier) {
             this.parent = new WeakReference<>(parent);
@@ -206,7 +208,7 @@ public final class ListenerTree  {
          * @return the list of current listeners
          */
         public Collection<DataChangeListenerRegistration<?>> getListeners() {
-            return listeners;
+            return publicListeners;
         }
 
         private Node ensureChild(final PathArgument child) {
@@ -220,11 +222,13 @@ public final class ListenerTree  {
 
         private void addListener(final DataChangeListenerRegistration<?> listener) {
             listeners.add(listener);
+            recalcDeepestScope();
             LOG.debug("Listener {} registered", listener);
         }
 
         private void removeListener(final DataChangeListenerRegistrationImpl<?> listener) {
             listeners.remove(listener);
+            recalcDeepestScope();
             LOG.debug("Listener {} unregistered", listener);
 
             // We have been called with the write-lock held, so we can perform some cleanup.
@@ -243,18 +247,46 @@ public final class ListenerTree  {
             removeThisIfUnused();
         }
 
+        private void recalcDeepestScope() {
+            DataChangeScope ret = null;
+
+            loop: {
+                for (DataChangeListenerRegistration<?> l : listeners) {
+                    switch (l.getScope()) {
+                    case BASE:
+                        if (ret == null) {
+                            ret = DataChangeScope.BASE;
+                        }
+                        break;
+                    case ONE:
+                        if (ret == null || ret == DataChangeScope.BASE) {
+                            ret = DataChangeScope.ONE;
+                        }
+                        break;
+                    case SUBTREE:
+                        ret = DataChangeScope.SUBTREE;
+                        break loop;
+                    }
+                }
+            }
+
+            deepestScope = ret;
+            LOG.trace("New deepest scope is {}", deepestScope);
+        }
+
         @Override
         public String toString() {
             return "Node [identifier=" + identifier + ", listeners=" + listeners.size() + ", children=" + children.size() + "]";
         }
 
-
-    }
-
-    private abstract static class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> //
-    implements DataChangeListenerRegistration<T> {
-        public DataChangeListenerRegistrationImpl(final T listener) {
-            super(listener);
+        /**
+         * Return the deepest scope mandated by listeners attached to this node.
+         *
+         * @return Deepest scope (SUBTREE > ONE > BASE), or null if there are no
+         *         listeners attached.
+         */
+        public DataChangeScope getDeepestScope() {
+            return deepestScope;
         }
     }
 }
