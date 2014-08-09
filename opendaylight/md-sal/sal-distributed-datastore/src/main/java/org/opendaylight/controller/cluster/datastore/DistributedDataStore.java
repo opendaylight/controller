@@ -10,8 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -19,6 +21,7 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -71,9 +74,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                                     EXECUTOR_MAX_QUEUE_SIZE_PROP,
                                     DEFAULT_EXECUTOR_MAX_QUEUE_SIZE), "DistDataStore"));
 
-    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
+    public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
+            Configuration configuration, InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
         this(new ActorContext(actorSystem, actorSystem
-            .actorOf(ShardManager.props(type, cluster, configuration),
+            .actorOf(ShardManager.props(type, cluster, configuration, dataStoreProperties),
                 "shardmanager-" + type), cluster, configuration), type);
     }
 

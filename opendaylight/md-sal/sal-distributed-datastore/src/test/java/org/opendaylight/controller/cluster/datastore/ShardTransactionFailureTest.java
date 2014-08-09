@@ -60,7 +60,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
             final ActorRef
                 shard = getSystem()
-                .actorOf(Shard.props("config", Collections.EMPTY_MAP));
+                .actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
             final Props props =
                 ShardTransaction
                     .props(store.newReadOnlyTransaction(), shard, TestModel
@@ -86,7 +86,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newReadOnlyTransaction(), shard,
                 TestModel.createTestContext());
@@ -121,7 +121,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -156,7 +156,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
                 TestModel.createTestContext());
@@ -195,7 +195,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -233,7 +233,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());
@@ -271,7 +271,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard =
-            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP));
+            getSystem().actorOf(Shard.props("config", Collections.EMPTY_MAP, null));
         final Props props =
             ShardTransaction.props(store.newReadWriteTransaction(), shard,
                 TestModel.createTestContext());

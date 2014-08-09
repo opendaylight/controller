@@ -9,19 +9,22 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
+
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 
 public class DistributedDataStoreFactory {
-    public static DistributedDataStore createInstance(String name, SchemaService schemaService){
+    public static DistributedDataStore createInstance(String name, SchemaService schemaService,
+            InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
+
         ActorSystem actorSystem = ActorSystemFactory.getInstance();
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore =
-            new DistributedDataStore(actorSystem, name, new ClusterWrapperImpl(actorSystem),config );
-       ShardStrategyFactory.setConfiguration(config);
-        schemaService
-            .registerSchemaContextListener(dataStore);
+            new DistributedDataStore(actorSystem, name, new ClusterWrapperImpl(actorSystem),
+                    config, dataStoreProperties );
+        ShardStrategyFactory.setConfiguration(config);
+        schemaService.registerSchemaContextListener(dataStore);
         return dataStore;
-
     }
 }

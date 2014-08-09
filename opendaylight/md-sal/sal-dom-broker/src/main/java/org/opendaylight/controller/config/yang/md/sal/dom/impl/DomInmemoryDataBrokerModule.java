@@ -16,8 +16,6 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFac
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import org.opendaylight.yangtools.util.PropertyUtils;
-
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -25,17 +23,6 @@ import com.google.common.collect.ImmutableMap;
 */
 public final class DomInmemoryDataBrokerModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModule {
-
-    private static final String FUTURE_CALLBACK_EXECUTOR_MAX_QUEUE_SIZE_PROP =
-            "mdsal.datastore-future-callback-queue.size";
-    private static final int DEFAULT_FUTURE_CALLBACK_EXECUTOR_MAX_QUEUE_SIZE = 1000;
-
-    private static final String FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE_PROP =
-            "mdsal.datastore-future-callback-pool.size";
-    private static final int DEFAULT_FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE = 20;
-    private static final String COMMIT_EXECUTOR_MAX_QUEUE_SIZE_PROP =
-            "mdsal.datastore-commit-queue.size";
-    private static final int DEFAULT_COMMIT_EXECUTOR_MAX_QUEUE_SIZE = 5000;
 
     public DomInmemoryDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -81,9 +68,7 @@ public final class DomInmemoryDataBrokerModule extends
          * system it's running on.
          */
         ExecutorService commitExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
-                PropertyUtils.getIntSystemProperty(
-                        COMMIT_EXECUTOR_MAX_QUEUE_SIZE_PROP,
-                        DEFAULT_COMMIT_EXECUTOR_MAX_QUEUE_SIZE), "WriteTxCommit");
+                getMaxDataBrokerCommitQueueSize(), "WriteTxCommit");
 
         /*
          * We use an executor for commit ListenableFuture callbacks that favors reusing available
@@ -94,12 +79,8 @@ public final class DomInmemoryDataBrokerModule extends
          * reached, subsequent submitted tasks will block the caller.
          */
         Executor listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
-                PropertyUtils.getIntSystemProperty(
-                        FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE_PROP,
-                        DEFAULT_FUTURE_CALLBACK_EXECUTOR_MAX_POOL_SIZE),
-                PropertyUtils.getIntSystemProperty(
-                        FUTURE_CALLBACK_EXECUTOR_MAX_QUEUE_SIZE_PROP,
-                        DEFAULT_FUTURE_CALLBACK_EXECUTOR_MAX_QUEUE_SIZE), "CommitFutures");
+                getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
+                "CommitFutures");
 
         DOMDataBrokerImpl newDataBroker = new DOMDataBrokerImpl(datastores,
                 new DeadlockDetectingListeningExecutorService(commitExecutor,

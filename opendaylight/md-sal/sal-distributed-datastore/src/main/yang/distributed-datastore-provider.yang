@@ -41,28 +41,64 @@ module distributed-datastore-provider {
         case distributed-config-datastore-provider {
             when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
             container config-schema-service {
-                          uses config:service-ref {
-                               refine type {
-                                      mandatory false;
-                                      config:required-identity sal:schema-service;
-                                }
-                          }
-                        }
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
+                }
+            }
+
+            leaf max-shard-data-change-executor-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for each shard's data store data change notification executor.";
+            }
+
+            leaf max-shard-data-change-executor-pool-size {
+                default 20;
+                type uint16;
+                description "The maximum thread pool size for each shard's data store data change notification executor.";
+            }
+
+            leaf max-shard-data-change-listener-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for each shard's data store data change listeners.";
+            }
         }
     }
 
     // Augments the 'configuration' choice node under modules/module.
-        augment "/config:modules/config:module/config:configuration" {
-            case distributed-operational-datastore-provider {
-                when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-operational-datastore-provider {
+            when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
                 container operational-schema-service {
-                              uses config:service-ref {
-                                   refine type {
-                                          mandatory false;
-                                          config:required-identity sal:schema-service;
-                                    }
-                              }
-                            }
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:schema-service;
+                        }
+                    }
+                }
+
+            leaf max-shard-data-change-executor-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for each shard's data store data change notification executor.";
+            }
+
+            leaf max-shard-data-change-executor-pool-size {
+                default 20;
+                type uint16;
+                description "The maximum thread pool size for each shard's data store data change notification executor.";
+            }
+
+            leaf max-shard-data-change-listener-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for each shard's data store data change listeners.";
+            }
             }
         }
 }
