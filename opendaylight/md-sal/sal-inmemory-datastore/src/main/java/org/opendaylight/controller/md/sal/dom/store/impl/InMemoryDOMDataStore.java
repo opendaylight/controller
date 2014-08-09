@@ -21,7 +21,6 @@ import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedEx
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.util.ExecutorServiceUtil;
-import org.opendaylight.yangtools.util.PropertyUtils;
 import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
@@ -85,11 +84,6 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                 }
             };
 
-    private static final String DCL_NOTIFICATION_MGR_MAX_QUEUE_SIZE_PROP =
-            "mdsal.datastore-dcl-notification-queue.size";
-
-    private static final int DEFAULT_DCL_NOTIFICATION_MGR_MAX_QUEUE_SIZE = 1000;
-
     private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
@@ -104,17 +98,21 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
 
     public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
             final ExecutorService dataChangeListenerExecutor) {
+        this(name, listeningExecutor, dataChangeListenerExecutor,
+                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE);
+    }
+
+    public InMemoryDOMDataStore(final String name, final ListeningExecutorService listeningExecutor,
+            final ExecutorService dataChangeListenerExecutor, int maxDataChangeListenerQueueSize) {
         this.name = Preconditions.checkNotNull(name);
         this.listeningExecutor = Preconditions.checkNotNull(listeningExecutor);
 
         this.dataChangeListenerExecutor = Preconditions.checkNotNull(dataChangeListenerExecutor);
 
-        int maxDCLQueueSize = PropertyUtils.getIntSystemProperty(
-                DCL_NOTIFICATION_MGR_MAX_QUEUE_SIZE_PROP, DEFAULT_DCL_NOTIFICATION_MGR_MAX_QUEUE_SIZE );
-
         dataChangeListenerNotificationManager =
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
-                        DCL_NOTIFICATION_MGR_INVOKER, maxDCLQueueSize, "DataChangeListenerQueueMgr");
+                        DCL_NOTIFICATION_MGR_INVOKER, maxDataChangeListenerQueueSize,
+                        "DataChangeListenerQueueMgr");
     }
 
     @Override

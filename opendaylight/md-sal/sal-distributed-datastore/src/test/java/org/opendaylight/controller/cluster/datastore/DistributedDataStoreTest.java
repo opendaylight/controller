@@ -68,7 +68,7 @@ public class DistributedDataStoreTest extends AbstractActorTest{
         ActorSystem actorSystem = mock(ActorSystem.class);
 
         new DistributedDataStore(actorSystem, "config",
-            mock(ClusterWrapper.class), mock(Configuration.class));
+            mock(ClusterWrapper.class), mock(Configuration.class), null);
 
         verify(actorSystem).actorOf(any(Props.class), eq("shardmanager-config"));
     }

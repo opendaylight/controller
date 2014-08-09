@@ -108,6 +108,24 @@ module opendaylight-sal-dom-broker-impl {
                        }
                    }
             }
+
+            leaf max-data-broker-future-callback-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for the data broker's commit future callback executor.";
+            }
+
+            leaf max-data-broker-future-callback-pool-size {
+                default 20;
+                type uint16;
+                description "The maximum thread pool size for the data broker's commit future callback executor.";
+            }
+
+            leaf max-data-broker-commit-queue-size {
+                default 5000;
+                type uint16;
+                description "The maximum queue size for the data broker's commit executor.";
+            }
         }
     }
     

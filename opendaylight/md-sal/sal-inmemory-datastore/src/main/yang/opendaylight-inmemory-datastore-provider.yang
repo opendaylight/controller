@@ -41,34 +41,68 @@ module opendaylight-inmemory-datastore-provider {
             when "/config:modules/config:module/config:type = 'inmemory-config-datastore-provider'";
 
             container schema-service {
-              uses config:service-ref {
+                uses config:service-ref {
                    refine type {
                           mandatory false;
                           config:required-identity sal:schema-service;
                     }
-              }
+                }
+            }
+
+            leaf max-data-change-executor-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for the data change notification executor.";
+            }
+
+            leaf max-data-change-executor-pool-size {
+                default 20;
+                type uint16;
+                description "The maximum thread pool size for the data change notification executor.";
+            }
+
+            leaf max-data-change-listener-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for the data change listeners.";
             }
         }
     }
 
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case inmemory-operational-datastore-provider {
+            when "/config:modules/config:module/config:type = 'inmemory-operational-datastore-provider'";
 
-
-      // Augments the 'configuration' choice node under modules/module.
-        augment "/config:modules/config:module/config:configuration" {
-            case inmemory-operational-datastore-provider {
-                when "/config:modules/config:module/config:type = 'inmemory-operational-datastore-provider'";
-
-                // Yang does not allow two cases from same namespaces with same children
-                // Schema-service dependency renamed to operational-schema-service
-                // to prevent conflict with schema-service container from inmemory-config-datastore-provider
-                container operational-schema-service {
-                  uses config:service-ref {
-                       refine type {
-                              mandatory false;
-                              config:required-identity sal:schema-service;
-                        }
-                  }
+            // Yang does not allow two cases from same namespaces with same children
+            // Schema-service dependency renamed to operational-schema-service
+            // to prevent conflict with schema-service container from inmemory-config-datastore-provider
+            container operational-schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
                 }
             }
+
+            leaf max-data-change-executor-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for the data change notification executor.";
+            }
+
+            leaf max-data-change-executor-pool-size {
+                default 20;
+                type uint16;
+                description "The maximum thread pool size for the data change notification executor.";
+            }
+
+            leaf max-data-change-listener-queue-size {
+                default 1000;
+                type uint16;
+                description "The maximum queue size for the data change listeners.";
+            }
         }
+    }
 }

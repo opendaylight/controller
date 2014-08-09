@@ -30,6 +30,8 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+
 import scala.concurrent.duration.Duration;
 
 import java.util.ArrayList;
@@ -68,15 +70,19 @@ public class ShardManager extends AbstractUntypedActor {
 
     private ShardManagerInfoMBean mBean;
 
+    private final InMemoryDOMDataStoreConfigProperties dataStoreProperties;
+
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
      *             configuration or operational
      */
-    private ShardManager(String type, ClusterWrapper cluster, Configuration configuration) {
+    private ShardManager(String type, ClusterWrapper cluster, Configuration configuration,
+            InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
 
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
+        this.dataStoreProperties = dataStoreProperties;
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -88,7 +94,8 @@ public class ShardManager extends AbstractUntypedActor {
 
     public static Props props(final String type,
         final ClusterWrapper cluster,
-        final Configuration configuration) {
+        final Configuration configuration,
+        final InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
 
         Preconditions.checkNotNull(type, "type should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
@@ -98,7 +105,7 @@ public class ShardManager extends AbstractUntypedActor {
 
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(type, cluster, configuration);
+                return new ShardManager(type, cluster, configuration, dataStoreProperties);
             }
         });
     }
@@ -243,7 +250,7 @@ public class ShardManager extends AbstractUntypedActor {
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<ShardIdentifier, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
-                .actorOf(Shard.props(shardId, peerAddresses),
+                .actorOf(Shard.props(shardId, peerAddresses, dataStoreProperties),
                     shardId.toString());
             localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));

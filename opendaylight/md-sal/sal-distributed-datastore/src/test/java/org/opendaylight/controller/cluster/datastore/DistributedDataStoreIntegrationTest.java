@@ -72,7 +72,7 @@ public class DistributedDataStoreIntegrationTest {
                     protected void run() {
                         try {
                             final DistributedDataStore distributedDataStore =
-                                new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), configuration);
+                                new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), configuration, null);
 
                             distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
@@ -154,7 +154,7 @@ public class DistributedDataStoreIntegrationTest {
                         try {
                             final DistributedDataStore distributedDataStore =
                                 new DistributedDataStore(getSystem(), "config",
-                                    new MockClusterWrapper(), configuration);
+                                    new MockClusterWrapper(), configuration, null);
 
                             distributedDataStore.onGlobalContextUpdated(
                                 SchemaContextHelper.full());

@@ -58,7 +58,7 @@ public class BasicIntegrationTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, null);
             final ActorRef shard = getSystem().actorOf(props);
 
             new Within(duration("5 seconds")) {

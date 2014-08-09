@@ -40,7 +40,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransactionChain");
 
@@ -96,7 +96,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testRegisterChangeListener");
 
@@ -154,7 +154,7 @@ public class ShardTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP);
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCreateTransaction");
 
@@ -216,7 +216,7 @@ public class ShardTest extends AbstractActorTest {
                     .shardName("inventory").type("config").build();
 
             peerAddresses.put(identifier, null);
-            final Props props = Shard.props(identifier, peerAddresses);
+            final Props props = Shard.props(identifier, peerAddresses, null);
             final ActorRef subject =
                 getSystem().actorOf(props, "testPeerAddressResolved");
 

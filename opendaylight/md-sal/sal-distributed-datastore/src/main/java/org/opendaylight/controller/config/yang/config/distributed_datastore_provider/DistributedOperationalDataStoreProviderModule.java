@@ -1,6 +1,7 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 
 public class DistributedOperationalDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
@@ -25,8 +26,11 @@ public class DistributedOperationalDataStoreProviderModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return DistributedDataStoreFactory
-            .createInstance("operational", getOperationalSchemaServiceDependency());
+        return DistributedDataStoreFactory.createInstance("operational",
+                getOperationalSchemaServiceDependency(),
+                InMemoryDOMDataStoreConfigProperties.create(getMaxShardDataChangeExecutorPoolSize(),
+                        getMaxShardDataChangeExecutorQueueSize(),
+                        getMaxShardDataChangeListenerQueueSize()));
     }
 
 }
