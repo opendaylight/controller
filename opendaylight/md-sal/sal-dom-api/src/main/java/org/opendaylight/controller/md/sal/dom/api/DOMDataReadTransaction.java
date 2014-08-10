@@ -47,4 +47,16 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
      */
     CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(
             LogicalDatastoreType store, YangInstanceIdentifier path);
+
+    /**
+     *
+     * @param store
+     *            Logical data store from which read should occur.
+     * @param path
+     *            Path which uniquely identifies subtree which client want to
+     *            read
+     * @return true if exists, false otherwise
+     */
+    boolean exists(LogicalDatastoreType store, YangInstanceIdentifier path);
+
 }

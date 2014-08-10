@@ -6579,6 +6579,933 @@ public final class ShardTransactionMessages {
     // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.MergeDataReply)
   }
 
+  public interface DataExistsOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    boolean hasInstanceIdentifierPathArguments();
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments();
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder();
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.DataExists}
+   */
+  public static final class DataExists extends
+      com.google.protobuf.GeneratedMessage
+      implements DataExistsOrBuilder {
+    // Use DataExists.newBuilder() to construct.
+    private DataExists(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DataExists(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DataExists defaultInstance;
+    public static DataExists getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DataExists getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DataExists(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = instanceIdentifierPathArguments_.toBuilder();
+              }
+              instanceIdentifierPathArguments_ = input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(instanceIdentifierPathArguments_);
+                instanceIdentifierPathArguments_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExists_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DataExists> PARSER =
+        new com.google.protobuf.AbstractParser<DataExists>() {
+      public DataExists parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DataExists(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DataExists> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+    public static final int INSTANCEIDENTIFIERPATHARGUMENTS_FIELD_NUMBER = 1;
+    private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierPathArguments_;
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    public boolean hasInstanceIdentifierPathArguments() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
+      return instanceIdentifierPathArguments_;
+    }
+    /**
+     * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+     */
+    public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
+      return instanceIdentifierPathArguments_;
+    }
+
+    private void initFields() {
+      instanceIdentifierPathArguments_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasInstanceIdentifierPathArguments()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getInstanceIdentifierPathArguments().isInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeMessage(1, instanceIdentifierPathArguments_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, instanceIdentifierPathArguments_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.DataExists}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExists_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getInstanceIdentifierPathArgumentsFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          instanceIdentifierPathArguments_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+        } else {
+          instanceIdentifierPathArgumentsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists build() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists buildPartial() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          result.instanceIdentifierPathArguments_ = instanceIdentifierPathArguments_;
+        } else {
+          result.instanceIdentifierPathArguments_ = instanceIdentifierPathArgumentsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists other) {
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists.getDefaultInstance()) return this;
+        if (other.hasInstanceIdentifierPathArguments()) {
+          mergeInstanceIdentifierPathArguments(other.getInstanceIdentifierPathArguments());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasInstanceIdentifierPathArguments()) {
+          
+          return false;
+        }
+        if (!getInstanceIdentifierPathArguments().isInitialized()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExists) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;
+      private org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier instanceIdentifierPathArguments_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> instanceIdentifierPathArgumentsBuilder_;
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public boolean hasInstanceIdentifierPathArguments() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier getInstanceIdentifierPathArguments() {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          return instanceIdentifierPathArguments_;
+        } else {
+          return instanceIdentifierPathArgumentsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder setInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          instanceIdentifierPathArguments_ = value;
+          onChanged();
+        } else {
+          instanceIdentifierPathArgumentsBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder setInstanceIdentifierPathArguments(
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder builderForValue) {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          instanceIdentifierPathArguments_ = builderForValue.build();
+          onChanged();
+        } else {
+          instanceIdentifierPathArgumentsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder mergeInstanceIdentifierPathArguments(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier value) {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              instanceIdentifierPathArguments_ != org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance()) {
+            instanceIdentifierPathArguments_ =
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.newBuilder(instanceIdentifierPathArguments_).mergeFrom(value).buildPartial();
+          } else {
+            instanceIdentifierPathArguments_ = value;
+          }
+          onChanged();
+        } else {
+          instanceIdentifierPathArgumentsBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public Builder clearInstanceIdentifierPathArguments() {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          instanceIdentifierPathArguments_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
+          onChanged();
+        } else {
+          instanceIdentifierPathArgumentsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder getInstanceIdentifierPathArgumentsBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getInstanceIdentifierPathArgumentsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      public org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder getInstanceIdentifierPathArgumentsOrBuilder() {
+        if (instanceIdentifierPathArgumentsBuilder_ != null) {
+          return instanceIdentifierPathArgumentsBuilder_.getMessageOrBuilder();
+        } else {
+          return instanceIdentifierPathArguments_;
+        }
+      }
+      /**
+       * <code>required .org.opendaylight.controller.mdsal.InstanceIdentifier instanceIdentifierPathArguments = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder> 
+          getInstanceIdentifierPathArgumentsFieldBuilder() {
+        if (instanceIdentifierPathArgumentsBuilder_ == null) {
+          instanceIdentifierPathArgumentsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+                  instanceIdentifierPathArguments_,
+                  getParentForChildren(),
+                  isClean());
+          instanceIdentifierPathArguments_ = null;
+        }
+        return instanceIdentifierPathArgumentsBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.DataExists)
+    }
+
+    static {
+      defaultInstance = new DataExists(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.DataExists)
+  }
+
+  public interface DataExistsReplyOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bool exists = 1;
+    /**
+     * <code>required bool exists = 1;</code>
+     */
+    boolean hasExists();
+    /**
+     * <code>required bool exists = 1;</code>
+     */
+    boolean getExists();
+  }
+  /**
+   * Protobuf type {@code org.opendaylight.controller.mdsal.DataExistsReply}
+   */
+  public static final class DataExistsReply extends
+      com.google.protobuf.GeneratedMessage
+      implements DataExistsReplyOrBuilder {
+    // Use DataExistsReply.newBuilder() to construct.
+    private DataExistsReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DataExistsReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DataExistsReply defaultInstance;
+    public static DataExistsReply getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DataExistsReply getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DataExistsReply(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              exists_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExistsReply_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DataExistsReply> PARSER =
+        new com.google.protobuf.AbstractParser<DataExistsReply>() {
+      public DataExistsReply parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DataExistsReply(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DataExistsReply> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bool exists = 1;
+    public static final int EXISTS_FIELD_NUMBER = 1;
+    private boolean exists_;
+    /**
+     * <code>required bool exists = 1;</code>
+     */
+    public boolean hasExists() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bool exists = 1;</code>
+     */
+    public boolean getExists() {
+      return exists_;
+    }
+
+    private void initFields() {
+      exists_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasExists()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBool(1, exists_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, exists_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendaylight.controller.mdsal.DataExistsReply}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReplyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExistsReply_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.class, org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.Builder.class);
+      }
+
+      // Construct using org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        exists_ = false;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply getDefaultInstanceForType() {
+        return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.getDefaultInstance();
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply build() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply buildPartial() {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.exists_ = exists_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply) {
+          return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply other) {
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply.getDefaultInstance()) return this;
+        if (other.hasExists()) {
+          setExists(other.getExists());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasExists()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.DataExistsReply) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bool exists = 1;
+      private boolean exists_ ;
+      /**
+       * <code>required bool exists = 1;</code>
+       */
+      public boolean hasExists() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bool exists = 1;</code>
+       */
+      public boolean getExists() {
+        return exists_;
+      }
+      /**
+       * <code>required bool exists = 1;</code>
+       */
+      public Builder setExists(boolean value) {
+        bitField0_ |= 0x00000001;
+        exists_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool exists = 1;</code>
+       */
+      public Builder clearExists() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        exists_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:org.opendaylight.controller.mdsal.DataExistsReply)
+    }
+
+    static {
+      defaultInstance = new DataExistsReply(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendaylight.controller.mdsal.DataExistsReply)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendaylight_controller_mdsal_CloseTransaction_descriptor;
   private static
@@ -6649,6 +7576,16 @@ public final class ShardTransactionMessages {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_org_opendaylight_controller_mdsal_MergeDataReply_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_DataExists_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_org_opendaylight_controller_mdsal_DataExistsReply_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -6683,10 +7620,13 @@ public final class ShardTransactionMessages {
       "thArguments\030\001 \002(\01325.org.opendaylight.con" +
       "troller.mdsal.InstanceIdentifier\022?\n\016norm" +
       "alizedNode\030\002 \002(\0132\'.org.opendaylight.cont" +
-      "roller.mdsal.Node\"\020\n\016MergeDataReplyBV\n:o" +
-      "rg.opendaylight.controller.protobuff.mes" +
-      "sages.transactionB\030ShardTransactionMessa" +
-      "ges"
+      "roller.mdsal.Node\"\020\n\016MergeDataReply\"l\n\nD" +
+      "ataExists\022^\n\037instanceIdentifierPathArgum" +
+      "ents\030\001 \002(\01325.org.opendaylight.controller" +
+      ".mdsal.InstanceIdentifier\"!\n\017DataExistsR" +
+      "eply\022\016\n\006exists\030\001 \002(\010BV\n:org.opendaylight",
+      ".controller.protobuff.messages.transacti" +
+      "onB\030ShardTransactionMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -6777,6 +7717,18 @@ public final class ShardTransactionMessages {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_MergeDataReply_descriptor,
               new java.lang.String[] { });
+          internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor =
+            getDescriptor().getMessageTypes().get(14);
+          internal_static_org_opendaylight_controller_mdsal_DataExists_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_DataExists_descriptor,
+              new java.lang.String[] { "InstanceIdentifierPathArguments", });
+          internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor =
+            getDescriptor().getMessageTypes().get(15);
+          internal_static_org_opendaylight_controller_mdsal_DataExistsReply_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_org_opendaylight_controller_mdsal_DataExistsReply_descriptor,
+              new java.lang.String[] { "Exists", });
           return null;
         }
       };
