@@ -65,3 +65,11 @@ required Node normalizedNode =2;
 message MergeDataReply{
 
 }
+
+message DataExists {
+  required InstanceIdentifier instanceIdentifierPathArguments = 1;
+}
+
+message DataExistsReply {
+  required bool exists = 1;
+}
