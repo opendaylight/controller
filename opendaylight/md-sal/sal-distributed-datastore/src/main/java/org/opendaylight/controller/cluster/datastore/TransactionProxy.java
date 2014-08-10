@@ -23,6 +23,8 @@ import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIden
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.DataExists;
+import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -110,6 +112,14 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         createTransactionIfMissing(actorContext, path);
 
         return transactionContext(path).readData(path);
+    }
+
+    @Override public boolean exists(YangInstanceIdentifier path) {
+        LOG.debug("exists {}", path);
+
+        createTransactionIfMissing(actorContext, path);
+
+        return transactionContext(path).dataExists(path);
     }
 
     @Override
@@ -242,6 +252,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 final YangInstanceIdentifier path);
 
         void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+
+        boolean dataExists(YangInstanceIdentifier path);
     }
 
 
@@ -319,6 +331,19 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             getActor().tell(new WriteData(path, data, schemaContext).toSerializable(), null);
         }
 
+        @Override public boolean dataExists(YangInstanceIdentifier path) {
+            Object o = actorContext.executeRemoteOperation(getActor(),
+                new DataExists(path),
+                ActorContext.ASK_DURATION
+            );
+
+            if(o instanceof DataExistsReply){
+                return ((DataExistsReply) o).exists();
+            }
+
+            return false;
+        }
+
     }
 
     private class NoOpTransactionContext implements TransactionContext {
@@ -372,6 +397,11 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         @Override public void writeData(YangInstanceIdentifier path,
             NormalizedNode<?, ?> data) {
             LOG.warn("writeData called path = {}", path);
+        }
+
+        @Override public boolean dataExists(YangInstanceIdentifier path) {
+            LOG.warn("dataExists called path = {}", path);
+            return false;
         }
     }
 

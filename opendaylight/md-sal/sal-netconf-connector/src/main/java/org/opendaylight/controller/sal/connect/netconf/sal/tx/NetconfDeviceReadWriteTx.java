@@ -23,6 +23,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+import java.util.concurrent.ExecutionException;
+
 public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
 
     private final DOMDataReadTransaction delegateReadTx;
@@ -67,6 +69,19 @@ public class NetconfDeviceReadWriteTx implements DOMDataReadWriteTransaction {
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         return delegateReadTx.read(store, path);
+    }
+
+    @Override public boolean exists(LogicalDatastoreType store,
+        YangInstanceIdentifier path) {
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+            data = read(store, path);
+
+        try {
+            return data.get().isPresent();
+        } catch (InterruptedException | ExecutionException e) {
+        }
+
+        return false;
     }
 
     @Override

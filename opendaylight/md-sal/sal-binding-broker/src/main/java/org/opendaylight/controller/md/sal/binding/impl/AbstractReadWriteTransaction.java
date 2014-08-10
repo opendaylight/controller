@@ -7,22 +7,18 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDataReadWriteTransaction> {
 
@@ -50,15 +46,9 @@ public class AbstractReadWriteTransaction extends AbstractWriteTransaction<DOMDa
             org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier currentPath = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.create(
                     currentArguments);
 
-            final Optional<NormalizedNode<?, ?>> d;
-            try {
-                d = getDelegate().read(store, currentPath).get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
-                throw new IllegalStateException("Failed to read pre-existing data", e);
-            }
+            final boolean exists = getDelegate().exists(store, currentPath);
 
-            if (!d.isPresent() && iterator.hasNext()) {
+            if (!exists && iterator.hasNext()) {
                 getDelegate().merge(store, currentPath, currentOp.createDefault(currentArg));
             }
         }
