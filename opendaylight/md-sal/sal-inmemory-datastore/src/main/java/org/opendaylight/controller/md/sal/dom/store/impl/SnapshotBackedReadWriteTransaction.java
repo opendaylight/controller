@@ -22,6 +22,8 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * Implementation of Read-Write transaction which is backed by {@link DataTreeSnapshot}
  * and executed according to {@link TransactionReadyPrototype}.
@@ -59,6 +61,16 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
         } catch (Exception e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
+        }
+    }
+
+    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
+        YangInstanceIdentifier path) {
+        try {
+            return Futures.immediateCheckedFuture(
+                read(path).checkedGet().isPresent());
+        } catch (ReadFailedException e) {
+            return Futures.immediateFailedCheckedFuture(e);
         }
     }
 }

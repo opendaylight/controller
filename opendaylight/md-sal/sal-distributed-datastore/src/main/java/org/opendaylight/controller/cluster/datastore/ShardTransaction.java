@@ -17,6 +17,8 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.DataExists;
+import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
@@ -33,6 +35,7 @@ import org.opendaylight.controller.cluster.datastore.modification.ImmutableCompo
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -207,6 +210,21 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     }, getContext().dispatcher());
   }
 
+    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message) {
+        final YangInstanceIdentifier path = message.getPath();
+
+
+
+        try {
+            Boolean exists = transaction.exists(path).checkedGet();
+            getSender().tell(new DataExistsReply(exists), getSelf());
+        } catch (ReadFailedException e) {
+            // Do nothing here. This will result in a timeout on the caller end
+            // Basheeruddin is working on a strategy to transport the exception
+            // to the caller
+        }
+
+    }
 
   protected void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
     modification.addModification(
