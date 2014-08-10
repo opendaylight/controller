@@ -40,6 +40,11 @@ class DOMForwardedReadOnlyTransaction extends
         return getSubtransaction(store).read(path);
     }
 
+    @Override public boolean exists(LogicalDatastoreType store,
+        YangInstanceIdentifier path) {
+        return getSubtransaction(store).exists(path);
+    }
+
     @Override
     public void close() {
         closeSubtransactions();
