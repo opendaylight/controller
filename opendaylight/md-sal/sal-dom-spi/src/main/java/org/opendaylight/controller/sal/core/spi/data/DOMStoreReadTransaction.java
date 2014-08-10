@@ -34,4 +34,15 @@ public interface DOMStoreReadTransaction extends DOMStoreTransaction {
      *         </ul>
      */
     CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(YangInstanceIdentifier path);
+
+    /**
+     * Checks if data exists at a given path
+     *
+     * @param path
+     *            Path which uniquely identifies subtree which client wants to
+     *            check the existence of
+
+     * @return true if the path was found, false otherwise
+     */
+    boolean exists(YangInstanceIdentifier path);
 }

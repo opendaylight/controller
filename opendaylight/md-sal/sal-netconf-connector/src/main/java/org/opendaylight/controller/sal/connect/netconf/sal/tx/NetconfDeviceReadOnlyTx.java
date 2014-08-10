@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.CONFIG_SOURCE_RUNNING;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DATA_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_CONFIG_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toFilterStructure;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,6 +28,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutionException;
+
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.CONFIG_SOURCE_RUNNING;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DATA_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_CONFIG_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toFilterStructure;
 
 
 public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction {
@@ -134,6 +136,19 @@ public final class NetconfDeviceReadOnlyTx implements DOMDataReadOnlyTransaction
         }
 
         throw new IllegalArgumentException(String.format("%s, Cannot read data %s for %s datastore, unknown datastore type", id, path, store));
+    }
+
+    @Override public boolean exists(LogicalDatastoreType store,
+        YangInstanceIdentifier path) {
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+            data = read(store, path);
+
+        try {
+            return data.get().isPresent();
+        } catch (InterruptedException | ExecutionException e) {
+        }
+
+        return false;
     }
 
     static YangInstanceIdentifier toLegacyPath(final DataNormalizer normalizer, final YangInstanceIdentifier path, final RemoteDeviceId id) {
