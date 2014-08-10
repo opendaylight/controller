@@ -7,13 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.ExecutionException;
-
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,9 +32,12 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class InMemoryDataStoreTest {
@@ -184,6 +184,74 @@ public class InMemoryDataStoreTest {
         assertEquals( "After commit read: isPresent", true, afterCommitRead.isPresent() );
         assertEquals( "After commit read: data", containerNode, afterCommitRead.get() );
     }
+
+
+    @Test
+    public void testExistsForExistingData() throws Exception {
+
+        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+        assertNotNull( writeTx );
+
+        ContainerNode containerNode = ImmutableContainerNodeBuilder.create()
+            .withNodeIdentifier( new NodeIdentifier( TestModel.TEST_QNAME ) )
+            .addChild( ImmutableNodes.mapNodeBuilder( TestModel.OUTER_LIST_QNAME )
+                .addChild( ImmutableNodes.mapEntry( TestModel.OUTER_LIST_QNAME,
+                    TestModel.ID_QNAME, 1 ) ).build() ).build();
+
+        writeTx.merge( TestModel.TEST_PATH, containerNode );
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+            writeTx.exists(TestModel.TEST_PATH);
+
+        assertEquals(true, exists.checkedGet());
+
+        DOMStoreThreePhaseCommitCohort ready = writeTx.ready();
+
+        ready.preCommit().get();
+
+        ready.commit().get();
+
+        DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
+        assertNotNull( readTx );
+
+        exists =
+            readTx.exists(TestModel.TEST_PATH);
+
+        assertEquals(true, exists.checkedGet());
+    }
+
+    @Test
+    public void testExistsForNonExistingData() throws Exception {
+
+        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+        assertNotNull( writeTx );
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+            writeTx.exists(TestModel.TEST_PATH);
+
+        assertEquals(false, exists.checkedGet());
+
+        DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
+        assertNotNull( readTx );
+
+        exists =
+            readTx.exists(TestModel.TEST_PATH);
+
+        assertEquals(false, exists.checkedGet());
+    }
+
+    @Test(expected=ReadFailedException.class)
+    public void testExistsThrowsReadFailedException() throws Exception {
+
+        DOMStoreReadTransaction readTx = domStore.newReadOnlyTransaction();
+        assertNotNull( readTx );
+
+        readTx.close();
+
+        readTx.exists(TestModel.TEST_PATH).checkedGet();
+    }
+
+
 
     @Test(expected=ReadFailedException.class)
     public void testReadWithReadOnlyTransactionClosed() throws Throwable {

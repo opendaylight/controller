@@ -15,13 +15,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
@@ -77,6 +70,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class BackwardsCompatibleMountPoint implements MountProvisionInstance, SchemaContextProvider, SchemaService {
 
@@ -405,6 +404,16 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
                 final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = Optional.<NormalizedNode<?, ?>>fromNullable(normalized.getValue());
                 return Futures.immediateCheckedFuture(normalizedNodeOptional);
             }
+
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
+                YangInstanceIdentifier path) {
+
+                try {
+                    return Futures.immediateCheckedFuture(read(store, path).get().isPresent());
+                } catch (InterruptedException | ExecutionException e) {
+                    return Futures.immediateFailedCheckedFuture(new ReadFailedException("Exists failed",e));
+                }
+            }
         }
 
         @VisibleForTesting
@@ -516,6 +525,16 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
                     final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 return new BackwardsCompatibleReadTransaction(dataReader, dataNormalizer).read(store, path);
+            }
+
+            @Override public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
+                YangInstanceIdentifier path) {
+
+                try {
+                    return Futures.immediateCheckedFuture(read(store, path).get().isPresent());
+                } catch (InterruptedException | ExecutionException e) {
+                    return Futures.immediateFailedCheckedFuture(new ReadFailedException("Exists failed",e));
+                }
             }
 
             @Override
