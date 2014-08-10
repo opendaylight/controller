@@ -17,6 +17,8 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.DataExists;
+import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
@@ -207,6 +209,11 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     }, getContext().dispatcher());
   }
 
+    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message) {
+        final YangInstanceIdentifier path = message.getPath();
+        getSender().tell(new DataExistsReply(transaction.exists(path)), getSelf());
+
+    }
 
   protected void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
     modification.addModification(
