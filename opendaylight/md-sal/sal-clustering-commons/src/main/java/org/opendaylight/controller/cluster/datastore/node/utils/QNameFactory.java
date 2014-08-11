@@ -10,25 +10,24 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.opendaylight.yangtools.yang.common.QName;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class QNameFactory {
-    private static final Map<String, QName> cache = new HashMap<>();
+
+    private static LoadingCache<String, QName> cache = CacheBuilder.newBuilder()
+        .maximumSize(10000)
+        .build(
+            new CacheLoader<String, QName>() {
+                public QName load(String key) {
+                    return QName.create(key);
+                }
+            });
+
 
     public static QName create(String name){
-        QName value = cache.get(name);
-        if(value == null){
-            synchronized (cache){
-                value = cache.get(name);
-                if(value == null) {
-                    value = QName.create(name);
-                    cache.put(name, value);
-                }
-            }
-        }
-        return value;
+        return cache.getUnchecked(name);
     }
 }
