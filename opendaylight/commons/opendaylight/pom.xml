@@ -1001,6 +1001,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>liblldp</artifactId>
+        <version>${sal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>logback-config</artifactId>
         <version>${config.version}</version>
       </dependency>
