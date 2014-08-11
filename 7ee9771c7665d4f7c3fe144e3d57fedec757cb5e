@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_38f028c8",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractReadWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "\u0027exists\u0027 should throw ReadFailedException on failure and this method should fail as it did before.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f8e080ce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "Return CheckedFuture here.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78d470eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "Submit to the executor to get a ListenableFuture as he read method does.\n\nAlso, I assume this call can fail. How does akka handle that? Does it throw an unchecked exception? We need to propagate a failure as a ReadFailedException.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_18e444df",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "What if the reply isn\u0027t the right type? Can this happen? Should throw ReadFailedException.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8dfbc38",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "I think this should be async like the read method, i.e. return CheckedFuture\u003cBoolean, ReadFailedException\u003e. What if the back-end can\u0027t definitively determine if the data exists (e.g. remote call fails)? If we return false, \u0027ensureWithParents\u0027 would think it doesn\u0027t exist and continue.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_18bd24b7",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "Return CheckedFuture\u003cBoolean, ReadFailedException\u003e ...",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_981e140b",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/SnapshotBackedReadTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "You should use checkGet here so you only have to catch ReadFailedException and also log the exception (as warning).\n\nHowever, if the method returns a CheckedFuture then:\n\ntry {\n    return Futures.immediateCheckedFuture(                                      \n                       Boolean.valueOf(read(path).checkedGet().isPresent()));\n} catch (ReadFailedException e) {\n    return Futures.immediateFailedCheckedFuture(e);\n}",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_58ebacdb",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/SnapshotBackedReadWriteTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "Same as comments in SnapshotBackedReadTransaction.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78d1d021",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-11T21:46:48Z",
+      "side": 1,
+      "message": "\u0027exists\u0027 should throw ReadFailedException on failure and this method should fail as before.",
+      "revId": "7ee9771c7665d4f7c3fe144e3d57fedec757cb5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
