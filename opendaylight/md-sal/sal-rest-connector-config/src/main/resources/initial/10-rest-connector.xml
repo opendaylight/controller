@@ -35,4 +35,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </services>
     </data>
   </configuration>
+  <required-capabilities>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector?module=opendaylight-rest-connector&amp;revision=2014-07-24</capability>
+  </required-capabilities>  
 </snapshot>
