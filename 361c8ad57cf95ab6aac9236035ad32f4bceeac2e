@@ -16,6 +16,24 @@
       "revId": "361c8ad57cf95ab6aac9236035ad32f4bceeac2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8433c11",
+        "filename": "opendaylight/md-sal/sal-rest-connector-config/src/main/resources/initial/10-rest-connector.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T19:55:08Z",
+      "side": 1,
+      "message": "Karaf runs jetty on port 8181",
+      "parentUuid": "fa82b9bf_58e16c28",
+      "revId": "361c8ad57cf95ab6aac9236035ad32f4bceeac2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
