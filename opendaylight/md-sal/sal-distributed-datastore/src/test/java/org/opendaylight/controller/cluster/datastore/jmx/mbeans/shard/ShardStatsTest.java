@@ -8,6 +8,8 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBea
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ShardStatsTest {
   private MBeanServer mbeanServer;
@@ -52,4 +54,19 @@ public class ShardStatsTest {
 
 
   }
+
+ @Test
+ public void testGetLastCommittedTransactionTime() throws Exception {
+     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+     Assert.assertEquals(shardStats.getLastCommittedTransactionTime(),
+         sdf.format(new Date(0L)));
+     long millis = System.currentTimeMillis();
+     shardStats.setLastCommittedTransactionTime(new Date(millis));
+
+     //now let us get from MBeanServer what is the transaction count.
+     Object attribute = mbeanServer.getAttribute(testMBeanName,"LastCommittedTransactionTime");
+     Assert.assertEquals((String) attribute, sdf.format(new Date(millis)));
+     Assert.assertNotEquals((String) attribute, sdf.format(new Date(millis-1)));
+
+ }
 }

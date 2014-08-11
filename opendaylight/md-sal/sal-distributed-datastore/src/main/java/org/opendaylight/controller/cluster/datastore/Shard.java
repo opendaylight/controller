@@ -48,6 +48,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -190,16 +191,14 @@ public class Shard extends RaftActor {
 
         getSender()
             .tell(new CreateTransactionReply(
-                    Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId()).toSerializable(),
-                getSelf()
-            );
+                Serialization.serializedActorPath(transactionActor),
+                createTransaction.getTransactionId()).toSerializable(),
+                getSelf());
     }
 
     private void commit(final ActorRef sender, Object serialized) {
-        Modification modification =
-            MutableCompositeModification.fromSerializable(
-                serialized, schemaContext);
+        Modification modification = MutableCompositeModification
+            .fromSerializable(serialized, schemaContext);
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
@@ -225,6 +224,7 @@ public class Shard extends RaftActor {
 
         final ListenableFuture<Void> future = cohort.commit();
         shardMBean.incrementCommittedTransactionCount();
+        shardMBean.setLastCommittedTransactionTime(new Date());
         final ActorRef self = getSelf();
         future.addListener(new Runnable() {
             @Override
@@ -318,8 +318,7 @@ public class Shard extends RaftActor {
         getSender()
             .tell(new CreateTransactionChainReply(transactionChain.path())
                     .toSerializable(),
-                getSelf()
-            );
+                getSelf());
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,

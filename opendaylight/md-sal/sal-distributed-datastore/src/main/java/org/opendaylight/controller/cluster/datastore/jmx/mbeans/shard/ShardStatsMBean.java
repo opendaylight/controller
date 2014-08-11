@@ -27,4 +27,6 @@ public interface ShardStatsMBean {
     Long getCommitIndex();
 
     Long getLastApplied();
+
+    String getLastCommittedTransactionTime();
 }

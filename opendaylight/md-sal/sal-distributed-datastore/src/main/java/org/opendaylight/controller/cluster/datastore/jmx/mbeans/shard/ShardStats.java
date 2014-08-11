@@ -2,6 +2,9 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.AbstractBaseMBean;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * @author: syedbahm
  */
@@ -31,8 +34,13 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
 
     private Long lastApplied = -1L;
 
+    private Date lastCommittedTransactionTime;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
     ShardStats(String shardName) {
         this.shardName = shardName;
+        committedTransactionsCount = 0L;
+        lastCommittedTransactionTime  = new Date(0L);
     }
 
 
@@ -86,6 +94,12 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
         return lastApplied;
     }
 
+    @Override
+    public String getLastCommittedTransactionTime() {
+
+        return sdf.format(lastCommittedTransactionTime);
+    }
+
     public Long incrementCommittedTransactionCount() {
         return committedTransactionsCount++;
     }
@@ -128,6 +142,11 @@ public class ShardStats extends AbstractBaseMBean implements ShardStatsMBean {
 
     public void setLastApplied(Long lastApplied) {
         this.lastApplied = lastApplied;
+    }
+
+
+    public void setLastCommittedTransactionTime(Date lastCommittedTransactionTime) {
+        this.lastCommittedTransactionTime = lastCommittedTransactionTime;
     }
 
     @Override
