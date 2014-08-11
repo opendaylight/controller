@@ -129,7 +129,9 @@
     <!-- Karaf Distribution -->
     <module>opendaylight/dummy-console</module>
     <module>opendaylight/karaf-branding</module>
+    <module>opendaylight/distribution/opendaylight-karaf-empty</module>
     <module>opendaylight/distribution/opendaylight-karaf</module>
+    <module>opendaylight/distribution/opendaylight-karaf-resources</module>
     <module>features</module>
   </modules>
   <scm>

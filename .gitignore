@@ -28,4 +28,6 @@ maven-eclipse.xml
 .DS_STORE
 .metadata
 opendaylight/md-sal/sal-distributed-datastore/journal
+!opendaylight/distribution/opendaylight-karaf-resources/src/main/resources/bin
+
 

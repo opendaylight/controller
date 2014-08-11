@@ -6,7 +6,7 @@
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
 
   <feature name='odl-config-all' version='${project.version}'>
-    <feature version='${project.version}'>odl-mdsal-common</feature>
+      <feature version='${mdsal.version}'>odl-mdsal-common</feature>
       <feature version='${project.version}'>odl-config-api</feature>
       <feature version='${project.version}'>odl-config-netty-config-api</feature>
       <feature version='${project.version}'>odl-config-core</feature>
