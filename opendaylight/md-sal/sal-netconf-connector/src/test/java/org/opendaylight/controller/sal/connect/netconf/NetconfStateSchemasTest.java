@@ -7,6 +7,7 @@ import static org.junit.matchers.JUnitMatchers.hasItem;
 import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
@@ -18,7 +19,7 @@ public class NetconfStateSchemasTest {
     public void testCreate() throws Exception {
         final Document schemasXml = XmlUtil.readXmlToDocument(getClass().getResourceAsStream("/netconf-state.schemas.payload.xml"));
         final CompositeNode compositeNodeSchemas = (CompositeNode) XmlDocumentUtils.toDomNode(schemasXml);
-        final NetconfStateSchemas schemas = NetconfStateSchemas.create(compositeNodeSchemas);
+        final NetconfStateSchemas schemas = NetconfStateSchemas.create(new RemoteDeviceId("device"), compositeNodeSchemas);
 
         final Set<QName> availableYangSchemasQNames = schemas.getAvailableYangSchemasQNames();
         assertEquals(73, availableYangSchemasQNames.size());
