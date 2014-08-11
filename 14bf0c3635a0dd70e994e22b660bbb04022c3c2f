@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_98f7f4d2",
+        "filename": "opendaylight/config/config-persister-api/src/main/java/org/opendaylight/controller/config/persist/api/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_18a204fd",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f89e40b8",
         "filename": "opendaylight/config/config-persister-api/src/main/java/org/opendaylight/controller/config/persist/api/ConfigPusher.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-11T18:55:39Z",
       "side": 1,
       "message": "A comment would be nice here to explain the purpose of the class.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1833e4ab",
+        "filename": "opendaylight/config/config-persister-api/src/main/java/org/opendaylight/controller/config/persist/api/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f89e40b8",
       "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_380268b4",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "This really is about autoclosable... if the bundle stops, we need to cleanup...",
+      "parentUuid": "fa82b9bf_d8701ca6",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d8a7bc09",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-11T18:55:39Z",
       "side": 1,
       "message": "The last two lines of logging really need to be combined into one or you may loose context.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f82f203d",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "The last two lines are logging distinct things.",
+      "parentUuid": "fa82b9bf_d8a7bc09",
       "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_58664cbc",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "You are correct... removing the synchronization",
+      "parentUuid": "fa82b9bf_78b2304d",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_98adb4eb",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-08-11T18:55:39Z",
       "side": 1,
       "message": "similar comment as above - can you explain why you wanted to synchornize on this method? Are you trying to block out the pushConfig method? Are you trying to something else with synchronization?",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f80880db",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "You are correct, removed the synchronization",
+      "parentUuid": "fa82b9bf_98adb4eb",
       "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d8281c35",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "The Customizers with the AddServvice are both created and registered after this assignment in start().  I would expect start to be called after stop has completed.",
+      "parentUuid": "fa82b9bf_386108d3",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b86d18ce",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_78fc70b8",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "synchronized on autoclosable",
+      "parentUuid": "fa82b9bf_b86d18ce",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_786b10b7",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2014-08-11T18:55:39Z",
       "side": 1,
       "message": "These three debug lines should be 1. It looks like they are intended to show up one after another, HOWEVER, due to multithreading this logging can show up spread out which would decrease its usefulness.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78231056",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-11T21:32:15Z",
+      "side": 1,
+      "message": "These are unrelated and so separate lines.",
+      "parentUuid": "fa82b9bf_786b10b7",
       "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
