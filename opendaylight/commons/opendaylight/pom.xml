@@ -64,6 +64,13 @@
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.2.5-SNAPSHOT</config.version>
+    <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
+    <config.netty.configfile>00-netty.xml</config.netty.configfile>
+    <config.mdsal.configfile>01-mdsal.xml</config.mdsal.configfile>
+    <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
+    <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
+    <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
+    <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.4.3-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.1.2-SNAPSHOT</connectionmanager.version>
@@ -83,6 +90,7 @@
     <!-- OpenEXI third party lib for netconf-->
 
     <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
+    <felix.util.version>1.6.0</felix.util.version>
     <filtervalve.version>1.4.2-SNAPSHOT</filtervalve.version>
     <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
@@ -852,6 +860,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-persister-feature-adapter</artifactId>
+        <version>${config.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-persister-impl</artifactId>
         <version>${netconf.version}</version>
       </dependency>
@@ -1216,6 +1229,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-inmemory-datastore</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-compatibility</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -1553,6 +1571,38 @@
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>features-yangtools</artifactId>
+        <version>${yangtools.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.samples</groupId>
+        <artifactId>features-toaster</artifactId>
+        <version>${mdsal.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>features-config-netty</artifactId>
+        <version>${config.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>features-flow</artifactId>
+        <version>${mdsal.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>
         <version>${jersey-servlet.version}</version>
@@ -1814,7 +1864,7 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-features</artifactId>
+        <artifactId>features-config</artifactId>
         <version>${config.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
@@ -1822,7 +1872,7 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-odl-protocol-framework</artifactId>
+        <artifactId>features-protocol-framework</artifactId>
         <version>${protocol-framework.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
@@ -1830,7 +1880,7 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>netconf-features</artifactId>
+        <artifactId>features-netconf</artifactId>
         <version>${netconf.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
@@ -1838,7 +1888,7 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-persister-features</artifactId>
+        <artifactId>features-config-persister</artifactId>
         <version>${config.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
@@ -1862,7 +1912,7 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-features</artifactId>
+        <artifactId>features-mdsal</artifactId>
         <version>${mdsal.version}</version>
         <classifier>features</classifier>
         <type>xml</type>

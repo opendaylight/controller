@@ -4,22 +4,20 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/netconf-features/${netconf.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/config-features/${config.version}/xml/features</repository>
-  <feature name='odl-config-startup' version='${project.version}'>
-    <feature version='${project.version}'>odl-config-netconf-connector</feature>
+  <repository>mvn:org.opendaylight.controller/features-netconf/${netconf.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
+  <feature name='odl-config-all' version='${project.version}'>
     <feature version='${project.version}'>odl-config-persister</feature>
-    <feature version='${project.version}'>odl-netconf-impl</feature>
+    <feature version='${project.version}'>odl-config-startup</feature>
   </feature>
   <feature name='odl-config-persister' version='${project.version}'>
     <feature version='${netconf.version}'>odl-netconf-api</feature>
     <feature version='${project.version}'>odl-config-api</feature>
-    <feature version='${yangtools.version}'>yangtools-binding-generator</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
     <bundle>mvn:org.opendaylight.controller/config-persister-api/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/${project.version}</bundle>
-    <bundle>mvn:org.opendaylight.controller/config-persister-directory-xml-adapter/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-impl/${project.version}</bundle>
-
+    <bundle>mvn:org.opendaylight.controller/config-persister-feature-adapter/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-util/${netconf.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-mapping-api/${netconf.version}</bundle>
 
@@ -28,5 +26,10 @@
     <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipse.persistence.version}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${eclipse.persistence.version}</bundle>
+  </feature>
+  <feature name='odl-config-startup' version='${project.version}'>
+    <feature version='${project.version}'>odl-config-netconf-connector</feature>
+    <feature version='${project.version}'>odl-config-persister</feature>
+    <feature version='${project.version}'>odl-netconf-impl</feature>
   </feature>
 </features>
