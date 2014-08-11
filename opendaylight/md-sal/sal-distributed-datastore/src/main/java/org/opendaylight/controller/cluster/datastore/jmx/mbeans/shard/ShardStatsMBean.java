@@ -1,5 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+
+
 /**
  * @author: syedbahm
  */
@@ -9,4 +11,5 @@ public interface ShardStatsMBean {
    Long getJournalMessagesCount();
    String getLeader();
    String getRaftState();
+   String getLastCommittedTransactionTime();
 }
