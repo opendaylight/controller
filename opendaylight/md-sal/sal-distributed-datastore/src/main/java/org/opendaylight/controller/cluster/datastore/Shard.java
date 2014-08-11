@@ -48,6 +48,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -190,16 +191,14 @@ public class Shard extends RaftActor {
 
         getSender()
             .tell(new CreateTransactionReply(
-                    Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId()).toSerializable(),
-                getSelf()
-            );
+                Serialization.serializedActorPath(transactionActor),
+                createTransaction.getTransactionId()).toSerializable(),
+                getSelf());
     }
 
     private void commit(final ActorRef sender, Object serialized) {
-        Modification modification =
-            MutableCompositeModification.fromSerializable(
-                serialized, schemaContext);
+        Modification modification = MutableCompositeModification
+            .fromSerializable(serialized, schemaContext);
         DOMStoreThreePhaseCommitCohort cohort =
             modificationToCohort.remove(serialized);
         if (cohort == null) {
@@ -217,29 +216,31 @@ public class Shard extends RaftActor {
                 future = commitCohort.commit();
                 future.get();
             } catch (InterruptedException e) {
+                shardMBean.incrementFailedTransactionsCount();
                 LOG.error("Failed to commit", e);
             } catch (ExecutionException e) {
+                shardMBean.incrementFailedTransactionsCount();
                 LOG.error("Failed to commit", e);
             }
+            //we want to just apply the recovery commit and return
+            return;
         }
 
         final ListenableFuture<Void> future = cohort.commit();
-        shardMBean.incrementCommittedTransactionCount();
         final ActorRef self = getSelf();
         future.addListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     future.get();
-
-                    if (sender != null) {
                         sender
                             .tell(new CommitTransactionReply().toSerializable(),
                                 self);
-                    } else {
-                        LOG.error("sender is null ???");
-                    }
+                        shardMBean.incrementCommittedTransactionCount();
+                        shardMBean.setLastCommittedTransactionTime(new Date());
+
                 } catch (InterruptedException | ExecutionException e) {
+                    shardMBean.incrementFailedTransactionsCount();
                     // FIXME : Handle this properly
                     LOG.error(e, "An exception happened when committing");
                 }
@@ -318,8 +319,7 @@ public class Shard extends RaftActor {
         getSender()
             .tell(new CreateTransactionChainReply(transactionChain.path())
                     .toSerializable(),
-                getSelf()
-            );
+                getSelf());
     }
 
     @Override protected void applyState(ActorRef clientActor, String identifier,
