@@ -25,14 +25,14 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.PropertyUtils;
+import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -42,25 +42,34 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
-    private static final int DEFAULT_EXECUTOR_POOL_SIZE = 10;
+    private static final String EXECUTOR_MAX_POOL_SIZE_PROP =
+            "mdsal.dist-datastore-executor-pool.size";
+    private static final int DEFAULT_EXECUTOR_MAX_POOL_SIZE = 10;
+
+    private static final String EXECUTOR_MAX_QUEUE_SIZE_PROP =
+            "mdsal.dist-datastore-executor-queue.size";
+    private static final int DEFAULT_EXECUTOR_MAX_QUEUE_SIZE = 5000;
 
     private final String type;
     private final ActorContext actorContext;
 
     private SchemaContext schemaContext;
 
-
-
     /**
      * Executor used to run FutureTask's
      *
      * This is typically used when we need to make a request to an actor and
      * wait for it's response and the consumer needs to be provided a Future.
-     *
-     * FIXME : Make the thread pool size configurable.
      */
     private final ListeningExecutorService executor =
-        MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(DEFAULT_EXECUTOR_POOL_SIZE));
+            MoreExecutors.listeningDecorator(
+                    SpecialExecutors.newBlockingBoundedFastThreadPool(
+                            PropertyUtils.getIntSystemProperty(
+                                    EXECUTOR_MAX_POOL_SIZE_PROP,
+                                    DEFAULT_EXECUTOR_MAX_POOL_SIZE),
+                            PropertyUtils.getIntSystemProperty(
+                                    EXECUTOR_MAX_QUEUE_SIZE_PROP,
+                                    DEFAULT_EXECUTOR_MAX_QUEUE_SIZE), "DistDataStore"));
 
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster, Configuration configuration) {
         this(new ActorContext(actorSystem, actorSystem

@@ -8,6 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -16,31 +18,33 @@ import org.slf4j.LoggerFactory;
 class ChangeListenerNotifyTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChangeListenerNotifyTask.class);
+
     private final Iterable<? extends DataChangeListenerRegistration<?>> listeners;
     private final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event;
 
+    @SuppressWarnings("rawtypes")
+    private final NotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent>
+                                                                            notificationMgr;
+
+    @SuppressWarnings("rawtypes")
     public ChangeListenerNotifyTask(final Iterable<? extends DataChangeListenerRegistration<?>> listeners,
-            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event) {
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event,
+            final NotificationManager<AsyncDataChangeListener,AsyncDataChangeEvent> notificationMgr) {
         this.listeners = listeners;
         this.event = event;
+        this.notificationMgr = notificationMgr;
     }
 
     @Override
     public void run() {
 
         for (DataChangeListenerRegistration<?> listener : listeners) {
-            try {
-                listener.getInstance().onDataChanged(event);
-            } catch (Exception e) {
-                LOG.error("Unhandled exception during invoking listener {} with event {}", listener, event, e);
-            }
+            notificationMgr.submitNotification(listener.getInstance(), event);
         }
-
     }
 
     @Override
     public String toString() {
         return "ChangeListenerNotifyTask [listeners=" + listeners + ", event=" + event + "]";
     }
-
 }
