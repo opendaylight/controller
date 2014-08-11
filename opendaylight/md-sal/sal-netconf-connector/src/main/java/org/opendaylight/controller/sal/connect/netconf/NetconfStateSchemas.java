@@ -115,18 +115,21 @@ public final class NetconfStateSchemas {
 
         final CompositeNode schemasNode =
                 (CompositeNode) NetconfMessageTransformUtil.findNode(schemasNodeResult.getResult(), DATA_STATE_SCHEMAS_IDENTIFIER);
-        return create(schemasNode);
+        return create(id, schemasNode);
     }
 
     /**
      * Parse response of get(netconf-state/schemas) to find all schemas under netconf-state/schemas
      */
     @VisibleForTesting
-    protected static NetconfStateSchemas create(final CompositeNode schemasNode) {
+    protected static NetconfStateSchemas create(final RemoteDeviceId id, final CompositeNode schemasNode) {
         final Set<RemoteYangSchema> availableYangSchemas = Sets.newHashSet();
 
         for (final CompositeNode schemaNode : schemasNode.getCompositesByName(Schema.QNAME.withoutRevision())) {
-            availableYangSchemas.add(RemoteYangSchema.createFromCompositeNode(schemaNode));
+            final Optional<RemoteYangSchema> fromCompositeNode = RemoteYangSchema.createFromCompositeNode(id, schemaNode);
+            if(fromCompositeNode.isPresent()) {
+                availableYangSchemas.add(fromCompositeNode.get());
+            }
         }
 
         return new NetconfStateSchemas(availableYangSchemas);
@@ -143,19 +146,23 @@ public final class NetconfStateSchemas {
             return qname;
         }
 
-        static RemoteYangSchema createFromCompositeNode(final CompositeNode schemaNode) {
+        static Optional<RemoteYangSchema> createFromCompositeNode(final RemoteDeviceId id, final CompositeNode schemaNode) {
             Preconditions.checkArgument(schemaNode.getKey().equals(Schema.QNAME.withoutRevision()), "Wrong QName %s", schemaNode.getKey());
 
             QName childNode = NetconfMessageTransformUtil.IETF_NETCONF_MONITORING_SCHEMA_FORMAT.withoutRevision();
 
             final String formatAsString = getSingleChildNodeValue(schemaNode, childNode).get();
-            Preconditions.checkArgument(formatAsString.equals(Yang.QNAME.getLocalName()),
-                    "Expecting format to be only %s, not %s", Yang.QNAME.getLocalName(), formatAsString);
+            if(formatAsString.equals(Yang.QNAME.getLocalName()) == false) {
+                logger.debug("{}: Ignoring schema due to unsupported format: {}", id, formatAsString);
+                return Optional.absent();
+            }
 
             childNode = NetconfMessageTransformUtil.IETF_NETCONF_MONITORING_SCHEMA_LOCATION.withoutRevision();
             final Set<String> locationsAsString = getAllChildNodeValues(schemaNode, childNode);
-            Preconditions.checkArgument(locationsAsString.contains(Schema.Location.Enumeration.NETCONF.toString()),
-                    "Expecting location to be %s, not %s", Schema.Location.Enumeration.NETCONF.toString(), locationsAsString);
+            if(locationsAsString.contains(Schema.Location.Enumeration.NETCONF.toString()) == false) {
+                logger.debug("{}: Ignoring schema due to unsupported location: {}", id, locationsAsString);
+                return Optional.absent();
+            }
 
             childNode = NetconfMessageTransformUtil.IETF_NETCONF_MONITORING_SCHEMA_NAMESPACE.withoutRevision();
             final String namespaceAsString = getSingleChildNodeValue(schemaNode, childNode).get();
@@ -171,7 +178,7 @@ public final class NetconfStateSchemas {
                     ? QName.create(namespaceAsString, revisionAsString.get(), moduleNameAsString)
                     : QName.create(URI.create(namespaceAsString), null, moduleNameAsString).withoutRevision();
 
-            return new RemoteYangSchema(moduleQName);
+            return Optional.of(new RemoteYangSchema(moduleQName));
         }
 
         private static Set<String> getAllChildNodeValues(final CompositeNode schemaNode, final QName childNodeQName) {
