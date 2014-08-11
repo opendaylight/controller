@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_75447949",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "It is necessary. The debug method takes a String you cannot pass it a RequestVote object. If this was to be used for formatting. debug(\"{}\", requestVote) we would not need to call toString()",
+      "parentUuid": "fa82b9bf_2d48ebb1",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cdca9f1a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-09T05:32:58Z",
       "side": 1,
       "message": "toString() call is unnecessary.",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_953fbdb3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Candidate.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "It is necessary",
+      "parentUuid": "fa82b9bf_cdca9f1a",
       "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,78 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_354a7155",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractUntypedActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "This is a really good point. I think now it is more appropriate to call unhandled message. My initial thinking was that I need to know when a message gets set to me so I should throw an exception but maybe now it\u0027s not required mostly because I have used the resume policy on ShardManager.",
+      "parentUuid": "fa82b9bf_edcd2332",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5545b540",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4dfbef78",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f577299e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "Done. But there are many more places where these PreConditions need to be added in general.",
+      "parentUuid": "fa82b9bf_6df6f390",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_157bad8c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "Need to remove the precondition. super is the first thing that needs to be called.",
+      "parentUuid": "fa82b9bf_0df16794",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8dd017ca",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -64,6 +172,24 @@
       "writtenOn": "2014-08-09T05:32:58Z",
       "side": 1,
       "message": "I dont see any reason to handle unknown message. Just let it go to event stream",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b56d21ce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "I know what you mean - it\u0027s legacy :)",
+      "parentUuid": "fa82b9bf_8dd017ca",
       "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +213,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d570e5a5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "The idea behind it was that if this exception occurred we would know that we are getting a message that we are not handling - was useful during development. May not be as useful now.",
+      "parentUuid": "fa82b9bf_add39bd3",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_756b19b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "unknownMessage throws an exception UnknowMessageException. Based on Abhishek\u0027s comments and the fact that really an exception occurring will really only result in the actor being \"resumed\" this is no longer useful. To be removed.",
+      "parentUuid": "fa82b9bf_cd2e1ffb",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4dde8fde",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
         "patchSetId": 2
@@ -98,6 +260,24 @@
       "writtenOn": "2014-08-09T05:32:58Z",
       "side": 1,
       "message": "Same question as Basheer. Applies to other Builders as well.",
+      "parentUuid": "fa82b9bf_ed31a35a",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9566ddeb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T01:50:24Z",
+      "side": 1,
+      "message": "I did this because there is a very common mistake that people - including myself do which is something like this.\n\nShardIdentifier.builder().shardName(\"foo\").memberName(\"blah\").toString()\n\nI wanted to throw an exception to warn - but I think this may be overdoing it. I\u0027ll remove this for now.",
       "parentUuid": "fa82b9bf_ed31a35a",
       "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
