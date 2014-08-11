@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d55a25f1",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMDataStore.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-11T06:29:53Z",
+      "side": 1,
+      "message": "no magic properties, this needs to go in as a separate constructor and be exposed via config subsystem",
+      "revId": "5bcd1acc0d6407ff27365e3dce7810589eae2a2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_95701d73",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMDataStoreFactory.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-11T06:29:53Z",
+      "side": 1,
+      "message": "please no magic properties -- expose them as APIs. At this point I think this patch needs to be split into a series, where each patch addresses a single concern",
+      "revId": "5bcd1acc0d6407ff27365e3dce7810589eae2a2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
