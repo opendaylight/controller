@@ -9,10 +9,10 @@ package org.opendaylight.md.controller.topology.lldp.utils;
 
 import java.nio.charset.Charset;
 
-import org.opendaylight.controller.sal.packet.Ethernet;
-import org.opendaylight.controller.sal.packet.LLDP;
-import org.opendaylight.controller.sal.packet.LLDPTLV;
-import org.opendaylight.controller.sal.utils.NetUtils;
+import org.opendaylight.controller.liblldp.Ethernet;
+import org.opendaylight.controller.liblldp.LLDP;
+import org.opendaylight.controller.liblldp.LLDPTLV;
+import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
