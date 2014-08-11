@@ -61,6 +61,14 @@
       <type>kar</type>
       <scope>runtime</scope>
     </dependency>
+
+    <!-- Resources needed -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>opendaylight-karaf-resources</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- AD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -238,27 +246,45 @@
               </artifactItems>
             </configuration>
           </execution>
+          <execution>
+            <id>unpack-karaf-resources</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+             <outputDirectory>${project.build.directory}/assembly</outputDirectory>
+             <groupId>org.opendaylight.controller</groupId>
+             <includeArtifactIds>opendaylight-karaf-resources</includeArtifactIds>
+             <excludes>META-INF\/**</excludes>
+             <excludeTransitive>true</excludeTransitive>
+             <ignorePermissions>false</ignorePermissions>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-                <execution>
-                    <phase>prepare-package</phase>
-                    <goals>
-                        <goal>run</goal>
-                    </goals>
-                    <configuration>
-                        <tasks>
-                            <copy todir="${project.build.directory}/assembly/bin" overwrite="true">
-                                <fileset dir="${basedir}/src/main/resources/karaf/" includes="karaf,karaf.bat,instance,instance.bat"/>
-                            </copy>
-                        </tasks>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+            <execution>
+                <phase>prepare-package</phase>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <configuration>
+                  <tasks>
+                    <chmod perm="755">
+                        <fileset dir="${project.build.directory}/assembly/bin">
+                          <include name="karaf"/>
+                          <include name="instance"/>
+                        </fileset>
+                    </chmod>
+                  </tasks>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <scm>
