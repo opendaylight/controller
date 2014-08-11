@@ -11,6 +11,7 @@
 package org.opendaylight.controller.cluster.datastore.util;
 
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
+import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -222,7 +223,7 @@ public class InstanceIdentifierUtils {
 
             YangInstanceIdentifier.NodeWithValue nodeWithValue =
                 new YangInstanceIdentifier.NodeWithValue(
-                    QName.create(pathArgument.getNodeType().getValue()),
+                    QNameFactory.create(pathArgument.getNodeType().getValue()),
                     parseAttribute(pathArgument.getAttributes(0)));
 
             return nodeWithValue;
@@ -232,7 +233,7 @@ public class InstanceIdentifierUtils {
             YangInstanceIdentifier.NodeIdentifierWithPredicates
                 nodeIdentifierWithPredicates =
                 new YangInstanceIdentifier.NodeIdentifierWithPredicates(
-                    QName.create(pathArgument.getNodeType().getValue()), toAttributesMap(pathArgument.getAttributesList()));
+                    QNameFactory.create(pathArgument.getNodeType().getValue()), toAttributesMap(pathArgument.getAttributesList()));
 
             return nodeIdentifierWithPredicates;
 
@@ -241,7 +242,7 @@ public class InstanceIdentifierUtils {
             Set<QName> qNameSet = new HashSet<>();
 
             for(NormalizedNodeMessages.Attribute attribute : pathArgument.getAttributesList()){
-                qNameSet.add(QName.create(attribute.getValue()));
+                qNameSet.add(QNameFactory.create(attribute.getValue()));
             }
 
             return new YangInstanceIdentifier.AugmentationIdentifier(qNameSet);
@@ -259,7 +260,7 @@ public class InstanceIdentifierUtils {
             String name = attribute.getName();
             Object value = parseAttribute(attribute);
 
-            map.put(QName.create(name), value);
+            map.put(QNameFactory.create(name), value);
         }
 
         return map;
