@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b53a01e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T23:17:49Z",
+      "side": 1,
+      "message": "The logging is uniform. This is just to note that exists was called. See logging for read/write etc.",
+      "parentUuid": "fa82b9bf_3576f106",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d53d45de",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExists.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T23:17:49Z",
+      "side": 1,
+      "message": "This has to be protobuf",
+      "parentUuid": "fa82b9bf_b5d0c1c9",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7528f999",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExistsReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-11T23:17:49Z",
+      "side": 1,
+      "message": "has to be protobuf",
+      "parentUuid": "fa82b9bf_15ce4d2e",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
