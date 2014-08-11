@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_18a204fd",
+        "filename": "opendaylight/config/config-persister-api/src/main/java/org/opendaylight/controller/config/persist/api/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "Copyright is needed.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f89e40b8",
+        "filename": "opendaylight/config/config-persister-api/src/main/java/org/opendaylight/controller/config/persist/api/ConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "A comment would be nice here to explain the purpose of the class.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8701ca6",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "This is where synchronization can start to lead to unintended blocks. In this case it is minor, but we are also synchronizing on this list in the Activator, which can cause readers to be confused about why something is locked... better practice is to keep locks local to a class when at all possible.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8a7bc09",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "The last two lines of logging really need to be combined into one or you may loose context.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78b2304d",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "not a fan of synchronizing on the method here. If config could become large and someone turns on debug you are now blocking all threads until the toString completes (assuming again that debug is on). I would rather you just used synchronization around the queue. \n\nThough, that said, if you are synchronizing just for the queue since you are using a blocking queue there is no need for synchronization since a blocking queue is thread safe naturally.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_98adb4eb",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "similar comment as above - can you explain why you wanted to synchornize on this method? Are you trying to block out the pushConfig method? Are you trying to something else with synchronization?",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_386108d3",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "synchronization issue - you set context here, but in the addingService and stop etc you can get unexpected behavior.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b86d18ce",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "Assuming that this does something with the auto closeables list then we have a synchronization issue. Below you synchronized on \"autocloseables\" but here you are synchronized on \"this\". You want to always synchronize on the same lock",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_786b10b7",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-11T18:55:39Z",
+      "side": 1,
+      "message": "These three debug lines should be 1. It looks like they are intended to show up one after another, HOWEVER, due to multithreading this logging can show up spread out which would decrease its usefulness.",
+      "revId": "14bf0c3635a0dd70e994e22b660bbb04022c3c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
