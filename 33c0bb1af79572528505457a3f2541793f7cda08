@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_95f7bdd2",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/ApiDocGenerator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-08-11T11:15:33Z",
+      "side": 1,
+      "message": "reason was to eliminate necessity of moving schemaContext as parameter from one method to another.",
+      "parentUuid": "fa82b9bf_a7117a05",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f2ef421c",
         "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/impl/BaseYangSwaggerGenerator.java",
         "patchSetId": 7
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_350271b4",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/main/java/org/opendaylight/controller/sal/rest/doc/util/RestDocgenUtil.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-08-11T11:15:33Z",
+      "side": 1,
+      "message": "I decided to synchronize access to the method which manipulate this class variable (resolveFullNameFromNode)",
+      "parentUuid": "fa82b9bf_92f27604",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_32b84a10",
         "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/ApiDocGeneratorTest.java",
         "patchSetId": 7
@@ -64,6 +100,24 @@
       "writtenOn": "2014-08-08T13:05:19Z",
       "side": 1,
       "message": "Question - does restconf work with fully qualified augmentations in the path like this? I tried quickly and didn\u0027t seem to get it to work. Can you provide the sample input that is needed for the toaster2 - that is I deployed the toaster_augmented.yang and toaster_short.yang in a live running system and then tried to put this slot info URL and it didn\u0027t work. If you can provide that sample input that would help to validate.",
+      "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_55fdb5af",
+        "filename": "opendaylight/md-sal/sal-rest-docgen/src/test/java/org/opendaylight/controller/sal/rest/doc/impl/ApiDocGeneratorTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 552
+      },
+      "writtenOn": "2014-08-11T11:15:33Z",
+      "side": 1,
+      "message": "Hi I tested (prepared bundle  with mentioned yang) and started controller.\n\nwhen I did\nPUT\nhttp://localhost:8080/restconf/config/toaster2:toaster/toasterSlot/1/toaster-augmented:slotInfo/\nDATA\n\u003cslotInfo xmlns\u003d\"http://netconfcentral.org/ns/toaster/augmented\"\u003e\n  \u003cnumberOfToastPrepared\u003e45\u003c/numberOfToastPrepared\u003e\n\u003c/slotInfo\u003e\n\nand then GET\nI obtained\n\u003cslotInfo xmlns\u003d\"http://netconfcentral.org/ns/toaster/augmented\"\u003e\n\u003cnumberOfToastPrepared\u003e45\u003c/numberOfToastPrepared\u003e\n\u003c/slotInfo\u003e",
+      "parentUuid": "fa82b9bf_32b84a10",
       "revId": "33c0bb1af79572528505457a3f2541793f7cda08",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
