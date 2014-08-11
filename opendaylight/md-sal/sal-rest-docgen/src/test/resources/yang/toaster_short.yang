@@ -83,6 +83,13 @@
                 Microsoft Toaster.";
       }
 
+      list toasterSlot {
+        key "slotId";
+        leaf slotId {
+            type string;
+        }
+      }
+
       leaf toasterModelNumber {
         type DisplayString;
         config false;
