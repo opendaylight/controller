@@ -5,11 +5,41 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
 
+  <feature name='odl-config-all' version='${project.version}'>
+    <feature version='${project.version}'>odl-mdsal-common</feature>
+      <feature version='${project.version}'>odl-config-api</feature>
+      <feature version='${project.version}'>odl-config-netty-config-api</feature>
+      <feature version='${project.version}'>odl-config-core</feature>
+      <feature version='${project.version}'>odl-config-manager</feature>
+  </feature>
+
+  <feature name='odl-mdsal-common' version='${mdsal.version}'>
+      <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
+      <bundle>mvn:org.opendaylight.controller/sal-common/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
+  </feature>
+
+  <feature name='odl-config-api' version='${project.version}'>
+    <bundle>mvn:org.opendaylight.controller/config-api/${project.version}</bundle>
+    <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+  </feature>
+
+  <feature name='odl-config-netty-config-api' version='${project.version}'>
+    <feature version='${project.version}'>odl-config-api</feature>
+    <bundle>mvn:org.opendaylight.controller/netty-config-api/${project.version}</bundle>
+    <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+  </feature>
+
   <feature name='odl-config-core' version='${project.version}'>
-    <feature version='${yangtools.version}'>yangtools-concepts</feature>
-    <feature version='${yangtools.version}'>yangtools-binding</feature>
-    <feature version='${yangtools.version}'>yangtools-binding-generator</feature>
-    <feature version='${mdsal.version}'>odl-mdsal-commons</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+    <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
+    <feature version='${mdsal.version}'>odl-mdsal-common</feature>
     <feature version='${project.version}'>odl-config-api</feature>
     <bundle>mvn:org.opendaylight.controller/config-util/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${project.version}</bundle>
@@ -23,27 +53,4 @@
     <feature version='${project.version}'>odl-config-core</feature>
     <bundle>mvn:org.opendaylight.controller/config-manager/${project.version}</bundle>
   </feature>
-
-  <feature name='odl-config-api' version='${project.version}'>
-    <bundle>mvn:org.opendaylight.controller/config-api/${project.version}</bundle>
-
-    <!-- yangtools features -->
-    <feature version='${yangtools.version}'>yangtools-concepts</feature>
-    <feature version='${yangtools.version}'>yangtools-binding</feature>
-  </feature>
-
-  <feature name='odl-config-netty-config-api' version='${project.version}'>
-    <bundle>mvn:org.opendaylight.controller/netty-config-api/${project.version}</bundle>
-
-    <!-- netty bundles -->
-    <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
-    <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
-    <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
-
-    <feature version='${project.version}'>odl-config-api</feature>
-  </feature>
-  <feature name='odl-config-dispatcher' version='${project.version}'>
-      <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${project.version}</bundle>
-  </feature>
-
 </features>
