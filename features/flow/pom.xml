@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-subsystem</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
-    <relativePath>../../opendaylight/config/</relativePath>
+    <artifactId>sal-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
+    <relativePath>../../opendaylight/md-sal</relativePath>
   </parent>
-  <artifactId>features-config-netty</artifactId>
+  <artifactId>features-flow</artifactId>
 
   <packaging>pom</packaging>
 
@@ -18,34 +18,51 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-config-persister</artifactId>
+      <artifactId>features-mdsal</artifactId>
+      <version>${mdsal.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-event-executor-config</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-base</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-threadgroup-config</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-timer-config</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-statistics</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>threadpool-config-api</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-inventory</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>threadpool-config-impl</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-topology</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-netty-config</artifactId>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>topology-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>topology-lldp-discovery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>statistics-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>inventory-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.md</groupId>
+      <artifactId>forwardingrules-manager</artifactId>
     </dependency>
   </dependencies>
 
