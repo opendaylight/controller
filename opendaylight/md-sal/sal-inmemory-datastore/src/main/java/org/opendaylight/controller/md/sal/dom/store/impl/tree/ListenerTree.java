@@ -144,7 +144,10 @@ public final class ListenerTree  {
 
     /**
      * A walking context, pretty much equivalent to an iterator, but it
-     * exposes the undelying tree structure.
+     * exposes the underlying tree structure.
+     */
+    /*
+     * FIXME: BUG-1511: split this class out as ListenerWalker.
      */
     public static final class Walker implements AutoCloseable {
         private final Lock lock;
@@ -176,6 +179,9 @@ public final class ListenerTree  {
      * and instance of this class is guaranteed to have any relevance or consistency
      * only as long as the {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker} instance through which it is reached remains
      * unclosed.
+     */
+    /*
+     * FIXME: BUG-1511: split this class out as ListenerNode.
      */
     public static final class Node implements StoreTreeNode<Node>, Identifiable<PathArgument> {
         private final Collection<DataChangeListenerRegistration<?>> listeners = new ArrayList<>();
