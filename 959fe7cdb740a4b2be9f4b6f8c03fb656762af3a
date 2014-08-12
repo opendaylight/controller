@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_93e5950a",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NotificationHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-12T11:05:22Z",
+      "side": 1,
+      "message": "missing copyright",
+      "revId": "959fe7cdb740a4b2be9f4b6f8c03fb656762af3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_33f049c8",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NotificationHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-12T11:05:22Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()?",
+      "revId": "959fe7cdb740a4b2be9f4b6f8c03fb656762af3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53eb8ddb",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/listener/NetconfDeviceCommunicator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-12T11:05:22Z",
+      "side": 1,
+      "message": "They always have to be in order, as per http://tools.ietf.org/html/rfc6241#section-4.5",
+      "revId": "959fe7cdb740a4b2be9f4b6f8c03fb656762af3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3bd01d9",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/schema/NetconfRemoteSchemaYangSourceProvider.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-12T11:05:22Z",
+      "side": 1,
+      "message": "yangtools.util.ExceptionMapper",
+      "revId": "959fe7cdb740a4b2be9f4b6f8c03fb656762af3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
