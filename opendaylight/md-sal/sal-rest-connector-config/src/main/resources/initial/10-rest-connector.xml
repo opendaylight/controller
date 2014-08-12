@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <module>
           <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector">rest:rest-connector-impl</type>
           <name>rest-connector-default-impl</name>
-          <websocket-port>8181</websocket-port>
+          <websocket-port>8185</websocket-port>
           <dom-broker>
             <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
             <name>dom-broker</name>

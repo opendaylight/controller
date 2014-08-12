@@ -61,14 +61,6 @@
       <type>kar</type>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-netty-features</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-
     <!-- AD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -89,7 +81,14 @@
     <!-- MD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>mdsal-features</artifactId>
+      <artifactId>features-mdsal</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-flow</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
