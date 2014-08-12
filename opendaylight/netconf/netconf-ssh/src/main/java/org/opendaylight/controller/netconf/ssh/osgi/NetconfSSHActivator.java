@@ -20,6 +20,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil.InfixProp;
@@ -72,7 +73,7 @@ public class NetconfSSHActivator implements BundleActivator {
         checkState(StringUtils.isNotBlank(path), "Path to ssh private key is blank. Reconfigure %s", NetconfConfigUtil.getPrivateKeyKey());
         String privateKeyPEMString = PEMGenerator.readOrGeneratePK(new File(path));
 
-        final AuthProvider authProvider = new AuthProvider(privateKeyPEMString, bundleContext);
+        final AuthProvider authProvider = new AuthProviderImpl(privateKeyPEMString, bundleContext);
         EventLoopGroup bossGroup  = new NioEventLoopGroup();
         NetconfSSHServer server = NetconfSSHServer.start(sshSocketAddress.getPort(), localAddress, authProvider, bossGroup);
 
