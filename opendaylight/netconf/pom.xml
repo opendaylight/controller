@@ -150,5 +150,15 @@
         <module>netconf-it</module>
       </modules>
     </profile>
+
+    <profile>
+        <id>testtool</id>
+        <activation>
+            <activeByDefault>false</activeByDefault>
+        </activation>
+        <modules>
+            <module>netconf-testtool</module>
+      </modules>
+    </profile>
   </profiles>
 </project>
