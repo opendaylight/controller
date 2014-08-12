@@ -124,6 +124,7 @@
     <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
     <module>opendaylight/commons/filter-valve</module>
+    <module>opendaylight/commons/liblldp</module>
 
     <!-- Karaf Distribution -->
     <module>opendaylight/dummy-console</module>

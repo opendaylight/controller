@@ -35,11 +35,11 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
+      <artifactId>sal-binding-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
+      <artifactId>liblldp</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
