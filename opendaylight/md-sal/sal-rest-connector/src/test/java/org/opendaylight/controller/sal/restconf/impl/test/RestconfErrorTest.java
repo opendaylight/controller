@@ -90,7 +90,7 @@ public class RestconfErrorTest {
         lookUpMap.put("resource-denied", 409);
         lookUpMap.put("rollback-failed", 500);
         lookUpMap.put("data-exists", 409);
-        lookUpMap.put("data-missing", 409);
+        lookUpMap.put("data-missing", 404);
         lookUpMap.put("operation-not-supported", 501);
         lookUpMap.put("operation-failed", 500);
         lookUpMap.put("partial-operation", 500);
