@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_33760907",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-12T15:54:11Z",
+      "side": 1,
+      "message": "Please call checkedGet here and propagate the ReadFailedException as the IllegalSateException cause.",
+      "revId": "b6d500b41ee63227f1f026495c58420e5e8332c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93d915f5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-12T15:54:11Z",
+      "side": 1,
+      "message": "Should this propagate the failure to the caller as is done below?",
+      "revId": "b6d500b41ee63227f1f026495c58420e5e8332c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d30ebd8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-12T15:54:11Z",
+      "side": 1,
+      "message": "Should this be submitted to the executor as a Callable task like the read method does? Also to be consistent the read method should also handle failures similarly.",
+      "revId": "b6d500b41ee63227f1f026495c58420e5e8332c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3855dcf",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-12T15:54:11Z",
+      "side": 1,
+      "message": "Please call checkedGet and propagate the ReadFailedException as the IllegalSateException cause.",
+      "revId": "b6d500b41ee63227f1f026495c58420e5e8332c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
