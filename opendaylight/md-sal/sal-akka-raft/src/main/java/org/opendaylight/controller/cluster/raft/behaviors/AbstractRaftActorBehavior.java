@@ -127,6 +127,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected RaftState requestVote(ActorRef sender,
         RequestVote requestVote) {
 
+
+        context.getLogger().debug(requestVote.toString());
+
         boolean grantVote = false;
 
         //  Reply false if term < currentTerm (§5.1)
@@ -326,7 +329,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
         // Send a local message to the local RaftActor (it's derived class to be
         // specific to apply the log to it's index)
-        context.getLogger().info("Setting last applied to {}", index);
+        context.getLogger().debug("Setting last applied to {}", index);
         context.setLastApplied(index);
     }
 

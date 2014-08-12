@@ -51,28 +51,6 @@
                     </schema-service>
                 </module>
 
-                <!-- DISTRIBUTED_DATA_STORE -->
-                <!-- Enable the following modules if you want to use the Distributed Data Store instead of the InMemoryDataStore -->
-                <!--
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider">prefix:distributed-operational-datastore-provider</type>
-                    <name>distributed-operational-store-module</name>
-                    <operational-schema-service>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
-                        <name>yang-schema-service</name>
-                    </operational-schema-service>
-                </module>
-
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider">prefix:distributed-config-datastore-provider</type>
-                    <name>distributed-config-store-module</name>
-                    <configschema-service>
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
-                        <name>yang-schema-service</name>
-                    </config-schema-service>
-                </module>
-                -->
-
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider">prefix:inmemory-operational-datastore-provider</type>
                     <name>operational-store-service</name>
@@ -97,20 +75,11 @@
                    <config-data-store>
                         <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
                         <name>config-store-service</name>
-                        <!-- DISTRIBUTED_DATA_STORE -->
-                        <!--
-                        <name>distributed-config-store-service</name>
-                        -->
                     </config-data-store>
 
                     <operational-data-store>
                         <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
                         <name>operational-store-service</name>
-                        <!-- DISTRIBUTED_DATA_STORE -->
-                        <!--
-                        <name>distributed-operational-store-service</name>
-                        -->
-
                     </operational-data-store>
                 </module>
                 <module>
@@ -147,17 +116,6 @@
                         </binding-mapping-service>
                     </binding-forwarded-data-broker>
                 </module>
-                <!-- Cluster RPC -->
-                <!-- Enable the following module if you want to use remote rpc connector
-                <module>
-                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">prefix:remote-rpc-connector</type>
-                    <name>remote-rpc-connector</name>
-                    <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:config:remote-rpc-connector">
-                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
-                        <name>dom-broker</name>
-                    </dom-broker>
-                </module>
-                -->
             </modules>
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
                     <service>
@@ -168,28 +126,6 @@
                         </instance>
                     </service>
 
-                <!-- DISTRIBUTED_DATA_STORE -->
-                <!-- Enable the following if you want to use the Distributed Data Store instead of the InMemory Data Store -->
-                <!-- Note that you MUST delete the InMemoryDataStore related services which provide config-dom-datastore and operational-dom-datastore -->
-                <!--
-                <service>
-                    <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
-                    <instance>
-                        <name>distributed-config-store-service</name>
-                        <provider>/modules/module[type='distributed-config-datastore-provider'][name='distributed-config-store-module']</provider>
-                    </instance>
-                </service>
-                <service>
-                    <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
-                    <instance>
-                        <name>distributed-operational-store-service</name>
-                        <provider>/modules/module[type='distributed-operational-datastore-provider'][name='distributed-operational-store-module']</provider>
-                    </instance>
-                </service>
-                -->
-
-                <!-- DISTRIBUTED_DATA_STORE -->
-                <!-- Delete the following two services (config-store-service and operational-store-service) if you want to use the distributed data store instead -->
                 <service>
                     <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
                     <instance>

@@ -18,6 +18,10 @@ import akka.cluster.ClusterEvent;
 import akka.japi.Creator;
 import akka.japi.Function;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
@@ -28,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import scala.concurrent.duration.Duration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +66,8 @@ public class ShardManager extends AbstractUntypedActor {
 
     private final Configuration configuration;
 
+    private ShardManagerInfoMBean mBean;
+
     /**
      * @param type defines the kind of data that goes into shards created by this shard manager. Examples of type would be
      *             configuration or operational
@@ -82,6 +89,11 @@ public class ShardManager extends AbstractUntypedActor {
     public static Props props(final String type,
         final ClusterWrapper cluster,
         final Configuration configuration) {
+
+        Preconditions.checkNotNull(type, "type should not be null");
+        Preconditions.checkNotNull(cluster, "cluster should not be null");
+        Preconditions.checkNotNull(configuration, "configuration should not be null");
+
         return Props.create(new Creator<ShardManager>() {
 
             @Override
@@ -108,7 +120,7 @@ public class ShardManager extends AbstractUntypedActor {
         } else if(message instanceof ClusterEvent.UnreachableMember) {
             ignoreMessage(message);
         } else{
-          throw new Exception ("Not recognized message received, message="+message);
+            unknownMessage(message);
         }
 
     }
@@ -122,11 +134,8 @@ public class ShardManager extends AbstractUntypedActor {
             return;
         }
 
-        getSender().tell(new LocalShardNotFound(message.getShardName()), getSelf());
-    }
-
-    private void ignoreMessage(Object message){
-        LOG.debug("Unhandled message : " + message);
+        getSender().tell(new LocalShardNotFound(message.getShardName()),
+            getSelf());
     }
 
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
@@ -140,7 +149,7 @@ public class ShardManager extends AbstractUntypedActor {
 
         for(ShardInformation info : localShards.values()){
             String shardName = info.getShardName();
-            info.updatePeerAddress(getShardActorName(memberName, shardName),
+            info.updatePeerAddress(getShardIdentifier(memberName, shardName),
                 getShardActorPath(shardName, memberName));
         }
     }
@@ -159,9 +168,6 @@ public class ShardManager extends AbstractUntypedActor {
     private void findPrimary(FindPrimary message) {
         String shardName = message.getShardName();
 
-        List<String> members =
-            configuration.getMembersFromShardName(shardName);
-
         // First see if the there is a local replica for the shard
         ShardInformation info = localShards.get(shardName);
         if(info != null) {
@@ -174,6 +180,9 @@ public class ShardManager extends AbstractUntypedActor {
                 return;
             }
         }
+
+        List<String> members =
+            configuration.getMembersFromShardName(shardName);
 
         if(cluster.getCurrentMemberName() != null) {
             members.remove(cluster.getCurrentMemberName());
@@ -196,9 +205,13 @@ public class ShardManager extends AbstractUntypedActor {
     private String getShardActorPath(String shardName, String memberName) {
         Address address = memberNameToAddress.get(memberName);
         if(address != null) {
-            return address.toString() + "/user/shardmanager-" + this.type + "/"
-                + getShardActorName(
-                memberName, shardName);
+            StringBuilder builder = new StringBuilder();
+            builder.append(address.toString())
+                .append("/user/")
+                .append(ShardManagerIdentifier.builder().type(type).build().toString())
+                .append("/")
+                .append(getShardIdentifier(memberName, shardName));
+            return builder.toString();
         }
         return null;
     }
@@ -211,8 +224,8 @@ public class ShardManager extends AbstractUntypedActor {
      * @param shardName
      * @return
      */
-    private String getShardActorName(String memberName, String shardName){
-        return memberName + "-shard-" + shardName + "-" + this.type;
+    private ShardIdentifier getShardIdentifier(String memberName, String shardName){
+        return ShardIdentifier.builder().memberName(memberName).shardName(shardName).type(type).build();
     }
 
     /**
@@ -225,14 +238,19 @@ public class ShardManager extends AbstractUntypedActor {
         List<String> memberShardNames =
             this.configuration.getMemberShardNames(memberName);
 
+        List<String> localShardActorNames = new ArrayList<>();
         for(String shardName : memberShardNames){
-            String shardActorName = getShardActorName(memberName, shardName);
-            Map<String, String> peerAddresses = getPeerAddresses(shardName);
+            ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
+            Map<ShardIdentifier, String> peerAddresses = getPeerAddresses(shardName);
             ActorRef actor = getContext()
-                .actorOf(Shard.props(shardActorName, peerAddresses),
-                    shardActorName);
+                .actorOf(Shard.props(shardId, peerAddresses),
+                    shardId.toString());
+            localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, actor, peerAddresses));
         }
+
+        mBean = ShardManagerInfo
+            .createShardManagerMBean("shard-manager-" + this.type, localShardActorNames);
 
     }
 
@@ -242,9 +260,9 @@ public class ShardManager extends AbstractUntypedActor {
      * @param shardName
      * @return
      */
-    private Map<String, String> getPeerAddresses(String shardName){
+    private Map<ShardIdentifier, String> getPeerAddresses(String shardName){
 
-        Map<String, String> peerAddresses = new HashMap<>();
+        Map<ShardIdentifier, String> peerAddresses = new HashMap<>();
 
         List<String> members =
             this.configuration.getMembersFromShardName(shardName);
@@ -253,15 +271,15 @@ public class ShardManager extends AbstractUntypedActor {
 
         for(String memberName : members){
             if(!currentMemberName.equals(memberName)){
-                String shardActorName = getShardActorName(memberName, shardName);
+                ShardIdentifier shardId = getShardIdentifier(memberName,
+                    shardName);
                 String path =
                     getShardActorPath(shardName, currentMemberName);
-                peerAddresses.put(shardActorName, path);
+                peerAddresses.put(shardId, path);
             }
         }
         return peerAddresses;
     }
-
 
     @Override
     public SupervisorStrategy supervisorStrategy() {
@@ -280,10 +298,10 @@ public class ShardManager extends AbstractUntypedActor {
         private final String shardName;
         private final ActorRef actor;
         private final ActorPath actorPath;
-        private final Map<String, String> peerAddresses;
+        private final Map<ShardIdentifier, String> peerAddresses;
 
         private ShardInformation(String shardName, ActorRef actor,
-            Map<String, String> peerAddresses) {
+            Map<ShardIdentifier, String> peerAddresses) {
             this.shardName = shardName;
             this.actor = actor;
             this.actorPath = actor.path();
@@ -302,16 +320,15 @@ public class ShardManager extends AbstractUntypedActor {
             return actorPath;
         }
 
-        public Map<String, String> getPeerAddresses() {
-            return peerAddresses;
-        }
-
-        public void updatePeerAddress(String peerId, String peerAddress){
-            LOG.info("updatePeerAddress for peer {} with address {}", peerId, peerAddress);
+        public void updatePeerAddress(ShardIdentifier peerId, String peerAddress){
+            LOG.info("updatePeerAddress for peer {} with address {}", peerId,
+                peerAddress);
             if(peerAddresses.containsKey(peerId)){
                 peerAddresses.put(peerId, peerAddress);
 
-                LOG.info("Sending PeerAddressResolved for peer {} with address {} to {}", peerId, peerAddress, actor.path());
+                LOG.debug(
+                    "Sending PeerAddressResolved for peer {} with address {} to {}",
+                    peerId, peerAddress, actor.path());
 
                 actor
                     .tell(new PeerAddressResolved(peerId, peerAddress),
@@ -321,3 +338,6 @@ public class ShardManager extends AbstractUntypedActor {
         }
     }
 }
+
+
+

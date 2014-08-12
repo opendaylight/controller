@@ -81,7 +81,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     @Override protected RaftState handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
-        context.getLogger().info("Candidate: Received {}", appendEntries.toString());
+        context.getLogger().debug(appendEntries.toString());
 
         return state();
     }
