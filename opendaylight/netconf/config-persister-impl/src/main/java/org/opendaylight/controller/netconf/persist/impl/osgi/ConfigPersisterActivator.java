@@ -8,13 +8,18 @@
 
 package org.opendaylight.controller.netconf.persist.impl.osgi;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.management.MBeanServer;
+
+import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
-import org.opendaylight.controller.netconf.persist.impl.ConfigPusher;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusherImpl;
 import org.opendaylight.controller.netconf.persist.impl.PersisterAggregator;
 import org.opendaylight.controller.netconf.util.CloseableUtil;
 import org.osgi.framework.BundleActivator;
@@ -23,16 +28,13 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServer;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.annotations.VisibleForTesting;
 
 public class ConfigPersisterActivator implements BundleActivator {
 
@@ -49,11 +51,15 @@ public class ConfigPersisterActivator implements BundleActivator {
     public static final String STORAGE_ADAPTER_CLASS_PROP_SUFFIX = "storageAdapterClass";
 
     private List<AutoCloseable> autoCloseables;
+    private volatile BundleContext context;
 
+    ServiceRegistration<?> registration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         logger.debug("ConfigPersister starting");
+        this.context = context;
+
         autoCloseables = new ArrayList<>();
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
@@ -81,8 +87,14 @@ public class ConfigPersisterActivator implements BundleActivator {
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        CloseableUtil.closeAll(autoCloseables);
+    public void stop(BundleContext context) throws Exception {
+        synchronized(autoCloseables) {
+            CloseableUtil.closeAll(autoCloseables);
+            if (registration != null) {
+                registration.unregister();
+            }
+            this.context = null;
+        }
     }
 
 
@@ -147,35 +159,29 @@ public class ConfigPersisterActivator implements BundleActivator {
             logger.trace("Got InnerCustomizer.addingService {}", reference);
             NetconfOperationServiceFactory service = reference.getBundle().getBundleContext().getService(reference);
 
-            final ConfigPusher configPusher = new ConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
+            logger.debug("Creating new job queue");
+
+            final ConfigPusherImpl configPusher = new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
             logger.debug("Configuration Persister got {}", service);
+            logger.debug("Context was {}", context);
+            logger.debug("Registration was {}", registration);
+
             final Thread pushingThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        configPusher.pushConfigs(configs);
-                    } catch (NetconfDocumentedException e) {
-                        logger.error("Error pushing configs {}",configs);
-                        throw new IllegalStateException(e);
+                        if(configs != null && !configs.isEmpty()) {
+                            configPusher.pushConfigs(configs);
+                        }
+                        registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
+                        configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator);
+                    } catch (InterruptedException e) {
+                        logger.info("ConfigPusher thread stopped",e);
                     }
                     logger.info("Configuration Persister initialization completed.");
-
-                    /*
-                     * We have completed initial configuration. At this point
-                     * it is good idea to perform garbage collection to prune
-                     * any garbage we have accumulated during startup.
-                     */
-                    logger.debug("Running post-initialization garbage collection...");
-                    System.gc();
-                    logger.debug("Post-initialization garbage collection completed.");
-
-                    ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
-                    synchronized (ConfigPersisterActivator.this) {
-                        autoCloseables.add(jmxNotificationHandler);
-                    }
                 }
             }, "config-pusher");
-            synchronized (ConfigPersisterActivator.this) {
+            synchronized (autoCloseables) {
                 autoCloseables.add(new AutoCloseable() {
                     @Override
                     public void close() {
