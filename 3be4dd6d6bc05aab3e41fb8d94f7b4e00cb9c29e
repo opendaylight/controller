@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_33da8917",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-12T15:03:57Z",
+      "side": 1,
+      "message": "We synchronize at the class level, and then we do a blocking wait where we sleep, which means we can be blocking any other threads up that synchronize on this for a LONG time. This is a bad practice. That said, it likely is just a performance issue, so we can still push this through. But this code should really be clean up the synchronization in case we need better performance.",
+      "revId": "3be4dd6d6bc05aab3e41fb8d94f7b4e00cb9c29e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3e9ddb7",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-12T15:03:57Z",
+      "side": 1,
+      "message": "I know you didn\u0027t change this line, but I am trying to figure out if we want synchronized at the class level here. I ask myself what is the purpose of synchronize? Are we trying to group a series of statements into an atomic operation? If so which statements?\n\nThis doesn\u0027t have to necessarily block the pushing of this, but this is a potential performance bottleneck.",
+      "revId": "3be4dd6d6bc05aab3e41fb8d94f7b4e00cb9c29e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_13e425df",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2014-08-12T15:03:57Z",
+      "side": 1,
+      "message": "It is possible for \"stop\" to be called BEFORE this pushingThread runs. Which means there is a chance that context could be null here.\n\nWe should either catch the NPE, or better check for null. \n\nBundleContext localContext \u003d context;\nif( localContext \u003d\u003d null ){\n\t//print message, gracefully exist thread\n}\nlocalContext.registerService.... (you need to use local context because \"context\" can be nulled out at any point, so just null check context is not safe. You need to get a local reference first, and then null check. This still leaves the situation where the bundle my be stopped before you use the local context, so there is still the possibility that the BundleContext could throw an error, but it is now a decreased risk and likely(hopefully) that would throw a more detail error message.",
+      "revId": "3be4dd6d6bc05aab3e41fb8d94f7b4e00cb9c29e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
