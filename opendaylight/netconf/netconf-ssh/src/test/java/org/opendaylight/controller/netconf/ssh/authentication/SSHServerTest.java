@@ -60,7 +60,7 @@ public class SSHServerTest {
         try (InputStream is = getClass().getResourceAsStream("/RSA.pk")) {
             pem = IOUtils.toString(is);
         }
-        AuthProvider ap = new AuthProvider(pem, mockedContext);
+        AuthProviderImpl ap = new AuthProviderImpl(pem, mockedContext);
         ap.setNullableUserManager(um);
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         NetconfSSHServer server = NetconfSSHServer.start(PORT, NetconfConfigUtil.getNetconfLocalAddress(),

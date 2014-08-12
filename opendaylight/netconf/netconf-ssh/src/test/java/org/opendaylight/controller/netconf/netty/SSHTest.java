@@ -32,6 +32,7 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.SshHandler;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class SSHTest {
     @Test
     public void test() throws Exception {
         new Thread(new EchoServer(), "EchoServer").start();
-        AuthProvider authProvider = mock(AuthProvider.class);
+        AuthProvider authProvider = mock(AuthProviderImpl.class);
         doReturn(PEMGenerator.generate().toCharArray()).when(authProvider).getPEMAsCharArray();
         doReturn(true).when(authProvider).authenticated(anyString(), anyString());
         NetconfSSHServer netconfSSHServer = NetconfSSHServer.start(10831, NetconfConfigUtil.getNetconfLocalAddress(),

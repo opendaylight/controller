@@ -49,6 +49,7 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFact
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.ssh.NetconfSSHServer;
 import org.opendaylight.controller.netconf.ssh.authentication.AuthProvider;
+import org.opendaylight.controller.netconf.ssh.authentication.AuthProviderImpl;
 import org.opendaylight.controller.netconf.ssh.authentication.PEMGenerator;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
@@ -136,7 +137,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
     }
 
     public AuthProvider getAuthProvider() throws Exception {
-        AuthProvider mock = mock(AuthProvider.class);
+        AuthProvider mock = mock(AuthProviderImpl.class);
         doReturn(true).when(mock).authenticated(anyString(), anyString());
         doReturn(PEMGenerator.generate().toCharArray()).when(mock).getPEMAsCharArray();
         return mock;
