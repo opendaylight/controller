@@ -55,4 +55,9 @@ public class ShardReadTransaction extends ShardTransaction {
     getSelf().tell(PoisonPill.getInstance(), getSelf());
   }
 
+  //default scope test method to check if we get correct exception
+  void forUnitTestOnlyExplicitTransactionClose(){
+      transaction.close();
+  }
+
 }

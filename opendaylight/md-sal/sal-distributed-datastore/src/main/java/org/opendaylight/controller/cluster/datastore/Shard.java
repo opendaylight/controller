@@ -144,7 +144,7 @@ public class Shard extends RaftActor {
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
             setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
-        } else {
+        } else{
             super.onReceiveCommand(message);
         }
     }
@@ -240,8 +240,7 @@ public class Shard extends RaftActor {
 
                 } catch (InterruptedException | ExecutionException e) {
                     shardMBean.incrementFailedTransactionsCount();
-                    // FIXME : Handle this properly
-                    LOG.error(e, "An exception happened when committing");
+                    sender.tell(new akka.actor.Status.Failure(e),self);
                 }
             }
         }, getContext().dispatcher());

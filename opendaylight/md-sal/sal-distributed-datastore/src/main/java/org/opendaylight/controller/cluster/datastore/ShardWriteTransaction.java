@@ -63,4 +63,13 @@ public class ShardWriteTransaction extends ShardTransaction {
     getSender().tell(new CloseTransactionReply().toSerializable(), getSelf());
     getSelf().tell(PoisonPill.getInstance(), getSelf());
   }
+
+    /**
+     * The following method is used in unit testing only
+     * hence the default scope.
+     * This is done to test out failure cases.
+     */
+    public void forUnitTestOnlyExplicitTransactionClose() {
+        transaction.close();
+    }
 }

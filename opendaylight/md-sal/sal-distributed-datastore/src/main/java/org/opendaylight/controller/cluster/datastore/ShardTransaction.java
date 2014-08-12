@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.modification.ImmutableCompo
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -40,8 +41,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * The ShardTransaction Actor represents a remote transaction
@@ -197,10 +196,9 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
           } else {
             sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
           }
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(e,
-              "An exception happened when reading data from path : "
-                  + path.toString());
+        } catch (Exception e) {
+            sender.tell(new akka.actor.Status.Failure(new ReadFailedException( "An Exception occurred  when reading data from path : "
+                + path.toString(),e)),self);
         }
 
       }
@@ -212,22 +210,35 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     modification.addModification(
         new WriteModification(message.getPath(), message.getData(),schemaContext));
     LOG.debug("writeData at path : " + message.getPath().toString());
-    transaction.write(message.getPath(), message.getData());
-    getSender().tell(new WriteDataReply().toSerializable(), getSelf());
+
+    try {
+        transaction.write(message.getPath(), message.getData());
+        getSender().tell(new WriteDataReply().toSerializable(), getSelf());
+    }catch(Exception e){
+        getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+    }
   }
 
   protected void mergeData(DOMStoreWriteTransaction transaction, MergeData message) {
     modification.addModification(
         new MergeModification(message.getPath(), message.getData(), schemaContext));
     LOG.debug("mergeData at path : " + message.getPath().toString());
-    transaction.merge(message.getPath(), message.getData());
-    getSender().tell(new MergeDataReply().toSerializable(), getSelf());
+    try {
+        transaction.merge(message.getPath(), message.getData());
+        getSender().tell(new MergeDataReply().toSerializable(), getSelf());
+    }catch(Exception e){
+        getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+    }
   }
 
   protected void deleteData(DOMStoreWriteTransaction transaction, DeleteData message) {
     modification.addModification(new DeleteModification(message.getPath()));
-    transaction.delete(message.getPath());
-    getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
+    try {
+        transaction.delete(message.getPath());
+        getSender().tell(new DeleteDataReply().toSerializable(), getSelf());
+    }catch(Exception e){
+        getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+    }
   }
 
   protected void readyTransaction(DOMStoreWriteTransaction transaction, ReadyTransaction message) {
