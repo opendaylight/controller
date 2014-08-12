@@ -235,6 +235,11 @@ public class NeutronPort extends ConfigurationObject implements Serializable, IN
             if (s.equals("tenant_id")) {
                 ans.setTenantID(this.getTenantID());
             }
+            if (s.equals("security_groups")) {
+                List<NeutronSecurityGroup> securityGroups = new ArrayList<NeutronSecurityGroup>();
+                securityGroups.addAll(this.getSecurityGroups());
+                ans.setSecurityGroups(securityGroups);
+            }
         }
         return ans;
     }
