@@ -49,8 +49,17 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
             LogicalDatastoreType store, YangInstanceIdentifier path);
 
     /**
-     * Checks if data is available in the logical data store located at provided path
+     /**
+     * Checks if data is available in the logical data store located at provided path.
+     * <p>
      *
+     * Note: a successful result from this method makes no guarantee that a subsequent call to {@link #read}
+     * will succeed. It is possible that the data resides in a data store on a remote node and, if that
+     * node goes down or a network failure occurs, a subsequent read would fail. Another scenario is if
+     * the data is deleted in between the calls to <code>exists</code> and <code>read</code>
+     *
+     * @param store
+     *            Logical data store from which read should occur.
      * @param path
      *            Path which uniquely identifies subtree which client want to
      *            check existence of
