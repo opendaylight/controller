@@ -16,6 +16,24 @@
       "revId": "085713d3e52264d57398e07e55b6abed9dbdc980",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_096ab4ed",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFloatingIPsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 590
+      },
+      "writtenOn": "2014-08-13T19:48:07Z",
+      "side": 1,
+      "message": "This is a side effect of the following API statement:\n\nAn address for the floating ip will be automatically allocated, unless the\nfloating_ip_address attribute is specified in the request body. If the requested\nfloating IP address does not fall in the external network\u0027s subnet range, a 400 error will be returned. If the requested floating IP address is already in use, a 409 error code will be returned.\n\nNow, IIRC, for the floating IP to be automatically allocated there needs to be a single subnet associated with the external network.  This extends that requirement to the case where the floating IP address is specified.",
+      "parentUuid": "fa82b9bf_89aec42c",
+      "revId": "085713d3e52264d57398e07e55b6abed9dbdc980",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
