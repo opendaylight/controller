@@ -1,5 +1,6 @@
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
@@ -39,9 +40,16 @@ public class ForwardedBackwardsCompatibleDataBrokerTest extends
         testCustomizer = createDataBrokerTestCustomizer();
 
         domBroker = testCustomizer.createDOMDataBroker();
-        dataBroker = testCustomizer.createBackwardsCompatibleDataBroker();
+        dataBroker = createBackwardsCompatibleDataBroker();
         testCustomizer.updateSchema(context);
     }
+
+    public ForwardedBackwardsCompatibleDataBroker createBackwardsCompatibleDataBroker() {
+        return new ForwardedBackwardsCompatibleDataBroker(domBroker, testCustomizer.getBindingToNormalized(), testCustomizer.getSchemaService(), MoreExecutors
+            .sameThreadExecutor());
+    }
+
+
 
 
     /**
@@ -53,7 +61,7 @@ public class ForwardedBackwardsCompatibleDataBrokerTest extends
      * @see org.opendaylight.controller.md.sal.binding.impl.AbstractReadWriteTransaction#ensureParentsByMerge(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, org.opendaylight.yangtools.yang.binding.InstanceIdentifier)
      */
     @Test
-    public void test() throws InterruptedException, ExecutionException {
+    public void testEnsureParentsByMerge() throws InterruptedException, ExecutionException {
         DataModificationTransaction writeTx =
             dataBroker.beginTransaction();
 
