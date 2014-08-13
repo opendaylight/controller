@@ -203,7 +203,7 @@ public class NeutronFloatingIPsNorthbound {
             // if floating IP is specified, make sure it can come from the network
             String floatingIP = singleton.getFloatingIPAddress();
             if (floatingIP != null) {
-                if (externNetwork.getSubnets().size() > 1)
+                if (externNetwork.getSubnets().size() != 1)
                     throw new BadRequestException("external network doesn't have a subnet");
                 NeutronSubnet externSubnet = subnetInterface.getSubnet(externNetwork.getSubnets().get(0));
                 if (!externSubnet.isValidIP(floatingIP))
@@ -312,7 +312,7 @@ public class NeutronFloatingIPsNorthbound {
         if (!input.isSingleton())
             throw new BadRequestException("only singleton requests allowed.");
         NeutronFloatingIP singleton = input.getSingleton();
-        if (singleton.getID() != null)
+        if (singleton.getID() == null)
             throw new BadRequestException("singleton UUID doesn't exist.");
 
         NeutronNetwork externNetwork = networkInterface.getNetwork(
@@ -321,7 +321,7 @@ public class NeutronFloatingIPsNorthbound {
         // if floating IP is specified, make sure it can come from the network
         String floatingIP = singleton.getFloatingIPAddress();
         if (floatingIP != null) {
-            if (externNetwork.getSubnets().size() > 1)
+            if (externNetwork.getSubnets().size() != 1)
                 throw new BadRequestException("external network doesn't have a subnet.");
             NeutronSubnet externSubnet = subnetInterface.getSubnet(externNetwork.getSubnets().get(0));
             if (!externSubnet.isValidIP(floatingIP))
