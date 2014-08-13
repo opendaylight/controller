@@ -16,7 +16,6 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -56,8 +55,6 @@ public class ShardReadWriteTransaction extends ShardTransaction {
       deleteData(transaction,DeleteData.fromSerizalizable(message));
     } else if (ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
       readyTransaction(transaction,new ReadyTransaction());
-    } else if(DataExists.SERIALIZABLE_CLASS.equals(message.getClass())) {
-        dataExists(transaction, DataExists.fromSerializable(message));
     }else {
       super.handleReceive(message);
     }
