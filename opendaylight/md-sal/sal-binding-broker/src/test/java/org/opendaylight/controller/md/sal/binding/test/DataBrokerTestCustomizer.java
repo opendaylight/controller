@@ -30,7 +30,6 @@ import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeC
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DataBrokerTestCustomizer {
@@ -93,10 +92,6 @@ public class DataBrokerTestCustomizer {
         return schemaService;
     }
 
-    private BindingIndependentMappingService getMappingService() {
-        return mappingService;
-    }
-
     private DOMDataBroker getDOMDataBroker() {
         if(domDataBroker == null) {
             domDataBroker = createDOMDataBroker();
@@ -104,8 +99,8 @@ public class DataBrokerTestCustomizer {
         return domDataBroker;
     }
 
-    private ImmutableMap<LogicalDatastoreType, DOMStore> getDatastores() {
-        if(datastores == null) {
+    private synchronized ImmutableMap<LogicalDatastoreType, DOMStore> getDatastores() {
+        if (datastores == null) {
             datastores = createDatastores();
         }
         return datastores;
