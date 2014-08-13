@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import javassist.ClassPool;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -22,10 +23,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 public class DataBrokerTestCustomizer {
 
@@ -72,16 +69,11 @@ public class DataBrokerTestCustomizer {
         return new ForwardedBindingDataBroker(getDOMDataBroker(), getMappingService(), getSchemaService());
     }
 
-    public ForwardedBackwardsCompatibleDataBroker createBackwardsCompatibleDataBroker() {
-        return new ForwardedBackwardsCompatibleDataBroker(getDOMDataBroker(), getMappingService(), getSchemaService(), MoreExecutors.sameThreadExecutor());
-    }
-
-
-    private SchemaService getSchemaService() {
+    public SchemaService getSchemaService() {
         return schemaService;
     }
 
-    private BindingIndependentMappingService getMappingService() {
+    public BindingIndependentMappingService getMappingService() {
         return mappingService;
     }
 
