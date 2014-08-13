@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_89aec42c",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFloatingIPsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-13T19:12:34Z",
+      "side": 1,
+      "message": "I dont understand the logic here. Maybe Ryan can help answer this.\nIf the Subnets is designed as a List, it is supposed to take in multiple subnets :-). It seems like the existing code isnt happy with \u003e 1.\nI see that your change has just included the condition for 0 subnets.\n\nBut still, it begs the question of the NB API intent and the backend implementaiton.\n\nIf it is just a implementation restriction, then we have to return appropriate exception atleast. \n\nBadRequest may not be the right one. It should more like. NOT IMPLEMENTED.",
+      "revId": "085713d3e52264d57398e07e55b6abed9dbdc980",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
