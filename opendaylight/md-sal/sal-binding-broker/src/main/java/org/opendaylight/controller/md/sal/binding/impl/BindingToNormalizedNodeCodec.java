@@ -9,9 +9,10 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import java.util.AbstractMap.SimpleEntry;
+
 import java.util.Iterator;
 import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
@@ -26,12 +27,8 @@ import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMapping
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoCloseable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodec.class);
 
     private final BindingIndependentMappingService bindingToLegacy;
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
@@ -80,14 +77,6 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
         } catch (IllegalArgumentException e) {
             return Optional.absent();
         }
-    }
-
-
-    private static final Entry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject> toBindingEntry(
-            final org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject> key,
-            final DataObject value) {
-        return new SimpleEntry<org.opendaylight.yangtools.yang.binding.InstanceIdentifier<? extends DataObject>, DataObject>(
-                key, value);
     }
 
     public DataNormalizer getDataNormalizer() {
