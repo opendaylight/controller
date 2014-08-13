@@ -34,6 +34,24 @@
       "revId": "085713d3e52264d57398e07e55b6abed9dbdc980",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_843f89b3",
+        "filename": "opendaylight/northbound/networkconfiguration/neutron/src/main/java/org/opendaylight/controller/networkconfig/neutron/northbound/NeutronFloatingIPsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-13T20:51:08Z",
+      "side": 1,
+      "message": "Thanks Ryan+Madhu. If I understood it right, when floating IP is not provided, it is valid to have 0 subnets in externalNetwork. In this particular code path, floatingIP was provided, so checking against 0 is the right thing to do. \n\nThe discussion of empty list vs null may apply here, but I\u0027ll not open that pandora box now. :)\n\nThus, the code could be improved so that as long as the floating ip provided falls within the valid range of _any_ of the subnets in the list, this codepath should not fail. As of now -- and that pre-dates this gerrit -- the code was made simple to avoid the potential iteration. \n\nSimple is good, but maybe the exception -- like Madhu proposed -- should be a little more indicative of the limitation of the current implementation. I\u0027ll give it a shot and see what you guys think.\n\nThanks!\n\n-- flavio",
+      "parentUuid": "fa82b9bf_096ab4ed",
+      "revId": "085713d3e52264d57398e07e55b6abed9dbdc980",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
