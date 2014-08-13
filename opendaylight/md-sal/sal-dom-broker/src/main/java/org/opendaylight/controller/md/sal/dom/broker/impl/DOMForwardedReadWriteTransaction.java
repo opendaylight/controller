@@ -50,10 +50,4 @@ class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMS
             final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         return getSubtransaction(store).read(path);
     }
-
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store,
-        YangInstanceIdentifier path) {
-        return getSubtransaction(store).exists(path);
-    }
 }

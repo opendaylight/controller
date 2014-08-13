@@ -23,8 +23,6 @@ import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIden
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -113,15 +111,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         createTransactionIfMissing(actorContext, path);
 
         return transactionContext(path).readData(path);
-    }
-
-    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
-        YangInstanceIdentifier path) {
-        LOG.debug("txn {} exists {}", identifier, path);
-
-        createTransactionIfMissing(actorContext, path);
-
-        return transactionContext(path).dataExists(path);
     }
 
     @Override
@@ -254,15 +243,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 final YangInstanceIdentifier path);
 
         void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
-
-        CheckedFuture<Boolean, ReadFailedException> dataExists(YangInstanceIdentifier path);
     }
 
 
-    private class TransactionContextImpl implements TransactionContext {
+    private class TransactionContextImpl implements TransactionContext{
         private final String shardName;
         private final String actorPath;
-        private final ActorSelection actor;
+        private final ActorSelection  actor;
 
 
         private TransactionContextImpl(String shardName, String actorPath,
@@ -280,7 +267,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             return actor;
         }
 
-        @Override public String getResolvedCohortPath(String cohortPath) {
+        @Override public String getResolvedCohortPath(String cohortPath){
             return actorContext.resolvePath(actorPath, cohortPath);
         }
 
@@ -301,76 +288,38 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             getActor().tell(new DeleteData(path).toSerializable(), null);
         }
 
-        @Override public void mergeData(YangInstanceIdentifier path,
-            NormalizedNode<?, ?> data) {
-            getActor()
-                .tell(new MergeData(path, data, schemaContext).toSerializable(),
-                    null);
+        @Override public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data){
+            getActor().tell(new MergeData(path, data, schemaContext).toSerializable(), null);
         }
 
-        @Override
-        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
-            final YangInstanceIdentifier path) {
+        @Override public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readData(
+                final YangInstanceIdentifier path) {
 
-            Callable<Optional<NormalizedNode<?, ?>>> call =
-                new Callable<Optional<NormalizedNode<?, ?>>>() {
+            Callable<Optional<NormalizedNode<?,?>>> call = new Callable<Optional<NormalizedNode<?,?>>>() {
 
-                    @Override public Optional<NormalizedNode<?, ?>> call()
-                        throws Exception {
-                        Object response = actorContext
-                            .executeRemoteOperation(getActor(),
-                                new ReadData(path).toSerializable(),
-                                ActorContext.ASK_DURATION);
-                        if (response.getClass()
-                            .equals(ReadDataReply.SERIALIZABLE_CLASS)) {
-                            ReadDataReply reply = ReadDataReply
-                                .fromSerializable(schemaContext, path,
-                                    response);
-                            if (reply.getNormalizedNode() == null) {
-                                return Optional.absent();
-                            }
-                            return Optional.<NormalizedNode<?, ?>>of(
-                                reply.getNormalizedNode());
+                @Override public Optional<NormalizedNode<?,?>> call() throws Exception {
+                    Object response = actorContext
+                        .executeRemoteOperation(getActor(), new ReadData(path).toSerializable(),
+                            ActorContext.ASK_DURATION);
+                    if(response.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)){
+                        ReadDataReply reply = ReadDataReply.fromSerializable(schemaContext,path, response);
+                        if(reply.getNormalizedNode() == null){
+                            return Optional.absent();
                         }
-
-                        throw new ReadFailedException("Read Failed " + path);
-                    }
-                };
-
-            return MappingCheckedFuture
-                .create(executor.submit(call), ReadFailedException.MAPPER);
-        }
-
-        @Override public void writeData(YangInstanceIdentifier path,
-            NormalizedNode<?, ?> data) {
-            getActor()
-                .tell(new WriteData(path, data, schemaContext).toSerializable(),
-                    null);
-        }
-
-        @Override public CheckedFuture<Boolean, ReadFailedException> dataExists(
-            final YangInstanceIdentifier path) {
-
-            Callable<Boolean> call = new Callable<Boolean>() {
-
-                @Override public Boolean call() throws Exception {
-                    Object o = actorContext.executeRemoteOperation(getActor(),
-                        new DataExists(path).toSerializable(),
-                        ActorContext.ASK_DURATION
-                    );
-
-
-                    if (DataExistsReply.SERIALIZABLE_CLASS
-                        .equals(o.getClass())) {
-                        return DataExistsReply.fromSerializable(o).exists();
+                        return Optional.<NormalizedNode<?,?>>of(reply.getNormalizedNode());
                     }
 
-                    throw new ReadFailedException("Exists Failed " + path);
+                    return Optional.absent();
                 }
             };
-            return MappingCheckedFuture
-                .create(executor.submit(call), ReadFailedException.MAPPER);
+
+            return MappingCheckedFuture.create(executor.submit(call), ReadFailedException.MAPPER);
         }
+
+        @Override public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+            getActor().tell(new WriteData(path, data, schemaContext).toSerializable(), null);
+        }
+
     }
 
     private class NoOpTransactionContext implements TransactionContext {
@@ -424,15 +373,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         @Override public void writeData(YangInstanceIdentifier path,
             NormalizedNode<?, ?> data) {
             LOG.warn("txn {} writeData called path = {}", identifier, path);
-        }
-
-        @Override public CheckedFuture<Boolean, ReadFailedException> dataExists(
-            YangInstanceIdentifier path) {
-            LOG.warn("txn {} dataExists called path = {}", identifier, path);
-
-            // Returning false instead of an exception to keep this aligned with
-            // read
-            return Futures.immediateCheckedFuture(false);
         }
     }
 

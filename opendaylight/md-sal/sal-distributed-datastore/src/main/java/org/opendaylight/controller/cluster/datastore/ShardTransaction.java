@@ -14,11 +14,9 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
@@ -185,38 +183,28 @@ public abstract class ShardTransaction extends AbstractUntypedActor {
     final ActorRef sender = getSender();
     final ActorRef self = getSelf();
     final YangInstanceIdentifier path = message.getPath();
-    final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
-          transaction.read(path);
+    final ListenableFuture<Optional<NormalizedNode<?, ?>>> future =
+        transaction.read(path);
 
-      future.addListener(new Runnable() {
+    future.addListener(new Runnable() {
       @Override
       public void run() {
         try {
-          Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
+          Optional<NormalizedNode<?, ?>> optional = future.get();
           if (optional.isPresent()) {
             sender.tell(new ReadDataReply(schemaContext,optional.get()).toSerializable(), self);
           } else {
             sender.tell(new ReadDataReply(schemaContext,null).toSerializable(), self);
           }
         } catch (Exception e) {
-            sender.tell(new akka.actor.Status.Failure(e),self);
+            sender.tell(new akka.actor.Status.Failure(new ReadFailedException( "An Exception occurred  when reading data from path : "
+                + path.toString(),e)),self);
         }
 
       }
     }, getContext().dispatcher());
   }
 
-    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message) {
-        final YangInstanceIdentifier path = message.getPath();
-
-        try {
-            Boolean exists = transaction.exists(path).checkedGet();
-            getSender().tell(new DataExistsReply(exists).toSerializable(), getSelf());
-        } catch (ReadFailedException e) {
-            getSender().tell(new akka.actor.Status.Failure(e),getSelf());
-        }
-
-    }
 
   protected void writeData(DOMStoreWriteTransaction transaction, WriteData message) {
     modification.addModification(
