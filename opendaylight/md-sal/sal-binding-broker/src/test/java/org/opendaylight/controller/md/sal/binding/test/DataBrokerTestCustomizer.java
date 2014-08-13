@@ -10,12 +10,9 @@ package org.opendaylight.controller.md.sal.binding.test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import javassist.ClassPool;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -84,11 +81,11 @@ public class DataBrokerTestCustomizer {
         return new ForwardedBindingDataBroker(getDOMDataBroker(), bindingToNormalized, schemaService );
     }
 
-    public ForwardedBackwardsCompatibleDataBroker createBackwardsCompatibleDataBroker() {
-        return new ForwardedBackwardsCompatibleDataBroker(getDOMDataBroker(), bindingToNormalized, getSchemaService(), MoreExecutors.sameThreadExecutor());
+    public BindingToNormalizedNodeCodec getBindingToNormalized() {
+        return bindingToNormalized;
     }
 
-    private SchemaService getSchemaService() {
+    public SchemaService getSchemaService() {
         return schemaService;
     }
 
