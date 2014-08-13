@@ -35,7 +35,8 @@ public class CompositeModificationPayload extends Payload implements
     @Override public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {
         Preconditions.checkState(modification!=null);
         Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> map = new HashMap<>();
-        map.put(org.opendaylight.controller.mdsal.CompositeModificationPayload.modification, this.modification);
+        map.put(
+            org.opendaylight.controller.protobuff.messages.shard.CompositeModificationPayload.modification, this.modification);
         return map;
     }
 
@@ -43,7 +44,7 @@ public class CompositeModificationPayload extends Payload implements
         AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload) {
         PersistentMessages.CompositeModification modification = payload
             .getExtension(
-                org.opendaylight.controller.mdsal.CompositeModificationPayload.modification);
+                org.opendaylight.controller.protobuff.messages.shard.CompositeModificationPayload.modification);
 
 
 
