@@ -10,11 +10,17 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+import java.util.Collection;
 import java.util.List;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.common.RpcError;
 
 /**
  * Unchecked exception to communicate error information, as defined in the ietf restcong draft, to be sent to the
@@ -57,8 +63,8 @@ public class RestconfDocumentedException extends WebApplicationException {
     }
 
     /**
-     * Constructs an instance with an error message and exception cause. The stack trace of the exception is included in
-     * the error info.
+     * Constructs an instance with an error message and exception cause.
+     * The stack trace of the exception is included in the error info.
      *
      * @param message
      *            A string which provides a plain text string describing the error.
@@ -80,10 +86,23 @@ public class RestconfDocumentedException extends WebApplicationException {
     /**
      * Constructs an instance with the given errors.
      */
-    public RestconfDocumentedException(List<RestconfError> errors) {
-        this.errors = ImmutableList.copyOf(errors);
-        Preconditions.checkArgument(!this.errors.isEmpty(), "RestconfError list can't be empty");
+    public RestconfDocumentedException(String message, Throwable cause, List<RestconfError> errors) {
+        super(message, cause);
+        if(!errors.isEmpty()) {
+            this.errors = ImmutableList.copyOf(errors);
+        } else {
+            this.errors = ImmutableList.of(new RestconfError(RestconfError.ErrorType.APPLICATION,
+                    RestconfError.ErrorTag.OPERATION_FAILED, message));
+        }
+
         status = null;
+    }
+
+    /**
+     * Constructs an instance with the given RpcErrors.
+     */
+    public RestconfDocumentedException(String message, Throwable cause, Collection<RpcError> rpcErrors) {
+        this(message, cause, convertToRestconfErrors(rpcErrors));
     }
 
     /**
@@ -104,6 +123,18 @@ public class RestconfDocumentedException extends WebApplicationException {
         errors = ImmutableList.of(error);
         status = null;
     }
+
+    private static List<RestconfError> convertToRestconfErrors(Collection<RpcError> rpcErrors) {
+        List<RestconfError> errorList = Lists.newArrayList();
+        if(rpcErrors != null) {
+            for (RpcError rpcError : rpcErrors) {
+                errorList.add(new RestconfError(rpcError));
+            }
+        }
+
+        return errorList;
+    }
+
 
     public List<RestconfError> getErrors() {
         return errors;
