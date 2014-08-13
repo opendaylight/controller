@@ -13,8 +13,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageEx
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
@@ -125,90 +123,6 @@ public class ShardTransactionTest extends AbstractActorTest {
                                 if (ReadDataReply.fromSerializable(testSchemaContext,TestModel.TEST_PATH, in)
                                     .getNormalizedNode()
                                     == null) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
-
-                    assertEquals("match", out);
-
-                    expectNoMsg();
-                }
-
-
-            };
-        }};
-    }
-
-    @Test
-    public void testOnReceiveDataExistsPositive() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
-            final Props props =
-                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
-            final ActorRef subject = getSystem().actorOf(props, "testDataExistsPositive");
-
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-
-                    subject.tell(
-                        new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
-                        getRef());
-
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                                if (DataExistsReply.fromSerializable(in)
-                                    .exists()) {
-                                    return "match";
-                                }
-                                return null;
-                            } else {
-                                throw noMatch();
-                            }
-                        }
-                    }.get(); // this extracts the received message
-
-                    assertEquals("match", out);
-
-                    expectNoMsg();
-                }
-
-
-            };
-        }};
-    }
-
-    @Test
-    public void testOnReceiveDataExistsNegative() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
-            final Props props =
-                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
-            final ActorRef subject = getSystem().actorOf(props, "testDataExistsNegative");
-
-            new Within(duration("1 seconds")) {
-                @Override
-                protected void run() {
-
-                    subject.tell(
-                        new DataExists(TestModel.TEST_PATH).toSerializable(),
-                        getRef());
-
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
-                        // do not put code outside this method, will run afterwards
-                        @Override
-                        protected String match(Object in) {
-                            if (in.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                                if (!DataExistsReply.fromSerializable(in)
-                                    .exists()) {
                                     return "match";
                                 }
                                 return null;
