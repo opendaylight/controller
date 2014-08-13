@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013-2014 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.action;
 
 /**
@@ -34,8 +33,8 @@ public enum ActionType {
     SET_NW_SRC("setNwSrc", 0, 0),
     SET_NW_DST("setNwDst", 0, 0),
     SET_NW_TOS("setNwTos", 0, 0x3f),
-    SET_TP_SRC("setTpSrc", 1, 0xffff),
-    SET_TP_DST("setTpDst", 1, 0xffff),
+    SET_TP_SRC("setTpSrc", 0, 0xffff), // Set transport source port
+    SET_TP_DST("setTpDst", 0, 0xffff), // Set transport destination port
     SET_NEXT_HOP("setNextHop", 0, 0);
 
     private String id;
