@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_694260af",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Await.result() of Akka throws Exception, not a particular one, just parent class Exception.",
+      "parentUuid": "fa82b9bf_699900c3",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a9f2a803",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-13T12:14:04Z",
       "side": 1,
       "message": "Nothing done with the Terminated message????",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_893d642d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Actually, redundant code, removed from other place, this was left behind. I\u0027ll remove it in next patch",
+      "parentUuid": "fa82b9bf_a9f2a803",
       "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4943dcae",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Agree, I think Abhishek is planning to make that change, once that change is in, I\u0027ll make this change also.",
+      "parentUuid": "fa82b9bf_e9d3d05d",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_09d7144c",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/LatestEntryRoutingLogic.java",
         "patchSetId": 3
@@ -81,6 +135,24 @@
       "writtenOn": "2014-08-13T12:14:04Z",
       "side": 1,
       "message": "Should this be named LatestEntryComparator?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a90b887b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/LatestEntryRoutingLogic.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Yes, will change it.",
+      "parentUuid": "fa82b9bf_09d7144c",
       "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c90e0c8c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/RoutingLogic.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a9c948ad",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c9ccccbd",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
         "patchSetId": 3
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_49719c0a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Removed all thread.sleep",
+      "parentUuid": "fa82b9bf_c9ccccbd",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_69c7c096",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
         "patchSetId": 3
@@ -132,6 +240,24 @@
       "writtenOn": "2014-08-13T12:14:04Z",
       "side": 1,
       "message": "This test alone will take 6 seconds atleast to complete. Why can\u0027t we just use Await.result here?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_29769806",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2014-08-13T17:40:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_69c7c096",
       "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
