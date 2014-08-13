@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
@@ -30,13 +31,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDeviceHandler<NetconfSessionCapabilities> {
 
@@ -64,11 +61,9 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     }
 
     @Override
-    public synchronized void onDeviceConnected(final SchemaContextProvider remoteSchemaContextProvider,
+    public synchronized void onDeviceConnected(final SchemaContext schemaContext,
                                                final NetconfSessionCapabilities netconfSessionPreferences, final RpcImplementation deviceRpc) {
-        final SchemaContext schemaContext = remoteSchemaContextProvider.getSchemaContext();
 
-        // TODO remove deprecated SchemaContextProvider from SchemaAwareRpcBroker
         // TODO move SchemaAwareRpcBroker from sal-broker-impl, now we have depend on the whole sal-broker-impl
         final RpcProvisionRegistry rpcRegistry = new SchemaAwareRpcBroker(id.getPath().toString(), new org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider() {
             @Override

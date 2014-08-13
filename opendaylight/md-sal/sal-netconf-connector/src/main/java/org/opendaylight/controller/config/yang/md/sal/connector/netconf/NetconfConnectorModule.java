@@ -10,12 +10,10 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
-import java.io.File;
-import java.io.InputStream;
+import com.google.common.base.Optional;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
@@ -25,9 +23,11 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
+import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionCapabilities;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
+import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
@@ -35,15 +35,11 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yangtools.yang.model.util.repo.AbstractCachingSchemaSourceProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.FilesystemSchemaCachingProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProviders;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 /**
  *
@@ -52,9 +48,10 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 {
     private static final Logger logger = LoggerFactory.getLogger(NetconfConnectorModule.class);
 
-    private static AbstractCachingSchemaSourceProvider<String, InputStream> GLOBAL_NETCONF_SOURCE_PROVIDER = null;
     private BundleContext bundleContext;
     private Optional<NetconfSessionCapabilities> userCapabilities;
+    private SchemaSourceRegistry schemaRegistry;
+    private SchemaContextFactory schemaContextFactory;
 
     public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -108,8 +105,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
         final RemoteDeviceHandler<NetconfSessionCapabilities> salFacade
                 = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, globalProcessingExecutor);
+
+        final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
+                new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
+
         final NetconfDevice device =
-                NetconfDevice.createNetconfDevice(id, getGlobalNetconfSchemaProvider(), globalProcessingExecutor, salFacade);
+                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, new NetconfMessageTransformer());
 
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
@@ -146,17 +147,6 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 yangModuleCapabilitiesJmxAttribute);
 
         return Optional.of(parsedOverrideCapabilities);
-    }
-
-    private synchronized AbstractCachingSchemaSourceProvider<String, InputStream> getGlobalNetconfSchemaProvider() {
-        if(GLOBAL_NETCONF_SOURCE_PROVIDER == null) {
-            final String storageFile = "cache/schema";
-            //            File directory = bundleContext.getDataFile(storageFile);
-            final File directory = new File(storageFile);
-            final SchemaSourceProvider<String> defaultProvider = SchemaSourceProviders.noopProvider();
-            GLOBAL_NETCONF_SOURCE_PROVIDER = FilesystemSchemaCachingProvider.createFromStringSourceProvider(defaultProvider, directory);
-        }
-        return GLOBAL_NETCONF_SOURCE_PROVIDER;
     }
 
     public void setBundleContext(final BundleContext bundleContext) {
@@ -211,5 +201,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             final String ip = ipAddress.getIpv4Address() != null ? ipAddress.getIpv4Address().getValue() : ipAddress.getIpv6Address().getValue();
             return new InetSocketAddress(ip, getPort().getValue());
         }
+    }
+
+    public void setSchemaRegistry(final SchemaSourceRegistry schemaRegistry) {
+        this.schemaRegistry = schemaRegistry;
+    }
+
+    public void setSchemaContextFactory(final SchemaContextFactory schemaContextFactory) {
+        this.schemaContextFactory = schemaContextFactory;
     }
 }
