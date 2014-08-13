@@ -36,7 +36,11 @@ public interface DOMStoreReadTransaction extends DOMStoreTransaction {
     CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(YangInstanceIdentifier path);
 
     /**
-     * Checks if data is available in the logical data store located at provided path
+     * Checks if data is available in the logical data store located at provided path. If exists returns
+     * a true a read that immediately follows it SHOULD return the Normalized Node at that path.
+     * <p>
+     * It is possible that the data being retrieved is from a remote data store
+     * in which case it is possible for that next read to fail even if exists was to succeed.
      *
      * @param path
      *            Path which uniquely identifies subtree which client want to
