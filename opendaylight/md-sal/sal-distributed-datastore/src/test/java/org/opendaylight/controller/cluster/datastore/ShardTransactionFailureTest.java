@@ -124,6 +124,41 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     }
 
+    @Test(expected = ReadFailedException.class)
+    public void testNegativeExistsWithReadWriteOnlyTransactionClosed()
+        throws Throwable {
+
+        final ActorRef shard =
+            getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP));
+        final Props props =
+            ShardTransaction.props(store.newReadWriteTransaction(), shard,
+                TestModel.createTestContext());
+
+        final TestActorRef<ShardTransaction> subject = TestActorRef
+            .create(getSystem(), props,
+                "testNegativeExistsWithReadWriteOnlyTransactionClosed");
+
+        ShardTransactionMessages.DataExists dataExists =
+            ShardTransactionMessages.DataExists.newBuilder()
+                .setInstanceIdentifierPathArguments(
+                    NormalizedNodeMessages.InstanceIdentifier.newBuilder()
+                        .build()
+                ).build();
+
+        Future<Object> future =
+            akka.pattern.Patterns.ask(subject, dataExists, 3000);
+        assertTrue(future.isCompleted());
+        Await.result(future, Duration.Zero());
+
+        ((ShardReadWriteTransaction) subject.underlyingActor())
+            .forUnitTestOnlyExplicitTransactionClose();
+
+        future = akka.pattern.Patterns.ask(subject, dataExists, 3000);
+        Await.result(future, Duration.Zero());
+
+
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testNegativeWriteWithTransactionReady() throws Exception {
 

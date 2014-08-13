@@ -2,20 +2,19 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
@@ -30,6 +29,7 @@ import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -81,6 +81,10 @@ public class TransactionProxyTest extends AbstractActorTest {
                 TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
+        actorContext.setExecuteRemoteOperationResponse(
+            new ReadDataReply(TestModel.createTestContext(), null)
+                .toSerializable());
+
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
             transactionProxy.read(TestModel.TEST_PATH);
 
@@ -99,7 +103,48 @@ public class TransactionProxyTest extends AbstractActorTest {
     }
 
     @Test
-    public void testReadWhenANullIsReturned() throws Exception {
+    public void testExists() throws Exception {
+        final Props props = Props.create(DoNothingActor.class);
+        final ActorRef actorRef = getSystem().actorOf(props);
+
+        final MockActorContext actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
+        actorContext.setExecuteRemoteOperationResponse("message");
+
+
+        TransactionProxy transactionProxy =
+            new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+
+
+        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(false).toSerializable());
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+            transactionProxy.exists(TestModel.TEST_PATH);
+
+        Assert.assertFalse(exists.checkedGet());
+
+        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(true).toSerializable());
+
+        exists = transactionProxy.exists(TestModel.TEST_PATH);
+
+        Assert.assertTrue(exists.checkedGet());
+
+        actorContext.setExecuteRemoteOperationResponse("bad message");
+
+        exists = transactionProxy.exists(TestModel.TEST_PATH);
+
+        try {
+            exists.checkedGet();
+            fail();
+        } catch(ReadFailedException e){
+        }
+
+    }
+
+    @Test(expected = ReadFailedException.class)
+    public void testReadWhenAnInvalidMessageIsSentInReply() throws Exception {
         final Props props = Props.create(DoNothingActor.class);
         final ActorRef actorRef = getSystem().actorOf(props);
 
@@ -113,21 +158,11 @@ public class TransactionProxyTest extends AbstractActorTest {
                 TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
 
 
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
-            transactionProxy.read(TestModel.TEST_PATH);
 
-        Optional<NormalizedNode<?, ?>> normalizedNodeOptional = read.get();
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+            read = transactionProxy.read(TestModel.TEST_PATH);
 
-        Assert.assertFalse(normalizedNodeOptional.isPresent());
-
-        actorContext.setExecuteRemoteOperationResponse(new ReadDataReply(
-           TestModel.createTestContext(), null).toSerializable());
-
-        read = transactionProxy.read(TestModel.TEST_PATH);
-
-        normalizedNodeOptional = read.get();
-
-        Assert.assertFalse(normalizedNodeOptional.isPresent());
+        read.checkedGet();
     }
 
     @Test

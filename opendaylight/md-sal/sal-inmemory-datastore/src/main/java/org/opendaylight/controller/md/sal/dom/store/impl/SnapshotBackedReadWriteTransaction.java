@@ -61,4 +61,14 @@ class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
         }
     }
+
+    @Override public CheckedFuture<Boolean, ReadFailedException> exists(
+        YangInstanceIdentifier path) {
+        try {
+            return Futures.immediateCheckedFuture(
+                read(path).checkedGet().isPresent());
+        } catch (ReadFailedException e) {
+            return Futures.immediateFailedCheckedFuture(e);
+        }
+    }
 }

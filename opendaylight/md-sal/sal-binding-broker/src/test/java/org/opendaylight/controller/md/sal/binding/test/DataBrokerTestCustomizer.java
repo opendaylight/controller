@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.test;
 import javassist.ClassPool;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -70,6 +71,11 @@ public class DataBrokerTestCustomizer {
     public DataBroker createDataBroker() {
         return new ForwardedBindingDataBroker(getDOMDataBroker(), getMappingService(), getSchemaService());
     }
+
+    public ForwardedBackwardsCompatibleDataBroker createBackwardsCompatibleDataBroker() {
+        return new ForwardedBackwardsCompatibleDataBroker(getDOMDataBroker(), getMappingService(), getSchemaService(), MoreExecutors.sameThreadExecutor());
+    }
+
 
     private SchemaService getSchemaService() {
         return schemaService;

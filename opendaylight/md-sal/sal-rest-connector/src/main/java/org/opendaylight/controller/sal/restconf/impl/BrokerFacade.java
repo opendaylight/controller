@@ -7,20 +7,12 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import javax.ws.rs.core.Response.Status;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
@@ -44,6 +36,16 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 public class BrokerFacade {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
@@ -255,15 +257,20 @@ public class BrokerFacade {
             currentArguments.add(currentArg);
             YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
 
-            final Optional<NormalizedNode<?, ?>> datastoreData;
+            final Boolean exists;
+
             try {
-                datastoreData = rwTx.read(store, currentPath).get();
-            } catch (InterruptedException | ExecutionException e) {
+
+                CheckedFuture<Boolean, ReadFailedException> future =
+                    rwTx.exists(store, currentPath);
+                exists = future.checkedGet();
+            } catch (ReadFailedException e) {
                 LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
                 throw new IllegalStateException("Failed to read pre-existing data", e);
             }
 
-            if (!datastoreData.isPresent() && iterator.hasNext()) {
+
+            if (!exists && iterator.hasNext()) {
                 rwTx.merge(store, currentPath, currentOp.createDefault(currentArg));
             }
         }
