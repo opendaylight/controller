@@ -16,6 +16,24 @@
       "revId": "72afa0ba847f00665492ef0d71ec5dc70a4b8649",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_693d80c3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfError.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-13T09:14:35Z",
+      "side": 1,
+      "message": "correct. and the ietf version still retains it.",
+      "parentUuid": "fa82b9bf_8e0a4a24",
+      "revId": "72afa0ba847f00665492ef0d71ec5dc70a4b8649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
