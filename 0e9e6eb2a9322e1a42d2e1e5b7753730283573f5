@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_699900c3",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "Which Akka API throws Exception?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9f2a803",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "Nothing done with the Terminated message????",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69e02029",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "Could we modify the FindRoutersReply message to return an empty list always instead of null? that way you can avoid null checks like this.",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9d3d05d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "Adding a props method on RpcRegistry is a recommended practice. See http://doc.akka.io/docs/akka/snapshot/java/untyped-actors.html\n\nThe idea is that if you do need to provide arguments or the arguments required to create your actor change you will get compiler help in figuring out all the places that need to be changed. With the Props.create method the code will compile fine but break at runtime.",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09d7144c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/LatestEntryRoutingLogic.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "Should this be named LatestEntryComparator?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9c948ad",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/utils/RoutingLogic.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "A bit of documentation on this interface will be helpful",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9ccccbd",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "These sleeps make tests really flaky and also slow. Isn\u0027t there a better way to do this?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69c7c096",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-13T12:14:04Z",
+      "side": 1,
+      "message": "This test alone will take 6 seconds atleast to complete. Why can\u0027t we just use Await.result here?",
+      "revId": "0e9e6eb2a9322e1a42d2e1e5b7753730283573f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
