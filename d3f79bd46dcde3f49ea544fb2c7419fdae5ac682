@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_642925e5",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T06:40:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_69fca0b8",
+      "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_89f7a4d2",
         "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
         "patchSetId": 4
@@ -47,6 +65,24 @@
       "writtenOn": "2014-08-13T13:06:17Z",
       "side": 1,
       "message": "The add call back on the submit is of this type: \"CheckedFuture\u003cVoid,TransactionCommitFailedException\u003e\". I think you want to apply this to the tx.read future, not a submit future. Submit is intended for writes.",
+      "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24f1dd94",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T06:40:47Z",
+      "side": 1,
+      "message": "I missed that one, thank you for pointing it out.",
+      "parentUuid": "fa82b9bf_89f7a4d2",
       "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_44ec21bb",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T06:40:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_49fd1cb0",
+      "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e92f503d",
         "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
         "patchSetId": 4
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e42e95fa",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T06:40:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e92f503d",
+      "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_093394ab",
         "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
         "patchSetId": 4
@@ -98,6 +170,24 @@
       "writtenOn": "2014-08-13T13:06:17Z",
       "side": 1,
       "message": "This seems to be a common pattern of just wanting to debug log success/failure... perhaps you could create a common utility that others can use so we don\u0027t have to keep duplicating it in all of the code?",
+      "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c40ef18b",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T06:40:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_093394ab",
       "revId": "d3f79bd46dcde3f49ea544fb2c7419fdae5ac682",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
