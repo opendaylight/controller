@@ -12,4 +12,8 @@ public class PrimaryNotFoundException extends RuntimeException {
     public PrimaryNotFoundException(String message){
         super(message);
     }
+
+    public PrimaryNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
