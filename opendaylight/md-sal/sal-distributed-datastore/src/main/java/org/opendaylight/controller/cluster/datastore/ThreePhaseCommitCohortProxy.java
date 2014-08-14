@@ -10,11 +10,13 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
+import akka.dispatch.Futures;
+import akka.dispatch.OnComplete;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.SettableFuture;
 
-import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -28,124 +30,148 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import scala.concurrent.Future;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
  */
-public class ThreePhaseCommitCohortProxy implements
-    DOMStoreThreePhaseCommitCohort{
+public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohort{
 
-    private static final Logger
-        LOG = LoggerFactory.getLogger(DistributedDataStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
     private final ActorContext actorContext;
     private final List<ActorPath> cohortPaths;
-    private final ListeningExecutorService executor;
     private final String transactionId;
 
-
-    public ThreePhaseCommitCohortProxy(ActorContext actorContext,
-        List<ActorPath> cohortPaths,
-        String transactionId,
-        ListeningExecutorService executor) {
-
+    public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<ActorPath> cohortPaths,
+            String transactionId) {
         this.actorContext = actorContext;
         this.cohortPaths = cohortPaths;
         this.transactionId = transactionId;
-        this.executor = executor;
     }
 
-    @Override public ListenableFuture<Boolean> canCommit() {
+    @Override
+    public ListenableFuture<Boolean> canCommit() {
         LOG.debug("txn {} canCommit", transactionId);
-        Callable<Boolean> call = new Callable<Boolean>() {
 
+        Future<Iterable<Object>> combinedFuture =
+                invokeCohorts(new CanCommitTransaction().toSerializable());
+
+        final SettableFuture<Boolean> returnFuture = SettableFuture.create();
+
+        combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
-            public Boolean call() throws Exception {
-                for(ActorPath actorPath : cohortPaths){
+            public void onComplete(Throwable failure, Iterable<Object> responses) throws Throwable {
+                if(failure != null) {
+                    returnFuture.setException(failure);
+                    return;
+                }
 
-                    Object message = new CanCommitTransaction().toSerializable();
-                    LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
-
-                    ActorSelection cohort = actorContext.actorSelection(actorPath);
-
-                    try {
-                        Object response =
-                                actorContext.executeRemoteOperation(cohort,
-                                        message,
-                                        ActorContext.ASK_DURATION);
-
-                        if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                            CanCommitTransactionReply reply =
-                                    CanCommitTransactionReply.fromSerializable(response);
-                            if (!reply.getCanCommit()) {
-                                return false;
-                            }
+                boolean result = true;
+                for(Object response: responses) {
+                    if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
+                        CanCommitTransactionReply reply =
+                                CanCommitTransactionReply.fromSerializable(response);
+                        if (!reply.getCanCommit()) {
+                            result = false;
+                            break;
                         }
-                    } catch(RuntimeException e){
-                        // FIXME : Need to properly handle this
-                        LOG.error("Unexpected Exception", e);
-                        return false;
+                    } else {
+                        LOG.error("Unexpected response type {}", response.getClass());
+                        returnFuture.setException(new IllegalArgumentException(
+                                String.format("Unexpected response type {}", response.getClass())));
+                        return;
                     }
                 }
 
-                return true;
+                returnFuture.set(Boolean.valueOf(result));
             }
-        };
+        }, actorContext.getActorSystem().dispatcher());
 
-        return executor.submit(call);
+        return returnFuture;
     }
 
-    @Override public ListenableFuture<Void> preCommit() {
+    private Future<Iterable<Object>> invokeCohorts(Object message) {
+        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohortPaths.size());
+        for(ActorPath actorPath : cohortPaths) {
+
+            LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
+
+            ActorSelection cohort = actorContext.actorSelection(actorPath);
+
+            futureList.add(actorContext.executeRemoteOperationAsync(cohort, message,
+                    ActorContext.ASK_DURATION));
+        }
+
+        return Futures.sequence(futureList, actorContext.getActorSystem().dispatcher());
+    }
+
+    @Override
+    public ListenableFuture<Void> preCommit() {
         LOG.debug("txn {} preCommit", transactionId);
-        return voidOperation(new PreCommitTransaction().toSerializable(), PreCommitTransactionReply.SERIALIZABLE_CLASS);
+        return voidOperation(new PreCommitTransaction().toSerializable(),
+                PreCommitTransactionReply.SERIALIZABLE_CLASS, true);
     }
 
-    @Override public ListenableFuture<Void> abort() {
+    @Override
+    public ListenableFuture<Void> abort() {
         LOG.debug("txn {} abort", transactionId);
-        return voidOperation(new AbortTransaction().toSerializable(), AbortTransactionReply.SERIALIZABLE_CLASS);
+
+        // Note - we pass false for propagateException. In the front-end data broker, this method
+        // is called when one of the 3 phases fails with an exception. We'd rather have that
+        // original exception propagated to the client. If our abort fails and we propagate the
+        // exception then that exception will supersede and suppress the original exception. But
+        // it's the original exception that is the root cause and of more interest to the client.
+
+        return voidOperation(new AbortTransaction().toSerializable(),
+                AbortTransactionReply.SERIALIZABLE_CLASS, false);
     }
 
-    @Override public ListenableFuture<Void> commit() {
+    @Override
+    public ListenableFuture<Void> commit() {
         LOG.debug("txn {} commit", transactionId);
-        return voidOperation(new CommitTransaction().toSerializable(), CommitTransactionReply.SERIALIZABLE_CLASS);
+        return voidOperation(new CommitTransaction().toSerializable(),
+                CommitTransactionReply.SERIALIZABLE_CLASS, true);
     }
 
-    private ListenableFuture<Void> voidOperation(final Object message, final Class expectedResponseClass){
-        Callable<Void> call = new Callable<Void>() {
+    private ListenableFuture<Void> voidOperation(final Object message,
+            final Class<?> expectedResponseClass, final boolean propagateException) {
 
-            @Override public Void call() throws Exception {
-                for(ActorPath actorPath : cohortPaths){
-                    ActorSelection cohort = actorContext.actorSelection(actorPath);
+        Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
-                    LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
+        final SettableFuture<Void> returnFuture = SettableFuture.create();
 
-                    try {
-                        Object response =
-                            actorContext.executeRemoteOperation(cohort,
-                                message,
-                                ActorContext.ASK_DURATION);
+        combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
+            @Override
+            public void onComplete(Throwable failure, Iterable<Object> responses) throws Throwable {
+                if(failure != null) {
+                    if(propagateException) {
+                        returnFuture.setException(failure);
+                    } else {
+                        LOG.debug(String.format("%s failed",  message.getClass().getSimpleName()),
+                                failure);
+                        returnFuture.set(null);
+                    }
+                    return;
+                }
 
-                        if (response != null && !response.getClass()
-                            .equals(expectedResponseClass)) {
-                            throw new RuntimeException(
-                                String.format(
-                                    "did not get the expected response \n\t\t expected : %s \n\t\t actual   : %s",
-                                    expectedResponseClass.toString(),
-                                    response.getClass().toString())
-                            );
-                        }
-                    } catch(TimeoutException e){
-                        LOG.error(String.format("A timeout occurred when processing operation : %s", message));
+                for(Object response: responses) {
+                    if(!response.getClass().equals(expectedResponseClass)) {
+                        LOG.error("Unexpected response type {}", response.getClass());
+                        returnFuture.setException(new IllegalArgumentException(
+                                String.format("Unexpected response type {}", response.getClass())));
+                        return;
                     }
                 }
-                return null;
-            }
-        };
 
-        return executor.submit(call);
+                returnFuture.set(null);
+            }
+        }, actorContext.getActorSystem().dispatcher());
+
+        return returnFuture;
     }
 
     public List<ActorPath> getCohortPaths() {

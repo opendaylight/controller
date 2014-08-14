@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
-
+import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -16,10 +16,12 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class MockActorContext extends ActorContext {
 
-    private Object executeShardOperationResponse;
-    private Object executeRemoteOperationResponse;
-    private Object executeLocalOperationResponse;
-    private Object executeLocalShardOperationResponse;
+    private volatile Object executeShardOperationResponse;
+    private volatile Object executeRemoteOperationResponse;
+    private volatile Object executeLocalOperationResponse;
+    private volatile Object executeLocalShardOperationResponse;
+    private volatile Exception executeRemoteOperationFailure;
+    private volatile Object inputMessage;
 
     public MockActorContext(ActorSystem actorSystem) {
         super(actorSystem, null, new MockClusterWrapper(), new MockConfiguration());
@@ -52,6 +54,10 @@ public class MockActorContext extends ActorContext {
         executeRemoteOperationResponse = response;
     }
 
+    public void setExecuteRemoteOperationFailure(Exception executeRemoteOperationFailure) {
+        this.executeRemoteOperationFailure = executeRemoteOperationFailure;
+    }
+
     public void setExecuteLocalOperationResponse(
         Object executeLocalOperationResponse) {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
@@ -62,12 +68,20 @@ public class MockActorContext extends ActorContext {
         this.executeLocalShardOperationResponse = executeLocalShardOperationResponse;
     }
 
-    @Override public Object executeLocalOperation(ActorRef actor,
+    @SuppressWarnings("unchecked")
+    public <T> T getInputMessage(Class<T> expType) throws Exception {
+        assertNotNull("Input message was null", inputMessage);
+        return (T) expType.getMethod("fromSerializable", Object.class).invoke(null, inputMessage);
+    }
+
+    @Override
+    public Object executeLocalOperation(ActorRef actor,
         Object message, FiniteDuration duration) {
         return this.executeLocalOperationResponse;
     }
 
-    @Override public Object executeLocalShardOperation(String shardName,
+    @Override
+    public Object executeLocalShardOperation(String shardName,
         Object message, FiniteDuration duration) {
         return this.executeLocalShardOperationResponse;
     }
