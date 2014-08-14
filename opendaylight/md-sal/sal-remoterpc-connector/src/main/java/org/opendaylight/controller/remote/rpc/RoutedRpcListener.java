@@ -14,7 +14,6 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChange;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -56,12 +55,7 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
   private void announce(Set<RpcRouter.RouteIdentifier<?, ?, ?>> announcements) {
     LOG.debug("Announcing [{}]", announcements);
     RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(new ArrayList<>(announcements));
-    try {
-      ActorUtil.executeOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
-    } catch (Exception e) {
-      // Just logging it because Akka API throws this exception
-      LOG.error("announce: {}", e);
-    }
+    rpcRegistry.tell(addRpcMsg, null);
   }
 
   /**
@@ -71,12 +65,7 @@ public class RoutedRpcListener implements RouteChangeListener<RpcRoutingContext,
   private void remove(Set<RpcRouter.RouteIdentifier<?, ?, ?>> removals){
     LOG.debug("Removing [{}]", removals);
     RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(new ArrayList<>(removals));
-    try {
-      ActorUtil.executeOperation(rpcRegistry, removeRpcMsg, ActorUtil.ASK_DURATION, ActorUtil.AWAIT_DURATION);
-    } catch (Exception e) {
-      // Just logging it because Akka API throws this exception
-      LOG.error("remove: {}", e);
-    }
+    rpcRegistry.tell(removeRpcMsg, null);
   }
 
   /**

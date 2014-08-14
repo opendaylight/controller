@@ -11,7 +11,6 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -37,14 +36,7 @@ public class RpcListener implements RpcRegistrationListener{
     List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
     routeIds.add(routeId);
     RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(routeIds);
-    try {
-      ActorUtil.executeOperation(rpcRegistry, addRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
-      LOG.debug("Route added [{}]", routeId);
-    } catch (Exception e) {
-      // Just logging it because Akka API Await.result() throws this exception
-      LOG.error("onRpcImplementationAdded: {}", e);
-    }
-
+    rpcRegistry.tell(addRpcMsg, null);
   }
 
   @Override
@@ -54,11 +46,6 @@ public class RpcListener implements RpcRegistrationListener{
     List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
     routeIds.add(routeId);
     RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(routeIds);
-    try {
-      ActorUtil.executeOperation(rpcRegistry, removeRpcMsg, ActorUtil.LOCAL_ASK_DURATION, ActorUtil.LOCAL_AWAIT_DURATION);
-    } catch (Exception e) {
-      // Just logging it because Akka API throws Await.result() this exception
-      LOG.error("onRpcImplementationRemoved: {}", e);
-    }
+    rpcRegistry.tell(removeRpcMsg, null);
   }
 }
