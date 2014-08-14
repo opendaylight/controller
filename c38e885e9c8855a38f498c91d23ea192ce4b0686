@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_c666f650",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T20:15:20Z",
+      "side": 1,
+      "message": "Use ActorRef.noSender() instead of null.\nhttp://doc.akka.io/japi/akka/2.3.4/akka/actor/ActorRef.html#noSender()",
+      "revId": "c38e885e9c8855a38f498c91d23ea192ce4b0686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_66592a8d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T20:15:20Z",
+      "side": 1,
+      "message": "same as before",
+      "revId": "c38e885e9c8855a38f498c91d23ea192ce4b0686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2657a259",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/resources/application.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T20:15:20Z",
+      "side": 1,
+      "message": "should the port be 2550 to match above port?",
+      "revId": "c38e885e9c8855a38f498c91d23ea192ce4b0686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
