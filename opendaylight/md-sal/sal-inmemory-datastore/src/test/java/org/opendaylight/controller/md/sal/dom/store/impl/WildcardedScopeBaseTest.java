@@ -34,8 +34,11 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
 
         assertNotNull(change);
 
-        assertNotContains(change.getCreatedData(), TOP_LEVEL);
-        assertContains(change.getCreatedData(), path(FOO), path(FOO, BAR));
+        /*
+         * Created data must not contain nested-list item, since that is two-level deep.
+         */
+        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR));
+        assertContains(change.getCreatedData(), path(FOO) );
 
         assertEmpty(change.getUpdatedData());
         assertEmpty(change.getRemovedPaths());
@@ -48,11 +51,18 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
-
-        assertContains(change.getCreatedData(), path(FOO, BAZ));
+        /*
+         * Created data must NOT contain nested-list item since scope is base, and change is two
+         * level deep.
+         */
+        assertNotContains(change.getCreatedData(), path(FOO, BAZ));
         assertContains(change.getUpdatedData(), path(FOO));
         assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        assertContains(change.getRemovedPaths(), path(FOO, BAR));
+        /*
+         * Removed data must NOT contain nested-list item since scope is base, and change is two
+         * level deep.
+         */
+        assertNotContains(change.getRemovedPaths(), path(FOO, BAR));
 
     }
 
@@ -64,8 +74,9 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
         assertNotNull(change);
         assertFalse(change.getCreatedData().isEmpty());
 
-        assertContains(change.getCreatedData(), path(FOO), path(FOO, BAR), path(FOO, BAZ));
-        assertNotContains(change.getCreatedData(), TOP_LEVEL);
+        // Base event should contain only changed item, no details about child.
+        assertContains(change.getCreatedData(), path(FOO));
+        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR), path(FOO, BAZ));
         assertEmpty(change.getUpdatedData());
         assertEmpty(change.getRemovedPaths());
 
@@ -95,7 +106,12 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
         assertEmpty(change.getUpdatedData());
 
         assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        assertContains(change.getRemovedPaths(), path(FOO),path(FOO, BAZ),path(FOO,BAR));
+        /*
+         *  Scope base listener event should contain top-level-list item and nested list path
+         *  and should not contain baz, bar which are two-level deep
+         */
+        assertContains(change.getRemovedPaths(), path(FOO));
+        assertNotContains(change.getRemovedPaths(),path(FOO, BAZ),path(FOO,BAR));
     }
 
     @Override

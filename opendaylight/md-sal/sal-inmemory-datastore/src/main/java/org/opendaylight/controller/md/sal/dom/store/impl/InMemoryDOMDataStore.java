@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.GuardedBy;
 
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -176,7 +175,7 @@ public class InMemoryDOMDataStore implements DOMStore, Identifiable<String>, Sch
                         .addCreated(path, data) //
                         .build();
 
-                new ChangeListenerNotifyTask(Collections.singletonList(reg), event,
+                new ChangeListenerNotifyTask(reg, event,
                         dataChangeListenerNotificationManager).run();
             }
         }
