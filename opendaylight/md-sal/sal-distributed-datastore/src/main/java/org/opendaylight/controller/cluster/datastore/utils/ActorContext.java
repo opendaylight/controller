@@ -13,7 +13,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.dispatch.OnComplete;
 import akka.util.Timeout;
+
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -22,9 +24,9 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -53,8 +55,6 @@ public class ActorContext {
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
-
-    private SchemaContext schemaContext = null;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
         ClusterWrapper clusterWrapper,
@@ -172,6 +172,39 @@ public class ActorContext {
         } catch (Exception e) {
             throw new TimeoutException("Sending message " + message.getClass().toString() + " to actor " + actor.toString() + " failed" , e);
         }
+    }
+
+    /**
+     * Execute an operation on a remote actor asynchronously.
+     *
+     * @param actor the ActorSelection
+     * @param message the message to send
+     * @param duration the maximum amount of time to send he message
+     * @param onComplete the callback that is notified on completion
+     */
+    public void executeRemoteOperationAsync(ActorSelection actor, Object message,
+            FiniteDuration duration, OnComplete<Object> onComplete) {
+
+        LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
+
+        Future<Object> future = ask(actor, message, new Timeout(duration));
+        future.onComplete(onComplete, actorSystem.dispatcher());
+    }
+
+    /**
+     * Execute an operation on a remote actor asynchronously.
+     *
+     * @param actor the ActorSelection
+     * @param message the message to send
+     * @param duration the maximum amount of time to send he message
+     * @return a Future containing the eventual result
+     */
+    public Future<Object> executeRemoteOperationAsync(ActorSelection actor, Object message,
+            FiniteDuration duration) {
+
+        LOG.debug("Sending remote message {} to {}", message.getClass().toString(), actor.toString());
+
+        return ask(actor, message, new Timeout(duration));
     }
 
     /**
