@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_04513935",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-14T09:54:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_c45cb17f",
+      "revId": "dafc3f6f5b882d6ebad10a670365817ab9ad5147",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6457e558",
         "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataReadTransaction.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a443ad6a",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-14T09:54:48Z",
+      "side": 1,
+      "message": "I\u0027ll change the language to to talk about a read that immediately follows an exists only. Getting into the delete scenario would not be useful. Plus the same comment would then apply to reads as well.",
+      "parentUuid": "fa82b9bf_6457e558",
+      "revId": "dafc3f6f5b882d6ebad10a670365817ab9ad5147",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_84522965",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreReadTransaction.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-14T07:30:59Z",
       "side": 1,
       "message": "Same as comments as in DOMDataReadTransaction.",
+      "revId": "dafc3f6f5b882d6ebad10a670365817ab9ad5147",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c446f17a",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreReadTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-14T09:54:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_84522965",
       "revId": "dafc3f6f5b882d6ebad10a670365817ab9ad5147",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
