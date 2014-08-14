@@ -9,10 +9,9 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.protobuff.messages.shard.ShardManagerMessages;
 
 public class PrimaryNotFound implements SerializableMessage {
-  public static final Class SERIALIZABLE_CLASS = ShardManagerMessages.PrimaryNotFound.class;
+  public static final Class SERIALIZABLE_CLASS = PrimaryNotFound.class;
 
     private final String shardName;
 
@@ -42,10 +41,10 @@ public class PrimaryNotFound implements SerializableMessage {
 
   @Override
   public Object toSerializable() {
-    return ShardManagerMessages.PrimaryNotFound.newBuilder().setShardName(shardName).build();
+    return this;
   }
 
   public static PrimaryNotFound fromSerializable(Object message){
-    return new PrimaryNotFound(((ShardManagerMessages.PrimaryNotFound)message).getShardName());
+    return (PrimaryNotFound) message;
   }
 }
