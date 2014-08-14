@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class TimeoutException extends RuntimeException {
-    public TimeoutException(String message, Exception e){
+public class OperationTimeoutException extends RuntimeException {
+    public OperationTimeoutException(String message, Exception e){
         super(message, e);
     }
 }

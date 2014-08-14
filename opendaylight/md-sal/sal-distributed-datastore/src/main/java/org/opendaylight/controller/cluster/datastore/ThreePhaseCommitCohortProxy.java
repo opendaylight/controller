@@ -14,7 +14,7 @@ import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
+import org.opendaylight.controller.cluster.datastore.exceptions.OperationTimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -137,7 +137,7 @@ public class ThreePhaseCommitCohortProxy implements
                                     response.getClass().toString())
                             );
                         }
-                    } catch(TimeoutException e){
+                    } catch(OperationTimeoutException e){
                         LOG.error(String.format("A timeout occurred when processing operation : %s", message));
                     }
                 }

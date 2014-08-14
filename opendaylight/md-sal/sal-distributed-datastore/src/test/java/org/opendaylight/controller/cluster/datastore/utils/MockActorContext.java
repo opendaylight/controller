@@ -12,6 +12,8 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.cluster.datastore.exceptions.OperationException;
+import org.opendaylight.controller.cluster.datastore.exceptions.RemoteOperationException;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MockActorContext extends ActorContext {
@@ -20,23 +22,29 @@ public class MockActorContext extends ActorContext {
     private Object executeRemoteOperationResponse;
     private Object executeLocalOperationResponse;
     private Object executeLocalShardOperationResponse;
+    private Object remoteOperationResponseOnExecution;
 
     public MockActorContext(ActorSystem actorSystem) {
-        super(actorSystem, null, new MockClusterWrapper(), new MockConfiguration());
+        super(actorSystem, null, new MockClusterWrapper(),
+            new MockConfiguration());
     }
 
     public MockActorContext(ActorSystem actorSystem, ActorRef shardManager) {
-        super(actorSystem, shardManager, new MockClusterWrapper(), new MockConfiguration());
+        super(actorSystem, shardManager, new MockClusterWrapper(),
+            new MockConfiguration());
     }
 
 
     @Override public Object executeShardOperation(String shardName,
-        Object message, FiniteDuration duration) {
+        Object message, FiniteDuration duration)
+        throws RemoteOperationException {
         return executeShardOperationResponse;
     }
 
     @Override public Object executeRemoteOperation(ActorSelection actor,
-        Object message, FiniteDuration duration) {
+        Object message, FiniteDuration duration)
+        throws RemoteOperationException {
+        remoteOperationResponseOnExecution = executeRemoteOperationResponse;
         return executeRemoteOperationResponse;
     }
 
@@ -44,11 +52,11 @@ public class MockActorContext extends ActorContext {
         return null;
     }
 
-    public void setExecuteShardOperationResponse(Object response){
+    public void setExecuteShardOperationResponse(Object response) {
         executeShardOperationResponse = response;
     }
 
-    public void setExecuteRemoteOperationResponse(Object response){
+    public void setExecuteRemoteOperationResponse(Object response) {
         executeRemoteOperationResponse = response;
     }
 
@@ -59,16 +67,24 @@ public class MockActorContext extends ActorContext {
 
     public void setExecuteLocalShardOperationResponse(
         Object executeLocalShardOperationResponse) {
-        this.executeLocalShardOperationResponse = executeLocalShardOperationResponse;
+        this.executeLocalShardOperationResponse =
+            executeLocalShardOperationResponse;
     }
 
     @Override public Object executeLocalOperation(ActorRef actor,
-        Object message, FiniteDuration duration) {
+        Object message, FiniteDuration duration) throws OperationException {
         return this.executeLocalOperationResponse;
     }
 
     @Override public Object executeLocalShardOperation(String shardName,
         Object message, FiniteDuration duration) {
         return this.executeLocalShardOperationResponse;
+    }
+
+    //for unit test cases purposes
+
+    public Object getRemoteOperationResponseOnExecution() {
+        return remoteOperationResponseOnExecution;
+
     }
 }
