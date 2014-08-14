@@ -31,7 +31,7 @@ public class DeleteData implements SerializableMessage {
             .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path)).build();
     }
 
-    public static DeleteData fromSerizalizable(Object serializable){
+    public static DeleteData fromSerializable(Object serializable){
         ShardTransactionMessages.DeleteData o = (ShardTransactionMessages.DeleteData) serializable;
         return new DeleteData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
     }

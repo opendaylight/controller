@@ -50,7 +50,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     } else if (MergeData.SERIALIZABLE_CLASS.equals(message.getClass())) {
       mergeData(transaction, MergeData.fromSerializable(message, schemaContext));
     } else if (DeleteData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-      deleteData(transaction,DeleteData.fromSerizalizable(message));
+      deleteData(transaction,DeleteData.fromSerializable(message));
     } else if (ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
       readyTransaction(transaction,new ReadyTransaction());
     }else {
