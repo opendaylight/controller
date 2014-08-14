@@ -12,14 +12,16 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import akka.dispatch.OnComplete;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MockActorContext extends ActorContext {
 
-    private Object executeShardOperationResponse;
-    private Object executeRemoteOperationResponse;
-    private Object executeLocalOperationResponse;
-    private Object executeLocalShardOperationResponse;
+    private volatile Object executeShardOperationResponse;
+    private volatile Object executeRemoteOperationResponse;
+    private volatile Object executeLocalOperationResponse;
+    private volatile Object executeLocalShardOperationResponse;
+    private volatile Exception executeRemoteOperationFailure;
 
     public MockActorContext(ActorSystem actorSystem) {
         super(actorSystem, null, new MockClusterWrapper(), new MockConfiguration());
@@ -52,6 +54,10 @@ public class MockActorContext extends ActorContext {
         executeRemoteOperationResponse = response;
     }
 
+    public void setExecuteRemoteOperationFailure(Exception executeRemoteOperationFailure) {
+        this.executeRemoteOperationFailure = executeRemoteOperationFailure;
+    }
+
     public void setExecuteLocalOperationResponse(
         Object executeLocalOperationResponse) {
         this.executeLocalOperationResponse = executeLocalOperationResponse;
@@ -62,13 +68,26 @@ public class MockActorContext extends ActorContext {
         this.executeLocalShardOperationResponse = executeLocalShardOperationResponse;
     }
 
-    @Override public Object executeLocalOperation(ActorRef actor,
+    @Override
+    public Object executeLocalOperation(ActorRef actor,
         Object message, FiniteDuration duration) {
         return this.executeLocalOperationResponse;
     }
 
-    @Override public Object executeLocalShardOperation(String shardName,
+    @Override
+    public Object executeLocalShardOperation(String shardName,
         Object message, FiniteDuration duration) {
         return this.executeLocalShardOperationResponse;
+    }
+
+    @Override
+    public void executeRemoteOperationAsync(ActorSelection actor, Object message,
+            FiniteDuration duration, OnComplete<Object> onComplete) {
+
+        try {
+            onComplete.onComplete(executeRemoteOperationFailure, executeRemoteOperationResponse);
+        } catch(Throwable e) {
+            e.printStackTrace();
+        }
     }
 }

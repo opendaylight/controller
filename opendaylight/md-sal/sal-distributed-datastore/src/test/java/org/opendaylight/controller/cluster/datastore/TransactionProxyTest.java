@@ -1,14 +1,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import junit.framework.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -26,7 +28,6 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -34,12 +35,14 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+
+import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.fail;
+import static akka.pattern.Patterns.ask;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -49,37 +52,30 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     private final Configuration configuration = new MockConfiguration();
 
-    private final ActorContext testContext =
-        new ActorContext(getSystem(), getSystem().actorOf(Props.create(DoNothingActor.class)), new MockClusterWrapper(), configuration );
-
-    private final ListeningExecutorService transactionExecutor =
-        MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    private MockActorContext actorContext;
 
     @Before
     public void setUp(){
         ShardStrategyFactory.setConfiguration(configuration);
     }
 
-    @After
-    public void tearDown() {
-        transactionExecutor.shutdownNow();
+    private ActorRef setupInitialMockActorContext(Class<? extends Actor> actorClass) {
+        final Props props = Props.create(actorClass);
+        final ActorRef actorRef = getSystem().actorOf(props);
+
+        actorContext = new MockActorContext(this.getSystem());
+        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
+        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
+        actorContext.setExecuteRemoteOperationResponse("message");
+        return actorRef;
     }
 
     @Test
     public void testRead() throws Exception {
-        final Props props = Props.create(DoNothingActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        setupInitialMockActorContext(DoNothingActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
         actorContext.setExecuteRemoteOperationResponse(
             new ReadDataReply(TestModel.createTestContext(), null)
@@ -88,120 +84,82 @@ public class TransactionProxyTest extends AbstractActorTest {
         ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
             transactionProxy.read(TestModel.TEST_PATH);
 
-        Optional<NormalizedNode<?, ?>> normalizedNodeOptional = read.get();
+        Optional<NormalizedNode<?, ?>> normalizedNodeOptional = read.get(5, TimeUnit.SECONDS);
 
-        Assert.assertFalse(normalizedNodeOptional.isPresent());
+        assertEquals("NormalizedNode isPresent", false, normalizedNodeOptional.isPresent());
 
+        NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         actorContext.setExecuteRemoteOperationResponse(new ReadDataReply(
-            TestModel.createTestContext(),ImmutableNodes.containerNode(TestModel.TEST_QNAME)).toSerializable());
+            TestModel.createTestContext(),expectedNode).toSerializable());
 
         read = transactionProxy.read(TestModel.TEST_PATH);
 
-        normalizedNodeOptional = read.get();
+        normalizedNodeOptional = read.get(5, TimeUnit.SECONDS);
 
-        Assert.assertTrue(normalizedNodeOptional.isPresent());
-    }
+        assertEquals("NormalizedNode isPresent", true, normalizedNodeOptional.isPresent());
 
-    @Test
-    public void testExists() throws Exception {
-        final Props props = Props.create(DoNothingActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
-
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
-
-        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(false).toSerializable());
-
-        CheckedFuture<Boolean, ReadFailedException> exists =
-            transactionProxy.exists(TestModel.TEST_PATH);
-
-        Assert.assertFalse(exists.checkedGet());
-
-        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(true).toSerializable());
-
-        exists = transactionProxy.exists(TestModel.TEST_PATH);
-
-        Assert.assertTrue(exists.checkedGet());
-
-        actorContext.setExecuteRemoteOperationResponse("bad message");
-
-        exists = transactionProxy.exists(TestModel.TEST_PATH);
-
-        try {
-            exists.checkedGet();
-            fail();
-        } catch(ReadFailedException e){
-        }
-
+        assertEquals("Response NormalizedNode", expectedNode, normalizedNodeOptional.get());
     }
 
     @Test(expected = ReadFailedException.class)
     public void testReadWhenAnInvalidMessageIsSentInReply() throws Exception {
-        final Props props = Props.create(DoNothingActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        setupInitialMockActorContext(DoNothingActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
-
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
             read = transactionProxy.read(TestModel.TEST_PATH);
 
-        read.checkedGet();
+        read.checkedGet(5, TimeUnit.SECONDS);
     }
 
-    @Test
+    @Test(expected = ReadFailedException.class)
+    public void testReadWithAsyncRemoteOperatonFailure() throws Exception {
+        setupInitialMockActorContext(DoNothingActor.class);
+
+        actorContext.setExecuteRemoteOperationFailure(new Exception("mock"));
+        actorContext.setExecuteRemoteOperationResponse(null);
+
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
+
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>
+            read = transactionProxy.read(TestModel.TEST_PATH);
+
+        read.checkedGet(5, TimeUnit.SECONDS);
+    }
+
+    @Test(expected = ReadFailedException.class)
     public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
         final ActorContext actorContext = mock(ActorContext.class);
 
         when(actorContext.executeShardOperation(anyString(), any(), any(
             FiniteDuration.class))).thenThrow(new PrimaryNotFoundException("test"));
 
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read =
+                transactionProxy.read(TestModel.TEST_PATH);
 
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
-            transactionProxy.read(TestModel.TEST_PATH);
-
-        Assert.assertFalse(read.get().isPresent());
-
+        read.checkedGet(5, TimeUnit.SECONDS);
     }
 
-
-    @Test
+    @Test(expected = ReadFailedException.class)
     public void testReadWhenATimeoutExceptionIsThrown() throws Exception {
         final ActorContext actorContext = mock(ActorContext.class);
 
         when(actorContext.executeShardOperation(anyString(), any(), any(
             FiniteDuration.class))).thenThrow(new TimeoutException("test", new Exception("reason")));
 
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
-
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read =
             transactionProxy.read(TestModel.TEST_PATH);
 
-        Assert.assertFalse(read.get().isPresent());
-
+        read.checkedGet(5, TimeUnit.SECONDS);
     }
 
     @Test
@@ -211,52 +169,108 @@ public class TransactionProxyTest extends AbstractActorTest {
         when(actorContext.executeShardOperation(anyString(), any(), any(
             FiniteDuration.class))).thenThrow(new NullPointerException());
 
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
         try {
             ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
                 transactionProxy.read(TestModel.TEST_PATH);
             fail("A null pointer exception was expected");
         } catch(NullPointerException e){
-
+            // Expected
         }
     }
 
+    @Test
+    public void testExists() throws Exception {
+        setupInitialMockActorContext(DoNothingActor.class);
 
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
+
+        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(false).toSerializable());
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+        assertEquals("Exists response", false, exists.checkedGet());
+
+        actorContext.setExecuteRemoteOperationResponse(new DataExistsReply(true).toSerializable());
+
+        exists = transactionProxy.exists(TestModel.TEST_PATH);
+
+        assertEquals("Exists response", true, exists.checkedGet(5, TimeUnit.SECONDS));
+    }
+
+    @Test(expected = ReadFailedException.class)
+    public void testExistsWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
+        final ActorContext actorContext = mock(ActorContext.class);
+
+        when(actorContext.executeShardOperation(anyString(), any(), any(
+            FiniteDuration.class))).thenThrow(new PrimaryNotFoundException("test"));
+
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+        exists.checkedGet(5, TimeUnit.SECONDS);
+    }
+
+    @Test(expected = ReadFailedException.class)
+    public void testExistsWhenAnInvalidMessageIsSentInReply() throws Exception {
+        setupInitialMockActorContext(DoNothingActor.class);
+
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+        exists.checkedGet(5, TimeUnit.SECONDS);
+    }
+
+    @Test(expected = ReadFailedException.class)
+    public void testExistsWithAsyncRemoteOperatonFailure() throws Exception {
+        setupInitialMockActorContext(DoNothingActor.class);
+
+        actorContext.setExecuteRemoteOperationFailure(new Exception("mock"));
+        actorContext.setExecuteRemoteOperationResponse(null);
+
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
+
+        CheckedFuture<Boolean, ReadFailedException> exists =
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+        exists.checkedGet(5, TimeUnit.SECONDS);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void queryMessagesAndVerify(ActorRef actorRef, Class<?> expMessageType) throws Exception {
+        Object messages = Await.result(ask(actorRef, "messages", 5000L),
+                ActorContext.AWAIT_DURATION);
+
+        assertNotNull("Returned message is null", messages);
+        assertTrue("Expected returned message of type List", messages instanceof List);
+
+        List<Object> listMessages = (List<Object>) messages;
+        assertEquals("Returned message List size", 1, listMessages.size());
+        assertEquals("Returned message type", expMessageType, listMessages.get(0).getClass());
+    }
 
     @Test
     public void testWrite() throws Exception {
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = setupInitialMockActorContext(MessageCollectorActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.WRITE_ONLY, TestModel.createTestContext());
 
         transactionProxy.write(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
 
-        Object messages = testContext
-            .executeLocalOperation(actorRef, "messages",
-                ActorContext.ASK_DURATION);
-
-        Assert.assertNotNull(messages);
-
-        Assert.assertTrue(messages instanceof List);
-
-        List<Object> listMessages = (List<Object>) messages;
-
-        Assert.assertEquals(1, listMessages.size());
-
-        Assert.assertEquals(WriteData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
+        queryMessagesAndVerify(actorRef, WriteData.SERIALIZABLE_CLASS);
     }
 
     private Object createPrimaryFound(ActorRef actorRef) {
@@ -265,140 +279,73 @@ public class TransactionProxyTest extends AbstractActorTest {
 
     @Test
     public void testMerge() throws Exception {
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = setupInitialMockActorContext(MessageCollectorActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.WRITE_ONLY, TestModel.createTestContext());
 
         transactionProxy.merge(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.NAME_QNAME));
 
-        Object messages = testContext
-            .executeLocalOperation(actorRef, "messages",
-                ActorContext.ASK_DURATION);
-
-        Assert.assertNotNull(messages);
-
-        Assert.assertTrue(messages instanceof List);
-
-        List<Object> listMessages = (List<Object>) messages;
-
-        Assert.assertEquals(1, listMessages.size());
-
-        Assert.assertEquals(MergeData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
+        queryMessagesAndVerify(actorRef, MergeData.SERIALIZABLE_CLASS);
     }
 
     @Test
     public void testDelete() throws Exception {
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = setupInitialMockActorContext(MessageCollectorActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.WRITE_ONLY, TestModel.createTestContext());
 
         transactionProxy.delete(TestModel.TEST_PATH);
 
-        Object messages = testContext
-            .executeLocalOperation(actorRef, "messages",
-                ActorContext.ASK_DURATION);
-
-        Assert.assertNotNull(messages);
-
-        Assert.assertTrue(messages instanceof List);
-
-        List<Object> listMessages = (List<Object>) messages;
-
-        Assert.assertEquals(1, listMessages.size());
-
-        Assert.assertEquals(DeleteData.SERIALIZABLE_CLASS, listMessages.get(0).getClass());
+        queryMessagesAndVerify(actorRef, DeleteData.SERIALIZABLE_CLASS);
     }
 
     @Test
     public void testReady() throws Exception {
-        final Props props = Props.create(DoNothingActor.class);
-        final ActorRef doNothingActorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = setupInitialMockActorContext(DoNothingActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(doNothingActorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(doNothingActorRef));
-        actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(doNothingActorRef.path()).toSerializable());
+        actorContext.setExecuteRemoteOperationResponse(new ReadyTransactionReply(
+                actorRef.path()).toSerializable());
 
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_WRITE, TestModel.createTestContext());
 
         transactionProxy.read(TestModel.TEST_PATH);
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        Assert.assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        Assert.assertTrue("No cohort paths returned", proxy.getCohortPaths().size() > 0);
-
+        assertTrue("No cohort paths returned", proxy.getCohortPaths().size() > 0);
     }
 
     @Test
     public void testGetIdentifier(){
-        final Props props = Props.create(DoNothingActor.class);
-        final ActorRef doNothingActorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = setupInitialMockActorContext(DoNothingActor.class);
+        actorContext.setExecuteShardOperationResponse( createTransactionReply(actorRef) );
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteShardOperationResponse( createTransactionReply(doNothingActorRef) );
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
-
-        Assert.assertNotNull(transactionProxy.getIdentifier());
+        assertNotNull(transactionProxy.getIdentifier());
     }
 
     @Test
-    public void testClose(){
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+    public void testClose() throws Exception{
+        final ActorRef actorRef = setupInitialMockActorContext(MessageCollectorActor.class);
 
-        final MockActorContext actorContext = new MockActorContext(this.getSystem());
-        actorContext.setExecuteLocalOperationResponse(createPrimaryFound(actorRef));
-        actorContext.setExecuteShardOperationResponse(createTransactionReply(actorRef));
-        actorContext.setExecuteRemoteOperationResponse("message");
-
-        TransactionProxy transactionProxy =
-            new TransactionProxy(actorContext,
-                TransactionProxy.TransactionType.READ_ONLY, transactionExecutor, TestModel.createTestContext());
+        TransactionProxy transactionProxy = new TransactionProxy(actorContext,
+                TransactionProxy.TransactionType.READ_ONLY, TestModel.createTestContext());
 
         transactionProxy.read(TestModel.TEST_PATH);
 
         transactionProxy.close();
 
-        Object messages = testContext
-            .executeLocalOperation(actorRef, "messages",
-                ActorContext.ASK_DURATION);
-
-        Assert.assertNotNull(messages);
-
-        Assert.assertTrue(messages instanceof List);
-
-        List<Object> listMessages = (List<Object>) messages;
-
-        Assert.assertEquals(1, listMessages.size());
-
-        Assert.assertTrue(listMessages.get(0).getClass().equals(CloseTransaction.SERIALIZABLE_CLASS));
+        queryMessagesAndVerify(actorRef, CloseTransaction.SERIALIZABLE_CLASS);
     }
 
     private CreateTransactionReply createTransactionReply(ActorRef actorRef){
