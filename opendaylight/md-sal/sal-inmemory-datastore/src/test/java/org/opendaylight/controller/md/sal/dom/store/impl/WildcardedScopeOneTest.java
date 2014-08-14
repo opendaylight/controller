@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.top.level.list.NestedList;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -34,8 +35,8 @@ public class WildcardedScopeOneTest extends DefaultDataChangeListenerTestSuite {
 
         assertNotNull(change);
 
-        assertNotContains(change.getCreatedData(), TOP_LEVEL);
-        assertContains(change.getCreatedData(), path(FOO), path(FOO, BAR));
+        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR));
+        assertContains(change.getCreatedData(), path(FOO), path(FOO).node(NestedList.QNAME));
 
         assertEmpty(change.getUpdatedData());
         assertEmpty(change.getRemovedPaths());
@@ -48,11 +49,18 @@ public class WildcardedScopeOneTest extends DefaultDataChangeListenerTestSuite {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
-
-        assertContains(change.getCreatedData(), path(FOO, BAZ));
-        assertContains(change.getUpdatedData(), path(FOO));
+        /*
+         * Created data must NOT contain nested-list item since scope is base, and change is two
+         * level deep.
+         */
+        assertNotContains(change.getCreatedData(), path(FOO, BAZ));
+        assertContains(change.getUpdatedData(), path(FOO),path(FOO).node(NestedList.QNAME));
         assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        assertContains(change.getRemovedPaths(), path(FOO, BAR));
+        /*
+         * Removed data must NOT contain nested-list item since scope is base, and change is two
+         * level deep.
+         */
+        assertNotContains(change.getRemovedPaths(), path(FOO, BAR));
 
     }
 
@@ -64,8 +72,9 @@ public class WildcardedScopeOneTest extends DefaultDataChangeListenerTestSuite {
         assertNotNull(change);
         assertFalse(change.getCreatedData().isEmpty());
 
-        assertContains(change.getCreatedData(), path(FOO), path(FOO, BAR), path(FOO, BAZ));
-        assertNotContains(change.getCreatedData(), TOP_LEVEL);
+        // Base event should contain only changed item, and details about immediate child.
+        assertContains(change.getCreatedData(), path(FOO),path(FOO).node(NestedList.QNAME));
+        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR), path(FOO, BAZ));
         assertEmpty(change.getUpdatedData());
         assertEmpty(change.getRemovedPaths());
 
@@ -96,7 +105,8 @@ public class WildcardedScopeOneTest extends DefaultDataChangeListenerTestSuite {
         assertEmpty(change.getUpdatedData());
 
         assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        assertContains(change.getRemovedPaths(), path(FOO),path(FOO, BAZ),path(FOO,BAR));
+        assertContains(change.getRemovedPaths(), path(FOO),path(FOO).node(NestedList.QNAME));
+        assertNotContains(change.getRemovedPaths(), path(FOO, BAZ),path(FOO,BAR));
     }
 
     @Override
