@@ -59,12 +59,12 @@ public final class SendErrorExceptionUtil {
             final NetconfDocumentedException sendErrorException) {
         try {
             final Element incommingRpc = incommingDocument.getDocumentElement();
-            Preconditions.checkState(incommingRpc.getTagName().equals(XmlNetconfConstants.RPC_KEY), "Missing "
-                    + XmlNetconfConstants.RPC_KEY + " " + "element");
+            Preconditions.checkState(incommingRpc.getTagName().equals(XmlNetconfConstants.RPC_KEY), "Missing %s element",
+                    XmlNetconfConstants.RPC_KEY);
 
             final Element rpcReply = errorDocument.getDocumentElement();
-            Preconditions.checkState(rpcReply.getTagName().equals(XmlNetconfConstants.RPC_REPLY_KEY), "Missing "
-                    + XmlNetconfConstants.RPC_REPLY_KEY + " element");
+            Preconditions.checkState(rpcReply.getTagName().equals(XmlNetconfConstants.RPC_REPLY_KEY), "Missing %s element",
+                    XmlNetconfConstants.RPC_REPLY_KEY);
 
             final NamedNodeMap incomingAttributes = incommingRpc.getAttributes();
             for (int i = 0; i < incomingAttributes.getLength(); i++) {
@@ -97,7 +97,7 @@ public final class SendErrorExceptionUtil {
 
         @Override
         public void operationComplete(final ChannelFuture channelFuture) throws Exception {
-            Preconditions.checkState(channelFuture.isSuccess(), "Unable to send exception {}", sendErrorException,
+            Preconditions.checkState(channelFuture.isSuccess(), "Unable to send exception %s", sendErrorException,
                     channelFuture.cause());
         }
     }
