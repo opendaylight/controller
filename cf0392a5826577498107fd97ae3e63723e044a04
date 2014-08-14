@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_64b36598",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/InventoryOperation.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T08:51:29Z",
+      "side": 1,
+      "message": "No it doesn\u0027t. We use tx for reading topology data and discovering existing links in FlowCapableTopologyExporter.",
+      "parentUuid": "fa82b9bf_8949e432",
+      "revId": "cf0392a5826577498107fd97ae3e63723e044a04",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_295458c8",
         "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-13T12:49:31Z",
       "side": 1,
       "message": "We need to have debug statements before enqueue as well. It would be useful to know if the notifications were ever received by the inventory manager.",
+      "revId": "cf0392a5826577498107fd97ae3e63723e044a04",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_84aea92c",
+        "filename": "opendaylight/md-sal/inventory-manager/src/main/java/org/opendaylight/controller/md/inventory/manager/NodeChangeCommiter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2014-08-14T08:51:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_295458c8",
       "revId": "cf0392a5826577498107fd97ae3e63723e044a04",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
