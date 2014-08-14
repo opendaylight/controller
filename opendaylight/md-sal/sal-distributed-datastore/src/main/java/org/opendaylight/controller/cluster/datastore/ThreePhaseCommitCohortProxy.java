@@ -39,7 +39,7 @@ public class ThreePhaseCommitCohortProxy implements
     DOMStoreThreePhaseCommitCohort{
 
     private static final Logger
-        LOG = LoggerFactory.getLogger(DistributedDataStore.class);
+        LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
 
     private final ActorContext actorContext;
     private final List<ActorPath> cohortPaths;
@@ -120,7 +120,7 @@ public class ThreePhaseCommitCohortProxy implements
                 for(ActorPath actorPath : cohortPaths){
                     ActorSelection cohort = actorContext.actorSelection(actorPath);
 
-                    LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
+                    LOG.debug("txn {} Sending message [{}] to [{}]", transactionId, message.getClass(), actorPath);
 
                     try {
                         Object response =
