@@ -40,7 +40,8 @@ import java.util.List;
  */
 public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohort{
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
+    private static final Logger
+        LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
 
     private final ActorContext actorContext;
     private final List<ActorPath> cohortPaths;
