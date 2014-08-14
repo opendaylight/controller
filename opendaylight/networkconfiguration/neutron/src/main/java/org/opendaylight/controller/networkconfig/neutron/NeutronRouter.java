@@ -43,8 +43,17 @@ public class NeutronRouter extends ConfigurationObject implements Serializable, 
     @XmlElement (name="tenant_id")
     String tenantID;
 
-    @XmlElement (name="external_gateway_info")
+    @XmlElement (name="external_gateway_info", nillable=true)
     NeutronRouter_NetworkReference externalGatewayInfo;
+
+    @XmlElement (name="distributed")
+    Boolean distributed;
+
+    @XmlElement (name="gw_port_id", nillable=true)
+    String gatewayPortId;
+
+    @XmlElement (name="routes")
+    List<String> routes;
 
     /* Holds a map of OpenStackRouterInterfaces by subnet UUID
      * used for internal mapping to DOVE
@@ -112,6 +121,30 @@ public class NeutronRouter extends ConfigurationObject implements Serializable, 
         this.externalGatewayInfo = externalGatewayInfo;
     }
 
+    public Boolean getDistributed() {
+        return distributed;
+    }
+
+    public void setDistributed(Boolean distributed) {
+        this.distributed = distributed;
+    }
+
+    public String getGatewayPortId() {
+        return gatewayPortId;
+    }
+
+    public void setGatewayPortId(String gatewayPortId) {
+        this.gatewayPortId = gatewayPortId;
+    }
+
+    public List<String> getRoutes() {
+        return routes;
+    }
+
+    public void setRoutes(List<String> routes) {
+        this.routes = routes;
+    }
+
     /**
      * This method copies selected fields from the object and returns them
      * as a new object, suitable for marshaling.
@@ -121,7 +154,6 @@ public class NeutronRouter extends ConfigurationObject implements Serializable, 
      * @return an OpenStackRouters object with only the selected fields
      * populated
      */
-
     public NeutronRouter extractFields(List<String> fields) {
         NeutronRouter ans = new NeutronRouter();
         Iterator<String> i = fields.iterator();
@@ -144,6 +176,15 @@ public class NeutronRouter extends ConfigurationObject implements Serializable, 
             }
             if (s.equals("external_gateway_info")) {
                 ans.setExternalGatewayInfo(this.getExternalGatewayInfo());
+            }
+            if (s.equals("distributed")) {
+                ans.setDistributed(this.getDistributed());
+            }
+            if (s.equals("gw_port_id")) {
+                ans.setGatewayPortId(this.getGatewayPortId());
+            }
+            if (s.equals("routes")){
+                ans.setRoutes(this.getRoutes());
             }
         }
         return ans;
