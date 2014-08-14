@@ -105,7 +105,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         Table table= (Table)trans.readConfigurationData(tableRef);
         if(table != null){
             for(Flow existingFlow : table.getFlow()){
-                logger.debug("Existing flow in data store : {}",existingFlow.toString());
+                logger.debug("Existing flow in configuration data store : {}",existingFlow.toString());
                 if(FlowComparator.flowEquals(flowRule,existingFlow)){
                     InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
                             .augmentation(FlowCapableNode.class)
@@ -113,7 +113,7 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
                             .child(Flow.class,existingFlow.getKey()).toInstance();
                     flow.setKey(existingFlow.getKey());
                     flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                    logger.debug("Found matching flow in the datastore, augmenting statistics");
+                    logger.debug("Found matching flow in the configuration datastore, augmenting statistics");
                     // Update entry with timestamp of latest response
                     FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
                     trans.putOperationalData(flowRef, flow.build());
@@ -125,24 +125,19 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         table = (Table)trans.readOperationalData(tableRef);
         if(table != null){
             for(Flow existingFlow : table.getFlow()){
-                FlowStatisticsData augmentedflowStatisticsData = existingFlow.getAugmentation(FlowStatisticsData.class);
-                if(augmentedflowStatisticsData != null){
-                    FlowBuilder existingOperationalFlow = new FlowBuilder();
-                    existingOperationalFlow.fieldsFrom(augmentedflowStatisticsData.getFlowStatistics());
-                    logger.debug("Existing unaccounted flow in operational data store : {}",existingFlow.toString());
-                    if(FlowComparator.flowEquals(flowRule,existingOperationalFlow.build())){
-                        InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
-                                .augmentation(FlowCapableNode.class)
-                                .child(Table.class, new TableKey(tableId))
-                                .child(Flow.class,existingFlow.getKey()).toInstance();
-                        flow.setKey(existingFlow.getKey());
-                        flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
-                        logger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
-                        // Update entry with timestamp of latest response
-                        FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
-                        trans.putOperationalData(flowRef, flow.build());
-                        return flowStatsEntry;
-                    }
+                logger.debug("Existing flow in operational store : {}",existingFlow.toString());
+                if(FlowComparator.flowEquals(flowRule,existingFlow)){
+                    InstanceIdentifier<Flow> flowRef = getNodeIdentifierBuilder()
+                            .augmentation(FlowCapableNode.class)
+                            .child(Table.class, new TableKey(tableId))
+                            .child(Flow.class,existingFlow.getKey()).toInstance();
+                    flow.setKey(existingFlow.getKey());
+                    flow.addAugmentation(FlowStatisticsData.class, flowStatisticsData.build());
+                    logger.debug("Found matching unaccounted flow in the operational datastore, augmenting statistics");
+                    // Update entry with timestamp of latest response
+                    FlowStatsEntry flowStatsEntry = new FlowStatsEntry(tableId,flow.build());
+                    trans.putOperationalData(flowRef, flow.build());
+                    return flowStatsEntry;
                 }
             }
         }
