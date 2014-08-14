@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-public class FindLeader {
+import java.io.Serializable;
+
+public class FindLeader implements Serializable{
 
 }

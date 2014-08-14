@@ -168,8 +168,7 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         } else if (message instanceof FindLeader) {
             getSender().tell(
-                new FindLeaderReply(
-                    context.getPeerAddress(currentBehavior.getLeaderId())),
+                new FindLeaderReply(getLeaderAddress()),
                 getSelf()
             );
 
@@ -182,12 +181,6 @@ public abstract class RaftActor extends UntypedPersistentActor {
         } else if (message instanceof SaveSnapshotFailure) {
 
             // TODO: Handle failure in saving the snapshot
-
-        } else if (message instanceof FindLeader){
-
-            getSender().tell(new FindLeaderReply(
-                context.getPeerAddress(currentBehavior.getLeaderId())),
-                getSelf());
 
         } else if (message instanceof AddRaftPeer){
 
@@ -269,18 +262,9 @@ public abstract class RaftActor extends UntypedPersistentActor {
      * @return A reference to the leader if known, null otherwise
      */
     protected ActorSelection getLeader(){
-        String leaderId = currentBehavior.getLeaderId();
-        if (leaderId == null) {
-            return null;
-        }
-        String peerAddress = context.getPeerAddress(leaderId);
-        LOG.debug("getLeader leaderId = " + leaderId + " peerAddress = "
-            + peerAddress);
+        String leaderAddress = getLeaderAddress();
 
-        if(peerAddress == null){
-            return null;
-        }
-        return context.actorSelection(peerAddress);
+        return context.actorSelection(leaderAddress);
     }
 
     /**
@@ -422,6 +406,21 @@ public abstract class RaftActor extends UntypedPersistentActor {
 
         // Trim akka journal
         deleteMessages(sequenceNumber);
+    }
+
+    private String getLeaderAddress(){
+        if(isLeader()){
+            return getSelf().path().toString();
+        }
+        String leaderId = currentBehavior.getLeaderId();
+        if (leaderId == null) {
+            return null;
+        }
+        String peerAddress = context.getPeerAddress(leaderId);
+        LOG.debug("getLeaderAddress leaderId = " + leaderId + " peerAddress = "
+            + peerAddress);
+
+        return peerAddress;
     }
 
 
