@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_84cc698a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "If its just a \"tell\", do we need LOCAL_ASK_DURATION and LOCAL_AWAIT_Duration?\nAlso, what exception is being caught?",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24c79d65",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RoutedRpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "Same as previous comment.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_048ff92a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "Same comment about catching these exceptions.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4816dfc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "Same as before.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_847a2922",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "Lets remove this system out.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24755d31",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RpcListenerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "typo!",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4470a13f",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/utils/LatestEntryRoutingLogicTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "Since you are only testing routing logic, all you need is a List\u003cPair\u003e with 3 different actor references. You dont need to create 2 node actor cluster. It might save time if you dont create 2 actor system.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e492154b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/resources/application.conf",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-14T01:41:18Z",
+      "side": 1,
+      "message": "change localhost to 127.0.0.1. Some jenkins slaves are not able to resolve  localhost.",
+      "revId": "48adc33e67cec60ef04a43a8aa206ef3e0ba2ebd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
