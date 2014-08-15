@@ -62,7 +62,7 @@ public class RestconfError {
         RESOURCE_DENIED("resource-denied", 409 /* Conflict */),
         ROLLBACK_FAILED("rollback-failed", 500 /* INTERNAL_SERVER_ERROR */),
         DATA_EXISTS("data-exists", 409 /* Conflict */),
-        DATA_MISSING("data-missing", 409 /* Conflict */),
+        DATA_MISSING("data-missing", 404 /* Resource Not Found */),
         OPERATION_NOT_SUPPORTED("operation-not-supported", 501 /* Not Implemented */),
         OPERATION_FAILED("operation-failed", 500 /* INTERNAL_SERVER_ERROR */),
         PARTIAL_OPERATION("partial-operation", 500 /* INTERNAL_SERVER_ERROR */),
