@@ -17,6 +17,8 @@ import akka.japi.Creator;
 import akka.serialization.Serialization;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
@@ -111,21 +113,27 @@ public class Shard extends RaftActor {
 
     }
 
-    private static Map<String, String> mapPeerAddresses(Map<ShardIdentifier, String> peerAddresses){
-        Map<String , String> map = new HashMap<>();
+    private static Map<String, String> mapPeerAddresses(
+        Map<ShardIdentifier, String> peerAddresses) {
+        Map<String, String> map = new HashMap<>();
 
-        for(Map.Entry<ShardIdentifier, String> entry : peerAddresses.entrySet()){
+        for (Map.Entry<ShardIdentifier, String> entry : peerAddresses
+            .entrySet()) {
             map.put(entry.getKey().toString(), entry.getValue());
         }
 
         return map;
     }
 
+
+
+
     public static Props props(final ShardIdentifier name,
         final Map<ShardIdentifier, String> peerAddresses,
         final InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
         Preconditions.checkNotNull(name, "name should not be null");
-        Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
+        Preconditions
+            .checkNotNull(peerAddresses, "peerAddresses should not be null");
 
         return Props.create(new Creator<Shard>() {
 
@@ -164,14 +172,16 @@ public class Shard extends RaftActor {
             }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
-            setPeerAddress(resolved.getPeerId().toString(), resolved.getPeerAddress());
+            setPeerAddress(resolved.getPeerId().toString(),
+                resolved.getPeerAddress());
         } else {
             super.onReceiveCommand(message);
         }
     }
 
     private ActorRef createTypedTransactionActor(
-        CreateTransaction createTransaction, ShardTransactionIdentifier transactionId) {
+        CreateTransaction createTransaction,
+        ShardTransactionIdentifier transactionId) {
         if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
 
@@ -203,24 +213,26 @@ public class Shard extends RaftActor {
                     .props(store.newWriteOnlyTransaction(), getSelf(),
                         schemaContext), transactionId.toString());
         } else {
-            // FIXME: This does not seem right
             throw new IllegalArgumentException(
-                "CreateTransaction message has unidentified transaction type="
+                "Shard="+name + ":CreateTransaction message has unidentified transaction type="
                     + createTransaction.getTransactionType());
         }
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
 
-        ShardTransactionIdentifier transactionId = ShardTransactionIdentifier.builder().remoteTransactionId(createTransaction.getTransactionId()).build();
+        ShardTransactionIdentifier transactionId =
+            ShardTransactionIdentifier.builder()
+                .remoteTransactionId(createTransaction.getTransactionId())
+                .build();
         LOG.debug("Creating transaction : {} ", transactionId);
         ActorRef transactionActor =
             createTypedTransactionActor(createTransaction, transactionId);
 
         getSender()
             .tell(new CreateTransactionReply(
-                Serialization.serializedActorPath(transactionActor),
-                createTransaction.getTransactionId()).toSerializable(),
+                    Serialization.serializedActorPath(transactionActor),
+                    createTransaction.getTransactionId()).toSerializable(),
                 getSelf());
     }
 
@@ -255,22 +267,21 @@ public class Shard extends RaftActor {
 
         final ListenableFuture<Void> future = cohort.commit();
         final ActorRef self = getSelf();
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.get();
-                        sender
-                            .tell(new CommitTransactionReply().toSerializable(),
-                                self);
-                        shardMBean.incrementCommittedTransactionCount();
-                        shardMBean.setLastCommittedTransactionTime(new Date());
-                } catch (InterruptedException | ExecutionException e) {
-                    shardMBean.incrementFailedTransactionsCount();
-                    sender.tell(new akka.actor.Status.Failure(e),self);
-                }
+
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            public void onSuccess(Void v) {
+               sender.tell(new CommitTransactionReply().toSerializable(),self);
+               shardMBean.incrementCommittedTransactionCount();
+               shardMBean.setLastCommittedTransactionTime(new Date());
             }
-        }, getContext().dispatcher());
+
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception happened during commit");
+                shardMBean.incrementFailedTransactionsCount();
+                sender.tell(new akka.actor.Status.Failure(t), getSelf());
+            }
+        });
+
     }
 
     private void handleForwardedCommit(ForwardedCommitTransaction message) {
@@ -329,7 +340,7 @@ public class Shard extends RaftActor {
 
         LOG.debug(
             "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
-                , listenerRegistration.path().toString());
+            , listenerRegistration.path().toString());
 
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
@@ -370,7 +381,7 @@ public class Shard extends RaftActor {
         // Update stats
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
 
-        if(lastLogEntry != null){
+        if (lastLogEntry != null) {
             shardMBean.setLastLogIndex(lastLogEntry.getIndex());
             shardMBean.setLastLogTerm(lastLogEntry.getTerm());
         }
