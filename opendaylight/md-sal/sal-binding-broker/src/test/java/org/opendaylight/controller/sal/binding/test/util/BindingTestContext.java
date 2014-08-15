@@ -9,12 +9,19 @@ package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.annotations.Beta;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.MutableClassToInstanceMap;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import javassist.ClassPool;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -43,9 +50,14 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
 import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
+import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
+import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
+import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -56,15 +68,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.Beta;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.ImmutableClassToInstanceMap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MutableClassToInstanceMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-
 @Beta
 public class BindingTestContext implements AutoCloseable {
 
@@ -74,6 +77,7 @@ public class BindingTestContext implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(BindingTestContext.class);
 
     private RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
+    private BindingToNormalizedNodeCodec codec;
 
     private DomForwardedBindingBrokerImpl baBrokerImpl;
     private DataBrokerImpl baDataImpl;
@@ -129,7 +133,7 @@ public class BindingTestContext implements AutoCloseable {
     public void startNewDataBroker() {
         checkState(executor != null, "Executor needs to be set");
         checkState(newDOMDataBroker != null, "DOM Data Broker must be set");
-        dataBroker = new ForwardedBindingDataBroker(newDOMDataBroker, mappingServiceImpl, mockSchemaService);
+        dataBroker = new ForwardedBindingDataBroker(newDOMDataBroker, codec, mockSchemaService);
     }
 
     public void startNewDomDataBroker() {
@@ -250,6 +254,12 @@ public class BindingTestContext implements AutoCloseable {
         checkState(classPool != null, "ClassPool needs to be present");
         mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
         mockSchemaService.registerSchemaContextListener(mappingServiceImpl);
+
+        DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(classPool));
+        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
+        GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
+        codec = new BindingToNormalizedNodeCodec(loading, mappingServiceImpl, codecRegistry);
+        mockSchemaService.registerSchemaContextListener(codec);
     }
 
     private void updateYangSchema(final ImmutableSet<YangModuleInfo> moduleInfos) {
@@ -280,7 +290,7 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startNewBindingDataBroker() {
-        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, mappingServiceImpl,mockSchemaService, executor);
+        ForwardedBackwardsCompatibleDataBroker forwarded = new ForwardedBackwardsCompatibleDataBroker(newDOMDataBroker, codec,mockSchemaService, executor);
         baData = forwarded;
     }
 
