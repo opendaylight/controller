@@ -39,6 +39,7 @@
     <module>opendaylight/statisticsmanager/api</module>
     <module>opendaylight/statisticsmanager/implementation</module>
     <module>opendaylight/topologymanager/implementation</module>
+    <module>opendaylight/topologymanager/shell</module>
     <module>opendaylight/usermanager/api</module>
     <module>opendaylight/usermanager/implementation</module>
     <module>opendaylight/connectionmanager/api</module>
