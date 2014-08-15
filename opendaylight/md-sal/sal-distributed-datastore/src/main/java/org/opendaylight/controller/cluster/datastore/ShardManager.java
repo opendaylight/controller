@@ -290,10 +290,12 @@ public class ShardManager extends AbstractUntypedActor {
 
     @Override
     public SupervisorStrategy supervisorStrategy() {
+
         return new OneForOneStrategy(10, Duration.create("1 minute"),
             new Function<Throwable, SupervisorStrategy.Directive>() {
                 @Override
                 public SupervisorStrategy.Directive apply(Throwable t) {
+                    LOG.warning("Supervisor Strategy of resume applied {}",t);
                     return SupervisorStrategy.resume();
                 }
             }

@@ -14,6 +14,8 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -25,8 +27,6 @@ import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-
-import java.util.concurrent.ExecutionException;
 
 public class ThreePhaseCommitCohort extends AbstractUntypedActor {
     private final DOMStoreThreePhaseCommitCohort cohort;
@@ -58,13 +58,17 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
+        if (message.getClass()
+            .equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
             canCommit(new CanCommitTransaction());
-        } else if (message.getClass().equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
             preCommit(new PreCommitTransaction());
-        } else if (message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(CommitTransaction.SERIALIZABLE_CLASS)) {
             commit(new CommitTransaction());
-        } else if (message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(AbortTransaction.SERIALIZABLE_CLASS)) {
             abort(new AbortTransaction());
         } else {
             unknownMessage(message);
@@ -76,17 +80,19 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
 
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.get();
-                    sender.tell(new AbortTransactionReply().toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e, "An exception happened when aborting");
-                }
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            public void onSuccess(Void v) {
+                sender
+                    .tell(new AbortTransactionReply().toSerializable(),
+                        self);
             }
-        }, getContext().dispatcher());
+
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception happened during abort");
+                sender
+                    .tell(new akka.actor.Status.Failure(t), getSelf());
+            }
+        });
     }
 
     private void commit(CommitTransaction message) {
@@ -103,18 +109,19 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ListenableFuture<Void> future = cohort.preCommit();
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
-
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.get();
-                    sender.tell(new PreCommitTransactionReply().toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e, "An exception happened when preCommitting");
-                }
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            public void onSuccess(Void v) {
+                sender
+                    .tell(new PreCommitTransactionReply().toSerializable(),
+                        self);
             }
-        }, getContext().dispatcher());
+
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception happened during pre-commit");
+                sender
+                    .tell(new akka.actor.Status.Failure(t), getSelf());
+            }
+        });
 
     }
 
@@ -122,18 +129,19 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
         final ListenableFuture<Boolean> future = cohort.canCommit();
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
-
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Boolean canCommit = future.get();
-                    sender.tell(new CanCommitTransactionReply(canCommit).toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e, "An exception happened when checking canCommit");
-                }
+        Futures.addCallback(future, new FutureCallback<Boolean>() {
+            public void onSuccess(Boolean canCommit) {
+                sender.tell(new CanCommitTransactionReply(canCommit)
+                    .toSerializable(), self);
             }
-        }, getContext().dispatcher());
+
+            public void onFailure(Throwable t) {
+                LOG.error(t, "An exception happened during canCommit");
+                sender
+                    .tell(new akka.actor.Status.Failure(t), getSelf());
+            }
+        });
+
 
     }
 }
