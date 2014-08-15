@@ -27,7 +27,7 @@ import com.google.common.util.concurrent.Futures;
  * and executed according to {@link TransactionReadyPrototype}.
  *
  */
-class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
+public class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction
                                          implements DOMStoreReadWriteTransaction {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadWriteTransaction.class);
