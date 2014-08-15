@@ -16,6 +16,24 @@
       "revId": "0ca8e47e2fee937c2da8762ecd708cad8ebdf872",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4ca1a792",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreReadTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T19:06:58Z",
+      "side": 1,
+      "message": "This method will raise ReadFailedException if it fails.\n\nAre you suggesting to return CheckFuture\u003cOptional\u003c...\u003e, ReadFailedException\u003e? This method answers a yes/no question. What would be the generic type? If Boolean then what would Optional\u003cBoolean\u003e convey that just Boolean doesn\u0027t?\n\nAlso I don\u0027t see how changing the return type of this method affects the contract between this method and \u0027read\u0027. \n\nI can understand that, within the same transaction,  after \u0027exists\u0027 returns true,  a subsequent \u0027read\u0027 should return the data. But how can we guarantee that? The only way I can see is if \u0027exists\u0027 pulls the data local but that\u0027s what we\u0027re trying to avoid by introducing this method. \n\nMaybe we should word it like this:\n\n\"Note: a successful result from this method makes no guarantee that a subsequent call to {@link #read} will succeed. It is possible that the data resides in a data store on a remote node and, if that node goes down or a network failure occurs, a subsequent read would fail. Another scenario is if the data is deleted in between the calls to \u003ccode\u003eexists\u003c/code\u003e and \u003ccode\u003eread\u003c/code\u003e.\"\n\nIn reality though, I don\u0027t really see a valid use case for calling \u0027exists\u0027 then \u0027read\u0027 anyway - you might as well just call \u0027read\u0027. Also this method is only on the BI DOM API and most users will use the BA APIs.",
+      "parentUuid": "fa82b9bf_ccd93758",
+      "revId": "0ca8e47e2fee937c2da8762ecd708cad8ebdf872",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
