@@ -8,6 +8,7 @@
 package org.opendaylight.md.controller.topology.manager;
 
 import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -44,16 +45,15 @@ public class FlowCapableTopologyProvider extends AbstractBindingAwareProvider im
         final String name = "flow:1";
         final TopologyKey key = new TopologyKey(new TopologyId(name));
         final InstanceIdentifier<Topology> path = InstanceIdentifier
-                .builder(NetworkTopology.class)
-                .child(Topology.class, key)
-                .build();
+                .create(NetworkTopology.class)
+                .child(Topology.class, key);
 
         final OperationProcessor processor = new OperationProcessor(dataBroker);
         final FlowCapableTopologyExporter listener = new FlowCapableTopologyExporter(processor, path);
         this.listenerRegistration = notificationService.registerNotificationListener(listener);
 
         final ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        tx.put(LogicalDatastoreType.OPERATIONAL, path, new TopologyBuilder().setKey(key).build());
+        tx.put(LogicalDatastoreType.OPERATIONAL, path, new TopologyBuilder().setKey(key).build(), true);
         try {
             tx.submit().get();
         } catch (InterruptedException | ExecutionException e) {
