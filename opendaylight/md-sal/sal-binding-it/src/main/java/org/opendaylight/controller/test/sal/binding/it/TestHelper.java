@@ -112,7 +112,6 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "binding-generator-api").versionAsInProject(), mavenBundle(YANGTOOLS,
                         "binding-generator-spi").versionAsInProject(), //
                 mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
-                mavenBundle(YANGTOOLS, "binding-data-codec").versionAsInProject(),
                 mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
 
                 mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
