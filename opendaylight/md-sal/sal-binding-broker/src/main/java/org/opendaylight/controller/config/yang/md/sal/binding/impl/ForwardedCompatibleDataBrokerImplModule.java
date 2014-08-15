@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
 import java.util.Collection;
 import java.util.Collections;
-import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
@@ -19,6 +18,9 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
 
 /**
 *
@@ -49,7 +51,7 @@ public final class ForwardedCompatibleDataBrokerImplModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultCommitExecutor();
-        BindingToNormalizedNodeCodec mappingService = getBindingMappingServiceDependency();
+        BindingIndependentMappingService mappingService = getBindingMappingServiceDependency();
 
         Broker domBroker = getDomAsyncBrokerDependency();
         ProviderSession session = domBroker.registerProvider(this, null);
@@ -58,7 +60,7 @@ public final class ForwardedCompatibleDataBrokerImplModule extends
         ForwardedBackwardsCompatibleDataBroker dataBroker = new ForwardedBackwardsCompatibleDataBroker(domDataBroker,
                 mappingService, schemaService,listeningExecutor);
 
-        dataBroker.setConnector(BindingDomConnectorDeployer.createConnector(mappingService.getLegacy()));
+        dataBroker.setConnector(BindingDomConnectorDeployer.createConnector(getBindingMappingServiceDependency()));
         dataBroker.setDomProviderContext(session);
         return dataBroker;
     }

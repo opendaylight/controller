@@ -69,11 +69,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>binding-data-codec</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
     </dependency>
     <dependency>
