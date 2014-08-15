@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
  */
-final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
+public final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
                                           implements DOMStoreReadTransaction {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);

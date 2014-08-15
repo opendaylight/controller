@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.Collections;
-import java.util.Map.Entry;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -21,9 +21,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Collections;
+import java.util.Map.Entry;
 
 /**
  *
@@ -102,7 +101,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * @param path Path to data (Binding Aware)
      * @param normalized Normalized version of data to be written
      */
-    private void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
+    protected void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
             final Entry<org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
         if(Identifiable.class.isAssignableFrom(path.getTargetType())) {
             org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
