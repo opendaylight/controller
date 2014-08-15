@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ccd93758",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/DOMStoreReadTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-15T18:04:10Z",
+      "side": 1,
+      "message": "okay, I think we need to make an API contract stronger here. A SHOULD is not really useful for developers.\n\nCan we make it a MUST either:\n- return an Optional.present() \u003d\u003d true, or\n- raise an exception",
+      "revId": "0ca8e47e2fee937c2da8762ecd708cad8ebdf872",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
