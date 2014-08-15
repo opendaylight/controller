@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.common.actor;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.DeadLetter;
+import akka.actor.Props;
+import akka.actor.UntypedActor;
+import akka.japi.Creator;
+import akka.testkit.JavaTestKit;
+import org.junit.After;
+import org.junit.Before;
+import scala.concurrent.duration.FiniteDuration;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class MeteredBoundedMailboxTest {
+
+    private static ActorSystem actorSystem;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    @Before
+    public void setUp() throws Exception {
+        actorSystem = ActorSystem.create("mysystem");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+       if (actorSystem != null)
+           actorSystem.shutdown();
+    }
+
+    //@Test
+    public void test_WhenQueueIsFull_ShouldSendMsgToDeadLetter() throws InterruptedException {
+        final JavaTestKit mockReceiver = new JavaTestKit(actorSystem);
+        actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
+
+
+        final FiniteDuration ONE_SEC = new FiniteDuration(1, TimeUnit.SECONDS);
+        String boundedMailBox = actorSystem.name() + ".bounded-mailbox";
+        ActorRef pingPongActor = actorSystem.actorOf(PingPongActor.props(lock).withMailbox(boundedMailBox),
+                                                     "pingpongactor");
+
+        actorSystem.mailboxes().settings();
+        lock.lock();
+        //queue capacity = 10
+        //need to send 12 messages; 1 message is dequeued and actor waits on lock,
+        //2nd to 11th messages are put on the queue
+        //12th message is sent to dead letter.
+        for (int i=0;i<12;i++){
+            pingPongActor.tell("ping", mockReceiver.getRef());
+        }
+
+        mockReceiver.expectMsgClass(ONE_SEC, DeadLetter.class);
+
+        lock.unlock();
+
+        Object[] eleven = mockReceiver.receiveN(11, ONE_SEC);
+    }
+
+    /**
+     * For testing
+     */
+    public static class PingPongActor extends UntypedActor{
+
+        ReentrantLock lock;
+
+        private PingPongActor(ReentrantLock lock){
+            this.lock = lock;
+        }
+
+        public static Props props(final ReentrantLock lock){
+            return Props.create(new Creator<PingPongActor>(){
+                @Override
+                public PingPongActor create() throws Exception {
+                    return new PingPongActor(lock);
+                }
+            });
+        }
+
+        @Override
+        public void onReceive(Object message) throws Exception {
+            lock.lock();
+            if ("ping".equals(message))
+                getSender().tell("pong", getSelf());
+        }
+    }
+}
