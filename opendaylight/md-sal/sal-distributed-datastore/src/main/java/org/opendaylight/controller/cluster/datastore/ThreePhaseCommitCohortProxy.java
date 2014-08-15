@@ -10,11 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-
-import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -36,7 +33,7 @@ import java.util.concurrent.Callable;
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
  */
 public class ThreePhaseCommitCohortProxy implements
-    DOMStoreThreePhaseCommitCohort{
+    DOMStoreThreePhaseCommitCohort {
 
     private static final Logger
         LOG = LoggerFactory.getLogger(DistributedDataStore.class);
@@ -64,31 +61,32 @@ public class ThreePhaseCommitCohortProxy implements
 
             @Override
             public Boolean call() throws Exception {
-                for(ActorPath actorPath : cohortPaths){
+                for (ActorPath actorPath : cohortPaths) {
 
-                    Object message = new CanCommitTransaction().toSerializable();
-                    LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
+                    Object message =
+                        new CanCommitTransaction().toSerializable();
+                    LOG.debug("txn {} Sending {} to {}", transactionId, message,
+                        actorPath);
 
-                    ActorSelection cohort = actorContext.actorSelection(actorPath);
+                    ActorSelection cohort =
+                        actorContext.actorSelection(actorPath);
 
-                    try {
-                        Object response =
-                                actorContext.executeRemoteOperation(cohort,
-                                        message,
-                                        ActorContext.ASK_DURATION);
 
-                        if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                            CanCommitTransactionReply reply =
-                                    CanCommitTransactionReply.fromSerializable(response);
-                            if (!reply.getCanCommit()) {
-                                return false;
-                            }
+                    Object response =
+                        actorContext.executeRemoteOperation(cohort,
+                            message,
+                            ActorContext.ASK_DURATION);
+
+                    if (response.getClass()
+                        .equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
+                        CanCommitTransactionReply reply =
+                            CanCommitTransactionReply
+                                .fromSerializable(response);
+                        if (!reply.getCanCommit()) {
+                            return false;
                         }
-                    } catch(RuntimeException e){
-                        // FIXME : Need to properly handle this
-                        LOG.error("Unexpected Exception", e);
-                        return false;
                     }
+
                 }
 
                 return true;
@@ -100,46 +98,50 @@ public class ThreePhaseCommitCohortProxy implements
 
     @Override public ListenableFuture<Void> preCommit() {
         LOG.debug("txn {} preCommit", transactionId);
-        return voidOperation(new PreCommitTransaction().toSerializable(), PreCommitTransactionReply.SERIALIZABLE_CLASS);
+        return voidOperation(new PreCommitTransaction().toSerializable(),
+            PreCommitTransactionReply.SERIALIZABLE_CLASS);
     }
 
     @Override public ListenableFuture<Void> abort() {
         LOG.debug("txn {} abort", transactionId);
-        return voidOperation(new AbortTransaction().toSerializable(), AbortTransactionReply.SERIALIZABLE_CLASS);
+        return voidOperation(new AbortTransaction().toSerializable(),
+            AbortTransactionReply.SERIALIZABLE_CLASS);
     }
 
     @Override public ListenableFuture<Void> commit() {
         LOG.debug("txn {} commit", transactionId);
-        return voidOperation(new CommitTransaction().toSerializable(), CommitTransactionReply.SERIALIZABLE_CLASS);
+        return voidOperation(new CommitTransaction().toSerializable(),
+            CommitTransactionReply.SERIALIZABLE_CLASS);
     }
 
-    private ListenableFuture<Void> voidOperation(final Object message, final Class expectedResponseClass){
+    private ListenableFuture<Void> voidOperation(final Object message,
+        final Class expectedResponseClass) {
         Callable<Void> call = new Callable<Void>() {
 
             @Override public Void call() throws Exception {
-                for(ActorPath actorPath : cohortPaths){
-                    ActorSelection cohort = actorContext.actorSelection(actorPath);
+                for (ActorPath actorPath : cohortPaths) {
+                    ActorSelection cohort =
+                        actorContext.actorSelection(actorPath);
 
-                    LOG.debug("txn {} Sending {} to {}", transactionId, message, actorPath);
+                    LOG.debug("txn {} Sending {} to {}", transactionId, message,
+                        actorPath);
 
-                    try {
-                        Object response =
-                            actorContext.executeRemoteOperation(cohort,
-                                message,
-                                ActorContext.ASK_DURATION);
 
-                        if (response != null && !response.getClass()
-                            .equals(expectedResponseClass)) {
-                            throw new RuntimeException(
-                                String.format(
-                                    "did not get the expected response \n\t\t expected : %s \n\t\t actual   : %s",
-                                    expectedResponseClass.toString(),
-                                    response.getClass().toString())
-                            );
-                        }
-                    } catch(TimeoutException e){
-                        LOG.error(String.format("A timeout occurred when processing operation : %s", message));
+                    Object response =
+                        actorContext.executeRemoteOperation(cohort,
+                            message,
+                            ActorContext.ASK_DURATION);
+
+                    if (response != null && !response.getClass()
+                        .equals(expectedResponseClass)) {
+                        throw new RuntimeException(
+                            String.format(
+                                "did not get the expected response \n\t\t expected : %s \n\t\t actual   : %s",
+                                expectedResponseClass.toString(),
+                                response.getClass().toString())
+                        );
                     }
+
                 }
                 return null;
             }

@@ -92,8 +92,10 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses) {
-        super(name.toString(), mapPeerAddresses(peerAddresses), Optional.of(configParams));
+    private Shard(ShardIdentifier name,
+        Map<ShardIdentifier, String> peerAddresses) {
+        super(name.toString(), mapPeerAddresses(peerAddresses),
+            Optional.of(configParams));
 
         this.name = name;
 
@@ -109,10 +111,12 @@ public class Shard extends RaftActor {
 
     }
 
-    private static Map<String, String> mapPeerAddresses(Map<ShardIdentifier, String> peerAddresses){
-        Map<String , String> map = new HashMap<>();
+    private static Map<String, String> mapPeerAddresses(
+        Map<ShardIdentifier, String> peerAddresses) {
+        Map<String, String> map = new HashMap<>();
 
-        for(Map.Entry<ShardIdentifier, String> entry : peerAddresses.entrySet()){
+        for (Map.Entry<ShardIdentifier, String> entry : peerAddresses
+            .entrySet()) {
             map.put(entry.getKey().toString(), entry.getValue());
         }
 
@@ -121,11 +125,11 @@ public class Shard extends RaftActor {
 
 
 
-
     public static Props props(final ShardIdentifier name,
         final Map<ShardIdentifier, String> peerAddresses) {
         Preconditions.checkNotNull(name, "name should not be null");
-        Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
+        Preconditions
+            .checkNotNull(peerAddresses, "peerAddresses should not be null");
 
         return Props.create(new Creator<Shard>() {
 
@@ -164,14 +168,16 @@ public class Shard extends RaftActor {
             }
         } else if (message instanceof PeerAddressResolved) {
             PeerAddressResolved resolved = (PeerAddressResolved) message;
-            setPeerAddress(resolved.getPeerId().toString(), resolved.getPeerAddress());
+            setPeerAddress(resolved.getPeerId().toString(),
+                resolved.getPeerAddress());
         } else {
             super.onReceiveCommand(message);
         }
     }
 
     private ActorRef createTypedTransactionActor(
-        CreateTransaction createTransaction, ShardTransactionIdentifier transactionId) {
+        CreateTransaction createTransaction,
+        ShardTransactionIdentifier transactionId) {
         if (createTransaction.getTransactionType()
             == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
 
@@ -212,15 +218,18 @@ public class Shard extends RaftActor {
 
     private void createTransaction(CreateTransaction createTransaction) {
 
-        ShardTransactionIdentifier transactionId = ShardTransactionIdentifier.builder().remoteTransactionId(createTransaction.getTransactionId()).build();
+        ShardTransactionIdentifier transactionId =
+            ShardTransactionIdentifier.builder()
+                .remoteTransactionId(createTransaction.getTransactionId())
+                .build();
         LOG.debug("Creating transaction : {} ", transactionId);
         ActorRef transactionActor =
             createTypedTransactionActor(createTransaction, transactionId);
 
         getSender()
             .tell(new CreateTransactionReply(
-                Serialization.serializedActorPath(transactionActor),
-                createTransaction.getTransactionId()).toSerializable(),
+                    Serialization.serializedActorPath(transactionActor),
+                    createTransaction.getTransactionId()).toSerializable(),
                 getSelf());
     }
 
@@ -260,14 +269,14 @@ public class Shard extends RaftActor {
             public void run() {
                 try {
                     future.get();
-                        sender
-                            .tell(new CommitTransactionReply().toSerializable(),
-                                self);
-                        shardMBean.incrementCommittedTransactionCount();
-                        shardMBean.setLastCommittedTransactionTime(new Date());
-                } catch (InterruptedException | ExecutionException e) {
+                    sender
+                        .tell(new CommitTransactionReply().toSerializable(),
+                            self);
+                    shardMBean.incrementCommittedTransactionCount();
+                    shardMBean.setLastCommittedTransactionTime(new Date());
+                } catch (Exception e) {
                     shardMBean.incrementFailedTransactionsCount();
-                    sender.tell(new akka.actor.Status.Failure(e),self);
+                    sender.tell(new akka.actor.Status.Failure(e), self);
                 }
             }
         }, getContext().dispatcher());
@@ -329,7 +338,7 @@ public class Shard extends RaftActor {
 
         LOG.debug(
             "registerDataChangeListener sending reply, listenerRegistrationPath = {} "
-                , listenerRegistration.path().toString());
+            , listenerRegistration.path().toString());
 
         getSender()
             .tell(new RegisterChangeListenerReply(listenerRegistration.path()),
@@ -370,7 +379,7 @@ public class Shard extends RaftActor {
         // Update stats
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
 
-        if(lastLogEntry != null){
+        if (lastLogEntry != null) {
             shardMBean.setLastLogIndex(lastLogEntry.getIndex());
             shardMBean.setLastLogTerm(lastLogEntry.getTerm());
         }

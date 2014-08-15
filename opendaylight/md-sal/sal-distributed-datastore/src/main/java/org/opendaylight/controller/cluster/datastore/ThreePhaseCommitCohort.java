@@ -26,8 +26,6 @@ import org.opendaylight.controller.cluster.datastore.messages.PreCommitTransacti
 import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
-import java.util.concurrent.ExecutionException;
-
 public class ThreePhaseCommitCohort extends AbstractUntypedActor {
     private final DOMStoreThreePhaseCommitCohort cohort;
     private final ActorRef shardActor;
@@ -58,13 +56,17 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
+        if (message.getClass()
+            .equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
             canCommit(new CanCommitTransaction());
-        } else if (message.getClass().equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(PreCommitTransaction.SERIALIZABLE_CLASS)) {
             preCommit(new PreCommitTransaction());
-        } else if (message.getClass().equals(CommitTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(CommitTransaction.SERIALIZABLE_CLASS)) {
             commit(new CommitTransaction());
-        } else if (message.getClass().equals(AbortTransaction.SERIALIZABLE_CLASS)) {
+        } else if (message.getClass()
+            .equals(AbortTransaction.SERIALIZABLE_CLASS)) {
             abort(new AbortTransaction());
         } else {
             unknownMessage(message);
@@ -81,9 +83,14 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new AbortTransactionReply().toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
+                    sender.tell(new AbortTransactionReply().toSerializable(),
+                        self);
+                } catch (Exception e) {
+
+                    //leaving the log message to be logged on the remote side
                     log.error(e, "An exception happened when aborting");
+                    getSender()
+                        .tell(new akka.actor.Status.Failure(e), getSelf());
                 }
             }
         }, getContext().dispatcher());
@@ -109,9 +116,17 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     future.get();
-                    sender.tell(new PreCommitTransactionReply().toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
+                    sender
+                        .tell(new PreCommitTransactionReply().toSerializable(),
+                            self);
+                } catch (Exception e) {
+                    //lets make it more meaningful
+
+                    //leaving the log message to be logged on the remote side
                     log.error(e, "An exception happened when preCommitting");
+                    getSender()
+                        .tell(new akka.actor.Status.Failure(e), getSelf());
+
                 }
             }
         }, getContext().dispatcher());
@@ -128,9 +143,15 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void run() {
                 try {
                     Boolean canCommit = future.get();
-                    sender.tell(new CanCommitTransactionReply(canCommit).toSerializable(), self);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e, "An exception happened when checking canCommit");
+                    sender.tell(new CanCommitTransactionReply(canCommit)
+                        .toSerializable(), self);
+                } catch (Exception e) {
+                    //leaving the log message to be logged on the remote side
+                    log.error(e,
+                        "An exception happened when checking canCommit");
+                    getSender()
+                        .tell(new akka.actor.Status.Failure(e), getSelf());
+
                 }
             }
         }, getContext().dispatcher());
