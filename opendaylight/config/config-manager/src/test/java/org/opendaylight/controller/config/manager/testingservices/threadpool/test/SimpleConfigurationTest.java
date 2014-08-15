@@ -380,7 +380,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     @Test
     public void testQNames() {
         Set<String> availableModuleFactoryQNames = configRegistryClient.getAvailableModuleFactoryQNames();
-        String expected = "(namespace?revision=revision)name";
+        String expected = "(namespace?revision=2012-12-12)name";
+
         assertEquals(Sets.newHashSet(expected), availableModuleFactoryQNames);
     }
 

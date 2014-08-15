@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.manager.impl.util;
 
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.BundleContext;
 
 import java.util.HashSet;
@@ -31,9 +32,7 @@ public class ModuleQNameUtil {
                 inspected = inspected.getSuperclass();
             }
             if (annotation != null) {
-                // FIXME
-                String qName = "(" + annotation.namespace() + "?revision=" + annotation.revision() + ")" + annotation.name();
-                result.add(qName);
+                result.add(QName.create(annotation.namespace(), annotation.revision(), annotation.name()).toString());
             }
         }
         return result;

@@ -9,19 +9,18 @@ package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.management.MXBean;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingScheduledThreadPoolServiceInterface;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.yangtools.concepts.Identifiable;
-
-import com.google.common.collect.Sets;
 
 public class InterfacesHelperTest {
 
@@ -46,7 +45,16 @@ public class InterfacesHelperTest {
 
     }
 
+    @ServiceInterfaceAnnotation(value = "a", osgiRegistrationType = SuperA.class, namespace = "n", revision = "r", localName = "l")
+    interface Service extends AbstractServiceInterface{}
+    @ServiceInterfaceAnnotation(value = "b", osgiRegistrationType = SuperC.class, namespace = "n", revision = "r", localName = "l")
+    interface SubService extends Service{}
+
     abstract class SubClass extends SuperClass implements SubA, Module {
+
+    }
+
+    abstract class SubClassWithService implements SubService, Module {
 
     }
 
@@ -56,6 +64,19 @@ public class InterfacesHelperTest {
                 SubA.class, Identifiable.class, Module.class);
         assertEquals(expected,
                 InterfacesHelper.getAllInterfaces(SubClass.class));
+    }
+
+    @Test
+    public void testGetServiceInterfaces() throws Exception {
+        assertEquals(Collections.<Class<?>>emptySet(), InterfacesHelper.getServiceInterfaces(SubClass.class));
+        assertEquals(Sets.<Class<?>>newHashSet(Service.class, SubService.class), InterfacesHelper.getServiceInterfaces(SubClassWithService.class));
+    }
+
+    @Test
+    public void testGetOsgiRegistrationTypes() throws Exception {
+        assertEquals(Collections.<Class<?>>emptySet(), InterfacesHelper.getOsgiRegistrationTypes(SubClass.class));
+        assertEquals(Sets.<Class<?>>newHashSet(SuperA.class, SuperC.class),
+                InterfacesHelper.getOsgiRegistrationTypes(SubClassWithService.class));
     }
 
     @Test
