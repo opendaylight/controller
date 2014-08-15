@@ -31,12 +31,12 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
     }
 
     @Override
-    protected void cleanupSingleStat(DataModificationTransaction trans, NodeConnectorStatisticsAndPortNumberMap item) {
+    protected void cleanupSingleStat(final DataModificationTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected NodeConnectorStatisticsAndPortNumberMap updateSingleStat(DataModificationTransaction trans, NodeConnectorStatisticsAndPortNumberMap item) {
+    protected NodeConnectorStatisticsAndPortNumberMap updateSingleStat(final DataModificationTransaction trans, final NodeConnectorStatisticsAndPortNumberMap item) {
         FlowCapableNodeConnectorStatisticsBuilder statisticsBuilder
                                         = new FlowCapableNodeConnectorStatisticsBuilder();
         statisticsBuilder.setBytes(item.getBytes());
@@ -57,16 +57,17 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
 
         statisticsDataBuilder.setFlowCapableNodeConnectorStatistics(statisticsBuilder.build());
 
-        InstanceIdentifier<NodeConnector> nodeConnectorRef = getNodeIdentifierBuilder()
-                .child(NodeConnector.class, new NodeConnectorKey(item.getNodeConnectorId())).build();
+        final NodeConnectorKey key = new NodeConnectorKey(item.getNodeConnectorId());
+        final InstanceIdentifier<NodeConnector> nodeConnectorRef = getNodeIdentifier().child(NodeConnector.class, key);
 
         // FIXME: can we bypass this read?
         NodeConnector nodeConnector = (NodeConnector)trans.readOperationalData(nodeConnectorRef);
         if(nodeConnector != null){
             final FlowCapableNodeConnectorStatisticsData stats = statisticsDataBuilder.build();
             logger.debug("Augmenting port statistics {} to port {}",stats,nodeConnectorRef.toString());
-            NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder();
-            nodeConnectorBuilder.addAugmentation(FlowCapableNodeConnectorStatisticsData.class, stats);
+            NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder()
+                .setKey(key).setId(item.getNodeConnectorId())
+                .addAugmentation(FlowCapableNodeConnectorStatisticsData.class, stats);
             trans.putOperationalData(nodeConnectorRef, nodeConnectorBuilder.build());
         }
 
