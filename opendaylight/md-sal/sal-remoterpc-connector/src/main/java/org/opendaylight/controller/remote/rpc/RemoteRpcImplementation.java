@@ -7,7 +7,7 @@ import org.opendaylight.controller.remote.rpc.messages.ErrorResponse;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
-import org.opendaylight.controller.remote.rpc.utils.XmlUtils;
+import org.opendaylight.controller.xml.codec.XmlUtils;
 import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
