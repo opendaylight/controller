@@ -13,10 +13,18 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.WriteTransactionCustomizer;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 
+/**
+ * Base template for a test suite for testing DataChangeListener functionality.
+ */
 public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataChangeListenerTest {
 
     protected static final String FOO_SIBLING = "foo-sibling";
 
+    /**
+     * Callback invoked when the test suite can modify task parameters.
+     *
+     * @param task Update task configuration as needed
+     */
     abstract protected void customizeTask(DatastoreTestTask task);
 
     @Test

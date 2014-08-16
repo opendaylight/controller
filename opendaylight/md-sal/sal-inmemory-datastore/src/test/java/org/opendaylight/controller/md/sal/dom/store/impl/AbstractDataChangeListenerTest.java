@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.Collection;
 import java.util.Map;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,8 +38,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.util.concurrent.MoreExecutors;
 
 public abstract class AbstractDataChangeListenerTest {
 
@@ -74,6 +75,13 @@ public abstract class AbstractDataChangeListenerTest {
         }
     }
 
+    /**
+     * Create a new test task. The task will operate on the backed database,
+     * and will use the proper background executor service.
+     *
+     * @return Test task initialized to clean up {@value #TOP_LEVEL} and its
+     *         children.
+     */
     public final DatastoreTestTask newTestTask() {
         return new DatastoreTestTask(datastore, dclExecutorService).cleanup(DatastoreTestTask
                 .simpleDelete(TOP_LEVEL));
