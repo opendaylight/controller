@@ -20,7 +20,7 @@ import org.opendaylight.controller.remote.rpc.utils.LatestEntryRoutingLogic;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.remote.rpc.utils.RoutingLogic;
-import org.opendaylight.controller.remote.rpc.utils.XmlUtils;
+import org.opendaylight.controller.xml.codec.XmlUtils;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.RpcResult;
