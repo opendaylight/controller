@@ -39,14 +39,20 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
         @Override
         public void modifiedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
-            // TODO Auto-generated method stub
-
+            removedService(reference, service);
+            addingService(reference);
         }
 
         @Override
         public void removedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
-            // TODO Auto-generated method stub
+            broker = context.getService(reference);
+            mdActivationPool.execute(new Runnable() {
 
+                @Override
+                public void run() {
+                    onBrokerRemoved(broker, context);
+                }
+            });
         }
 
     };
@@ -117,6 +123,6 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
     protected abstract void onBrokerAvailable(BindingAwareBroker broker, BundleContext context);
 
     protected void onBrokerRemoved(BindingAwareBroker broker, BundleContext context) {
-
+        stopImpl(context);
     }
 }
