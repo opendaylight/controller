@@ -76,8 +76,16 @@ public final class ToasterProviderModule extends
                 dataChangeListenerRegistration.close();
                 rpcRegistration.close();
                 runtimeReg.close();
-                opendaylightToaster.close();
+                closeQuietly(opendaylightToaster);
                 log.info("Toaster provider (instance {}) torn down.", this);
+            }
+
+            private void closeQuietly(final AutoCloseable resource) {
+                try {
+                    resource.close();
+                } catch (final Exception e) {
+                    log.debug("Ignoring exception while closing {}", resource, e);
+                }
             }
         }
 
