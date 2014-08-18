@@ -412,7 +412,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         List<RestconfError> errorList = Arrays.asList(new RestconfError(ErrorType.APPLICATION, ErrorTag.LOCK_DENIED,
                 "mock error1"), new RestconfError(ErrorType.RPC, ErrorTag.ROLLBACK_FAILED, "mock error2"));
-        stageMockEx(new RestconfDocumentedException(errorList));
+        stageMockEx(new RestconfDocumentedException("mock", null, errorList));
 
         Response resp = target("/operational/foo").request(MediaType.APPLICATION_JSON).get();
 
@@ -651,7 +651,7 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         List<RestconfError> errorList = Arrays.asList(new RestconfError(ErrorType.APPLICATION, ErrorTag.LOCK_DENIED,
                 "mock error1"), new RestconfError(ErrorType.RPC, ErrorTag.ROLLBACK_FAILED, "mock error2"));
-        stageMockEx(new RestconfDocumentedException(errorList));
+        stageMockEx(new RestconfDocumentedException("mock", null, errorList));
 
         Response resp = target("/operational/foo").request(MediaType.APPLICATION_XML).get();
 

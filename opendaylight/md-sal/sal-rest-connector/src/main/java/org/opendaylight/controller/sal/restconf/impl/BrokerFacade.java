@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -41,7 +40,6 @@ import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
@@ -178,39 +176,31 @@ public class BrokerFacade {
     private NormalizedNode<?, ?> readDataViaTransaction(final DOMDataReadTransaction transaction,
             LogicalDatastoreType datastore, YangInstanceIdentifier path) {
         LOG.trace("Read " + datastore.name() + " via Restconf: {}", path);
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> listenableFuture = transaction.read(datastore, path);
-        if (listenableFuture != null) {
-            Optional<NormalizedNode<?, ?>> optional;
-            try {
-                LOG.debug("Reading result data from transaction.");
-                optional = listenableFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RestconfDocumentedException("Problem to get data from transaction.", e.getCause());
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> listenableFuture =
+                                                                 transaction.read(datastore, path);
 
-            }
-            if (optional != null) {
-                if (optional.isPresent()) {
-                    return optional.get();
-                }
-            }
+        try {
+            Optional<NormalizedNode<?, ?>> optional = listenableFuture.checkedGet();
+            return optional.isPresent() ? optional.get() : null;
+        } catch(ReadFailedException e) {
+            throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
         }
-        return null;
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
             final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, DataNormalizationOperation<?> root) {
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = rWTransaction.read(datastore, path);
+        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> futureDatastoreData =
+                                                               rWTransaction.read(datastore, path);
         try {
-            final Optional<NormalizedNode<?, ?>> optionalDatastoreData = futureDatastoreData.get();
+            final Optional<NormalizedNode<?, ?>> optionalDatastoreData = futureDatastoreData.checkedGet();
             if (optionalDatastoreData.isPresent() && payload.equals(optionalDatastoreData.get())) {
-                String errMsg = "Post Configuration via Restconf was not executed because data already exists";
-                LOG.trace(errMsg + ":{}", path);
+                LOG.trace("Post Configuration via Restconf was not executed because data already exists :{}", path);
                 throw new RestconfDocumentedException("Data already exists for path: " + path, ErrorType.PROTOCOL,
                         ErrorTag.DATA_EXISTS);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.trace("It wasn't possible to get data loaded from datastore at path " + path);
+        } catch(ReadFailedException e) {
+            LOG.warn("Error reading from datastore with path: " + path, e);
         }
 
         ensureParentsByMerge(datastore, path, rWTransaction, root);
@@ -251,27 +241,21 @@ public class BrokerFacade {
             try {
                 currentOp = currentOp.getChild(currentArg);
             } catch (DataNormalizationException e) {
-                throw new IllegalArgumentException(
-                        String.format("Invalid child encountered in path %s", normalizedPath), e);
+                throw new RestconfDocumentedException(
+                        String.format("Error normalizing data for path %s", normalizedPath), e);
             }
             currentArguments.add(currentArg);
             YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
 
-            final Boolean exists;
-
             try {
 
-                CheckedFuture<Boolean, ReadFailedException> future =
-                    rwTx.exists(store, currentPath);
-                exists = future.checkedGet();
+                boolean exists = rwTx.exists(store, currentPath).checkedGet();
+                if (!exists && iterator.hasNext()) {
+                    rwTx.merge(store, currentPath, currentOp.createDefault(currentArg));
+                }
             } catch (ReadFailedException e) {
                 LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
-                throw new IllegalStateException("Failed to read pre-existing data", e);
-            }
-
-
-            if (!exists && iterator.hasNext()) {
-                rwTx.merge(store, currentPath, currentOp.createDefault(currentArg));
+                throw new RestconfDocumentedException("Failed to read pre-existing data", e);
             }
         }
     }

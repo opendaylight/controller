@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +36,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.rest.api.Draft02;
@@ -52,7 +53,6 @@ import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.concepts.Codec;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
@@ -609,19 +609,8 @@ public class RestconfImpl implements RestconfService {
     private void checkRpcSuccessAndThrowException(final RpcResult<CompositeNode> rpcResult) {
         if (rpcResult.isSuccessful() == false) {
 
-            Collection<RpcError> rpcErrors = rpcResult.getErrors();
-            if (rpcErrors == null || rpcErrors.isEmpty()) {
-                throw new RestconfDocumentedException(
-                        "The operation was not successful and there were no RPC errors returned", ErrorType.RPC,
-                        ErrorTag.OPERATION_FAILED);
-            }
-
-            List<RestconfError> errorList = Lists.newArrayList();
-            for (RpcError rpcError : rpcErrors) {
-                errorList.add(new RestconfError(rpcError));
-            }
-
-            throw new RestconfDocumentedException(errorList);
+            throw new RestconfDocumentedException("The operation was not successful", null,
+                    rpcResult.getErrors());
         }
     }
 
@@ -729,18 +718,50 @@ public class RestconfImpl implements RestconfService {
                 iiWithData.getSchemaNode());
 
         YangInstanceIdentifier normalizedII;
+        if (mountPoint != null) {
+            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(
+                    iiWithData.getInstanceIdentifier());
+        } else {
+            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
+        }
 
-        try {
-            if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                        .getInstanceIdentifier());
-                broker.commitConfigurationDataPut(mountPoint, normalizedII, datastoreNormalizedNode).get();
-            } else {
-                normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-                broker.commitConfigurationDataPut(normalizedII, datastoreNormalizedNode).get();
+        /*
+         * There is a small window where another write transaction could be updating the same data
+         * simultaneously and we get an OptimisticLockFailedException. This error is likely
+         * transient and The WriteTransaction#submit API docs state that a retry will likely
+         * succeed. So we'll try again if that scenario occurs. If it fails a third time then it
+         * probably will never succeed so we'll fail in that case.
+         *
+         * By retrying we're attempting to hide the internal implementation of the data store and
+         * how it handles concurrent updates from the restconf client. The client has instructed us
+         * to put the data and we should make every effort to do so without pushing optimistic lock
+         * failures back to the client and forcing them to handle it via retry (and having to
+         * document the behavior).
+         */
+        int tries = 2;
+        while(true) {
+            try {
+                if (mountPoint != null) {
+                    broker.commitConfigurationDataPut(mountPoint, normalizedII,
+                            datastoreNormalizedNode).checkedGet();
+                } else {
+                    broker.commitConfigurationDataPut(normalizedII,
+                            datastoreNormalizedNode).checkedGet();
+                }
+
+                break;
+            } catch (TransactionCommitFailedException e) {
+                if(e instanceof OptimisticLockFailedException) {
+                    if(--tries <= 0) {
+                        LOG.debug("Got OptimisticLockFailedException on last try - failing");
+                        throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
+                    }
+
+                    LOG.debug("Got OptimisticLockFailedException - trying again");
+                } else {
+                    throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
+                }
             }
-        } catch (Exception e) {
-            throw new RestconfDocumentedException("Error updating data", e);
         }
 
         return Response.status(Status.OK).build();
@@ -852,6 +873,8 @@ public class RestconfImpl implements RestconfService {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
             }
+        } catch(RestconfDocumentedException e) {
+            throw e;
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
         }
@@ -898,6 +921,8 @@ public class RestconfImpl implements RestconfService {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
             }
+        } catch(RestconfDocumentedException e) {
+            throw e;
         } catch (Exception e) {
             throw new RestconfDocumentedException("Error creating data", e);
         }
@@ -1156,8 +1181,9 @@ public class RestconfImpl implements RestconfService {
 
     private CompositeNode normalizeNode(final Node<?> node, final DataSchemaNode schema, final DOMMountPoint mountPoint) {
         if (schema == null) {
-            QName nodeType = node == null ? null : node.getNodeType();
-            String localName = nodeType == null ? null : nodeType.getLocalName();
+            String localName = node == null ? null :
+                    node instanceof NodeWrapper ? ((NodeWrapper<?>)node).getLocalName() :
+                    node.getNodeType().getLocalName();
 
             throw new RestconfDocumentedException("Data schema node was not found for " + localName,
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
