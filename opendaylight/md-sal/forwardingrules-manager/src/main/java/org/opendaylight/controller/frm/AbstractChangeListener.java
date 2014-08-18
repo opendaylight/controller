@@ -18,11 +18,15 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 /**
  * AbstractChangeListner implemented basic {@link AsyncDataChangeEvent} processing for
@@ -170,4 +174,23 @@ public abstract class AbstractChangeListener implements DataChangeListener {
      */
     protected abstract void add(final InstanceIdentifier<? extends DataObject> identifier,
             final DataObject add);
+
+    /**
+     * Bug 1553 - Table-id in restconf uri and flow xml is different
+     * Validation prevent a send payload with different TableID to device
+     *
+     * @param tableKey - table Key from URI (InstanceIdentifier)
+     * @param flow - Input Flow payload
+     * @return validation result (for validation false the Error has logged)
+     */
+    protected boolean tableIdValidationPrecondition (final TableKey tableKey, final Flow flow) {
+        Preconditions.checkNotNull(tableKey, "TableKey can not be null or empty!");
+        Preconditions.checkNotNull(flow, "Flow can not be null or empty!");
+        if (flow.getTableId() != tableKey.getId()) {
+            LOG.error("TableID in URI tableId={} and in palyload tableId={} is not same.",
+                    flow.getTableId(), tableKey.getId());
+            return false;
+        }
+        return true;
+    }
 }
