@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowTableRef;
@@ -160,7 +161,22 @@ public class FlowNodeReconcilListener extends AbstractChangeListener {
     @Override
     protected boolean preconditionForChange(final InstanceIdentifier<? extends DataObject> identifier,
                                             final DataObject dataObj, final DataObject update) {
-        return (dataObj instanceof FlowCapableNode);
+
+        boolean returnValue = dataObj instanceof FlowCapableNode;
+
+        if (returnValue) { /* check for a connected FlowCapableNode only */
+            TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
+            if (dataObj instanceof Flow) {
+                returnValue = this.tableIdValidationPrecondition(tableKey, (Flow) dataObj);
+                Preconditions.checkArgument(returnValue, "Mismatch TableID in URI and in payload");
+            }
+            if (update instanceof Flow) {
+                returnValue = this.tableIdValidationPrecondition(tableKey, (Flow) update);
+                Preconditions.checkNotNull(returnValue, "Mismatch TableID in URI and in payload");
+            }
+        }
+
+        return returnValue;
     }
 
     private Optional<FlowCapableNode> readFlowCapableNode(final InstanceIdentifier<FlowCapableNode> flowNodeIdent) {
