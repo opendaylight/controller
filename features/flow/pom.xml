@@ -9,7 +9,7 @@
   </parent>
   <artifactId>features-flow</artifactId>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <features.file>features.xml</features.file>
@@ -22,7 +22,6 @@
       <version>${mdsal.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
@@ -63,6 +62,11 @@
     <dependency>
       <groupId>org.opendaylight.controller.md</groupId>
       <artifactId>forwardingrules-manager</artifactId>
+    </dependency>
+    <!-- test to validate features.xml -->
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>features-test</artifactId>
     </dependency>
   </dependencies>
 
@@ -108,6 +112,20 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
+            <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
+            <karaf.distro.version>${commons.opendaylight.version}</karaf.distro.version>
+          </systemPropertyVariables>
+          <dependenciesToScan>
+           <dependency>org.opendaylight.yangtools:features-test</dependency>
+          </dependenciesToScan>
+        </configuration>
       </plugin>
     </plugins>
   </build>
