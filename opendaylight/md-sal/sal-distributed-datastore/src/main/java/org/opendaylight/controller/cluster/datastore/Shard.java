@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -92,7 +93,8 @@ public class Shard extends RaftActor {
 
     private final List<ActorSelection> dataChangeListeners = new ArrayList<>();
 
-    private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses) {
+    private Shard(ShardIdentifier name, Map<ShardIdentifier, String> peerAddresses,
+            InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
         super(name.toString(), mapPeerAddresses(peerAddresses), Optional.of(configParams));
 
         this.name = name;
@@ -103,7 +105,7 @@ public class Shard extends RaftActor {
 
         LOG.info("Shard created : {} persistent : {}", name, persistent);
 
-        store = InMemoryDOMDataStoreFactory.create(name.toString(), null);
+        store = InMemoryDOMDataStoreFactory.create(name.toString(), null, dataStoreProperties);
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString());
 
@@ -119,11 +121,9 @@ public class Shard extends RaftActor {
         return map;
     }
 
-
-
-
     public static Props props(final ShardIdentifier name,
-        final Map<ShardIdentifier, String> peerAddresses) {
+        final Map<ShardIdentifier, String> peerAddresses,
+        final InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
         Preconditions.checkNotNull(name, "name should not be null");
         Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
 
@@ -131,7 +131,7 @@ public class Shard extends RaftActor {
 
             @Override
             public Shard create() throws Exception {
-                return new Shard(name, peerAddresses);
+                return new Shard(name, peerAddresses, dataStoreProperties);
             }
 
         });

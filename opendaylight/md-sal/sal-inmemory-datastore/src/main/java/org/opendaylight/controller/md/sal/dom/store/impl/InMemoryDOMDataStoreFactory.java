@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import org.opendaylight.yangtools.util.PropertyUtils;
 import com.google.common.util.concurrent.MoreExecutors;
 
 /**
@@ -25,15 +24,12 @@ import com.google.common.util.concurrent.MoreExecutors;
  */
 public final class InMemoryDOMDataStoreFactory {
 
-    private static final String DCL_EXECUTOR_MAX_QUEUE_SIZE_PROP =
-            "mdsal.datastore-dcl-notification-queue.size";
-    private static final int DEFAULT_DCL_EXECUTOR_MAX_QUEUE_SIZE = 1000;
-
-    private static final String DCL_EXECUTOR_MAX_POOL_SIZE_PROP =
-            "mdsal.datastore-dcl-notification-pool.size";
-    private static final int DEFAULT_DCL_EXECUTOR_MAX_POOL_SIZE = 20;
-
     private InMemoryDOMDataStoreFactory() {
+    }
+
+    public static InMemoryDOMDataStore create(final String name,
+            @Nullable final SchemaService schemaService) {
+        return create(name, schemaService, null);
     }
 
     /**
@@ -41,27 +37,33 @@ public final class InMemoryDOMDataStoreFactory {
      *
      * @param name the name of the data store
      * @param schemaService the SchemaService to which to register the data store.
+     * @param properties configuration properties for the InMemoryDOMDataStore instance. If null,
+     *                   default property values are used.
      * @return an InMemoryDOMDataStore instance
      */
     public static InMemoryDOMDataStore create(final String name,
-            @Nullable final SchemaService schemaService) {
+            @Nullable final SchemaService schemaService,
+            @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
+
+        InMemoryDOMDataStoreConfigProperties actualProperties = properties;
+        if(actualProperties == null) {
+            actualProperties = InMemoryDOMDataStoreConfigProperties.getDefault();
+        }
 
         // For DataChangeListener notifications we use an executor that provides the fastest
         // task execution time to get higher throughput as DataChangeListeners typically provide
         // much of the business logic for a data model. If the executor queue size limit is reached,
         // subsequent submitted notifications will block the calling thread.
 
-        int dclExecutorMaxQueueSize = PropertyUtils.getIntSystemProperty(
-                DCL_EXECUTOR_MAX_QUEUE_SIZE_PROP, DEFAULT_DCL_EXECUTOR_MAX_QUEUE_SIZE);
-        int dclExecutorMaxPoolSize = PropertyUtils.getIntSystemProperty(
-                DCL_EXECUTOR_MAX_POOL_SIZE_PROP, DEFAULT_DCL_EXECUTOR_MAX_POOL_SIZE);
+        int dclExecutorMaxQueueSize = actualProperties.getMaxDataChangeExecutorQueueSize();
+        int dclExecutorMaxPoolSize = actualProperties.getMaxDataChangeExecutorPoolSize();
 
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
                 dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
 
         InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name,
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()),
-                dataChangeListenerExecutor);
+                dataChangeListenerExecutor, actualProperties.getMaxDataChangeListenerQueueSize());
 
         if(schemaService != null) {
             schemaService.registerSchemaContextListener(dataStore);
