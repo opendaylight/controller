@@ -14,6 +14,7 @@ import org.opendaylight.controller.frm.FlowCookieProducer;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowTableRef;
@@ -118,9 +119,39 @@ public class FlowChangeListener extends AbstractChangeListener {
     protected boolean preconditionForChange(final InstanceIdentifier<? extends DataObject> identifier,
             final DataObject dataObj, final DataObject update) {
 
+        boolean returnValue = false;
+
         final ReadOnlyTransaction trans = this.provider.getDataService().newReadOnlyTransaction();
-        return update != null
+        returnValue = update != null
                 ? (dataObj instanceof Flow && update instanceof Flow && isNodeAvailable(identifier, trans))
                 : (dataObj instanceof Flow && isNodeAvailable(identifier, trans));
+
+        if (returnValue) { /* check for a connected FlowCapableNode only */
+            TableKey tableKey = identifier.firstKeyOf(Table.class, TableKey.class);
+            if (dataObj instanceof Flow) {
+                returnValue = this.tableIdValidationPrecondition(tableKey, (Flow) dataObj);
+                Preconditions.checkArgument(returnValue, "Mismatch TableID in URI and in payload");
+            }
+            if (update instanceof Flow) {
+                returnValue = this.tableIdValidationPrecondition(tableKey, (Flow) update);
+                Preconditions.checkNotNull(returnValue, "Mismatch TableID in URI and in payload");
+            }
+        }
+
+        return returnValue;
+    }
+
+    /**
+     * Bug 1553 - Table-id in restconf uri and flow xml is different
+     * Validation prevent a send payload with different TableID to device
+     */
+    protected boolean tableIdValidationPrecondition (final TableKey tableKey, final Flow flow) {
+        Preconditions.checkNotNull(tableKey, "TableKey can not be null or empty!");
+        Preconditions.checkNotNull(flow, "Flow can not be null or empty!");
+        if (flow.getTableId() != tableKey.getId()) {
+            LOG.warn("TableID in URI {} and in palyload {} is not same.", flow.getTableId(), tableKey.getId());
+            return false;
+        }
+        return true;
     }
 }
