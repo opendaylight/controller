@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3557c659",
+        "filename": "opendaylight/distribution/opendaylight-karaf/src/main/resources/etc/jre.properties",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-18T23:05:16Z",
+      "side": 0,
+      "message": "javax.annotation.processing is the change that was required.",
+      "revId": "ac732369c7ddaaf60faef5eda22fa9c41aad391e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_55528a67",
+        "filename": "opendaylight/distribution/opendaylight-karaf/src/main/resources/etc/startup.properties",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-18T23:05:16Z",
+      "side": 0,
+      "message": "This line was required for AD-SAL / Northbounds",
+      "revId": "ac732369c7ddaaf60faef5eda22fa9c41aad391e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

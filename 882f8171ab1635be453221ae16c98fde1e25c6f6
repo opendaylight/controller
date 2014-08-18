@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_955c927e",
+        "filename": "opendaylight/distribution/opendaylight-karaf/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-18T23:05:16Z",
+      "side": 1,
+      "message": "While we\u0027re at it lets rename..?",
+      "revId": "882f8171ab1635be453221ae16c98fde1e25c6f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
