@@ -21,9 +21,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
+
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -109,14 +111,14 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData readConfigurationData(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext readConfigurationData(@Encoded @PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData readOperationalData(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext readOperationalData(@Encoded @PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @PUT

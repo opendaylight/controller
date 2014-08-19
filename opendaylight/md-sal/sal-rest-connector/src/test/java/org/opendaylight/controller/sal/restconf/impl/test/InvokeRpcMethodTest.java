@@ -40,7 +40,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -324,7 +324,7 @@ public class InvokeRpcMethodTest {
         when(mockMountPoint.getService(eq(RpcProvisionRegistry.class))).thenReturn(Optional.of(mockedRpcProvisionRegistry));
         when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
 
-        InstanceIdWithSchemaNode mockedInstanceId = mock(InstanceIdWithSchemaNode.class);
+        InstanceIdentifierContext mockedInstanceId = mock(InstanceIdentifierContext.class);
         when(mockedInstanceId.getMountPoint()).thenReturn(mockMountPoint);
 
         ControllerContext mockedContext = mock(ControllerContext.class);
