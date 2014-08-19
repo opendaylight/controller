@@ -19,7 +19,13 @@ public class RestconfApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return ImmutableSet.<Class<?>> of(RestconfDocumentedExceptionMapper.class);
+        return ImmutableSet.<Class<?>> builder()
+                .add(RestconfDocumentedExceptionMapper.class)
+                .add(XmlNormalizedNodeBodyReader.class)
+                .add(JsonNormalizedNodeBodyReader.class)
+                .add(NormalizedNodeJsonBodyWriter.class)
+                .add(NormalizedNodeXmlBodyWriter.class)
+                .build();
     }
 
     @Override
@@ -33,10 +39,10 @@ public class RestconfApplication extends Application {
         singletons.add(controllerContext);
         singletons.add(brokerFacade);
         singletons.add(restconfImpl);
-        singletons.add(XmlToCompositeNodeProvider.INSTANCE);
         singletons.add(StructuredDataToXmlProvider.INSTANCE);
-        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
         singletons.add(StructuredDataToJsonProvider.INSTANCE);
+        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
+        singletons.add(XmlToCompositeNodeProvider.INSTANCE);
         return singletons;
     }
 

@@ -21,9 +21,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -102,44 +103,44 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData invokeRpc(@Encoded @PathParam("identifier") String identifier,
+    public StructuredData invokeRpc(@PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
 
     @GET
     @Path("/config/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData readConfigurationData(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext readConfigurationData(@PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData readOperationalData(@Encoded @PathParam("identifier") String identifier,
+    public NormalizedNodeContext readOperationalData(@PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @PUT
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
+    public Response updateConfigurationData(NormalizedNodeContext dataContext);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
+    public Response createConfigurationData(NormalizedNodeContext dataContext);
 
     @POST
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(Node<?> payload);
+    public Response createConfigurationData(NormalizedNode<?,?> payload);
 
     @DELETE
     @Path("/config/{identifier:.+}")
-    public Response deleteConfigurationData(@Encoded @PathParam("identifier") String identifier);
+    public Response deleteConfigurationData(@PathParam("identifier") String path);
 
     @GET
     @Path("/streams/stream/{identifier:.+}")
