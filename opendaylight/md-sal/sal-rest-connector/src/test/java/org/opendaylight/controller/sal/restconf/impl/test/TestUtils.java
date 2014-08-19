@@ -402,7 +402,7 @@ public final class TestUtils {
         return interfaceBuilder.toInstance();
     }
 
-    static NormalizedNode prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
+    static NormalizedNode<?,?> prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
         String ietfInterfacesDate = "2013-07-04";
         String namespace = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
         DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> mapEntryNode = ImmutableMapEntryNodeBuilder.create();
