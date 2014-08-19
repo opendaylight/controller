@@ -83,6 +83,9 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>md-sal-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -99,6 +102,9 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-connector-config</artifactId>
+      <version>${netconf.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -151,6 +157,9 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-rest-connector-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
@@ -167,6 +176,9 @@
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>toaster-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <!-- test to validate features.xml -->
     <dependency>
