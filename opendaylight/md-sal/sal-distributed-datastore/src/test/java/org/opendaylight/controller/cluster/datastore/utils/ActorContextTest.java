@@ -1,11 +1,14 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import java.util.concurrent.TimeUnit;
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -14,6 +17,9 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
@@ -74,14 +80,23 @@ public class ActorContextTest extends AbstractActorTest{
         }
 
         private static Props props(final boolean found, final ActorRef actorRef){
-            return Props.create(new Creator<MockShardManager>() {
+            return Props.create(new MockShardManagerCreator(found, actorRef) );
+        }
 
-                @Override public MockShardManager create()
-                    throws Exception {
-                    return new MockShardManager(found,
-                        actorRef);
-                }
-            });
+        @SuppressWarnings("serial")
+        private static class MockShardManagerCreator implements Creator<MockShardManager> {
+            final boolean found;
+            final ActorRef actorRef;
+
+            MockShardManagerCreator(boolean found, ActorRef actorRef) {
+                this.found = found;
+                this.actorRef = actorRef;
+            }
+
+            @Override
+            public MockShardManager create() throws Exception {
+                return new MockShardManager(found, actorRef);
+            }
         }
     }
 
@@ -90,6 +105,7 @@ public class ActorContextTest extends AbstractActorTest{
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
@@ -118,6 +134,7 @@ public class ActorContextTest extends AbstractActorTest{
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef shardManagerActorRef = getSystem()
@@ -145,6 +162,7 @@ public class ActorContextTest extends AbstractActorTest{
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
@@ -173,6 +191,7 @@ public class ActorContextTest extends AbstractActorTest{
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     ActorRef shardManagerActorRef = getSystem()
@@ -192,5 +211,69 @@ public class ActorContextTest extends AbstractActorTest{
             };
         }};
 
+    }
+
+    @Test
+    public void testExecuteRemoteOperation() {
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("3 seconds")) {
+                @Override
+                protected void run() {
+
+                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+
+                    ActorRef shardManagerActorRef = getSystem()
+                        .actorOf(MockShardManager.props(true, shardActorRef));
+
+                    ActorContext actorContext =
+                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
+                            mock(Configuration.class));
+
+                    ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+
+                    Object out = actorContext.executeRemoteOperation(actor, "hello", duration("3 seconds"));
+
+                    assertEquals("hello", out);
+
+                    expectNoMsg();
+                }
+            };
+        }};
+    }
+
+    @Test
+    public void testExecuteRemoteOperationAsync() {
+        new JavaTestKit(getSystem()) {{
+
+            new Within(duration("3 seconds")) {
+                @Override
+                protected void run() {
+
+                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+
+                    ActorRef shardManagerActorRef = getSystem()
+                        .actorOf(MockShardManager.props(true, shardActorRef));
+
+                    ActorContext actorContext =
+                        new ActorContext(getSystem(), shardManagerActorRef , mock(ClusterWrapper.class),
+                            mock(Configuration.class));
+
+                    ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+
+                    Future<Object> future = actorContext.executeRemoteOperationAsync(actor, "hello",
+                            Duration.create(3, TimeUnit.SECONDS));
+
+                    try {
+                        Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+                        assertEquals("Result", "hello", result);
+                    } catch(Exception e) {
+                        throw new AssertionError(e);
+                    }
+
+                    expectNoMsg();
+                }
+            };
+        }};
     }
 }
