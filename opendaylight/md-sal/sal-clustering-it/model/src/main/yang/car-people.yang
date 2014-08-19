@@ -1,0 +1,67 @@
+module car-people {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car-people";
+
+    prefix car;
+
+	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	  import car { prefix "c"; revision-date 2014-08-18; }
+	  import people { prefix "people"; revision-date 2014-08-18; }
+
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for car for test application";
+
+    revision "2014-08-18" {
+      description
+        "Clustering sample app";
+    }
+
+    typedef car-person-id {
+      type inet:uri;
+      description "An identifier for car person map.";
+    }
+
+    container car-people {
+      description
+       "Top-level container for all people car map";
+
+      list car-person {
+        key "id";
+        description "A mapping of cars and people.";
+        leaf id {
+          type car-person-id;
+          description "identifier of single list of entries.";
+        }
+        leaf car-id {
+          type c:car-id;
+        }
+
+        leaf person-id {
+          type people:person-id;
+        }
+      }
+    }
+
+    rpc add-car-person {
+      description
+        "Add a mapping of car and person";
+      input {
+        leaf car-id {
+          type c:car-id;
+          description "identifier of car.";
+        }
+
+        leaf person-id {
+          type people:person-id;
+          description "identifier of person.";
+        }
+      }
+    }
+}
