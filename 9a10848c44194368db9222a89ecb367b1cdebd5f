@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b5667628",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-19T00:14:42Z",
+      "side": 1,
+      "message": "Consider moving the log statement after line 164 the \"if\" statement as the exception needs to be logged whether or not it was due to unexpected response type or Timeout or any other.",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5575aac8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-19T00:14:42Z",
+      "side": 1,
+      "message": "Consider moving the above log statement (see previous comment) here.",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f57f1ea9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-19T00:14:42Z",
+      "side": 1,
+      "message": "This will be redundant if above log statement is moved.",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1543a2af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-19T00:14:42Z",
+      "side": 1,
+      "message": "Instead of null, use ActorRef.noSender()",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
