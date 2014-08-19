@@ -1572,6 +1572,12 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>features-test</artifactId>
+        <version>${yangtools.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>features-yangtools</artifactId>
         <version>${yangtools.version}</version>
         <classifier>features</classifier>
