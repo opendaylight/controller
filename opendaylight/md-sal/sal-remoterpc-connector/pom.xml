@@ -59,18 +59,23 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-util</artifactId>
-    </dependency>
       <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-core-spi</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-core-spi</artifactId>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-common-impl</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-common-impl</artifactId>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-util</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-clustering-commons</artifactId>
+      </dependency>
+
     <!-- Yang tools-->
 
     <dependency>
@@ -156,8 +161,10 @@
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package></Export-package>
             <Private-Package></Private-Package>
-            <Import-Package>!org.jboss.*;!com.jcraft.*;*</Import-Package>
+            <Import-Package>!org.iq80.*;!*snappy;!org.jboss.*;!com.jcraft.*;!org.fusesource.*;*</Import-Package>
             <Embed-Dependency>
+                sal-clustering-commons;
+                sal-akka-raft;
                 !sal*;
                 !*config-api*;
                 !*testkit*;
