@@ -16,10 +16,6 @@ module packet-processing {
         description "";
     }
 
-    typedef buffer-id {
-        type uint32;
-    }
-
     typedef connection-cookie {
         type uint32;
     }
@@ -63,11 +59,6 @@ module packet-processing {
     }
 
     notification packet-received {
-
-        leaf buffer-id {
-            type buffer-id;
-        }
-
     	leaf connection-cookie {
                 type connection-cookie;
         }
@@ -105,7 +96,7 @@ module packet-processing {
     			type inv:node-connector-ref;
     		}
             leaf buffer-id {
-                  type buffer-id;
+                  type uint32;
             }
 
     		uses raw-packet;
