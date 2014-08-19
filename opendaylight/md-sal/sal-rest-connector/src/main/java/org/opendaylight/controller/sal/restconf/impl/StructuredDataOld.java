@@ -8,21 +8,22 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
-public class StructuredData {
+@Deprecated
+public class StructuredDataOld {
 
-    private final NormalizedNode<?,?> data;
+    private final CompositeNode data;
     private final DataSchemaNode schema;
     private final DOMMountPoint mountPoint;
     private final boolean prettyPrintMode;
 
-    public StructuredData(final NormalizedNode<?,?> data, final DataSchemaNode schema, final DOMMountPoint mountPoint) {
+    public StructuredDataOld(final CompositeNode data, final DataSchemaNode schema, final DOMMountPoint mountPoint) {
         this(data, schema, mountPoint, false);
     }
 
-    public StructuredData(final NormalizedNode<?,?> data, final DataSchemaNode schema, final DOMMountPoint mountPoint,
+    public StructuredDataOld(final CompositeNode data, final DataSchemaNode schema, final DOMMountPoint mountPoint,
             final boolean preattyPrintMode) {
         this.data = data;
         this.schema = schema;
@@ -30,7 +31,7 @@ public class StructuredData {
         this.prettyPrintMode = preattyPrintMode;
     }
 
-    public NormalizedNode<?,?> getData() {
+    public CompositeNode getData() {
         return data;
     }
 

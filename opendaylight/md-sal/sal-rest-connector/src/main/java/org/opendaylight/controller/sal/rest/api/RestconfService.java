@@ -22,8 +22,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.StructuredData;
+import org.opendaylight.controller.sal.restconf.impl.StructuredDataOld;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -94,7 +95,7 @@ public interface RestconfService {
     @Consumes({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData invokeRpc(@Encoded @PathParam("identifier") String identifier, CompositeNode payload,
+    public StructuredDataOld invokeRpc(@Encoded @PathParam("identifier") String identifier, CompositeNode payload,
             @Context UriInfo uriInfo);
 
     @POST
@@ -102,7 +103,7 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public StructuredData invokeRpc(@Encoded @PathParam("identifier") String identifier,
+    public StructuredDataOld invokeRpc(@Encoded @PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
 
     @GET
@@ -123,19 +124,19 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
+    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNode<?,?> payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, Node<?> payload);
+    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNode<?,?> payload);
 
     @POST
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(Node<?> payload);
+    public Response createConfigurationData(NormalizedNode<?,?> payload);
 
     @DELETE
     @Path("/config/{identifier:.+}")
