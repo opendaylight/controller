@@ -26,7 +26,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -51,7 +51,7 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierList() throws FileNotFoundException {
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:userWithoutClass/foo");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "userWithoutClass");
 
@@ -80,7 +80,7 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierContainer() throws FileNotFoundException {
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users");
+        InstanceIdentifierContext instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "users");
         assertTrue(instanceIdentifier.getSchemaNode() instanceof ContainerSchemaNode);
         assertEquals(2, ((ContainerSchemaNode) instanceIdentifier.getSchemaNode()).getChildNodes().size());
@@ -88,7 +88,7 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierChoice() throws FileNotFoundException {
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:food/nonalcoholic");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "nonalcoholic");
     }
@@ -120,7 +120,7 @@ public class URITest {
     @Test
     public void testMountPointWithExternModul() throws FileNotFoundException {
         initMountService(true);
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
         assertEquals(
                 "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
@@ -130,7 +130,7 @@ public class URITest {
     @Test
     public void testMountPointWithoutExternModul() throws FileNotFoundException {
         initMountService(true);
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/");
         assertTrue(Iterables.isEmpty(instanceIdentifier.getInstanceIdentifier().getPathArguments()));
     }
@@ -140,7 +140,7 @@ public class URITest {
         exception.expect(RestconfDocumentedException.class);
 
         controllerContext.setMountService(null);
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
     }
 
@@ -149,7 +149,7 @@ public class URITest {
         initMountService(false);
         exception.expect(RestconfDocumentedException.class);
 
-        InstanceIdWithSchemaNode instanceIdentifier = controllerContext
+        InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class");
     }
 

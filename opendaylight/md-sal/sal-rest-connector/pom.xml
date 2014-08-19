@@ -118,6 +118,11 @@
       <artifactId>yang-data-composite-node</artifactId>
       <version>0.6.2-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-codec-gson</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>
