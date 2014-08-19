@@ -118,15 +118,19 @@ public class ControllerContext implements SchemaContextListener {
         this.onGlobalContextUpdated(schemas);
     }
 
-    public InstanceIdWithSchemaNode toInstanceIdentifier(final String restconfInstance) {
+    public InstanceIdentifierContext toInstanceIdentifier(final String restconfInstance) {
         return this.toIdentifier(restconfInstance, false);
     }
 
-    public InstanceIdWithSchemaNode toMountPointIdentifier(final String restconfInstance) {
+    public SchemaContext getGlobalSchema() {
+        return globalSchema;
+    }
+
+    public InstanceIdentifierContext toMountPointIdentifier(final String restconfInstance) {
         return this.toIdentifier(restconfInstance, true);
     }
 
-    private InstanceIdWithSchemaNode toIdentifier(final String restconfInstance, final boolean toMountPointIdentifier) {
+    private InstanceIdentifierContext toIdentifier(final String restconfInstance, final boolean toMountPointIdentifier) {
         this.checkPreconditions();
 
         final List<String> pathArgs = urlPathArgsDecode(SLASH_SPLITTER.split(restconfInstance));
@@ -144,7 +148,7 @@ public class ControllerContext implements SchemaContextListener {
 
         InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
         Module latestModule = globalSchema.findModuleByName(startModule, null);
-        InstanceIdWithSchemaNode iiWithSchemaNode = this.collectPathArguments(builder, pathArgs, latestModule, null,
+        InstanceIdentifierContext iiWithSchemaNode = this.collectPathArguments(builder, pathArgs, latestModule, null,
                 toMountPointIdentifier);
 
         if (iiWithSchemaNode == null) {
@@ -462,7 +466,7 @@ public class ControllerContext implements SchemaContextListener {
         return object == null ? "" : URLEncoder.encode(object.toString(), ControllerContext.URI_ENCODING_CHAR_SET);
     }
 
-    private InstanceIdWithSchemaNode collectPathArguments(final InstanceIdentifierBuilder builder,
+    private InstanceIdentifierContext collectPathArguments(final InstanceIdentifierBuilder builder,
             final List<String> strings, final DataNodeContainer parentNode, final DOMMountPoint mountPoint,
             final boolean returnJustMountPoint) {
         Preconditions.<List<String>> checkNotNull(strings);
@@ -472,7 +476,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         if (strings.isEmpty()) {
-            return new InstanceIdWithSchemaNode(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint);
+            return new InstanceIdentifierContext(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
         }
 
         String head = strings.iterator().next();
@@ -511,12 +515,12 @@ public class ControllerContext implements SchemaContextListener {
 
                 if (returnJustMountPoint) {
                     YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
-                    return new InstanceIdWithSchemaNode(instance, mountPointSchema, mount);
+                    return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
                 }
 
                 if (strings.size() == 1) {
                     YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
-                    return new InstanceIdWithSchemaNode(instance, mountPointSchema, mount);
+                    return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
                 }
 
                 final String moduleNameBehindMountPoint = toModuleName(strings.get(1));
@@ -632,7 +636,7 @@ public class ControllerContext implements SchemaContextListener {
                     returnJustMountPoint);
         }
 
-        return new InstanceIdWithSchemaNode(builder.toInstance(), targetNode, mountPoint);
+        return new InstanceIdentifierContext(builder.toInstance(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
     }
 
     public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,
