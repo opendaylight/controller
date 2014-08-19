@@ -15,7 +15,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,7 +31,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -205,7 +203,7 @@ public class RestconfImpl implements RestconfService {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdWithSchemaNode mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             modules = this.controllerContext.getAllModules(mountPoint);
         } else {
@@ -236,7 +234,7 @@ public class RestconfImpl implements RestconfService {
         Module module = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdWithSchemaNode mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             module = this.controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
         } else {
@@ -267,7 +265,7 @@ public class RestconfImpl implements RestconfService {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            InstanceIdWithSchemaNode mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
+            InstanceIdentifierContext mountPointIdentifier = this.controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             modules = this.controllerContext.getAllModules(mountPoint);
         } else {
@@ -518,7 +516,7 @@ public class RestconfImpl implements RestconfService {
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
             // mounted RPC call - look up mount instance.
-            InstanceIdWithSchemaNode mountPointId = controllerContext.toMountPointIdentifier(identifier);
+            InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointId.getMountPoint();
 
             int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
@@ -615,8 +613,8 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData readConfigurationData(final String identifier, final UriInfo uriInfo) {
-        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
+    public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
@@ -628,12 +626,7 @@ public class RestconfImpl implements RestconfService {
             normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
             data = broker.readConfigurationData(normalizedII);
         }
-
-        final CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
-        final CompositeNode prunedCompositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(uriInfo));
-
-        final boolean prettyPrintMode = parsePrettyPrintParameter(uriInfo);
-        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
+        return new NormalizedNodeContext(iiWithData, data);
     }
 
     @SuppressWarnings("unchecked")
@@ -679,8 +672,8 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData readOperationalData(final String identifier, final UriInfo info) {
-        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
+    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         YangInstanceIdentifier normalizedII;
@@ -693,11 +686,7 @@ public class RestconfImpl implements RestconfService {
             data = broker.readOperationalData(normalizedII);
         }
 
-        final CompositeNode compositeNode = datastoreNormalizedNodeToCompositeNode(data, iiWithData.getSchemaNode());
-        final CompositeNode prunedCompositeNode = pruneDataAtDepth(compositeNode, parseDepthParameter(info));
-
-        final boolean prettyPrintMode = parsePrettyPrintParameter(info);
-        return new StructuredData(prunedCompositeNode, iiWithData.getSchemaNode(), mountPoint, prettyPrintMode);
+        return new NormalizedNodeContext(iiWithData, data);
     }
 
     private boolean parsePrettyPrintParameter(final UriInfo info) {
@@ -707,7 +696,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response updateConfigurationData(final String identifier, final Node<?> payload) {
-        final InstanceIdWithSchemaNode iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = this.controllerContext.toInstanceIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
 
@@ -774,7 +763,7 @@ public class RestconfImpl implements RestconfService {
      *             if key values or key count in payload and URI isn't equal
      *
      */
-    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdWithSchemaNode iiWithData,
+    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext iiWithData,
             final CompositeNode payload) {
         if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
             final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
@@ -825,7 +814,7 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
         }
 
-        InstanceIdWithSchemaNode iiWithData = null;
+        InstanceIdentifierContext iiWithData = null;
         CompositeNode value = null;
         if (this.representsMountPointRootData(payload)) {
             // payload represents mount point data and URI represents path to the mount point
@@ -841,7 +830,7 @@ public class RestconfImpl implements RestconfService {
 
             value = this.normalizeNode(payload, iiWithData.getSchemaNode(), iiWithData.getMountPoint());
         } else {
-            final InstanceIdWithSchemaNode incompleteInstIdWithData = this.controllerContext
+            final InstanceIdentifierContext incompleteInstIdWithData = this.controllerContext
                     .toInstanceIdentifier(identifier);
             final DataNodeContainer parentSchema = (DataNodeContainer) incompleteInstIdWithData.getSchemaNode();
             DOMMountPoint mountPoint = incompleteInstIdWithData.getMountPoint();
@@ -856,7 +845,7 @@ public class RestconfImpl implements RestconfService {
                     parentSchema, payloadName, module.getNamespace());
             value = this.normalizeNode(payload, schemaNode, mountPoint);
 
-            iiWithData = addLastIdentifierFromData(incompleteInstIdWithData, value, schemaNode);
+            iiWithData = addLastIdentifierFromData(incompleteInstIdWithData, value, schemaNode,incompleteInstIdWithData.getSchemaContext());
         }
 
         final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value,
@@ -906,7 +895,7 @@ public class RestconfImpl implements RestconfService {
         final DataSchemaNode schemaNode = ControllerContext.findInstanceDataChildByNameAndNamespace(module,
                 payloadName, module.getNamespace());
         final CompositeNode value = this.normalizeNode(payload, schemaNode, null);
-        final InstanceIdWithSchemaNode iiWithData = this.addLastIdentifierFromData(null, value, schemaNode);
+        final InstanceIdentifierContext iiWithData = this.addLastIdentifierFromData(null, value, schemaNode,ControllerContext.getInstance().getGlobalSchema());
         final NormalizedNode<?, ?> datastoreNormalizedData = compositeNodeToDatastoreNormalizedNode(value, schemaNode);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
@@ -932,7 +921,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
         DOMMountPoint mountPoint = iiWithData.getMountPoint();
         YangInstanceIdentifier normalizedII;
 
@@ -1098,8 +1087,8 @@ public class RestconfImpl implements RestconfService {
         return module;
     }
 
-    private InstanceIdWithSchemaNode addLastIdentifierFromData(final InstanceIdWithSchemaNode identifierWithSchemaNode,
-            final CompositeNode data, final DataSchemaNode schemaOfData) {
+    private InstanceIdentifierContext addLastIdentifierFromData(final InstanceIdentifierContext identifierWithSchemaNode,
+            final CompositeNode data, final DataSchemaNode schemaOfData, SchemaContext schemaContext) {
         YangInstanceIdentifier instanceIdentifier = null;
         if (identifierWithSchemaNode != null) {
             instanceIdentifier = identifierWithSchemaNode.getInstanceIdentifier();
@@ -1122,11 +1111,12 @@ public class RestconfImpl implements RestconfService {
 
         YangInstanceIdentifier instance = iiBuilder.toInstance();
         DOMMountPoint mountPoint = null;
+        SchemaContext schemaCtx = null;
         if (identifierWithSchemaNode != null) {
             mountPoint = identifierWithSchemaNode.getMountPoint();
         }
 
-        return new InstanceIdWithSchemaNode(instance, schemaOfData, mountPoint);
+        return new InstanceIdentifierContext(instance, schemaOfData, mountPoint,schemaContext);
     }
 
     private HashMap<QName, Object> resolveKeysFromData(final ListSchemaNode listNode, final CompositeNode dataNode) {
@@ -1514,16 +1504,16 @@ public class RestconfImpl implements RestconfService {
                 "It wasn't possible to translate specified data to datastore readable form."));
     }
 
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdWithSchemaNode iiWithSchemaNode) {
+    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
+            final InstanceIdentifierContext iiWithSchemaNode) {
         return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
     }
 
-    private InstanceIdWithSchemaNode normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdWithSchemaNode iiWithSchemaNode, final boolean unwrapLastListNode) {
-        return new InstanceIdWithSchemaNode(instanceIdentifierToReadableFormForNormalizeNode(
+    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
+            final InstanceIdentifierContext iiWithSchemaNode, final boolean unwrapLastListNode) {
+        return new InstanceIdentifierContext(instanceIdentifierToReadableFormForNormalizeNode(
                 iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
-                iiWithSchemaNode.getMountPoint());
+                iiWithSchemaNode.getMountPoint(),iiWithSchemaNode.getSchemaContext());
     }
 
     private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(
