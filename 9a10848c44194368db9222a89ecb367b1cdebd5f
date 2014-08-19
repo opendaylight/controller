@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e0051a11",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-19T01:36:13Z",
+      "side": 1,
+      "message": "I actually don\u0027t need to log it all since the ex will be propagated to the CommitCoordinationTask in md-sal core which will log it. However invalid response type should never occur so it really doesn\u0027t matter if it\u0027s redundantly logged. So, if you agree, I think we can leave it as is.",
+      "parentUuid": "fa82b9bf_b5667628",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5575aac8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 6
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f504fe18",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-19T01:36:13Z",
+      "side": 1,
+      "message": "I logged this as debug, not error, to avoid flooding the log with redundant errors when attempting to abort. If we\u0027re aborting, it\u0027s b/c of another exception that has already been logged.  Most likely abort would fail with an exception if the remote node is down which also would have been the cause of the original exception. So the intent of propagateException \u003d\u003d false is to essentially ignore it, i.e. not propagate to the caller and not log it normally (hence debug). Do you agree with my reasoning?",
+      "parentUuid": "fa82b9bf_f57f1ea9",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1543a2af",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 6
@@ -64,6 +100,24 @@
       "writtenOn": "2014-08-19T00:14:42Z",
       "side": 1,
       "message": "Instead of null, use ActorRef.noSender()",
+      "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e02c3a9b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-19T01:36:13Z",
+      "side": 1,
+      "message": "OK - I actually copied this from somewhere else. The akka javadocs are inconsistent about this - the docs for \u0027tell\u0027 says \"pass null if there is nobody to reply to\" however the docs for \u0027noSender\u0027 say to use that for \u0027tell\u0027. Oh well, I\u0027ll change to noSender().",
+      "parentUuid": "fa82b9bf_1543a2af",
       "revId": "9a10848c44194368db9222a89ecb367b1cdebd5f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
