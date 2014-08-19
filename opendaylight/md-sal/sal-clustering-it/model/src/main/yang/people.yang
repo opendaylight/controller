@@ -1,0 +1,84 @@
+module people {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:people";
+
+    prefix people;
+
+	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	  import car { prefix "car"; revision-date 2014-08-18; }
+	
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for person for test application";
+
+    revision "2014-08-18" {
+      description
+        "MD-SAL sample app";
+    }
+    
+    typedef person-id {
+      type inet:uri;
+      description "An identifier for person.";
+    }
+
+    grouping person {
+      description "Describes the details of the person";
+
+      leaf id {
+        type person-id;
+        description "identifier of single list of entries.";
+      }
+
+      leaf gender {
+        type string;
+      }
+
+      leaf age {
+        type uint32;
+      }
+
+      leaf address {
+        type string;
+      }
+
+      leaf contactNo {
+        type string;
+      }
+    }
+    
+    container people {
+      description
+        "Top-level container for all people";
+
+      list person {
+      	key "id";
+      	description "A list of people (as defined by the 'grouping person').";
+      	uses person;
+      }
+    }
+
+    rpc add-person {
+      description
+        "Add a person entry into database";
+      input {
+        uses person;
+      }
+    }
+
+    rpc buy-car {
+      description
+        "buy a new car";
+      input {
+        leaf car-id {
+          type car:car-id;
+          description "identifier of single list of entries.";
+        }
+      }
+    }
+}
