@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Charsets;
-import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -23,45 +22,42 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
+import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.JSON, Draft02.MediaTypes.DATA + RestconfService.JSON,
     Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
-public enum StructuredDataToJsonProvider implements MessageBodyWriter<StructuredData> {
-    INSTANCE;
+public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<NormalizedNodeContext> {
 
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
-        return type.equals(StructuredData.class);
+        return type.equals(NormalizedNodeContext.class);
     }
 
     @Override
-    public long getSize(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
+    public long getSize(final NormalizedNodeContext t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public void writeTo(final StructuredData t, final Class<?> type, final Type genericType, final Annotation[] annotations,
+    public void writeTo(final NormalizedNodeContext t, final Class<?> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
                     throws IOException, WebApplicationException {
-        CompositeNode data = t.getData();
-        if (data == null) {
+        if (t.getData() == null) {
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-        JsonWriter writer = new JsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
+        InstanceIdentifierContext pathContext = t.getInstanceIdentifierContext();
+        OutputStreamWriter ouWriter = new OutputStreamWriter(entityStream, Charsets.UTF_8);
+        NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(pathContext.getSchemaContext(),ouWriter);
+        NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
 
-        if (t.isPrettyPrintMode()) {
-            writer.setIndent("    ");
-        } else {
-            writer.setIndent("");
-        }
-        JsonMapper jsonMapper = new JsonMapper(t.getMountPoint());
-        jsonMapper.write(writer, data, (DataNodeContainer) t.getSchema());
-        writer.flush();
+        nnWriter.write(t.getData());
+        nnWriter.flush();
     }
 }
