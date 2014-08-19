@@ -17,7 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdWithSchemaNode;
+import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -36,7 +36,7 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
 
     @Test
     public void augmentedNodesInUri() {
-        InstanceIdWithSchemaNode iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-a:cont1");
+        InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-a:cont1");
         assertEquals("ns:augment:main:a", iiWithData.getSchemaNode().getQName().getNamespace().toString());
         iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-b:cont1");
         assertEquals("ns:augment:main:b", iiWithData.getSchemaNode().getQName().getNamespace().toString());
