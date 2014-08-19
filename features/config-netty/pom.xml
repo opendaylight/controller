@@ -45,6 +45,14 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-netty-config</artifactId>
+      <!-- 
+        note, the reason the type and classifier
+        are here instead of in opendaylight/commons/opendaylight/pom.xml
+        is because they are used as jars in distribution.
+      -->
+      <version>${config.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <!-- test to validate features.xml -->
     <dependency>
