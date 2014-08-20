@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.util;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,10 @@ public class TestingConfigTransactionController implements
         ConfigTransactionControllerMXBean {
 
     public final ObjectName conf1, conf2, conf3;
+    public ObjectName conf4;
+    public String check;
+    Map<String, ObjectName> mapSub;
+    Map<String, Map<String, ObjectName>> map;
 
     public static final String moduleName1 = "moduleA";
     public static final String moduleName2 = "moduleB";
@@ -42,17 +47,29 @@ public class TestingConfigTransactionController implements
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + moduleName2 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
                 + "=" + instName2);
+        conf4 = ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
+                + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
+                + "=" + moduleName2 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
+                + "=" + instName2);
+        mapSub = new HashMap<String, ObjectName>();
+        map = new HashMap<String, Map<String,ObjectName>>();
     }
 
     @Override
     public ObjectName createModule(String moduleName, String instanceName)
             throws InstanceAlreadyExistsException {
-        return null;
+        //return null;
+        return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
+                + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
+                + "=" + moduleName);
     }
 
     @Override
     public void destroyModule(ObjectName objectName)
             throws InstanceNotFoundException {
+        if(objectName != null){
+            conf4 = null;
+        }
     }
 
     @Override
@@ -65,7 +82,8 @@ public class TestingConfigTransactionController implements
 
     @Override
     public String getTransactionName() {
-        return null;
+        //return null;
+        return "transactionName";
     }
 
     @Override
@@ -113,66 +131,69 @@ public class TestingConfigTransactionController implements
 
     @Override
     public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        check = "configBeanExists";
     }
 
     @Override
     public ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return moduleON;
     }
 
     @Override
     public void removeServiceReference(String serviceInterfaceName, String refName) {
-        throw new UnsupportedOperationException();
+        check = refName;
     }
 
     @Override
     public void removeAllServiceReferences() {
-        throw new UnsupportedOperationException();
+        check = null;
     }
 
     @Override
     public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
-        throw new UnsupportedOperationException();
+        return conf3;
     }
 
     @Override
     public Map<String, Map<String, ObjectName>> getServiceMapping() {
-        throw new UnsupportedOperationException();
+        mapSub.put("A",conf2);
+        map.put("AA", mapSub);
+        return map;
     }
 
     @Override
     public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
-        throw new UnsupportedOperationException();
+        mapSub.put("A",conf2);
+        return mapSub;
     }
 
     @Override
     public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return Sets.newHashSet("setA");
     }
 
     @Override
     public String getServiceInterfaceName(String namespace, String localName) {
-        throw new UnsupportedOperationException();
+        return check=namespace+localName;
     }
 
     @Override
     public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
-        throw new UnsupportedOperationException();
+        return Sets.newHashSet("availableModuleFactoryQNames");
     }
 
     @Override
     public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return conf3;
     }
 
     @Override
     public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        check = "referenceExist";
     }
 }
