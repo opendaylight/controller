@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import com.google.common.collect.ImmutableList;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -48,17 +50,17 @@ public class NetconfClientSessionNegotiator extends
 
     private static final String EXI_1_0_CAPABILITY_MARKER = "exi:1.0";
 
-    protected NetconfClientSessionNegotiator(NetconfClientSessionPreferences sessionPreferences,
-                                             Promise<NetconfClientSession> promise,
-                                             Channel channel,
-                                             Timer timer,
-                                             NetconfClientSessionListener sessionListener,
-                                             long connectionTimeoutMillis) {
+    protected NetconfClientSessionNegotiator(final NetconfClientSessionPreferences sessionPreferences,
+                                             final Promise<NetconfClientSession> promise,
+                                             final Channel channel,
+                                             final Timer timer,
+                                             final NetconfClientSessionListener sessionListener,
+                                             final long connectionTimeoutMillis) {
         super(sessionPreferences, promise, channel, timer, sessionListener, connectionTimeoutMillis);
     }
 
     @Override
-    protected void handleMessage(NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
+    protected void handleMessage(final NetconfHelloMessage netconfMessage) throws NetconfDocumentedException {
         final NetconfClientSession session = getSessionForHelloMessage(netconfMessage);
         replaceHelloMessageInboundHandler(session);
 
@@ -98,7 +100,7 @@ public class NetconfClientSessionNegotiator extends
         });
     }
 
-    private boolean shouldUseExi(NetconfHelloMessage helloMsg) {
+    private boolean shouldUseExi(final NetconfHelloMessage helloMsg) {
         return containsExi10Capability(helloMsg.getDocument())
                 && containsExi10Capability(sessionPreferences.getHelloMessage().getDocument());
     }
@@ -113,7 +115,7 @@ public class NetconfClientSessionNegotiator extends
         return false;
     }
 
-    private long extractSessionId(Document doc) {
+    private long extractSessionId(final Document doc) {
         final Node sessionIdNode = (Node) XmlUtil.evaluateXPath(sessionIdXPath, doc, XPathConstants.NODE);
         String textContent = sessionIdNode.getTextContent();
         if (textContent == null || textContent.equals("")) {
@@ -124,10 +126,14 @@ public class NetconfClientSessionNegotiator extends
     }
 
     @Override
-    protected NetconfClientSession getSession(NetconfClientSessionListener sessionListener, Channel channel,
-            NetconfHelloMessage message) throws NetconfDocumentedException {
+    protected NetconfClientSession getSession(final NetconfClientSessionListener sessionListener, final Channel channel,
+            final NetconfHelloMessage message) throws NetconfDocumentedException {
         long sessionId = extractSessionId(message.getDocument());
-        Collection<String> capabilities = NetconfMessageUtil.extractCapabilitiesFromHello(message.getDocument());
+
+        // Copy here is important: it disconnects the strings from the document
+        Collection<String> capabilities = ImmutableList.copyOf(NetconfMessageUtil.extractCapabilitiesFromHello(message.getDocument()));
+
+        // FIXME: scalability: we could instantiate a cache to share the same collections
         return new NetconfClientSession(sessionListener, channel, sessionId, capabilities);
     }
 
@@ -138,15 +144,15 @@ public class NetconfClientSessionNegotiator extends
         private static final String EXI_CONFIRMED_HANDLER = "exiConfirmedHandler";
 
         private final NetconfClientSession session;
-        private NetconfStartExiMessage startExiMessage;
+        private final NetconfStartExiMessage startExiMessage;
 
-        ExiConfirmationInboundHandler(NetconfClientSession session, final NetconfStartExiMessage startExiMessage) {
+        ExiConfirmationInboundHandler(final NetconfClientSession session, final NetconfStartExiMessage startExiMessage) {
             this.session = session;
             this.startExiMessage = startExiMessage;
         }
 
         @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
             ctx.pipeline().remove(ExiConfirmationInboundHandler.EXI_CONFIRMED_HANDLER);
 
             NetconfMessage netconfMessage = (NetconfMessage) msg;

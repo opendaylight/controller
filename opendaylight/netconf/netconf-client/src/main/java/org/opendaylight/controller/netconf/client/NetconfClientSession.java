@@ -9,7 +9,9 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
+
 import java.util.Collection;
+
 import org.opendaylight.controller.netconf.nettyutil.AbstractNetconfSession;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXICodec;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfEXIToMessageDecoder;
@@ -24,8 +26,16 @@ public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSe
     private static final Logger logger = LoggerFactory.getLogger(NetconfClientSession.class);
     private final Collection<String> capabilities;
 
-    public NetconfClientSession(NetconfClientSessionListener sessionListener, Channel channel, long sessionId,
-            Collection<String> capabilities) {
+    /**
+     * Construct a new session.
+     *
+     * @param sessionListener
+     * @param channel
+     * @param sessionId
+     * @param capabilities set of advertised capabilities. Expected to be immutable.
+     */
+    public NetconfClientSession(final NetconfClientSessionListener sessionListener, final Channel channel, final long sessionId,
+            final Collection<String> capabilities) {
         super(sessionListener, channel, sessionId);
         this.capabilities = capabilities;
         logger.debug("Client Session {} created", toString());
@@ -41,7 +51,7 @@ public class NetconfClientSession extends AbstractNetconfSession<NetconfClientSe
     }
 
     @Override
-    protected void addExiHandlers(NetconfEXICodec exiCodec) {
+    protected void addExiHandlers(final NetconfEXICodec exiCodec) {
         // TODO used only in negotiator, client supports only auto start-exi
         replaceMessageDecoder(new NetconfEXIToMessageDecoder(exiCodec));
         replaceMessageEncoder(new NetconfMessageToEXIEncoder(exiCodec));
