@@ -59,4 +59,54 @@ public class ConfigTransactionClientsTest {
         assertEquals(3, beans.size());
         return beans;
     }
+    
+    @Test
+    public void testGetObjectName() throws Exception {    	
+    	testClientGetObjectName(jmxTransactionClient);
+    	assertEquals(testClientGetObjectName(jmxTransactionClient), true);
+    }
+    
+    private boolean testClientGetObjectName(ConfigTransactionClient client){
+    	return transactionControllerON.equals(client.getObjectName());    
+    }
+    
+    @Test
+    public void testGetAvailableModuleNames() throws Exception {
+    	Set<String> jmxMN = testClientGetAvailableModuleNames(jmxTransactionClient);    	
+    	assertEquals(null, jmxMN);
+    }
+    
+    private Set<String> testClientGetAvailableModuleNames(ConfigTransactionClient client){
+    	Set<String> moduleNames = client.getAvailableModuleNames();
+    	if(moduleNames != null){
+    		for(String str : moduleNames){
+        		assertEquals(null, str);
+        	}
+    	}    	
+    	return client.getAvailableModuleNames();    	
+    }
+     
+    @Test
+    public void testGetTransactionName() throws Exception {
+    	String jmxTN = testClientGetTransactionName(jmxTransactionClient);
+    	assertEquals(null, jmxTN);
+    }
+    
+    private String testClientGetTransactionName(ConfigTransactionClient client){
+    	return client.getTransactionName();    	
+    }
+    
+    @Ignore
+    public void testGetVersion() throws Exception {
+    	long jmxVersion = jmxTransactionClient.getVersion();
+    	assertEquals((Long)null, (Long)jmxVersion);    	
+    }
+    
+    @Ignore
+    public void testGetParentVersion() throws Exception {
+    	long jmxParentVersion = jmxTransactionClient.getParentVersion();
+    	assertEquals((Long)null, (Long)jmxParentVersion);    	
+    }
+    
+    
 }
