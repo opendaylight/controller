@@ -39,26 +39,26 @@
     <clustering.test.version>0.4.2-SNAPSHOT</clustering.test.version>
     <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
     <!-- Third Party Versions -->
-    <commons.catalina>7.0.32.v201211201336</commons.catalina>
-    <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
-    <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
+    <commons.catalina>7.0.47.v201312051530</commons.catalina>
+    <commons.catalina.ha>7.0.47.v201312060745</commons.catalina.ha>
+    <commons.catalina.tribes>7.0.47.v201312060745</commons.catalina.tribes>
     <commons.checkstyle.version>0.0.3-SNAPSHOT</commons.checkstyle.version>
-    <commons.coyote>7.0.32.v201211201952</commons.coyote>
-    <commons.el>7.0.32.v201211081135</commons.el>
+    <commons.coyote>7.0.47.v201312060745</commons.coyote>
+    <commons.el>7.0.47.v201312021000</commons.el>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <commons.io.version>2.4</commons.io.version>
-    <commons.jasper>7.0.32.v201211201952</commons.jasper>
-    <commons.juli.version>7.0.32.v201211081135</commons.juli.version>
+    <commons.jasper>7.0.47.v201312060745</commons.jasper>
+    <commons.juli.version>7.0.47.v201312021000</commons.juli.version>
     <commons.lang3.version>3.1</commons.lang3.version>
     <commons.logback_settings.version>0.0.2-SNAPSHOT</commons.logback_settings.version>
     <commons.net.version>3.0.1</commons.net.version>
     <commons.opendaylight.commons.httpclient>0.1.2-SNAPSHOT</commons.opendaylight.commons.httpclient>
     <commons.opendaylight.concepts.version>0.5.2-SNAPSHOT</commons.opendaylight.concepts.version>
     <commons.opendaylight.version>1.4.2-SNAPSHOT</commons.opendaylight.version>
+    <commons.tomcat.api>7.0.47.v201312061105</commons.tomcat.api>
+    <commons.tomcat.util>7.0.47.v201312060745</commons.tomcat.util>
     <commons.parent.version>1.0.2-SNAPSHOT</commons.parent.version>
-    <commons.tomcat.api>7.0.32.v201211081135</commons.tomcat.api>
-    <commons.tomcat.util>7.0.32.v201211201952</commons.tomcat.util>
     <compiler.version>2.3.2</compiler.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.2-SNAPSHOT</concepts.version>
