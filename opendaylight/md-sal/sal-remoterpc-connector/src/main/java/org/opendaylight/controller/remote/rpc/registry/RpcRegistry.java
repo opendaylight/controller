@@ -60,6 +60,8 @@ public class RpcRegistry extends UntypedActor {
 
     public RpcRegistry() {
         bucketStore = getContext().actorOf(Props.create(BucketStore.class), "store");
+
+        log.info("Bucket store path = {}", bucketStore.path().toString());
     }
 
     public RpcRegistry(ActorRef bucketStore) {

@@ -15,6 +15,7 @@ import akka.actor.UntypedActor;
 import akka.cluster.Cluster;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import org.opendaylight.controller.utils.ConditionalProbe;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +72,8 @@ public class BucketStore extends UntypedActor {
      */
     private ActorRef gossiper;
 
+    private ConditionalProbe probe;
+
     public BucketStore(){
         gossiper = getContext().actorOf(Props.create(Gossiper.class), "gossiper");
     }
@@ -88,27 +91,32 @@ public class BucketStore extends UntypedActor {
     @Override
     public void onReceive(Object message) throws Exception {
 
-        log.debug("Received message: node[{}], message[{}]", selfAddress, message);
+        log.debug("Received message: node[{}], message[{}]", selfAddress,
+            message);
 
-        if (message instanceof UpdateBucket)
+        if (probe != null) {
+
+            probe.tell(message, getSelf());
+        }
+
+        if (message instanceof ConditionalProbe) {
+            log.info("Received probe {} {}", getSelf(), message);
+            probe = (ConditionalProbe) message;
+        } else if (message instanceof UpdateBucket) {
             receiveUpdateBucket(((UpdateBucket) message).getBucket());
-
-        else if (message instanceof GetAllBuckets)
+        } else if (message instanceof GetAllBuckets) {
             receiveGetAllBucket();
-
-        else if (message instanceof GetLocalBucket)
+        } else if (message instanceof GetLocalBucket) {
             receiveGetLocalBucket();
-
-        else if (message instanceof GetBucketsByMembers)
-            receiveGetBucketsByMembers(((GetBucketsByMembers) message).getMembers());
-
-        else if (message instanceof GetBucketVersions)
+        } else if (message instanceof GetBucketsByMembers) {
+            receiveGetBucketsByMembers(
+                ((GetBucketsByMembers) message).getMembers());
+        } else if (message instanceof GetBucketVersions) {
             receiveGetBucketVersions();
-
-        else if (message instanceof UpdateRemoteBuckets)
-            receiveUpdateRemoteBuckets(((UpdateRemoteBuckets) message).getBuckets());
-
-        else {
+        } else if (message instanceof UpdateRemoteBuckets) {
+            receiveUpdateRemoteBuckets(
+                ((UpdateRemoteBuckets) message).getBuckets());
+        } else {
             log.debug("Unhandled message [{}]", message);
             unhandled(message);
         }
@@ -270,4 +278,5 @@ public class BucketStore extends UntypedActor {
     Address getSelfAddress() {
         return selfAddress;
     }
+
 }
