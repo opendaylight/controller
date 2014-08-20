@@ -8,6 +8,7 @@ import akka.actor.ChildActorPath;
 import akka.actor.Props;
 import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
+import com.google.common.base.Predicate;
 import com.typesafe.config.ConfigFactory;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -16,22 +17,26 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages;
+import org.opendaylight.controller.utils.ConditionalProbe;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.assertNotNull;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
-import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRoutersReply;
+import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import static org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 
 public class RpcRegistryTest {
@@ -46,7 +51,6 @@ public class RpcRegistryTest {
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        Thread.sleep(1000); //give some time for previous test to close netty ports
         node1 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberA"));
         node2 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberB"));
         node3 = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("memberC"));
@@ -96,29 +100,29 @@ public class RpcRegistryTest {
 
         final JavaTestKit mockBroker = new JavaTestKit(node1);
 
+        final ActorPath bucketStorePath = new ChildActorPath(registry1.path(), "store");
+        final JavaTestKit probe = createProbeForMessage(node1, bucketStorePath,
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+
         //Add rpc on node 1
         registry1.tell(new SetLocalRouter(mockBroker.getRef()), mockBroker.getRef());
         registry1.tell(getAddRouteMessage(), mockBroker.getRef());
 
-        Thread.sleep(1000);//
-
-        //find the route on node 1's registry
-        registry1.tell(new FindRouters(createRouteId()), mockBroker.getRef());
-        FindRoutersReply message = mockBroker.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
-        List<Pair<ActorRef, Long>> pairs = message.getRouterWithUpdateTime();
-
-        validateRouterReceived(pairs, mockBroker.getRef());
+        probe.expectMsgClass(
+            FiniteDuration.apply(10, TimeUnit.SECONDS),
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
 
         //Now remove rpc
         registry1.tell(getRemoveRouteMessage(), mockBroker.getRef());
-        Thread.sleep(1000);
-        //find the route on node 1's registry
-        registry1.tell(new FindRouters(createRouteId()), mockBroker.getRef());
-        message = mockBroker.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
-        pairs = message.getRouterWithUpdateTime();
 
-        Assert.assertTrue(pairs.isEmpty());
+        probe.expectMsgClass(
+            FiniteDuration.apply(10, TimeUnit.SECONDS),
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+
+
     }
+
+
 
     /**
      * Three node cluster.
@@ -134,32 +138,28 @@ public class RpcRegistryTest {
         validateSystemStartup();
 
         final JavaTestKit mockBroker1 = new JavaTestKit(node1);
-        final JavaTestKit mockBroker2 = new JavaTestKit(node2);
-        final JavaTestKit mockBroker3 = new JavaTestKit(node3);
+
+        final ActorPath bucketStorePath = new ChildActorPath(registry2.path(), "store");
+        final JavaTestKit probe = createProbeForMessage(node2, bucketStorePath,
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+
 
         //Add rpc on node 1
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
         registry1.tell(getAddRouteMessage(), mockBroker1.getRef());
 
-        Thread.sleep(1000);// give some time for bucket store data sync
 
-        //find the route in node 2's registry
-        List<Pair<ActorRef, Long>> pairs = findRouters(registry2, mockBroker2);
-        validateRouterReceived(pairs, mockBroker1.getRef());
-
-        //find the route in node 3's registry
-        pairs = findRouters(registry3, mockBroker3);
-        validateRouterReceived(pairs, mockBroker1.getRef());
+        probe.expectMsgClass(
+            FiniteDuration.apply(10, TimeUnit.SECONDS),
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
 
         //Now remove
         registry1.tell(getRemoveRouteMessage(), mockBroker1.getRef());
-        Thread.sleep(1000);// give some time for bucket store data sync
 
-        pairs = findRouters(registry2, mockBroker2);
-        Assert.assertTrue(pairs.isEmpty());
+        probe.expectMsgClass(
+            FiniteDuration.apply(10, TimeUnit.SECONDS),
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
 
-        pairs = findRouters(registry3, mockBroker3);
-        Assert.assertTrue(pairs.isEmpty());
     }
 
     /**
@@ -177,7 +177,10 @@ public class RpcRegistryTest {
         final JavaTestKit mockBroker2 = new JavaTestKit(node2);
         final JavaTestKit mockBroker3 = new JavaTestKit(node3);
 
-        //Thread.sleep(5000);//let system come up
+        final ActorPath bucketStorePath = new ChildActorPath(registry2.path(), "store");
+        final JavaTestKit probe = createProbeForMessage(node2, bucketStorePath,
+            Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
+
 
         //Add rpc on node 1
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
@@ -188,16 +191,36 @@ public class RpcRegistryTest {
         registry2.tell(getAddRouteMessage(), mockBroker2.getRef());
 
         registry3.tell(new SetLocalRouter(mockBroker3.getRef()), mockBroker3.getRef());
-        Thread.sleep(1000);// give some time for bucket store data sync
 
-        //find the route in node 3's registry
-        registry3.tell(new FindRouters(createRouteId()), mockBroker3.getRef());
-        FindRoutersReply message = mockBroker3.expectMsgClass(JavaTestKit.duration("10 second"), FindRoutersReply.class);
-        List<Pair<ActorRef, Long>> pairs = message.getRouterWithUpdateTime();
+        Messages.BucketStoreMessages.UpdateRemoteBuckets updateRemoteBuckets =
+            probe.expectMsgClass(
+                FiniteDuration.apply(10, TimeUnit.SECONDS),
+                Messages.BucketStoreMessages.UpdateRemoteBuckets.class);
 
-        validateMultiRouterReceived(pairs, mockBroker1.getRef(), mockBroker2.getRef());
+        assertNotNull(updateRemoteBuckets);
 
     }
+
+    private JavaTestKit createProbeForMessage(ActorSystem node,
+        ActorPath subjectPath, final Class clazz){
+        final JavaTestKit probe = new JavaTestKit(node);
+
+        ConditionalProbe conditionalProbe =
+            new ConditionalProbe(probe.getRef(), new Predicate() {
+                @Override public boolean apply(@Nullable Object input) {
+                    return clazz.equals(input.getClass());
+                }
+            });
+
+
+        ActorSelection subject = node2.actorSelection(subjectPath);
+
+        subject.tell(conditionalProbe, ActorRef.noSender());
+
+        return probe;
+
+    }
+
 
     private List<Pair<ActorRef, Long>> findRouters(ActorRef registry, JavaTestKit receivingActor) throws URISyntaxException {
         registry.tell(new FindRouters(createRouteId()), receivingActor.getRef());
@@ -221,7 +244,6 @@ public class RpcRegistryTest {
 
     private void validateSystemStartup() throws InterruptedException {
 
-        Thread.sleep(5000);
         ActorPath gossiper1Path = new ChildActorPath(new ChildActorPath(registry1.path(), "store"), "gossiper");
         ActorPath gossiper2Path = new ChildActorPath(new ChildActorPath(registry2.path(), "store"), "gossiper");
         ActorPath gossiper3Path = new ChildActorPath(new ChildActorPath(registry3.path(), "store"), "gossiper");
