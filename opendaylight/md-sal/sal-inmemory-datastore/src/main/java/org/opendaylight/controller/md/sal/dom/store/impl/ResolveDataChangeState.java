@@ -136,8 +136,7 @@ final class ResolveDataChangeState {
             return true;
         }
 
-        // FIXME: do we need anything else? If not, flip this to 'false'
-        return true;
+        return false;
     }
 
     /**
