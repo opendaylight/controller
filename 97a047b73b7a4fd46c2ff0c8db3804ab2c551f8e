@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b0d9a158",
+        "filename": "features/base/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-20T20:34:51Z",
+      "side": 1,
+      "message": "Can we put a version here?",
+      "revId": "97a047b73b7a4fd46c2ff0c8db3804ab2c551f8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_50dcd545",
+        "filename": "features/base/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-08-20T20:34:51Z",
+      "side": 1,
+      "message": "And here while we\u0027re at it?",
+      "revId": "97a047b73b7a4fd46c2ff0c8db3804ab2c551f8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
