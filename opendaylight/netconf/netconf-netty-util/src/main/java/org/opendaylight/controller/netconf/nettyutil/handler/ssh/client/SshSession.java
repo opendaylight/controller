@@ -9,8 +9,6 @@
 package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
 import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.StreamGobbler;
-
 import ch.ethz.ssh2.channel.Channel;
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,19 +21,20 @@ import java.io.OutputStream;
 class SshSession implements Closeable {
     private final Session session;
 
-    public SshSession(Session session) {
+    public SshSession(final Session session) {
         this.session = session;
     }
 
-
-    public void startSubSystem(String name) throws IOException {
+    public void startSubSystem(final String name) throws IOException {
         session.startSubSystem(name);
     }
 
     public InputStream getStdout() {
-        return new StreamGobbler(session.getStdout());
+        return session.getStdout();
     }
 
+    // FIXME according to http://www.ganymed.ethz.ch/ssh2/FAQ.html#blocking you should read data from both stdout and stderr to prevent window filling up (since stdout and stderr share a window)
+    // FIXME stdErr is not used anywhere
     public InputStream getStderr() {
         return session.getStderr();
     }
