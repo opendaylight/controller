@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.opendaylight.controller.sal.common.util.Arguments;
 import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -79,6 +80,12 @@ public final class NodeMapping {
     private final static Class<Node> NODE_CLASS = Node.class;
 
     private final static Class<NodeConnector> NODECONNECTOR_CLASS = NodeConnector.class;
+
+    private final static Pattern COLON_NUMBERS_EOL = Pattern.compile(":[0-9]+$");
+
+    private final static Pattern NUMBERS_ONLY = Pattern.compile("[0-9]+");
+
+    private final static Pattern ALL_CHARS_TO_COLON = Pattern.compile("^.*:");
 
     private NodeMapping() {
         throw new UnsupportedOperationException("Utility class. Instantiation is not allowed.");
@@ -182,15 +189,16 @@ public final class NodeMapping {
             return org.opendaylight.controller.sal.core.NodeConnector.SPECIALNODECONNECTORID;
         }
 
-        String nodeConnectorIdStripped = nodeConnectorId.getValue().replaceFirst("^.*:", "");
-        if (nodeConnectorIdStripped.matches("[0-9]+")) {
+        String nodeConnectorIdStripped = ALL_CHARS_TO_COLON.matcher(nodeConnectorId.getValue()).replaceFirst("");
+
+        if (NUMBERS_ONLY.matcher(nodeConnectorIdStripped).matches()) {
             Short nodeConnectorIdVal = null;
             try {
                 nodeConnectorIdVal = Short.valueOf(nodeConnectorIdStripped);
+                return nodeConnectorIdVal;
             } catch (NumberFormatException e) {
-                LOG.warn("nodeConnectorId not supported (short): {}", nodeConnectorIdStripped, e);
+                LOG.warn("nodeConnectorId not supported (long): {}", nodeConnectorIdStripped, e);
             }
-            return nodeConnectorIdVal;
         }
         return nodeConnectorIdStripped;
     }
@@ -198,7 +206,7 @@ public final class NodeMapping {
     public static NodeId toAdNodeId(final NodeConnectorId nodeConnectorId) {
         NodeId nodeId = null;
         if (nodeConnectorId != null) {
-            nodeId = new NodeId(nodeConnectorId.getValue().replaceFirst(":[0-9]+$", ""));
+            nodeId = new NodeId(COLON_NUMBERS_EOL.matcher(nodeConnectorId.getValue()).replaceFirst(""));
         }
         return nodeId;
     }
