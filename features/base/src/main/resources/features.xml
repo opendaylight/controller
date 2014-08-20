@@ -13,6 +13,7 @@
       <feature>base-tomcat</feature>
       <feature>base-netty</feature>
       <feature>base-jersey</feature>
+      <feature>base-jackson</feature>
       <feature>base-spring-security</feature>
    </feature>
    <feature name="base-dummy-console" description="Temporary Dummy Console" version="1.1.0-SNAPSHOT">
@@ -44,7 +45,6 @@
       <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
       <bundle>mvn:com.sun.jersey/jersey-client/${jersey.version}</bundle>
       <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
-      <bundle start="true" start-level="35">mvn:javax.ws.rs/javax.ws.rs-api/2.0</bundle>
    </feature>
    <feature name="base-jersey2-osgi" description="OSGi friendly Jersey" version="${jersey2.publisher.version}">
       <feature>http</feature>
@@ -110,20 +110,21 @@
       <bundle start="true" start-level="35">mvn:orbit/javax.servlet.jsp.jstl/1.2.0.v201105211821</bundle>
       <bundle start="true" start-level="35">mvn:orbit/javax.servlet.jsp.jstl.impl/1.2.0.v201210211230</bundle>
    </feature>
-   <feature name="base-tomcat" description="OpenDaylight Tomcat" version="7.0.32">
+   <feature name="base-tomcat" description="OpenDaylight Tomcat" version="7.0.47">
       <feature>base-gemini-web</feature>
       <feature>base-eclipselink-persistence</feature>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina/7.0.32.v201211201336</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina/${commons.catalina}</bundle>
       <bundle start="true" start-level="35">mvn:geminiweb/org.eclipse.gemini.web.tomcat/${geminiweb.version}</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.ha/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.tribes/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.coyote/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.el/7.0.32.v201211081135</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.jasper/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.juli.extras/7.0.32.v201211081135</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.api/7.0.32.v201211081135</bundle>
-      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.util/7.0.32.v201211201952</bundle>
-      <bundle start="true" start-level="35">wrap:mvn:virgomirror/org.eclipse.jdt.core.compiler.batch/3.8.0.I20120518-2145</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.ha/${commons.catalina.ha}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.catalina.tribes/${commons.catalina.tribes}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.coyote/${commons.coyote}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.el/${commons.el}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.jasper/${commons.jasper}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.juli.extras/${commons.juli.version}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.api/${commons.tomcat.api}</bundle>
+      <bundle start="true" start-level="35">mvn:orbit/org.apache.tomcat.util/${commons.tomcat.util}</bundle>
+      <bundle start="true" >mvn:org.opendaylight.controller/karaf-tomcat-security/${karaf.security.version}</bundle>
+      <bundle start="true" start-level="35">wrap:mvn:virgomirror/org.eclipse.jdt.core.compiler.batch/${eclipse.jdt.core.compiler.batch.version}</bundle>
    </feature>
    <feature name="base-spring" description="Opendaylight Spring Support" version="${spring.version}">
       <bundle>mvn:org.ow2.asm/asm-all/${asm.version}</bundle>

@@ -45,6 +45,7 @@
     <module>opendaylight/connectionmanager/api</module>
     <module>opendaylight/connectionmanager/implementation</module>
     <module>opendaylight/security</module>
+    <module>opendaylight/karaf-tomcat-security</module>
 
     <!-- third-parties uncomment them if you need snapshot version of it -->
     <!-- <module>third-party/openflowj</module> -->
