@@ -295,7 +295,12 @@ public class ShardManager extends AbstractUntypedActor {
             new Function<Throwable, SupervisorStrategy.Directive>() {
                 @Override
                 public SupervisorStrategy.Directive apply(Throwable t) {
-                    LOG.warning("Supervisor Strategy of resume applied {}",t);
+                    StringBuilder sb = new StringBuilder();
+                    for(StackTraceElement element : t.getStackTrace()) {
+                       sb.append("\n\tat ")
+                         .append(element.toString());
+                    }
+                    LOG.warning("Supervisor Strategy of resume applied {}",sb.toString());
                     return SupervisorStrategy.resume();
                 }
             }
