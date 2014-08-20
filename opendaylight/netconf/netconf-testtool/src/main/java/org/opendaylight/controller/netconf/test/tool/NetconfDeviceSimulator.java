@@ -24,7 +24,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
@@ -42,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
@@ -91,7 +91,7 @@ public class NetconfDeviceSimulator implements Closeable {
         this.hashedWheelTimer = hashedWheelTimer;
     }
 
-    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders) {
+    private NetconfServerDispatcher createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi) {
 
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
@@ -108,8 +108,12 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final DefaultCommitNotificationProducer commitNotifier = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
 
+        final Set<String> serverCapabilities = exi
+                ? NetconfServerSessionNegotiatorFactory.DEFAULT_BASE_CAPABILITIES
+                : Sets.newHashSet(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0, XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
+
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, simulatedOperationProvider, idProvider, CONNECTION_TIMEOUT_MILLIS, commitNotifier, new LoggingMonitoringService());
+                hashedWheelTimer, simulatedOperationProvider, idProvider, CONNECTION_TIMEOUT_MILLIS, commitNotifier, new LoggingMonitoringService(), serverCapabilities);
 
         final NetconfServerDispatcher.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcher.ServerChannelInitializer(
                 serverNegotiatorFactory);
@@ -147,7 +151,7 @@ public class NetconfDeviceSimulator implements Closeable {
     public List<Integer> start(final Main.Params params) {
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
-        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders);
+        final NetconfServerDispatcher dispatcher = createDispatcher(moduleBuilders, params.exi);
 
         int currentPort = params.startingPort;
 
