@@ -47,7 +47,10 @@ public class TestingConfigTransactionController implements
     @Override
     public ObjectName createModule(String moduleName, String instanceName)
             throws InstanceAlreadyExistsException {
-        return null;
+        //return null;
+        return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
+                + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
+                + "=" + moduleName);
     }
 
     @Override
@@ -65,7 +68,8 @@ public class TestingConfigTransactionController implements
 
     @Override
     public String getTransactionName() {
-        return null;
+        //return null;
+        return "transactionName";
     }
 
     @Override
