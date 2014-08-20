@@ -187,10 +187,10 @@ public final class NodeMapping {
             Short nodeConnectorIdVal = null;
             try {
                 nodeConnectorIdVal = Short.valueOf(nodeConnectorIdStripped);
+                return nodeConnectorIdVal;
             } catch (NumberFormatException e) {
-                LOG.warn("nodeConnectorId not supported (short): {}", nodeConnectorIdStripped, e);
+                LOG.warn("nodeConnectorId not supported (long): {}", nodeConnectorIdStripped, e);
             }
-            return nodeConnectorIdVal;
         }
         return nodeConnectorIdStripped;
     }
