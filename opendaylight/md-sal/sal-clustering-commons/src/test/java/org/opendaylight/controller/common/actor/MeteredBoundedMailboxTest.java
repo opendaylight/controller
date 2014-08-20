@@ -44,7 +44,7 @@ public class MeteredBoundedMailboxTest {
         actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
 
 
-        final FiniteDuration ONE_SEC = new FiniteDuration(1, TimeUnit.SECONDS);
+        final FiniteDuration TEN_SEC = new FiniteDuration(10, TimeUnit.SECONDS);
         String boundedMailBox = actorSystem.name() + ".bounded-mailbox";
         ActorRef pingPongActor = actorSystem.actorOf(PingPongActor.props(lock).withMailbox(boundedMailBox),
                                                      "pingpongactor");
@@ -59,11 +59,11 @@ public class MeteredBoundedMailboxTest {
             pingPongActor.tell("ping", mockReceiver.getRef());
         }
 
-        mockReceiver.expectMsgClass(ONE_SEC, DeadLetter.class);
+        mockReceiver.expectMsgClass(TEN_SEC, DeadLetter.class);
 
         lock.unlock();
 
-        Object[] eleven = mockReceiver.receiveN(11, ONE_SEC);
+        Object[] eleven = mockReceiver.receiveN(11, TEN_SEC);
     }
 
     /**
