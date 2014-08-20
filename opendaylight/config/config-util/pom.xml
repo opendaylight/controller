@@ -23,6 +23,11 @@
       <artifactId>guava</artifactId>
       <scope>test</scope>
     </dependency>
+  <dependency>
+    <groupId>org.opendaylight.yangtools</groupId>
+    <artifactId>mockito-configuration</artifactId>
+    <version>0.6.1</version>
+  </dependency>
   </dependencies>
 
   <build>
