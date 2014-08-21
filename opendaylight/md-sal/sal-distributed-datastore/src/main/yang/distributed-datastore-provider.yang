@@ -49,19 +49,19 @@ module distributed-datastore-provider {
                 }
             }
 
-            leaf max-shard-data-change-executor-queue-size {
+            leaf config-max-shard-data-change-executor-queue-size {
                 default 1000;
                 type uint16;
                 description "The maximum queue size for each shard's data store data change notification executor.";
             }
 
-            leaf max-shard-data-change-executor-pool-size {
+            leaf config-max-shard-data-change-executor-pool-size {
                 default 20;
                 type uint16;
                 description "The maximum thread pool size for each shard's data store data change notification executor.";
             }
 
-            leaf max-shard-data-change-listener-queue-size {
+            leaf config-max-shard-data-change-listener-queue-size {
                 default 1000;
                 type uint16;
                 description "The maximum queue size for each shard's data store data change listeners.";
@@ -82,19 +82,19 @@ module distributed-datastore-provider {
                     }
                 }
 
-            leaf max-shard-data-change-executor-queue-size {
+            leaf operational-max-shard-data-change-executor-queue-size {
                 default 1000;
                 type uint16;
                 description "The maximum queue size for each shard's data store data change notification executor.";
             }
 
-            leaf max-shard-data-change-executor-pool-size {
+            leaf operational-max-shard-data-change-executor-pool-size {
                 default 20;
                 type uint16;
                 description "The maximum thread pool size for each shard's data store data change notification executor.";
             }
 
-            leaf max-shard-data-change-listener-queue-size {
+            leaf operational-max-shard-data-change-listener-queue-size {
                 default 1000;
                 type uint16;
                 description "The maximum queue size for each shard's data store data change listeners.";
