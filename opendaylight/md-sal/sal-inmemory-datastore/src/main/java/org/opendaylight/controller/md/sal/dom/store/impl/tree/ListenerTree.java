@@ -7,41 +7,29 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.annotation.concurrent.GuardedBy;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.StoreTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A set of listeners organized as a tree by node to which they listen. This class
  * allows for efficient lookup of listeners when we walk the DataTreeCandidate.
+ *
+ * @author Robert Varga
  */
 public final class ListenerTree  {
     private static final Logger LOG = LoggerFactory.getLogger(ListenerTree.class);
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
-    private final Node rootNode = new Node(null, null);
+    private final ListenerNode rootNode = new ListenerNode(null, null);
 
     private ListenerTree() {
         // Private to disallow direct instantiation
@@ -71,12 +59,12 @@ public final class ListenerTree  {
         rwLock.writeLock().lock();
 
         try {
-            Node walkNode = rootNode;
+            ListenerNode walkNode = rootNode;
             for (final PathArgument arg : path.getPathArguments()) {
                 walkNode = walkNode.ensureChild(arg);
             }
 
-            final Node node = walkNode;
+            final ListenerNode node = walkNode;
             DataChangeListenerRegistration<L> reg = new DataChangeListenerRegistrationImpl<L>(listener) {
                 @Override
                 public DataChangeScope getScope() {
@@ -128,7 +116,7 @@ public final class ListenerTree  {
      *
      * @return A walker instance.
      */
-    public Walker getWalker() {
+    public ListenerWalker getWalker() {
         /*
          * TODO: The only current user of this method is local to the datastore.
          *       Since this class represents a read-lock, losing a reference to
@@ -137,127 +125,12 @@ public final class ListenerTree  {
          *       external user exist, make the Walker a phantom reference, which
          *       will cleanup the lock if not told to do so.
          */
-        final Walker ret = new Walker(rwLock.readLock(), rootNode);
+        final ListenerWalker ret = new ListenerWalker(rwLock.readLock(), rootNode);
         rwLock.readLock().lock();
         return ret;
     }
 
-    /**
-     * A walking context, pretty much equivalent to an iterator, but it
-     * exposes the underlying tree structure.
-     */
-    /*
-     * FIXME: BUG-1511: split this class out as ListenerWalker.
-     */
-    public static final class Walker implements AutoCloseable {
-        private final Lock lock;
-        private final Node node;
-
-        @GuardedBy("this")
-        private boolean valid = true;
-
-        private Walker(final Lock lock, final Node node) {
-            this.lock = Preconditions.checkNotNull(lock);
-            this.node = Preconditions.checkNotNull(node);
-        }
-
-        public Node getRootNode() {
-            return node;
-        }
-
-        @Override
-        public synchronized void close() {
-            if (valid) {
-                lock.unlock();
-                valid = false;
-            }
-        }
-    }
-
-    /**
-     * This is a single node within the listener tree. Note that the data returned from
-     * and instance of this class is guaranteed to have any relevance or consistency
-     * only as long as the {@link org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker} instance through which it is reached remains
-     * unclosed.
-     */
-    /*
-     * FIXME: BUG-1511: split this class out as ListenerNode.
-     */
-    public static final class Node implements StoreTreeNode<Node>, Identifiable<PathArgument> {
-        private final Collection<DataChangeListenerRegistration<?>> listeners = new ArrayList<>();
-        private final Map<PathArgument, Node> children = new HashMap<>();
-        private final PathArgument identifier;
-        private final Reference<Node> parent;
-
-        private Node(final Node parent, final PathArgument identifier) {
-            this.parent = new WeakReference<>(parent);
-            this.identifier = identifier;
-        }
-
-        @Override
-        public PathArgument getIdentifier() {
-            return identifier;
-        }
-
-        @Override
-        public Optional<Node> getChild(final PathArgument child) {
-            return Optional.fromNullable(children.get(child));
-        }
-
-        /**
-         * Return the list of current listeners. This collection is guaranteed
-         * to be immutable only while the walker, through which this node is
-         * reachable remains unclosed.
-         *
-         * @return the list of current listeners
-         */
-        public Collection<DataChangeListenerRegistration<?>> getListeners() {
-            return listeners;
-        }
-
-        private Node ensureChild(final PathArgument child) {
-            Node potential = children.get(child);
-            if (potential == null) {
-                potential = new Node(this, child);
-                children.put(child, potential);
-            }
-            return potential;
-        }
-
-        private void addListener(final DataChangeListenerRegistration<?> listener) {
-            listeners.add(listener);
-            LOG.debug("Listener {} registered", listener);
-        }
-
-        private void removeListener(final DataChangeListenerRegistrationImpl<?> listener) {
-            listeners.remove(listener);
-            LOG.debug("Listener {} unregistered", listener);
-
-            // We have been called with the write-lock held, so we can perform some cleanup.
-            removeThisIfUnused();
-        }
-
-        private void removeThisIfUnused() {
-            final Node p = parent.get();
-            if (p != null && listeners.isEmpty() && children.isEmpty()) {
-                p.removeChild(identifier);
-            }
-        }
-
-        private void removeChild(final PathArgument arg) {
-            children.remove(arg);
-            removeThisIfUnused();
-        }
-
-        @Override
-        public String toString() {
-            return "Node [identifier=" + identifier + ", listeners=" + listeners.size() + ", children=" + children.size() + "]";
-        }
-
-
-    }
-
-    private abstract static class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> //
+    abstract static class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> //
     implements DataChangeListenerRegistration<T> {
         public DataChangeListenerRegistrationImpl(final T listener) {
             super(listener);
