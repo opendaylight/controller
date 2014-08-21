@@ -1,0 +1,8 @@
+Verified+1: jenkins-controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Tony Tkacik <ttkacik@cisco.com>
+Code-Review+1: Robert Varga <rovarga@cisco.com>
+Submitted-by: Tony Tkacik <ttkacik@cisco.com>
+Submitted-at: Thu, 21 Aug 2014 09:08:33 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/10096
+Project: controller
+Branch: refs/heads/master
