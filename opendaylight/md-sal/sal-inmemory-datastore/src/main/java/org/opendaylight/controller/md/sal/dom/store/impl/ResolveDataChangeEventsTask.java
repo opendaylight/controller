@@ -7,17 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.Walker;
+import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerWalker;
 import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -27,6 +24,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Resolve Data Change Events based on modifications and listeners
@@ -44,14 +46,14 @@ final class ResolveDataChangeEventsTask {
 
     public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
         this.candidate = Preconditions.checkNotNull(candidate);
-        this.listenerRoot = Preconditions.checkNotNull(listenerTree);
+        listenerRoot = Preconditions.checkNotNull(listenerTree);
     }
 
     /**
      * Resolves and submits notification tasks to the specified manager.
      */
     public synchronized void resolve(final NotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> manager) {
-        try (final Walker w = listenerRoot.getWalker()) {
+        try (final ListenerWalker w = listenerRoot.getWalker()) {
             // Defensive: reset internal state
             collectedEvents = ArrayListMultimap.create();
 
@@ -63,13 +65,13 @@ final class ResolveDataChangeEventsTask {
              * Convert to tasks, but be mindful of multiple values -- those indicate multiple
              * wildcard matches, which need to be merged.
              */
-            for (Entry<DataChangeListenerRegistration<?>, Collection<DOMImmutableDataChangeEvent>> e : collectedEvents.asMap().entrySet()) {
+            for (final Entry<DataChangeListenerRegistration<?>, Collection<DOMImmutableDataChangeEvent>> e : collectedEvents.asMap().entrySet()) {
                 final Collection<DOMImmutableDataChangeEvent> col = e.getValue();
                 final DOMImmutableDataChangeEvent event;
 
                 if (col.size() != 1) {
                     final Builder b = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE);
-                    for (DOMImmutableDataChangeEvent i : col) {
+                    for (final DOMImmutableDataChangeEvent i : col) {
                         b.merge(i);
                     }
 
@@ -152,8 +154,10 @@ final class ResolveDataChangeEventsTask {
              */
             LOG.trace("Resolving subtree replace event for {} before {}, after {}", state.getPath(), beforeData, afterData);
             @SuppressWarnings("unchecked")
+            final
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) beforeData;
             @SuppressWarnings("unchecked")
+            final
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) afterData;
             return resolveNodeContainerReplaced(state, beforeCont, afterCont);
         }
@@ -166,7 +170,7 @@ final class ResolveDataChangeEventsTask {
         }
 
         LOG.trace("Resolving leaf replace event for {} , before {}, after {}", state.getPath(), beforeData, afterData);
-        DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE).addUpdated(state.getPath(), beforeData, afterData).build();
+        final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE).addUpdated(state.getPath(), beforeData, afterData).build();
         state.addEvent(event);
         state.collectEvents(beforeData, afterData, collectedEvents);
         return true;
@@ -182,7 +186,7 @@ final class ResolveDataChangeEventsTask {
 
         // We look at all children from before and compare it with after state.
         boolean childChanged = false;
-        for (NormalizedNode<PathArgument, ?> beforeChild : beforeCont.getValue()) {
+        for (final NormalizedNode<PathArgument, ?> beforeChild : beforeCont.getValue()) {
             final PathArgument childId = beforeChild.getIdentifier();
 
             if (resolveNodeContainerChildUpdated(state.child(childId), beforeChild, afterCont.getChild(childId))) {
@@ -190,7 +194,7 @@ final class ResolveDataChangeEventsTask {
             }
         }
 
-        for (NormalizedNode<PathArgument, ?> afterChild : afterCont.getValue()) {
+        for (final NormalizedNode<PathArgument, ?> afterChild : afterCont.getValue()) {
             final PathArgument childId = afterChild.getIdentifier();
 
             /*
@@ -205,7 +209,7 @@ final class ResolveDataChangeEventsTask {
         }
 
         if (childChanged) {
-            DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE)
+            final DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE)
                     .addUpdated(state.getPath(), beforeCont, afterCont).build();
             state.addEvent(event);
         }
@@ -226,6 +230,26 @@ final class ResolveDataChangeEventsTask {
         return true;
     }
 
+    /**
+     * Resolves create events deep down the interest listener tree.
+     *
+     * @param path
+     * @param listeners
+     * @param afterState
+     * @return
+     */
+    private void resolveCreateEvent(final ResolveDataChangeState state, final NormalizedNode<?, ?> afterState) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) afterState;
+        resolveSameEventRecursivelly(state, node, DOMImmutableDataChangeEvent.getCreateEventFactory());
+    }
+
+    private void resolveDeleteEvent(final ResolveDataChangeState state, final NormalizedNode<?, ?> beforeState) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final NormalizedNode<PathArgument, ?> node = (NormalizedNode) beforeState;
+        resolveSameEventRecursivelly(state, node, DOMImmutableDataChangeEvent.getRemoveEventFactory());
+    }
+
     private void resolveSameEventRecursivelly(final ResolveDataChangeState state,
             final NormalizedNode<PathArgument, ?> node, final SimpleEventFactory eventFactory) {
         if (!state.needsProcessing()) {
@@ -241,8 +265,9 @@ final class ResolveDataChangeEventsTask {
             // Node has children, so we will try to resolve it's children
             // changes.
             @SuppressWarnings("unchecked")
+            final
             NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
-            for (NormalizedNode<PathArgument, ?> child : container.getValue()) {
+            for (final NormalizedNode<PathArgument, ?> child : container.getValue()) {
                 final PathArgument childId = child.getIdentifier();
 
                 LOG.trace("Resolving event for child {}", childId);
@@ -266,7 +291,7 @@ final class ResolveDataChangeEventsTask {
         }
 
         DataChangeScope scope = null;
-        for (DataTreeCandidateNode childMod : modification.getChildNodes()) {
+        for (final DataTreeCandidateNode childMod : modification.getChildNodes()) {
             final ResolveDataChangeState childState = state.child(childMod.getIdentifier());
 
             switch (childMod.getModificationType()) {
@@ -292,7 +317,7 @@ final class ResolveDataChangeEventsTask {
         final NormalizedNode<?, ?> after = modification.getDataAfter().get();
 
         if (scope != null) {
-            DOMImmutableDataChangeEvent one = DOMImmutableDataChangeEvent.builder(scope).addUpdated(state.getPath(), before, after).build();
+            final DOMImmutableDataChangeEvent one = DOMImmutableDataChangeEvent.builder(scope).addUpdated(state.getPath(), before, after).build();
             state.addEvent(one);
         }
 
