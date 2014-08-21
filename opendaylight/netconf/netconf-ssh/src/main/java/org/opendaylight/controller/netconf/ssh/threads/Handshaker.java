@@ -243,6 +243,12 @@ class ServerConnectionCallbackImpl implements ServerConnectionCallback {
                             ChannelFuture clientChannelFuture = initializeNettyConnection(localAddress, bossGroup, sshClientHandler);
                             // get channel
                             final Channel channel = clientChannelFuture.awaitUninterruptibly().channel();
+
+                            // write additional header before polling thread is started
+                            // polling thread could process and forward data before additional header is written
+                            // This will result into unexpected state:  hello message without additional header and the next message with additional header
+                            channel.writeAndFlush(Unpooled.copiedBuffer(additionalHeader.getBytes()));
+
                             new ClientInputStreamPoolingThread(session, ss.getStdout(), channel, new AutoCloseable() {
                                 @Override
                                 public void close() throws Exception {
@@ -259,9 +265,6 @@ class ServerConnectionCallbackImpl implements ServerConnectionCallback {
                                     }
                                 }
                             }, sshClientHandler.getChannelHandlerContext()).start();
-
-                            // write additional header
-                            channel.writeAndFlush(Unpooled.copiedBuffer(additionalHeader.getBytes()));
                         } else {
                             logger.debug("{} Wrong subsystem requested:'{}', closing ssh session", serverSession, subsystem);
                             String reason = "Only netconf subsystem is supported, requested:" + subsystem;
