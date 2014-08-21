@@ -87,7 +87,9 @@ public class RestconfDocumentedException extends WebApplicationException {
      * Constructs an instance with the given errors.
      */
     public RestconfDocumentedException(String message, Throwable cause, List<RestconfError> errors) {
-        super(message, cause);
+        // FIXME: We override getMessage so supplied message is lost for any public access
+        // this was lost also in original code.
+        super(cause);
         if(!errors.isEmpty()) {
             this.errors = ImmutableList.copyOf(errors);
         } else {
