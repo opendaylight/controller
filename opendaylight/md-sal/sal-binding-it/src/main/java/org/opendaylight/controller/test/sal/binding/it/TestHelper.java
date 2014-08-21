@@ -77,6 +77,7 @@ public class TestHelper {
                 mavenBundle("org.openexi", "nagasena-rta").versionAsInProject(), //
                 mavenBundle(CONTROLLER + ".thirdparty", "ganymed").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
+                mavenBundle("org.apache.sshd", "sshd-code").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
 

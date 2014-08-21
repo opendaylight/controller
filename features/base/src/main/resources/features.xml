@@ -37,6 +37,7 @@
       <bundle>wrap:mvn:io.netty/netty-handler/${netty.version}</bundle>
       <bundle>wrap:mvn:io.netty/netty-codec-http/${netty.version}</bundle>
       <bundle>mvn:org.opendaylight.controller.thirdparty/ganymed/1.1-SNAPSHOT</bundle>
+      <bundle>mvn:org.apache.sshd/sshd-core/${sshd-core.version}</bundle>
    </feature>
    <feature name="base-jersey" description="Jersey" version="${jersey.version}">
       <feature>base-gemini-web</feature>
