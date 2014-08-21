@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_2670f770",
+        "filename": "opendaylight/netconf/netconf-netty-util/src/main/java/org/opendaylight/controller/netconf/nettyutil/handler/ssh/client/MinaSshHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2014-08-21T20:06:28Z",
+      "side": 1,
+      "message": "I think we need to just track whether we are reading the first line (delimited with \\n) and skip that -- openssh will be sending:\nSSH-2.0-OpenSSH_6.6p1-hpn14v4 (or similar). Note that the string is useful, as it describes basic protocol characteristics:\nSSH-2.0 says it\u0027s SSH 2 (as opposed to 1.5 which is \"either 1 or 2\")\nhpn is \u0027high performance networking\u0027, e.g. dynamic buffer sizing",
+      "revId": "489d65f3a2536742708a9310f9864f820b666251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
