@@ -109,4 +109,10 @@ final class MeterConfigStatsTracker extends AbstractListeningStatsTracker<MeterC
 
         super.start(dbs);
     }
+
+    @Override
+    protected MeterConfigStats createInvariantKey(MeterConfigStats item) {
+        // No invariant data exist in the meter config stats.
+        return item;
+    }
 }

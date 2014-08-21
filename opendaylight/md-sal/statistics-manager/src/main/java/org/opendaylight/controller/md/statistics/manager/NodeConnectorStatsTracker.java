@@ -17,6 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.G
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.OpendaylightPortStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.flow.capable.node.connector.statistics.FlowCapableNodeConnectorStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.port.statistics.rev131214.node.connector.statistics.and.port.number.map.NodeConnectorStatisticsAndPortNumberMapBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,5 +83,13 @@ final class NodeConnectorStatsTracker extends AbstractStatsTracker<NodeConnector
 
             requestHelper(portStatsService.getAllNodeConnectorsStatistics(input.build()));
         }
+    }
+
+    @Override
+    protected NodeConnectorStatisticsAndPortNumberMap createInvariantKey(NodeConnectorStatisticsAndPortNumberMap item) {
+        NodeConnectorStatisticsAndPortNumberMapBuilder ncStatsBuilder = new NodeConnectorStatisticsAndPortNumberMapBuilder();
+        ncStatsBuilder.setNodeConnectorId(item.getNodeConnectorId());
+        ncStatsBuilder.setKey(item.getKey());
+        return ncStatsBuilder.build();
     }
 }

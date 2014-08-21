@@ -114,4 +114,10 @@ final class GroupDescStatsTracker extends AbstractListeningStatsTracker<GroupDes
 
         super.start(dbs);
     }
+
+    @Override
+    protected GroupDescStats createInvariantKey(GroupDescStats item) {
+        // No invariant data exist in the group description stats.
+        return item;
+    }
 }
