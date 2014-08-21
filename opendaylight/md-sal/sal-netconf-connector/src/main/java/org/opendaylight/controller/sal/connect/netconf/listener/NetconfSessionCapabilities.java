@@ -7,8 +7,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-
 import com.google.common.collect.Sets;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -158,7 +158,7 @@ public final class NetconfSessionCapabilities {
             }
 
             // FIXME: do we really want to continue here?
-            moduleBasedCaps.add(QName.create(namespace, revision, moduleName));
+            moduleBasedCaps.add(QName.cachedReference(QName.create(namespace, revision, moduleName)));
             nonModuleCaps.remove(capability);
         }
 
