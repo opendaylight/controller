@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.frm.reconil;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.frm.AbstractChangeListener;
 import org.opendaylight.controller.frm.FlowCookieProducer;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -38,10 +41,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-
 /**
  * forwardingrules-manager
  * org.opendaylight.controller.frm
@@ -65,7 +64,7 @@ public class FlowNodeReconcilListener extends AbstractChangeListener {
     }
 
     @Override
-    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvent) {
+    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvent) {
         /* FlowCapableNode DataObjects for reconciliation */
         final Set<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> createdEntries =
                 changeEvent.getCreatedData().entrySet();
@@ -118,34 +117,46 @@ public class FlowNodeReconcilListener extends AbstractChangeListener {
             final InstanceIdentifier<Node> nodeIdent = identifier.firstIdentifierOf(Node.class);
             final NodeRef nodeRef = new NodeRef(nodeIdent);
             /* Groups - have to be first */
-            for (Group group : flowCapNode.get().getGroup()) {
-                final GroupRef groupRef = new GroupRef(flowNodeIdent.child(Group.class, group.getKey()));
-                final AddGroupInputBuilder groupBuilder = new AddGroupInputBuilder(group);
-                groupBuilder.setGroupRef(groupRef);
-                groupBuilder.setNode(nodeRef);
-                this.provider.getSalGroupService().addGroup(groupBuilder.build());
+            List<Group> groups = flowCapNode.get().getGroup();
+            if(groups != null) {
+                for (Group group : groups) {
+                    final GroupRef groupRef = new GroupRef(flowNodeIdent.child(Group.class, group.getKey()));
+                    final AddGroupInputBuilder groupBuilder = new AddGroupInputBuilder(group);
+                    groupBuilder.setGroupRef(groupRef);
+                    groupBuilder.setNode(nodeRef);
+                    this.provider.getSalGroupService().addGroup(groupBuilder.build());
+                }
             }
             /* Meters */
-            for (Meter meter : flowCapNode.get().getMeter()) {
-                final MeterRef meterRef = new MeterRef(flowNodeIdent.child(Meter.class, meter.getKey()));
-                final AddMeterInputBuilder meterBuilder = new AddMeterInputBuilder(meter);
-                meterBuilder.setMeterRef(meterRef);
-                meterBuilder.setNode(nodeRef);
-                this.provider.getSalMeterService().addMeter(meterBuilder.build());
+            List<Meter> meters = flowCapNode.get().getMeter();
+            if(meters != null) {
+                for (Meter meter : meters) {
+                    final MeterRef meterRef = new MeterRef(flowNodeIdent.child(Meter.class, meter.getKey()));
+                    final AddMeterInputBuilder meterBuilder = new AddMeterInputBuilder(meter);
+                    meterBuilder.setMeterRef(meterRef);
+                    meterBuilder.setNode(nodeRef);
+                    this.provider.getSalMeterService().addMeter(meterBuilder.build());
+                }
             }
             /* Flows */
-            for (Table flowTable : flowCapNode.get().getTable()) {
-                final InstanceIdentifier<Table> tableIdent = flowNodeIdent.child(Table.class, flowTable.getKey());
-                for (Flow flow : flowTable.getFlow()) {
-                    final FlowCookie flowCookie = new FlowCookie(FlowCookieProducer.INSTANCE.getNewCookie(tableIdent));
-                    final FlowRef flowRef = new FlowRef(tableIdent.child(Flow.class, flow.getKey()));
-                    final FlowTableRef flowTableRef = new FlowTableRef(tableIdent);
-                    final AddFlowInputBuilder flowBuilder = new AddFlowInputBuilder(flow);
-                    flowBuilder.setCookie(flowCookie);
-                    flowBuilder.setNode(nodeRef);
-                    flowBuilder.setFlowTable(flowTableRef);
-                    flowBuilder.setFlowRef(flowRef);
-                    this.provider.getSalFlowService().addFlow(flowBuilder.build());
+            List<Table> tables = flowCapNode.get().getTable();
+            if(tables != null) {
+                for (Table flowTable : tables) {
+                    final InstanceIdentifier<Table> tableIdent = flowNodeIdent.child(Table.class, flowTable.getKey());
+                    List<Flow> flows = flowTable.getFlow();
+                    if(flows != null) {
+                        for (Flow flow : flows) {
+                            final FlowCookie flowCookie = new FlowCookie(FlowCookieProducer.INSTANCE.getNewCookie(tableIdent));
+                            final FlowRef flowRef = new FlowRef(tableIdent.child(Flow.class, flow.getKey()));
+                            final FlowTableRef flowTableRef = new FlowTableRef(tableIdent);
+                            final AddFlowInputBuilder flowBuilder = new AddFlowInputBuilder(flow);
+                            flowBuilder.setCookie(flowCookie);
+                            flowBuilder.setNode(nodeRef);
+                            flowBuilder.setFlowTable(flowTableRef);
+                            flowBuilder.setFlowRef(flowRef);
+                            this.provider.getSalFlowService().addFlow(flowBuilder.build());
+                        }
+                    }
                 }
             }
         }
@@ -153,7 +164,7 @@ public class FlowNodeReconcilListener extends AbstractChangeListener {
 
     @Override
     protected void update(final InstanceIdentifier<? extends DataObject> identifier,
-                          final DataObject original, DataObject update) {
+                          final DataObject original, final DataObject update) {
         // NOOP - Listener is registered for DataChangeScope.BASE only
     }
 
