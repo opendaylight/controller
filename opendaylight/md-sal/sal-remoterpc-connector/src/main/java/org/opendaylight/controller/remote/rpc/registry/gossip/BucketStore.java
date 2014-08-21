@@ -9,10 +9,11 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.cluster.Cluster;
+import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
@@ -64,25 +65,15 @@ public class BucketStore extends UntypedActor {
     /**
      * Cluster address for this node
      */
-    private final Address selfAddress = Cluster.get(getContext().system()).selfAddress();
+    private Address selfAddress;
 
-    /**
-     * Our private gossiper
-     */
-    private ActorRef gossiper;
+    @Override
+    public void preStart(){
+        ActorRefProvider provider = getContext().provider();
+        selfAddress = provider.getDefaultAddress();
 
-    public BucketStore(){
-        gossiper = getContext().actorOf(Props.create(Gossiper.class), "gossiper");
-    }
-
-    /**
-     * This constructor is useful for testing.
-     * TODO: Pass Props instead of ActorRef
-     *
-     * @param gossiper
-     */
-    public BucketStore(ActorRef gossiper){
-        this.gossiper = gossiper;
+        if ( provider instanceof ClusterActorRefProvider)
+            getContext().actorOf(Props.create(Gossiper.class), "gossiper");
     }
 
     @Override
@@ -230,7 +221,7 @@ public class BucketStore extends UntypedActor {
             if (remoteVersion == null) remoteVersion = -1L;
 
             //update only if remote version is newer
-            if ( remoteVersion > localVersion ) {
+            if ( remoteVersion.longValue() > localVersion.longValue() ) {
                 remoteBuckets.put(entry.getKey(), receivedBucket);
                 versions.put(entry.getKey(), remoteVersion);
             }
