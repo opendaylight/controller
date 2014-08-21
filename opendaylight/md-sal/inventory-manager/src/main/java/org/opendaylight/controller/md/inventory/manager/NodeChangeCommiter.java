@@ -32,8 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
@@ -81,7 +79,7 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
                 InstanceIdentifier<NodeConnector> value = (InstanceIdentifier<NodeConnector>) ref.getValue();
                 LOG.debug("updating node connector : {}.", value);
                 NodeConnector build = data.build();
-                tx.put(LogicalDatastoreType.OPERATIONAL, value, build);
+                tx.merge(LogicalDatastoreType.OPERATIONAL, value, build, true);
             }
         });
     }
@@ -139,13 +137,9 @@ class NodeChangeCommiter implements OpendaylightInventoryListener {
         manager.enqueue(new InventoryOperation() {
             @Override
             public void applyOperation(final ReadWriteTransaction tx) {
-                final NodeBuilder nodeBuilder = new NodeBuilder(node);
-                nodeBuilder.setKey(new NodeKey(node.getId()));
-
                 final FlowCapableNode augment = InventoryMapping.toInventoryAugment(flowNode);
-                nodeBuilder.addAugmentation(FlowCapableNode.class, augment);
                 LOG.debug("updating node :{} ", path);
-                tx.put(LogicalDatastoreType.OPERATIONAL, path, augment);
+                tx.merge(LogicalDatastoreType.OPERATIONAL, path, augment, true);
             }
         });
     }

@@ -91,7 +91,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                 public void applyOperation(final ReadWriteTransaction transaction) {
                     final Node node = toTopologyNode(toTopologyNodeId(notification.getId()), notification.getNodeRef());
                     final InstanceIdentifier<Node> path = getNodePath(toTopologyNodeId(notification.getId()));
-                    transaction.put(LogicalDatastoreType.OPERATIONAL, path, node);
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL, path, node, true);
                 }
             });
         }
@@ -130,7 +130,7 @@ class FlowCapableTopologyExporter implements FlowTopologyDiscoveryListener, Open
                     TerminationPoint point = toTerminationPoint(toTerminationPointId(notification.getId()),
                             notification.getNodeConnectorRef());
                     final InstanceIdentifier<TerminationPoint> path = tpPath(nodeId, point.getKey().getTpId());
-                    transaction.put(LogicalDatastoreType.OPERATIONAL, path, point);
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL, path, point, true);
                     if ((fcncu.getState() != null && fcncu.getState().isLinkDown())
                             || (fcncu.getConfiguration() != null && fcncu.getConfiguration().isPORTDOWN())) {
                         removeAffectedLinks(point.getTpId());
