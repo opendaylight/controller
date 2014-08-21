@@ -8,11 +8,13 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorRefProvider;
 import akka.actor.ActorSelection;
 import akka.actor.Address;
 import akka.actor.Cancellable;
 import akka.actor.UntypedActor;
 import akka.cluster.Cluster;
+import akka.cluster.ClusterActorRefProvider;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.dispatch.Mapper;
@@ -60,12 +62,12 @@ public class Gossiper extends UntypedActor {
 
     final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-    Cluster cluster = Cluster.get(getContext().system());
+    private Cluster cluster;
 
     /**
      * ActorSystem's address for the current cluster node.
      */
-    private Address selfAddress = cluster.selfAddress();
+    private Address selfAddress;
 
     /**
      * All known cluster members
@@ -89,11 +91,16 @@ public class Gossiper extends UntypedActor {
 
     @Override
     public void preStart(){
+        ActorRefProvider provider = getContext().provider();
+        selfAddress = provider.getDefaultAddress();
 
-        cluster.subscribe(getSelf(),
-                          ClusterEvent.initialStateAsEvents(),
-                          ClusterEvent.MemberEvent.class,
-                          ClusterEvent.UnreachableMember.class);
+        if ( provider instanceof ClusterActorRefProvider ) {
+            cluster = Cluster.get(getContext().system());
+            cluster.subscribe(getSelf(),
+                    ClusterEvent.initialStateAsEvents(),
+                    ClusterEvent.MemberEvent.class,
+                    ClusterEvent.UnreachableMember.class);
+        }
 
         if (autoStartGossipTicks) {
             gossipTask = getContext().system().scheduler().schedule(
