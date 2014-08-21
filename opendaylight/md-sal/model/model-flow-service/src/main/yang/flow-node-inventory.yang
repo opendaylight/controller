@@ -123,6 +123,13 @@ module flow-node-inventory {
         }
     }
 
+    grouping datapath-id-grouping {
+        leaf datapath-id {
+            description "Datapath ID of a flow capable node.";
+            type uint64;
+        }
+    }
+
     grouping ip-address-grouping {
         leaf ip-address {
             description "IP address of a flow capable node.";
@@ -150,6 +157,7 @@ module flow-node-inventory {
         uses tables;
         uses group:groups;
         uses meters;
+        uses datapath-id-grouping;
         uses ip-address-grouping;
         // TODO: ports
         
