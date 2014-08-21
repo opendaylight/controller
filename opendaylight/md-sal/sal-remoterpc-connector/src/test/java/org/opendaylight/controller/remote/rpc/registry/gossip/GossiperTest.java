@@ -45,7 +45,7 @@ public class GossiperTest {
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster"));
+        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 
         gossiper = createGossiper();
