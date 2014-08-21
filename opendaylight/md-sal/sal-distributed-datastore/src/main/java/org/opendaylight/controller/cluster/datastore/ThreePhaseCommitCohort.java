@@ -90,7 +90,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during abort");
                 sender
-                    .tell(new akka.actor.Status.Failure(t), getSelf());
+                    .tell(new akka.actor.Status.Failure(t), self);
             }
         });
     }
@@ -119,7 +119,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during pre-commit");
                 sender
-                    .tell(new akka.actor.Status.Failure(t), getSelf());
+                    .tell(new akka.actor.Status.Failure(t), self);
             }
         });
 
@@ -138,7 +138,7 @@ public class ThreePhaseCommitCohort extends AbstractUntypedActor {
             public void onFailure(Throwable t) {
                 LOG.error(t, "An exception happened during canCommit");
                 sender
-                    .tell(new akka.actor.Status.Failure(t), getSelf());
+                    .tell(new akka.actor.Status.Failure(t), self);
             }
         });
 
