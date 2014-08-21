@@ -63,7 +63,7 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
-    private FiniteDuration ASK_RESULT_DURATION = Duration.create(3000, TimeUnit.MILLISECONDS);
+    private FiniteDuration ASK_RESULT_DURATION = Duration.create(5000, TimeUnit.MILLISECONDS);
 
 
     @Test(expected = TestException.class)
