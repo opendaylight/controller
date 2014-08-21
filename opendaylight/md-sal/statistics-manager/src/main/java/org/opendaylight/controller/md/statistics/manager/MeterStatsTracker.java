@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.OpendaylightMeterStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStatsBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -111,5 +112,13 @@ final class MeterStatsTracker extends AbstractListeningStatsTracker<MeterStats, 
         }
 
         super.start(dbs);
+    }
+
+    @Override
+    protected MeterStats createInvariantKey(MeterStats item) {
+        MeterStatsBuilder meterStatsBuilder = new MeterStatsBuilder();
+        meterStatsBuilder.setKey(item.getKey());
+        meterStatsBuilder.setMeterId(item.getMeterId());
+        return meterStatsBuilder.build();
     }
 }

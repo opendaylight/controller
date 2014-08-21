@@ -152,4 +152,10 @@ final class QueueStatsTracker extends AbstractListeningStatsTracker<QueueIdAndSt
 
         super.start(dbs);
     }
+
+    @Override
+    protected QueueStatsEntry createInvariantKey(QueueStatsEntry item) {
+        // No invariant data exist in the group description stats.
+        return item;
+    }
 }

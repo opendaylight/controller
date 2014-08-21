@@ -21,6 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.GetFlowTablesStatisticsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.and.statistics.map.FlowTableAndStatisticsMapBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatistics;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.flow.table.statistics.FlowTableStatisticsBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -69,5 +70,13 @@ final class FlowTableStatsTracker extends AbstractStatsTracker<FlowTableAndStati
 
             requestHelper(flowTableStatsService.getFlowTablesStatistics(input.build()));
         }
+    }
+
+    @Override
+    protected FlowTableAndStatisticsMap createInvariantKey(FlowTableAndStatisticsMap item) {
+        FlowTableAndStatisticsMapBuilder flowTableAndStatisticsMapBuilder = new FlowTableAndStatisticsMapBuilder();
+        flowTableAndStatisticsMapBuilder.setTableId(item.getTableId());
+        flowTableAndStatisticsMapBuilder.setKey(item.getKey());
+        return flowTableAndStatisticsMapBuilder.build();
     }
 }

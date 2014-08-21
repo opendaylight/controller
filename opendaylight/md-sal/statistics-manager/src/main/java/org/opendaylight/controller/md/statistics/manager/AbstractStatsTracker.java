@@ -97,14 +97,15 @@ abstract class AbstractStatsTracker<I, K> {
     }
     protected abstract void cleanupSingleStat(DataModificationTransaction trans, K item);
     protected abstract K updateSingleStat(DataModificationTransaction trans, I item);
+    protected abstract K createInvariantKey(K item);
     public abstract void request();
 
     public final synchronized void updateStats(List<I> list) {
 
         final DataModificationTransaction trans = startTransaction();
-
         for (final I item : list) {
-            trackedItems.put(updateSingleStat(trans, item), requestCounter);
+            K key = updateSingleStat(trans, item);
+            trackedItems.put(createInvariantKey(key), requestCounter);
         }
 
         trans.commit();
