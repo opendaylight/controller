@@ -1,8 +1,8 @@
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static org.junit.Assert.assertTrue;
-import javassist.ClassPool;
 
+import javassist.ClassPool;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
@@ -11,7 +11,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
+import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
+import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
+import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
@@ -34,7 +38,9 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Override
     protected void setupWithSchema(final SchemaContext context) {
         mappingService = new RuntimeGeneratedMappingServiceImpl(ClassPool.getDefault());
-        codec = new BindingToNormalizedNodeCodec(mappingService);
+        StreamWriterGenerator streamWriter = new StreamWriterGenerator(JavassistUtils.forClassPool(ClassPool.getDefault()));
+        BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
+        codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), mappingService, registry);
         mappingService.onGlobalContextUpdated(context);
         codec.onGlobalContextUpdated(context);
     };
