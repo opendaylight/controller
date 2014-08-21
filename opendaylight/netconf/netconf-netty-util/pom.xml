@@ -73,6 +73,12 @@
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.apache.sshd</groupId>
+          <artifactId>sshd-core</artifactId>
+          <version>0.12.0</version>
+      </dependency>
+
   </dependencies>
 
   <build>
