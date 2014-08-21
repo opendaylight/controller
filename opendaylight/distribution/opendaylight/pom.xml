@@ -1157,6 +1157,10 @@
           <artifactId>ganymed</artifactId>
         </dependency>
         <dependency>
+          <groupId>org.apache.sshd</groupId>
+          <artifactId>sshd-core</artifactId>
+        </dependency>
+        <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>binding-generator-api</artifactId>
           <version>${yangtools.version}</version>
