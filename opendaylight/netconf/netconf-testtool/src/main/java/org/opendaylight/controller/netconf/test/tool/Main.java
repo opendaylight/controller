@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import java.util.concurrent.TimeUnit;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -49,6 +50,9 @@ public final class Main {
         @Arg(dest = "starting-port")
         public int startingPort;
 
+        @Arg(dest = "generate-config-connection-timeout")
+        public int generateConfigsTimeout;
+
         @Arg(dest = "generate-configs-dir")
         public File generateConfigsDir;
 
@@ -57,6 +61,9 @@ public final class Main {
 
         @Arg(dest = "ssh")
         public boolean ssh;
+
+        @Arg(dest = "exi")
+        public boolean exi;
 
         static ArgumentParser getParser() {
             final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf testool");
@@ -79,6 +86,12 @@ public final class Main {
                     .help("First port for simulated device. Each other device will have previous+1 port number")
                     .dest("starting-port");
 
+            parser.addArgument("--generate-config-connection-timeout")
+                    .type(Integer.class)
+                    .setDefault((int)TimeUnit.MINUTES.toMillis(5))
+                    .help("Timeout to be generated in initial config files")
+                    .dest("generate-config-connection-timeout");
+
             parser.addArgument("--generate-configs-batch-size")
                     .type(Integer.class)
                     .setDefault(100)
@@ -96,6 +109,12 @@ public final class Main {
                     .help("Whether to use ssh for transport or just pure tcp")
                     .dest("ssh");
 
+            parser.addArgument("--exi")
+                    .type(Boolean.class)
+                    .setDefault(false)
+                    .help("Whether to use exi to transport xml content")
+                    .dest("exi");
+
             return parser;
         }
 
@@ -110,6 +129,8 @@ public final class Main {
     }
 
     public static void main(final String[] args) {
+        ch.ethz.ssh2.log.Logger.enabled = true;
+
         final Params params = parseArgs(args, Params.getParser());
         params.validate();
 
@@ -117,7 +138,7 @@ public final class Main {
         try {
             final List<Integer> openDevices = netconfDeviceSimulator.start(params);
             if(params.generateConfigsDir != null) {
-                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize);
+                new ConfigGenerator(params.generateConfigsDir, openDevices).generate(params.ssh, params.generateConfigBatchSize, params.generateConfigsTimeout);
             }
         } catch (final Exception e) {
             LOG.error("Unhandled exception", e);
@@ -164,7 +185,7 @@ public final class Main {
             this.openDevices = openDevices;
         }
 
-        public void generate(final boolean useSsh, final int batchSize) {
+        public void generate(final boolean useSsh, final int batchSize, final int generateConfigsTimeout) {
             if(directory.exists() == false) {
                 checkState(directory.mkdirs(), "Unable to create folder %s" + directory);
             }
@@ -182,7 +203,7 @@ public final class Main {
                 configBlueprint = configBlueprint.replace(NETCONF_USE_SSH, "%s");
 
                 final String before = configBlueprint.substring(0, configBlueprint.indexOf("<module>"));
-                final String middleBlueprint = configBlueprint.substring(configBlueprint.indexOf("<module>"), configBlueprint.indexOf("</module>") + "</module>".length());
+                final String middleBlueprint = configBlueprint.substring(configBlueprint.indexOf("<module>"), configBlueprint.indexOf("</module>"));
                 final String after = configBlueprint.substring(configBlueprint.indexOf("</module>") + "</module>".length());
 
                 int connectorCount = 0;
@@ -196,7 +217,9 @@ public final class Main {
                     }
 
                     final String name = String.valueOf(openDevice) + SIM_DEVICE_SUFFIX;
-                    final String configContent = String.format(middleBlueprint, name, String.valueOf(openDevice), String.valueOf(!useSsh));
+                    String configContent = String.format(middleBlueprint, name, String.valueOf(openDevice), String.valueOf(!useSsh));
+                    configContent = String.format("%s%s%d%s\n%s\n", configContent, "<connection-timeout-millis>", generateConfigsTimeout, "</connection-timeout-millis>", "</module>");
+
                     b.append(configContent);
                     connectorCount++;
                     if(connectorCount == batchSize) {
