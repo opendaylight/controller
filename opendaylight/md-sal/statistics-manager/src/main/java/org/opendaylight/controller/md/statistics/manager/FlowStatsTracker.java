@@ -301,4 +301,13 @@ final class FlowStatsTracker extends AbstractListeningStatsTracker<FlowAndStatis
         }
         return flowCookieMap;
     }
+
+    @Override
+    protected FlowStatsEntry createInvariantKey(final FlowStatsEntry item) {
+        FlowBuilder newFlow = new FlowBuilder();
+        newFlow.setId(item.getFlow().getId());
+        newFlow.setKey(item.getFlow().getKey());
+        newFlow.fieldsFrom(item.getFlow());
+        return new FlowStatsEntry(item.getTableId(),newFlow.build());
+    }
 }
