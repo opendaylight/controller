@@ -56,4 +56,9 @@ final class FlowStatsEntry {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "FlowStatsEntry [tableId=" + tableId + ", flow=" + flow + "]";
+    }
 }
