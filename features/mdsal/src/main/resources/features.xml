@@ -46,7 +46,7 @@
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.thirdparty/com.sun.jersey.jersey-servlet/${jersey.version}</bundle>
+        <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
         <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>

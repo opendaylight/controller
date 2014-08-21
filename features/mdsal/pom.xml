@@ -123,8 +123,8 @@
       <artifactId>jersey-server</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.thirdparty</groupId>
-      <artifactId>com.sun.jersey.jersey-servlet</artifactId>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
