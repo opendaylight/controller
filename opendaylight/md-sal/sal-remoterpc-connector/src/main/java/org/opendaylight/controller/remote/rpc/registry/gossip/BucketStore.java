@@ -9,10 +9,11 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.cluster.Cluster;
+import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import org.opendaylight.controller.utils.ConditionalProbe;
@@ -65,37 +66,25 @@ public class BucketStore extends UntypedActor {
     /**
      * Cluster address for this node
      */
-    private final Address selfAddress = Cluster.get(getContext().system()).selfAddress();
-
-    /**
-     * Our private gossiper
-     */
-    private ActorRef gossiper;
+    private Address selfAddress;
 
     private ConditionalProbe probe;
 
-    public BucketStore(){
-        gossiper = getContext().actorOf(Props.create(Gossiper.class), "gossiper");
-    }
+    @Override
+    public void preStart(){
+        ActorRefProvider provider = getContext().provider();
+        selfAddress = provider.getDefaultAddress();
 
-    /**
-     * This constructor is useful for testing.
-     * TODO: Pass Props instead of ActorRef
-     *
-     * @param gossiper
-     */
-    public BucketStore(ActorRef gossiper){
-        this.gossiper = gossiper;
+        if ( provider instanceof ClusterActorRefProvider)
+            getContext().actorOf(Props.create(Gossiper.class), "gossiper");
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
 
-        log.debug("Received message: node[{}], message[{}]", selfAddress,
-            message);
+        log.debug("Received message: node[{}], message[{}]", selfAddress, message);
 
         if (probe != null) {
-
             probe.tell(message, getSelf());
         }
 
@@ -238,7 +227,7 @@ public class BucketStore extends UntypedActor {
             if (remoteVersion == null) remoteVersion = -1L;
 
             //update only if remote version is newer
-            if ( remoteVersion > localVersion ) {
+            if ( remoteVersion.longValue() > localVersion.longValue() ) {
                 remoteBuckets.put(entry.getKey(), receivedBucket);
                 versions.put(entry.getKey(), remoteVersion);
             }
@@ -278,5 +267,4 @@ public class BucketStore extends UntypedActor {
     Address getSelfAddress() {
         return selfAddress;
     }
-
 }
