@@ -1,0 +1,5 @@
+<toaster xmlns="http://netconfcentral.org/ns/toaster">
+     <toasterManufacturer>Opendaylight</toasterManufacturer>
+    <toasterModelNumber>Model 1 - Binding Aware</toasterModelNumber>
+     <toasterStatus>up</toasterStatus>
+</toaster>

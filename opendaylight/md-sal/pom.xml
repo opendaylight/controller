@@ -78,6 +78,10 @@
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
 
+    <!--Xpath -->
+    <module>sal-xpath</module>
+    <module>sal-xpath-it</module>
+
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
 
