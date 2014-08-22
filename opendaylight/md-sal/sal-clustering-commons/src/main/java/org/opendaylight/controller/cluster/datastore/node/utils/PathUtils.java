@@ -23,6 +23,8 @@ public class PathUtils {
                         parentPath.append(parentPaths[i]);
                     }
                 }
+            } else if(parentPaths.length == 2){
+                return parentPaths[0];
             }
         }
         return parentPath.toString();
