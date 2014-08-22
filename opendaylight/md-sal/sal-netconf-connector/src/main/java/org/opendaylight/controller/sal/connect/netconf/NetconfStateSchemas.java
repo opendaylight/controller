@@ -115,6 +115,11 @@ public final class NetconfStateSchemas {
 
         final CompositeNode schemasNode =
                 (CompositeNode) NetconfMessageTransformUtil.findNode(schemasNodeResult.getResult(), DATA_STATE_SCHEMAS_IDENTIFIER);
+        if(schemasNode == null) {
+            logger.warn("{}: Unable to detect available schemas, get to {} was empty", id, STATE_SCHEMAS_IDENTIFIER);
+            return EMPTY;
+        }
+        
         return create(id, schemasNode);
     }
 
