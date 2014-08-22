@@ -5,9 +5,11 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.junit.Assert;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -32,11 +34,15 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import scala.concurrent.duration.Duration;
+
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -54,8 +60,10 @@ public class ShardTransactionTest extends AbstractActorTest {
         ShardIdentifier.builder().memberName("member-1")
             .shardName("inventory").type("config").build();
 
+    private ShardContext shardContext = new ShardContext();
 
-    static {
+    @BeforeClass
+    public static void staticSetup() {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
@@ -63,8 +71,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveReadData() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
+            final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadData");
 
             new Within(duration("1 seconds")) {
@@ -105,8 +113,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props( store.newReadOnlyTransaction(), shard, testSchemaContext);
+            final Props props = ShardTransaction.props( store.newReadOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject = getSystem().actorOf(props, "testReadDataWhenDataNotFound");
 
             new Within(duration("1 seconds")) {
@@ -148,8 +156,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveDataExistsPositive() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
+            final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsPositive");
 
             new Within(duration("1 seconds")) {
@@ -191,8 +199,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
                     Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newReadOnlyTransaction(), shard, testSchemaContext);
+            final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject = getSystem().actorOf(props, "testDataExistsNegative");
 
             new Within(duration("1 seconds")) {
@@ -268,8 +276,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveWriteData() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newWriteOnlyTransaction(), shard, TestModel.createTestContext());
+            final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testWriteData");
 
@@ -308,8 +316,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveMergeData() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, testSchemaContext);
+            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testMergeData");
 
@@ -349,8 +357,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveDeleteData() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props( store.newWriteOnlyTransaction(), shard, TestModel.createTestContext());
+            final Props props = ShardTransaction.props( store.newWriteOnlyTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testDeleteData");
 
@@ -388,8 +396,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveReadyTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props( store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+            final Props props = ShardTransaction.props( store.newReadWriteTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testReadyTransaction");
 
@@ -426,23 +434,24 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveCloseTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-            final Props props =
-                ShardTransaction.props(store.newReadWriteTransaction(), shard, TestModel.createTestContext());
+            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+                    testSchemaContext, shardContext);
             final ActorRef subject =
                 getSystem().actorOf(props, "testCloseTransaction");
 
             watch(subject);
 
-            new Within(duration("2 seconds")) {
+            new Within(duration("6 seconds")) {
                 @Override
                 protected void run() {
 
                     subject.tell(new CloseTransaction().toSerializable(), getRef());
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
+                    final String out = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
                         protected String match(Object in) {
+                            System.out.println("!!!IN match 1: "+(in!=null?in.getClass():"NULL"));
                             if (in.getClass().equals(CloseTransactionReply.SERIALIZABLE_CLASS)) {
                                 return "match";
                             } else {
@@ -453,10 +462,11 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                     assertEquals("match", out);
 
-                    final String termination = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
+                    final String termination = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
                         // do not put code outside this method, will run afterwards
                         @Override
                         protected String match(Object in) {
+                            System.out.println("!!!IN match 2: "+(in!=null?in.getClass():"NULL"));
                             if (in instanceof Terminated) {
                                 return "match";
                             } else {
@@ -465,33 +475,52 @@ public class ShardTransactionTest extends AbstractActorTest {
                         }
                     }.get(); // this extracts the received message
 
-
-                    expectNoMsg();
+                    assertEquals("match", termination);
                 }
-
-
             };
         }};
-
     }
 
-
-  @Test
-  public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
-    try {
-
+    @Test(expected=UnknownMessageException.class)
+    public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
         final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
-        final Props props =
-            ShardTransaction.props(store.newReadOnlyTransaction(), shard, TestModel.createTestContext());
-         final TestActorRef subject = TestActorRef.apply(props,getSystem());
+        final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+                testSchemaContext, shardContext);
+        final TestActorRef subject = TestActorRef.apply(props,getSystem());
 
         subject.receive(new DeleteData(TestModel.TEST_PATH).toSerializable(), ActorRef.noSender());
-        Assert.assertFalse(true);
-
-
-    } catch (Exception cs) {
-      assertEquals(UnknownMessageException.class.getSimpleName(), cs.getClass().getSimpleName());
-      assertTrue(cs.getMessage(), cs.getMessage().startsWith("Unknown message received "));
     }
-  }
+
+    @Test
+    public void testShardTransactionInactivity() {
+
+        shardContext = new ShardContext(InMemoryDOMDataStoreConfigProperties.getDefault(),
+                Duration.create(500, TimeUnit.MILLISECONDS));
+
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, null));
+            final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+                    testSchemaContext, shardContext);
+            final ActorRef subject =
+                getSystem().actorOf(props, "testShardTransactionInactivity");
+
+            watch(subject);
+
+            // The shard Tx actor should receive a ReceiveTimeout message and self-destruct.
+
+            final String termination = new ExpectMsg<String>(duration("3 seconds"), "match hint") {
+                // do not put code outside this method, will run afterwards
+                @Override
+                protected String match(Object in) {
+                    if (in instanceof Terminated) {
+                        return "match";
+                    } else {
+                        throw noMatch();
+                    }
+                }
+            }.get(); // this extracts the received message
+
+            assertEquals("match", termination);
+        }};
+    }
 }
