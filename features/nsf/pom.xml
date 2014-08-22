@@ -8,12 +8,27 @@
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <artifactId>features-nsf</artifactId>
-  <packaging>pom</packaging>
+  <version>${nsf.version}</version>
+  <packaging>jar</packaging>
   <name>OpenDaylight :: Features :: Network Service Functions</name>
   <description>Feature for Network Service Functions</description>
   <properties>
     <features.file>features.xml</features.file>
   </properties>
+  <dependencies>
+    <!-- test to validate features.xml -->
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>features-test</artifactId>
+    </dependency>
+    <!-- dependency for opendaylight-karaf-empty for use by testing -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>opendaylight-karaf-empty</artifactId>
+      <version>1.4.2-SNAPSHOT</version>
+      <type>zip</type>
+    </dependency>
+  </dependencies>
   <build>
     <resources>
       <resource>
@@ -56,6 +71,20 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
+            <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
+            <karaf.distro.version>${commons.opendaylight.version}</karaf.distro.version>
+          </systemPropertyVariables>
+          <dependenciesToScan>
+           <dependency>org.opendaylight.yangtools:features-test</dependency>
+          </dependenciesToScan>
+        </configuration>
       </plugin>
     </plugins>
   </build>

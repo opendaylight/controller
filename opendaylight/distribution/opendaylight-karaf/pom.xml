@@ -52,7 +52,7 @@
           down with testing... ie, no broken feature repos
     -->
 
-    <!-- MD-SAL Related Features -->
+    <!-- AD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>base-features</artifactId>
@@ -65,6 +65,13 @@
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-nsf</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <!-- MD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>

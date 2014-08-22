@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="nsf-${project.version}"  xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <repository>mvn:org.opendaylight.controller/base-features/${commons.opendaylight.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
     <feature name="odl-nsf-all" description="OpenDaylight :: NSF :: All Network Service Functions" version="${project.version}">
         <feature version="${sal.version}">odl-adsal-all</feature>
         <feature version="${project.version}">odl-nsf-managers</feature>
@@ -11,7 +13,7 @@
     </feature>
 
     <feature name="odl-nsf-managers" description="OpenDaylight :: AD-SAL :: Network Service Functions" version="${project.version}">
-        <feature version="${project.version}">base-all</feature>
+        <feature version="${commons.opendaylight.version}">base-all</feature>
         <feature version="${sal.version}">odl-adsal-all</feature>
         <bundle>mvn:org.opendaylight.controller/usermanager/${usermanager.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/usermanager.implementation/${usermanager.version}</bundle>
@@ -50,7 +52,7 @@
     </feature>
 
     <feature name="odl-adsal-northbound" description="OpenDaylight :: AD-SAL :: Northbound APIs" version="${project.version}">
-        <feature version="${project.version}">base-all</feature>
+        <feature version="${commons.opendaylight.version}">base-all</feature>
         <feature version="${project.version}">odl-nsf-managers</feature>
         <bundle start-level="35">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
         <!--
