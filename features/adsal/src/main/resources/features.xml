@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="adsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <repository>mvn:org.opendaylight.controller/base-features/${commons.opendaylight.version}/xml/features</repository>
    <feature name="odl-adsal-all" description="OpenDaylight AD-SAL All Features" version="${sal.version}">
       <feature version="${sal.version}">odl-adsal-core</feature>
       <feature version="${sal.networkconfiguration.version}">odl-adsal-networkconfiguration</feature>
@@ -18,6 +19,7 @@
       <bundle>mvn:org.opendaylight.controller/sal.implementation/${sal.implementation.version}</bundle>
    </feature>
    <feature name="odl-adsal-networkconfiguration" description="OpenDaylight :: AD-SAL :: Network Configuration" version="${sal.networkconfiguration.version}">
+      <feature>odl-adsal-core</feature>
       <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration/${sal.networkconfiguration.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal.networkconfiguration.implementation/${sal.networkconfiguration.version}</bundle>
    </feature>

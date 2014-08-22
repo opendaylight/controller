@@ -61,6 +61,12 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-adsal</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
