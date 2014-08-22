@@ -13,9 +13,13 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -31,6 +35,7 @@ import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessa
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -59,19 +64,26 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         ShardIdentifier.builder().memberName("member-1")
             .shardName("inventory").type("config").build();
 
-    static {
+    private final ShardContext shardContext = new ShardContext(null);
+
+    @BeforeClass
+    public static void staticSetup() {
         store.onGlobalContextUpdated(testSchemaContext);
     }
 
-    private FiniteDuration ASK_RESULT_DURATION = Duration.create(5000, TimeUnit.MILLISECONDS);
+    @Before
+    public void setUp() {
+        shardContext.setSchemaContext(testSchemaContext);
+    }
+
+    private final FiniteDuration ASK_RESULT_DURATION = Duration.create(5000, TimeUnit.MILLISECONDS);
 
 
     @Test(expected = TestException.class)
     public void testNegativeAbortResultsInException() throws Exception {
 
-        final ActorRef shard =
-            getSystem()
-                .actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP,null));
+        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
+                Collections.EMPTY_MAP, shardContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -93,18 +105,14 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
         assertTrue(future.isCompleted());
 
         Await.result(future, ASK_RESULT_DURATION);
-
-
-
     }
 
 
     @Test(expected = OptimisticLockFailedException.class)
     public void testNegativeCanCommitResultsInException() throws Exception {
 
-        final ActorRef shard =
-            getSystem()
-                .actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP,null));
+        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
+                Collections.EMPTY_MAP, shardContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -135,9 +143,8 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     @Test(expected = TestException.class)
     public void testNegativePreCommitResultsInException() throws Exception {
 
-        final ActorRef shard =
-            getSystem()
-                .actorOf(Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP,null));
+        final ActorRef shard = getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
+                Collections.EMPTY_MAP, shardContext));
         final DOMStoreThreePhaseCommitCohort mockCohort = Mockito
             .mock(DOMStoreThreePhaseCommitCohort.class);
         final CompositeModification mockComposite =
@@ -166,15 +173,13 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
     @Test(expected = TestException.class)
     public void testNegativeCommitResultsInException() throws Exception {
 
-        final TestActorRef<Shard> subject = TestActorRef
-            .create(getSystem(),
-                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP,null),
+        final TestActorRef<Shard> subject = TestActorRef.create(getSystem(),
+                Shard.props(SHARD_IDENTIFIER, Collections.EMPTY_MAP, shardContext),
                 "testNegativeCommitResultsInException");
 
         final ActorRef shardTransaction =
             getSystem().actorOf(
-                ShardTransaction.props(store.newReadWriteTransaction(), subject,
-                    TestModel.createTestContext()));
+                ShardTransaction.props(store.newReadWriteTransaction(), subject, shardContext));
 
         ShardTransactionMessages.WriteData writeData =
             ShardTransactionMessages.WriteData.newBuilder()
@@ -221,12 +226,8 @@ public class ThreePhaseCommitCohortFailureTest extends AbstractActorTest {
                 mockForwardCommitTransaction
                 , 3000);
         Await.result(future, ASK_RESULT_DURATION);
-
-
     }
 
     private class TestException extends Exception {
     }
-
-
 }

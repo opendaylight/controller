@@ -3,9 +3,12 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import akka.event.Logging;
 import akka.testkit.JavaTestKit;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import junit.framework.Assert;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -69,10 +72,13 @@ public class DistributedDataStoreIntegrationTest {
             {
 
                 new Within(duration("10 seconds")) {
+                    @Override
                     protected void run() {
                         try {
                             final DistributedDataStore distributedDataStore =
-                                new DistributedDataStore(getSystem(), "config", new MockClusterWrapper(), configuration, null);
+                                new DistributedDataStore(getSystem(), "config",
+                                        new MockClusterWrapper(), configuration,
+                                        new DistributedDataStoreProperties());
 
                             distributedDataStore.onGlobalContextUpdated(TestModel.createTestContext());
 
@@ -80,6 +86,7 @@ public class DistributedDataStoreIntegrationTest {
                             final boolean result =
                                 new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                                     ) {
+                                    @Override
                                     protected Boolean run() {
                                         return true;
                                     }
@@ -150,6 +157,7 @@ public class DistributedDataStoreIntegrationTest {
             {
 
                 new Within(duration("10 seconds")) {
+                    @Override
                     protected void run() {
                         try {
                             final DistributedDataStore distributedDataStore =
@@ -164,6 +172,7 @@ public class DistributedDataStoreIntegrationTest {
                                 new JavaTestKit.EventFilter<Boolean>(
                                     Logging.Info.class
                                 ) {
+                                    @Override
                                     protected Boolean run() {
                                         return true;
                                     }
