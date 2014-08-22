@@ -182,7 +182,7 @@ public class NormalizedNodeToNodeCodecTest {
 
     System.out.println(encode.getNormalizedNode());
 
-    codec.decode(identifier, encode.getNormalizedNode());
+    codec.decode(identifier , encode.getNormalizedNode());
   }
 
 }
