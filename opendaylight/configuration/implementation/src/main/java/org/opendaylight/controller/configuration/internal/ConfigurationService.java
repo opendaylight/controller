@@ -44,13 +44,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class ConfigurationService implements IConfigurationService, ICacheUpdateAware<ConfigurationEvent, String> {
+public class ConfigurationService implements IConfigurationService, ICacheUpdateAware<String, String> {
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigurationService.class);
     public static final String SAVE_EVENT_CACHE = "config.event.save";
     private static final String ROOT = GlobalConstants.STARTUPHOME.toString();
     private IClusterGlobalServices clusterServices;
-    private ConcurrentMap <ConfigurationEvent, String> configEvent;
+    private ConcurrentMap<String, String> configEvent;
     private Set<IConfigurationAware> configurationAwareList = Collections
             .synchronizedSet(new HashSet<IConfigurationAware>());
     private ObjectReader objReader;
@@ -105,7 +105,7 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     @Override
     public Status saveConfigurations() {
         if (configEvent != null) {
-            configEvent.put(ConfigurationEvent.SAVE, "");
+            configEvent.put(ConfigurationEvent.SAVE.toString(), "");
         }
         return saveConfigurationsInternal();
     }
@@ -183,7 +183,7 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     }
 
     @Override
-    public void entryCreated(ConfigurationEvent key, String cacheName,
+    public void entryCreated(String key, String cacheName,
             boolean originLocal) {
         if (originLocal) {
             return;
@@ -191,18 +191,18 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
     }
 
     @Override
-    public void entryUpdated(ConfigurationEvent key, String new_value,
+    public void entryUpdated(String key, String new_value,
             String cacheName, boolean originLocal) {
         if (originLocal) {
             return;
         }
-        if (key == ConfigurationEvent.SAVE) {
+        if (key.equals(ConfigurationEvent.SAVE.toString())) {
             saveConfigurationsInternal();
         }
     }
 
     @Override
-    public void entryDeleted(ConfigurationEvent key, String cacheName,
+    public void entryDeleted(String key, String cacheName,
             boolean originLocal) {
         if (originLocal) {
             return;
@@ -230,7 +230,7 @@ public class ConfigurationService implements IConfigurationService, ICacheUpdate
             logger.error("uninitialized clusterServices, can't retrieve cache");
             return;
         }
-        configEvent = (ConcurrentMap<ConfigurationEvent, String>) this.clusterServices.getCache(SAVE_EVENT_CACHE);
+        configEvent = (ConcurrentMap<String, String>) this.clusterServices.getCache(SAVE_EVENT_CACHE);
         if (configEvent == null) {
             logger.error("Failed to retrieve configuration Cache");
         }
