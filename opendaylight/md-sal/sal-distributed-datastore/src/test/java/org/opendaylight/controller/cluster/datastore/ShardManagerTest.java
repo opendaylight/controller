@@ -46,7 +46,7 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 
@@ -71,7 +71,7 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 
@@ -95,13 +95,13 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 
                     subject.tell(new FindLocalShard("inventory"), getRef());
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "find local") {
+                    final String out = new ExpectMsg<String>(duration("10 seconds"), "find local") {
                         @Override
                         protected String match(Object in) {
                             if (in instanceof LocalShardNotFound) {
@@ -132,13 +132,13 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 
                     subject.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
 
-                    final ActorRef out = new ExpectMsg<ActorRef>(duration("1 seconds"), "find local") {
+                    final ActorRef out = new ExpectMsg<ActorRef>(duration("10 seconds"), "find local") {
                         @Override
                         protected ActorRef match(Object in) {
                             if (in instanceof LocalShardFound) {
@@ -169,7 +169,7 @@ public class ShardManagerTest {
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 
@@ -209,7 +209,7 @@ public class ShardManagerTest {
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 @Override
                 protected void run() {
 

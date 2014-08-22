@@ -30,7 +30,7 @@ public class LatestEntryRoutingLogicTest {
 
   @BeforeClass
   public static void setup() throws InterruptedException {
-    system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster"));
+    system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
   }
 
   @AfterClass

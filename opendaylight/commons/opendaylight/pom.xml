@@ -39,6 +39,7 @@
     <clustering.test.version>0.4.2-SNAPSHOT</clustering.test.version>
     <commmons.northbound.version>0.4.2-SNAPSHOT</commmons.northbound.version>
     <!-- Third Party Versions -->
+    <codahale.metrics.version>3.0.1</codahale.metrics.version>
     <commons.catalina>7.0.32.v201211201336</commons.catalina>
     <commons.catalina.ha>7.0.32.v201211201952</commons.catalina.ha>
     <commons.catalina.tribes>7.0.32.v201211201952</commons.catalina.tribes>
@@ -252,6 +253,16 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-core</artifactId>
         <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>${codahale.metrics.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-graphite</artifactId>
+        <version>${codahale.metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>

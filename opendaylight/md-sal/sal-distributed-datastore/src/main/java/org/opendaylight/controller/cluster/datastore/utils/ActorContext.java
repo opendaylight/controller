@@ -52,6 +52,8 @@ public class ActorContext {
     public static final Duration AWAIT_DURATION =
         Duration.create(5, TimeUnit.SECONDS);
 
+    public static final String MAILBOX = "bounded-mailbox";
+
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
