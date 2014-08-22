@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_bc53ba15",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Add a precondition for null check?",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7c59b233",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Its a matter of preference, but I\u0027d rather return an Option\u003cNormalizedNodeMessage.Node\u003e to prevent NPE",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc323ef1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Shouldnt you do else if here?",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bc7ada85",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "will node.getNodeType() and node.getValue() always be present. Do you think a validateNode(Node) method should be added?",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1c6bc6b7",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Should argument be validated?",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3c66caed",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Same as before. Argument validation.",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dc60fed0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Same as above comment about returning Option vs null",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fc5b821f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2014-08-22T20:47:11Z",
+      "side": 1,
+      "message": "Better to do null check for this mandatory field upfront either in the constructor or in the public method where instance is created.",
+      "revId": "53ff6690d1468ddc22525a0edbb6cbbaaa78361c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
