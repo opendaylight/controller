@@ -13,6 +13,8 @@ import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.FinalizablePhantomReference;
+import com.google.common.base.FinalizableReferenceQueue;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -49,9 +51,9 @@ import scala.Function1;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -87,9 +89,72 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
 
+    /**
+     * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
+     * FinalizableReferenceQueue is safe to use statically in an OSGi environment as it uses some
+     * trickery to clean up its internal thread when the bundle is unloaded.
+     */
+    private static final FinalizableReferenceQueue phantomReferenceQueue =
+                                                                  new FinalizableReferenceQueue();
+
+    /**
+     * This stores the TransactionProxyCleanupPhantomReference instances statically, This is
+     * necessary because PhantomReferences need a hard reference so they're not garbage collected.
+     * Once finalized, the TransactionProxyCleanupPhantomReference removes itself from this map
+     * and thus becomes eligible for garbage collection.
+     */
+    private static final Map<TransactionProxyCleanupPhantomReference,
+                             TransactionProxyCleanupPhantomReference> phantomReferenceCache =
+                                                                        new ConcurrentHashMap<>();
+
+    /**
+     * A PhantomReference that closes remote transactions for a TransactionProxy when it's
+     * garbage collected. This is used for read-only transactions as they're not explicitly closed
+     * by clients. So the only way to detect that a transaction is no longer in use and it's safe
+     * to clean up is when it's garbage collected. It's inexact as to when an instance will be GC'ed
+     * but TransactionProxy instances should generally be short-lived enough to avoid being moved
+     * to the old generation space and thus should be cleaned up in a timely manner as the GC
+     * runs on the young generation (eden, swap1...) space much more frequently.
+     */
+    private static class TransactionProxyCleanupPhantomReference
+                                           extends FinalizablePhantomReference<TransactionProxy> {
+
+        private final Map<String, TransactionContext> remoteTransactionPaths;
+        private final TransactionIdentifier identifier;
+
+        protected TransactionProxyCleanupPhantomReference(TransactionProxy referent) {
+            super(referent, phantomReferenceQueue);
+
+            // Note we need to cache the relevant fields from the TransactionProxy as we can't
+            // have a hard reference to the TransactionProxy instance itself.
+
+            remoteTransactionPaths = referent.remoteTransactionPaths;
+            identifier = referent.identifier;
+        }
+
+        @Override
+        public void finalizeReferent() {
+            LOG.trace("Cleaning up TransactionProxy {}", identifier);
+
+            phantomReferenceCache.remove(this);
+
+            for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
+                transactionContext.closeTransaction();
+            }
+        }
+    }
+
+    /**
+     * Stores the TransactionContext for each requested data store path. Even though transactions
+     * aren't intended to be accessed by multiple threads, concurrently or not, we still use a
+     * ConcurrentHashMap here as the map may be accessed by the PhantomReference after garbage
+     * collection so we need to ensure updates to this map will be visible to the thread accessing
+     * the PhantomReference.
+     */
+    private final Map<String, TransactionContext> remoteTransactionPaths = new ConcurrentHashMap<>();
+
     private final TransactionType transactionType;
     private final ActorContext actorContext;
-    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
     private final TransactionIdentifier identifier;
     private final SchemaContext schemaContext;
     private boolean inReadyState;
@@ -108,8 +173,17 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this.identifier = TransactionIdentifier.builder().memberName(memberName).counter(
                 counter.getAndIncrement()).build();
 
-        LOG.debug("Created txn {}", identifier);
+        if(transactionType == TransactionType.READ_ONLY) {
+            // Read-only Tx's aren't explicitly closed by the client so we create a PhantomReference
+            // to close the remote Tx's when this instance is no longer in use and is garbage
+            // collected.
 
+            TransactionProxyCleanupPhantomReference cleanup =
+                                              new TransactionProxyCleanupPhantomReference(this);
+            phantomReferenceCache.put(cleanup, cleanup);
+        }
+
+        LOG.debug("Created {} txn {}", transactionType, identifier);
     }
 
     @VisibleForTesting
@@ -226,6 +300,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
             transactionContext.closeTransaction();
         }
+
+        remoteTransactionPaths.clear();
     }
 
     private TransactionContext transactionContext(YangInstanceIdentifier path){
@@ -264,7 +340,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     actorContext.actorSelection(transactionPath);
                 transactionContext =
                     new TransactionContextImpl(shardName, transactionPath,
-                        transactionActor);
+                        transactionActor, identifier, actorContext, schemaContext);
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             } else {
@@ -273,7 +349,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             }
         } catch(Exception e){
             LOG.debug("Tx {} Creating NoOpTransaction because of : {}", identifier, e.getMessage());
-            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName, e));
+            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName, e, identifier));
         }
     }
 
@@ -298,13 +374,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         List<Future<Object>> getRecordedOperationFutures();
     }
 
-    private abstract class AbstractTransactionContext implements TransactionContext {
+    private static abstract class AbstractTransactionContext implements TransactionContext {
 
+        protected final TransactionIdentifier identifier;
         protected final String shardName;
         protected final List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
 
-        AbstractTransactionContext(String shardName) {
+        AbstractTransactionContext(String shardName, TransactionIdentifier identifier) {
             this.shardName = shardName;
+            this.identifier = identifier;
         }
 
         @Override
@@ -318,17 +396,28 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private class TransactionContextImpl extends AbstractTransactionContext {
+    /**
+     * Note: this class must be static so it has no reference back to the enclosing
+     * TransactionProxy instance. This is necessary so TransactionProxy and TransactionContextImpl
+     * instances can be garbage collection as the TransactionProxyCleanupPhantomReference instances
+     * have an indirect reference to the TransactionContextImpl instance.
+     */
+    private static class TransactionContextImpl extends AbstractTransactionContext {
         private final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
+        private final ActorContext actorContext;
+        private final SchemaContext schemaContext;
         private final String actorPath;
         private final ActorSelection actor;
 
         private TransactionContextImpl(String shardName, String actorPath,
-            ActorSelection actor) {
-            super(shardName);
+                ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
+                SchemaContext schemaContext) {
+            super(shardName, identifier);
             this.actorPath = actorPath;
             this.actor = actor;
+            this.actorContext = actorContext;
+            this.schemaContext = schemaContext;
         }
 
         private ActorSelection getActor() {
@@ -600,14 +689,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private class NoOpTransactionContext extends AbstractTransactionContext {
+    private static class NoOpTransactionContext extends AbstractTransactionContext {
 
         private final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
         private final Exception failure;
 
-        public NoOpTransactionContext(String shardName, Exception failure){
-            super(shardName);
+        public NoOpTransactionContext(String shardName, Exception failure,
+                TransactionIdentifier identifier){
+            super(shardName, identifier);
             this.failure = failure;
         }
 
