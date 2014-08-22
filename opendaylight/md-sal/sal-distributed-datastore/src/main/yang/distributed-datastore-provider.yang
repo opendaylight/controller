@@ -36,36 +36,48 @@ module distributed-datastore-provider {
                 config:java-name-prefix DistributedOperationalDataStoreProvider;
      }
 
+    grouping data-store-properties {
+        leaf max-shard-data-change-executor-queue-size {
+            default 1000;
+            type uint16;
+            description "The maximum queue size for each shard's data store data change notification executor.";
+         }
+
+         leaf max-shard-data-change-executor-pool-size {
+            default 20;
+            type uint16;
+            description "The maximum thread pool size for each shard's data store data change notification executor.";
+         }
+
+         leaf max-shard-data-change-listener-queue-size {
+            default 1000;
+            type uint16;
+            description "The maximum queue size for each shard's data store data change listeners.";
+         }
+         
+         leaf shard-transaction-idle-timeout-in-minutes {
+            default 10;
+            type uint16;
+            description "The maximum amount of time a shard transaction can be idle without receiving any messages before it self-destructs.";
+         }
+    }
+    
     // Augments the 'configuration' choice node under modules/module.
     augment "/config:modules/config:module/config:configuration" {
         case distributed-config-datastore-provider {
             when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
-            container config-schema-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:schema-service;
+                container config-schema-service {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:schema-service;
+                        }
                     }
                 }
-            }
 
-            leaf config-max-shard-data-change-executor-queue-size {
-                default 1000;
-                type uint16;
-                description "The maximum queue size for each shard's data store data change notification executor.";
-            }
-
-            leaf config-max-shard-data-change-executor-pool-size {
-                default 20;
-                type uint16;
-                description "The maximum thread pool size for each shard's data store data change notification executor.";
-            }
-
-            leaf config-max-shard-data-change-listener-queue-size {
-                default 1000;
-                type uint16;
-                description "The maximum queue size for each shard's data store data change listeners.";
-            }
+                container config-properties {
+                    uses data-store-properties;
+                }
         }
     }
 
@@ -82,23 +94,9 @@ module distributed-datastore-provider {
                     }
                 }
 
-            leaf operational-max-shard-data-change-executor-queue-size {
-                default 1000;
-                type uint16;
-                description "The maximum queue size for each shard's data store data change notification executor.";
-            }
-
-            leaf operational-max-shard-data-change-executor-pool-size {
-                default 20;
-                type uint16;
-                description "The maximum thread pool size for each shard's data store data change notification executor.";
-            }
-
-            leaf operational-max-shard-data-change-listener-queue-size {
-                default 1000;
-                type uint16;
-                description "The maximum queue size for each shard's data store data change listeners.";
-            }
-            }
+                container operational-properties {
+                    uses data-store-properties;
+                }
         }
+    }
 }

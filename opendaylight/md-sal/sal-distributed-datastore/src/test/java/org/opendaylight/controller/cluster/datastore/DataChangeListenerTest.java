@@ -24,9 +24,9 @@ import static org.junit.Assert.assertTrue;
 public class DataChangeListenerTest extends AbstractActorTest {
 
     private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
-       Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap();
-       Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap();
-       Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap();
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> createdData = new HashMap<>();
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> updatedData = new HashMap<>();
+       Map<YangInstanceIdentifier,NormalizedNode<?,?>> originalData = new HashMap<>();
 
 
 
@@ -90,11 +90,12 @@ public class DataChangeListenerTest extends AbstractActorTest {
     public void testDataChangedWhenNotificationsAreEnabled(){
         new JavaTestKit(getSystem()) {{
             final MockDataChangeListener listener = new MockDataChangeListener();
-            final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener,CompositeModel.FAMILY_PATH );
+            final Props props = DataChangeListener.props(listener);
             final ActorRef subject =
                 getSystem().actorOf(props, "testDataChangedNotificationsEnabled");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     // Let the DataChangeListener know that notifications should
@@ -107,6 +108,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("800 millis"), "dataChanged") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in != null && in.getClass().equals(DataChangedReply.class)) {
 
@@ -123,8 +125,6 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                     expectNoMsg();
                 }
-
-
             };
         }};
     }
@@ -133,11 +133,12 @@ public class DataChangeListenerTest extends AbstractActorTest {
     public void testDataChangedWhenNotificationsAreDisabled(){
         new JavaTestKit(getSystem()) {{
             final MockDataChangeListener listener = new MockDataChangeListener();
-            final Props props = DataChangeListener.props(CompositeModel.createTestContext(),listener,CompositeModel.FAMILY_PATH );
+            final Props props = DataChangeListener.props(listener);
             final ActorRef subject =
                 getSystem().actorOf(props, "testDataChangedNotificationsDisabled");
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     subject.tell(
@@ -146,8 +147,6 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                     expectNoMsg();
                 }
-
-
             };
         }};
     }

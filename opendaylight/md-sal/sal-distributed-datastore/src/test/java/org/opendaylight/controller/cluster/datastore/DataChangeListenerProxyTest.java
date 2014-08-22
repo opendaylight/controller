@@ -3,7 +3,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -47,7 +47,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
     @Override
     public Set<YangInstanceIdentifier> getRemovedPaths() {
-      Set<YangInstanceIdentifier>ids = new HashSet();
+      Set<YangInstanceIdentifier>ids = new HashSet<>();
       ids.add( CompositeModel.TEST_PATH);
       return ids;
     }
@@ -73,9 +73,8 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
         final Props props = Props.create(MessageCollectorActor.class);
         final ActorRef actorRef = getSystem().actorOf(props);
 
-        DataChangeListenerProxy dataChangeListenerProxy =
-            new DataChangeListenerProxy(TestModel.createTestContext(),
-                getSystem().actorSelection(actorRef.path()));
+        DataChangeListenerProxy dataChangeListenerProxy = new DataChangeListenerProxy(
+                TestModel.createTestContext(), getSystem().actorSelection(actorRef.path()));
 
         dataChangeListenerProxy.onDataChanged(new MockDataChangedEvent());
 
