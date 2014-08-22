@@ -13,6 +13,8 @@ import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.FinalizablePhantomReference;
+import com.google.common.base.FinalizableReferenceQueue;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -52,6 +54,8 @@ import scala.runtime.AbstractFunction1;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -87,18 +91,98 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
 
+    /**
+     * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
+     * FinalizableReferenceQueue is safe to use statically in an OSGi environment as it uses some
+     * trickery to clean up its internal thread when the bundle is unloaded.
+     */
+    private static final FinalizableReferenceQueue phantomReferenceQueue =
+                                                                  new FinalizableReferenceQueue();
+
+    /**
+     * This stores the TransactionProxyCleanupPhantomReference instances statically, This is
+     * necessary because PhantomReferences need a hard reference so they're not garbage collected.
+     * Once finalized, the TransactionProxyCleanupPhantomReference removes itself from this map
+     * and thus becomes eligible for garbage collection.
+     */
+    private static final Map<TransactionProxyCleanupPhantomReference,
+                             TransactionProxyCleanupPhantomReference> phantomReferenceCache =
+                                                                        new ConcurrentHashMap<>();
+
+    /**
+     * A PhantomReference that closes remote transactions for a TransactionProxy when it's
+     * garbage collected. This is used for read-only transactions as they're not explicitly closed
+     * by clients. So the only way to detect that a transaction is no longer in use and it's safe
+     * to clean up is when it's garbage collected. It's inexact as to when an instance will be GC'ed
+     * but TransactionProxy instances should generally be short-lived enough to avoid being moved
+     * to the old generation space and thus should be cleaned up in a timely manner as the GC
+     * runs on the young generation (eden, swap1...) space much more frequently.
+     */
+    private static class TransactionProxyCleanupPhantomReference
+                                           extends FinalizablePhantomReference<TransactionProxy> {
+
+        private final List<ActorSelection> remoteTransactionActors;
+        private final AtomicBoolean remoteTransactionActorsMB;
+        private final ActorContext actorContext;
+        private final TransactionIdentifier identifier;
+
+        protected TransactionProxyCleanupPhantomReference(TransactionProxy referent) {
+            super(referent, phantomReferenceQueue);
+
+            // Note we need to cache the relevant fields from the TransactionProxy as we can't
+            // have a hard reference to the TransactionProxy instance itself.
+
+            remoteTransactionActors = referent.remoteTransactionActors;
+            remoteTransactionActorsMB = referent.remoteTransactionActorsMB;
+            actorContext = referent.actorContext;
+            identifier = referent.identifier;
+        }
+
+        @Override
+        public void finalizeReferent() {
+            LOG.trace("Cleaning up {} Tx actors for TransactionProxy {}",
+                    remoteTransactionActors.size(), identifier);
+
+            phantomReferenceCache.remove(this);
+
+            // Access the memory barrier volatile to ensure all previous updates to the
+            // remoteTransactionActors list are visible to this thread.
+
+            if(remoteTransactionActorsMB.get()) {
+                for(ActorSelection actor : remoteTransactionActors) {
+                    LOG.trace("Sending CloseTransaction to {}", actor);
+                    actorContext.sendRemoteOperationAsync(actor,
+                            new CloseTransaction().toSerializable());
+                }
+            }
+        }
+    }
+
+    /**
+     * Stores the remote Tx actors for each requested data store path to be used by the
+     * PhantomReference to close the remote Tx's. This is only used for read-only Tx's. The
+     * remoteTransactionActorsMB volatile serves as a memory barrier to publish updates to the
+     * remoteTransactionActors list so they will be visible to the thread accessing the
+     * PhantomReference.
+     */
+    private List<ActorSelection> remoteTransactionActors;
+    private AtomicBoolean remoteTransactionActorsMB;
+
+    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
+
     private final TransactionType transactionType;
     private final ActorContext actorContext;
-    private final Map<String, TransactionContext> remoteTransactionPaths = new HashMap<>();
     private final TransactionIdentifier identifier;
     private final SchemaContext schemaContext;
     private boolean inReadyState;
 
-    public TransactionProxy(ActorContext actorContext, TransactionType transactionType,
-            SchemaContext schemaContext) {
-        this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
-        this.transactionType = Preconditions.checkNotNull(transactionType, "transactionType should not be null");
-        this.schemaContext = Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+    public TransactionProxy(ActorContext actorContext, TransactionType transactionType) {
+        this.actorContext = Preconditions.checkNotNull(actorContext,
+                "actorContext should not be null");
+        this.transactionType = Preconditions.checkNotNull(transactionType,
+                "transactionType should not be null");
+        this.schemaContext = Preconditions.checkNotNull(actorContext.getSchemaContext(),
+                "schemaContext should not be null");
 
         String memberName = actorContext.getCurrentMemberName();
         if(memberName == null){
@@ -108,8 +192,20 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this.identifier = TransactionIdentifier.builder().memberName(memberName).counter(
                 counter.getAndIncrement()).build();
 
-        LOG.debug("Created txn {} of type {}", identifier, transactionType);
+        if(transactionType == TransactionType.READ_ONLY) {
+            // Read-only Tx's aren't explicitly closed by the client so we create a PhantomReference
+            // to close the remote Tx's when this instance is no longer in use and is garbage
+            // collected.
 
+            remoteTransactionActors = Lists.newArrayList();
+            remoteTransactionActorsMB = new AtomicBoolean();
+
+            TransactionProxyCleanupPhantomReference cleanup =
+                                              new TransactionProxyCleanupPhantomReference(this);
+            phantomReferenceCache.put(cleanup, cleanup);
+        }
+
+        LOG.debug("Created txn {} of type {}", identifier, transactionType);
     }
 
     @VisibleForTesting
@@ -226,6 +322,13 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         for(TransactionContext transactionContext : remoteTransactionPaths.values()) {
             transactionContext.closeTransaction();
         }
+
+        remoteTransactionPaths.clear();
+
+        if(transactionType == TransactionType.READ_ONLY) {
+            remoteTransactionActors.clear();
+            remoteTransactionActorsMB.set(true);
+        }
     }
 
     private TransactionContext transactionContext(YangInstanceIdentifier path){
@@ -260,11 +363,20 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
                 LOG.debug("Tx {} Received transaction path = {}", identifier, transactionPath);
 
-                ActorSelection transactionActor =
-                    actorContext.actorSelection(transactionPath);
-                transactionContext =
-                    new TransactionContextImpl(shardName, transactionPath,
-                        transactionActor);
+                ActorSelection transactionActor = actorContext.actorSelection(transactionPath);
+
+                if(transactionType == TransactionType.READ_ONLY) {
+                    // Add the actor to the remoteTransactionActors list for access by the
+                    // cleanup PhantonReference.
+                    remoteTransactionActors.add(transactionActor);
+
+                    // Write to the memory barrier volatile to publish the above update to the
+                    // remoteTransactionActors list for thread visibility.
+                    remoteTransactionActorsMB.set(true);
+                }
+
+                transactionContext = new TransactionContextImpl(shardName, transactionPath,
+                        transactionActor, identifier, actorContext, schemaContext);
 
                 remoteTransactionPaths.put(shardName, transactionContext);
             } else {
@@ -273,7 +385,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             }
         } catch(Exception e){
             LOG.debug("Tx {} Creating NoOpTransaction because of : {}", identifier, e.getMessage());
-            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName, e));
+            remoteTransactionPaths.put(shardName, new NoOpTransactionContext(shardName, e, identifier));
         }
     }
 
@@ -298,13 +410,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         List<Future<Object>> getRecordedOperationFutures();
     }
 
-    private abstract class AbstractTransactionContext implements TransactionContext {
+    private static abstract class AbstractTransactionContext implements TransactionContext {
 
+        protected final TransactionIdentifier identifier;
         protected final String shardName;
         protected final List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
 
-        AbstractTransactionContext(String shardName) {
+        AbstractTransactionContext(String shardName, TransactionIdentifier identifier) {
             this.shardName = shardName;
+            this.identifier = identifier;
         }
 
         @Override
@@ -318,17 +432,22 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private class TransactionContextImpl extends AbstractTransactionContext {
+    private static class TransactionContextImpl extends AbstractTransactionContext {
         private final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
+        private final ActorContext actorContext;
+        private final SchemaContext schemaContext;
         private final String actorPath;
         private final ActorSelection actor;
 
         private TransactionContextImpl(String shardName, String actorPath,
-            ActorSelection actor) {
-            super(shardName);
+                ActorSelection actor, TransactionIdentifier identifier, ActorContext actorContext,
+                SchemaContext schemaContext) {
+            super(shardName, identifier);
             this.actorPath = actorPath;
             this.actor = actor;
+            this.actorContext = actorContext;
+            this.schemaContext = schemaContext;
         }
 
         private ActorSelection getActor() {
@@ -600,14 +719,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
     }
 
-    private class NoOpTransactionContext extends AbstractTransactionContext {
+    private static class NoOpTransactionContext extends AbstractTransactionContext {
 
         private final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
         private final Exception failure;
 
-        public NoOpTransactionContext(String shardName, Exception failure){
-            super(shardName);
+        public NoOpTransactionContext(String shardName, Exception failure,
+                TransactionIdentifier identifier){
+            super(shardName, identifier);
             this.failure = failure;
         }
 
