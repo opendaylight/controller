@@ -16,6 +16,7 @@ import akka.actor.UntypedActor;
 import akka.cluster.ClusterActorRefProvider;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.utils.ConditionalProbe;
 
 import java.util.HashMap;
@@ -76,7 +77,7 @@ public class BucketStore extends UntypedActor {
         selfAddress = provider.getDefaultAddress();
 
         if ( provider instanceof ClusterActorRefProvider)
-            getContext().actorOf(Props.create(Gossiper.class), "gossiper");
+            getContext().actorOf(Props.create(Gossiper.class).withMailbox(ActorUtil.MAILBOX), "gossiper");
     }
 
     @Override
