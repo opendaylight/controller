@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dcc6be67",
+        "filename": "features/adsal/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-22T22:41:23Z",
+      "side": 1,
+      "message": "Please don\u0027t use start levels in features... see https://git.opendaylight.org/gerrit/#/c/10182/ comment for full explanation.",
+      "revId": "b722eef1f7eb101d3d7ea12cd1b1c5481d606c90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
