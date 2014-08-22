@@ -35,9 +35,6 @@ final class FlowComparator {
         if (statsFlow == null || storedFlow == null) {
             return false;
         }
-        if (statsFlow.getClass() != storedFlow.getClass()) {
-            return false;
-        }
         if (statsFlow.getContainerName()== null) {
             if (storedFlow.getContainerName()!= null) {
                 return false;
@@ -99,9 +96,6 @@ final class FlowComparator {
         }
         if (storedFlow == null && statsFlow != null) return false;
         if (statsFlow == null && storedFlow != null) return false;
-        if (storedFlow.getClass() != statsFlow.getClass()) {
-            return false;
-        }
         if (storedFlow.getEthernetMatch() == null) {
             if (statsFlow.getEthernetMatch() != null) {
                 return false;
