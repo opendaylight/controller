@@ -28,9 +28,9 @@ public class DistributedOperationalDataStoreProviderModule extends
     public java.lang.AutoCloseable createInstance() {
         return DistributedDataStoreFactory.createInstance("operational",
                 getOperationalSchemaServiceDependency(),
-                InMemoryDOMDataStoreConfigProperties.create(getMaxShardDataChangeExecutorPoolSize(),
-                        getMaxShardDataChangeExecutorQueueSize(),
-                        getMaxShardDataChangeListenerQueueSize()));
+                InMemoryDOMDataStoreConfigProperties.create(getOperationalMaxShardDataChangeExecutorPoolSize(),
+                        getOperationalMaxShardDataChangeExecutorQueueSize(),
+                        getOperationalMaxShardDataChangeListenerQueueSize()));
     }
 
 }

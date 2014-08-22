@@ -27,9 +27,9 @@ public class DistributedConfigDataStoreProviderModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
         return DistributedDataStoreFactory.createInstance("config", getConfigSchemaServiceDependency(),
-                InMemoryDOMDataStoreConfigProperties.create(getMaxShardDataChangeExecutorPoolSize(),
-                        getMaxShardDataChangeExecutorQueueSize(),
-                        getMaxShardDataChangeListenerQueueSize()));
+                InMemoryDOMDataStoreConfigProperties.create(getConfigMaxShardDataChangeExecutorPoolSize(),
+                        getConfigMaxShardDataChangeExecutorQueueSize(),
+                        getConfigMaxShardDataChangeListenerQueueSize()));
     }
 
 }
