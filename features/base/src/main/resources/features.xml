@@ -54,6 +54,8 @@
       <bundle>mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
     </feature>
    <feature name="base-jackson" description="Jackson JAX-RS" version="${jackson.version}">
+      <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
+      <bundle>mvn:com.sun.jersey/jersey-client/${jersey.version}</bundle>
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
       <bundle start="true" start-level="35">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
