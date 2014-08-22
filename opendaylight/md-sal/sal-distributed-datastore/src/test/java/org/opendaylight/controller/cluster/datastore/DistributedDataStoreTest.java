@@ -3,6 +3,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,12 +64,14 @@ public class DistributedDataStoreTest extends AbstractActorTest{
 
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void testConstructor(){
         ActorSystem actorSystem = mock(ActorSystem.class);
 
         new DistributedDataStore(actorSystem, "config",
-            mock(ClusterWrapper.class), mock(Configuration.class), null);
+            mock(ClusterWrapper.class), mock(Configuration.class),
+            new DistributedDataStoreProperties());
 
         verify(actorSystem).actorOf(any(Props.class), eq("shardmanager-config"));
     }

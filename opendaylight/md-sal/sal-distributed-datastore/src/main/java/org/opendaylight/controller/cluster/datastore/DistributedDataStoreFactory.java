@@ -11,12 +11,11 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 
 public class DistributedDataStoreFactory {
     public static DistributedDataStore createInstance(String name, SchemaService schemaService,
-            InMemoryDOMDataStoreConfigProperties dataStoreProperties) {
+            DistributedDataStoreProperties dataStoreProperties) {
 
         ActorSystem actorSystem = ActorSystemFactory.getInstance();
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");

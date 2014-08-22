@@ -15,22 +15,21 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * DataChangeListenerProxy represents a single remote DataChangeListener
  */
 public class DataChangeListenerProxy implements AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>{
     private final ActorSelection dataChangeListenerActor;
-    private final SchemaContext schemaContext;
+    private final ShardContext shardContext;
 
-    public DataChangeListenerProxy(SchemaContext schemaContext,ActorSelection dataChangeListenerActor) {
+    public DataChangeListenerProxy(ShardContext shardContext, ActorSelection dataChangeListenerActor) {
         this.dataChangeListenerActor = Preconditions.checkNotNull(dataChangeListenerActor, "dataChangeListenerActor should not be null");
-        this.schemaContext = schemaContext;
+        this.shardContext = shardContext;
     }
 
     @Override public void onDataChanged(
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        dataChangeListenerActor.tell(new DataChanged(schemaContext,change), null);
+        dataChangeListenerActor.tell(new DataChanged(shardContext.getSchemaContext(), change), null);
     }
 }

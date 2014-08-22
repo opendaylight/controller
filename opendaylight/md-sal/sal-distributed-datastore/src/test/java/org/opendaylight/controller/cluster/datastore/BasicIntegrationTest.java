@@ -14,6 +14,7 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.testkit.JavaTestKit;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
@@ -30,6 +31,8 @@ import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -58,22 +61,24 @@ public class BasicIntegrationTest extends AbstractActorTest {
                 ShardIdentifier.builder().memberName("member-1")
                     .shardName("inventory").type("config").build();
 
-            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, null);
+            final SchemaContext schemaContext = TestModel.createTestContext();
+            ShardContext shardContext = new ShardContext(null);
+            shardContext.setSchemaContext(schemaContext);
+
+            final Props props = Shard.props(identifier, Collections.EMPTY_MAP, shardContext);
             final ActorRef shard = getSystem().actorOf(props);
 
-            new Within(duration("5 seconds")) {
+            new Within(duration("10 seconds")) {
+                @Override
                 protected void run() {
-
-
-                    shard.tell(
-                        new UpdateSchemaContext(TestModel.createTestContext()),
-                        getRef());
+                    shard.tell(new UpdateSchemaContext(schemaContext), getRef());
 
 
                     // Wait for a specific log message to show up
                     final boolean result =
                         new JavaTestKit.EventFilter<Boolean>(Logging.Info.class
                         ) {
+                            @Override
                             protected Boolean run() {
                                 return true;
                             }
@@ -87,7 +92,8 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     shard.tell(new CreateTransactionChain().toSerializable(), getRef());
 
                     final ActorSelection transactionChain =
-                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionChainReply") {
+                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "CreateTransactionChainReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(CreateTransactionChainReply.SERIALIZABLE_CLASS)) {
                                     ActorPath transactionChainPath =
@@ -109,7 +115,8 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transactionChain.tell(new CreateTransaction("txn-1", TransactionProxy.TransactionType.WRITE_ONLY.ordinal() ).toSerializable(), getRef());
 
                     final ActorSelection transaction =
-                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "CreateTransactionReply") {
+                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "CreateTransactionReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(in.getClass())) {
                                     CreateTransactionReply reply = CreateTransactionReply.fromSerializable(in);
@@ -128,10 +135,11 @@ public class BasicIntegrationTest extends AbstractActorTest {
 
                     // 3. Write some data
                     transaction.tell(new WriteData(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), TestModel.createTestContext()).toSerializable(),
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME), schemaContext).toSerializable(),
                         getRef());
 
-                    Boolean writeDone = new ExpectMsg<Boolean>(duration("1 seconds"), "WriteDataReply") {
+                    Boolean writeDone = new ExpectMsg<Boolean>(duration("3 seconds"), "WriteDataReply") {
+                        @Override
                         protected Boolean match(Object in) {
                             if (in.getClass().equals(WriteDataReply.SERIALIZABLE_CLASS)) {
                                 return true;
@@ -150,7 +158,8 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     transaction.tell(new ReadyTransaction().toSerializable(), getRef());
 
                     final ActorSelection cohort =
-                        new ExpectMsg<ActorSelection>(duration("1 seconds"), "ReadyTransactionReply") {
+                        new ExpectMsg<ActorSelection>(duration("3 seconds"), "ReadyTransactionReply") {
+                            @Override
                             protected ActorSelection match(Object in) {
                                 if (in.getClass().equals(ReadyTransactionReply.SERIALIZABLE_CLASS)) {
                                     ActorPath cohortPath =
@@ -173,7 +182,8 @@ public class BasicIntegrationTest extends AbstractActorTest {
                     cohort.tell(new PreCommitTransaction().toSerializable(), getRef());
 
                     Boolean preCommitDone =
-                        new ExpectMsg<Boolean>(duration("1 seconds"), "PreCommitTransactionReply") {
+                        new ExpectMsg<Boolean>(duration("3 seconds"), "PreCommitTransactionReply") {
+                            @Override
                             protected Boolean match(Object in) {
                                 if (in.getClass().equals(PreCommitTransactionReply.SERIALIZABLE_CLASS)) {
                                     return true;
