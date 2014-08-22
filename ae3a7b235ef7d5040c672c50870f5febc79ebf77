@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_86ca2319",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/ConfigTransactionClientsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-22T08:33:02Z",
+      "side": 1,
+      "message": "Whitespace should be space, also watch out for trailing whitespace",
+      "revId": "ae3a7b235ef7d5040c672c50870f5febc79ebf77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a6cde732",
+        "filename": "opendaylight/config/config-util/src/test/java/org/opendaylight/controller/config/util/Ignore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2014-08-22T08:33:02Z",
+      "side": 1,
+      "message": "This interface has to be imported from JUnit, not custom",
+      "revId": "ae3a7b235ef7d5040c672c50870f5febc79ebf77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
