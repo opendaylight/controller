@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toaster>
+    <toasterStatus>up</toasterStatus>
+    <toasterManufacturer>Opendaylight</toasterManufacturer>
+    <toasterModelNumber>Model 1 - Binding Aware</toasterModelNumber>
+    <childtoaster>
+        <toasterMaker>ChildOpendaylight</toasterMaker>
+        <toasterModel>ChildModel 1 - Binding Aware</toasterModel>
+    </childtoaster>
+</toaster>

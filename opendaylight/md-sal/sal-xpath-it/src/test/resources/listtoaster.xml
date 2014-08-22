@@ -1,0 +1,17 @@
+<toaster xmlns="http://netconfcentral.org/ns/toaster">
+    <toasterManufacturer>Opendaylight</toasterManufacturer>
+    <toasterModelNumber>Model 1 - Binding Aware</toasterModelNumber>
+    <childtoasterlist>
+        <toastervalue>Value2</toastervalue>
+        <toastervalue>Value1</toastervalue>
+    </childtoasterlist>
+    <childtoasterlist>
+        <toastervalue>Value2</toastervalue>
+        <toastervalue>Value1</toastervalue>
+    </childtoasterlist>
+    <toasterStatus>up</toasterStatus>
+    <childtoaster>
+        <toasterMaker>ChildOpendaylight</toasterMaker>
+        <toasterModel>ChildModel 1 - Binding Aware</toasterModel>
+    </childtoaster>
+</toaster>
