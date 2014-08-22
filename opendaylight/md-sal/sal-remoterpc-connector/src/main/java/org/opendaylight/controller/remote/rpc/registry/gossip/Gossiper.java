@@ -21,6 +21,7 @@ import akka.dispatch.Mapper;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.pattern.Patterns;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -105,7 +106,7 @@ public class Gossiper extends UntypedActor {
         if (autoStartGossipTicks) {
             gossipTask = getContext().system().scheduler().schedule(
                     new FiniteDuration(1, TimeUnit.SECONDS),        //initial delay
-                    new FiniteDuration(500, TimeUnit.MILLISECONDS), //interval
+                    ActorUtil.GOSSIP_TICK_INTERVAL,                 //interval
                     getSelf(),                                       //target
                     new Messages.GossiperMessages.GossipTick(),      //message
                     getContext().dispatcher(),                       //execution context
@@ -227,7 +228,9 @@ public class Gossiper extends UntypedActor {
             return;
 
         final ActorRef sender = getSender();
-        Future<Object> futureReply = Patterns.ask(getContext().parent(), new GetBucketVersions(), 1000);
+        Future<Object> futureReply =
+                Patterns.ask(getContext().parent(), new GetBucketVersions(), ActorUtil.ASK_DURATION.toMillis());
+
         futureReply.map(getMapperToProcessRemoteStatus(sender, status), getContext().dispatcher());
 
     }
@@ -267,7 +270,8 @@ public class Gossiper extends UntypedActor {
      */
     void sendGossipTo(final ActorRef remote, final Set<Address> addresses){
 
-        Future<Object> futureReply = Patterns.ask(getContext().parent(), new GetBucketsByMembers(addresses), 1000);
+        Future<Object> futureReply =
+                Patterns.ask(getContext().parent(), new GetBucketsByMembers(addresses), ActorUtil.ASK_DURATION.toMillis());
         futureReply.map(getMapperToSendGossip(remote), getContext().dispatcher());
     }
 
@@ -279,7 +283,10 @@ public class Gossiper extends UntypedActor {
     void getLocalStatusAndSendTo(Address remoteActorSystemAddress){
 
         //Get local status from bucket store and send to remote
-        Future<Object> futureReply = Patterns.ask(getContext().parent(), new GetBucketVersions(), 1000);
+        Future<Object> futureReply =
+                Patterns.ask(getContext().parent(), new GetBucketVersions(), ActorUtil.ASK_DURATION.toMillis());
+
+        //Find gossiper on remote system
         ActorSelection remoteRef = getContext().system().actorSelection(
                 remoteActorSystemAddress.toString() + getSelf().path().toStringWithoutAddress());
 

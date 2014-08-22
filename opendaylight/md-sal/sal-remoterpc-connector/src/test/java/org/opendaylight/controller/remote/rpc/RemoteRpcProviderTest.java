@@ -12,10 +12,11 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.UntypedActor;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.ConfigFactory;
-import junit.framework.Assert;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -24,7 +25,6 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
-
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +38,7 @@ public class RemoteRpcProviderTest {
 
   @BeforeClass
   public static void setup() throws InterruptedException {
-    system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster"));
+    system = ActorSystem.create("odl-cluster-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
   }
 
   @AfterClass
@@ -60,6 +60,12 @@ public class RemoteRpcProviderTest {
     Assert.assertTrue(actorRef.path().toString().contains(ActorConstants.RPC_MANAGER_PATH));
   }
 
+  public static class DumbActor extends UntypedActor{
 
+      @Override
+      public void onReceive(Object message) throws Exception {
+          //DO NOTHING
+      }
+  }
 
 }

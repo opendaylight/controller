@@ -46,7 +46,7 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindPrimary("inventory").toSerializable(), getRef());
@@ -70,12 +70,12 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindPrimary(Shard.DEFAULT_NAME).toSerializable(), getRef());
 
-                    expectMsgClass(duration("1 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("10 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
 
                     expectNoMsg();
                 }
@@ -93,12 +93,12 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindLocalShard("inventory"), getRef());
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "find local") {
+                    final String out = new ExpectMsg<String>(duration("10 seconds"), "find local") {
                         protected String match(Object in) {
                             if (in instanceof LocalShardNotFound) {
                                 return ((LocalShardNotFound) in).getShardName();
@@ -128,12 +128,12 @@ public class ShardManagerTest {
             final TestActorRef<ShardManager> subject =
                 TestActorRef.create(system, props);
 
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     subject.tell(new FindLocalShard(Shard.DEFAULT_NAME), getRef());
 
-                    final ActorRef out = new ExpectMsg<ActorRef>(duration("1 seconds"), "find local") {
+                    final ActorRef out = new ExpectMsg<ActorRef>(duration("10 seconds"), "find local") {
                         protected ActorRef match(Object in) {
                             if (in instanceof LocalShardFound) {
                                 return ((LocalShardFound) in).getPath();
@@ -163,14 +163,14 @@ public class ShardManagerTest {
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     MockClusterWrapper.sendMemberUp(subject, "member-2", getRef().path().toString());
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    final String out = new ExpectMsg<String>(duration("1 seconds"), "primary found") {
+                    final String out = new ExpectMsg<String>(duration("10 seconds"), "primary found") {
                         // do not put code outside this method, will run afterwards
                         protected String match(Object in) {
                             if (in.getClass().equals(PrimaryFound.SERIALIZABLE_CLASS)) {
@@ -201,20 +201,20 @@ public class ShardManagerTest {
                 TestActorRef.create(system, props);
 
             // the run() method needs to finish within 3 seconds
-            new Within(duration("1 seconds")) {
+            new Within(duration("10 seconds")) {
                 protected void run() {
 
                     MockClusterWrapper.sendMemberUp(subject, "member-2", getRef().path().toString());
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    expectMsgClass(duration("1 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("10 seconds"), PrimaryFound.SERIALIZABLE_CLASS);
 
                     MockClusterWrapper.sendMemberRemoved(subject, "member-2", getRef().path().toString());
 
                     subject.tell(new FindPrimary("astronauts").toSerializable(), getRef());
 
-                    expectMsgClass(duration("1 seconds"), PrimaryNotFound.SERIALIZABLE_CLASS);
+                    expectMsgClass(duration("10 seconds"), PrimaryNotFound.SERIALIZABLE_CLASS);
 
                     expectNoMsg();
                 }

@@ -20,6 +20,7 @@ import akka.pattern.Patterns;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
+import org.opendaylight.controller.remote.rpc.utils.ActorUtil;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import scala.concurrent.Future;
 
@@ -107,7 +108,7 @@ public class RpcRegistry extends UntypedActor {
 
         Preconditions.checkState(localRouter != null, "Router must be set first");
 
-        Future<Object> futureReply = Patterns.ask(bucketStore, new GetLocalBucket(), 1000);
+        Future<Object> futureReply = Patterns.ask(bucketStore, new GetLocalBucket(), ActorUtil.ASK_DURATION.toMillis());
         futureReply.map(getMapperToAddRoutes(msg.getRouteIdentifiers()), getContext().dispatcher());
     }
 
@@ -116,7 +117,7 @@ public class RpcRegistry extends UntypedActor {
      */
     private void receiveRemoveRoutes(RemoveRoutes msg) {
 
-        Future<Object> futureReply = Patterns.ask(bucketStore, new GetLocalBucket(), 1000);
+        Future<Object> futureReply = Patterns.ask(bucketStore, new GetLocalBucket(), ActorUtil.ASK_DURATION.toMillis());
         futureReply.map(getMapperToRemoveRoutes(msg.getRouteIdentifiers()), getContext().dispatcher());
 
     }
@@ -129,7 +130,7 @@ public class RpcRegistry extends UntypedActor {
     private void receiveGetRouter(FindRouters msg) {
         final ActorRef sender = getSender();
 
-        Future<Object> futureReply = Patterns.ask(bucketStore, new GetAllBuckets(), 1000);
+        Future<Object> futureReply = Patterns.ask(bucketStore, new GetAllBuckets(), ActorUtil.ASK_DURATION.toMillis());
         futureReply.map(getMapperToGetRouter(msg.getRouteIdentifier(), sender), getContext().dispatcher());
     }
 

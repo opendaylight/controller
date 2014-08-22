@@ -95,7 +95,7 @@ public class RpcRegistryTest {
    */
   @Test
   public void testAddRemoveRpcOnSameNode() throws URISyntaxException, InterruptedException {
-    validateSystemStartup();
+    //validateSystemStartup();
 
     final JavaTestKit mockBroker = new JavaTestKit(node1);
 
@@ -137,7 +137,7 @@ public class RpcRegistryTest {
   @Test
   public void testRpcAddRemoveInCluster() throws URISyntaxException, InterruptedException {
 
-    validateSystemStartup();
+    //validateSystemStartup();
 
     final JavaTestKit mockBroker1 = new JavaTestKit(node1);
 
@@ -175,7 +175,7 @@ public class RpcRegistryTest {
   @Test
   public void testRpcAddedOnMultiNodes() throws Exception {
 
-    validateSystemStartup();
+    //validateSystemStartup();
 
     final JavaTestKit mockBroker1 = new JavaTestKit(node1);
     final JavaTestKit mockBroker2 = new JavaTestKit(node2);
@@ -240,7 +240,7 @@ public class RpcRegistryTest {
       Assert.fail("Could not find gossipers");
   }
 
-  private Boolean resolveReference(ActorSelection... gossipers) {
+  private Boolean resolveReference(ActorSelection... gossipers) throws InterruptedException {
 
     Boolean resolved = true;
     for (int i = 0; i < 5; i++) {
